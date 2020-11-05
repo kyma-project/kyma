@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -83,28 +82,6 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	return emsSubscription, nil
 }
 
-// ConvertURLPortForApiRulePort converts string port from url.URL to uint32 port
-func ConvertStringPortUInt32Port(u url.URL) (uint32, error) {
-	port := uint32(0)
-	sinkPort := u.Port()
-	if sinkPort != "" {
-		u64, err := strconv.ParseUint(u.Port(), 10, 32)
-		if err != nil {
-			return port, errors.Wrapf(err, "failed to convert port: %s", u.Port())
-		}
-		port = uint32(u64)
-	}
-	if port == uint32(0) {
-		switch strings.ToLower(u.Scheme) {
-		case "http":
-			port = uint32(80)
-		case "https":
-			port = uint32(443)
-		}
-	}
-	return port, nil
-}
-
 func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventingv1alpha1.Subscription) (string, error) {
 	scheme := "https://"
 	path := ""
@@ -151,8 +128,8 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 	return emsSubscription, nil
 }
 
-// GetRandSuffix returns a random suffix of length l or -1 for the whole random string
-func GetRandSuffix(l int) string {
+// GetRandString returns a random string of the given length
+func GetRandString(l int) string {
 	b := make([]byte, l)
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]

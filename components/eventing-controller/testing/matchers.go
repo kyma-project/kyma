@@ -1,26 +1,24 @@
-package controllers
+package testing
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"log"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	. "github.com/onsi/gomega/types"
 
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 )
 
 func HaveSubscriptionName(name string) GomegaMatcher {
@@ -139,7 +137,7 @@ func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
 		if subscriberSvcName != *apiRule.Spec.Service.Name {
 			return false
 		}
-		svcPort, err := handlers.ConvertStringPortUInt32Port(*sURL)
+		svcPort, err := utils.ConvertStringPortUInt32Port(*sURL)
 		if err != nil {
 			log.Panic("failed to convert sink port to uint32 port")
 		}
@@ -178,34 +176,5 @@ func HaveEvent(event v1.Event) GomegaMatcher {
 }
 
 func IsK8sUnprocessableEntity() GomegaMatcher {
-	//  <*errors.StatusError | 0xc0001330e0>: {
-	//     ErrStatus: {
-	//         TypeMeta: {Kind: "", APIVersion: ""},
-	//         ListMeta: {
-	//             SelfLink: "",
-	//             ResourceVersion: "",
-	//             Continue: "",
-	//             RemainingItemCount: nil,
-	//         },
-	//         Status: "Failure",
-	//         Message: "Subscription.eventing.kyma-project.io \"test-valid-subscription-1\" is invalid: spec.filter: Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
-	//         Reason: "Invalid",
-	//         Details: {
-	//             Name: "test-valid-subscription-1",
-	//             Group: "eventing.kyma-project.io",
-	//             Kind: "Subscription",
-	//             UID: "",
-	//             Causes: [
-	//                 {
-	//                     Type: "FieldValueInvalid",
-	//                     Message: "Invalid value: \"null\": spec.filter in body must be of type object: \"null\"",
-	//                     Field: "spec.filter",
-	//                 },
-	//             ],
-	//             RetryAfterSeconds: 0,
-	//         },
-	//         Code: 422,
-	//     },
-	// }
 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
 }

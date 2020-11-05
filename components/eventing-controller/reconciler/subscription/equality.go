@@ -1,4 +1,4 @@
-package controllers
+package subscription
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"

@@ -4,13 +4,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
@@ -42,7 +42,9 @@ func Test_SyncBebSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := NewAPIRule(subscription, WithPath, WithService)
+	apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
+	reconcilertesting.WithService("foo-host", "foo-svc", apiRule)
+
 	// then
 	changed, err := beb.SyncBebSubscription(subscription, apiRule)
 	g.Expect(err).To(Not(BeNil()))

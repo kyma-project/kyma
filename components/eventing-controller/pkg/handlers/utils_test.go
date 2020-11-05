@@ -8,6 +8,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_getHash(t *testing.T) {
@@ -69,7 +70,8 @@ func Test_getInternalView4Ev2(t *testing.T) {
 		},
 	}
 
-	apiRule := NewAPIRule(subscription, WithPath, WithService)
+	apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
+	reconcilertesting.WithService("foo-host", "foo-svc", apiRule)
 
 	defaultWebhookAuth := &types.WebhookAuth{}
 
@@ -141,7 +143,7 @@ func TestGetRandSuffix(t *testing.T) {
 	lengthOfRandomSuffix := 6
 	results := make(map[string]bool)
 	for i := 0; i < totalExecutions; i++ {
-		result := GetRandSuffix(lengthOfRandomSuffix)
+		result := GetRandString(lengthOfRandomSuffix)
 		if _, ok := results[result]; ok {
 			t.Fatalf("generated string already exists: %s", result)
 		}

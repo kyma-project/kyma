@@ -1,21 +1,18 @@
-package controllers
+package testing
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"log"
 	"net/http"
 	"net/url"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-
 	corev1 "k8s.io/api/core/v1"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
 
@@ -146,15 +143,6 @@ func NewSubscription(name, ns string, opts ...subOpt) *eventingv1alpha1.Subscrip
 	return newSub
 }
 
-func WithoutWebhook(s *eventingv1alpha1.Subscription) {
-	s.Spec.Protocol = "BEB"
-	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST_ONCE",
-	}
-}
-
 func WithWebhook(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "BEB"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
@@ -273,7 +261,7 @@ func SetSinkSvcPortInAPIRule(apiRule *apigatewayv1alpha1.APIRule, sink string) {
 	if err != nil {
 		log.Fatalf("failed to parse sink URI: %v", err)
 	}
-	sinkPort, err := handlers.ConvertStringPortUInt32Port(*sinkURL)
+	sinkPort, err := utils.ConvertStringPortUInt32Port(*sinkURL)
 	if err != nil {
 		log.Fatalf("failed to convert port from sink URL: %v", err)
 	}

@@ -1,4 +1,4 @@
-package controllers
+package testing
 
 import (
 	"net/url"

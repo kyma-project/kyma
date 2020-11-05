@@ -1,4 +1,4 @@
-package controllers
+package apirule
 
 import (
 	"context"
@@ -6,15 +6,14 @@ import (
 	"net/url"
 	"strings"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -22,41 +21,37 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler"
 )
 
-const ExternalSinkScheme = "https"
+// externalSinkScheme the scheme used for external sink.
+const externalSinkScheme = "https"
 
-// APIRuleReconciler reconciles an APIRule object
-type APIRuleReconciler struct {
+// Reconciler reconciles an APIRule object.
+type Reconciler struct {
 	client.Client
 	cache.Cache
 	Log      logr.Logger
 	recorder record.EventRecorder
-	Scheme   *runtime.Scheme
 }
 
-// NewAPIRuleReconciler TODO ...
-func NewAPIRuleReconciler(client client.Client,
-	cache cache.Cache,
-	log logr.Logger,
-	recorder record.EventRecorder,
-	scheme *runtime.Scheme) *APIRuleReconciler {
-	return &APIRuleReconciler{
+// NewReconciler returns a new APIRule reconciler instance.
+func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+	return &Reconciler{
 		Client:   client,
 		Cache:    cache,
 		Log:      log,
 		recorder: recorder,
-		Scheme:   scheme,
 	}
 }
 
-// SetupWithManager TODO ...
-func (r *APIRuleReconciler) SetupWithManager(mgr ctrl.Manager) error {
+// SetupWithManager sets the controller manager object type to be the APIRule.
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).For(&apigatewayv1alpha1.APIRule{}).Complete(r)
 }
 
-// Reconcile TODO ...
-func (r *APIRuleReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile handles the APIRule add/update/delete.
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
@@ -74,8 +69,8 @@ func (r *APIRuleReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return r.handleAPIRuleAddOrUpdate(ctx, apiRule)
 }
 
-// handleAPIRuleDelete TODO ...
-func (r *APIRuleReconciler) handleAPIRuleDelete(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) (ctrl.Result, error) {
+// handleAPIRuleDelete handles the APIRule delete.
+func (r *Reconciler) handleAPIRuleDelete(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) (ctrl.Result, error) {
 	if !isRelevantAPIRuleName(apiRule.Name) {
 		return ctrl.Result{}, nil
 	}
@@ -114,8 +109,8 @@ func (r *APIRuleReconciler) handleAPIRuleDelete(ctx context.Context, apiRule *ap
 	return r.syncSubscriptionsStatus(ctx, apiRule, apiRuleSubscriptions, log)
 }
 
-// handleAPIRuleAddOrUpdate TODO ...
-func (r *APIRuleReconciler) handleAPIRuleAddOrUpdate(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) (ctrl.Result, error) {
+// handleAPIRuleAddOrUpdate handles the APIRule add/update.
+func (r *Reconciler) handleAPIRuleAddOrUpdate(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) (ctrl.Result, error) {
 	if !isRelevantAPIRule(apiRule) {
 		return ctrl.Result{}, nil
 	}
@@ -155,8 +150,8 @@ func (r *APIRuleReconciler) handleAPIRuleAddOrUpdate(ctx context.Context, apiRul
 	return r.syncSubscriptionsStatus(ctx, apiRule, apiRuleSubscriptions, log)
 }
 
-// syncSubscriptionsStatus TODO ...
-func (r *APIRuleReconciler) syncSubscriptionsStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule, subscriptions []eventingv1alpha1.Subscription, log logr.Logger) (ctrl.Result, error) {
+// syncSubscriptionsStatus updates the subscription status for each item in the given subscriptions list.
+func (r *Reconciler) syncSubscriptionsStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule, subscriptions []eventingv1alpha1.Subscription, log logr.Logger) (ctrl.Result, error) {
 	apiRuleReady := computeAPIRuleReadyStatus(apiRule)
 
 	// update the statuses of the APIRule dependant subscriptions
@@ -195,12 +190,14 @@ func (r *APIRuleReconciler) syncSubscriptionsStatus(ctx context.Context, apiRule
 	return ctrl.Result{}, nil
 }
 
-// isRelevantAPIRuleName TODO ...
+// isRelevantAPIRuleName returns true if the given name matches the APIRule name pattern
+// used by the eventing-controller, otherwise returns false.
 func isRelevantAPIRuleName(name string) bool {
-	return strings.HasPrefix(name, SinkURLPrefix)
+	return strings.HasPrefix(name, reconciler.ApiRuleNamePrefix)
 }
 
-// isRelevantAPIRule TODO ...
+// isRelevantAPIRule returns true if the given APIRule labels matches the APIRule Labels
+// used by the eventing-controller, otherwise returns false.
 func isRelevantAPIRule(apiRule *apigatewayv1alpha1.APIRule) bool {
 	if v, ok := apiRule.Labels[constants.ControllerIdentityLabelKey]; ok && v == constants.ControllerIdentityLabelValue {
 		return true
@@ -208,7 +205,7 @@ func isRelevantAPIRule(apiRule *apigatewayv1alpha1.APIRule) bool {
 	return false
 }
 
-// computeAPIRuleReadyStatus TODO ...
+// computeAPIRuleReadyStatus returns true if all APIRule statuses is ok, otherwise returns false.
 func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
 	if apiRule.Status.APIRuleStatus == nil || apiRule.Status.AccessRuleStatus == nil || apiRule.Status.VirtualServiceStatus == nil {
 		return false
@@ -219,8 +216,16 @@ func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
 	return apiRuleStatus && accessRuleStatus && virtualServiceStatus
 }
 
-// setSubscriptionStatusExternalSink TODO ...
+// setSubscriptionStatusExternalSink sets the subscription external sink based on the given APIRule service host.
 func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) error {
+	if apiRule.Spec.Service == nil {
+		return errors.Errorf("APIRule has nil service")
+	}
+
+	if apiRule.Spec.Service.Host == nil {
+		return errors.Errorf("APIRule has nil host")
+	}
+
 	u, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf(fmt.Sprintf("subscription: [%s/%s] has invalid sink", subscription.Name, subscription.Namespace)))
@@ -231,7 +236,7 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 		path = "/"
 	}
 
-	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s%s", ExternalSinkScheme, *apiRule.Spec.Service.Host, path)
+	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s%s", externalSinkScheme, *apiRule.Spec.Service.Host, path)
 
 	return nil
 }

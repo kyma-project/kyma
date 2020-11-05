@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/apirule"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 	"log"
 	"os"
 	"time"
@@ -17,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -59,23 +60,21 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-	if err = controllers.NewSubscriptionReconciler(
+	if err = subscription.NewReconciler(
 		mgr.GetClient(),
 		mgr.GetCache(),
-		ctrl.Log.WithName("controllers").WithName("Subscription"),
-		mgr.GetEventRecorderFor("subscription-controller"),
-		mgr.GetScheme(),
+		ctrl.Log.WithName("reconciler").WithName("Subscription"),
+		mgr.GetEventRecorderFor("eventing-controller"),
 		cfg,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
 	}
-	if err = controllers.NewAPIRuleReconciler(
+	if err = apirule.NewReconciler(
 		mgr.GetClient(),
 		mgr.GetCache(),
-		ctrl.Log.WithName("controllers").WithName("APIRule"),
-		mgr.GetEventRecorderFor("api-rule-controller"),
-		mgr.GetScheme(),
+		ctrl.Log.WithName("reconciler").WithName("APIRule"),
+		mgr.GetEventRecorderFor("eventing-controller"),
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)

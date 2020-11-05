@@ -20,12 +20,6 @@ import (
 // compile time check
 var _ Interface = &Beb{}
 
-const (
-	OAuth2SchemeTokenURL    = "https://"
-	OAuth2SubDomainTokenURL = "oauth2"
-	OAuth2PathTokenURL      = "/oauth2/token"
-)
-
 type Interface interface {
 	Initialize(cfg *env.Config)
 	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
@@ -127,7 +121,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, a
 		}
 	}
 	// set the status of emsSubscription in ev2Subscription
-	statusChanged = b.setEmsSubscritionStatus(subscription, emsSubscription) || statusChanged
+	statusChanged = b.setEmsSubscriptionStatus(subscription, emsSubscription) || statusChanged
 
 	return statusChanged, nil
 }
@@ -138,7 +132,7 @@ func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription)
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) (*types.Subscription, int64, error) {
-	// delete Ems susbcription
+	// delete Ems subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		b.Log.Error(err, "delete ems subscription failed", "subscription name:", subscription.Name)
 		return nil, 0, err
@@ -167,8 +161,8 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) 
 	return emsSubscription, newEmsHash, nil
 }
 
-// Set the status of emsSubscription in ev2Subscription
-func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types.Subscription) bool {
+// setEmsSubscriptionStatus sets the status of emsSubscription in ev2Subscription
+func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)

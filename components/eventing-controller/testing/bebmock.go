@@ -1,4 +1,4 @@
-package controllers
+package testing
 
 import (
 	"encoding/json"
@@ -9,18 +9,18 @@ import (
 	"path"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"golang.org/x/oauth2"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	// gcp auth etc.
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-
-	// gcp auth etc.
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 const (

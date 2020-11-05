@@ -1,4 +1,4 @@
-package controllers
+package subscription
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -26,11 +26,11 @@ const (
 )
 
 // eventNormal records a normal event for an API object.
-func (r *SubscriptionReconciler) eventNormal(obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
+func (r *Reconciler) eventNormal(obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
 	r.recorder.Eventf(obj, corev1.EventTypeNormal, string(rn), msgFmt, args...)
 }
 
 // eventWarn records a warning event for an API object.
-func (r *SubscriptionReconciler) eventWarn(obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
+func (r *Reconciler) eventWarn(obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
 	r.recorder.Eventf(obj, corev1.EventTypeWarning, string(rn), msgFmt, args...)
 }

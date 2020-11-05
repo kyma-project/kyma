@@ -11,11 +11,11 @@ import (
 )
 
 // NewAPIRule creates a APIRule object.
-func NewAPIRule(ns, nameSuffix string, opts ...ObjectOption) *apigatewayv1alpha1.APIRule {
+func NewAPIRule(ns, namePrefix string, opts ...Option) *apigatewayv1alpha1.APIRule {
 	s := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ns,
-			GenerateName: nameSuffix,
+			GenerateName: namePrefix,
 		},
 	}
 
@@ -41,7 +41,7 @@ func ApplyExistingAPIRuleAttributes(src, dst *apigatewayv1alpha1.APIRule) {
 }
 
 // WithService sets the Service of an APIRule
-func WithService(host, svcName string, port uint32) ObjectOption {
+func WithService(host, svcName string, port uint32) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
 		isExternal := true
@@ -56,15 +56,15 @@ func WithService(host, svcName string, port uint32) ObjectOption {
 }
 
 // WithGateway sets the gateway of an APIRule
-func WithGateway(gw string) ObjectOption {
+func WithGateway(gw string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
 		d.Spec.Gateway = &gw
 	}
 }
 
-// WithOwnerReference sets the OwnerReeference of an APIRule
-func WithOwnerReference(subs []eventingv1alpha1.Subscription) ObjectOption {
+// WithOwnerReference sets the OwnerReferences of an APIRule
+func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
 		ownerRefs := make([]metav1.OwnerReference, 0)
@@ -86,8 +86,8 @@ func WithOwnerReference(subs []eventingv1alpha1.Subscription) ObjectOption {
 	}
 }
 
-// WithRules sets the rulees of an APIRule for all Subscriptions for a subscriber
-func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) ObjectOption {
+// WithRules sets the rules of an APIRule for all Subscriptions for a subscriber
+func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
 		handlerOAuth := "oauth2_introspection"
@@ -144,7 +144,7 @@ func removeDuplicateValues(values []string) []string {
 }
 
 // WithLabels sets the labels for an APIRule
-func WithLabels(labels map[string]string) ObjectOption {
+func WithLabels(labels map[string]string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
 		d.Labels = labels
