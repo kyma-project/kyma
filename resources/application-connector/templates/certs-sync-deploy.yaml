@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-certs-sync
+  namespace: istio-system
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      release: {{ .Release.Name }}
+      helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      app.kubernetes.io/name: {{ template "name" . }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: “false”
+      labels:
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: watcher
+          image: "{{ .Values.application_connectivity_certs_sync.image.repository }}:{{ .Values.application_connectivity_certs_sync.image.tag }}"
+          volumeMounts:
+            - name: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
+              mountPath: /etc/secrets
+              readOnly: true
+          env:
+            - name: MTLS_GATEWAY_NAME
+              value: {{ .Values.application_connectivity_certs_sync.secrets.caCertificateSecret.name }}
+            - name: MTLS_GATEWAY_NAMESPACE
+              value: {{ .Values.application_connectivity_certs_sync.secrets.caCertificateSecret.namespace }}
+          command:
+            - /bin/bash
+            - -c
+            - |-
+{{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
+      serviceAccountName: {{ .Chart.Name }}-certs-sync
+      volumes:
+        - name: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
+          secret:
+            secretName: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}

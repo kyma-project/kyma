@@ -28,9 +28,6 @@ kubectl delete customresourcedefinitions.apiextensions.k8s.io rbacconfigs.rbac.i
 kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebindings.rbac.istio.io --ignore-not-found
 kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io --ignore-not-found
 
-echo "--> Temporary disable ingress-gateway"
-kubectl scale deploy -n istio-system istio-ingressgateway --replicas 0
-
 echo "--> Upgrade to Istio 1.6"
 istioctl upgrade -f "${OPERATOR_FILE}" -y
 
