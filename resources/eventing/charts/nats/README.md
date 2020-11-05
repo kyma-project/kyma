@@ -1,9 +1,10 @@
 # NATS Chart
 
-This Helm chart deploy NATS: https://nats.io/
+This Helm chart deploy NATS: https://nats.io/  using NATS-Operator.
+
 Steps:
 
-- Install NATS using Helm 3 into "nats" namespace:
+- Install NATS into "nats" namespace using Helm 3 :
 ```bash
 $ helm install nats nats -n nats --set install.enabled=true --create-namespace
 ```
