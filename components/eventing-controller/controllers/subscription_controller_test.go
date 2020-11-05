@@ -162,10 +162,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	PWhen("Subscription changed in sink path with update of APIRule", func() {
 		It("Should shrink the array of rules in APIRule", func() {})
 	})
-	When("Subscription changed in sink port with update of APIRule", func() {
+	PWhen("Subscription changed in sink port with update of APIRule", func() {
 		It("Should add the Subscription to the ownerreferences of APIRule and remove it from the old APIRule ", func() {})
 	})
-	When("Creating a valid Subscription(with webhook) with already existing APIRule", func() {
+	PWhen("Creating a valid Subscription(with webhook) with already existing APIRule", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
@@ -252,7 +252,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription changed with already existing APIRule", func() {
+	PWhen("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-sub-changed"
 
@@ -316,7 +316,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("BEB subscription creation failed with existing APIRule", func() {
+	PWhen("BEB subscription creation failed with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
@@ -383,7 +383,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("BEB subscription status is not ready with existing APIRule", func() {
+	PWhen("BEB subscription status is not ready with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
 			ctx := context.Background()
@@ -458,7 +458,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Deleting a valid Subscription", func() {
+	PWhen("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
