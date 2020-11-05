@@ -75,68 +75,91 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		}
 	})
 
-	When("Creating a valid Subscription with webhook followed by a creation of APIRule", func() {
+	PWhen("Creating a valid Subscription with webhook followed by a creation of APIRule", func() {
 		It("Should create a valid APIRule", func() {
-			//ctx := context.Background()
-			//subscriptionName := "sub-create-api-rule"
-			//
-			//// Ensuring subscriber svc
-			//subscriberSvc := NewSubscriberSvc("webhook", namespaceName)
-			//ensureSubscriberSvcCreated(subscriberSvc, ctx)
-			//
-			//// Create subscription
-			//givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
-			//WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
-			//ensureSubscriptionCreated(givenSubscription, ctx)
-			//
-			//By("Creating a valid APIRule")
-			//getAPIRuleForASvc(subscriberSvc, ctx).Should(HaveValidAPIRule(givenSubscription))
-			//
-			//By("Updating the APIRule(replicating apigateway controller) status to be Ready")
-			//apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-			//
-			//ensureAPIRuleStatusUpdatedWithStatusReady(apiRuleCreated, ctx).Should(BeNil())
-			//
-			//By("Creating a BEB Subscription")
-			//var bebSubscription bebtypes.Subscription
-			//Eventually(func() bool {
-			//	for r, payloadObject := range beb.Requests {
-			//		if IsBebSubscriptionCreate(r, *beb.BebConfig) {
-			//			bebSubscription = payloadObject.(bebtypes.Subscription)
-			//			receivedSubscriptionName := bebSubscription.Name
-			//			// ensure the correct subscription was created
-			//			return subscriptionName == receivedSubscriptionName
-			//		}
-			//	}
-			//	return false
-			//}).Should(BeTrue())
-			//
-			//By("Setting a subscription active condition")
-			//subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue)
-			//getSubscription(givenSubscription, ctx).Should(And(
-			//	HaveSubscriptionName(subscriptionName),
-			//	HaveCondition(subscriptionActiveCondition),
-			//))
-			//
-			//By("Setting APIRule status in Subscription to Ready")
-			//subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue)
-			//getSubscription(givenSubscription, ctx).Should(And(
-			//	HaveSubscriptionName(subscriptionName),
-			//	HaveCondition(subscriptionAPIReadyCondition),
-			//))
-			//
-			//By("Marking the subscription as ready")
-			//getSubscription(givenSubscription, ctx).Should(HaveSubscriptionReady())
+			ctx := context.Background()
+			subscriptionName := "sub-create-api-rule"
+
+			// Ensuring subscriber svc
+			subscriberSvc := NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
+
+			// Create subscription
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
+			WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(HaveValidAPIRule(givenSubscription))
+
+			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+
+			ensureAPIRuleStatusUpdatedWithStatusReady(apiRuleCreated, ctx).Should(BeNil())
+
+			By("Creating a BEB Subscription")
+			var bebSubscription bebtypes.Subscription
+			Eventually(func() bool {
+				for r, payloadObject := range beb.Requests {
+					if IsBebSubscriptionCreate(r, *beb.BebConfig) {
+						bebSubscription = payloadObject.(bebtypes.Subscription)
+						receivedSubscriptionName := bebSubscription.Name
+						// ensure the correct subscription was created
+						return subscriptionName == receivedSubscriptionName
+					}
+				}
+				return false
+			}).Should(BeTrue())
+
+			By("Setting a subscription active condition")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue)
+			getSubscription(givenSubscription, ctx).Should(And(
+				HaveSubscriptionName(subscriptionName),
+				HaveCondition(subscriptionActiveCondition),
+			))
+
+			By("Setting APIRule status in Subscription to Ready")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue)
+			getSubscription(givenSubscription, ctx).Should(And(
+				HaveSubscriptionName(subscriptionName),
+				HaveCondition(subscriptionAPIReadyCondition),
+			))
+
+			By("Marking the subscription as ready")
+			getSubscription(givenSubscription, ctx).Should(HaveSubscriptionReady())
 
 		})
 	})
-	When("Creating a valid Subscription without webhook with already existing APIRule", func() {})
-	When("Creating a valid Subscription with invalid APIRule", func() {})
-	When("Subscription changed with creation of APIRule", func() {})
-	When("Subscription changed in sink path with update of APIRule", func() {
+	PWhen("Creating a Subscription with invalid Sink", func() {
+		It("Should stop reconciling", func() {
+			ctx := context.Background()
+			subscriptionName := "sub-create-with-invalid-sink"
+			// Ensuring subscriber svc
+			subscriberSvc := NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
+
+			// Create subscription
+			givenSubscription := NewSubscription(subscriptionName, namespaceName, WithFilter, WithWebhook)
+			givenSubscription.Spec.Sink = "invalid"
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			By("Setting APIRule status to False")
+			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionFalse)
+			getSubscription(givenSubscription, ctx).Should(And(
+				HaveSubscriptionName(subscriptionName),
+				HaveCondition(subscriptionAPIReadyFalseCondition),
+			))
+
+			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(HaveEvent(subscriptionDeletedEvent))
+		})
+	})
+	PWhen("Creating a valid Subscription without webhook with already existing APIRule", func() {})
+	PWhen("Creating a valid Subscription with invalid APIRule", func() {})
+	PWhen("Subscription changed with creation of APIRule", func() {})
+	PWhen("Subscription changed in sink path with update of APIRule", func() {
 		It("Should append to the array of rules in APIRule", func() {})
 	})
-	When("Subscription changed in sink path with update of APIRule", func() {
+	PWhen("Subscription changed in sink path with update of APIRule", func() {
 		It("Should shrink the array of rules in APIRule", func() {})
 	})
 	When("Subscription changed in sink port with update of APIRule", func() {
@@ -574,6 +597,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
+		log.Printf("like what: %v", subscription.Status)
 		return *subscription
 	}, bigTimeOut, bigPollingInterval)
 }
