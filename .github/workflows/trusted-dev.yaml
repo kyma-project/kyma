@@ -1,4 +1,3 @@
-# If someone with write access comments "/ok-to-test" on a pull request, emit a repository_dispatch event
 name: Is trusted dev?
 
 on:
@@ -12,17 +11,14 @@ jobs:
   is-trusted-dev:
     runs-on: ubuntu-latest
     steps:
-    # Generate a GitHub App installation access token from an App ID and private key
-    # To create a new GitHub App:
-    #   https://developer.github.com/apps/building-github-apps/creating-a-github-app/
-    # See app.yml for an example app manifest
+
     - name: Generate token
       id: generate_token
       uses: tibdex/github-app-token@v1
       env: 
-        SECRET: "${{ secrets.PRIVATE_KEY }}" 
+        SECRET: "${{ secrets.TOKEN_GETTER_PRIVATE_KEY }}"
       with: 
-        app_id: ${{ secrets.APP_ID }}
+        app_id: ${{ secrets.TOKEN_GETTER_APP_ID }}
         private_key: "${{ env.SECRET}}"
 
     - name: Check if Author is a trusted dev
@@ -40,7 +36,7 @@ jobs:
       env:
         TOKEN: ${{ steps.generate_token.outputs.token }}
       with:
-        token: ${{ env.TOKEN }} # GitHub App installation access token
+        token: ${{ env.TOKEN }}
         event-type: ok-to-test-command
         client-payload: '{"sha": "${{ github.event.pull_request.head.sha }}","pull_request":{"number":${{ github.event.number }}}}'
         repository: kyma-project/kyma

@@ -41,7 +41,7 @@ jobs:
     - name: Setup gcloud
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
-        service_account_key: ${{ secrets.GOPHER_GCR_KEY }}
+        service_account_key: ${{ secrets.GOPHER_GCR_SA }}
         project_id: sap-se-cx-gopher
         export_default_credentials: true
 
