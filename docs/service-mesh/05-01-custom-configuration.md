@@ -32,7 +32,7 @@ See the following example that customizes settings for the `policy` and `pilot` 
         kind: IstioOperator
         metadata:
           namespace: istio-system
-          name: example-istiocontrolplane
+          name: example-istiooperator
         spec:
           components:
             policy:

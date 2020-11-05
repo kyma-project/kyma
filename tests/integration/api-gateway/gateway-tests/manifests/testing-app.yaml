@@ -31,7 +31,7 @@ spec:
         version: v1
     spec:
       containers:
-      - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:latest
+      - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:20201004
         command:
           - /bin/bash
           - -c
