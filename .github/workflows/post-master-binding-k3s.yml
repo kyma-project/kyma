@@ -26,7 +26,7 @@ jobs:
       - name: Go test, vet, fmt
         run:  |
           go test ./...
-          if [ "$(gofmt -s -l ./... | wc -l)" -gt 0 ]; then
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
             echo "Some files are not properly formatted"
             exit 1
           fi
