@@ -35,8 +35,11 @@ jobs:
           echo "Some files are not properly formatted"
           exit 1
         fi
-        go vet ./...
-
+        goVetResult=$(go vet ./...)
+        if [ $(echo ${#goVetResult}) != 0 ]; then
+            echo -e "go vet errors \n$goVetResult"
+            exit 1
+        fi
 
     - name: Setup gcloud
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -100,19 +103,3 @@ jobs:
             conclusion: process.env.conclusion
           });
           return result;
-
-
-  binding-pre-master:
-    env:
-      PR_NUMBER: ${{ github.event.number }}
-      PROJECT_ID: "sap-se-cx-gopher"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Set up Go 1.14
-        uses: actions/setup-go@v2
-        with:
-          go-version: ^1.14
-
-      - uses: actions/checkout@v2
-

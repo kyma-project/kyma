@@ -2,7 +2,7 @@ name: Binding-post-master
 on: 
   push:
     branches:
-      - main
+      - master
   
 defaults:
   run:
@@ -30,8 +30,11 @@ jobs:
             echo "Some files are not properly formatted"
             exit 1
           fi
-          go vet ./...
-
+          goVetResult=$(go vet ./...)
+          if [ $(echo ${#goVetResult}) != 0 ]; then
+          echo -e "go vet errors \n$goVetResult"
+          exit 1
+          fi
 
       - name: Setup gcloud
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master

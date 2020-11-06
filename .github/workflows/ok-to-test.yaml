@@ -1,4 +1,4 @@
-name: Label
+name: Ok to test comment
 
 on:
   issue_comment:
