@@ -3,6 +3,9 @@ package mutate
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/kyma-project/kyma/components/binding/internal/storage"
+	v1 "k8s.io/api/apps/v1"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -15,6 +18,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -24,6 +28,8 @@ const (
 	namespace   = "test"
 	bindingName = "binding-test"
 	secretName  = "secret-test"
+	deployName  = "deploy"
+	targetKind  = "Deployment"
 )
 
 func TestMutationHandler_Handle(t *testing.T) {
@@ -52,11 +58,16 @@ func TestMutationHandler_Handle(t *testing.T) {
 		},
 	}
 
+	kindStorage := storage.NewKindStorage()
+	err = kindStorage.Register(*fixTargetKind())
+	require.NoError(t, err)
+
+	dc := dynamicFake.NewSimpleDynamicClient(sch, fixDeployment())
 	fakeClient := fake.NewFakeClientWithScheme(sch, fixBinding(), fixSecret())
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	require.NoError(t, err)
 
-	handler := NewMutationHandler(logrus.New())
+	handler := NewMutationHandler(kindStorage, dc, logrus.New())
 	err = handler.InjectClient(fakeClient)
 	require.NoError(t, err)
 	err = handler.InjectDecoder(decoder)
@@ -70,6 +81,7 @@ func TestMutationHandler_Handle(t *testing.T) {
 
 	// filtering out status cause k8s api-server will discard this too
 	patches := filterOutStatusPatch(response.Patches)
+	fmt.Println(patches)
 	assert.Len(t, patches, 2)
 
 	for _, patch := range patches {
@@ -90,7 +102,34 @@ func fixBinding() *v1alpha1.Binding {
 				Kind: v1alpha1.SourceKindSecret,
 				Name: secretName,
 			},
+			Target: v1alpha1.Target{
+				Kind: targetKind,
+				Name: deployName,
+			},
 		},
+	}
+}
+
+func fixDeployment() *v1.Deployment {
+	return &v1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployName,
+			Namespace: namespace,
+		},
+	}
+}
+
+func fixTargetKind() *v1alpha1.TargetKind {
+	return &v1alpha1.TargetKind{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployName,
+			Namespace: namespace,
+		},
+		Spec: v1alpha1.TargetKindSpec{Resource: v1alpha1.Resource{
+			Kind:    targetKind,
+			Version: "v1",
+			Group:   "apps",
+		}},
 	}
 }
 

@@ -18,14 +18,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-func TestMutationHandler_Handle(t *testing.T) {
+func TestValidationHandler_Handle(t *testing.T) {
 	// given
 	sch, err := v1alpha1.SchemeBuilder.Build()
 	require.NoError(t, err)
 	err = scheme.AddToScheme(sch)
 	require.NoError(t, err)
 
-	tk := fixTargetKind("valid.-name")
+	tk := fixTargetKind("valid-name")
 	rawTargetKind, err := json.Marshal(tk)
 	require.NoError(t, err)
 
@@ -61,7 +61,7 @@ func TestMutationHandler_Handle(t *testing.T) {
 	assert.True(t, response.Allowed)
 }
 
-func TestMutationHandler_HandleError(t *testing.T) {
+func TestValidationHandler_HandleError(t *testing.T) {
 	// given
 	sch, err := v1alpha1.SchemeBuilder.Build()
 	require.NoError(t, err)

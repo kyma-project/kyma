@@ -213,9 +213,9 @@ func rawPod() []byte {
 		  "creationTimestamp": null,
 		  "name": "test-pod",
 		  "labels": {
-			"%s-%s": "1234",
-			"%s-%s": "4567",
-			"%s-%s": "9875"
+			"%s/%s": "1234",
+			"%s/%s": "4567",
+			"%s/%s": "9875"
 		  }
 		},
 		"spec": {

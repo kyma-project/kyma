@@ -128,13 +128,13 @@ func (h *MutationHandler) validateSource(ctx context.Context, binding *v1alpha1.
 func (h *MutationHandler) validateTarget(ctx context.Context, binding *v1alpha1.Binding) *webhook.Error {
 	kind, err := h.kindStorage.Get(v1alpha1.Kind(binding.Spec.Target.Kind))
 	if err != nil {
-		return webhook.NewErrorf(http.StatusBadRequest, "kind %s not exist: %s", binding.Spec.Source.Kind, err)
+		return webhook.NewErrorf(http.StatusBadRequest, "kind %s not exist: %s", binding.Spec.Target.Kind, err)
 	}
-	_, err = h.dc.Resource(kind.Schema).Get(ctx, binding.Spec.Target.Name, v1.GetOptions{})
+	_, err = h.dc.Resource(kind.Schema).Namespace(binding.Namespace).Get(ctx, binding.Spec.Target.Name, v1.GetOptions{})
 	switch {
 	case err == nil:
 	case errors.IsNotFound(err):
-		return webhook.NewErrorf(http.StatusBadRequest, "resource %s of kind %s is not found", binding.Spec.Target.Name, binding.Spec.Source.Kind)
+		return webhook.NewErrorf(http.StatusBadRequest, "resource %s of kind %s is not found", binding.Spec.Target.Name, binding.Spec.Target.Kind)
 	default:
 		return webhook.NewErrorf(http.StatusInternalServerError, "while getting resource: %s", err)
 	}

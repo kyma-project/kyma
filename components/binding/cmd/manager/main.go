@@ -57,22 +57,22 @@ func main() {
 	})
 	fatalOnError(err, "while creating new manager")
 
+	targetKindStorage := storage.NewKindStorage()
+	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
+	fatalOnError(err, "while creating dynamic client")
+
 	mgr.GetWebhookServer().Register(
 		"/pod-mutating",
 		&k8sWebhook.Admission{Handler: podMutate.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-mutating",
-		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(log.WithField("webhook", "binding-mutating"))})
+		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, dc, log.WithField("webhook", "binding-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-validating",
 		&k8sWebhook.Admission{Handler: bindingValidate.NewValidationHandler(log.WithField("webhook", "binding-validating"))})
 	mgr.GetWebhookServer().Register(
 		"/targetkind-validating",
 		&k8sWebhook.Admission{Handler: targetKindValidate.NewValidationHandler(log.WithField("webhook", "targetkind-validating"))})
-
-	targetKindStorage := storage.NewKindStorage()
-	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
-	fatalOnError(err, "while creating dynamic client")
 
 	targetKindManager := target.NewHandler(dc, targetKindStorage)
 
