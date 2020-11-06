@@ -79,7 +79,7 @@ verify:: test check-imports check-fmt
 format:: imports fmt
 
 release:
-	$(MAKE) $(1)-old
+	$(MAKE) release-old
 
 #Old Target for dep projects
 release-old: resolve dep-status verify build-image push-image
