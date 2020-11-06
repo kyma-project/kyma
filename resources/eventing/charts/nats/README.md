@@ -26,7 +26,7 @@ Hello Kyma
 PUB foo 3
 Bye
 ```
-- Unintall nats:
+- Uninstall NATS:
 ```bash
 helm uninstall nats -n nats
 ```
