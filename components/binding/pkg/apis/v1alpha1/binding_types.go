@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	BindingLabelKey = "bindings.kyma.project.io"
+	BindingLabelKey          = "bindings.kyma.project.io"
 	BindingValidatedLabelKey = "validation.bindings.kyma.project.io"
 )
 

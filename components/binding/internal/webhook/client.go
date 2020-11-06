@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultInterval = 500 * time.Millisecond
-	defaultTimeout = 3 * time.Second
+	defaultTimeout  = 3 * time.Second
 )
 
 // findSecret finds Secret based on Binding Source field

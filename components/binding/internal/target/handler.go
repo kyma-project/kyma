@@ -154,10 +154,6 @@ func (h *Handler) updateResource(resource *unstructured.Unstructured, data *stor
 	return nil
 }
 
-func (h *Handler) labelKey(b *v1alpha1.Binding) string {
-	return fmt.Sprintf("%s-%s", v1alpha1.BindingLabelKey, b.Name)
-}
-
 func (h *Handler) getResourceLabels(res *unstructured.Unstructured, labelFields []string) (map[string]string, error) {
 	labels, err := h.findOrCreateLabelsField(res, labelFields)
 	if err != nil {
@@ -198,7 +194,6 @@ func (h *Handler) ensureLabelsAreDeleted(res *unstructured.Unstructured, labelsT
 	return nil
 }
 
-<<<<<<< HEAD
 func (h *Handler) findOrCreateLabelsField(res *unstructured.Unstructured, labelFields []string) (map[string]interface{}, error) {
 	var val interface{} = res.Object
 	for i, field := range labelFields {
@@ -218,9 +213,9 @@ func (h *Handler) findOrCreateLabelsField(res *unstructured.Unstructured, labelF
 		return nil, fmt.Errorf("expected type of field is map[string]string, but was %T", val)
 	}
 	return result, nil
-=======
+}
+
 // label key is split to prefix (max 253 chars) + name part after slash (max 63 chars)
 func (h *Handler) labelKey(b *v1alpha1.Binding) string {
 	return fmt.Sprintf("%s/%s", v1alpha1.BindingLabelKey, b.Name)
->>>>>>> Implement validating webhooks for bindings
 }

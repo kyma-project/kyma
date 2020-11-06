@@ -12,7 +12,7 @@ import (
 )
 
 // StaticCreate runs basic TargetKind validation for Create operation.
-type StaticCreate struct {}
+type StaticCreate struct{}
 
 var _ Validator = &StaticCreate{}
 

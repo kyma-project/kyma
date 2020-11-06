@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -19,14 +22,18 @@ var _ admission.Handler = &MutationHandler{}
 var _ admission.DecoderInjector = &MutationHandler{}
 
 type MutationHandler struct {
-	decoder *admission.Decoder
-	client  client.Client
-	log     log.FieldLogger
+	decoder     *admission.Decoder
+	client      client.Client
+	dc          dynamic.Interface
+	log         log.FieldLogger
+	kindStorage storage.KindStorage
 }
 
-func NewMutationHandler(log log.FieldLogger) *MutationHandler {
+func NewMutationHandler(kindStorage storage.KindStorage, dc dynamic.Interface, log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
-		log: log,
+		kindStorage: kindStorage,
+		dc:          dc,
+		log:         log,
 	}
 }
 
@@ -119,6 +126,18 @@ func (h *MutationHandler) validateSource(ctx context.Context, binding *v1alpha1.
 
 // checks if source of data to inject, exists on cluster
 func (h *MutationHandler) validateTarget(ctx context.Context, binding *v1alpha1.Binding) *webhook.Error {
+	kind, err := h.kindStorage.Get(v1alpha1.Kind(binding.Spec.Target.Kind))
+	if err != nil {
+		return webhook.NewErrorf(http.StatusBadRequest, "kind %s not exist: %s", binding.Spec.Source.Kind, err)
+	}
+	_, err = h.dc.Resource(kind.Schema).Get(ctx, binding.Spec.Target.Name, v1.GetOptions{})
+	switch {
+	case err == nil:
+	case errors.IsNotFound(err):
+		return webhook.NewErrorf(http.StatusBadRequest, "resource %s of kind %s is not found", binding.Spec.Target.Name, binding.Spec.Source.Kind)
+	default:
+		return webhook.NewErrorf(http.StatusInternalServerError, "while getting resource: %s", err)
+	}
 	return nil
 }
 
