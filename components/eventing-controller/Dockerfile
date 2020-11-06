@@ -17,7 +17,7 @@ COPY main.go main.go
 RUN GOOS=linux GO111MODULE=on go mod vendor && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o eventing-controller main.go
 
-FROM scratch
+FROM gcr.io/distroless/static:nonroot
 LABEL source = git@github.com:kyma-project/kyma.git
 
 WORKDIR /
