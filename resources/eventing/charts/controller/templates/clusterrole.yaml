@@ -5,25 +5,39 @@ metadata:
   labels: {{- include "controller.labels" . | nindent 4 }}
 rules:
   - apiGroups:
-      - eventing.kyma-project.io
+    - ""
     resources:
-      - subscriptions
+    - services
     verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
+    - list
+    - get
   - apiGroups:
-      - eventing.kyma-project.io
+    - ""
     resources:
-      - subscriptions/status
+    - events
     verbs:
-      - get
-      - patch
-      - update
+    - create
+    - patch
+  - apiGroups:
+    - eventing.kyma-project.io
+    resources:
+    - subscriptions
+    verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+  - apiGroups:
+    - eventing.kyma-project.io
+    resources:
+    - subscriptions/status
+    verbs:
+    - get
+    - patch
+    - update
   - apiGroups:
     - eventing.kyma-project.io
     resources:
@@ -41,8 +55,9 @@ rules:
     resources:
     - apirules
     verbs:
-      - get
-      - list
-      - watch
-      - patch
-      - update
+    - get
+    - list
+    - watch
+    - patch
+    - update
+    - create
