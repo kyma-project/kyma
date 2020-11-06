@@ -262,7 +262,7 @@ func SetSinkSvcPortInAPIRule(apiRule *apigatewayv1alpha1.APIRule, sink string) {
 	if err != nil {
 		log.Fatalf("failed to parse sink URI: %v", err)
 	}
-	sinkPort, err := utils.ConvertStringPortUInt32Port(*sinkURL)
+	sinkPort, err := utils.GetPortNumberFromURL(*sinkURL)
 	if err != nil {
 		log.Fatalf("failed to convert port from sink URL: %v", err)
 	}

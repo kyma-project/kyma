@@ -138,7 +138,7 @@ func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
 		if subscriberSvcName != *apiRule.Spec.Service.Name {
 			return false
 		}
-		svcPort, err := utils.ConvertStringPortUInt32Port(*sURL)
+		svcPort, err := utils.GetPortNumberFromURL(*sURL)
 		if err != nil {
 			log.Panic("failed to convert sink port to uint32 port")
 		}

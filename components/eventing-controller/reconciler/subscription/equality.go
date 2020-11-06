@@ -4,7 +4,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// conditionsEquals checks if two list of conditions are equal
+// conditionsEquals checks if two list of conditions are equal.
 func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 	// not equal if length is different
 	if len(existing) != len(expected) {
@@ -26,6 +26,7 @@ func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 	return true
 }
 
+// conditionsEquals checks if two conditions are equal.
 func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 	isStatusEqual := existing.Status == expected.Status
 	isReasonEqual := existing.Reason == expected.Reason

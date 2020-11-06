@@ -50,9 +50,9 @@ var (
 )
 
 const (
-	SuffixLength          = 10
-	ExternalHostPrefix    = "web"
-	ClusterLocalURLSuffix = "svc.cluster.local"
+	suffixLength          = 10
+	externalHostPrefix    = "web"
+	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
 func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg *env.Config) *Reconciler {
@@ -272,7 +272,6 @@ func (r *Reconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, ct
 	}
 	if !isValidSink {
 		logger.Error(fmt.Errorf("sink URL is not valid"), subscription.Spec.Sink)
-		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", subscription.Spec.Sink)
 		return nil, nil
 	}
 
@@ -290,22 +289,29 @@ func (r *Reconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, ct
 }
 
 func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger logr.Logger) (bool, error) {
+	if !isValidScheme(subscription.Spec.Sink) {
+		r.eventWarn(subscription, reasonValidationFailed, "Sink URL scheme should be 'http' or 'https' %s", subscription.Spec.Sink)
+		return false, nil
+	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		logger.Error(err, subscription.Spec.Sink)
+		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", err.Error())
 		return false, nil
 	}
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
-	if !strings.HasSuffix(trimmedHost, ClusterLocalURLSuffix) {
-		logger.Error(fmt.Errorf("sink does not contain suffix: %s in the URL", ClusterLocalURLSuffix), "")
+	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
+		logger.Error(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix), "")
+		r.eventWarn(subscription, reasonValidationFailed, "sink does not contain suffix: %s in the URL", clusterLocalURLSuffix)
 		return false, nil
 	}
 	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
 		logger.Error(fmt.Errorf("sink should contain 5 sub-domains"), trimmedHost)
+		r.eventWarn(subscription, reasonValidationFailed, "sink should contain 5 sub-domains %s", trimmedHost)
 		return false, nil
 	}
 
@@ -313,6 +319,7 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	if subscription.Namespace != svcNs {
 		logger.Error(fmt.Errorf("the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs), "")
+		r.eventWarn(subscription, reasonValidationFailed, "the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
 		return false, nil
 	}
 
@@ -321,8 +328,10 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			logger.Error(err, "sink doesn't correspond to a valid cluster local svc")
+			r.eventWarn(subscription, reasonValidationFailed, "sink doesn't correspond to a valid cluster local svc")
 			return false, nil
 		}
+		r.eventWarn(subscription, reasonValidationFailed, "failed to fetch cluster-local svc %s/%s", svcNs, svcName)
 		return false, errors.Wrapf(err, "failed to fetch cluster-local svc %s/%s", svcNs, svcName)
 	}
 	return true, nil
@@ -347,7 +356,7 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 		constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 	}
 
-	svcPort, err := utils.ConvertStringPortUInt32Port(sink)
+	svcPort, err := utils.GetPortNumberFromURL(sink)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to convert URL port to APIRule port")
 	}
@@ -419,7 +428,7 @@ func (r *Reconciler) cleanup(subscription *eventingv1alpha1.Subscription, ctx co
 						// It's ok as this subscription doesn't have a port anyway
 						continue
 					}
-					port, err := utils.ConvertStringPortUInt32Port(*subSinkURL)
+					port, err := utils.GetPortNumberFromURL(*subSinkURL)
 					if err != nil {
 						// It's ok as the port is not valid anyway
 						continue
@@ -511,7 +520,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 			continue
 		}
 
-		svcPortForSub, err := utils.ConvertStringPortUInt32Port(*hostURL)
+		svcPortForSub, err := utils.GetPortNumberFromURL(*hostURL)
 		if err != nil {
 			// It's ok as the relevant subscription will have a valid port to filter on
 			continue
@@ -525,8 +534,8 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 
 func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) (*apigatewayv1alpha1.APIRule, error) {
 
-	randomSuffix := handlers.GetRandString(SuffixLength)
-	hostName := fmt.Sprintf("%s-%s.%s", ExternalHostPrefix, randomSuffix, r.Domain)
+	randomSuffix := handlers.GetRandString(suffixLength)
+	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 
 	apiRule := object.NewAPIRule(svcNs, reconciler.ApiRuleNamePrefix,
 		object.WithLabels(labels),
@@ -728,4 +737,9 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 		retry = true
 	}
 	return false, retry, err
+}
+
+// isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
+func isValidScheme(sink string) bool {
+	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }

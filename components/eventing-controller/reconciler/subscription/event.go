@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// reason is the reason of an eventNormal.
+// reason is the reason of an event.
 type reason string
 
 const (
