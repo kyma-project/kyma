@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	v1 "k8s.io/api/apps/v1"
 	"testing"
 
@@ -67,9 +68,7 @@ func TestMutationHandler_Handle(t *testing.T) {
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	require.NoError(t, err)
 
-	handler := NewMutationHandler(kindStorage, dc, logrus.New())
-	err = handler.InjectClient(fakeClient)
-	require.NoError(t, err)
+	handler := NewMutationHandler(kindStorage, webhook.NewClient(fakeClient), dc, logrus.New())
 	err = handler.InjectDecoder(decoder)
 	require.NoError(t, err)
 

@@ -14,7 +14,6 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -29,10 +28,10 @@ type MutationHandler struct {
 	kindStorage storage.KindStorage
 }
 
-func NewMutationHandler(kindStorage storage.KindStorage, client client.Client, dc dynamic.Interface, log log.FieldLogger) *MutationHandler {
+func NewMutationHandler(kindStorage storage.KindStorage, client webhook.Client, dc dynamic.Interface, log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
 		kindStorage: kindStorage,
-		client:      webhook.NewClient(client),
+		client:      client,
 		dc:          dc,
 		log:         log,
 	}

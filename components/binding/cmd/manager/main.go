@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/target"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	bindingMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/binding/mutate"
 	bindingValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/binding/validate"
 	podMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/pod/mutate"
@@ -61,12 +62,13 @@ func main() {
 	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
 	fatalOnError(err, "while creating dynamic client")
 
+	webhookClient := webhook.NewClient(mgr.GetClient())
 	mgr.GetWebhookServer().Register(
 		"/pod-mutating",
-		&k8sWebhook.Admission{Handler: podMutate.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
+		&k8sWebhook.Admission{Handler: podMutate.NewMutationHandler(webhookClient, log.WithField("webhook", "pod-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-mutating",
-		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, mgr.GetClient(), dc, log.WithField("webhook", "binding-mutating"))})
+		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, webhookClient, dc, log.WithField("webhook", "binding-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-validating",
 		&k8sWebhook.Admission{Handler: bindingValidate.NewValidationHandler(log.WithField("webhook", "binding-validating"))})

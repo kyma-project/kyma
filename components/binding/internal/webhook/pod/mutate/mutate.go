@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -25,9 +24,9 @@ type MutationHandler struct {
 	log     log.FieldLogger
 }
 
-func NewMutationHandler(client client.Client, log log.FieldLogger) *MutationHandler {
+func NewMutationHandler(client webhook.Client, log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
-		client: webhook.NewClient(client),
+		client: client,
 		log:    log,
 	}
 }
