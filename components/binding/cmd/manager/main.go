@@ -4,8 +4,11 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/target"
-	"github.com/kyma-project/kyma/components/binding/internal/webhook/binding"
-	"github.com/kyma-project/kyma/components/binding/internal/webhook/pod"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
+	bindingMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/binding/mutate"
+	bindingValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/binding/validate"
+	podMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/pod/mutate"
+	targetKindValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/targetkind/validate"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"k8s.io/client-go/dynamic"
 
@@ -55,16 +58,23 @@ func main() {
 	})
 	fatalOnError(err, "while creating new manager")
 
-	mgr.GetWebhookServer().Register(
-		"/pod-mutating",
-		&k8sWebhook.Admission{Handler: pod.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
-	mgr.GetWebhookServer().Register(
-		"/binding-mutating",
-		&k8sWebhook.Admission{Handler: binding.NewMutationHandler(log.WithField("webhook", "binding-mutating"))})
-
 	targetKindStorage := storage.NewKindStorage()
 	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
 	fatalOnError(err, "while creating dynamic client")
+
+	webhookClient := webhook.NewClient(mgr.GetClient())
+	mgr.GetWebhookServer().Register(
+		"/pod-mutating",
+		&k8sWebhook.Admission{Handler: podMutate.NewMutationHandler(webhookClient, log.WithField("webhook", "pod-mutating"))})
+	mgr.GetWebhookServer().Register(
+		"/binding-mutating",
+		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, webhookClient, dc, log.WithField("webhook", "binding-mutating"))})
+	mgr.GetWebhookServer().Register(
+		"/binding-validating",
+		&k8sWebhook.Admission{Handler: bindingValidate.NewValidationHandler(log.WithField("webhook", "binding-validating"))})
+	mgr.GetWebhookServer().Register(
+		"/targetkind-validating",
+		&k8sWebhook.Admission{Handler: targetKindValidate.NewValidationHandler(log.WithField("webhook", "targetkind-validating"))})
 
 	targetKindManager := target.NewHandler(dc, targetKindStorage)
 

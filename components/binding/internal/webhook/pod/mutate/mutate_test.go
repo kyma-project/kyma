@@ -1,8 +1,9 @@
-package pod
+package mutate
 
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -59,7 +60,7 @@ func TestMutationHandler_Handle(t *testing.T) {
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	require.NoError(t, err)
 
-	handler := NewMutationHandler(fakeClient, logrus.New())
+	handler := NewMutationHandler(webhook.NewClient(fakeClient), logrus.New())
 	err = handler.InjectDecoder(decoder)
 	require.NoError(t, err)
 
@@ -213,9 +214,9 @@ func rawPod() []byte {
 		  "creationTimestamp": null,
 		  "name": "test-pod",
 		  "labels": {
-			"%s-%s": "1234",
-			"%s-%s": "4567",
-			"%s-%s": "9875"
+			"%s/%s": "1234",
+			"%s/%s": "4567",
+			"%s/%s": "9875"
 		  }
 		},
 		"spec": {

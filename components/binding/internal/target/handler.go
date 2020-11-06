@@ -1,6 +1,7 @@
 package target
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -127,7 +128,7 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 		labelsToDelete = append(labelsToDelete, key)
 	}
 	if err := h.ensureLabelsAreDeleted(resource, labelsToDelete, resourceData.LabelFields); err != nil {
-		return errors.Wrapf(err, "while trying to delete labels %+v")
+		return errors.Wrapf(err, "while trying to delete labels %+v", labelsToDelete)
 	}
 
 	err = h.updateResource(resource, resourceData)
@@ -139,7 +140,7 @@ func (h *Handler) RemoveLabel(b *v1alpha1.Binding) error {
 }
 
 func (h *Handler) getResource(b *v1alpha1.Binding, data *storage.ResourceData) (*unstructured.Unstructured, error) {
-	resource, err := h.client.Resource(data.Schema).Namespace(b.Namespace).Get(b.Spec.Target.Name, metav1.GetOptions{})
+	resource, err := h.client.Resource(data.Schema).Namespace(b.Namespace).Get(context.Background(), b.Spec.Target.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, bindErr.AsTemporaryError(err, "while getting resource %s %s in namespace %s", b.Spec.Target.Kind, b.Spec.Target.Name, b.Namespace)
 	}
@@ -147,15 +148,11 @@ func (h *Handler) getResource(b *v1alpha1.Binding, data *storage.ResourceData) (
 }
 
 func (h *Handler) updateResource(resource *unstructured.Unstructured, data *storage.ResourceData) error {
-	_, err := h.client.Resource(data.Schema).Namespace(resource.GetNamespace()).Update(resource, metav1.UpdateOptions{})
+	_, err := h.client.Resource(data.Schema).Namespace(resource.GetNamespace()).Update(context.Background(), resource, metav1.UpdateOptions{})
 	if err != nil {
 		return bindErr.AsTemporaryError(err, "while updating target resource %s %s in namespace %s", resource.GetKind(), resource.GetName(), resource.GetNamespace())
 	}
 	return nil
-}
-
-func (h *Handler) labelKey(b *v1alpha1.Binding) string {
-	return fmt.Sprintf("%s-%s", v1alpha1.BindingLabelKey, b.Name)
 }
 
 func (h *Handler) getResourceLabels(res *unstructured.Unstructured, labelFields []string) (map[string]string, error) {
@@ -217,4 +214,9 @@ func (h *Handler) findOrCreateLabelsField(res *unstructured.Unstructured, labelF
 		return nil, fmt.Errorf("expected type of field is map[string]string, but was %T", val)
 	}
 	return result, nil
+}
+
+// label key is split to prefix (max 253 chars) + name part after slash (max 63 chars)
+func (h *Handler) labelKey(b *v1alpha1.Binding) string {
+	return fmt.Sprintf("%s/%s", v1alpha1.BindingLabelKey, b.Name)
 }
