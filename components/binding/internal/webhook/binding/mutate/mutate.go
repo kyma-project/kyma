@@ -23,15 +23,16 @@ var _ admission.DecoderInjector = &MutationHandler{}
 
 type MutationHandler struct {
 	decoder     *admission.Decoder
-	client      client.Client
+	client      webhook.Client
 	dc          dynamic.Interface
 	log         log.FieldLogger
 	kindStorage storage.KindStorage
 }
 
-func NewMutationHandler(kindStorage storage.KindStorage, dc dynamic.Interface, log log.FieldLogger) *MutationHandler {
+func NewMutationHandler(kindStorage storage.KindStorage, client client.Client, dc dynamic.Interface, log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
 		kindStorage: kindStorage,
+		client:      webhook.NewClient(client),
 		dc:          dc,
 		log:         log,
 	}
@@ -99,7 +100,7 @@ func (h *MutationHandler) validateSpec(ctx context.Context, binding *v1alpha1.Bi
 func (h *MutationHandler) validateSource(ctx context.Context, binding *v1alpha1.Binding) *webhook.Error {
 	switch binding.Spec.Source.Kind {
 	case v1alpha1.SourceKindConfigMap:
-		_, err := webhook.FindConfigMap(ctx, h.client, binding)
+		_, err := h.client.FindConfigMap(ctx, binding)
 		switch {
 		case err == nil:
 		case errors.IsNotFound(err):
@@ -109,7 +110,7 @@ func (h *MutationHandler) validateSource(ctx context.Context, binding *v1alpha1.
 		}
 
 	case v1alpha1.SourceKindSecret:
-		_, err := webhook.FindSecret(ctx, h.client, binding)
+		_, err := h.client.FindSecret(ctx, binding)
 		switch {
 		case err == nil:
 		case errors.IsNotFound(err):
@@ -170,10 +171,5 @@ func (h *MutationHandler) removeValidationLabel(binding *v1alpha1.Binding) {
 
 func (h *MutationHandler) InjectDecoder(d *admission.Decoder) error {
 	h.decoder = d
-	return nil
-}
-
-func (h *MutationHandler) InjectClient(c client.Client) error {
-	h.client = c
 	return nil
 }
