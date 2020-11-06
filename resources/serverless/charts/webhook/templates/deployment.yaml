@@ -43,7 +43,7 @@ spec:
               memory: {{ .Values.deployment.resources.requests.memory }}
             limits:
               cpu: {{ .Values.deployment.resources.limits.cpu }}
-              memory: {{ .Values.deployment.resources.limits }}
+              memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
           ports:
