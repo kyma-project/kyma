@@ -7,13 +7,15 @@ This tutorial shows how you can automate the deployment of local Kyma resources 
 
 > **TIP:** Although this tutorial uses Flux to synchronize Git resources with the cluster, you can use an alternative GitOps operator for this purpose, such as [Argo](https://argoproj.github.io/argo-cd/).
 
+
 ## Prerequisites
 
 All you need before you start is to have the following:
 
-- Kyma CLI
-- [Homebrew](https://docs.brew.sh/Installation)
+- [Docker](https://www.docker.com/)
 - Git repository
+- [Homebrew](https://docs.brew.sh/Installation)
+- Kyma CLI
 
 ## Steps
 

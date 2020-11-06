@@ -1,0 +1,31 @@
+name: Ok to test comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  ok-to-test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Generate token
+      id: generate_token
+      uses: tibdex/github-app-token@v1
+      env: 
+        SECRET: "${{ secrets.TOKEN_GETTER_PRIVATE_KEY }}"
+      with: 
+        app_id: ${{ secrets.TOKEN_GETTER_APP_ID }}
+        private_key: "${{ env.SECRET}}"
+
+    - name: Slash Command Dispatch
+      uses: peter-evans/slash-command-dispatch@v1
+      env:
+        TOKEN: ${{ steps.generate_token.outputs.token }}
+      with:
+        token: ${{ env.TOKEN }}
+        reaction-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-type: pull-request
+        commands: ok-to-test
+        named-args: true
+        permission: write

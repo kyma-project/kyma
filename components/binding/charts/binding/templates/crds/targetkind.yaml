@@ -1,0 +1,80 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: targetkinds.bindings.kyma-project.io
+spec:
+  conversion:
+    strategy: None
+  group: bindings.kyma-project.io
+  names:
+    kind: TargetKind
+    listKind: TargetKindList
+    plural: targetkinds
+    singular: targetkind
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          x-kubernetes-preserve-unknown-fields: true
+          description: TargetKind is the Schema for the targetkinds API
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: TargetKindSpec defines the desired state of TargetKind
+              properties:
+                displayName:
+                  type: string
+                resource:
+                  properties:
+                    group:
+                      type: string
+                    kind:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                  - group
+                  - kind
+                  - version
+                  type: object
+                labelsPath:
+                  type: string
+              required:
+                - displayName
+                - resource
+                - labelsPath
+              type: object
+            status:
+              description: TargetKindStatus defines the observed state of TargetKind
+              properties:
+                lastProcessedTime:
+                  format: date-time
+                  type: string
+                phase:
+                  type: string
+                message:
+                  type: string
+              required:
+              - phase
+              - message
+              type: object
+          type: object
+      served: true
+      storage: true
+      additionalPrinterColumns:
+      - name: Status
+        type: string
+        description: the field shows the current registration status of the resource
+        jsonPath: .status.phase

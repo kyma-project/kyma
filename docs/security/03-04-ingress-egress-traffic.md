@@ -78,7 +78,7 @@ The order differs depending on the mode:
   | Secret | ingress-tls-cert | `kyma-system` |
   | ConfigMap | net-global-overrides | `kyma-installer `| 
   | Secret | kyma-gateway-certs | `istio-system` |
-  | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | Secret | app-connector-certs | `istio-system `|
   | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
   | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
@@ -91,7 +91,7 @@ The order differs depending on the mode:
   | Secret | ingress-tls-cert | `kyma-system` |
   | ConfigMap | net-global-overrides | `kyma-installer `| 
   | Secret | kyma-gateway-certs | `istio-system` |
-  | Secret | kyma-gateway-certs-cacert | `istio-system `|
+  | Secret | app-connector-certs | `istio-system `|
   | Secret | apiserver-proxy-tls-cert | `kyma-system` | 
   | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
@@ -103,7 +103,7 @@ The order differs depending on the mode:
   | :--- | :--- | :--- | 
   | Secret | ingress-tls-cert | `kyma-system `|
   | ConfigMap | net-global-overrides | `kyma-installer `| 
-  | Secret | kyma-gateway-certs-cacert | `istio-system` |
+  | Secret | app-connector-certs | `istio-system` |
   | Certificate | kyma-tls-cert | `istio-system`|
   | Certificate | apiserver-proxy-tls-cert | `kyma-system` | 
   |ConfigMap | apiserver-proxy | `kyma-system` |

@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-9481
+    version: 470796a1
     enabled: true
     labels:
       integration: true
@@ -1211,7 +1211,7 @@ prometheusOperator:
   ##
   resources:
     limits:
-      cpu: 200m
+      cpu: 300m
       memory: 200Mi
     requests:
       cpu: 10m
@@ -1981,5 +1981,5 @@ prometheus:
 
 pushgateway:
   enabled: false
-prometheusIstio:
+prometheus-istio:
   enabled: true
