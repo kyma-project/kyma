@@ -49,16 +49,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "controller.serviceAccountName" -}}
-{{- default (include "controller.fullname" .) .Values.serviceAccount.name }}
-{{- end }}
-{{/*
-Create the name of the cluster role to use
-*/}}
-{{- define "controller.clusterRoleName" -}}
-{{- default (include "controller.fullname" .) .Values.clusterRole.name }}
-{{- end }}

@@ -1,9 +1,11 @@
-# override name to avoid collision with kantive eventing resources
-nameOverride: subscription-controller
+# override name to avoid collision with knative eventing resources
+nameOverride:
 replicaCount: 1
 serviceAccount:
   # name defines optionally another name than the default name for the service account
   name: ""
+  annotations: ""
+
 
 clusterRole:
   # name defines optionally another name than the default name for the cluster role
@@ -13,6 +15,20 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "eventing-controller"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "PR-9750"
+  tag: "PR-9868"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
-  pullPolicy: "IfNotPresent"
+  pullPolicy: "Always"
+
+podSecurityContext:
+
+bebSecret:
+  nameSuffix: "-beb-oauth2"
+
+metrics:
+  service:
+    nameSuffix: "-metrics"
+
+#TODO: Remove this when knative chart is removed
+clusterRoleBindingSuffix: "-crole-binding"
+
+secretName: "eventing"

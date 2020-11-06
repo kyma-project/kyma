@@ -4,10 +4,15 @@ This Helm chart contains all components required for eventing in Kyma:
 
 Components:
 - event-publisher-proxy
+- controller
 
 ## Event Publisher Proxy
 
 This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. Click [here](https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy) for more details.
+
+## Controller
+
+This component manages the internal infrastructure in order to receive an event for all subscriptions
 
 ## Install
 
@@ -17,8 +22,8 @@ You can install this Helm chart using either Helm or Kyma CLI. In both cases, th
 
 ```bash
 $ cat << EOF > helm-values.yaml
-event-publisher-proxy:
-  upstreamAuthentication:
+eventing:
+  authentication:
     oauthClientId: "$bebOauthClientId"
     oauthClientSecret: "$bebOauthClientSecret"
     oauthTokenEndpoint: "$bebOauthTokenEndpoint"
@@ -39,17 +44,17 @@ apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: eventing-epp-overrides
+  name: eventing-beb-auth-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
     component: eventing
     kyma-project.io/installation: ""
 stringData:
-    event-publisher-proxy.upstreamAuthentication.oauthClientId: "$bebOauthClientId"
-    event-publisher-proxy.upstreamAuthentication.oauthClientSecret: "$bebOauthClientSecret"
-    event-publisher-proxy.upstreamAuthentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
-    event-publisher-proxy.upstreamAuthentication.publishUrl: "$bebPublishUrl"
+    eventing.authentication.oauthClientId: "$bebOauthClientId"
+    eventing.authentication.oauthClientSecret: "$bebOauthClientSecret"
+    eventing.authentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
+    eventing.authentication.publishUrl: "$bebPublishUrl"
 EOF
 
 $ kyma install -s <source-image> -o installation-overrides-epp.yaml
