@@ -66,7 +66,7 @@ func main() {
 		&k8sWebhook.Admission{Handler: podMutate.NewMutationHandler(mgr.GetClient(), log.WithField("webhook", "pod-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-mutating",
-		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, dc, log.WithField("webhook", "binding-mutating"))})
+		&k8sWebhook.Admission{Handler: bindingMutate.NewMutationHandler(targetKindStorage, mgr.GetClient(), dc, log.WithField("webhook", "binding-mutating"))})
 	mgr.GetWebhookServer().Register(
 		"/binding-validating",
 		&k8sWebhook.Admission{Handler: bindingValidate.NewValidationHandler(log.WithField("webhook", "binding-validating"))})
