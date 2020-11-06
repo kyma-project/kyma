@@ -156,11 +156,11 @@ Since Kyma installation on Minikube uses the self-signed certificate by default,
 Call the Application Registry with this command:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 Use this command to call the Event Service:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/events/subscribed --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.kyma.local/{APP_NAME}/v1/events/subscribed --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
