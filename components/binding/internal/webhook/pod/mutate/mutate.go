@@ -21,13 +21,13 @@ var _ admission.DecoderInjector = &MutationHandler{}
 
 type MutationHandler struct {
 	decoder *admission.Decoder
+	client  webhook.Client
 	log     log.FieldLogger
-	client  client.Client
 }
 
 func NewMutationHandler(client client.Client, log log.FieldLogger) *MutationHandler {
 	return &MutationHandler{
-		client: client,
+		client: webhook.NewClient(client),
 		log:    log,
 	}
 }
@@ -52,7 +52,7 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Allowed("pod has no any assigned bindings. action not taken.")
 	}
 
-	bindings, err := webhook.FindBindings(ctx, h.client, bindingsName, req.Namespace)
+	bindings, err := h.client.FindBindings(ctx, bindingsName, req.Namespace)
 	if err != nil {
 		h.log.Errorf("cannot find Bindings: %s", err)
 		return admission.Errored(http.StatusInternalServerError, err)
@@ -100,13 +100,13 @@ func (h *MutationHandler) mutatePod(ctx context.Context, pod *corev1.Pod, bindin
 	for _, binding := range bindings {
 		switch binding.Spec.Source.Kind {
 		case v1alpha1.SourceKindSecret:
-			secret, err := webhook.FindSecret(ctx, h.client, binding)
+			secret, err := h.client.FindSecret(ctx, binding)
 			if err != nil {
 				return errors.Wrapf(err, "while finding Secrets for %s/%s Binding", binding.Namespace, binding.Name)
 			}
 			h.addSecretReference(pod, secret)
 		case v1alpha1.SourceKindConfigMap:
-			cm, err := webhook.FindConfigMap(ctx, h.client, binding)
+			cm, err := h.client.FindConfigMap(ctx, binding)
 			if err != nil {
 				return errors.Wrapf(err, "while finding ConfigMap for %s/%s Binding", binding.Namespace, binding.Name)
 			}

@@ -59,7 +59,6 @@ func (b *BindingWorker) RemoveProcess(binding *v1alpha1.Binding, log log.FieldLo
 }
 
 func (b *BindingWorker) Process(binding *v1alpha1.Binding, log log.FieldLogger) (*v1alpha1.Binding, error) {
-	log = log.WithField("Binding", fmt.Sprintf("%s/%s", binding.Name, binding.Namespace))
 	log.Info("start Binding process")
 
 	if binding.Status.IsEmpty() {

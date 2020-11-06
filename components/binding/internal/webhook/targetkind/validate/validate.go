@@ -17,7 +17,7 @@ var _ admission.Handler = &ValidationHandler{}
 var _ admission.DecoderInjector = &ValidationHandler{}
 
 type Validator interface {
-	Validate(context.Context, admission.Request, *v1alpha1.TargetKind, log.FieldLogger) *webhook.Error
+	Validate(*v1alpha1.TargetKind) *webhook.Error
 }
 
 type ValidationHandler struct {
@@ -56,14 +56,14 @@ func (h *ValidationHandler) Handle(ctx context.Context, req admission.Request) a
 	switch req.Operation {
 	case admissionTypes.Create:
 		for _, v := range h.CreateValidators {
-			err = v.Validate(ctx, req, targetKind, h.log)
+			err = v.Validate(targetKind)
 			if err != nil {
 				break
 			}
 		}
 	case admissionTypes.Update:
 		for _, v := range h.UpdateValidators {
-			err = v.Validate(ctx, req, targetKind, h.log)
+			err = v.Validate(targetKind)
 			if err != nil {
 				break
 			}

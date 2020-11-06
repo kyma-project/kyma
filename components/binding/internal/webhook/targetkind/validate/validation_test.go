@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package validation
+package validate
 
 import (
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -23,41 +23,32 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func validBinding() *v1alpha1.Binding {
-	return &v1alpha1.Binding{
+func validTargetKind() *v1alpha1.TargetKind {
+	return &v1alpha1.TargetKind{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-binding",
 			Namespace: "test-ns",
 		},
-		Spec: v1alpha1.BindingSpec{
-			Source: v1alpha1.Source{
-				Kind: "test",
-				Name: "test",
-			},
-			Target: v1alpha1.Target{
-				Kind: "test",
-				Name: "test",
-			},
-		},
+		Spec: v1alpha1.TargetKindSpec{},
 	}
 }
 
-func TestValidateBinding(t *testing.T) {
+func TestValidateTargetKind(t *testing.T) {
 	cases := []struct {
 		name    string
-		binding *v1alpha1.Binding
+		binding *v1alpha1.TargetKind
 		valid   bool
 	}{
 		{
 			name:    "valid",
-			binding: validBinding(),
+			binding: validTargetKind(),
 			valid:   true,
 		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			errs := internalValidateBinding(tc.binding)
+			errs := internalValidateTargetKind(tc.binding)
 			if len(errs) != 0 && tc.valid {
 				t.Errorf("unexpected error: %v", errs)
 			} else if len(errs) == 0 && !tc.valid {

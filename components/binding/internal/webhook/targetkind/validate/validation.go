@@ -1,4 +1,4 @@
-package validation
+package validate
 
 import (
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -9,8 +9,8 @@ import (
 // validateTargetKindName is the validation function for ServiceTargetKind names.
 var validateTargetKindName = apivalidation.NameIsDNSSubdomain
 
-// ValidateTargetKind validates a TargetKind and returns a list of errors.
-func ValidateTargetKind(targetKind *v1alpha1.TargetKind) field.ErrorList {
+// TargetKindValidation validates a TargetKind and returns a list of errors.
+func TargetKindValidation(targetKind *v1alpha1.TargetKind) field.ErrorList {
 	return internalValidateTargetKind(targetKind)
 }
 

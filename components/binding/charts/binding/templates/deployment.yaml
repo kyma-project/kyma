@@ -33,7 +33,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}-sa
       containers:
         - name: manager
-          image: "polskikiel/binding:0.1.0"
+          image: "{{ .Values.images.containerRegistry.path }}/binding:{{ .Values.images.bindingController.version }}"
           ports:
             - containerPort: {{ .Values.config.bindingController.port }}
           imagePullPolicy: Always
