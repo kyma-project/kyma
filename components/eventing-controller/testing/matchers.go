@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	. "github.com/onsi/gomega/types"
@@ -20,6 +18,8 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 func HaveSubscriptionName(name string) GomegaMatcher {
@@ -112,7 +112,7 @@ func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
 					break
 				}
 				accessStrategy := rule.AccessStrategies[0]
-				if accessStrategy.Handler.Name != "oauth2_introspection" {
+				if accessStrategy.Handler.Name != object.OAuthHandlerName {
 					break
 				}
 				hasRule = true

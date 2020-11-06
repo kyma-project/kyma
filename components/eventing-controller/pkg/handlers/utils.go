@@ -99,7 +99,6 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventing
 			path = rule.Path
 			break
 		}
-
 	}
 	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Service.Host, path), nil
 }

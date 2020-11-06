@@ -10,6 +10,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// OAuthHandlerName OAuth handler name supported in Kyma
+const OAuthHandlerName = "oauth2_introspection"
+
 // NewAPIRule creates a APIRule object.
 func NewAPIRule(ns, namePrefix string, opts ...Option) *apigatewayv1alpha1.APIRule {
 	s := &apigatewayv1alpha1.APIRule{
@@ -90,9 +93,8 @@ func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
-		handlerOAuth := "oauth2_introspection"
 		handler := oryv1alpha1.Handler{
-			Name: handlerOAuth,
+			Name: OAuthHandlerName,
 		}
 		authenticator := &oryv1alpha1.Authenticator{
 			Handler: &handler,

@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
 
@@ -72,7 +72,7 @@ func WithGateway(apiRule *apigatewayv1alpha1.APIRule) {
 }
 
 func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
-	handlerOAuth := "oauth2_introspection"
+	handlerOAuth := object.OAuthHandlerName
 	handler := oryv1alpha1.Handler{
 		Name: handlerOAuth,
 	}
@@ -94,9 +94,8 @@ func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 }
 
 func WithoutPath(apiRule *apigatewayv1alpha1.APIRule) {
-	handlerOAuth := "oauth2_introspection"
 	handler := oryv1alpha1.Handler{
-		Name: handlerOAuth,
+		Name: object.OAuthHandlerName,
 	}
 	authenticator := &oryv1alpha1.Authenticator{
 		Handler: &handler,

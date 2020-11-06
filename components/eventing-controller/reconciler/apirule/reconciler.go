@@ -111,7 +111,7 @@ func (r *Reconciler) handleAPIRuleDelete(ctx context.Context, apiRule *apigatewa
 
 // handleAPIRuleAddOrUpdate handles the APIRule add/update.
 func (r *Reconciler) handleAPIRuleAddOrUpdate(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) (ctrl.Result, error) {
-	if !isRelevantAPIRule(apiRule) {
+	if !hasRelevantAPIRuleLabels(apiRule.Labels) {
 		return ctrl.Result{}, nil
 	}
 
@@ -196,10 +196,10 @@ func isRelevantAPIRuleName(name string) bool {
 	return strings.HasPrefix(name, reconciler.ApiRuleNamePrefix)
 }
 
-// isRelevantAPIRule returns true if the given APIRule labels matches the APIRule Labels
+// hasRelevantAPIRuleLabels returns true if the given APIRule labels matches the APIRule Labels
 // used by the eventing-controller, otherwise returns false.
-func isRelevantAPIRule(apiRule *apigatewayv1alpha1.APIRule) bool {
-	if v, ok := apiRule.Labels[constants.ControllerIdentityLabelKey]; ok && v == constants.ControllerIdentityLabelValue {
+func hasRelevantAPIRuleLabels(labels map[string]string) bool {
+	if v, ok := labels[constants.ControllerIdentityLabelKey]; ok && v == constants.ControllerIdentityLabelValue {
 		return true
 	}
 	return false

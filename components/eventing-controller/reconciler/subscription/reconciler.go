@@ -228,7 +228,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	statusChangedAtCheck, retry, errTimeout := r.checkStatusActive(subscription)
 	statusChanged = statusChanged || statusChangedAtCheck
 	if errTimeout != nil {
-		logger.Error(errTimeout, "Timeout at retry")
+		logger.Error(errTimeout, "timeout at retry")
 		result.Requeue = false
 		return statusChanged, errTimeout
 	}

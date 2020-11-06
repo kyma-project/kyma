@@ -40,7 +40,7 @@ func Test_isRelevantAPIRuleName(t *testing.T) {
 	}
 }
 
-func Test_isRelevantAPIRule(t *testing.T) {
+func Test_hasRelevantAPIRuleLabels(t *testing.T) {
 	testCases := []struct {
 		name         string
 		givenApiRule *apigatewayv1alpha1.APIRule
@@ -77,7 +77,7 @@ func Test_isRelevantAPIRule(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		if got := isRelevantAPIRule(tc.givenApiRule); got != tc.wantValue {
+		if got := hasRelevantAPIRuleLabels(tc.givenApiRule.Labels); got != tc.wantValue {
 			t.Errorf("Test: [%s] failed for APIRule with labels: [%v], want: [%v] but got: [%v]",
 				tc.name, tc.givenApiRule.Labels, tc.wantValue, got)
 		}
