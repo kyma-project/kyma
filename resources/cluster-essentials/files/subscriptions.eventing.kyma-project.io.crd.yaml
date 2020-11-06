@@ -170,6 +170,8 @@ spec:
                 type: string
               ready:
                 type: boolean
+              externalSink:
+                type: string
             type: object
         type: object
     served: true
