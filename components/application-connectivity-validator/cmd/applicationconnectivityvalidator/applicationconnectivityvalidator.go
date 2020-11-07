@@ -70,6 +70,10 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
+	// TODO: controller should start here
+
+	
+
 	go func() {
 		log.Error(proxyServer.ListenAndServe())
 	}()
