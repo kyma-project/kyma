@@ -16,6 +16,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -70,9 +71,10 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
-	// TODO: controller should start here
-
-	
+	// Starting the Cache Controller for Application CRs
+	go func() {
+		controller.Start()
+	}()
 
 	go func() {
 		log.Error(proxyServer.ListenAndServe())

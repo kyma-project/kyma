@@ -27,8 +27,8 @@ const (
 )
 
 type ProxyHandler interface {
+	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
 }
-ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
 
 //go:generate mockery --name=ApplicationGetter
 type ApplicationGetter interface {
