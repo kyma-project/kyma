@@ -1,5 +1,9 @@
 name: Binding-pre-master
 on: 
+  pull_request:
+    paths: 
+      - 'components/binding/**'
+      - '.github/workflows/bindings-k3s.yml' 
   repository_dispatch:
     types: [ok-to-test-command]   
 
@@ -10,7 +14,7 @@ defaults:
 jobs:
   pre-master-binding-k3s:
     env:
-      PR_NUMBER: ${{ github.event.number }}
+      PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
       PROJECT_ID: "sap-se-cx-gopher"
     runs-on: ubuntu-latest
     if: 
@@ -26,7 +30,7 @@ jobs:
     - name: Fork based /ok-to-test checkout
       uses: actions/checkout@v2
       with:
-        ref: 'refs/pull/${{ github.event.client_payload.pull_request.number }}/merge'
+        ref: "refs/pull/${{ env.PR_NUMBER }}/merge"
 
     - name: Go test, vet, fmt
       run:  |
@@ -78,6 +82,7 @@ jobs:
     # Update check run 
     - uses: actions/github-script@v1
       id: update-check-run
+      if: ${{ always() }}
       env:
         number: ${{ github.event.client_payload.pull_request.number }}
         job: ${{ github.job }}
