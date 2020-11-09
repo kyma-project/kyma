@@ -6,6 +6,9 @@ global:
   kymaRuntime:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
+  role:
+    developer: KymaRuntimeDeveloper
+    namespaceAdmin: KymaRuntimeNamespaceAdmin
 
 image:
   registryPath: eu.gcr.io/kyma-project
