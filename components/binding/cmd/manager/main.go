@@ -10,11 +10,10 @@ import (
 	podMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/pod/mutate"
 	targetKindValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/targetkind/validate"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
-	"k8s.io/client-go/dynamic"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
