@@ -31,7 +31,7 @@ Read the subsections for details.
 
 You can provide a custom list of components to Kyma CLI during the installation. The version of your component's deployment must match the version that Kyma currently supports.
 
->**NOTE:** For some components, you must perform additional actions to exclude them from the Kyma installation. In case of the Service Catalog, you must provide your own deployment of these components in the Kyma-supported version before you remove them from the installation process. See the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) file for the currently supported version of the Service Catalog.
+>**NOTE:** For some components, you must perform additional actions to exclude them from the Kyma installation. In case of the Service Catalog, you must provide your own deployment of this component in the Kyma-supported version before you remove them from the installation process. See the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) file for the currently supported version of the Service Catalog.
 
 ### Installation from the release
 
