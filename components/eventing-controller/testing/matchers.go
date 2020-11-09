@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -88,12 +87,12 @@ func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
 
 		sURL, err := url.ParseRequestURI(s.Spec.Sink)
 		if err != nil {
-			log.Panic("failed to parse sub sink URI", err)
+			return false
 		}
 
 		sURLSplitArr := strings.Split(sURL.Host, ".")
 		if len(sURLSplitArr) != 5 {
-			log.Panic("sink URL is invalid")
+			return false
 		}
 		_, subscriberSvcName := sURLSplitArr[1], sURLSplitArr[0]
 		if sURL.Path == "" {
@@ -140,7 +139,7 @@ func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
 		}
 		svcPort, err := utils.GetPortNumberFromURL(*sURL)
 		if err != nil {
-			log.Panic("failed to convert sink port to uint32 port")
+			return false
 		}
 
 		if svcPort != *apiRule.Spec.Service.Port {

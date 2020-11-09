@@ -841,7 +841,6 @@ func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncA
 		if len(apiRuleList.Items) > 0 && len(apiRule.OwnerReferences) > 0 {
 			log.Printf("#### owner ref ####")
 			log.Printf("oR: %v", apiRule.OwnerReferences[0])
-			log.Printf("delete timestamp: %v", apiRule.DeletionTimestamp)
 			sub := &eventingv1alpha1.Subscription{}
 			err = k8sClient.Get(ctx, types.NamespacedName{
 				Namespace: apiRule.Namespace,
