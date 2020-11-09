@@ -8,7 +8,7 @@ The Central Connector Service uses the Root certificate issued by the Certificat
 Two different components use the Root CA certificate. As a result, the certificate is stored in two separate Secrets:
 
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
-  - The `kyma-gateway-certs-cacert` Istio Secret responsible for security in the Connector Service API
+  - The `app-connector-certs` Istio Secret responsible for security in the Connector Service API
 
 Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered Applications can access its API.
 
@@ -50,10 +50,10 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    kubectl -n kyma-integration edit secret connector-service-app-ca
    ```
 
-1. Get the existing Istio CA certificate. Fetch it from the `kyma-gateway-certs-cacert` Secret and save it to the `old-ca.crt` file.
+1. Get the existing Istio CA certificate. Fetch it from the `app-connector-certs` Secret and save it to the `old-ca.crt` file.
   
    ```bash
-   kubectl -n istio-system get secret kyma-gateway-certs-cacert -o=jsonpath='{.data.cacert}' | base64 --decode > old-ca.crt
+   kubectl -n istio-system get secret app-connector-certs -o=jsonpath='{.data.cacert}' | base64 --decode > old-ca.crt
    ```
 
 1. Merge the old certificate and the newly generated certificate into a single `merged-ca.crt` file.
@@ -71,14 +71,14 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 1. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `cacert` value with the `merged-ca.crt` base64-encoded certificate.
   
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret app-connector-certs
    ```
 
 1. Wait for all the client certificates to be renewed. 
 
     > **NOTE:** In the case of a Kyma Runtime connected to the central Connector Service, the system renews the certificates automatically using the information stored in the Secrets. Alternatively, you can renew the certificates in said Runtime yourself. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to renew the certificates.
 
-1. After the client certificates are renewed, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
+1. After the client certificates are renewed, remove the `app-connector-certs` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
   
    > **CAUTION:** Do not proceed with this step until all the client certificates are renewed!
 
@@ -89,7 +89,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 1. Edit the Secret and replace the `cacert` value with the base64-encoded `new-ca.crt` certificate.
   
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret app-connector-certs
    ```
 
 ## Rotating a compromised Root CA certificate
@@ -123,7 +123,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate.
    
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret app-connector-certs
    ```
 
 6. Generate new certificates in a Runtime. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to generate the certificates.
@@ -163,7 +163,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate.
   
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret app-connector-certs
    ```
 
 6. Generate new certificates in a Runtime. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to generate the certificates.

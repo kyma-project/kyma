@@ -41,7 +41,7 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: kyma-gateway-certs-cacert
+        name: app-connector-certs
         namespace: istio-system
   compass:
     skipTLSVerification: true

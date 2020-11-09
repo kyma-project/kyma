@@ -2,7 +2,6 @@ package testsuite
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,6 +9,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go"
 
 	retrygo "github.com/avast/retry-go"
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
@@ -20,7 +20,6 @@ import (
 // SendEventToMeshAndCheckEventId is a step which sends an event and checks if the correct EventId has been received
 type SendEventToMeshAndCheckEventId struct {
 	testkit.SendEvent
-	counter     int
 	testService *testkit.TestService
 	retryOpts   []retrygo.Option
 }
@@ -32,7 +31,6 @@ func NewSendEventToMeshAndCheckEventId(appName, payload string, state testkit.Se
 	opts ...retrygo.Option) *SendEventToMeshAndCheckEventId {
 	return &SendEventToMeshAndCheckEventId{
 		testkit.SendEvent{State: state, AppName: appName, Payload: payload},
-		0,
 		testService,
 		opts,
 	}
@@ -45,8 +43,7 @@ func (s *SendEventToMeshAndCheckEventId) Name() string {
 
 // Run executes the step
 func (s *SendEventToMeshAndCheckEventId) Run() error {
-	const basicId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"
-	eventId := fmt.Sprint(basicId, s.counter)
+	eventId := uuid.New().String()
 
 	err := s.sendEventToMesh(eventId)
 	if err != nil {
@@ -55,7 +52,6 @@ func (s *SendEventToMeshAndCheckEventId) Run() error {
 
 	err = s.checkEventId(eventId)
 	if err != nil {
-		s.counter++
 		return errors.Wrap(err, s.testService.DumpAllReceivedEvents().Error())
 	}
 
