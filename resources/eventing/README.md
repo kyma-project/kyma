@@ -51,10 +51,10 @@ metadata:
     component: eventing
     kyma-project.io/installation: ""
 stringData:
-    eventing.authentication.oauthClientId: "$bebOauthClientId"
-    eventing.authentication.oauthClientSecret: "$bebOauthClientSecret"
-    eventing.authentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
-    eventing.authentication.publishUrl: "$bebPublishUrl"
+    authentication.oauthClientId: "$bebOauthClientId"
+    authentication.oauthClientSecret: "$bebOauthClientSecret"
+    authentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
+    authentication.publishUrl: "$bebPublishUrl"
 EOF
 
 $ kyma install -s <source-image> -o installation-overrides-epp.yaml
