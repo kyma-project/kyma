@@ -11,8 +11,8 @@ RUN GOOS=linux GO111MODULE=on go mod vendor && \
 FROM gcr.io/distroless/static:nonroot
 LABEL source = git@github.com:kyma-project/kyma.git
 
+WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-publisher-proxy/event-publisher-proxy .
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY licenses/ /licenses/
 USER 1001
