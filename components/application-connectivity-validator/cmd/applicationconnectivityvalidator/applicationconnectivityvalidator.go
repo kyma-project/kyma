@@ -73,7 +73,7 @@ func main() {
 
 	// Starting the Cache Controller for Application CRs
 	go func() {
-		controller.Start()
+		controller.Start(options.kubeConfig, options.masterURL, options.syncPeriod)
 	}()
 
 	go func() {

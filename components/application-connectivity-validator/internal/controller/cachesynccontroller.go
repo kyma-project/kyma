@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
@@ -37,8 +36,6 @@ const (
 
 // Controller is the controller implementation for Application resources
 type Controller struct {
-	// kubeclientset is a standard kubernetes clientset
-	kubeclientset kubernetes.Interface
 	// clientset is a clientset for our own API group
 	clientset clientset.Interface
 
@@ -54,12 +51,10 @@ type Controller struct {
 }
 
 func NewController(
-	kubeclientset kubernetes.Interface,
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer) *Controller {
 
 	controller := &Controller{
-		kubeclientset:     kubeclientset,
 		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,

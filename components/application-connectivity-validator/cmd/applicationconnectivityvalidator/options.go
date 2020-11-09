@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 )
 
 type options struct {
@@ -20,6 +21,9 @@ type options struct {
 	appRegistryHost          string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
+	kubeConfig               string
+	masterURL                string
+	syncPeriod               time.Duration
 }
 
 func parseArgs() *options {
@@ -37,6 +41,9 @@ func parseArgs() *options {
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
+	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	syncPeriod := flag.Duration("syncPeriod", 60, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
 
@@ -55,6 +62,9 @@ func parseArgs() *options {
 		appRegistryHost:          *appRegistryHost,
 		cacheExpirationMinutes:   *cacheExpirationMinutes,
 		cacheCleanupMinutes:      *cacheCleanupMinutes,
+		kubeConfig:               *kubeConfig,
+		masterURL:                *masterURL,
+		syncPeriod:               *syncPeriod,
 	}
 }
 
@@ -65,9 +75,11 @@ func (o *options) String() string {
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s"+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d",
+		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost,
-		o.cacheExpirationMinutes, o.cacheCleanupMinutes)
+		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
+		o.kubeConfig, o.masterURL, o.syncPeriod)
 }
