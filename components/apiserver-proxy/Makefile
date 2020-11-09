@@ -8,7 +8,8 @@ ENTRYPOINT := ./cmd/proxy/main.go
 
 .DEFAULT_GOAL=gomod-verify
 
-release: gomod-release
+release:
+	$(MAKE) gomod-release
 
 .PHONY: clean
 >>>>>>> 5e64c9c03... fix generic makefile and clean up the code

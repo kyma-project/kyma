@@ -32,7 +32,7 @@ ARTIFACTS:=/tmp/artifacts
 endif
 
 # Base docker configuration
-DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated -v $(ARTIFACTS):/tmp/artifacts -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
+DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated -v $(ARTIFACTS):/tmp/artifacts --rm -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
 
 # Check if go is available
 ifneq (,$(shell go version 2>/dev/null))
