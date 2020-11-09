@@ -12,11 +12,11 @@ clusterRole:
   name: ""
 
 image:
-  # name is the name of the container image for the event-publisher-proxy
+  # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
-  # tag is the container tag of the event-publisher-proxy image
+  # tag is the container tag of the eventing-controller image
   tag: "PR-9868"
-  # pullPolicy is the pullPolicy for the event-publisher-proxy image
+  # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
 podSecurityContext:
@@ -28,7 +28,7 @@ metrics:
   service:
     nameSuffix: "-metrics"
 
-#TODO: Remove this when knative chart is removed
+#TODO: Remove this when knative-eventing chart is removed
 clusterRoleBindingSuffix: "-crole-binding"
 
 secretName: "eventing"
