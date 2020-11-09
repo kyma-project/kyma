@@ -1,0 +1,32 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-kyma-patch
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list"]
+  - apiGroups: ["security.istio.io"]
+    resources: ["peerauthentications"]
+    verbs: ["get", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-kyma-patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Chart.Name }}-kyma-patch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Chart.Name }}-kyma-patch
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-kyma-patch
+    namespace: istio-system

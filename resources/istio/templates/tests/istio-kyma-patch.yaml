@@ -1,0 +1,39 @@
+{{- if .Values.istio_kyma_patch.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-kyma-patch
+  labels:
+    app: {{ .Chart.Name }}-kyma-patch
+    app.kubernetes.io/name: {{ .Chart.Name }}-kyma-patch
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.istio_kyma_patch.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-kyma-patch
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-kyma-patch
+      containers:
+        - name: tests
+          image: {{ .Values.istio_kyma_patch.image }}:{{ .Values.istio_kyma_patch.tag }}
+          imagePullPolicy: Always
+          command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/istio-kyma-patch-test.sh" | printf "%s" | indent 16}}
+          env:
+        - name: CONFIG_DIR
+          value: /etc/config
+        - name: REQUIRED_ISTIO_VERSION
+          value: {{ .Chart.Version }}
+      restartPolicy: Never
+  {{- end }}
+  {{- end }}
