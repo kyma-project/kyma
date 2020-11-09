@@ -1,20 +1,20 @@
-{{- if and .Values.prometheus.enabled .Values.prometheus.servicePerReplica.enabled }}
-{{- $count := .Values.prometheus.prometheusSpec.replicas | int -}}
-{{- $serviceValues := .Values.prometheus.servicePerReplica -}} 
+{{- if and .Values.alertmanager.enabled .Values.alertmanager.servicePerReplica.enabled }}
+{{- $count := .Values.alertmanager.alertmanagerSpec.replicas | int -}}
+{{- $serviceValues := .Values.alertmanager.servicePerReplica -}}
 apiVersion: v1
 kind: List
 metadata:
-  name: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-serviceperreplica
+  name: {{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-serviceperreplica
   namespace: {{ template "kube-prometheus-stack.namespace" . }}
 items:
 {{- range $i, $e := until $count }}
   - apiVersion: v1
     kind: Service
     metadata:
-      name: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+      name: {{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-{{ $i }}
       namespace: {{ template "kube-prometheus-stack.namespace" $ }}
       labels:
-        app: {{ include "kube-prometheus-stack.name" $ }}-prometheus
+        app: {{ include "kube-prometheus-stack.name" $ }}-alertmanager
 {{ include "kube-prometheus-stack.labels" $ | indent 8 }}
       {{- if $serviceValues.annotations }}
       annotations:
@@ -31,16 +31,16 @@ items:
       {{- end }}
       {{- end }}
       ports:
-        - name: {{ $.Values.prometheus.prometheusSpec.portName }}
+        - name: {{ $.Values.alertmanager.alertmanagerSpec.portName }}
           {{- if eq $serviceValues.type "NodePort" }}
           nodePort: {{ $serviceValues.nodePort }}
           {{- end }}
           port: {{ $serviceValues.port }}
           targetPort: {{ $serviceValues.targetPort }}
       selector:
-        app: prometheus
-        prometheus: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus
-        statefulset.kubernetes.io/pod-name: prometheus-{{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+        app: alertmanager
+        alertmanager: {{ template "kube-prometheus-stack.fullname" $ }}-alertmanager
+        statefulset.kubernetes.io/pod-name: alertmanager-{{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-{{ $i }}
       type: "{{ $serviceValues.type }}"
 {{- end }}
 {{- end }}
