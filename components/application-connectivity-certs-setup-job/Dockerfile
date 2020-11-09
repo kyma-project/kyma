@@ -15,7 +15,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o appconnectivityce
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/appconnectivitycertssetupjob .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/appconnectivitycertssetupjob/appconnectivitycertssetupjob .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/licenses ./licenses
+COPY --from=builder /etc/passwd /etc/passwd
 
 CMD ["/appconnectivitycertssetupjob"]

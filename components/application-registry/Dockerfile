@@ -22,5 +22,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY ./docs/api/api.yaml .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-registry/applicationregistry .
 COPY --from=builder /app/licenses /app/licenses
+COPY --from=builder /etc/passwd /etc/passwd
 
 CMD ["/applicationregistry"]

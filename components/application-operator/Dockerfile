@@ -19,5 +19,6 @@ COPY charts/application application/
 COPY charts/gateway gateway/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-operator/manager .
 COPY --from=builder /app/licenses /app/licenses
+COPY --from=builder /etc/passwd /etc/passwd
 
 CMD ["/manager"]

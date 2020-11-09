@@ -21,5 +21,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-gateway/applicationgateway .
 COPY --from=builder /app/licenses /app/licenses
+COPY --from=builder /etc/passwd /etc/passwd
 
 CMD ["/applicationgateway"]

@@ -17,5 +17,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/connection-token-handler/manager .
 COPY --from=builder /app/licenses /app/licenses
+COPY --from=builder /etc/passwd /etc/passwd
 
 ENTRYPOINT ["/manager"]
