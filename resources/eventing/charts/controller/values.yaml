@@ -17,7 +17,7 @@ image:
   # tag is the container tag of the event-publisher-proxy image
   tag: "PR-9868"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
-  pullPolicy: "Always"
+  pullPolicy: "IfNotPresent"
 
 podSecurityContext:
 
