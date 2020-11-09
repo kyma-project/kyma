@@ -30,10 +30,10 @@ spec:
           - |
 {{.Files.Get "files/istio-kyma-patch-test.sh" | printf "%s" | indent 16}}
           env:
-        - name: CONFIG_DIR
-          value: /etc/config
-        - name: REQUIRED_ISTIO_VERSION
-          value: {{ .Chart.Version }}
+          - name: CONFIG_DIR
+            value: /etc/config
+          - name: REQUIRED_ISTIO_VERSION
+            value: {{ .Chart.Version }}
       restartPolicy: Never
   {{- end }}
   {{- end }}
