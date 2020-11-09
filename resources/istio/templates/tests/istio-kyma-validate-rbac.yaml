@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Chart.Name }}-kyma-patch
+  name: {{ .Chart.Name }}-kyma-validate
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -16,48 +16,39 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-kyma-patch
+  name: {{ .Chart.Name }}-kyma-validate
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Chart.Name }}-kyma-patch
+  name: {{ .Chart.Name }}-kyma-validate
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ .Chart.Name }}-kyma-patch
+  name: {{ .Chart.Name }}-kyma-validate
 subjects:
   - kind: ServiceAccount
-    name: {{ .Chart.Name }}-kyma-patch
+    name: {{ .Chart.Name }}-kyma-validate
     namespace: istio-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: istio-kyma-patch
+  name: istio-kyma-validate
 rules:
   - apiGroups: [""]
     resources: ["namespaces"]
-    verbs: ["get", "list", "watch", "patch"]
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["authentication.istio.io"]
-    resources: ["meshpolicies"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["mutatingwebhookconfigurations"]
     verbs: ["get", "list", "watch", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: istio-kyma-patch
+  name: istio-kyma-validate
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: istio-kyma-patch
+  name: istio-kyma-validate
 subjects:
   - kind: ServiceAccount
-    name: istio-kyma-patch
+    name: istio-kyma-validate
     namespace: istio-system

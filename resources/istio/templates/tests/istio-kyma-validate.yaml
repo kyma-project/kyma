@@ -1,34 +1,34 @@
-{{- if .Values.istio_kyma_patch.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+{{- if .Values.test.istio_kyma_validate.enabled }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-kyma-patch
+  name: {{ .Chart.Name }}-kyma-validate
   labels:
-    app: {{ .Chart.Name }}-kyma-patch
-    app.kubernetes.io/name: {{ .Chart.Name }}-kyma-patch
+    app: {{ .Chart.Name }}-kyma-validate
+    app.kubernetes.io/name: {{ .Chart.Name }}-kyma-validate
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    {{- range $key, $val := .Values.istio_kyma_patch.labels }}
+    {{- range $key, $val := .Values.test.istio_kyma_validate.labels }}
     kyma-project.io/test.{{ $key }}: {{ $val | quote }}
   {{- end }}
 spec:
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-kyma-patch
+        app: {{ .Chart.Name }}-kyma-validate
     spec:
-      serviceAccountName: {{ .Chart.Name }}-kyma-patch
+      serviceAccountName: {{ .Chart.Name }}-kyma-validate
       containers:
         - name: tests
-          image: {{ .Values.istio_kyma_patch.image }}:{{ .Values.istio_kyma_patch.tag }}
+          image: {{ .Values.test.istio_kyma_validate.image }}:{{ .Values.test.istio_kyma_validate.tag }}
           imagePullPolicy: Always
           command:
           - /bin/bash
           - -c
           - |
-{{.Files.Get "files/istio-kyma-patch-test.sh" | printf "%s" | indent 16}}
+{{.Files.Get "files/istio-kyma-validate-test.sh" | printf "%s" | indent 16}}
           env:
           - name: CONFIG_DIR
             value: /etc/config

@@ -39,7 +39,7 @@ fi
 function require_istio_version() {
     local version
     version=$(kubectl -n istio-system get deployment istiod -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
-    if [[ "$version" != ${REQUIRED_ISTIO_VERSION} ]]; then
+    if [[ "$version" != "${REQUIRED_ISTIO_VERSION}" ]]; then
         log "Istio must be in version: $REQUIRED_ISTIO_VERSION!" red
         exit 1
     fi
@@ -53,7 +53,7 @@ function check_mtls_enabled() {
   log "--> Check global mTLS"
   local mTLS=$(kubectl get PeerAuthentication -n istio-system default -o jsonpath='{.spec.mtls.mode}')
   local status=$?
-  if [[ "$?" != 0 ]]; then
+  if [[ $status != 0 ]]; then
     log "----> PeerAuthentication istio-system/default not found!" red
     exit 1
   fi
@@ -62,21 +62,6 @@ function check_mtls_enabled() {
     exit 1
   fi
   log "----> mTLS is enabled" green
-}
-
-function check_mtls_enabled_v1() {
-    log "--> Check global mTLS"
-    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
-    local status=$?
-    if [[ "$?" != 0 ]]; then
-      log "----> MeshPolicy istio-system/default not found!" red
-      exit 1
-    fi
-    if [[ "${mTLS}" != "STRICT" ]] && [[ "${mTLS}" != "" ]]; then
-        log "----> mTLS must be \"STRICT\"" red
-        exit 1
-    fi
-    log "----> mTLS is enabled" green
 }
 
 function check_sidecar_injector() {
@@ -93,6 +78,6 @@ function check_sidecar_injector() {
 
 require_istio_system
 require_istio_version
-check_mtls_enabled_v1
+check_mtls_enabled
 check_sidecar_injector
 log "Istio is configured to run Kyma!" green
