@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - 'components/binding/**'
-      - '.github/workflows/pre-master-binding-k3s.yml'
+      - '.github/workflows/trusted-dev.yml'
 
 jobs:
   is-trusted-dev:
