@@ -17,6 +17,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/vrischmann/envconfig v1.1.0
+	golang.org/x/tools v0.0.0-20201105220310-78b158585360 // indirect
 	helm.sh/helm/v3 v3.2.1
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.6
