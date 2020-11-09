@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - 'components/binding/*'
-      - '.github/workflows/bindings-k3s.yml'
+      - '.github/workflows/post-master-binding-k3s.yml'
     branches:
       - master
   

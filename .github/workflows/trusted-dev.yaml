@@ -4,8 +4,8 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
     paths:
-      - 'components/binding/*'
-      - '.github/workflows/bindings-k3s.yml'
+      - 'components/binding/**'
+      - '.github/workflows/trusted-dev.yml'
 
 jobs:
   is-trusted-dev:
@@ -25,8 +25,9 @@ jobs:
       env:
         TOKEN: ${{ steps.generate_token.outputs.token }}
       run: |
-        RESPONSE=$(curl -H "Authorization: token ${{ env.TOKEN}}" -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/kyma-project/kyma/collaborators/${{ github.event.pull_request.user.login }})
+        RESPONSE=$(curl -H "Authorization: token ${{ env.TOKEN}}" -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/kyma-project/kyma/collaborators/${{ github.event.pull_request.user.login }} )
         if [ "$RESPONSE" != "204" ]; then
+          echo "Status code is ${RESPONSE}"
           echo "${{ github.event.pull_request.user.login }} is not a collaborator"
           exit 1
         fi
