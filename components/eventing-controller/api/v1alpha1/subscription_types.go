@@ -69,7 +69,7 @@ type EmsSubscriptionStatus struct {
 // SubscriptionStatus defines the observed state of Subscription
 type SubscriptionStatus struct {
 	Conditions            []Condition           `json:"conditions,omitempty"`
-	Ready                 bool                  `json:"ready,omitempty"`
+	Ready                 bool                  `json:"ready"`
 	Ev2hash               int64                 `json:"ev2hash,omitempty"`
 	Emshash               int64                 `json:"emshash,omitempty"`
 	ExternalSink          string                `json:"externalSink,omitempty"`

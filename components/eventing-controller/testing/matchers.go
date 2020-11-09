@@ -73,7 +73,7 @@ func HaveApiRuleReady() GomegaMatcher {
 	}, BeTrue())
 }
 
-func HaveValidAPIRule(s *eventingv1alpha1.Subscription) GomegaMatcher {
+func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
 	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
 		hasOwnRef, hasRule := false, false
 		for _, or := range apiRule.OwnerReferences {

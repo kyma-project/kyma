@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -53,6 +54,19 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	}
 
 	s.Conditions = finalConditions
+}
+
+// TODO: unit test me
+func (s SubscriptionStatus) IsReady() bool {
+	// the subscription is ready if all conditions are fulfilled
+	isReady := true
+
+	for _, c := range s.Conditions {
+		if string(c.Status) != string(v1.ConditionTrue) {
+			isReady = false
+		}
+	}
+	return isReady
 }
 
 // makeConditions creates an map of all conditions which the Subscription should have

@@ -580,21 +580,31 @@ func getSvcNsAndName(url string) (string, string, error) {
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context) error {
 	currentStatus := subscription.Status
-
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
+	currentReadyStatusFromConditions := currentStatus.IsReady()
 
+	var updateReadyStatus bool
+	if currentReadyStatusFromConditions && !currentStatus.Ready {
+		currentStatus.Ready = true
+		updateReadyStatus = true
+	} else if !currentReadyStatusFromConditions && currentStatus.Ready {
+		currentStatus.Ready = false
+		updateReadyStatus = true
+	}
 	// case: conditions are already initialized
-	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) {
+	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) && !updateReadyStatus {
 		return nil
 	}
-
-	subscription.Status = expectedStatus
+	if len(currentStatus.Conditions) == 0 {
+		subscription.Status = expectedStatus
+	} else {
+		subscription.Status.Ready = currentStatus.Ready
+	}
 	if err := r.Status().Update(ctx, subscription); err != nil {
 		return err
 	}
 	result.Requeue = true
-
 	return nil
 }
 

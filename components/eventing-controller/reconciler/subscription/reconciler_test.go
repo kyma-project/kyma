@@ -36,6 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
@@ -84,7 +85,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		}
 	})
 
-	PWhen("Creating a valid Subscription with webhook followed by a creation of APIRule", func() {
+	When("Creating a valid Subscription with webhook followed by a creation of APIRule", func() {
 		It("Should create a valid APIRule", func() {
 			ctx := context.Background()
 			subscriptionName := "sub-create-api-rule"
@@ -99,12 +100,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
 			By("Creating a valid APIRule")
-			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveValidAPIRule(givenSubscription))
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 
 			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
 			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
-
-			ensureAPIRuleStatusUpdatedWithStatusReady(apiRuleCreated, ctx).Should(BeNil())
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx).Should(BeNil())
 
 			By("Creating a BEB Subscription")
 			var bebSubscription bebtypes.Subscription
@@ -136,10 +136,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Marking the subscription as ready")
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
-
 		})
 	})
-	PWhen("Creating a Subscription with invalid Sink", func() {
+
+	When("Creating a Subscription with invalid Sink", func() {
 		It("Should stop reconciling", func() {
 			ctx := context.Background()
 			subscriptionName := "sub-create-with-invalid-sink"
@@ -153,11 +153,15 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
 			By("Setting APIRule status to False")
-			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionFalse)
+			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady, v1.ConditionFalse)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyFalseCondition),
 			))
+
+			By("Deleting the object to not provoke more reconciliation requests")
+			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(HaveEvent(subscriptionDeletedEvent))
 		})
@@ -253,7 +257,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Updating APIRule")
-			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(givenSubscription))
+			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 
 			By("Marking it as ready")
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
@@ -321,7 +325,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					},
 				))))
 			By("Updating APIRule")
-			getAPIRule(apiRuleForNewSvc, ctx).Should(reconcilertesting.HaveValidAPIRule(givenSubscription))
+			getAPIRule(apiRuleForNewSvc, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 		})
 	})
 
@@ -388,7 +392,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Updating APIRule")
-			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(givenSubscription))
+			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 		})
 	})
 
@@ -489,7 +493,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Create subscription
 			ensureSubscriptionCreated(givenSubscription, ctx)
-			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(givenSubscription))
+			getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 
 			Context("Given the subscription is ready", func() {
 				getSubscription(givenSubscription, ctx).Should(And(
@@ -678,6 +682,7 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(apiRule *apigatewayv1alpha1.APIRu
 	By(fmt.Sprintf("Ensuring the APIRule %q is updated", apiRule.Name))
 
 	return Eventually(func() error {
+
 		lookupKey := types.NamespacedName{
 			Namespace: apiRule.Namespace,
 			Name:      apiRule.Name,
@@ -688,7 +693,7 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(apiRule *apigatewayv1alpha1.APIRu
 		}
 		newAPIRule := apiRule.DeepCopy()
 		reconcilertesting.WithStatusReady(newAPIRule)
-		err = k8sClient.Status().Update(ctx, apiRule)
+		err = k8sClient.Status().Update(ctx, newAPIRule)
 		if err != nil {
 			return err
 		}
@@ -853,12 +858,12 @@ func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncA
 	}, bigTimeOut, bigPollingInterval)
 }
 
-func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) *apigatewayv1alpha1.APIRule {
+func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) apigatewayv1alpha1.APIRule {
 	log.Printf("apirules got ::: %v", apiRules)
 	if len(apiRules.Items) == 1 && *apiRules.Items[0].Spec.Service.Name == svc.Name {
-		return &apiRules.Items[0]
+		return apiRules.Items[0]
 	}
-	return nil
+	return apigatewayv1alpha1.APIRule{}
 }
 
 func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.APIRuleList {
@@ -876,7 +881,7 @@ func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.A
 }
 
 func getAPIRuleForASvc(svc *corev1.Service, ctx context.Context) AsyncAssertion {
-	return Eventually(func() *apigatewayv1alpha1.APIRule {
+	return Eventually(func() apigatewayv1alpha1.APIRule {
 		apiRules := getAPIRules(ctx, svc)
 		log.Printf("apirules got ::: %v", apiRules)
 		return filterAPIRulesForASvc(apiRules, svc)

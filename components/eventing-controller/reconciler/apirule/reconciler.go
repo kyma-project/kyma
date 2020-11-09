@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler"
@@ -53,6 +54,9 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 // Reconcile handles the APIRule add/update/delete.
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
+
+	// prepare an APIRule instance with the basic info (name, namespace)
+	// which is required for the deletion scenario to work properly
 	apiRule := &apigatewayv1alpha1.APIRule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      req.Name,
@@ -60,9 +64,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		},
 	}
 
-	// handle delete APIRule
+	// try to get the APIRule from the API server
 	if err := r.Client.Get(ctx, req.NamespacedName, apiRule); err != nil {
-		return r.handleAPIRuleDelete(ctx, apiRule)
+		// handle delete APIRule
+		if k8serrors.IsNotFound(err) {
+			return r.handleAPIRuleDelete(ctx, apiRule)
+		}
+
+		return ctrl.Result{}, err
 	}
 
 	// handle add/update APIRule
