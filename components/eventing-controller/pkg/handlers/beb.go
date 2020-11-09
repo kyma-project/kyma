@@ -62,7 +62,7 @@ func getWebHookAuthFromConfig(cfg *env.Config) *types.WebhookAuth {
 		GrantType:    grantType,
 		ClientID:     cfg.WebhookClientID,
 		ClientSecret: cfg.WebhookClientSecret,
-		TokenURL:     cfg.TokenEndpoint,
+		TokenURL:     cfg.WebhookTokenEndpoint,
 	}
 }
 
