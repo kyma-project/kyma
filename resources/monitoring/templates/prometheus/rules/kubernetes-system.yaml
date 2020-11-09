@@ -1,18 +1,18 @@
 {{- /*
-Generated from 'kubernetes-system' group from https://raw.githubusercontent.com/coreos/kube-prometheus/release-0.1/manifests/prometheus-rules.yaml
+Generated from 'kubernetes-system' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/release-0.1/manifests/prometheus-rules.yaml
 Do not change in-place! In order to change this file first read following link:
-https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.10.0-0" $kubeTargetVersion) (semverCompare "<1.14.0-0" $kubeTargetVersion) .Values.defaultRules.create .Values.defaultRules.rules.kubernetesSystem }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" .) "kubernetes-system" | trunc 63 | trimSuffix "-" }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "kubernetes-system" | trunc 63 | trimSuffix "-" }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 {{- if .Values.defaultRules.labels }}
 {{ toYaml .Values.defaultRules.labels | indent 4 }}
 {{- end }}
@@ -32,6 +32,9 @@ spec:
       for: 1h
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeVersionMismatch
       annotations:
         message: There are {{`{{`}} $value {{`}}`}} different semantic versions of Kubernetes components running.
@@ -40,6 +43,9 @@ spec:
       for: 1h
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeClientErrors
       annotations:
         message: Kubernetes API server client '{{`{{`}} $labels.job {{`}}`}}/{{`{{`}} $labels.instance {{`}}`}}' is experiencing {{`{{`}} printf "%0.0f" $value {{`}}`}}% errors.'
@@ -52,6 +58,9 @@ spec:
       for: 15m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeClientErrors
       annotations:
         message: Kubernetes API server client '{{`{{`}} $labels.job {{`}}`}}/{{`{{`}} $labels.instance {{`}}`}}' is experiencing {{`{{`}} printf "%0.0f" $value {{`}}`}} errors / second.
@@ -60,6 +69,9 @@ spec:
       for: 15m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeletTooManyPods
       annotations:
         message: Kubelet {{`{{`}} $labels.instance {{`}}`}} is running {{`{{`}} $value {{`}}`}} Pods, close to the limit of 110.
@@ -68,66 +80,87 @@ spec:
       for: 15m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPILatencyHigh
       annotations:
         message: The API server has a 99th percentile latency of {{`{{`}} $value {{`}}`}} seconds for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapilatencyhigh
-      expr: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
+      expr: cluster_quantile:apiserver_request_latencies:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
       for: 10m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPILatencyHigh
       annotations:
         message: The API server has a 99th percentile latency of {{`{{`}} $value {{`}}`}} seconds for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapilatencyhigh
-      expr: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
+      expr: cluster_quantile:apiserver_request_latencies:histogram_quantile{job="apiserver",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
       for: 10m
       labels:
         severity: critical
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPIErrorsHigh
       annotations:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
+        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m]))
           /
-        sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 3
+        sum(rate(apiserver_request_count{job="apiserver"}[5m])) * 100 > 3
       for: 10m
       labels:
         severity: critical
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPIErrorsHigh
       annotations:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m]))
+        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m]))
           /
-        sum(rate(apiserver_request_total{job="apiserver"}[5m])) * 100 > 1
+        sum(rate(apiserver_request_count{job="apiserver"}[5m])) * 100 > 1
       for: 10m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPIErrorsHigh
       annotations:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}} {{`{{`}} $labels.subresource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
           /
-        sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10
+        sum(rate(apiserver_request_count{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 10
       for: 10m
       labels:
         severity: critical
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeAPIErrorsHigh
       annotations:
         message: API server is returning errors for {{`{{`}} $value {{`}}`}}% of requests for {{`{{`}} $labels.verb {{`}}`}} {{`{{`}} $labels.resource {{`}}`}} {{`{{`}} $labels.subresource {{`}}`}}.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeapierrorshigh
       expr: |-
-        sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
+        sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[5m])) by (resource,subresource,verb)
           /
-        sum(rate(apiserver_request_total{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5
+        sum(rate(apiserver_request_count{job="apiserver"}[5m])) by (resource,subresource,verb) * 100 > 5
       for: 10m
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeClientCertificateExpiration
       annotations:
         message: A client certificate used to authenticate to the apiserver is expiring in less than 7.0 days.
@@ -135,6 +168,9 @@ spec:
       expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 604800
       labels:
         severity: warning
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
     - alert: KubeClientCertificateExpiration
       annotations:
         message: A client certificate used to authenticate to the apiserver is expiring in less than 24.0 hours.
@@ -142,4 +178,7 @@ spec:
       expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 86400
       labels:
         severity: critical
+{{- if .Values.defaultRules.additionalRuleLabels }}
+{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+{{- end }}
 {{- end }}

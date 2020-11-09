@@ -1,12 +1,12 @@
-{{- if and .Values.prometheus.enabled .Values.prometheus.servicePerReplica.enabled .Values.prometheus.ingressPerReplica.enabled }}
-{{- $count := .Values.prometheus.prometheusSpec.replicas | int -}}
-{{- $servicePort := .Values.prometheus.servicePerReplica.port -}}
-{{- $ingressValues := .Values.prometheus.ingressPerReplica -}}
+{{- if and .Values.alertmanager.enabled .Values.alertmanager.servicePerReplica.enabled .Values.alertmanager.ingressPerReplica.enabled }}
+{{- $count := .Values.alertmanager.alertmanagerSpec.replicas | int -}}
+{{- $servicePort := .Values.alertmanager.service.port -}}
+{{- $ingressValues := .Values.alertmanager.ingressPerReplica -}}
 apiVersion: v1
 kind: List
 metadata:
-  name: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-ingressperreplica
-  namespace: {{ template "kube-prometheus-stack.namespace" $ }}
+  name: {{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-ingressperreplica
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
 items:
 {{ range $i, $e := until $count }}
   - kind: Ingress
@@ -16,10 +16,10 @@ items:
     apiVersion: extensions/v1beta1
     {{ end -}}
     metadata:
-      name: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+      name: {{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-{{ $i }}
       namespace: {{ template "kube-prometheus-stack.namespace" $ }}
       labels:
-        app: {{ include "kube-prometheus-stack.name" $ }}-prometheus
+        app: {{ include "kube-prometheus-stack.name" $ }}-alertmanager
 {{ include "kube-prometheus-stack.labels" $ | indent 8 }}
       {{- if $ingressValues.labels }}
       {{ toYaml $ingressValues.labels | indent 8 }}
@@ -41,7 +41,7 @@ items:
       {{- range $p := $ingressValues.paths }}
               - path: {{ tpl $p $ }}
                 backend:
-                  serviceName: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+                  serviceName: {{ include "kube-prometheus-stack.fullname" $ }}-alertmanager-{{ $i }}
                   servicePort: {{ $servicePort }}
       {{- end -}}
       {{- if or $ingressValues.tlsSecretName $ingressValues.tlsSecretPerReplica.enabled }}
