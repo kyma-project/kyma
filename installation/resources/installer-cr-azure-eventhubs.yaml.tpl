@@ -6,8 +6,6 @@ metadata:
   labels:
     action: install
     kyma-project.io/installation: ""
-  finalizers:
-    - finalizer.installer.kyma-project.io
 spec:
   version: "__VERSION__"
   url: "__URL__"
