@@ -1,3 +1,5 @@
+nameOverride: "kiali"
+fullnameOverride: "kiali"
 
 tests:
   enabled: true
@@ -7,8 +9,6 @@ tests:
   labels:
     integration: true
     after-upgrade: true
-
-nodeSelector: {}
 
 global:
   isLocalEnv: false
@@ -57,27 +57,6 @@ kcproxy:
       memory: 5Mi
 
 kiali:
-  operator:
-    image:
-      repository: eu.gcr.io/kyma-project/incubator/develop/kiali-operator
-      tag: 1.24.0-b586f70c
-      pullPolicy: IfNotPresent
-    resources:
-      limits:
-        cpu: 600m
-        memory: 250Mi
-      requests:
-        cpu: 20m
-        memory: 50Mi
-    nodeSelector: {}
-    # debug.enabled: when true the full ansible logs are dumped after each reconciliation run
-    # debug.verbosity: defines the amount of details the operator will log (higher numbers are more noisy)
-    debug:
-      enabled: false
-      verbosity: "1"
-    # Defines where the operator will look for Kial CR resources. "" means "all namespaces".
-    watchNamespace: "kyma-system"
-
   spec:
     # Taken from https://github.com/kiali/kiali-operator/blob/master/deploy/kiali/kiali_cr.yaml
     ###################################################################
@@ -267,12 +246,13 @@ kiali:
     # The Route resource name and OAuthClient resource name will have this value as its prefix.
     # This value normally should never change. The installer will ensure this value is set correctly.
     #    ---
-    #    openshift:
+      openshift: {}
     #      client_id_prefix: kiali
 
     ##########
     #  ---
     deployment:
+    #    pod_labels: {}
     #
     # A list of namespaces Kiali is to be given access to.
     # These namespaces have service mesh components that are to be observed by Kiali.
@@ -282,7 +262,8 @@ kiali:
     # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
     # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
     #    ---
-      accessible_namespaces: "**"
+      accessible_namespaces: 
+      - "**"
     #
     # Additional custom yaml to add to the service definition. This is used mainly to customize the service type.
     # For example, if the deployment.service_type is set to "LoadBalancer" and you want to set the loadBalancerIP,
@@ -297,10 +278,10 @@ kiali:
     # See the Kubernetes documentation on Assigning Pods to Nodes for the proper syntax for these three
     # different affinity types.
     #    ---
-    #    affinity:
-    #      node: {}
-    #      pod: {}
-    #      pod_anti: {}
+      affinity:
+        node: {}
+        pod: {}
+        pod_anti: {}
     #
     # Names of the out-of-box custom monitoring dashboards that are to be installed.
     # The custom monitoring dashboards are defined in yaml files located within the operator.
@@ -348,7 +329,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.24.0-b586f70c"
+      image_version: "1.26.0-cfbe109c"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -417,7 +398,7 @@ kiali:
     #
     # The name of a secret used by the Kiali. Reserved for future use - not currently used.
     #    ---
-    #    secret_name: "kiali"
+      secret_name: "kiali"
     #
     # Custom annotations to be created on the Kiali Service resource.
     #    ---
@@ -720,7 +701,7 @@ kiali:
 
     ##########
     #  ---
-    #  identity:
+    identity: {}
     #
     # Certificate file used to identify the file server. If set, you must go over https to access Kiali.
     # The operator will set these if it deploys Kiali behind https.
@@ -817,7 +798,7 @@ kiali:
 
     ##########
     #  ---
-    #  login_token:
+    login_token:
     #
     # The token expiration in seconds.
     #    ---
@@ -831,7 +812,7 @@ kiali:
     # If left as an empty string, a secret with a random signing key will be
     # generated for you.
     #    ---
-    #    signing_key: ""
+      signing_key: ""
 
     ##########
     #  ---
@@ -880,7 +861,7 @@ kiali:
     # For example, use "/kiali" not "/kiali/".
     # When empty, will default to "/" on OpenShift and "/kiali" on Kubernetes.
     #    ---
-      web_root: "/"
+      web_root: ""
     #
     # Defines the public HTTP schema used to serve Kiali. This can only take
     # two possible values: either "http" or "https".
