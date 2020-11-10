@@ -24,7 +24,7 @@ spec:
       serviceAccountName: {{ include "uaa-activator.fullname" . }}
       initContainers:
         - name: "secret-wait"
-          image: "{{ .Values.initJobs.secret.image.registryPath }}/k8s-tools:{{ .Values.initJobs.secret.image.version }}"
+          image: "{{ .Values.initJobs.secret.image.registryPath }}/k8s-tools:{{ .Values.initJobs.secret.image.tag }}"
           command: ["sh", "-c"]
           args: ["until kubectl get secret {{ include "uaa-activator.fullname" . }}; do echo waiting for secret; done; echo secret found"]
       containers:
