@@ -4,17 +4,17 @@ ctrl:
       memory: 256Mi
       cpu: 100m
     requests:
-      memory: 48Mi
+      memory: 64Mi
       cpu: 100m
 
 broker:
   resources:
     limits:
       memory: 256Mi
-      cpu: 60m
+      cpu: 100m
     requests:
-      memory: 48Mi
-      cpu: 20m
+      memory: 64Mi
+      cpu: 60m
 
 etcd-stateful:
   etcd:
