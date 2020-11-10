@@ -1,4 +1,3 @@
-
 service-binding-usage-controller":
   resources:
     limits:

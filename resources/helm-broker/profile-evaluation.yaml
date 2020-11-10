@@ -14,7 +14,7 @@ broker:
       memory: 256Mi
       cpu: 60m
     requests:
-      memory: 32Mi
+      memory: 60Mi
       cpu: 20m
 
 etcd-stateful:
