@@ -55,7 +55,7 @@ func (s *storage) Get(kind v1alpha1.Kind) (*ResourceData, error) {
 	defer s.mu.RUnlock()
 	concreteResourceData, exists := s.registered[kind]
 	if !exists {
-		return &ResourceData{}, fmt.Errorf("TargetKind %s was not found", kind)
+		return &ResourceData{}, NewNotFound("TargetKind %s was not found", kind)
 	}
 	return concreteResourceData, nil
 }

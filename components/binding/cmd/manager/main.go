@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/kyma-project/kyma/components/binding/internal/controller"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/target"
@@ -9,11 +10,16 @@ import (
 	bindingValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/binding/validate"
 	podMutate "github.com/kyma-project/kyma/components/binding/internal/webhook/pod/mutate"
 	targetKindValidate "github.com/kyma-project/kyma/components/binding/internal/webhook/targetkind/validate"
+	"github.com/kyma-project/kyma/components/binding/internal/worker"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
+	"github.com/pkg/errors"
+	"k8s.io/client-go/dynamic"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sort"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,7 +55,11 @@ func main() {
 		logger.SetLevel(log.WarnLevel)
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	config := ctrl.GetConfigOrDie()
+	cli, err := client.New(config, client.Options{Scheme: scheme})
+	fatalOnError(err, "while creating client")
+
+	mgr, err := ctrl.NewManager(config, ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: cfg.MetricsAddress,
 		Port:               cfg.Port,
@@ -58,7 +68,7 @@ func main() {
 	fatalOnError(err, "while creating new manager")
 
 	targetKindStorage := storage.NewKindStorage()
-	dc, err := dynamic.NewForConfig(ctrl.GetConfigOrDie())
+	dc, err := dynamic.NewForConfig(config)
 	fatalOnError(err, "while creating dynamic client")
 
 	webhookClient := webhook.NewClient(mgr.GetClient())
@@ -75,12 +85,14 @@ func main() {
 		"/targetkind-validating",
 		&k8sWebhook.Admission{Handler: targetKindValidate.NewValidationHandler(log.WithField("webhook", "targetkind-validating"))})
 
+	targetKindWorker := worker.NewTargetKindWorker(targetKindStorage, dc)
+
+	err = syncTargetKinds(cli, targetKindWorker, logger)
+	fatalOnError(err, "while syncing TargetKinds")
+
 	targetKindManager := target.NewHandler(dc, targetKindStorage)
-
-	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), dc, logger, targetKindStorage, mgr.GetScheme())
+	targetKindReconciler := controller.SetupTargetKindReconciler(mgr.GetClient(), targetKindWorker, logger, mgr.GetScheme())
 	fatalOnError(targetKindReconciler.SetupWithManager(mgr), "while creating TargetKindReconciler")
-
-	//TODO: wait for all TargetKind to be synced and registered
 
 	bindingReconciler := controller.SetupBindingReconciler(mgr.GetClient(), targetKindManager, logger, mgr.GetScheme())
 	fatalOnError(bindingReconciler.SetupWithManager(mgr), "while creating BindingReconciler")
@@ -92,4 +104,29 @@ func fatalOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err.Error())
 	}
+}
+
+// syncTargetKinds assures that existing TargetKinds will be loaded before reconcilers are started
+func syncTargetKinds(cli client.Client, worker *worker.TargetKindWorker, log log.FieldLogger) error {
+	log.Info("Starting syncing TargetKinds on startup")
+
+	tks := &bindingsv1alpha1.TargetKindList{}
+	err := cli.List(context.Background(), tks)
+	if err != nil {
+		return errors.Wrap(err, "while listing TargetKinds")
+	}
+
+	tkList := tks.Items
+	sort.Slice(tkList, func(i, j int) bool {
+		return tkList[i].CreationTimestamp.Before(&tkList[j].CreationTimestamp)
+	})
+
+	for _, tk := range tkList {
+		_, err := worker.Process(&tk, log)
+		if err != nil {
+			return errors.Wrapf(err, "while processing TargetKind %s/%s", tk.Name, tk.Namespace)
+		}
+	}
+
+	return nil
 }
