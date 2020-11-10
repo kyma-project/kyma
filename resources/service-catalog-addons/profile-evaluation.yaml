@@ -3,7 +3,7 @@ service-binding-usage-controller":
   resources:
     limits:
       memory: 76Mi
-      cpu: 50m
+      cpu: 100m
     requests:
       memory: 24Mi
-      cpu: 30m
+      cpu: 20m
