@@ -169,3 +169,5 @@ spec:
                   done
                 fi
               done
+          securityContext:
+            runAsUser: 1000
