@@ -1,6 +1,7 @@
 package worker
 
 import (
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
@@ -33,7 +34,7 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 
 	registered, err := w.storage.Get(targetKind.Spec.Resource.Kind)
 	switch {
-	case storage.IsNotFound(err):
+	case bindErr.IsNotFound(err):
 	case err == nil:
 		if targetKind.Status.IsRegistered() {
 			log.Infof("TargetKind %s was already registered", targetKind.Name)
@@ -45,7 +46,8 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 				log.Infof("TargetKind %s is not different than existing one", targetKind.Name)
 				return targetKind, nil
 			}
-			err = w.register(targetKind, v1alpha1.TargetKindFailed)
+			targetKind.Status.Message = "Failed because a TargetKind with the same kind and different properties exists"
+			err = w.register(targetKind, v1alpha1.TargetKindFailed, log)
 			if err != nil {
 				return targetKind, err
 			}
@@ -57,7 +59,7 @@ func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.Fiel
 		return targetKind, errors.Wrap(err, "while getting target kind")
 	}
 
-	err = w.register(targetKind, v1alpha1.TargetKindRegistered)
+	err = w.register(targetKind, v1alpha1.TargetKindRegistered, log)
 	if err != nil {
 		return targetKind, err
 	}
@@ -71,7 +73,7 @@ func (w *TargetKindWorker) RemoveProcess(targetKind *v1alpha1.TargetKind, log lo
 	return w.storage.Unregister(*targetKind)
 }
 
-func (w *TargetKindWorker) register(targetKind *v1alpha1.TargetKind, status string) error {
+func (w *TargetKindWorker) register(targetKind *v1alpha1.TargetKind, status string, log log.FieldLogger) error {
 	err := w.storage.Register(*targetKind)
 	if err != nil {
 		return errors.Wrapf(err, "while registering TargetKind %q", targetKind.Name)
@@ -88,8 +90,7 @@ func (w *TargetKindWorker) register(targetKind *v1alpha1.TargetKind, status stri
 			return errors.Wrapf(err, "while set TargetKind phase to %s", status)
 		}
 	}
-
-	log.Infof("TargetKind %q %s", targetKind.Name, status)
+	log.Info(status)
 	return nil
 }
 

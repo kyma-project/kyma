@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	log "github.com/sirupsen/logrus"

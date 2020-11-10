@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/worker"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
