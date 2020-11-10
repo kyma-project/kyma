@@ -1,11 +1,16 @@
 ## Overview
 
-Kyma Binding is a component that allows injecting values from Secret/ConfigMap to the 
-resources which have a Pod template underneath. (e.g. Deployment)
+Kyma Binding is a component that allows you to inject values from a Secret or ConfigMap to the 
+resources such as Deployment, which have a Pod template underneath.
+
+## Prerequisites
+
+- Helm in version 3.0 or higher
+- Kubernetes in version 1.16 or higher
 
 ## Installation
 
-To install the Kyma Binding component to your cluster use Helm in version >= 3.0
+To install the Kyma Binding component on your cluster, run:
 
 ```bash
 helm install binding ./charts/binding --wait
@@ -13,54 +18,53 @@ helm install binding ./charts/binding --wait
 
 ## Walkthrough
 
-Below there is a short tutorial presenting the use and capabilities of the component.
+Go through the short tutorial that presents the useage and capabilities of the component.
 
-Our first step is to register TargetKind, a resource which defines how and where environments could be injected:
+1. Register a TargetKind. It's a resource that defines how and where environments can be injected.
 
 ```bash
 kubectl apply -f ./examples/target-kind-deployment.yaml
 ``` 
 
-check if TargetKind was registered properly:
+2. Check if the TargetKind is registered properly:
 
 ```bash
 kubectl get targetkinds.bindings.kyma-project.io
 ```
 
-create Deployment into which environments will be injected:
+3. Create a Deployment into which environments will be injected:
 
 ```bash
 kubectl apply -f ./examples/deployment.yaml
 ```
 
-when Pod will be ready you can port-forward it:
+4. Port-forward the Pod when it's ready:
 
 ```bash
 kubectl port-forward svc/env-sample 8080:8080
 ```
 
-and check the browser on ```http://localhost:8080``` web content with not injected environments.
+5. Check the browser on ```http://localhost:8080```. You can see that there are no environments injected.
 
-The next step is to create secret:
+6. Create a Secret:
 
 ```bash
 kubectl create secret generic secret-with-credentials --from-literal=APP_PASSWORD='super_secret_password' --from-literal=APP_TOKEN='token_to_app'
 ``` 
 
-when Secret will be ready, create Binding which inject data from Secret to our Pod:
+7. When the Secret is ready, create a Binding that injects data from the Secret to the Pod:
 
 ```bash
 kubectl apply -f ./examples/secret-binding.yaml
 ```
 
-now check again web browser, environments should be injected under `Password` and `Token` keys.
+8. Check again the browser. Environments are now injected under the **Password** and **Token** keys.
 
-In addition to Secrets, environments can be injected from ConfigMap, to test this create ConfigMap and 
-Binding injecting parameters to our Pod:
+9. You can also inject environments from a ConfigMap. To check this out, create a ConfigMap and a Binding that injects parameters to our Pod:
 
 ```bash
 kubectl apply -f ./examples/config-map.yaml
 kubectl apply -f ./examples/config-map-binding.yaml
 ```
 
-check web browser on ```http://localhost:8080```, three environments should be injected.
+10. Check the browser on ```http://localhost:8080```. There are three environments injected.
