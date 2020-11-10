@@ -3,8 +3,8 @@ kind: PrometheusRule
 metadata:
   name: kyma.rules
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
   - name: kyma-pod-not-running-rule
