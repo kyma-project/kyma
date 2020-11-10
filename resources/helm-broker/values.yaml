@@ -28,7 +28,7 @@ broker:
       memory: 256Mi
       cpu: 60m
     requests:
-      memory: 96Mi
+      memory: 64Mi
       cpu: 30m
   tillerTLSInsecure: true
   tillerTLSEnabled: true

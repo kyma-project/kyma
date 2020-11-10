@@ -41,3 +41,11 @@ service:
 sm:
   password: admin
   user: admin
+
+resources:
+  limits:
+    memory: 96Mi
+    cpu: 100m
+  requests:
+    memory: 32Mi
+    cpu: 30m
