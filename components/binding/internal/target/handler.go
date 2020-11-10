@@ -93,10 +93,6 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 			}
 		}
 	}
-	labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
-	if err := h.ensureLabelsAreApplied(resource, labelsToApply, resourceData.LabelFields); err != nil {
-		return errors.Wrap(err, "while ensuring labels are applied")
-	}
 
 	err = h.updateResource(resource, resourceData)
 	if err != nil {
