@@ -1,9 +1,0 @@
-# Ignore all
-**
-# Allow
-!internal
-!pkg
-!cmd
-!go.mod
-!go.sum
-!licenses

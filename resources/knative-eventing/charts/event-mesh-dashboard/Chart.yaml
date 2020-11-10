@@ -1,9 +1,0 @@
-apiVersion: v2
-name: event-mesh-dashboard
-version: 0.0.1
-description: Helm chart for installing event-mesh dashboards
-keywords:
-  - knative
-  - knative-eventing
-  - kyma
-  - monitoring

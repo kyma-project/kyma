@@ -1,8 +1,0 @@
-.idea
-*.iml
-.vscode/
-/debug
-/temp_*
-vendor/
-fetch-token/bin/
-.DS_Store

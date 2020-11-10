@@ -1,5 +1,0 @@
-apiVersion: application.kyma.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  # Application "ec-prod" is enabled in "production" environment
-  name: ec-prod

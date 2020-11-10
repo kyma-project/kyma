@@ -1,6 +1,0 @@
-apiVersion: serverless.kyma-project.io/v1alpha1
-kind: GitRepository
-metadata:
-  name: sample
-spec:
-  url: "https://github.com/kyma-project/kyma.git"

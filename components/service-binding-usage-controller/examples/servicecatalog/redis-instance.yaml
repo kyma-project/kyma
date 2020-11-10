@@ -1,7 +1,0 @@
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: redis
-spec:
-  clusterServiceClassExternalName: redis
-  clusterServicePlanExternalName: micro

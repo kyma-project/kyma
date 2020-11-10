@@ -1,5 +1,0 @@
-dependencies:
-  - name: docker-registry
-    condition: dockerRegistry.enableInternal
-  - name: webhook
-    condition: webhook.enabled  

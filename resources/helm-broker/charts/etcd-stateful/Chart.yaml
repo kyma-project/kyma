@@ -1,8 +1,0 @@
-name: etcd-stateful
-home: https://github.com/alexandrem/
-version: 0.1.0
-description: self-hosted etcd cluster
-maintainers:
-- name: Alexandre Mclean
-  email: alexandre.mclean@gmail.com
-apiVersion: v1

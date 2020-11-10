@@ -1,6 +1,0 @@
-apiVersion: v1
-description: Connector Service
-name: connector-service
-version: 0.0.1
-keywords:
-  - connector-service

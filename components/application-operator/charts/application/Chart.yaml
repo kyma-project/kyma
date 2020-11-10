@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Application helm chart for Kubernetes
-name: application
-version: 0.0.1

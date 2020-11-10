@@ -1,9 +1,0 @@
-/.idea
-*.iml
-
-/applicationregistry
-
-*.log
-
-vendor
-licenses

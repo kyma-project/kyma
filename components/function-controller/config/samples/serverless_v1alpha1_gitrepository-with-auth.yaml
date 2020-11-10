@@ -1,9 +1,0 @@
-apiVersion: serverless.kyma-project.io/v1alpha1
-kind: GitRepository
-metadata:
-  name: sample-with-auth
-spec:
-  url: "git@github.com:kyma-project/kyma.git"
-  auth:
-    type: key
-    secretName: kyma-git-creds
