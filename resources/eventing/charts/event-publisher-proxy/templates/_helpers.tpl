@@ -58,5 +58,3 @@ Create the name of the service account to use
 {{- define "event-publisher-proxy.serviceAccountName" -}}
 {{- default (include "event-publisher-proxy.fullname" .) .Values.serviceAccount.name }}
 {{- end }}
-
-

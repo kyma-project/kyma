@@ -26,22 +26,22 @@ spec:
           - name: CLIENT_ID
             valueFrom:
               secretKeyRef:
-                name: {{ include "global.eventing.secretName" . }}
+                name: {{ include "eventing.secretName" . }}
                 key: client-id
           - name: CLIENT_SECRET
             valueFrom:
               secretKeyRef:
-                name: {{ include "global.eventing.secretName" . }}
+                name: {{ include "eventing.secretName" . }}
                 key: client-secret
           - name: TOKEN_ENDPOINT
             valueFrom:
               secretKeyRef:
-                name: {{ include "global.eventing.secretName" . }}
+                name: {{ include "eventing.secretName" . }}
                 key: token-endpoint
           - name: EMS_PUBLISH_URL
             valueFrom:
               secretKeyRef:
-                name: {{ include "global.eventing.secretName" . }}
+                name: {{ include "eventing.secretName" . }}
                 key: ems-publish-url
           - name: WEBHOOK_CLIENT_ID
             valueFrom:

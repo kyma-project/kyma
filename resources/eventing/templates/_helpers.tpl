@@ -54,6 +54,6 @@ Create chart name and version as used by the chart label.
 {{/*
 Create the name of the secret to use
 */}}
-{{- define "global.eventing.secretName" -}}
+{{- define "eventing.secretName" -}}
 {{ default (include "eventing.fullname" .) .Values.global.secretName }}
 {{- end }}

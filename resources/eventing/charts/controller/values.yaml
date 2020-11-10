@@ -28,7 +28,5 @@ metrics:
   service:
     nameSuffix: "-metrics"
 
-#TODO: Remove this when knative-eventing chart is removed
+#TODO(sayanh): Remove this when knative-eventing chart is removed
 clusterRoleBindingSuffix: "-crole-binding"
-
-secretName: "eventing"
