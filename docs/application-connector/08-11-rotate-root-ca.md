@@ -160,7 +160,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    kubectl -n kyma-integration edit secret connector-service-app-ca
    ```
 
-5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate.
+5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `cacert` value with the new base64-encoded certificate.
   
    ```bash
    kubectl -n istio-system edit secret app-connector-certs
