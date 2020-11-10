@@ -116,24 +116,24 @@ dep-status-local:
 	dep status -v
 
 #Go mod
-mod-deps-local:: vendor-local mod-verify-local status-local
+gomod-deps-local:: gomod-vendor-local gomod-verify-local gomod-status-local
 $(eval $(call buildpack-mount,mod-deps))
 
-gomod-verify-local:: test-local check-imports-local check-fmt-local
-$(eval $(call buildpack-cp-ro,gomod-verify))
+gomod-check-local:: test-local check-imports-local check-fmt-local
+$(eval $(call buildpack-cp-ro,gomod-check))
 
-component-check-local:: mod-deps-local gomod-verify-local
-$(eval $(call buildpack-mount,component-check))
+gomod-component-check-local:: gomod-deps-local gomod-check-local
+$(eval $(call buildpack-mount,gomod-component-check))
 
-gomod-release:component-check build-image push-image
+gomod-release:gomod-component-check build-image push-image
 
-vendor-local:
+gomod-vendor-local:
 	GO111MODULE=on go mod vendor -v
 
-mod-verify-local:
+gomod-verify-local:
 	GO111MODULE=on go mod verify
 
-status-local:
+gomod-status-local:
 	GO111MODULE=on go mod graph
 
 ## Source Code tools
