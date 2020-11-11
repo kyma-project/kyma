@@ -131,7 +131,8 @@ After this, Prometheus operator should create a new PVC and a new StatefulSet. V
 kubect get pvc -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
 ```
 Check the column `CAPACITY` and verify that `20Gi` is set as the new value.
-4. Check if the StatefulSet has been created:
+
+4. Check if the StatefulSet has been created successfully:
 ```bash
 kubectl get statefulsets.apps -n kyma-system prometheus-monitoring-prometheus
 ```
