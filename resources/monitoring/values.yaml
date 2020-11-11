@@ -638,33 +638,33 @@ grafana:
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
   
 
-    dataSources:
-      loki:
-        enabled: true
-        config:
-          - name: Loki
-            type: loki
-            access: proxy
-            url: http://logging-loki.kyma-system:3100
-            editable: true
-            jsonData:
-              maxLines: 1000
-      jaeger:
-        enabled: true
-        config:
-          - name: Jaeger
-            type: jaeger
-            access: proxy
-            url: http://tracing-jaeger-query.kyma-system:16686
-            editable: true
-      prometheusIstio:
-        enabled: false
-        config:
-          - name: Prometheus-Istio
-            type: prometheus
-            access: proxy
-            url: http://monitoring-prometheus-istio-server.kyma-system:80
-            editable: true
+  dataSources:
+    loki:
+      enabled: true
+      config:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://logging-loki.kyma-system:3100
+          editable: true
+          jsonData:
+            maxLines: 1000
+    jaeger:
+      enabled: true
+      config:
+        - name: Jaeger
+          type: jaeger
+          access: proxy
+          url: http://tracing-jaeger-query.kyma-system:16686
+          editable: true
+    prometheusIstio:
+      enabled: false
+      config:
+        - name: Prometheus-Istio
+          type: prometheus
+          access: proxy
+          url: http://monitoring-prometheus-istio-server.kyma-system:80
+          editable: true
 
   additionalDataSources: []
   # - name: prometheus-sample
