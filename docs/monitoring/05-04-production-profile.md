@@ -125,6 +125,7 @@ kubectl delete statefulset -n kyma-system  prometheus-monitoring-prometheus
 kubectl delete statefulset -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
 ```
 After this, Prometheus operator should create a new PVC and a new StatefulSet. Verify if they are present.
+
 3. Check if PVC has been successfully created:
 ```bash
 kubect get pvc -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
