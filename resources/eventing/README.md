@@ -20,14 +20,20 @@ You can install this Helm chart using either Helm or Kyma CLI. In both cases, th
 
 ### Using Helm 3:
 
+
 ```bash
+# Install subscriptions.eventing.kyma-project.io CRD
+kubectl apply -f resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
+
+# Set values for chart
 $ cat << EOF > helm-values.yaml
-eventing:
-  authentication:
-    oauthClientId: "$bebOauthClientId"
-    oauthClientSecret: "$bebOauthClientSecret"
-    oauthTokenEndpoint: "$bebOauthTokenEndpoint"
-    publishUrl: "$bebPublishUrl"
+global:
+  domainName: "$domainName"
+authentication:
+  oauthClientId: "$bebOauthClientId"
+  oauthClientSecret: "$bebOauthClientSecret"
+  oauthTokenEndpoint: "$bebOauthTokenEndpoint"
+  publishUrl: "$bebPublishUrl"
 EOF
 
 $ helm install \
