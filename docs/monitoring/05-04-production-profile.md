@@ -136,37 +136,3 @@ kubectl get statefulsets.apps -n kyma-system prometheus-monitoring-prometheus
 Check if the value in column `READY` is `1/1`.
   </details>
 </div>
-
-
-#### Workaround to install the Production Profile on already running cluster
-
-**Warning** This workaround would delete existing metrics as it would create a new persitent storage.
-After the cluster update process is finished proceed to apply the workaround:
-
-1. Delete the prometheus statefulset
-
-```bash
-kubectl delete statefulset -n kyma-system  prometheus-monitoring-prometheus
-```
-
-2. Delete the PVC for the statefulset
-
-```bash
-kubectl delete statefulset -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
-```
-
-After this prometheus operator should create a new PVC and a new statefulset for the prometheus. Verify if they are present
-
-3. Check if pvc has been sucessfullt created
-
-```bash
-kubect get pvc -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
-```
-Check the column `CAPACITY` and verify if `20Gi` is set as new value.
-
-4. Check if the statefulset has been created
-
-```bash
-kubectl get statefulsets.apps -n kyma-system prometheus-monitoring-prometheus
-```
-Check if the column `READY` has `1/1`.
