@@ -86,7 +86,7 @@ defaultRules:
   create: true
   rules:
     alertmanager: true
-    etcd: true
+    etcd: false
     general: true
     k8s: true
     kubeApiserver: true
@@ -180,21 +180,22 @@ alertmanager:
   ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
   ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
   ##
-  config:
-    global:
-      resolve_timeout: 5m
-    route:
-      group_by: ['job']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
-      routes:
-      - match:
-          alertname: Watchdog
-        receiver: 'null'
-    receivers:
-    - name: 'null'
+  # config:
+  #   global:
+  #     resolve_timeout: 5m
+  #   route:
+  #     group_by: ['job']
+  #     group_wait: 30s
+  #     group_interval: 5m
+  #     repeat_interval: 12h
+  #     receiver: 'null'
+  #     routes:
+  #       - match:
+  #           alertname: Watchdog
+  #         receiver: 'null'
+  #   receivers:
+  #     - name: 'null'
+
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
@@ -375,10 +376,10 @@ alertmanager:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(alertmanager_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -397,7 +398,9 @@ alertmanager:
     ## Standard object’s metadata. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#metadata
     ## Metadata Labels and Annotations gets propagated to the Alertmanager pods.
     ##
-    podMetadata: {}
+    podMetadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
 
     ## Image of Alertmanager
     ##
@@ -478,9 +481,13 @@ alertmanager:
     ## Define resources requests and limits for single Pods.
     ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
-    # requests:
-    #   memory: 400Mi
+    resources:
+      limits:
+        cpu: 100m
+        memory: 400Mi
+      requests:
+        cpu: 100m
+        memory: 400Mi
 
     ## Pod anti-affinity can prevent the scheduler from placing Prometheus replicas on the same node.
     ## The default value "soft" means that the scheduler should *prefer* to not schedule two replica pods onto the same node but no guarantee is provided.
@@ -629,6 +636,36 @@ grafana:
 
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
+  
+
+    dataSources:
+      loki:
+        enabled: true
+        config:
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://logging-loki.kyma-system:3100
+            editable: true
+            jsonData:
+              maxLines: 1000
+      jaeger:
+        enabled: true
+        config:
+          - name: Jaeger
+            type: jaeger
+            access: proxy
+            url: http://tracing-jaeger-query.kyma-system:16686
+            editable: true
+      prometheusIstio:
+        enabled: false
+        config:
+          - name: Prometheus-Istio
+            type: prometheus
+            access: proxy
+            url: http://monitoring-prometheus-istio-server.kyma-system:80
+            editable: true
+
   additionalDataSources: []
   # - name: prometheus-sample
   #   access: proxy
@@ -643,10 +680,11 @@ grafana:
   #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
   #   version: 1
 
+
   ## Passed to grafana subchart and used by servicemonitor below
   ##
   service:
-    portName: service
+    portName: http-service
 
   ## If true, create a serviceMonitor for grafana
   ##
@@ -658,10 +696,10 @@ grafana:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(http_request_total|grafana_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -742,17 +780,10 @@ kubelet:
     resourcePath: "/metrics/resource/v1alpha1"
     ## Metric relabellings to apply to samples before ingestion
     ##
-    cAdvisorMetricRelabelings: []
-    # - sourceLabels: [__name__, image]
-    #   separator: ;
-    #   regex: container_([a-z_]+);
-    #   replacement: $1
-    #   action: drop
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)
-    #   replacement: $1
-    #   action: drop
+    cAdvisorMetricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(container_cpu_cfs_periods_total|container_cpu_cfs_throttled_periods_total|container_cpu_cfs_throttled_seconds_total|container_cpu_usage_seconds_total|container_fs_reads_bytes_total|container_fs_usage_bytes|container_fs_writes_bytes_total|container_memory_cache|container_memory_failcnt|container_memory_rss|container_memory_swap|container_memory_usage_bytes|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_receive_packets_dropped_total|container_network_receive_packets_total|container_network_transmit_bytes_total|container_network_transmit_packets_dropped_total|container_network_transmit_packets_total)$
+      action: keep
 
     ## Metric relabellings to apply to samples before ingestion
     ##
@@ -801,17 +832,10 @@ kubelet:
     #   replacement: $1
     #   action: replace
 
-    metricRelabelings: []
-    # - sourceLabels: [__name__, image]
-    #   separator: ;
-    #   regex: container_([a-z_]+);
-    #   replacement: $1
-    #   action: drop
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: container_(network_tcp_usage_total|network_udp_usage_total|tasks_state|cpu_load_average_10s)
-    #   replacement: $1
-    #   action: drop
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     #   metrics_path is required to match upstream rules and charts
@@ -829,7 +853,7 @@ kubelet:
 ## Component scraping the kube controller manager
 ##
 kubeControllerManager:
-  enabled: true
+  enabled: false
 
   ## If your kube controller manager is not deployed as a pod, specify IPs it can be found on
   ##
@@ -882,7 +906,7 @@ kubeControllerManager:
 ## Component scraping coreDns. Use either this or kubeDns
 ##
 coreDns:
-  enabled: true
+  enabled: false
   service:
     port: 9153
     targetPort: 9153
@@ -895,10 +919,10 @@ coreDns:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(coredns_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -962,7 +986,7 @@ kubeDns:
 ## Component scraping etcd
 ##
 kubeEtcd:
-  enabled: true
+  enabled: false
 
   ## If your etcd is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1022,7 +1046,7 @@ kubeEtcd:
 ## Component scraping kube scheduler
 ##
 kubeScheduler:
-  enabled: true
+  enabled: false
 
   ## If your kube scheduler is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1075,7 +1099,7 @@ kubeScheduler:
 ## Component scraping kube proxy
 ##
 kubeProxy:
-  enabled: true
+  enabled: false
 
   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1126,10 +1150,10 @@ kubeStateMetrics:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - action: keep
-    #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
-    #   sourceLabels: [__name__]
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_hpa_spec_max_replicas|kube_hpa_status_current_replicas|kube_hpa_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_allocatable_cpu_cores|kube_node_status_allocatable_memory_bytes|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_limits_cpu_cores|kube_pod_container_resource_limits_memory_bytes|kube_pod_container_resource_requests|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision|kube_job_complete|kube_job_failed|kube_job_status_completion_time|kube_job_status_start_time|kube_pod_container_status_waiting_reason|kube_pod_container_status_terminated_reason)$
+      action: keep
 
     # 	relabel configs to apply to samples before ingestion.
     ##
@@ -1170,12 +1194,10 @@ nodeExporter:
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
-    metricRelabelings: []
-    # - sourceLabels: [__name__]
-    #   separator: ;
-    #   regex: ^node_mountstats_nfs_(event|operations|transport)_.+
-    #   replacement: $1
-    #   action: drop
+    metricRelabelings:
+    - sourceLabels: [ __name__ ]
+      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|node_.*|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      action: keep
 
     ## 	relabel configs to apply to samples before ingestion.
     ##
@@ -1212,7 +1234,7 @@ prometheusOperator:
   ## rules from making their way into prometheus and potentially preventing the container from starting
   admissionWebhooks:
     failurePolicy: Fail
-    enabled: true
+    enabled: false
     ## If enabled, generate a self-signed certificate, then patch the webhook configurations with the generated data.
     ## On chart upgrades (or if the secret exists) the cert will not be re-generated. You can use this to provide your own
     ## certs ahead of time if you wish.
@@ -1228,7 +1250,8 @@ prometheusOperator:
       ## Provide a priority class name to the webhook patching job
       ##
       priorityClassName: ""
-      podAnnotations: {}
+      podAnnotations:
+        sidecar.istio.io/inject: "false"
       nodeSelector: {}
       affinity: {}
       tolerations: []
@@ -1299,7 +1322,8 @@ prometheusOperator:
 
   ## Annotations to add to the operator pod
   ##
-  podAnnotations: {}
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
   ## Assign a PriorityClassName to pods if set
   # priorityClassName: ""
