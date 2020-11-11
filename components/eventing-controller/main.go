@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/apirule"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -71,16 +70,6 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
 		os.Exit(1)
 	}
-	if err = apirule.NewReconciler(
-		mgr.GetClient(),
-		mgr.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("APIRule"),
-		mgr.GetEventRecorderFor("eventing-controller"),
-	).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Subscription")
-		os.Exit(1)
-	}
-	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

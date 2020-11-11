@@ -8,11 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,10 +18,15 @@ import (
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -33,6 +36,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 // Reconciler reconciles a Subscription object
@@ -52,6 +56,7 @@ var (
 const (
 	suffixLength          = 10
 	externalHostPrefix    = "web"
+	externalSinkScheme    = "https"
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
@@ -144,10 +149,28 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	// update the subscription status if relevant the APIRule changed
-	if apiRule != nil && apiRule.Name != subscription.Status.APIRuleName {
+	if apiRule != nil {
+		apiRuleReady := computeAPIRuleReadyStatus(apiRule)
+
+		// set initial subscription status
+		subscription.Status.ExternalSink = ""
 		subscription.Status.APIRuleName = apiRule.Name
-		statusChanged = true
+		subscription.Status.SetConditionAPIRuleStatus(apiRuleReady)
+
+		// update subscription sink only if the APIRule is ready
+		if apiRuleReady {
+			if err := setSubscriptionStatusExternalSink(subscription, apiRule); err != nil {
+				log.Error(err, "Failed to set Subscription status externalSink", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
+				return ctrl.Result{}, err
+			}
+		}
+
+		// update the subscription status only if needed
+		if subscription.Status.APIRuleName != apiRule.Name ||
+			subscription.Status.ExternalSink != cachedSubscription.Status.ExternalSink ||
+			apiRuleReady != cachedSubscription.Status.GetConditionAPIRuleStatus() {
+			statusChanged = true
+		}
 	}
 
 	// Sync the BEB Subscription with the Subscription CR
@@ -672,7 +695,157 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscript
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&eventingv1alpha1.Subscription{}).
+		Watches(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, r.getAPIRuleEventHandler()).
 		Complete(r)
+}
+
+// getAPIRuleEventHandler returns an APIRule event handler.
+func (r *Reconciler) getAPIRuleEventHandler() handler.EventHandler {
+	eventHandler := func(eventType, name, namespace string, q workqueue.RateLimitingInterface) {
+		log := r.Log.WithValues("event", eventType, "kind", "APIRule", "name", name, "namespace", namespace)
+		if err := r.handleAPIRuleEvent(name, namespace, q, log); err != nil {
+			log.Error(err, "Failed to handle APIRule Event, requeue event again")
+			q.Add(reconcile.Request{NamespacedName: k8stypes.NamespacedName{Name: name, Namespace: namespace}})
+		}
+	}
+
+	return handler.Funcs{
+		CreateFunc: func(e event.CreateEvent, q workqueue.RateLimitingInterface) {
+			eventType, name, namespace := "Create", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventHandler(eventType, name, namespace, q)
+		},
+		UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
+			eventType, name, namespace := "Update", e.MetaNew.GetName(), e.MetaNew.GetNamespace()
+			eventHandler(eventType, name, namespace, q)
+		},
+		DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
+			eventType, name, namespace := "Delete", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventHandler(eventType, name, namespace, q)
+		},
+		GenericFunc: func(e event.GenericEvent, q workqueue.RateLimitingInterface) {
+			eventType, name, namespace := "Generic", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventHandler(eventType, name, namespace, q)
+		},
+	}
+}
+
+// handleAPIRuleEvent handles APIRule event.
+func (r *Reconciler) handleAPIRuleEvent(name, namespace string, q workqueue.RateLimitingInterface, log logr.Logger) error {
+	// skip not relevant APIRules
+	if !isRelevantAPIRuleName(name) {
+		return nil
+	}
+
+	log.Info("Handle APIRule Event")
+
+	// try to get the APIRule from the API server
+	ctx := context.Background()
+	apiRule := &apigatewayv1alpha1.APIRule{}
+	key := k8stypes.NamespacedName{Name: name, Namespace: namespace}
+	if err := r.Client.Get(ctx, key, apiRule); err != nil {
+		log.Info("Cannot get APIRule")
+	}
+
+	// list all namespace subscriptions
+	namespaceSubscriptions := &eventingv1alpha1.SubscriptionList{}
+	if err := r.Client.List(ctx, namespaceSubscriptions, client.InNamespace(namespace)); err != nil {
+		log.Error(err, "Failed to list namespace Subscriptions")
+		return err
+	}
+
+	// filter namespace subscriptions that are relevant to the current APIRule
+	apiRuleSubscriptions := make([]eventingv1alpha1.Subscription, 0, len(apiRule.ObjectMeta.OwnerReferences))
+	for _, subscription := range namespaceSubscriptions.Items {
+		// skip if the subscription is marked for deletion
+		if subscription.DeletionTimestamp != nil {
+			continue
+		}
+
+		// check if APIRule name match
+		if subscription.Status.APIRuleName == name {
+			apiRuleSubscriptions = append(apiRuleSubscriptions, subscription)
+			continue
+		}
+
+		// check if APIRule OwnerReferences contains subscription info
+		if containsOwnerReference(apiRule.ObjectMeta.OwnerReferences, subscription.UID) {
+			apiRuleSubscriptions = append(apiRuleSubscriptions, subscription)
+			continue
+		}
+	}
+
+	// queue reconcile requests for APIRule subscriptions
+	r.queueReconcileRequestForSubscriptions(apiRuleSubscriptions, q, log)
+
+	return nil
+}
+
+// containsOwnerReference returns true if the OwnerReferences list contains the given uid, otherwise returns false.
+func containsOwnerReference(ownerReferences []v1.OwnerReference, uid k8stypes.UID) bool {
+	for _, ownerReference := range ownerReferences {
+		if ownerReference.UID == uid {
+			return true
+		}
+	}
+	return false
+}
+
+// queueReconcileRequestForSubscriptions queues reconciliation requests for the given subscriptions.
+func (r *Reconciler) queueReconcileRequestForSubscriptions(subscriptions []eventingv1alpha1.Subscription, q workqueue.RateLimitingInterface, log logr.Logger) {
+	subscriptionNames := make([]string, 0, len(subscriptions))
+	for _, subscription := range subscriptions {
+		request := reconcile.Request{
+			NamespacedName: k8stypes.NamespacedName{
+				Name:      subscription.Name,
+				Namespace: subscription.Namespace,
+			},
+		}
+		q.Add(request)
+		subscriptionNames = append(subscriptionNames, subscription.Name)
+	}
+	log.Info("Queue Subscription Reconcile Requests", "Subscriptions", subscriptionNames)
+}
+
+// isRelevantAPIRuleName returns true if the given name matches the APIRule name pattern
+// used by the eventing-controller, otherwise returns false.
+func isRelevantAPIRuleName(name string) bool {
+	return strings.HasPrefix(name, reconciler.ApiRuleNamePrefix)
+}
+
+// computeAPIRuleReadyStatus returns true if all APIRule statuses is ok, otherwise returns false.
+func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
+	if apiRule.Status.APIRuleStatus == nil || apiRule.Status.AccessRuleStatus == nil || apiRule.Status.VirtualServiceStatus == nil {
+		return false
+	}
+	apiRuleStatus := apiRule.Status.APIRuleStatus.Code == apigatewayv1alpha1.StatusOK
+	accessRuleStatus := apiRule.Status.AccessRuleStatus.Code == apigatewayv1alpha1.StatusOK
+	virtualServiceStatus := apiRule.Status.VirtualServiceStatus.Code == apigatewayv1alpha1.StatusOK
+	return apiRuleStatus && accessRuleStatus && virtualServiceStatus
+}
+
+// setSubscriptionStatusExternalSink sets the subscription external sink based on the given APIRule service host.
+func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) error {
+	if apiRule.Spec.Service == nil {
+		return errors.Errorf("APIRule has nil service")
+	}
+
+	if apiRule.Spec.Service.Host == nil {
+		return errors.Errorf("APIRule has nil host")
+	}
+
+	u, err := url.ParseRequestURI(subscription.Spec.Sink)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf(fmt.Sprintf("subscription: [%s/%s] has invalid sink", subscription.Name, subscription.Namespace)))
+	}
+
+	path := u.Path
+	if u.Path == "" {
+		path = "/"
+	}
+
+	subscription.Status.ExternalSink = fmt.Sprintf("%s://%s%s", externalSinkScheme, *apiRule.Spec.Service.Host, path)
+
+	return nil
 }
 
 func (r *Reconciler) addFinalizer(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) error {
