@@ -14,7 +14,7 @@ This component receives Cloud Event publishing requests from the cluster workloa
 
 This component manages the internal infrastructure in order to receive an event for all subscriptions
 
-## Install
+## Installation
 
 You can install this Helm chart using either Helm or Kyma CLI. In both cases, the secret details for BEB have to be configured using the `beb` prefixed variables:
 
