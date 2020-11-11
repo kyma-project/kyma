@@ -86,7 +86,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
 
   1. Apply an override that forces Monitoring to use the production profile:
 
-    ```bash
+  ```bash
     cat <<EOF | kubectl apply -f -
     ---
     apiVersion: v1
@@ -108,7 +108,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
       prometheus.prometheusSpec.resources.requests.memory: "1Gi"
       alertmanager.alertmanagerSpec.retention: "240h"
     EOF
-    ```
+  ```
   2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
 
 When the production overrides are applied to an already installed Kyma cluster, then the changes to the storage size of the PVC for Prometheus will not be applied. This is because the underlying Cloud infrastructure might not support dynamic resizing of the PVC. For a workaround, follow these steps:  
