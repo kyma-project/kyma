@@ -114,8 +114,6 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
 </div>
 
 
-> When the production overrides are applied to an already installed kyma then the changes to the storage size of the PVC for prometheus would not be applied. This is because the underlying Cloud infrastructure might not support dynamic resizing of the PVC.
-
 #### Workaround to install the Production Profile on already running cluster
 
 **Warning** This workaround would delete existing metrics as it would create a new persitent storage.
