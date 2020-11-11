@@ -42,7 +42,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/apirule"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -178,7 +177,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	PWhen("Subscription changed in sink port with update of APIRule", func() {
 		It("Should add the Subscription to the ownerreferences of APIRule and remove it from the old APIRule ", func() {})
 	})
-	PWhen("Creating a valid Subscription(with webhook) with already existing APIRule", func() {
+	When("Creating a valid Subscription(with webhook) with already existing APIRule", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
@@ -265,7 +264,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	PWhen("Subscription changed with already existing APIRule", func() {
+	When("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-sub-changed"
 
@@ -329,7 +328,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	PWhen("BEB subscription creation failed with existing APIRule", func() {
+	When("BEB subscription creation failed with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
@@ -396,7 +395,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	PWhen("BEB subscription status is not ready with existing APIRule", func() {
+	When("BEB subscription status is not ready with existing APIRule", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
 			ctx := context.Background()
@@ -471,7 +470,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	PWhen("Deleting a valid Subscription", func() {
+	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
 			ctx := context.Background()
@@ -610,7 +609,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
-		log.Printf("like what: %v", subscription.Status)
+		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace, subscription.Status.APIRuleName)
 		return *subscription
 	}, bigTimeOut, bigPollingInterval)
 }
@@ -968,14 +967,6 @@ var _ = BeforeSuite(func(done Done) {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller"),
 		envConf,
-	).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	err = apirule.NewReconciler(
-		k8sManager.GetClient(),
-		k8sManager.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("APIRule"),
-		k8sManager.GetEventRecorderFor("eventing-controller"),
 	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
