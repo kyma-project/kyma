@@ -15,6 +15,5 @@ WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-publisher-proxy/event-publisher-proxy .
 
 COPY licenses/ /licenses/
-USER 1001
 
 ENTRYPOINT ["/event-publisher-proxy"]
