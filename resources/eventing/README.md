@@ -12,7 +12,7 @@ This component receives Cloud Event publishing requests from the cluster workloa
 
 ## Controller
 
-This component manages the internal infrastructure in order to receive an event for all subscriptions
+This component manages the internal infrastructure in order to receive an event for all subscriptions.
 
 ## Installation
 
