@@ -110,6 +110,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
     EOF
     ```
   2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
+
 When the production overrides are applied to an already installed Kyma cluster, then the changes to the storage size of the PVC for Prometheus will not be applied. This is because the underlying Cloud infrastructure might not support dynamic resizing of the PVC. For a workaround, follow these steps:  
 
 >**CAUTION:** This workaround will delete existing metrics, as it creates a new persistent storage.
