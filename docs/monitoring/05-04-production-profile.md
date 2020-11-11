@@ -110,6 +110,30 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
     EOF
     ```
   2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
+
+When the production overrides are applied to an already installed Kyma cluster, then the changes to the storage size of the PVC for Prometheus will not be applied. This is because the underlying Cloud infrastructure might not support dynamic resizing of the PVC. For a workaround, follow these steps:  
+
+>**CAUTION:** This workaround will delete existing metrics, as it creates a new persistent storage.
+
+After the cluster update process is finished, proceed to apply the workaround:
+1. Delete the Prometheus StatefulSet:
+```bash
+kubectl delete statefulset -n kyma-system  prometheus-monitoring-prometheus
+```
+2. Delete the PVC for the StatefulSet:
+```bash
+kubectl delete statefulset -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
+```
+After this, Prometheus operator should create a new PVC and a new StatefulSet. Verify if they are present.
+3. Check if PVC has been successfully created:
+```bash
+kubect get pvc -n kyma-system prometheus-monitoring-prometheus-db-prometheus-monitoring-prometheus-0
+```
+Check the column `CAPACITY` and verify that `20Gi` is set as the new value.
+4. Check if the StatefulSet has been created:
+```bash
+kubectl get statefulsets.apps -n kyma-system prometheus-monitoring-prometheus
+```
+Check if the value in column `READY` is `1/1`.
   </details>
 </div>
-
