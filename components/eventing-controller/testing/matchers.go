@@ -1,11 +1,12 @@
 package testing
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -16,6 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
@@ -33,10 +35,7 @@ func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 func IsAnEmptySubscription() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
 		emptySub := eventingv1alpha1.Subscription{}
-		if reflect.DeepEqual(s, emptySub) {
-			return true
-		}
-		return false
+		return reflect.DeepEqual(s, emptySub)
 	}, BeTrue())
 }
 
@@ -67,30 +66,6 @@ func HaveAPIRuleName(name string) GomegaMatcher {
 func HaveSubscriptionReady() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
 		return s.Status.Ready
-	}, BeTrue())
-}
-
-func HaveSink(sink string) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
-		return s.Spec.Sink == sink
-	}, BeTrue())
-}
-
-func HaveApiRuleReady() GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) bool {
-		if a.Status.APIRuleStatus == nil || a.Status.AccessRuleStatus == nil || a.Status.VirtualServiceStatus == nil {
-			return false
-		}
-		apiRuleStatus := a.Status.APIRuleStatus.Code == apigatewayv1alpha1.StatusOK
-		accessRuleStatus := a.Status.AccessRuleStatus.Code == apigatewayv1alpha1.StatusOK
-		virtualServiceStatus := a.Status.VirtualServiceStatus.Code == apigatewayv1alpha1.StatusOK
-		return apiRuleStatus && accessRuleStatus && virtualServiceStatus
-	}, BeTrue())
-}
-
-func HaveLabels(labels map[string]string) GomegaMatcher {
-	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
-		return reflect.DeepEqual(labels, apiRule.Labels)
 	}, BeTrue())
 }
 

@@ -41,20 +41,6 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 	return apiRule
 }
 
-// NewAPIRuleWithoutOwnRef returns a valid APIRule
-func NewAPIRuleWithoutOwnRef(name string, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
-	apiRule := &apigatewayv1alpha1.APIRule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-
-	for _, opt := range opts {
-		opt(apiRule)
-	}
-	return apiRule
-}
-
 func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
 	port := uint32(443)
 	isExternal := true
