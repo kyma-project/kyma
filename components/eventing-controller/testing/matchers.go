@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -39,12 +40,27 @@ func IsAnEmptySubscription() GomegaMatcher {
 	}, BeTrue())
 }
 
-func IsAnEmptyAPIRule() GomegaMatcher {
+func HaveNotEmptyAPIRule() GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) types.UID {
+		return a.UID
+	}, Not(BeEmpty()))
+}
+
+func HaveNotEmptyHost() GomegaMatcher {
 	return WithTransform(func(a apigatewayv1alpha1.APIRule) bool {
-		if a.Name == "" {
-			return true
-		}
-		return false
+		return a.Spec.Service != nil && a.Spec.Service.Host != nil
+	}, BeTrue())
+}
+
+func HaveNoneEmptyAPIRuleName() GomegaMatcher {
+	return WithTransform(func(s eventingv1alpha1.Subscription) string {
+		return s.Status.APIRuleName
+	}, Not(BeEmpty()))
+}
+
+func HaveAPIRuleName(name string) GomegaMatcher {
+	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+		return s.Status.APIRuleName == name
 	}, BeTrue())
 }
 
@@ -69,6 +85,12 @@ func HaveApiRuleReady() GomegaMatcher {
 		accessRuleStatus := a.Status.AccessRuleStatus.Code == apigatewayv1alpha1.StatusOK
 		virtualServiceStatus := a.Status.VirtualServiceStatus.Code == apigatewayv1alpha1.StatusOK
 		return apiRuleStatus && accessRuleStatus && virtualServiceStatus
+	}, BeTrue())
+}
+
+func HaveLabels(labels map[string]string) GomegaMatcher {
+	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
+		return reflect.DeepEqual(labels, apiRule.Labels)
 	}, BeTrue())
 }
 

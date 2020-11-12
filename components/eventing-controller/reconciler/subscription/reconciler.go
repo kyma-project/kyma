@@ -405,6 +405,41 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 	}
 
 	if existingAPIRule == nil {
+		// cleanup or update the previously used ApiRule for the subscription
+		if len(subscription.Status.APIRuleName) != 0 {
+			key := k8stypes.NamespacedName{Namespace: subscription.Namespace, Name: subscription.Status.APIRuleName}
+			previousApiRule := &apigatewayv1alpha1.APIRule{}
+
+			if err := r.Client.Get(ctx, key, previousApiRule); err != nil {
+				if !k8serrors.IsNotFound(err) {
+					return nil, err
+				}
+			} else {
+				// previous ApiRule still exists
+
+				// build a new OwnerReference list without the subscription
+				ownerReferences := make([]v1.OwnerReference, 0, len(previousApiRule.OwnerReferences))
+				for _, ownerReference := range previousApiRule.OwnerReferences {
+					if ownerReference.UID != subscription.UID {
+						ownerReferences = append(ownerReferences, ownerReference)
+					}
+				}
+
+				// delete the previous ApiRule only if the new OwnerReference list is empty
+				if len(ownerReferences) == 0 {
+					if err := r.Client.Delete(ctx, previousApiRule); err != nil {
+						return nil, err
+					}
+				} else if len(previousApiRule.OwnerReferences) > len(ownerReferences) {
+					// update the previous ApiRule only if the new OwnerReference list length is decreased
+					previousApiRule.OwnerReferences = ownerReferences
+					if err := r.Client.Update(ctx, previousApiRule); err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+
 		err = r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{})
 		if err != nil {
 			r.eventWarn(subscription, reasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
@@ -465,15 +500,15 @@ func (r *Reconciler) cleanup(subscription *eventingv1alpha1.Subscription, ctx co
 
 		// TODO the logic below introduce flakiness in the tests, uncomment and fix it
 		// Delete the APIRule as the port for the concerned svc is not used by any subscriptions
-		//if len(filteredOwnerRefs) == 0 {
-		//	err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
-		//	if err != nil {
-		//		r.eventWarn(subscription, reasonDeleteFailed, "Deleted APIRule failed %s", apiRule.Name)
-		//		return errors.Wrap(err, "failed to delete APIRule while cleanupAPIRules")
-		//	}
-		//	r.eventNormal(subscription, reasonDelete, "Deleted APIRule %s", apiRule.Name)
-		//	return nil
-		//}
+		if len(filteredOwnerRefs) == 0 {
+			err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
+			if err != nil {
+				r.eventWarn(subscription, reasonDeleteFailed, "Deleted APIRule failed %s", apiRule.Name)
+				return errors.Wrap(err, "failed to delete APIRule while cleanupAPIRules")
+			}
+			r.eventNormal(subscription, reasonDelete, "Deleted APIRule %s", apiRule.Name)
+			return nil
+		}
 
 		// Take the subscription out of the OwnerReferences and update the APIRule
 		desiredAPIRule := apiRule.DeepCopy()

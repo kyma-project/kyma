@@ -264,6 +264,60 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	FWhen("Subscription changed", func() {
+		It("Should update the BEB subscription", func() {
+			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			ctx := context.Background()
+
+			// create a service
+			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(serviceOld, ctx)
+
+			givenSubscription := reconcilertesting.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			By("Given subscription with none empty APIRule name")
+			subscription := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: subscriptionName, Namespace: namespaceName}}
+			getSubscription(subscription, ctx).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+			apiRuleOld := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: namespaceName}}
+			getAPIRule(apiRuleOld, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+			reconcilertesting.WithStatusReady(apiRuleOld)
+			updateAPIRuleStatus(apiRuleOld, ctx).ShouldNot(HaveOccurred())
+
+			By("Given subscription is ready")
+			getSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
+
+			By("Updating the sink")
+			serviceNew := reconcilertesting.NewSubscriberSvc("webhook-new", namespaceName)
+			ensureSubscriberSvcCreated(serviceNew, ctx)
+			subscription.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", serviceNew.Name, serviceNew.Namespace)
+			updateSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
+			getSubscription(subscription, ctx).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRuleOld.Name))
+
+			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: namespaceName}}
+			getAPIRule(apiRuleNew, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+			))
+			reconcilertesting.WithStatusReady(apiRuleNew)
+			updateAPIRuleStatus(apiRuleNew, ctx).ShouldNot(HaveOccurred())
+
+			By("BEB Subscription has the same webhook URL")
+			bebCreationRequests := make([]bebtypes.Subscription, 0)
+			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
+				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
+					Fields{
+						"Name":       BeEquivalentTo(subscription.Name),
+						"WebhookUrl": ContainSubstring(*apiRuleNew.Spec.Service.Host),
+					},
+				))))
+
+			By("Cleanup not used APIRule")
+			getAPIRule(apiRuleOld, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
+		})
+	})
+
+	// TODO fix me
 	When("Subscription changed with already existing APIRule", func() {
 		It("Should update the BEB subscription", func() {
 			subscriptionName := "test-subscription-sub-changed"
@@ -598,6 +652,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	)
 })
 
+func updateAPIRuleStatus(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
+	return Eventually(func() error {
+		return k8sClient.Status().Update(ctx, apiRule)
+	}, bigTimeOut, bigPollingInterval)
+}
+
 // getSubscription fetches a subscription using the lookupKey and allows to make assertions on it
 func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
 	return Eventually(func() eventingv1alpha1.Subscription {
@@ -829,29 +889,6 @@ func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncA
 			log.Printf("failed to fetch APIRule(%s): %v", lookUpKey.String(), err)
 			return apigatewayv1alpha1.APIRule{}
 		}
-		apiRuleList := &apigatewayv1alpha1.APIRuleList{}
-		err := k8sClient.List(ctx, apiRuleList, &client.ListOptions{
-			Namespace: apiRule.Namespace,
-		})
-		if err != nil {
-			log.Printf("failed to list APIRules: %v", err)
-		}
-		log.Printf("apiRules :%d", len(apiRuleList.Items))
-		if len(apiRuleList.Items) > 0 && len(apiRule.OwnerReferences) > 0 {
-			log.Printf("#### owner ref ####")
-			log.Printf("oR: %v", apiRule.OwnerReferences[0])
-			sub := &eventingv1alpha1.Subscription{}
-			err = k8sClient.Get(ctx, types.NamespacedName{
-				Namespace: apiRule.Namespace,
-				Name:      apiRule.OwnerReferences[0].Name,
-			}, sub)
-			if err != nil {
-				log.Printf("failed to get sub: %v", err)
-			} else {
-				log.Printf("sub is %s", sub.Name)
-			}
-		}
-
 		return *apiRule
 	}, bigTimeOut, bigPollingInterval)
 }
@@ -884,6 +921,15 @@ func getAPIRuleForASvc(svc *corev1.Service, ctx context.Context) AsyncAssertion 
 		log.Printf("apirules got ::: %v", apiRules)
 		return filterAPIRulesForASvc(apiRules, svc)
 	}, smallTimeOut, smallPollingInterval)
+}
+
+func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+	return Eventually(func() eventingv1alpha1.Subscription {
+		if err := k8sClient.Update(ctx, subscription); err != nil {
+			return eventingv1alpha1.Subscription{}
+		}
+		return *subscription
+	}, time.Second*10, time.Second)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
