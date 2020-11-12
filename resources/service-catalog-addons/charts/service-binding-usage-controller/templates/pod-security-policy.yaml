@@ -9,14 +9,16 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  allowedCapabilities: ['NET_ADMIN', 'NET_RAW']
+  allowedCapabilities:
+  - NET_ADMIN
+  - NET_RAW
   privileged: false
-  allowPrivilegeEscalation: false
+  allowPrivilegeEscalation: true
   hostNetwork: false
   hostIPC: false
   hostPID: false
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: 'RunAsAny'
   seLinux:
     rule: 'RunAsAny'
   supplementalGroups:
