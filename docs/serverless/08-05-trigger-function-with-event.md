@@ -27,9 +27,9 @@ Follows these steps:
   kubectl
   </summary>
 
-  > **CAUTION:** If you use a Namespace created through kubectl, you need to manually inject the Knative's Default Broker to this Namespace to enable Trigger creation and correct event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
+1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace. If not, you must manually inject it to the Namespace to enable Trigger creation and correct event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
 
-1. Export these variables:
+2. Export these variables:
 
     ```bash
     export NAME={FUNCTION_NAME}
@@ -47,7 +47,7 @@ These variables refer to the following:
 - **EVENT_VERSION** points to the specific event version type, such as `v1`.
 - **EVENT_TYPE** points to the event type to which you want to subscribe your Function, such as `user.created`.
 
-2. Create a Trigger CR for your Function to subscribe your Function to a specific event type.
+3. Create a Trigger CR for your Function to subscribe your Function to a specific event type.
 
     ```yaml
     cat <<EOF | kubectl apply -f  -
