@@ -166,9 +166,6 @@ metrics:
 backendModule:
   enabled: true
 
-destinationRule:
-  enabled: true
-
 clusterMicroFrontend:
   enabled: true
 
@@ -188,6 +185,8 @@ dockerRegistry:
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
+  destinationRule:
+    enabled: true
   secrets:
     haSharedSecret: "secret"
     htpasswd: "generated-in-init-container"

@@ -139,3 +139,6 @@ extraVolumes: []
 
 nameOverride:
 fullnameOverride:
+
+destinationRule:
+  enabled: true
