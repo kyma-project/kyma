@@ -412,6 +412,7 @@ func (t TargetsAndRulesTest) testRulesAreHealthy() error {
 }
 
 func (t TargetsAndRulesTest) checkAlerts() error {
+	return errors.Errorf("fail upgrade on purpose")
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	var timeoutMessage string
