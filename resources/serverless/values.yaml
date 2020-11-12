@@ -166,6 +166,9 @@ metrics:
 backendModule:
   enabled: true
 
+destinationRule:
+  enabled: true
+
 clusterMicroFrontend:
   enabled: true
 

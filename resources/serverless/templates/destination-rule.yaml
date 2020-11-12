@@ -1,3 +1,4 @@
+{{ if .Values.destinationRule.enabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -8,3 +9,4 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE
+{{- end }}
