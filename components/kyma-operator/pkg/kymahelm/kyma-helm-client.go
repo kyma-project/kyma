@@ -9,7 +9,9 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	"github.com/sirupsen/logrus"
+	"helm.sh/helm/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -227,6 +229,11 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 
 	hc.PrintOverrides(values, nn.Name, "install")
 
+	//chart.Values := getProfileData(chart.Files) ONLY IF PROFILE IS THE FULL VALUES.YAML
+	chart.Values, err = hc.getProfileValues(*chart, "test")
+	if err != nil {
+		return nil, err
+	}
 	installedRelease, err := install.Run(chart, values)
 	if err != nil {
 		return nil, err
@@ -330,4 +337,22 @@ func (hc *Client) newActionConfig(namespace string) (*action.Configuration, erro
 	}
 
 	return cfg, nil
+}
+
+func (hc *Client) getProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
+	var profile *chart.File
+	for _, f := range ch.Files {
+		if strings.Contains(f.Name, profileName) {
+			profile = f
+			break
+		}
+	}
+	if profile.Name == "" {
+		return ch.Values, nil
+	}
+	profileValues, err := chartutil.ReadValues(profile.Data)
+	if err != nil {
+		return nil, err
+	}
+	return profileValues, nil
 }
