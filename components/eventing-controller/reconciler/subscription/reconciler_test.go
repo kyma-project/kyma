@@ -42,6 +42,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -124,7 +125,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should add the Subscription to the ownerreferences of APIRule and remove it from the old APIRule ", func() {})
 	})
 
-	FWhen("Creating a valid Subscription", func() {
+	When("Creating a valid Subscription", func() {
 		It("Should mark the Subscription as ready", func() {
 			subscriptionName := "test-valid-subscription-1"
 			ctx := context.Background()
@@ -209,6 +210,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Updating APIRule")
+			apiRule := &apigatewayv1alpha1.APIRule{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      givenSubscription.Status.APIRuleName,
+					Namespace: givenSubscription.Namespace,
+				},
+			}
+			acceptableMethods := []string{http.MethodPost, http.MethodOptions}
+			getAPIRule(apiRule, ctx).Should(And(
+				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
+				reconcilertesting.HaveAPIRuleSpec(acceptableMethods, object.OAuthHandlerName),
+			))
 			// TODO.
 			// getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
 			// 			    reconcilertesting.HaveValidSink(),

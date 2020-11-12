@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
 	. "github.com/onsi/gomega"
@@ -24,6 +25,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
+//
+// string matchers
+//
+
 func HaveSubscriptionName(name string) GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
 }
@@ -39,6 +44,10 @@ func IsAnEmptySubscription() GomegaMatcher {
 	}, BeTrue())
 }
 
+//
+// APIRule matchers
+//
+
 func HaveNotEmptyAPIRule() GomegaMatcher {
 	return WithTransform(func(a apigatewayv1alpha1.APIRule) types.UID {
 		return a.UID
@@ -50,6 +59,35 @@ func HaveNotEmptyHost() GomegaMatcher {
 		return a.Spec.Service != nil && a.Spec.Service.Host != nil
 	}, BeTrue())
 }
+
+func HaveAPIRuleSpec(ruleMethods []string, accessStrategy string) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) []apigatewayv1alpha1.Rule {
+		return a.Spec.Rules
+	}, ContainElement(
+		MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+			"Methods":          ConsistOf(ruleMethods),
+			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategies(accessStrategy)),
+		}),
+	))
+}
+
+func haveAPIRuleAccessStrategies(accessStrategy string) GomegaMatcher {
+	return WithTransform(func(a *v1alpha1.Authenticator) string {
+		return a.Name
+	}, Equal(accessStrategy))
+}
+
+func HaveAPIRuleOwnersRefs(uid types.UID) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) []metav1.OwnerReference {
+		return a.ObjectMeta.OwnerReferences
+	}, ConsistOf(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"UID": Equal(uid),
+	})))
+}
+
+//
+// Subscription matchers
+//
 
 func HaveNoneEmptyAPIRuleName() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) string {
@@ -69,6 +107,7 @@ func HaveSubscriptionReady() GomegaMatcher {
 	}, BeTrue())
 }
 
+// TODO: replace this with matchers
 func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
 	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
 		hasOwnRef, hasRule := false, false
@@ -81,6 +120,7 @@ func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
 		if !hasOwnRef {
 			return false
 		}
+		// --
 
 		sURL, err := url.ParseRequestURI(s.Spec.Sink)
 		if err != nil {
