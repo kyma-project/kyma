@@ -1,12 +1,10 @@
 package k8s
 
 import (
-	"context"
 	"log"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,16 +17,13 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/client-go/util/retry"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	internalClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	internalscheme "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/scheme"
 	informers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/informers/externalversions"
 	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/conditionmanager"
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
@@ -60,14 +55,13 @@ type Controller struct {
 	errorHandlers      internalerrors.ErrorHandlersInterface
 	kymaOperation      KymaOperation
 	conditionManager   conditionmanager.Interface
-	finalizerManager   *finalizer.Manager
 	internalClientset  *internalClientset.Clientset
 }
 
 // NewController .
 func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kubeinformers.SharedInformerFactory,
 	internalInformerFactory informers.SharedInformerFactory, kymaOperation KymaOperation,
-	conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
+	conditionManager conditionmanager.Interface, internalClientset *internalClientset.Clientset) *Controller {
 
 	installationInformer := internalInformerFactory.Installer().V1alpha1().Installations()
 
@@ -86,7 +80,6 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		errorHandlers:      &internalerrors.ErrorHandlers{},
 		kymaOperation:      kymaOperation,
 		conditionManager:   conditionManager,
-		finalizerManager:   finalizerManager,
 		internalClientset:  internalClientset,
 	}
 
@@ -158,18 +151,10 @@ func (c *Controller) syncHandler(key string) error {
 
 	//Handle Delete
 	if installation.IsBeingDeleted() {
-		if installation.CanBeDeleted() {
-			log.Println("Delete of Installation CR was requested, removing finalizer...")
-			err := c.deleteFinalizer(installation)
-
-			if c.errorHandlers.CheckError("Error while removing finalizer", err) {
-				return err
-			}
-
-			return nil
-		} else {
+		if !installation.CanBeDeleted() {
 			log.Println("Delete of Installation CR was requested but it's status does not allow for it - ignoring the request")
 		}
+		return nil
 	}
 
 	//TODO: Fill it with proper data and install UpdateStatus func
@@ -217,32 +202,6 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	c.recorder.Event(installation, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
-
-	return nil
-}
-
-func (c *Controller) deleteFinalizer(installation *v1alpha1.Installation) error {
-	if !c.finalizerManager.HasFinalizer(installation) {
-		return nil
-	}
-
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := c.installationLister.Installations(installation.Namespace).Get(installation.Name)
-
-		if getErr != nil {
-			return getErr
-		}
-
-		installationCopy := instObj.DeepCopy()
-
-		c.finalizerManager.RemoveFinalizer(installationCopy)
-		_, updateErr := c.internalClientset.InstallerV1alpha1().Installations(installation.Namespace).Update(context.TODO(), installationCopy, v1.UpdateOptions{})
-		return updateErr
-	})
-
-	if retryErr != nil {
-		return retryErr
-	}
 
 	return nil
 }
