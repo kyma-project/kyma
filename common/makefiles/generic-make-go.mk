@@ -117,7 +117,7 @@ dep-status-local:
 
 #Go mod
 gomod-deps-local:: gomod-vendor-local gomod-verify-local gomod-status-local
-$(eval $(call buildpack-mount,mod-deps))
+$(eval $(call buildpack-mount,gomod-deps))
 
 gomod-check-local:: test-local check-imports-local check-fmt-local
 $(eval $(call buildpack-cp-ro,gomod-check))
@@ -135,6 +135,9 @@ gomod-verify-local:
 
 gomod-status-local:
 	GO111MODULE=on go mod graph
+
+gomod-tidy-local:
+	GO111MODULE=on go mod tidy
 
 ## Source Code tools
 check-imports-local:
