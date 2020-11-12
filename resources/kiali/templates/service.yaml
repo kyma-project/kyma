@@ -1,0 +1,41 @@
+{{- /*
+  Taken from https://github.com/kiali/helm-charts/tree/master/kiali-server
+  */ -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kiali-server.fullname" . }}-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    service.beta.openshift.io/serving-cert-secret-name: {{ include "kiali-server.fullname" . }}-cert-secret
+    {{- end }}
+    kiali.io/api-spec: https://kiali.io/api
+    kiali.io/api-type: rest
+    {{- if .Values.kiali.spec.deployment.service_annotations }}
+    {{- toYaml .Values.kiali.spec.deployment.service_annotations | nindent 4  }}
+    {{- end }}
+spec:
+  {{- if .Values.kiali.spec.deployment.service_type }}
+  type: {{ .Values.kiali.spec.deployment.service_type }}
+  {{- end }}
+  ports:
+  {{- if (include "kiali-server.identity.cert_file" .) }}
+  - name: tcp
+  {{- else }}
+  - name: http
+  {{- end }}
+    protocol: TCP
+    port: {{ .Values.kiali.spec.server.port }}
+  {{- if .Values.kiali.spec.server.metrics_enabled }}
+  - name: http-metrics
+    protocol: TCP
+    port: {{ .Values.kiali.spec.server.metrics_port }}
+  {{- end }}
+  selector:
+    {{- include "kiali-server.selectorLabels" . | nindent 4 }}
+  {{- if .Values.kiali.spec.deployment.additional_service_yaml }}
+  {{- toYaml .Values.kiali.spec.deployment.additional_service_yaml | nindent 2  }}
+  {{- end }}

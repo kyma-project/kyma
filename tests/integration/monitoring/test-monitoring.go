@@ -289,8 +289,6 @@ func buildScrapePoolSet() map[string]struct{} {
 
 func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 	var serviceMonitorsToBeIgnored = []string{
-		// kiali-operator-metrics is created automatically by kiali operator and can't be disabled
-		"kiali-operator-metrics",
 		// tracing-metrics is created automatically by jaeger operator and can't be disabled
 		"tracing-metrics",
 	}
