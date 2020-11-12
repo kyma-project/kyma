@@ -370,27 +370,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("BEB subscription status is not ready with existing APIRule", func() {
-		It("Should not mark the subscription as ready", func() {
+	When("BEB subscription is set to paused after creation", func() {
+		It("Should not mark the subscription as active", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
 			ctx := context.Background()
-			// Ensuring subscriber svc
-			svc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(svc, ctx)
+
+			// Ensuring subscriber subscriberSvc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhook, reconcilertesting.WithFilter)
-			reconcilertesting.WithValidSink(svc.Namespace, svc.Name, givenSubscription)
-
-			// Ensuring existing APIRule
-			apiRule := reconcilertesting.NewAPIRuleWithoutOwnRef("foo", reconcilertesting.WithoutPath, reconcilertesting.WithGateway, reconcilertesting.WithStatusReady)
-			reconcilertesting.WithService(svc.Name, svc.Name, apiRule)
-			apiRule.Namespace = namespaceName
-			apiRule.Labels = map[string]string{
-				constants.ControllerServiceLabelKey:  svc.Name,
-				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
-			}
-			reconcilertesting.SetSinkSvcPortInAPIRule(apiRule, givenSubscription.Spec.Sink)
-			ensureAPIRuleCreated(apiRule, ctx)
+			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 
 			isBebSubscriptionCreated := false
 
@@ -418,6 +408,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Create subscription
 			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx).Should(BeNil())
 
 			By("Setting APIRule status to Ready")
 			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue)
