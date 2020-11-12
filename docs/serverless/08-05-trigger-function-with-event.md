@@ -27,6 +27,8 @@ Follows these steps:
   kubectl
   </summary>
 
+  > **CAUTION:** If you use a Namespace created through kubectl, you need to manually inject the Knative's Default Broker to this Namespace to enable Trigger creation and correct event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
+
 1. Export these variables:
 
     ```bash
