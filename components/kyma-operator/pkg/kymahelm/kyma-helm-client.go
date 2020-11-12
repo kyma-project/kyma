@@ -9,7 +9,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	"github.com/sirupsen/logrus"
-	"helm.sh/helm/pkg/chartutil"
+	chartutil "helm.sh/helm/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
