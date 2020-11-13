@@ -32,7 +32,7 @@ ARTIFACTS:=/tmp/artifacts
 endif
 
 # Base docker configuration
-DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated -v $(ARTIFACTS):/tmp/artifacts --rm -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
+DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated -v $(ARTIFACTS):/tmp/artifacts -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
 
 # Check if go is available
 ifneq (,$(shell go version 2>/dev/null))
@@ -78,7 +78,12 @@ endef
 verify:: test check-imports check-fmt
 format:: imports fmt
 
-release: resolve dep-status verify build-image push-image
+release:
+	$(MAKE) $(1)-old
+
+#Old Target for dep projects
+release-old: resolve dep-status verify build-image push-image
+
 
 .PHONY: build-image push-image
 build-image: pull-licenses
@@ -110,6 +115,38 @@ ensure-local:
 
 dep-status-local:
 	dep status -v
+
+#Go mod
+mod-deps-local:: vendor-local mod-verify-local status-local
+$(eval $(call buildpack-cp-ro,mod-deps))
+
+gomod-verify-local:: test-local check-imports-local check-fmt-local
+$(eval $(call buildpack-cp-ro,gomod-verify))
+
+component-check-local:: mod-deps-local gomod-verify-local
+$(eval $(call buildpack-cp-ro,component-check))
+
+gomod-release:component-check build-image push-image
+
+vendor-local:
+	GO111MODULE=on go mod vendor -v
+
+mod-verify-local:
+	GO111MODULE=on go mod verify
+
+status-local:
+	GO111MODULE=on go mod graph
+
+
+.PHONY: do do-local touch-local read-local
+do-local:: touch-local read-local
+$(eval $(call buildpack-cp-ro,do))
+
+touch-local:
+	echo "damian je zupe" > plik.txt
+read-local:
+	cat plik.txt
+
 
 check-imports-local:
 	@if [ -n "$$(goimports -l $$($(FILES_TO_CHECK)))" ]; then \

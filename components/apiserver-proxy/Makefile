@@ -6,12 +6,18 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 ENTRYPOINT := ./cmd/proxy/main.go
 
-verify:: vet
-
-.PHONY: clean
 clean:
 	rm -rf bin
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/core"
+
+
+
+## Overwrites to not used targets
+#dep-status-local:
+#	@echo "Go modules present in component - omitting."
+#
+#resolve-local:
+#	GO111MODULE=on go mod vendor -v
