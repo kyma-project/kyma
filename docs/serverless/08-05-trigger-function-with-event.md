@@ -27,7 +27,11 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
+1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command:
+
+```bash
+kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
+```
 
 2. Export these variables:
 

@@ -21,7 +21,11 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
+1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command:
+
+```bash
+kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
+```
 
 2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
