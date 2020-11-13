@@ -6,6 +6,10 @@ SCRIPTS_DIR = ../../common/makefiles
 # COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+# Override to use go modules
+release:
+	$(MAKE) gomod-release
+
 #########
 #       #
 #  Dev  #
@@ -169,7 +173,7 @@ istio-injection: bin/injection-gen
         --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
         --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
-$(generators_bin): vendor
+$(generators_bin): gomod-vendor-local
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
 		go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@); \
 	else \
