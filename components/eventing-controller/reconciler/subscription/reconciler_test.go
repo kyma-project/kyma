@@ -109,20 +109,36 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
-			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(HaveEvent(subscriptionDeletedEvent))
+			By("Emitting a Subscription deleted event")
+			var subscriptionEvents = v1.EventList{}
+			subscriptionDeletedEvent := v1.Event{
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
+				Message: "",
+				Type:    v1.EventTypeWarning,
+			}
+			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 		})
 	})
-	PWhen("Creating a valid Subscription without webhook with already existing APIRule", func() {})
-	PWhen("Creating a valid Subscription with invalid APIRule", func() {})
-	PWhen("Subscription changed with creation of APIRule", func() {})
-	PWhen("Subscription changed in sink path with update of APIRule", func() {
-		It("Should append to the array of rules in APIRule", func() {})
+
+	// TODO: https://github.com/kyma-project/kyma/issues/9950
+	PWhen("Fixing an invalid Subscription (related to APIRule)", func() {
+		It("Should finally mark the subscription as ready", func() {})
 	})
-	PWhen("Subscription changed in sink path with update of APIRule", func() {
-		It("Should shrink the array of rules in APIRule", func() {})
+
+	PWhen("Two Subscriptions using the same sink but different path", func() {
+		It("Should update the APIRule accordingly ", func() {})
+		// check APIRule has two owner refs and two paths
+		// delete one subscription
+		// check APIRule has one owner ref and one path
+		// delete last subscription
+		// check APIRule is gone
 	})
-	PWhen("Subscription changed in sink port with update of APIRule", func() {
-		It("Should add the Subscription to the ownerreferences of APIRule and remove it from the old APIRule ", func() {})
+
+	PWhen("Creating two Subscriptions using different sinks", func() {
+		It("Should mark both Subscriptions as ready and create two different APIRules", func() {})
+		When("Unifying both Subscription sinks", func() {
+			It("Should mark both Subscriptions as ready and end up with only one APIRule", func() {})
+		})
 	})
 
 	When("Creating a valid Subscription", func() {
