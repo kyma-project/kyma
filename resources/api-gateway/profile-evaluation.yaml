@@ -1,0 +1,11 @@
+# TEST file
+replicaCount: 3
+
+deployment:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 150Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
