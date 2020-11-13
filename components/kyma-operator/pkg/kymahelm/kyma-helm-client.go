@@ -24,7 +24,7 @@ type ClientInterface interface {
 	IsReleaseDeletable(nn NamespacedName) (bool, error)
 	IsReleasePresent(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
-	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map, profile string) (*Release, error)
 	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	UninstallRelease(nn NamespacedName) error
 	RollbackRelease(nn NamespacedName, revision int) error
@@ -208,7 +208,7 @@ func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) {
 }
 
 // InstallRelease installs a Helm chart
-func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -227,7 +227,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 	install.Wait = true
 	install.CreateNamespace = true
 
-	profileValues, err := getProfileValues(*chart, "evaluation")
+	profileValues, err := getProfileValues(*chart, profile)
 	if err != nil {
 		return nil, err
 	}

@@ -20,6 +20,7 @@ type Step interface {
 type step struct {
 	helmClient kymahelm.ClientInterface
 	component  v1alpha1.KymaComponent
+	profile    v1alpha1.KymaProfile
 }
 
 // ToString method returns step details in readable string
