@@ -208,7 +208,7 @@ func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) {
 }
 
 // InstallRelease installs a Helm chart
-func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map, profile string) (*Release, error) {
+func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideValues overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -232,12 +232,10 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 		return nil, err
 	}
 
-	var combo overrides.Map
-	overrides.MergeMaps(combo, profileValues)
-	overrides.MergeMaps(combo, values)
-	hc.PrintOverrides(combo, nn.Name, "install")
+	overrides.MergeMaps(profileValues, overrideValues)
+	hc.PrintOverrides(overrideValues, nn.Name, "install")
 
-	installedRelease, err := install.Run(chart, combo)
+	installedRelease, err := install.Run(chart, profileValues)
 	if err != nil {
 		return nil, err
 	}
@@ -360,9 +358,8 @@ func getProfileValues(ch chart.Chart, profileName string) (map[string]interface{
 		}
 	}
 	if profile == nil {
-		var empty map[string]interface{}
 		log.Println("No profile file found. Using default.")
-		return empty, nil
+		return ch.Values, nil
 	}
 	profileValues, err := chartutil.ReadValues(profile.Data)
 	if err != nil {
