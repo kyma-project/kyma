@@ -27,7 +27,7 @@ type Config struct {
 
 func GetConfig() Config {
 	cfg := Config{}
-	if err := envconfig.Process("", cfg); err != nil {
+	if err := envconfig.Process("", &cfg); err != nil {
 		log.Fatalf("Invalid configuration: %v", err)
 	}
 	return cfg
