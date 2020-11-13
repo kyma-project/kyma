@@ -253,7 +253,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Subscription sink is changed", func() {
-		It("Should update the BEB subscription webhookurl", func() {
+		It("Should update the BEB subscription webhookURL", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
 			ctx := context.Background()
 
@@ -492,7 +492,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						// ensure the correct subscription was created
 						return subscriptionName == receivedSubscriptionName
 					}
-					// TODO: ensure that the remaining beb calls are neither CRRATE NOR POST (means no new beb subscription is created
+					// TODO: ensure that the remaining beb calls are neither create nor delete (means no new beb subscription is created)
 				}
 				return false
 			}).Should(BeTrue())
@@ -845,7 +845,7 @@ var _ = BeforeSuite(func(done Done) {
 		SyncPeriod: &syncPeriod,
 	})
 	Expect(err).ToNot(HaveOccurred())
-	envConf := &env.Config{
+	envConf := env.Config{
 		BebApiUrl:                bebMock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
@@ -854,8 +854,6 @@ var _ = BeforeSuite(func(done Done) {
 		WebhookClientID:          "foo-client-id",
 		WebhookClientSecret:      "foo-client-secret",
 		WebhookTokenEndpoint:     "foo-token-endpoint",
-		WebhookAuthType:          "oauth",
-		WebhookGrantType:         "client_credentials",
 		Domain:                   domain,
 	}
 	err = NewReconciler(

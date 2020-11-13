@@ -23,7 +23,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 	clientId := "client-id"
 	clientSecret := "client-secret"
 	tokenEndpoint := "token-endpoint"
-	envConfig := &env.Config{
+	envConfig := env.Config{
 		ClientID:      clientId,
 		ClientSecret:  clientSecret,
 		TokenEndpoint: tokenEndpoint,

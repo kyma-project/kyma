@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,6 +12,8 @@ const (
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
 )
+
+var allConditions = makeConditions()
 
 type Condition struct {
 	Type               ConditionType          `json:"type,omitempty"`
@@ -56,17 +57,18 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	s.Conditions = finalConditions
 }
 
-// TODO: unit test me
 func (s SubscriptionStatus) IsReady() bool {
-	// the subscription is ready if all conditions are fulfilled
-	isReady := true
+	if !containSameConditionTypes(allConditions, s.Conditions) {
+		return false
+	}
 
+	// the subscription is ready if all its conditions are evaluated to true
 	for _, c := range s.Conditions {
-		if string(c.Status) != string(v1.ConditionTrue) {
-			isReady = false
+		if c.Status != corev1.ConditionTrue {
+			return false
 		}
 	}
-	return isReady
+	return true
 }
 
 // makeConditions creates an map of all conditions which the Subscription should have
@@ -89,6 +91,30 @@ func makeConditions() []Condition {
 		},
 	}
 	return conditions
+}
+
+func containSameConditionTypes(conditions1, conditions2 []Condition) bool {
+	if len(conditions1) != len(conditions2) {
+		return false
+	}
+
+	for _, condition := range conditions1 {
+		if !containConditionType(conditions2, condition.Type) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func containConditionType(conditions []Condition, conditionType ConditionType) bool {
+	for _, condition := range conditions {
+		if condition.Type == conditionType {
+			return true
+		}
+	}
+
+	return false
 }
 
 func MakeCondition(conditionType ConditionType, reason ConditionReason, status corev1.ConditionStatus) Condition {

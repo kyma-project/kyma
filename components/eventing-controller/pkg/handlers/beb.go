@@ -21,7 +21,7 @@ import (
 var _ Interface = &Beb{}
 
 type Interface interface {
-	Initialize(cfg *env.Config)
+	Initialize(cfg env.Config)
 	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
@@ -37,32 +37,23 @@ type BebResponse struct {
 	Error      error
 }
 
-func (b *Beb) Initialize(cfg *env.Config) {
+func (b *Beb) Initialize(cfg env.Config) {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
 		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
-		b.WebhookAuth = getWebHookAuthFromConfig(cfg)
+		b.WebhookAuth = getWebHookAuth(cfg)
 	}
 }
 
-// getWebhookAuthFromConfig
-func getWebHookAuthFromConfig(cfg *env.Config) *types.WebhookAuth {
-
-	var grantType types.GrantType
-	if cfg.WebhookGrantType == string(types.GrantTypeClientCredentials) {
-		grantType = types.GrantTypeClientCredentials
-	}
-	var authType types.AuthType
-	if cfg.WebhookAuthType == string(types.AuthTypeClientCredentials) {
-		authType = types.AuthTypeClientCredentials
-	}
-
+// getWebHookAuth returns the webhook auth config from the given env config
+// or returns an error if the env config contains invalid grant type or auth type.
+func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 	return &types.WebhookAuth{
-		Type:         authType,
-		GrantType:    grantType,
 		ClientID:     cfg.WebhookClientID,
 		ClientSecret: cfg.WebhookClientSecret,
 		TokenURL:     cfg.WebhookTokenEndpoint,
+		Type:         types.AuthTypeClientCredentials,
+		GrantType:    types.GrantTypeClientCredentials,
 	}
 }
 

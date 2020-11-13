@@ -35,7 +35,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -57,10 +56,11 @@ const (
 	suffixLength          = 10
 	externalHostPrefix    = "web"
 	externalSinkScheme    = "https"
+	apiRuleNamePrefix     = "webhook-"
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg *env.Config) *Reconciler {
+func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
 	bebClient := &handlers.Beb{Log: log}
 	bebClient.Initialize(cfg)
 	return &Reconciler{
@@ -498,7 +498,6 @@ func (r *Reconciler) cleanup(subscription *eventingv1alpha1.Subscription, ctx co
 			}
 		}
 
-		// TODO the logic below introduce flakiness in the tests, uncomment and fix it
 		// Delete the APIRule as the port for the concerned svc is not used by any subscriptions
 		if len(filteredOwnerRefs) == 0 {
 			err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
@@ -597,7 +596,7 @@ func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string
 	randomSuffix := handlers.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
 
-	apiRule := object.NewAPIRule(svcNs, reconciler.ApiRuleNamePrefix,
+	apiRule := object.NewAPIRule(svcNs, apiRuleNamePrefix,
 		object.WithLabels(labels),
 		object.WithOwnerReference(subs),
 		object.WithService(hostName, svcName, port),
@@ -846,7 +845,7 @@ func (r *Reconciler) queueReconcileRequestForSubscriptions(subscriptions []event
 // isRelevantAPIRuleName returns true if the given name matches the APIRule name pattern
 // used by the eventing-controller, otherwise returns false.
 func isRelevantAPIRuleName(name string) bool {
-	return strings.HasPrefix(name, reconciler.ApiRuleNamePrefix)
+	return strings.HasPrefix(name, apiRuleNamePrefix)
 }
 
 // computeAPIRuleReadyStatus returns true if all APIRule statuses is ok, otherwise returns false.

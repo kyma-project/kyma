@@ -26,7 +26,7 @@ func TestAuthenticator(t *testing.T) {
 	if err := os.Setenv("TOKEN_ENDPOINT", "foo"); err != nil {
 		t.Errorf("error while setting env var TOKEN_ENDPOINT")
 	}
-	cfg := &env.Config{}
+	cfg := env.Config{}
 	// authenticate
 	authenticator := NewAuthenticator(cfg)
 

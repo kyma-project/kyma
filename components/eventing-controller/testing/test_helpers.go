@@ -2,9 +2,10 @@ package testing
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
+
+	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -245,11 +246,11 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 func SetSinkSvcPortInAPIRule(apiRule *apigatewayv1alpha1.APIRule, sink string) {
 	sinkURL, err := url.ParseRequestURI(sink)
 	if err != nil {
-		log.Fatalf("failed to parse sink URI: %v", err)
+		Expect(err).ShouldNot(HaveOccurred())
 	}
 	sinkPort, err := utils.GetPortNumberFromURL(*sinkURL)
 	if err != nil {
-		log.Fatalf("failed to convert port from sink URL: %v", err)
+		Expect(err).ShouldNot(HaveOccurred())
 	}
 	apiRule.Spec.Service.Port = &sinkPort
 }
