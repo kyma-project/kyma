@@ -227,15 +227,15 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideVal
 	install.Wait = true
 	install.CreateNamespace = true
 
-	profileValues, err := getProfileValues(*chart, profile)
+	comboValues, err := getProfileValues(*chart, profile)
 	if err != nil {
 		return nil, err
 	}
 
-	overrides.MergeMaps(profileValues, overrideValues)
+	overrides.MergeMaps(comboValues, overrideValues)
 	hc.PrintOverrides(overrideValues, nn.Name, "install")
 
-	installedRelease, err := install.Run(chart, profileValues)
+	installedRelease, err := install.Run(chart, comboValues)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideVal
 }
 
 // UpgradeRelease upgrades a Helm chart
-func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map, profile string) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, overrideValues overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -264,17 +264,15 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	upgrade.Recreate = false
 	upgrade.MaxHistory = hc.maxHistory
 
-	profileValues, err := getProfileValues(*chart, profile)
+	comboValues, err := getProfileValues(*chart, profile)
 	if err != nil {
 		return nil, err
 	}
 
-	var combo overrides.Map
-	overrides.MergeMaps(combo, profileValues)
-	overrides.MergeMaps(combo, values)
-	hc.PrintOverrides(combo, nn.Name, "update")
+	overrides.MergeMaps(comboValues, overrideValues)
+	hc.PrintOverrides(overrideValues, nn.Name, "update")
 
-	upgradedRelease, err := upgrade.Run(nn.Name, chart, combo)
+	upgradedRelease, err := upgrade.Run(nn.Name, chart, comboValues)
 	if err != nil {
 		return nil, err
 	}
