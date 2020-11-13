@@ -38,3 +38,13 @@ func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 
 	return true
 }
+
+// isApiRuleStatueChanged returns true if any property in the subscription status related to the APIRule is changed, otherwise returns false.
+func isApiRuleStatueChanged(existing, expected *eventingv1alpha1.Subscription) bool {
+	if existing.Status.APIRuleName != expected.Status.APIRuleName ||
+		existing.Status.ExternalSink != expected.Status.ExternalSink ||
+		existing.Status.GetConditionAPIRuleStatus() != expected.Status.GetConditionAPIRuleStatus() {
+		return true
+	}
+	return false
+}

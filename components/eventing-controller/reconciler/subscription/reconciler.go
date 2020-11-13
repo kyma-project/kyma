@@ -35,6 +35,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	. "github.com/kyma-project/kyma/components/eventing-controller/reconciler/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -88,102 +89,77 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	//_ = r.Log.WithValues("subscription", req.NamespacedName)
 
-	cachedSubscription := &eventingv1alpha1.Subscription{}
+	actualSubscription := &eventingv1alpha1.Subscription{}
 
 	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
-	if err := r.Client.Get(ctx, req.NamespacedName, cachedSubscription); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, actualSubscription); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	// Handle only the new subscription
-	subscription := cachedSubscription.DeepCopy()
+	desiredSubscription := actualSubscription.DeepCopy()
 
 	// Bind fields to logger
-	log := r.Log.WithValues("kind", subscription.GetObjectKind().GroupVersionKind().Kind,
-		"name", subscription.GetName(),
-		"namespace", subscription.GetNamespace(),
-		"version", subscription.GetGeneration(),
+	log := r.Log.WithValues("kind", desiredSubscription.GetObjectKind().GroupVersionKind().Kind,
+		"name", desiredSubscription.GetName(),
+		"namespace", desiredSubscription.GetNamespace(),
+		"version", desiredSubscription.GetGeneration(),
 	)
 
-	if !r.isInDeletion(subscription) {
-		// Ensure the finalizer is set
-		if err := r.syncFinalizer(subscription, &result, ctx, log); err != nil {
+	// the APIRule for the desired subscription
+	var apiRule *apigatewayv1alpha1.APIRule
+
+	if !r.isInDeletion(desiredSubscription) {
+		// ensure the finalizer is set
+		if err := r.syncFinalizer(desiredSubscription, &result, ctx, log); err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "failed to sync finalizer")
 		}
 		if result.Requeue {
 			return result, nil
 		}
-		if err := r.syncInitialStatus(subscription, &result, ctx); err != nil {
+
+		// sync the initial Subscription status
+		if err := r.syncInitialStatus(desiredSubscription, &result, ctx); err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "failed to sync status")
 		}
 		if result.Requeue {
 			return result, nil
+		}
+
+		// sync APIRule
+		var err error
+		apiRule, err = r.syncAPIRule(desiredSubscription, ctx, log)
+		if !IsSkippable(err) {
+			return ctrl.Result{}, err
+		}
+
+		// sync the Subscription status for the APIRule
+		statusChanged, err := r.syncSubscriptionAPIRuleStatus(actualSubscription, desiredSubscription, apiRule)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if statusChanged {
+			if err := r.Client.Status().Update(ctx, desiredSubscription); err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 
 	// mark if the subscription status was changed
 	statusChanged := false
 
-	// Sync with APIRule, expose the webhook
-	apiRule, err := r.syncAPIRule(subscription, ctx, log)
-	if err != nil {
-		return ctrl.Result{}, errors.Wrap(err, "failed to sync API rule")
-	}
-	if apiRule == nil && !r.isInDeletion(subscription) {
-		log.Error(fmt.Errorf("APIRule is nil hence no host URL to work with"), "")
-		// Change APIRule status to not ready
-		for _, cond := range subscription.Status.Conditions {
-			if cond.Type == eventingv1alpha1.ConditionAPIRuleStatus {
-				if cond.Reason != eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady {
-					desiredSubscription := subscription.DeepCopy()
-					desiredSubscription.Status.SetConditionAPIRuleStatus(false)
-					desiredSubscription.Status.ExternalSink = ""
-					if err := r.Status().Update(ctx, desiredSubscription); err != nil {
-						return ctrl.Result{}, errors.Wrap(err, "failed to update status of Subscription when APIRule is nil")
-					}
-				}
-				return ctrl.Result{}, nil
-			}
-		}
-		return ctrl.Result{}, nil
-	}
-
-	if apiRule != nil {
-		apiRuleReady := computeAPIRuleReadyStatus(apiRule)
-
-		// set initial subscription status
-		subscription.Status.ExternalSink = ""
-		subscription.Status.APIRuleName = apiRule.Name
-		subscription.Status.SetConditionAPIRuleStatus(apiRuleReady)
-
-		// update subscription sink only if the APIRule is ready
-		if apiRuleReady {
-			if err := setSubscriptionStatusExternalSink(subscription, apiRule); err != nil {
-				log.Error(err, "Failed to set Subscription status externalSink", "Subscription", subscription.Name, "Namespace", subscription.Namespace)
-				return ctrl.Result{}, err
-			}
-		}
-
-		// update the subscription status only if needed
-		if subscription.Status.APIRuleName != apiRule.Name ||
-			subscription.Status.ExternalSink != cachedSubscription.Status.ExternalSink ||
-			apiRuleReady != cachedSubscription.Status.GetConditionAPIRuleStatus() {
-			statusChanged = true
-		}
-	}
-
 	// Sync the BEB Subscription with the Subscription CR
-	if statusChangedForBeb, err := r.syncBEBSubscription(subscription, &result, ctx, log, apiRule); err != nil {
+	if statusChangedForBeb, err := r.syncBEBSubscription(desiredSubscription, &result, ctx, log, apiRule); err != nil {
 		log.Error(err, "error while syncing BEB subscription")
 		return ctrl.Result{}, err
 	} else {
 		statusChanged = statusChanged || statusChangedForBeb
 	}
 
-	if r.isInDeletion(subscription) {
+	if r.isInDeletion(desiredSubscription) {
 		// Remove finalizers
-		if err := r.removeFinalizer(subscription, ctx, log); err != nil {
+		if err := r.removeFinalizer(desiredSubscription, ctx, log); err != nil {
 			return ctrl.Result{}, err
 		}
 		result.Requeue = false
@@ -192,7 +168,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// Save the subscription status if it was changed
 	if statusChanged {
-		if err := r.Status().Update(ctx, subscription); err != nil {
+		if err := r.Status().Update(ctx, desiredSubscription); err != nil {
 			log.Error(err, "Update subscription status failed")
 			return ctrl.Result{}, err
 		}
@@ -200,6 +176,28 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	return result, nil
+}
+
+func (r *Reconciler) syncSubscriptionAPIRuleStatus(actualSubscription, desiredSubscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
+	apiRuleReady := computeAPIRuleReadyStatus(apiRule)
+
+	// set the default subscription status
+	desiredSubscription.Status.APIRuleName = ""
+	desiredSubscription.Status.ExternalSink = ""
+	desiredSubscription.Status.SetConditionAPIRuleStatus(apiRuleReady)
+
+	if apiRule != nil {
+		desiredSubscription.Status.APIRuleName = apiRule.Name
+	}
+
+	// set subscription sink only if the APIRule is ready
+	if apiRuleReady {
+		if err := setSubscriptionStatusExternalSink(desiredSubscription, apiRule); err != nil {
+			return false, errors.Wrapf(err, "Failed to set Subscription status externalSink [%s/%s]", desiredSubscription.Namespace, desiredSubscription.Name)
+		}
+	}
+
+	return isApiRuleStatueChanged(actualSubscription, desiredSubscription), nil
 }
 
 // syncFinalizer sets the finalizer in the Subscription
@@ -216,17 +214,17 @@ func (r *Reconciler) syncFinalizer(subscription *eventingv1alpha1.Subscription, 
 }
 
 // syncBEBSubscription delegates the subscription synchronization to the backend client. It returns true if the subscription status was changed.
-func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription,
-
-	result *ctrl.Result, ctx context.Context, logger logr.Logger, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
+func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
+	ctx context.Context, logger logr.Logger, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	logger.Info("Syncing subscription with BEB")
-
-	//No need to initialize in every sync
-	//r.bebClient.Initialize()
 
 	// if object is marked for deletion, we need to delete the BEB subscription
 	if r.isInDeletion(subscription) {
 		return false, r.deleteBEBSubscription(subscription, logger, ctx)
+	}
+
+	if apiRule == nil {
+		return false, errors.Errorf("APIRule is required")
 	}
 
 	var statusChanged bool
@@ -283,81 +281,69 @@ func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscr
 }
 
 func (r *Reconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) (*apigatewayv1alpha1.APIRule, error) {
-	if subscription.DeletionTimestamp != nil {
-		logger.Info("subscription is getting deleted so nothing needs to be done")
-		return nil, nil
-	}
-
-	isValidSink, err := r.isSinkURLValid(ctx, subscription, logger)
-	if err != nil {
-		logger.Error(err, "failed to validate sink URLs")
+	if err := r.isSinkURLValid(ctx, subscription); err != nil {
 		return nil, err
-	}
-	if !isValidSink {
-		logger.Error(fmt.Errorf("sink URL is not valid"), subscription.Spec.Sink)
-		return nil, nil
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		logger.Error(err, "failed to parse sink URI")
 		r.eventWarn(subscription, reasonValidationFailed, "Failed to parse sink URI %s", subscription.Spec.Sink)
-		return nil, nil
+		return nil, NewSkippable(errors.Wrapf(err, "failed to parse sink URI"))
 	}
+
 	apiRule, err := r.createOrUpdateAPIRule(subscription, ctx, *sURL, logger)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to createOrUpdateAPIRule")
+		return nil, errors.Wrap(err, "failed to create or update APIRule")
 	}
+
 	return apiRule, nil
 }
 
-func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger logr.Logger) (bool, error) {
+func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
 		r.eventWarn(subscription, reasonValidationFailed, "Sink URL scheme should be 'http' or 'https' %s", subscription.Spec.Sink)
-		return false, nil
+		return NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		logger.Error(err, subscription.Spec.Sink)
 		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", err.Error())
-		return false, nil
+		return NewSkippable(err)
 	}
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
-		logger.Error(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix), "")
 		r.eventWarn(subscription, reasonValidationFailed, "sink does not contain suffix: %s in the URL", clusterLocalURLSuffix)
-		return false, nil
-	}
-	subDomains := strings.Split(trimmedHost, ".")
-	if len(subDomains) != 5 {
-		logger.Error(fmt.Errorf("sink should contain 5 sub-domains"), trimmedHost)
-		r.eventWarn(subscription, reasonValidationFailed, "sink should contain 5 sub-domains %s", trimmedHost)
-		return false, nil
+		return NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
 	}
 
-	svcNs, svcName := subDomains[1], subDomains[0]
+	subDomains := strings.Split(trimmedHost, ".")
+	if len(subDomains) != 5 {
+		r.eventWarn(subscription, reasonValidationFailed, "sink should contain 5 sub-domains %s", trimmedHost)
+		return NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
+	}
+
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
-		logger.Error(fmt.Errorf("the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs), "")
 		r.eventWarn(subscription, reasonValidationFailed, "the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
-		return false, nil
+		return NewSkippable(fmt.Errorf("the namespace of Subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
 	}
 
 	// Validate svc is a cluster-local one
-	_, err = r.getClusterLocalService(ctx, svcNs, svcName)
-	if err != nil {
+	svcName := subDomains[0]
+	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
-			logger.Error(err, "sink doesn't correspond to a valid cluster local svc")
 			r.eventWarn(subscription, reasonValidationFailed, "sink doesn't correspond to a valid cluster local svc")
-			return false, nil
+			return NewSkippable(errors.Wrapf(err, "sink doesn't correspond to a valid cluster local svc"))
 		}
+
 		r.eventWarn(subscription, reasonValidationFailed, "failed to fetch cluster-local svc %s/%s", svcNs, svcName)
-		return false, errors.Wrapf(err, "failed to fetch cluster-local svc %s/%s", svcNs, svcName)
+		return errors.Wrapf(err, "failed to fetch cluster-local svc %s/%s", svcNs, svcName)
 	}
-	return true, nil
+
+	return nil
 }
 
 func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
@@ -405,46 +391,15 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 	}
 
 	if existingAPIRule == nil {
-		// cleanup or update the previously used ApiRule for the subscription
-		if len(subscription.Status.APIRuleName) != 0 {
-			key := k8stypes.NamespacedName{Namespace: subscription.Namespace, Name: subscription.Status.APIRuleName}
-			previousApiRule := &apigatewayv1alpha1.APIRule{}
-
-			if err := r.Client.Get(ctx, key, previousApiRule); err != nil {
-				if !k8serrors.IsNotFound(err) {
-					return nil, err
-				}
-			} else {
-				// previous ApiRule still exists
-
-				// build a new OwnerReference list without the subscription
-				ownerReferences := make([]v1.OwnerReference, 0, len(previousApiRule.OwnerReferences))
-				for _, ownerReference := range previousApiRule.OwnerReferences {
-					if ownerReference.UID != subscription.UID {
-						ownerReferences = append(ownerReferences, ownerReference)
-					}
-				}
-
-				// delete the previous ApiRule only if the new OwnerReference list is empty
-				if len(ownerReferences) == 0 {
-					if err := r.Client.Delete(ctx, previousApiRule); err != nil {
-						return nil, err
-					}
-				} else if len(previousApiRule.OwnerReferences) > len(ownerReferences) {
-					// update the previous ApiRule only if the new OwnerReference list length is decreased
-					previousApiRule.OwnerReferences = ownerReferences
-					if err := r.Client.Update(ctx, previousApiRule); err != nil {
-						return nil, err
-					}
-				}
-			}
+		if err := r.handlePreviousAPIRule(subscription, ctx); err != nil {
+			return nil, err
 		}
 
-		err = r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{})
-		if err != nil {
+		if err := r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{}); err != nil {
 			r.eventWarn(subscription, reasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
 			return nil, errors.Wrap(err, "failed to create APIRule")
 		}
+
 		r.eventNormal(subscription, reasonCreate, "Created APIRule %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
@@ -473,6 +428,72 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 		return nil, errors.Wrap(err, "failed to cleanup APIRules")
 	}
 	return desiredAPIRule, nil
+}
+
+// handlePreviousAPIRule computes the OwnerReferences list for the previous subscription APIRule (if any)
+// if the OwnerReferences list is empty, then the APIRule will be deleted
+// else if the OwnerReferences list length was decreased, then the APIRule will be updated
+func (r *Reconciler) handlePreviousAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
+	if len(subscription.Status.APIRuleName) == 0 {
+		return nil
+	}
+
+	// get the actual APIRule (if any)
+	apiRule := &apigatewayv1alpha1.APIRule{}
+	key := k8stypes.NamespacedName{Namespace: subscription.Namespace, Name: subscription.Status.APIRuleName}
+	if err := r.Client.Get(ctx, key, apiRule); err != nil {
+		if !k8serrors.IsNotFound(err) {
+			return err
+		}
+		return nil
+	}
+
+	// build a new OwnerReference list and exclude the current subscription from the list (if exists)
+	ownerReferences := make([]v1.OwnerReference, 0, len(apiRule.OwnerReferences))
+	for _, ownerReference := range apiRule.OwnerReferences {
+		if ownerReference.UID != subscription.UID {
+			ownerReferences = append(ownerReferences, ownerReference)
+		}
+	}
+
+	// delete the ApiRule if the new OwnerReference list is empty
+	if len(ownerReferences) == 0 {
+		if err := r.Client.Delete(ctx, apiRule); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// update the ApiRule if the new OwnerReference list length is decreased
+	if len(ownerReferences) < len(apiRule.OwnerReferences) {
+		// list all subscriptions in the APIRule namespace
+		namespaceSubscriptions := &eventingv1alpha1.SubscriptionList{}
+		if err := r.Client.List(ctx, namespaceSubscriptions, &client.ListOptions{Namespace: apiRule.Namespace}); err != nil {
+			return err
+		}
+
+		// build a new subscription list and exclude the current subscription from the list
+		subscriptions := make([]eventingv1alpha1.Subscription, 0, len(namespaceSubscriptions.Items))
+		for _, namespaceSubscription := range namespaceSubscriptions.Items {
+			if namespaceSubscription.UID == subscription.UID {
+				continue
+			}
+			if namespaceSubscription.Status.APIRuleName != apiRule.Name {
+				continue
+			}
+			subscriptions = append(subscriptions, namespaceSubscription)
+		}
+
+		// update the APIRule OwnerReferences list and Spec Rules
+		object.WithOwnerReference(subscriptions)(apiRule)
+		object.WithRules(subscriptions, http.MethodPost, http.MethodOptions)(apiRule)
+
+		if err := r.Client.Update(ctx, apiRule); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *Reconciler) cleanup(subscription *eventingv1alpha1.Subscription, ctx context.Context, subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
@@ -850,7 +871,7 @@ func isRelevantAPIRuleName(name string) bool {
 
 // computeAPIRuleReadyStatus returns true if all APIRule statuses is ok, otherwise returns false.
 func computeAPIRuleReadyStatus(apiRule *apigatewayv1alpha1.APIRule) bool {
-	if apiRule.Status.APIRuleStatus == nil || apiRule.Status.AccessRuleStatus == nil || apiRule.Status.VirtualServiceStatus == nil {
+	if apiRule == nil || apiRule.Status.APIRuleStatus == nil || apiRule.Status.AccessRuleStatus == nil || apiRule.Status.VirtualServiceStatus == nil {
 		return false
 	}
 	apiRuleStatus := apiRule.Status.APIRuleStatus.Code == apigatewayv1alpha1.StatusOK

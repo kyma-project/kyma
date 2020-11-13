@@ -137,13 +137,13 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 	return false
 }
 
-func (s *SubscriptionStatus) GetConditionAPIRuleStatus() bool {
+func (s *SubscriptionStatus) GetConditionAPIRuleStatus() corev1.ConditionStatus {
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionAPIRuleStatus {
-			return condition.Status == corev1.ConditionTrue
+			return condition.Status
 		}
 	}
-	return false
+	return corev1.ConditionUnknown
 }
 
 func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
