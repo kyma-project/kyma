@@ -35,7 +35,7 @@ func TestStepsFactory(t *testing.T) {
 			isf := installStepFactory{
 				stepFactory: stepFactory{
 					installedReleases: nil,
-					installationData: fakeInstallationData(),
+					installationData:  fakeInstallationData(),
 				},
 			}
 			component := fakeComponent()
@@ -62,7 +62,7 @@ func TestStepsFactory(t *testing.T) {
 			isf := installStepFactory{
 				stepFactory: stepFactory{
 					installedReleases: installedReleases,
-					installationData: fakeInstallationData(),
+					installationData:  fakeInstallationData(),
 				},
 			}
 
