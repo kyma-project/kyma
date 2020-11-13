@@ -986,7 +986,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "UTC",
+        "timezone": "",
         "title": "Nodes",
         "uid": "fa49a4706d07a042595b664c87fb33ea",
         "version": 0

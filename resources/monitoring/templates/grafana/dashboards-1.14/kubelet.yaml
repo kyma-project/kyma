@@ -275,7 +275,7 @@ data:
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(kubelet_running_containers{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"})",
+                                "expr": "sum(kubelet_running_container_count{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"})",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}instance{{`}}`}}",
@@ -2507,7 +2507,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "UTC",
+        "timezone": "",
         "title": "Kubernetes / Kubelet",
         "uid": "3138fa155d5915769fbded898ac09fd9",
         "version": 0
