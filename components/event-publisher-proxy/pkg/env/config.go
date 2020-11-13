@@ -15,6 +15,8 @@ type Config struct {
 	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
+	BEBNamespace        string        `envconfig:"BEB_NAMESPACE" default:""`
+	EventTypePrefix     string        `envconfig:"EVENT_TYPE_PREFIX" default:""`
 }
 
 // ConfigureTransport receives an HTTP transport and configure its max idle connection properties.

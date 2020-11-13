@@ -2,6 +2,7 @@ package testing
 
 import (
 	"bytes"
+	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"net/http"
 )
 
@@ -47,5 +48,11 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeTypeHeader, CeType)
 	headers.Add(CeSourceHeader, CeSource)
 	headers.Add(CeSpecVersionHeader, CeSpecVersion)
+	return headers
+}
+
+func GetApplicationJSONHeaders() http.Header {
+	headers := make(http.Header)
+	headers.Add(http2.ContentType, "application/json")
 	return headers
 }

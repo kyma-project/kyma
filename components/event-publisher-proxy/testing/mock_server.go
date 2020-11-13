@@ -37,7 +37,7 @@ func WithResponseTime(responseTime time.Duration) MockServerOption {
 	}
 }
 
-func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string) {
+func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint, eventsWithHTTP400 string) {
 	m.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(m.responseTime)
 
@@ -53,6 +53,14 @@ func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string) {
 		case eventsEndpoint:
 			{
 				w.WriteHeader(http.StatusNoContent)
+			}
+		case eventsWithHTTP400:
+			{
+				w.WriteHeader(http.StatusBadRequest)
+				_, err := w.Write([]byte("invalid request as foo does not comply with certain spec"))
+				if err != nil {
+					t.Fatalf("failed to write message: %v", err)
+				}
 			}
 		default:
 			{
