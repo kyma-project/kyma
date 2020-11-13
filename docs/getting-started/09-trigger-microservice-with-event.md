@@ -23,34 +23,34 @@ Follow these steps:
 
 1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command:
 
-```bash
-kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
-```
+  ```bash
+  kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
+  ```
 
 2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
-```yaml
-cat <<EOF | kubectl apply -f  -
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  name: orders-service
-  namespace: orders-service
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce-mock
-      type: order.deliverysent
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
+  ```yaml
+  cat <<EOF | kubectl apply -f  -
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Trigger
+    metadata:
       name: orders-service
       namespace: orders-service
-EOF
-```
+    spec:
+      broker: default
+      filter:
+        attributes:
+          eventtypeversion: v1
+          source: commerce-mock
+          type: order.deliverysent
+      subscriber:
+        ref:
+          apiVersion: v1
+          kind: Service
+          name: orders-service
+          namespace: orders-service
+  EOF
+  ```
 
 - **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
