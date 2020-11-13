@@ -264,7 +264,7 @@ func (hc *mockHelmClient) IsReleaseDeletable(nn kymahelm.NamespacedName) (bool, 
 	return hc.isReleaseDeletable, nil
 }
 
-func (hc *mockHelmClient) InstallRelease(chartDir string, nn kymahelm.NamespacedName, values overrides.Map) (*kymahelm.Release, error) {
+func (hc *mockHelmClient) InstallRelease(chartDir string, nn kymahelm.NamespacedName, values overrides.Map, profile string) (*kymahelm.Release, error) {
 	if hc.failInstallingRelease == true {
 		err := errors.New("failed to install release")
 		return nil, err
