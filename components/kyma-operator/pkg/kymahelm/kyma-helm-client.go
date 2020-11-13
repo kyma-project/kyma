@@ -25,7 +25,7 @@ type ClientInterface interface {
 	IsReleasePresent(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
 	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map, profile string) (*Release, error)
-	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map, profile string) (*Release, error)
 	UninstallRelease(nn NamespacedName) error
 	RollbackRelease(nn NamespacedName, revision int) error
 	WaitForReleaseDelete(nn NamespacedName) (bool, error)
@@ -246,7 +246,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 }
 
 // UpgradeRelease upgrades a Helm chart
-func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -266,9 +266,17 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	upgrade.Recreate = false
 	upgrade.MaxHistory = hc.maxHistory
 
-	hc.PrintOverrides(values, nn.Name, "update")
+	profileValues, err := getProfileValues(*chart, profile)
+	if err != nil {
+		return nil, err
+	}
 
-	upgradedRelease, err := upgrade.Run(nn.Name, chart, values)
+	var combo overrides.Map
+	overrides.MergeMaps(combo, profileValues)
+	overrides.MergeMaps(combo, values)
+	hc.PrintOverrides(combo, nn.Name, "update")
+
+	upgradedRelease, err := upgrade.Run(nn.Name, chart, combo)
 	if err != nil {
 		return nil, err
 	}
