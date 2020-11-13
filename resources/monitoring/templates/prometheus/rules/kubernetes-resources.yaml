@@ -103,19 +103,21 @@ spec:
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
-    - alert: CPUThrottlingHigh
-      annotations:
-        message: '{{`{{`}} printf "%0.0f" $value {{`}}`}}% throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container_name {{`}}`}} in pod {{`{{`}} $labels.pod_name {{`}}`}}.'
-        runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-cputhrottlinghigh
-      expr: |-
-        100 * sum(increase(container_cpu_cfs_throttled_periods_total{container_name!="", }[5m])) by (container_name, pod_name, namespace)
-          /
-        sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container_name, pod_name, namespace)
-          > 25
-      for: 15m
-      labels:
-        severity: warning
-{{- if .Values.defaultRules.additionalRuleLabels }}
-{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
-{{- end }}
+# Kyma customization: the alert is too easily triggered, thus creating a lot of noise
+# https://github.com/kubernetes-monitoring/kubernetes-mixin/issues/108
+#     - alert: CPUThrottlingHigh
+#       annotations:
+#         message: '{{`{{`}} printf "%0.0f" $value {{`}}`}}% throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container_name {{`}}`}} in pod {{`{{`}} $labels.pod_name {{`}}`}}.'
+#         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-cputhrottlinghigh
+#       expr: |-
+#         100 * sum(increase(container_cpu_cfs_throttled_periods_total{container_name!="", }[5m])) by (container_name, pod_name, namespace)
+#           /
+#         sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container_name, pod_name, namespace)
+#           > 25
+#       for: 15m
+#       labels:
+#         severity: warning
+# {{- if .Values.defaultRules.additionalRuleLabels }}
+# {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+# {{- end }}
 {{- end }}
