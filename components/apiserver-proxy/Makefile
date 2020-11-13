@@ -6,13 +6,9 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 ENTRYPOINT := ./cmd/proxy/main.go
 
-.DEFAULT_GOAL=gomod-verify
-
-release:
-	$(MAKE) gomod-release
+verify:: vet
 
 .PHONY: clean
->>>>>>> 5e64c9c03... fix generic makefile and clean up the code
 clean:
 	rm -rf bin
 
