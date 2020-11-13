@@ -347,7 +347,7 @@ func getProfileValues(ch chart.Chart, profileName string) (map[string]interface{
 			break
 		}
 	}
-	if profile != nil {
+	if profile == nil {
 		return ch.Values, nil
 	}
 	profileValues, err := chartutil.ReadValues(profile.Data)
