@@ -231,10 +231,13 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 	if err != nil {
 		return nil, err
 	}
-	overrides.MergeMaps(values, profileValues)
-	hc.PrintOverrides(values, nn.Name, "install")
 
-	installedRelease, err := install.Run(chart, values)
+	var combo overrides.Map
+	overrides.MergeMaps(combo, profileValues)
+	overrides.MergeMaps(combo, values)
+	hc.PrintOverrides(combo, nn.Name, "install")
+
+	installedRelease, err := install.Run(chart, combo)
 	if err != nil {
 		return nil, err
 	}
