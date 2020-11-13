@@ -344,11 +344,13 @@ func getProfileValues(ch chart.Chart, profileName string) (map[string]interface{
 	for _, f := range ch.Files {
 		if (f.Name == fmt.Sprintf("profile-%s.yaml", profileName)) || (f.Name == fmt.Sprintf("%s.yaml", profileName)) {
 			profile = f
+			log.Printf("Found %s, extracing profile values.\n", f.Name)
 			break
 		}
 	}
 	if profile == nil {
 		var empty map[string]interface{}
+		log.Println("No profile file found. Using default.")
 		return empty, nil
 	}
 	profileValues, err := chartutil.ReadValues(profile.Data)
