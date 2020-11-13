@@ -1,10 +1,7 @@
 package testing
 
 import (
-	"net/http"
-	"net/url"
 	"reflect"
-	"strings"
 
 	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
@@ -21,8 +18,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 //
@@ -60,13 +55,44 @@ func HaveNotEmptyHost() GomegaMatcher {
 	}, BeTrue())
 }
 
-func HaveAPIRuleSpec(ruleMethods []string, accessStrategy string) GomegaMatcher {
+func HaveAPIRuleGateway(gateway string) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) string {
+		if a.Spec.Gateway == nil {
+			return ""
+		}
+		return *a.Spec.Gateway
+	}, Equal(gateway))
+}
+
+func HaveAPIRuleLabels(labels map[string]string) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) map[string]string {
+		return a.Labels
+	}, Equal(labels))
+}
+
+func HaveAPIRuleService(serviceName string, port uint32, domain string) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) apigatewayv1alpha1.Service {
+		if a.Spec.Service == nil {
+			return apigatewayv1alpha1.Service{}
+		}
+		return *a.Spec.Service
+	}, MatchFields(IgnoreMissing|IgnoreExtras, Fields{
+		"Port":       PointTo(Equal(port)),
+		"Name":       PointTo(Equal(serviceName)),
+		"Host":       PointTo(ContainSubstring(domain)),
+		"IsExternal": PointTo(BeTrue()),
+	}),
+	)
+}
+
+func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy string) GomegaMatcher {
 	return WithTransform(func(a apigatewayv1alpha1.APIRule) []apigatewayv1alpha1.Rule {
 		return a.Spec.Rules
 	}, ContainElement(
 		MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 			"Methods":          ConsistOf(ruleMethods),
 			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategies(accessStrategy)),
+			"Gateway":          Equal(constants.ClusterLocalAPIGateway),
 		}),
 	))
 }
@@ -105,95 +131,6 @@ func HaveSubscriptionReady() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
 		return s.Status.Ready
 	}, BeTrue())
-}
-
-// TODO: replace this with matchers
-func HaveValidAPIRule(s eventingv1alpha1.Subscription) GomegaMatcher {
-	return WithTransform(func(apiRule apigatewayv1alpha1.APIRule) bool {
-		hasOwnRef, hasRule := false, false
-		for _, or := range apiRule.OwnerReferences {
-			if or.Name == s.Name && or.UID == s.UID {
-				hasOwnRef = true
-				break
-			}
-		}
-		if !hasOwnRef {
-			return false
-		}
-		// --
-
-		sURL, err := url.ParseRequestURI(s.Spec.Sink)
-		if err != nil {
-			return false
-		}
-
-		sURLSplitArr := strings.Split(sURL.Host, ".")
-		if len(sURLSplitArr) != 5 {
-			return false
-		}
-		_, subscriberSvcName := sURLSplitArr[1], sURLSplitArr[0]
-		if sURL.Path == "" {
-			sURL.Path = "/"
-		}
-		for _, rule := range apiRule.Spec.Rules {
-			if rule.Path == sURL.Path {
-				if len(rule.Methods) != 2 {
-					break
-				}
-				acceptableMethods := []string{http.MethodPost, http.MethodOptions}
-				if !(containsString(acceptableMethods, rule.Methods[0]) && containsString(acceptableMethods, rule.Methods[1])) {
-					break
-				}
-				if len(rule.AccessStrategies) != 1 {
-					break
-				}
-				accessStrategy := rule.AccessStrategies[0]
-				if accessStrategy.Handler.Name != object.OAuthHandlerName {
-					break
-				}
-				hasRule = true
-				break
-			}
-		}
-		if !hasRule {
-			return false
-		}
-
-		if *apiRule.Spec.Gateway != constants.ClusterLocalAPIGateway {
-			return false
-		}
-
-		expectedLabels := map[string]string{
-			constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
-			constants.ControllerServiceLabelKey:  subscriberSvcName,
-		}
-		if !reflect.DeepEqual(expectedLabels, apiRule.Labels) {
-			return false
-		}
-
-		if subscriberSvcName != *apiRule.Spec.Service.Name {
-			return false
-		}
-		svcPort, err := utils.GetPortNumberFromURL(*sURL)
-		if err != nil {
-			return false
-		}
-
-		if svcPort != *apiRule.Spec.Service.Port {
-			return false
-		}
-
-		return true
-	}, BeTrue())
-}
-
-func containsString(list []string, contains string) bool {
-	for _, elem := range list {
-		if elem == contains {
-			return true
-		}
-	}
-	return false
 }
 
 func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {

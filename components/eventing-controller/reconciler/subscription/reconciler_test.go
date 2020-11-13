@@ -53,6 +53,7 @@ const (
 	bigTimeOut                  = 40 * time.Second
 	smallTimeOut                = 5 * time.Second
 	smallPollingInterval        = 1 * time.Second
+	domain                      = "domain.com"
 )
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
@@ -233,19 +234,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				},
 			}
 			acceptableMethods := []string{http.MethodPost, http.MethodOptions}
+			expectedLabels := map[string]string{
+				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
+				constants.ControllerServiceLabelKey:  subscriberSvc.Name,
+			}
 			getAPIRule(apiRule, ctx).Should(And(
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
-				reconcilertesting.HaveAPIRuleSpec(acceptableMethods, object.OAuthHandlerName),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName),
+				reconcilertesting.HaveAPIRuleGateway(constants.ClusterLocalAPIGateway),
+				reconcilertesting.HaveAPIRuleLabels(expectedLabels),
+				reconcilertesting.HaveAPIRuleService(subscriberSvc.Name, 443, domain),
 			))
-			// TODO.
-			// getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveValidAPIRule(*givenSubscription))
-			// 			    reconcilertesting.HaveValidSink(),
-			//			    reconcilertesting.HaveValidOwnerReferences(),
-			//			    reconcilertesting.HaveApiRules(wantApiRules),
-			//			    reconcilertesting.HaveGateway(gateway),
-			//			    reconcilertesting.HaveLabels(labels),
-			//			    reconcilertesting.HaveServiceName(serviceName),
-			//			    reconcilertesting.HavePort(port),
 
 			By("Marking it as ready")
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
@@ -575,26 +574,6 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 	}, bigTimeOut, bigPollingInterval)
 }
 
-func updateSubscriptionSink(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
-	return Eventually(func() error {
-		lookupKey := types.NamespacedName{
-			Namespace: subscription.Namespace,
-			Name:      subscription.Name,
-		}
-		existingSub := &eventingv1alpha1.Subscription{}
-		if err := k8sClient.Get(ctx, lookupKey, existingSub); err != nil {
-			return err
-		}
-		subToBeUpdated := existingSub.DeepCopy()
-		subToBeUpdated.Spec.Sink = subscription.Spec.Sink
-
-		if err := k8sClient.Update(ctx, subToBeUpdated); err != nil {
-			return err
-		}
-		return nil
-	}, time.Second*10, time.Second)
-}
-
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
 func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
@@ -606,35 +585,6 @@ func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
 		}
 		return *eventList
 	})
-}
-
-// ensureAPIRuleCreated creates an APIRule with status READY
-func ensureAPIRuleCreated(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) {
-	By(fmt.Sprintf("Ensuring the test namespace %q is created", apiRule.Namespace))
-	if apiRule.Namespace != "default " {
-		// create testing namespace
-		namespace := fixtureNamespace(apiRule.Namespace)
-		if namespace.Name != "default" {
-			err := k8sClient.Create(ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				Expect(err).ShouldNot(HaveOccurred())
-			}
-		}
-	}
-
-	By(fmt.Sprintf("Ensuring the APIRule %q is created", apiRule.Name))
-	// create subscription
-	err := k8sClient.Create(ctx, apiRule)
-	if !k8serrors.IsAlreadyExists(err) {
-		fmt.Println(err)
-		Expect(err).Should(BeNil())
-	}
-	// update status only once when APIRule creation succeeds
-	if err == nil {
-		err = k8sClient.Status().Update(ctx, apiRule)
-		Expect(err).Should(BeNil())
-	}
 }
 
 // ensureAPIRuleStatusUpdated updates the status fof the APIRule(mocking APIGateway controller)
@@ -906,7 +856,7 @@ var _ = BeforeSuite(func(done Done) {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		WebhookAuthType:          "oauth",
 		WebhookGrantType:         "client_credentials",
-		Domain:                   "domain.com",
+		Domain:                   domain,
 	}
 	err = NewReconciler(
 		k8sManager.GetClient(),
