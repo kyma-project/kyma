@@ -230,7 +230,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 	hc.PrintOverrides(values, nn.Name, "install")
 
 	//chart.Values := getProfileData(chart.Files) ONLY IF PROFILE IS THE FULL VALUES.YAML
-	chart.Values, err = hc.getProfileValues(*chart, "test")
+	chart.Values, err = getProfileValues(*chart, "test")
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +339,7 @@ func (hc *Client) newActionConfig(namespace string) (*action.Configuration, erro
 	return cfg, nil
 }
 
-func (hc *Client) getProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
+func getProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
 	var profile *chart.File
 	for _, f := range ch.Files {
 		if strings.Contains(f.Name, profileName) {
@@ -347,7 +347,7 @@ func (hc *Client) getProfileValues(ch chart.Chart, profileName string) (map[stri
 			break
 		}
 	}
-	if profile.Name == "" {
+	if profile != nil {
 		return ch.Values, nil
 	}
 	profileValues, err := chartutil.ReadValues(profile.Data)
