@@ -140,20 +140,22 @@ spec:
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
-    - alert: CPUThrottlingHigh
-      annotations:
-        description: '{{`{{`}} $value | humanizePercentage {{`}}`}} throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container {{`}}`}} in pod {{`{{`}} $labels.pod {{`}}`}}.'
-        runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-cputhrottlinghigh
-        summary: Processes experience elevated CPU throttling.
-      expr: |-
-        sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace)
-          /
-        sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)
-          > ( 25 / 100 )
-      for: 15m
-      labels:
-        severity: info
-{{- if .Values.defaultRules.additionalRuleLabels }}
-{{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
-{{- end }}
+# Kyma customization: the alert is too easily triggered, thus creating a lot of noise
+# https://github.com/kubernetes-monitoring/kubernetes-mixin/issues/108
+#     - alert: CPUThrottlingHigh
+#       annotations:
+#         description: '{{`{{`}} $value | humanizePercentage {{`}}`}} throttling of CPU in namespace {{`{{`}} $labels.namespace {{`}}`}} for container {{`{{`}} $labels.container {{`}}`}} in pod {{`{{`}} $labels.pod {{`}}`}}.'
+#         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-cputhrottlinghigh
+#         summary: Processes experience elevated CPU throttling.
+#       expr: |-
+#         sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace)
+#           /
+#         sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)
+#           > ( 25 / 100 )
+#       for: 15m
+#       labels:
+#         severity: info
+# {{- if .Values.defaultRules.additionalRuleLabels }}
+# {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
+# {{- end }}
 {{- end }}
