@@ -84,7 +84,6 @@ release:
 #Old Target for dep projects
 release-old: resolve dep-status verify build-image push-image
 
-
 .PHONY: build-image push-image
 build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
@@ -118,13 +117,13 @@ dep-status-local:
 
 #Go mod
 mod-deps-local:: vendor-local mod-verify-local status-local
-$(eval $(call buildpack-cp-ro,mod-deps))
+$(eval $(call buildpack-mount,mod-deps))
 
 gomod-verify-local:: test-local check-imports-local check-fmt-local
 $(eval $(call buildpack-cp-ro,gomod-verify))
 
 component-check-local:: mod-deps-local gomod-verify-local
-$(eval $(call buildpack-cp-ro,component-check))
+$(eval $(call buildpack-mount,component-check))
 
 gomod-release:component-check build-image push-image
 
@@ -137,17 +136,7 @@ mod-verify-local:
 status-local:
 	GO111MODULE=on go mod graph
 
-
-.PHONY: do do-local touch-local read-local
-do-local:: touch-local read-local
-$(eval $(call buildpack-cp-ro,do))
-
-touch-local:
-	echo "damian je zupe" > plik.txt
-read-local:
-	cat plik.txt
-
-
+## Source Code tools
 check-imports-local:
 	@if [ -n "$$(goimports -l $$($(FILES_TO_CHECK)))" ]; then \
 		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
