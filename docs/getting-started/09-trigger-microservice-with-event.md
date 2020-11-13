@@ -21,7 +21,9 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command: `kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled`.
+
+2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
 ```yaml
 cat <<EOF | kubectl apply -f  -
@@ -50,7 +52,7 @@ EOF
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
 - **spec.filter.attributes.type** points to the event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
 
-2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
+3. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
 
    ```bash
    kubectl get trigger orders-service -n orders-service -o=jsonpath="{.status.conditions[2].status}"
