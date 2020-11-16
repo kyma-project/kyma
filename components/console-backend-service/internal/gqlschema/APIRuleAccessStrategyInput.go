@@ -25,6 +25,10 @@ func UnmarshalAPIRuleAccessStrategyInput(v interface{}) (v1alpha1.Authenticator,
 			}
 			it.Name = name
 		case "config":
+			if v == nil {
+				it.Config = nil
+				break
+			}
 			raw, err := json.Marshal(v)
 			if err != nil {
 				return it, err
