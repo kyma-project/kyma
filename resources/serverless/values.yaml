@@ -134,7 +134,7 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true,--verbosity=trace"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor@sha256:f652f28537fa76e8f4f9393de13a064f0206003c451ce2ad6e4359fd5a21acbc
+        value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
 
