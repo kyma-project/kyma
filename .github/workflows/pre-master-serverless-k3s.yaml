@@ -1,0 +1,72 @@
+name: Binding-pre-master
+on: 
+  pull_request:
+    paths: 
+      - 'components/function-controller/**'
+      - 'resources/serverless/**'
+      - '.github/workflows/pre-master-serverless-k3s.yml' 
+  repository_dispatch:
+    types: [ok-to-test-command]   
+
+defaults:
+  run:
+    working-directory: resources/serverless
+
+jobs:
+  pre-master-binding-k3s:
+    env:
+      PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
+      PROJECT_ID: "sap-se-cx-gopher"
+    runs-on: ubuntu-latest
+    if: 
+      github.event_name == 'repository_dispatch'
+    steps:
+    - name: Set up Go 1.14
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.14
+
+
+    # Check out merge commit
+    - name: Fork based /ok-to-test checkout
+      uses: actions/checkout@v2
+      with:
+        ref: "refs/pull/${{ env.PR_NUMBER }}/merge"
+
+    - name: Prepare k3s and helm 3
+      run: |
+        ./scripts/create-cluster-k3s.sh
+        echo "Installing helm"
+        curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done
+
+    - name: Install serverless component using Helm
+      run: |
+        export REGISTRY_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' /registry.localhost)
+        echo "Patching CoreDns with REGISTRY_IP=$REGISTRY_IP"
+        sed "s/REGISTRY_IP/$REGISTRY_IP/" coredns-patch.tpl >coredns-patch.yaml
+        kubectl -n kube-system patch cm coredns --patch "$(cat coredns-patch.yaml)"
+        kubectl create ns kyma-system
+        kubectl apply -f resources/cluster-essentials/files -n kyma-system 
+
+        helm install serverless . --set dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName="local.kyma.dev" --wait
+        export KYMA_SOURCES_DIR="../.."
+        kubectl apply -f "$KYMA_SOURCES_DIR/components/function-controller/config/samples/serverless_v1alpha1_function.yaml"
+        kubectl wait --for=condition=Running function/demo --timeout 180s
+        kubectl get -f "$KYMA_SOURCES_DIR/components/function-controller/config/samples/serverless_v1alpha1_function.yaml" -oyaml
+        kubectl get deployment -oyaml
+        echo "jobs:"
+        kubectl get job -oyaml
+        echo "pods:"
+        kubectl get pods -oyaml
+        echo "deployments:"
+        kubectl get deployment -oyaml
+        echo "logs:"
+        kubectl logs -l serverless.kyma-project.io/function-name=demo
+        echo "pod list:"
+        kubectl get pods -A
+
+
+    - name: Apply test scenario and check if secrets are injected
+      run: |
+        kubectl apply -f ../../components/function-controller/config/samples/serverless_v1alpha1_function.yaml
