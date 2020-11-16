@@ -280,6 +280,7 @@ func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscr
 	return r.updateCondition(subscription, condition, ctx)
 }
 
+// syncAPIRule validate the given subscription sink URL and sync its APIRule.
 func (r *Reconciler) syncAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context, logger logr.Logger) (*apigatewayv1alpha1.APIRule, error) {
 	if err := r.isSinkURLValid(ctx, subscription); err != nil {
 		return nil, err
@@ -318,6 +319,7 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 		return NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
 	}
 
+	// we expected a sink in the format "service.namespace.svc.cluster.local"
 	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
 		r.eventWarn(subscription, reasonValidationFailed, "sink should contain 5 sub-domains %s", trimmedHost)
@@ -355,6 +357,7 @@ func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName 
 	return svc, nil
 }
 
+// createOrUpdateAPIRule create new or update existing APIRule for the given subscription.
 func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context, sink url.URL, logger logr.Logger) (*apigatewayv1alpha1.APIRule, error) {
 	svcNs, svcName, err := getSvcNsAndName(sink.Host)
 	if err != nil {
