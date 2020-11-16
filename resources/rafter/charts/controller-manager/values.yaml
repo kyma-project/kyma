@@ -32,8 +32,8 @@ pod:
       cpu: 150m
       memory: 128Mi
     requests:
-      cpu: 10m
-      memory: 16Mi
+      cpu: 50m
+      memory: 64Mi
   volumes:
     - name: tmp-empty-dir
       emptyDir: {}
