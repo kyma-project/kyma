@@ -1,0 +1,9 @@
+application-broker:
+  ctrl:
+    resources:
+      limits:
+        memory: 96Mi
+        cpu: 100m
+      requests:
+        memory: 28Mi
+        cpu: 20m
