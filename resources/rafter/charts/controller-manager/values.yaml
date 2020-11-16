@@ -33,7 +33,7 @@ pod:
       memory: 128Mi
     requests:
       cpu: 10m
-      memory: 32Mi
+      memory: 16Mi
   volumes:
     - name: tmp-empty-dir
       emptyDir: {}
