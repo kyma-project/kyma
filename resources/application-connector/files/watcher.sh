@@ -43,20 +43,12 @@ function syncSecret() {
   patchSecret "${TLS_CRT}" "${TLS_KEY}"
 }
 
-function onFileDelete() {
-  read event file; do
-  echo "---> $file modified"
-  syncSecret
-}
-
 echo "---> Initial sync"
 syncSecret
 
 while true; do
   echo "---> Listen for cert changes"
-  inotifyd - $SECRET_FILE:D |
-  while read event file; do
-    echo "---> $file modified"
-    syncSecret
-  done
+  inotifyd - $SECRET_FILE:D | read event file
+  echo "---> $file modified"
+  syncSecret
 done
