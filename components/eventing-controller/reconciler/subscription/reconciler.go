@@ -393,6 +393,7 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 		return nil, errors.Wrap(err, "failed to make an APIRule")
 	}
 
+	// update or remove the previous APIRule if it is not used by other subscriptions
 	if err := r.handlePreviousAPIRule(subscription, reusableAPIRule, ctx); err != nil {
 		return nil, err
 	}
@@ -420,17 +421,6 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 	}
 	r.eventNormal(subscription, reasonUpdate, "Updated APIRule %s", desiredAPIRule.Name)
 
-	//freshExistingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
-	//if err != nil {
-	//	return nil, errors.Wrapf(err, "error while fetching oldApiRules for labels: %v after create/update", labels)
-	//}
-	//// Cleanup does the following:
-	//// 1. Delete APIRule using obsolete ports
-	//// 2. Update APIRule by deleting the OwnerReference of the Subscription with port different than that of the APIRule
-	//err = r.cleanup(subscription, ctx, subscriptions, freshExistingAPIRules)
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "failed to cleanup APIRules")
-	//}
 	return desiredAPIRule, nil
 }
 
@@ -814,8 +804,8 @@ func (r *Reconciler) handleAPIRuleEvent(name, namespace string, q workqueue.Rate
 	ctx := context.Background()
 	apiRule := &apigatewayv1alpha1.APIRule{}
 	key := k8stypes.NamespacedName{Name: name, Namespace: namespace}
-	if err := r.Client.Get(ctx, key, apiRule); err != nil {
-		log.Info("Cannot get APIRule")
+	if err := r.Client.Get(ctx, key, apiRule); err != nil && !k8serrors.IsNotFound(err) {
+		return err
 	}
 
 	// list all namespace subscriptions
