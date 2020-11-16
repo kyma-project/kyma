@@ -13,7 +13,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `testing` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
-| `istio-kyma-patch` | ✅ | ✅ |
 | `knative-eventing` | ✅ | ✅ |
 | `knative-eventing-kafka` | ⛔️ | ⛔️ |
 | `dex` | ✅ | ✅ |
