@@ -828,7 +828,7 @@ func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context
 
 // TODO: make configurable
 const (
-	useExistingCluster       = true
+	useExistingCluster       = false
 	attachControlPlaneOutput = false
 )
 
