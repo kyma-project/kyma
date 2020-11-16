@@ -1,8 +1,6 @@
 set -e
 set -o pipefail
 
-apk add inotify-tools
-
 export SECRETS_DIR=/etc/secrets
 
 if [[ -f "${SECRETS_DIR}/cert" ]]; then
@@ -45,14 +43,20 @@ function syncSecret() {
   patchSecret "${TLS_CRT}" "${TLS_KEY}"
 }
 
+function onFileDelete() {
+  read event file; do
+  echo "---> $file modified"
+  syncSecret
+}
+
 echo "---> Initial sync"
 syncSecret
 
 while true; do
   echo "---> Listen for cert changes"
-  inotifywait -e DELETE_SELF $SECRET_FILE |
-    while read path _ file; do
-      echo "---> $path$file modified"
-      syncSecret
-    done
+  inotifyd - $SECRET_FILE:D |
+  while read event file; do
+    echo "---> $file modified"
+    syncSecret
+  done
 done
