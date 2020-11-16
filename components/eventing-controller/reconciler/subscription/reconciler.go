@@ -372,13 +372,13 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to convert URL port to APIRule port")
 	}
-	var existingAPIRule *apigatewayv1alpha1.APIRule
+	var reusableAPIRule *apigatewayv1alpha1.APIRule
 	existingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to fetch existing ApiRule for labels: %v", labels)
 	}
 	if existingAPIRules != nil {
-		existingAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
+		reusableAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
 	}
 
 	// Get all subscriptions valid for the cluster-local subscriber
@@ -393,11 +393,12 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 		return nil, errors.Wrap(err, "failed to make an APIRule")
 	}
 
-	if existingAPIRule == nil {
-		if err := r.handlePreviousAPIRule(subscription, ctx); err != nil {
-			return nil, err
-		}
+	if err := r.handlePreviousAPIRule(subscription, reusableAPIRule, ctx); err != nil {
+		return nil, err
+	}
 
+	// no APIRule to reuse, create a new one
+	if reusableAPIRule == nil {
 		if err := r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{}); err != nil {
 			r.eventWarn(subscription, reasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
 			return nil, errors.Wrap(err, "failed to create APIRule")
@@ -406,11 +407,11 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 		r.eventNormal(subscription, reasonCreate, "Created APIRule %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
-	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%s", existingAPIRule.Name))
+	logger.Info("Existing APIRules", fmt.Sprintf("in ns: %s for svc: %s", svcNs, svcName), fmt.Sprintf("%s", reusableAPIRule.Name))
 
-	object.ApplyExistingAPIRuleAttributes(existingAPIRule, desiredAPIRule)
-	if object.Semantic.DeepEqual(existingAPIRule, desiredAPIRule) {
-		return existingAPIRule, nil
+	object.ApplyExistingAPIRuleAttributes(reusableAPIRule, desiredAPIRule)
+	if object.Semantic.DeepEqual(reusableAPIRule, desiredAPIRule) {
+		return reusableAPIRule, nil
 	}
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 	if err != nil {
@@ -419,32 +420,39 @@ func (r *Reconciler) createOrUpdateAPIRule(subscription *eventingv1alpha1.Subscr
 	}
 	r.eventNormal(subscription, reasonUpdate, "Updated APIRule %s", desiredAPIRule.Name)
 
-	freshExistingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error while fetching oldApiRules for labels: %v after create/update", labels)
-	}
-	// Cleanup does the following:
-	// 1. Delete APIRule using obsolete ports
-	// 2. Update APIRule by deleting the OwnerReference of the Subscription with port different than that of the APIRule
-	err = r.cleanup(subscription, ctx, subscriptions, freshExistingAPIRules)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to cleanup APIRules")
-	}
+	//freshExistingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, "error while fetching oldApiRules for labels: %v after create/update", labels)
+	//}
+	//// Cleanup does the following:
+	//// 1. Delete APIRule using obsolete ports
+	//// 2. Update APIRule by deleting the OwnerReference of the Subscription with port different than that of the APIRule
+	//err = r.cleanup(subscription, ctx, subscriptions, freshExistingAPIRules)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "failed to cleanup APIRules")
+	//}
 	return desiredAPIRule, nil
 }
 
 // handlePreviousAPIRule computes the OwnerReferences list for the previous subscription APIRule (if any)
 // if the OwnerReferences list is empty, then the APIRule will be deleted
 // else if the OwnerReferences list length was decreased, then the APIRule will be updated
-func (r *Reconciler) handlePreviousAPIRule(subscription *eventingv1alpha1.Subscription, ctx context.Context) error {
+// TODO write more tests https://github.com/kyma-project/kyma/issues/9950
+func (r *Reconciler) handlePreviousAPIRule(subscription *eventingv1alpha1.Subscription, reusableApiRule *apigatewayv1alpha1.APIRule, ctx context.Context) error {
+	// subscription does not have a previous APIRule
 	if len(subscription.Status.APIRuleName) == 0 {
 		return nil
 	}
 
-	// get the actual APIRule (if any)
-	apiRule := &apigatewayv1alpha1.APIRule{}
+	// the previous APIRule for the subscription is the current one no need to update it
+	if reusableApiRule != nil && subscription.Status.APIRuleName == reusableApiRule.Name {
+		return nil
+	}
+
+	// get the previous APIRule
+	previousAPIRule := &apigatewayv1alpha1.APIRule{}
 	key := k8stypes.NamespacedName{Namespace: subscription.Namespace, Name: subscription.Status.APIRuleName}
-	if err := r.Client.Get(ctx, key, apiRule); err != nil {
+	if err := r.Client.Get(ctx, key, previousAPIRule); err != nil {
 		if !k8serrors.IsNotFound(err) {
 			return err
 		}
@@ -452,8 +460,8 @@ func (r *Reconciler) handlePreviousAPIRule(subscription *eventingv1alpha1.Subscr
 	}
 
 	// build a new OwnerReference list and exclude the current subscription from the list (if exists)
-	ownerReferences := make([]v1.OwnerReference, 0, len(apiRule.OwnerReferences))
-	for _, ownerReference := range apiRule.OwnerReferences {
+	ownerReferences := make([]v1.OwnerReference, 0, len(previousAPIRule.OwnerReferences))
+	for _, ownerReference := range previousAPIRule.OwnerReferences {
 		if ownerReference.UID != subscription.UID {
 			ownerReferences = append(ownerReferences, ownerReference)
 		}
@@ -461,37 +469,41 @@ func (r *Reconciler) handlePreviousAPIRule(subscription *eventingv1alpha1.Subscr
 
 	// delete the ApiRule if the new OwnerReference list is empty
 	if len(ownerReferences) == 0 {
-		if err := r.Client.Delete(ctx, apiRule); err != nil {
+		if err := r.Client.Delete(ctx, previousAPIRule); err != nil {
 			return err
 		}
 		return nil
 	}
 
 	// update the ApiRule if the new OwnerReference list length is decreased
-	if len(ownerReferences) < len(apiRule.OwnerReferences) {
+	if len(ownerReferences) < len(previousAPIRule.OwnerReferences) {
 		// list all subscriptions in the APIRule namespace
 		namespaceSubscriptions := &eventingv1alpha1.SubscriptionList{}
-		if err := r.Client.List(ctx, namespaceSubscriptions, &client.ListOptions{Namespace: apiRule.Namespace}); err != nil {
+		if err := r.Client.List(ctx, namespaceSubscriptions, &client.ListOptions{Namespace: previousAPIRule.Namespace}); err != nil {
 			return err
 		}
 
 		// build a new subscription list and exclude the current subscription from the list
 		subscriptions := make([]eventingv1alpha1.Subscription, 0, len(namespaceSubscriptions.Items))
 		for _, namespaceSubscription := range namespaceSubscriptions.Items {
+			// skip the current subscription
 			if namespaceSubscription.UID == subscription.UID {
 				continue
 			}
-			if namespaceSubscription.Status.APIRuleName != apiRule.Name {
+
+			// skip not relevant subscriptions to the previous APIRule
+			if namespaceSubscription.Status.APIRuleName != previousAPIRule.Name {
 				continue
 			}
+
 			subscriptions = append(subscriptions, namespaceSubscription)
 		}
 
 		// update the APIRule OwnerReferences list and Spec Rules
-		object.WithOwnerReference(subscriptions)(apiRule)
-		object.WithRules(subscriptions, http.MethodPost, http.MethodOptions)(apiRule)
+		object.WithOwnerReference(subscriptions)(previousAPIRule)
+		object.WithRules(subscriptions, http.MethodPost, http.MethodOptions)(previousAPIRule)
 
-		if err := r.Client.Update(ctx, apiRule); err != nil {
+		if err := r.Client.Update(ctx, previousAPIRule); err != nil {
 			return err
 		}
 	}
