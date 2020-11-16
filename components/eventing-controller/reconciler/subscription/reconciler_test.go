@@ -252,37 +252,26 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Subscription sink is changed", func() {
-		It("Should update the BEB subscription webhookURL", func() {
-			subscriptionName := "test-subscription-beb-not-status-not-ready"
+	When("Subscription sink name is changed", func() {
+		It("Should update the BEB subscription webhookURL by creating a new APIRule", func() {
+			subscriptionName := "test-subscription-sink-name-changed"
 			ctx := context.Background()
 
-			// create a service
+			// prepare objects
 			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(serviceOld, ctx)
-
 			givenSubscription := reconcilertesting.FixtureValidSubscription(subscriptionName, namespaceName, subscriptionID)
-			ensureSubscriptionCreated(givenSubscription, ctx)
 
-			By("Given subscription with none empty APIRule name")
-			subscription := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: subscriptionName, Namespace: namespaceName}}
-			getSubscription(subscription, ctx).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
-			apiRuleOld := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: namespaceName}}
-			getAPIRule(apiRuleOld, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
-			reconcilertesting.WithStatusReady(apiRuleOld)
-			updateAPIRuleStatus(apiRuleOld, ctx).ShouldNot(HaveOccurred())
-
-			By("Given subscription is ready")
-			getSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
+			// create them and wait for Subscription to be ready
+			readySubscription, apiRule := createSubscriptionObjectsAndWaitForReadiness(givenSubscription, serviceOld, ctx)
 
 			By("Updating the sink")
 			serviceNew := reconcilertesting.NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(serviceNew, ctx)
-			subscription.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", serviceNew.Name, serviceNew.Namespace)
-			updateSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
-			getSubscription(subscription, ctx).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRuleOld.Name))
+			readySubscription.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", serviceNew.Name, serviceNew.Namespace)
+			updateSubscription(readySubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
+			getSubscription(readySubscription, ctx).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
 
-			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: namespaceName}}
+			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription.Status.APIRuleName, Namespace: namespaceName}}
 			getAPIRule(apiRuleNew, ctx).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
@@ -295,13 +284,54 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
-						"Name":       BeEquivalentTo(subscription.Name),
+						"Name":       BeEquivalentTo(readySubscription.Name),
 						"WebhookUrl": ContainSubstring(*apiRuleNew.Spec.Service.Host),
 					},
 				))))
 
 			By("Cleanup not used APIRule")
-			getAPIRule(apiRuleOld, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
+			getAPIRule(apiRule, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
+		})
+	})
+
+	// idea: create sub1 and sub2 with 2 different sinks
+	// wait until both are reedy
+	// change sub1 to use sub2 APIRule
+	// ensure sub1 APIRule got deleted
+	When("Subscription1 sink is changed to reuse Subscription2 APIRule", func() {
+		It("Should delete APIRule for Subscription1 and use APIRule2 from Subscription2 instead", func() {
+			ctx := context.Background()
+
+			// prepare objects
+			// create them and wait for Subscription to be ready
+			subscriptionName1 := "test-subscription-1"
+			service1 := reconcilertesting.NewSubscriberSvc("webhook-1", namespaceName)
+			subscription1 := reconcilertesting.FixtureValidSubscription(subscriptionName1, namespaceName, subscriptionID)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", service1.Name, service1.Namespace)
+			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(subscription1, service1, ctx)
+			subscriptionName2 := "test-subscription-2"
+			service2 := reconcilertesting.NewSubscriberSvc("webhook-2", namespaceName)
+			subscription2 := reconcilertesting.FixtureValidSubscription(subscriptionName2, namespaceName, "another-id")
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", service2.Name, service2.Namespace)
+			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(subscription2, service2, ctx)
+
+			By("Updating the sink")
+			readySubscription1.Spec.Sink = readySubscription2.Spec.Sink
+			updateSubscription(readySubscription1, ctx).Should(reconcilertesting.HaveSubscriptionSink(readySubscription2.Spec.Sink))
+
+			By("Reusing APIRule from Subscription 2")
+			getSubscription(readySubscription1, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
+
+			By("Get the reused APIRule (from subscription 2)")
+			apiRuleNew := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: readySubscription1.Status.APIRuleName, Namespace: namespaceName}}
+			getAPIRule(apiRuleNew, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+			))
+			// TODO: ensure apiRule2 has 2 OwnerRefs and 2 Rules
+
+			By("Deleting APIRule from Subscription 1")
+			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 		})
 	})
 
@@ -792,7 +822,7 @@ func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context
 
 // TODO: make configurable
 const (
-	useExistingCluster       = false
+	useExistingCluster       = true
 	attachControlPlaneOutput = false
 )
 
@@ -897,4 +927,29 @@ func startBebMock() *reconcilertesting.BebMock {
 	bebConfig = config.GetDefaultConfig(messagingURL)
 	beb.BebConfig = bebConfig
 	return beb
+}
+
+// createSubscriptionObjectsAndWaitForReadiness creates the given Subscription and the given Service. It then performs the following steps:
+// - wait until an APIRule is linked in the Subscription
+// - mark the APIRule as ready
+// - wait until the Subscription is ready
+// - as soon as both the APIRule and Subscription are ready, the function returns both objects
+func createSubscriptionObjectsAndWaitForReadiness(givenSubscription *eventingv1alpha1.Subscription, service *corev1.Service, ctx context.Context) (*eventingv1alpha1.Subscription, *apigatewayv1alpha1.APIRule) {
+
+	ensureSubscriberSvcCreated(service, ctx)
+	ensureSubscriptionCreated(givenSubscription, ctx)
+
+	By("Given subscription with none empty APIRule name")
+	subscription := &eventingv1alpha1.Subscription{ObjectMeta: metav1.ObjectMeta{Name: givenSubscription.Name, Namespace: givenSubscription.Namespace}}
+	// wait for APIRule to be set in Subscription
+	getSubscription(subscription, ctx).Should(reconcilertesting.HaveNoneEmptyAPIRuleName())
+	apiRule := &apigatewayv1alpha1.APIRule{ObjectMeta: metav1.ObjectMeta{Name: subscription.Status.APIRuleName, Namespace: subscription.Namespace}}
+	getAPIRule(apiRule, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+	reconcilertesting.WithStatusReady(apiRule)
+	updateAPIRuleStatus(apiRule, ctx).ShouldNot(HaveOccurred())
+
+	By("Given subscription is ready")
+	getSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
+
+	return subscription, apiRule
 }

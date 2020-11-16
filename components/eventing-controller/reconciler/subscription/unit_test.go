@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -12,6 +13,51 @@ import (
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
+func Test_isInDeletion(t *testing.T) {
+	var tests = []struct {
+		name              string
+		givenSubscription func() *eventingv1alpha1.Subscription
+		isInDeletion      bool
+	}{
+		{
+			name: "Deletion timestamp uninitialized",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = nil
+				return sub
+			},
+			isInDeletion: false,
+		},
+		{
+			name: "Deletion timestamp is zero",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				zero := metav1.Time{}
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = &zero
+				return sub
+			},
+			isInDeletion: false,
+		},
+		{
+			name: "Deletion timestamp is set to a useful time",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				newTime := metav1.NewTime(time.Now())
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = &newTime
+				return sub
+			},
+			isInDeletion: true,
+		},
+	}
+	g := NewGomegaWithT(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			givenSubscription := tt.givenSubscription()
+			g.Expect(isInDeletion(givenSubscription)).To(Equal(tt.isInDeletion))
+		})
+	}
+}
 func Test_replaceStatusCondition(t *testing.T) {
 	var tests = []struct {
 		name              string

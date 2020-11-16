@@ -110,7 +110,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// the APIRule for the desired subscription
 	var apiRule *apigatewayv1alpha1.APIRule
 
-	if !r.isInDeletion(desiredSubscription) {
+	if !isInDeletion(desiredSubscription) {
 		// ensure the finalizer is set
 		if err := r.syncFinalizer(desiredSubscription, &result, ctx, log); err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "failed to sync finalizer")
@@ -157,7 +157,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		statusChanged = statusChanged || statusChangedForBeb
 	}
 
-	if r.isInDeletion(desiredSubscription) {
+	if isInDeletion(desiredSubscription) {
 		// Remove finalizers
 		if err := r.removeFinalizer(desiredSubscription, ctx, log); err != nil {
 			return ctrl.Result{}, err
@@ -219,7 +219,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	logger.Info("Syncing subscription with BEB")
 
 	// if object is marked for deletion, we need to delete the BEB subscription
-	if r.isInDeletion(subscription) {
+	if isInDeletion(subscription) {
 		return false, r.deleteBEBSubscription(subscription, logger, ctx)
 	}
 
@@ -962,7 +962,7 @@ func (r *Reconciler) isFinalizerSet(subscription *eventingv1alpha1.Subscription)
 }
 
 // isInDeletion checks if the Subscription shall be deleted
-func (r *Reconciler) isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
+func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 	return !subscription.DeletionTimestamp.IsZero()
 }
 

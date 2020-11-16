@@ -28,6 +28,10 @@ func HaveSubscriptionName(name string) GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
 }
 
+func HaveSubscriptionSink(sink string) GomegaMatcher {
+	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Spec.Sink }, Equal(sink))
+}
+
 func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
