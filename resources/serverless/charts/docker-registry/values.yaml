@@ -5,7 +5,7 @@ replicaCount: 1
 
 updateStrategy:
   type: Recreate
-  rollingUpdate: null
+  rollingUpdate: {}
   #   maxSurge: 1
   #   maxUnavailable: 0
 
