@@ -3,6 +3,7 @@ package receiver
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"time"
@@ -45,6 +46,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	go func() {
 		errChan <- recv.server.Serve(recv.listener)
 	}()
+	logrus.Info("Event Publisher Proxy server has started.")
 
 	// wait for the server to return or ctx.Done().
 	select {

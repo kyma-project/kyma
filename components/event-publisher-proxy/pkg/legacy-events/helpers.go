@@ -1,72 +1,55 @@
 package legacy
 
 import (
-	"net/http"
+	"fmt"
+	api "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	"encoding/json"
+	"net/http"
+	"strings"
 )
 
-// ErrorResponseBadRequest returns an error of type PublishEventResponses with BadRequest status code
-func ErrorResponseBadRequest(moreInfo string) (response *api.PublishEventResponses) {
-	var details []api.ErrorDetail
-	apiError := api.Error{Status: http.StatusBadRequest, Type: ErrorTypeBadPayload, Message: ErrorMessageBadPayload, MoreInfo: moreInfo, Details: details}
-	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
+// ParseApplicationNameFromPath returns application name from the URL.
+// The format of the URL is: /:application-name/v1/...
+func ParseApplicationNameFromPath(path string) string {
+	// Assumption: Clients(application validator which has a flag for the path(https://github.com/kyma-project/kyma/blob/master/components/application-connectivity-validator/cmd/applicationconnectivityvalidator/applicationconnectivityvalidator.go#L49) using this endpoint must be sending request to path /:application/v1/events
+	// Hence it should be safe to return 0th index as the application name
+	pathSegments := make([]string, 0)
+	for _, segment := range strings.Split(path, "/") {
+		if strings.TrimSpace(segment) != "" {
+			pathSegments = append(pathSegments, segment)
+		}
+	}
+	return pathSegments[0]
 }
 
-// ErrorResponseRequestBodyTooLarge returns an error of type PublishEventResponses with BadRequest status code
-func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEventResponses) {
-	var details []api.ErrorDetail
-	apiError := api.Error{Status: http.StatusRequestEntityTooLarge, Type: ErrorTypeRequestBodyTooLarge, Message: ErrorMessageRequestBodyTooLarge, MoreInfo: moreInfo, Details: details}
-	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
+// is2XXStatusCode checks whether status code is a 2XX status code
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
 
-// ErrorResponseMissingFieldEventType returns an error of type PublishEventResponses for missing EventType field
-func ErrorResponseMissingFieldEventType() (response *api.PublishEventResponses) {
-	return CreateMissingFieldError(FieldEventType)
+// writeJSONResponse writes a JSON response
+func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+	encoder := json.NewEncoder(w)
+	w.Header().Set("Content-Type", ContentTypeApplicationJSON)
+
+	if resp.Error != nil {
+		w.WriteHeader(resp.Error.Status)
+		_ = encoder.Encode(resp.Error)
+		return
+	}
+
+	if resp.Ok != nil {
+		_ = encoder.Encode(resp.Ok)
+		return
+	}
+
+	log.Errorf("received an empty response")
 }
 
-// ErrorResponseMissingFieldEventTypeVersion returns an error of type PublishEventResponses for missing EventTypeVersion field
-func ErrorResponseMissingFieldEventTypeVersion() (response *api.PublishEventResponses) {
-	return CreateMissingFieldError(FieldEventTypeVersion)
-}
-
-// ErrorResponseWrongEventTypeVersion returns an error of type PublishEventResponses for wrong EventTypeVersion field
-func ErrorResponseWrongEventTypeVersion() (response *api.PublishEventResponses) {
-	return CreateInvalidFieldError(FieldEventTypeVersion)
-}
-
-// ErrorResponseMissingFieldEventTime returns an error of type PublishEventResponses for missing EventTime field
-func ErrorResponseMissingFieldEventTime() (response *api.PublishEventResponses) {
-	return CreateMissingFieldError(FieldEventTime)
-}
-
-// ErrorResponseWrongEventTime returns an error of type PublishEventResponses for wrong EventTime field
-func ErrorResponseWrongEventTime() (response *api.PublishEventResponses) {
-	return CreateInvalidFieldError(FieldEventTime)
-}
-
-// ErrorResponseWrongEventID returns an error of type PublishEventResponses for wrong EventID field
-func ErrorResponseWrongEventID() (response *api.PublishEventResponses) {
-	return CreateInvalidFieldError(FieldEventID)
-}
-
-// ErrorResponseMissingFieldData returns an error of type PublishEventResponses for missing Data field
-func ErrorResponseMissingFieldData() (response *api.PublishEventResponses) {
-	return CreateMissingFieldError(FieldData)
-}
-
-//CreateMissingFieldError create an error for a missing field
-func CreateMissingFieldError(field interface{}) (response *api.PublishEventResponses) {
-	apiErrorDetail := api.ErrorDetail{Field: field.(string), Type: ErrorTypeMissingField, Message: ErrorMessageMissingField, MoreInfo: ""}
-	details := []api.ErrorDetail{apiErrorDetail}
-	apiError := api.Error{Status: http.StatusBadRequest, Type: ErrorTypeValidationViolation, Message: ErrorMessageMissingField, MoreInfo: "", Details: details}
-	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
-}
-
-//CreateInvalidFieldError creates an error for an invalid field
-func CreateInvalidFieldError(field interface{}) (response *api.PublishEventResponses) {
-	apiErrorDetail := api.ErrorDetail{Field: field.(string), Type: ErrorTypeInvalidField, Message: ErrorMessageInvalidField, MoreInfo: ""}
-	details := []api.ErrorDetail{apiErrorDetail}
-	apiError := api.Error{Status: http.StatusBadRequest, Type: ErrorTypeValidationViolation, Message: ErrorMessageInvalidField, MoreInfo: "", Details: details}
-	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
+// formatEventType4BEB format eventType as per BEB spec
+func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
+	eventType4BEB := fmt.Sprintf(eventTypePrefixFormat, eventTypePrefix, app, eventType, version)
+	return strings.ReplaceAll(eventType4BEB, "-", ".")
 }
