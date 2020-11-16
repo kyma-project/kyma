@@ -15,7 +15,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
     type: Recreate
-    rollingUpdate: {}
+    rollingUpdate: null
   minReadySeconds: 5
   template:
     metadata:
