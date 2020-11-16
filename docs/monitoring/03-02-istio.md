@@ -15,7 +15,7 @@ See the diagram for a broader view of how the Istio-related instance fits into t
 
 ![Istio Monitoring](./assets/monitoring-istio.svg)
 
-By default `minitoring-prometheus-istio-server` is not provided as a datasource in grafana. However, this can be enabled by adding following override 
+By default, `minitoring-prometheus-istio-server` is not provided as a data source in Grafana. However, this can be enabled by adding the override: 
 
  ```bash
 cat <<EOF | kubectl apply -f -
@@ -34,7 +34,7 @@ data:
 EOF
 ```
 
-Run the [cluster update process](/root/kyma/#installation-update-kyma). After finishing the upgrade process restart the grafana deployment by using following command
+Run the [cluster update process](/root/kyma/#installation-update-kyma). After finishing the upgrade process, restart the Grafana deployment by using this command:
 
 ```bash
 kubectl rollout restart -n kyma-system deployment monitoring-grafana
