@@ -1,8 +1,9 @@
 package legacy
 
 import (
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
 // ErrorResponseBadRequest returns an error of type PublishEventResponses with BadRequest status code

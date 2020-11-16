@@ -3,15 +3,16 @@ package legacy
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"regexp"
+	"strings"
+	"time"
+
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"regexp"
-	"strings"
-	"time"
 )
 
 var (

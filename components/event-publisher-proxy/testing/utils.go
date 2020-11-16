@@ -2,8 +2,9 @@ package testing
 
 import (
 	"bytes"
-	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
 	"net/http"
+
+	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
 )
 
 const (

@@ -1,9 +1,10 @@
 package legacy
 
 import (
-	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"testing"
 	"time"
+
+	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {

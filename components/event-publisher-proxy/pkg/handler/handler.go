@@ -2,12 +2,13 @@ package handler
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 
 	"github.com/sirupsen/logrus"
 

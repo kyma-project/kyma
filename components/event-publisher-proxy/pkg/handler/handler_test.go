@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/sirupsen/logrus"
@@ -486,11 +487,11 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			_ = legacyapi.PublishEventResponses{}
 			resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
 			if err != nil {
-				t.Errorf("Failed to send event with error: %v", err)
+				t.Errorf("failed to send event with error: %v", err)
 			}
 
 			if testCase.wantStatusCode != resp.StatusCode {
-				t.Errorf("Test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
+				t.Errorf("test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
 			}
 
 			if testCase.endPoint == publishLegacyEndpoint {
@@ -575,16 +576,16 @@ func validateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacy
 	}
 
 	if tcWantResponse.Ok.EventID != "" && tcWantResponse.Ok.EventID != legacyResponse.Ok.EventID {
-		t.Errorf("Invalid event-id, want: %v, got: %v", tcWantResponse.Ok.EventID, legacyResponse.Ok.EventID)
+		t.Errorf("invalid event-id, want: %v, got: %v", tcWantResponse.Ok.EventID, legacyResponse.Ok.EventID)
 	}
 
 	if tcWantResponse.Ok.EventID == "" && !isValidEventID(legacyResponse.Ok.EventID) {
-		t.Errorf("Should match regex: [%s] Not a valid event-id: %v ", legacy.AllowedEventIDChars, legacyResponse.Ok.EventID)
+		t.Errorf("should match regex: [%s] Not a valid event-id: %v ", legacy.AllowedEventIDChars, legacyResponse.Ok.EventID)
 	}
 	if tcWantResponse.Ok.Reason != legacyResponse.Ok.Reason {
-		t.Errorf("Invalid reason, want: %v, got: %v", tcWantResponse.Ok.Reason, legacyResponse.Ok.Reason)
+		t.Errorf("invalid reason, want: %v, got: %v", tcWantResponse.Ok.Reason, legacyResponse.Ok.Reason)
 	}
 	if tcWantResponse.Ok.Status != legacyResponse.Ok.Status {
-		t.Errorf("Invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
+		t.Errorf("invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
 	}
 }
