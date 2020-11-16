@@ -89,7 +89,7 @@ func HaveAPIRuleService(serviceName string, port uint32, domain string) GomegaMa
 	)
 }
 
-func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy string) GomegaMatcher {
+func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) GomegaMatcher {
 	return WithTransform(func(a apigatewayv1alpha1.APIRule) []apigatewayv1alpha1.Rule {
 		return a.Spec.Rules
 	}, ContainElement(
@@ -97,6 +97,7 @@ func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy string) GomegaMat
 			"Methods":          ConsistOf(ruleMethods),
 			"AccessStrategies": ConsistOf(haveAPIRuleAccessStrategies(accessStrategy)),
 			"Gateway":          Equal(constants.ClusterLocalAPIGateway),
+			"Path":             Equal(path),
 		}),
 	))
 }
@@ -107,12 +108,14 @@ func haveAPIRuleAccessStrategies(accessStrategy string) GomegaMatcher {
 	}, Equal(accessStrategy))
 }
 
-func HaveAPIRuleOwnersRefs(uid types.UID) GomegaMatcher {
-	return WithTransform(func(a apigatewayv1alpha1.APIRule) []metav1.OwnerReference {
-		return a.ObjectMeta.OwnerReferences
-	}, ConsistOf(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
-		"UID": Equal(uid),
-	})))
+func HaveAPIRuleOwnersRefs(uids ...types.UID) GomegaMatcher {
+	return WithTransform(func(a apigatewayv1alpha1.APIRule) []types.UID {
+		ownerRefUIDs := make([]types.UID, 0, len(a.OwnerReferences))
+		for _, ownerRef := range a.OwnerReferences {
+			ownerRefUIDs = append(ownerRefUIDs, ownerRef.UID)
+		}
+		return ownerRefUIDs
+	}, Equal(uids))
 }
 
 //

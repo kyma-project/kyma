@@ -56,6 +56,10 @@ const (
 	domain                      = "domain.com"
 )
 
+var (
+	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
+)
+
 var _ = Describe("Subscription Reconciliation Tests", func() {
 	var namespaceName string
 
@@ -233,14 +237,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					Namespace: givenSubscription.Namespace,
 				},
 			}
-			acceptableMethods := []string{http.MethodPost, http.MethodOptions}
 			expectedLabels := map[string]string{
 				constants.ControllerIdentityLabelKey: constants.ControllerIdentityLabelValue,
 				constants.ControllerServiceLabelKey:  subscriberSvc.Name,
 			}
 			getAPIRule(apiRule, ctx).Should(And(
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/"),
 				reconcilertesting.HaveAPIRuleGateway(constants.ClusterLocalAPIGateway),
 				reconcilertesting.HaveAPIRuleLabels(expectedLabels),
 				reconcilertesting.HaveAPIRuleService(subscriberSvc.Name, 443, domain),
@@ -294,10 +297,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	// idea: create sub1 and sub2 with 2 different sinks
-	// wait until both are reedy
-	// change sub1 to use sub2 APIRule
-	// ensure sub1 APIRule got deleted
 	When("Subscription1 sink is changed to reuse Subscription2 APIRule", func() {
 		It("Should delete APIRule for Subscription1 and use APIRule2 from Subscription2 instead", func() {
 			ctx := context.Background()
@@ -307,17 +306,18 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscriptionName1 := "test-subscription-1"
 			service1 := reconcilertesting.NewSubscriberSvc("webhook-1", namespaceName)
 			subscription1 := reconcilertesting.FixtureValidSubscription(subscriptionName1, namespaceName, subscriptionID)
-			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", service1.Name, service1.Namespace)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)
 			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(subscription1, service1, ctx)
 			subscriptionName2 := "test-subscription-2"
 			service2 := reconcilertesting.NewSubscriberSvc("webhook-2", namespaceName)
 			subscription2 := reconcilertesting.FixtureValidSubscription(subscriptionName2, namespaceName, "another-id")
-			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", service2.Name, service2.Namespace)
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service2.Name, service2.Namespace)
 			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(subscription2, service2, ctx)
 
-			By("Updating the sink")
-			readySubscription1.Spec.Sink = readySubscription2.Spec.Sink
-			updateSubscription(readySubscription1, ctx).Should(reconcilertesting.HaveSubscriptionSink(readySubscription2.Spec.Sink))
+			By("Updating the sink to use same port and service as Subscription 2")
+			newSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service2.Name, service2.Namespace)
+			readySubscription1.Spec.Sink = newSink
+			updateSubscription(readySubscription1, ctx).Should(reconcilertesting.HaveSubscriptionSink(newSink))
 
 			By("Reusing APIRule from Subscription 2")
 			getSubscription(readySubscription1, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRule2.Name))
@@ -328,7 +328,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
 			))
-			// TODO: ensure apiRule2 has 2 OwnerRefs and 2 Rules
+
+			By("Ensuring the reused APIRule has 2 OwnerReferences and 2 paths")
+			getAPIRule(apiRule2, ctx).Should(And(
+				reconcilertesting.HaveAPIRuleOwnersRefs(readySubscription1.UID, readySubscription2.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+			))
 
 			By("Deleting APIRule from Subscription 1")
 			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
