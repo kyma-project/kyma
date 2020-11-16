@@ -1,0 +1,73 @@
+name: Binding-post-master
+on: 
+  push:
+    paths:
+      - 'components/binding/*'
+      - '.github/workflows/post-master-binding-k3s.yml'
+    branches:
+      - master
+  
+defaults:
+  run:
+    working-directory: components/binding
+
+jobs:
+  post-master-binding-k3s:
+    env:
+      COMMIT_HASH: ${GITHUB_SHA::8}
+      PROJECT_ID: "sap-se-cx-gopher"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+
+      - uses: actions/checkout@v2
+
+      - name: Go test, vet, fmt
+        run:  |
+          go test ./...
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "Some files are not properly formatted"
+            exit 1
+          fi
+          goVetResult=$(go vet ./...)
+          if [ $(echo ${#goVetResult}) != 0 ]; then
+          echo -e "go vet errors \n$goVetResult"
+          exit 1
+          fi
+
+      - name: Setup gcloud
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GOPHER_GCR_SA }}
+          project_id: sap-se-cx-gopher
+          export_default_credentials: true
+
+      - name: Build Image
+        run: |
+          docker build -t eu.gcr.io/$PROJECT_ID/binding:$COMMIT_HASH .
+
+      - name: Push Image
+        run: |
+          gcloud auth configure-docker -q
+          docker push eu.gcr.io/$PROJECT_ID/binding:$COMMIT_HASH
+
+      - name: Prepare k3s and helm 3
+        run: |
+          ./scripts/create-cluster-k3s.sh
+          echo "Installing helm"
+          curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          while [[ $(kubectl get nodes -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for cluster nodes to be ready"; sleep 2; done
+
+      - name: Install Bindings component using Helm
+        run: |
+          helm install binding ./charts/binding --set images.bindingController.version="${COMMIT_HASH}" --wait
+
+      - name: Apply test scenario and check if secrets are injected
+        run: |
+          ./scripts/create-scenario.sh
+          while [[ $(kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers') != *"TEST_PASSWORD"* ]]; do echo "Waiting for the secrets to inject"; sleep 2; done
+          kubectl get po -l app=sandbox -ojson | jq '.items | .[] | .spec.containers'

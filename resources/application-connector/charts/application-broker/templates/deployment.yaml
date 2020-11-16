@@ -40,12 +40,7 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-          limits:
-            memory: 76Mi
-            cpu: 100m
-          requests:
-            memory: 24Mi
-            cpu: 80m
+{{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
           - name: APP_PORT
             value: {{ .Values.service.internalPort | quote }}

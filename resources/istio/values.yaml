@@ -27,3 +27,12 @@ monitoring:
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
+
+test:
+  istio_kyma_validate:
+    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
+    enabled: true
+    labels:
+      integration: true
+      after-upgrade: true
