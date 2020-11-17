@@ -3,7 +3,6 @@
 # Declare variables to be passed into your templates.
 install:
   enabled: false
-namespace: nats
 nats:
   ports:
     client: 4222

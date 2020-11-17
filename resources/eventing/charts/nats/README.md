@@ -6,7 +6,7 @@ Steps:
 
 - Install NATS into "nats" namespace using Helm 3 :
 ```bash
-$ helm install nats nats -n nats --set install.enabled=true --create-namespace
+$ helm install nats nats -n nats --set install.enabled=true --create-namespace --debug --wait
 ```
 - Test the installation:
 ```bash
