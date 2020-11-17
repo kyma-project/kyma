@@ -1,15 +1,63 @@
-package controllers
+package subscription
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
+func Test_isInDeletion(t *testing.T) {
+	var tests = []struct {
+		name              string
+		givenSubscription func() *eventingv1alpha1.Subscription
+		isInDeletion      bool
+	}{
+		{
+			name: "Deletion timestamp uninitialized",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = nil
+				return sub
+			},
+			isInDeletion: false,
+		},
+		{
+			name: "Deletion timestamp is zero",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				zero := metav1.Time{}
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = &zero
+				return sub
+			},
+			isInDeletion: false,
+		},
+		{
+			name: "Deletion timestamp is set to a useful time",
+			givenSubscription: func() *eventingv1alpha1.Subscription {
+				newTime := metav1.NewTime(time.Now())
+				sub := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", "some-id")
+				sub.DeletionTimestamp = &newTime
+				return sub
+			},
+			isInDeletion: true,
+		},
+	}
+	g := NewGomegaWithT(t)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			givenSubscription := tt.givenSubscription()
+			g.Expect(isInDeletion(givenSubscription)).To(Equal(tt.isInDeletion))
+		})
+	}
+}
 func Test_replaceStatusCondition(t *testing.T) {
 	var tests = []struct {
 		name              string
@@ -23,7 +71,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("some-name", "some-namespace")
+				subscription := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", subscriptionID)
 				subscription.Status.InitializeConditions()
 				return subscription
 			}(),
@@ -37,7 +85,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 		{
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
-				subscription := fixtureValidSubscription("some-name", "some-namespace")
+				subscription := reconcilertesting.FixtureValidSubscription("some-name", "some-namespace", subscriptionID)
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false
 
@@ -59,14 +107,14 @@ func Test_replaceStatusCondition(t *testing.T) {
 			giveCondition: func() eventingv1alpha1.Condition {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
 			}(),
-			wantStatusChanged: true, // readyness changed
+			wantStatusChanged: true, // readiness changed
 			wantError:         false,
 			wantReady:         true, // all conditions are true
 		},
 	}
 
 	g := NewGomegaWithT(t)
-	r := SubscriptionReconciler{}
+	r := Reconciler{}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

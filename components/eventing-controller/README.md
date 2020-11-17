@@ -27,9 +27,24 @@ This section explains how to use the Eventing Controller.
 
 - The Eventing Controller comes with the following command line argument flags:
 
-    | Flag    | Default Value | Description                                                                                   |
-    | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
-    | metrics-addr            | :8080          | The address the metric endpoint binds to.
+    | Flag                    | Description                                         | Default Value |
+    | ----------------------- | --------------------------------------------------- | ------------- |
+    | metrics-addr            | The address the metric endpoint binds to.           | :8080         |
+    | reconcile-period        | The period between triggering of reconciling calls. | 10 minutes    |
+    | enable-debug-logs       | Enable debug logs.                                  | false         |
+
+- The Eventing Controller expects the following environment variables:
+
+    | Environment variable   | Description                                                                     |
+    | ---------------------- | ------------------------------------------------------------------------------- |
+    | CLIENT_ID              | The Client ID used to acquire Access Tokens from the Authentication server.     |
+    | CLIENT_SECRET          | The Client Secret used to acquire Access Tokens from the Authentication server. |
+    | TOKEN_ENDPOINT         | The Authentication Server Endpoint to provide Access Tokens.                    |
+    | WEBHOOK_CLIENT_ID      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
+    | WEBHOOK_CLIENT_SECRET  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
+    | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              |
+    | DOMAIN                 | The Kyma cluster public domain.                                                 |
+
 
 - To install the CustomResourceDefinitions in a cluster, run:
 

@@ -8,6 +8,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_getHash(t *testing.T) {
@@ -48,7 +49,7 @@ func Test_getInternalView4Ev2(t *testing.T) {
 					Scope:        []string{"guid-identifier"},
 				},
 			},
-			Sink: "https://webhook.xxx.com",
+			Sink: "https://foo-host",
 			Filter: &eventingv1alpha1.BebFilters{
 				Dialect: "beb",
 				Filters: []*eventingv1alpha1.BebFilter{
@@ -69,8 +70,13 @@ func Test_getInternalView4Ev2(t *testing.T) {
 		},
 	}
 
+	apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
+	reconcilertesting.WithService("foo-host", "foo-svc", apiRule)
+
+	defaultWebhookAuth := &types.WebhookAuth{}
+
 	// then
-	bebSubscription, err := getInternalView4Ev2(subscription)
+	bebSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth)
 
 	// when
 	g.Expect(err).ShouldNot(HaveOccurred())
@@ -97,14 +103,14 @@ func Test_getInternalView4Ems(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	// given
-	emsSubscription := &types.Subscription {
-		Name: "ev2subs1",
-		ContentMode: types.ContentModeStructured,
+	emsSubscription := &types.Subscription{
+		Name:            "ev2subs1",
+		ContentMode:     types.ContentModeStructured,
 		ExemptHandshake: true,
-		Qos: types.QosAtLeastOnce,
-		WebhookUrl: "https://webhook.xxx.com",
+		Qos:             types.QosAtLeastOnce,
+		WebhookUrl:      "https://webhook.xxx.com",
 
-		Events: []types.Event {
+		Events: []types.Event{
 			{
 				Source: "/default/kyma/myinstance",
 				Type:   "kyma.ev2.poc.event1.v1",
@@ -130,4 +136,17 @@ func Test_getInternalView4Ems(t *testing.T) {
 		},
 	}))
 	g.Expect(bebSubscription)
+}
+
+func TestGetRandSuffix(t *testing.T) {
+	totalExecutions := 10
+	lengthOfRandomSuffix := 6
+	results := make(map[string]bool)
+	for i := 0; i < totalExecutions; i++ {
+		result := GetRandString(lengthOfRandomSuffix)
+		if _, ok := results[result]; ok {
+			t.Fatalf("generated string already exists: %s", result)
+		}
+		results[result] = true
+	}
 }

@@ -1,7 +1,5 @@
 package config
 
-import "github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 type Config struct {
 	BaseURL              string
 	PublishURL           string
@@ -13,16 +11,15 @@ type Config struct {
 	UpdateStateURLFormat string
 }
 
-func GetDefaultConfig() *Config {
-	baseApiURL := env.GetConfig().BebApiUrl
+func GetDefaultConfig(baseAPIURL string) *Config {
 	return &Config{
-		BaseURL:              baseApiURL,
-		PublishURL:           baseApiURL + "/events",
-		CreateURL:            baseApiURL + "/events/subscriptions",
-		ListURL:              baseApiURL + "/events/subscriptions",
-		GetURLFormat:         baseApiURL + "/events/subscriptions/%s",
-		DeleteURLFormat:      baseApiURL + "/events/subscriptions/%s",
-		HandshakeURLFormat:   baseApiURL + "/events/subscriptions/%s/handshake",
-		UpdateStateURLFormat: baseApiURL + "/events/subscriptions/%s/state",
+		BaseURL:              baseAPIURL,
+		PublishURL:           baseAPIURL + "/events",
+		CreateURL:            baseAPIURL + "/events/subscriptions",
+		ListURL:              baseAPIURL + "/events/subscriptions",
+		GetURLFormat:         baseAPIURL + "/events/subscriptions/%s",
+		DeleteURLFormat:      baseAPIURL + "/events/subscriptions/%s",
+		HandshakeURLFormat:   baseAPIURL + "/events/subscriptions/%s/handshake",
+		UpdateStateURLFormat: baseAPIURL + "/events/subscriptions/%s/state",
 	}
 }
