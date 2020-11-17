@@ -9,6 +9,9 @@ import (
 	"syscall"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+
 	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
@@ -139,6 +142,17 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
 		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
 
+	// wait for api server
+	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {
+		_, err := k8sClient.CoreV1().Namespaces().List(metav1.ListOptions{})
+		if err != nil {
+			log.Errorf("while waiting for api server: %s", err)
+			return false, nil
+		}
+		return true, nil
+	})
+	fatalOnError(err)
+
 	// start informers
 	scInformerFactory.Start(stopCh)
 	appInformerFactory.Start(stopCh)
@@ -150,13 +164,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	appInformerFactory.WaitForCacheSync(stopCh)
 	mInformerFactory.WaitForCacheSync(stopCh)
 	cache.WaitForCacheSync(stopCh, nsInformer.HasSynced)
-
-	// migration old ServiceBrokers & Services setup
-	migrationService, err := nsbroker.NewMigrationService(k8sClient.CoreV1(), scClientSet.ServicecatalogV1beta1(), cfg.Namespace, cfg.ServiceName, log)
-	fatalOnError(err)
-	// The migration is done synchronously to prevent HTTP 404 when ServiceCatalog is doing a call via a legacy service.
-	// In such case the broker returns 404 which could mean the service instance does not exists - it could make a problem.
-	migrationService.Migrate()
 
 	// start services & ctrl
 	go appSyncCtrl.Run(stopCh)
