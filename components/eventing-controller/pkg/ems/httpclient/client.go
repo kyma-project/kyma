@@ -18,14 +18,14 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewHttpClient(cfg *clientcredentials.Config) *Client {
+func NewHttpClient(cfg clientcredentials.Config) *Client {
 	ctx := signals.NewContext()
 	httpClient := newOauth2Client(ctx, cfg)
 	return &Client{httpClient: httpClient}
 }
 
 // NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
-func newOauth2Client(ctx context.Context, cfg *clientcredentials.Config) *http.Client {
+func newOauth2Client(ctx context.Context, cfg clientcredentials.Config) *http.Client {
 	// create and configure oauth2 client
 	client := cfg.Client(ctx)
 

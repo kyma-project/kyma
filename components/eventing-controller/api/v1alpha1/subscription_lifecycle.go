@@ -10,7 +10,10 @@ type ConditionType string
 const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
+	ConditionAPIRuleStatus      ConditionType = "APIRule status"
 )
+
+var allConditions = makeConditions()
 
 type Condition struct {
 	Type               ConditionType          `json:"type,omitempty"`
@@ -28,6 +31,8 @@ const (
 	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
 	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
 	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
+	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -52,9 +57,28 @@ func (s *SubscriptionStatus) InitializeConditions() {
 	s.Conditions = finalConditions
 }
 
+func (s SubscriptionStatus) IsReady() bool {
+	if !containSameConditionTypes(allConditions, s.Conditions) {
+		return false
+	}
+
+	// the subscription is ready if all its conditions are evaluated to true
+	for _, c := range s.Conditions {
+		if c.Status != corev1.ConditionTrue {
+			return false
+		}
+	}
+	return true
+}
+
 // makeConditions creates an map of all conditions which the Subscription should have
 func makeConditions() []Condition {
 	conditions := []Condition{
+		{
+			Type:               ConditionAPIRuleStatus,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
 		{
 			Type:               ConditionSubscribed,
 			LastTransitionTime: metav1.Now(),
@@ -67,6 +91,30 @@ func makeConditions() []Condition {
 		},
 	}
 	return conditions
+}
+
+func containSameConditionTypes(conditions1, conditions2 []Condition) bool {
+	if len(conditions1) != len(conditions2) {
+		return false
+	}
+
+	for _, condition := range conditions1 {
+		if !containConditionType(conditions2, condition.Type) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func containConditionType(conditions []Condition, conditionType ConditionType) bool {
+	for _, condition := range conditions {
+		if condition.Type == conditionType {
+			return true
+		}
+	}
+
+	return false
 }
 
 func MakeCondition(conditionType ConditionType, reason ConditionReason, status corev1.ConditionStatus) Condition {
@@ -87,4 +135,31 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 		}
 	}
 	return false
+}
+
+func (s *SubscriptionStatus) GetConditionAPIRuleStatus() corev1.ConditionStatus {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionAPIRuleStatus {
+			return condition.Status
+		}
+	}
+	return corev1.ConditionUnknown
+}
+
+func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
+	reason := ConditionReasonAPIRuleStatusNotReady
+	status := corev1.ConditionFalse
+	if ready {
+		reason = ConditionReasonAPIRuleStatusReady
+		status = corev1.ConditionTrue
+	}
+
+	newConditions := []Condition{MakeCondition(ConditionAPIRuleStatus, reason, status)}
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionAPIRuleStatus {
+			continue
+		}
+		newConditions = append(newConditions, condition)
+	}
+	s.Conditions = newConditions
 }
