@@ -5,7 +5,6 @@
     enabled: false
   namespace: nats
   nats:
-    fullname: nats
     ports:
       client: 4222
       monitoring: 8222

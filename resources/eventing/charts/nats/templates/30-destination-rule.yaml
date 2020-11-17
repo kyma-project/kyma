@@ -3,9 +3,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ .Values.nats.fullname }}
+  name: {{ include "nats.fullname" . }}
 spec:
-  host: {{ .Values.nats.fullname }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ include "nats.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

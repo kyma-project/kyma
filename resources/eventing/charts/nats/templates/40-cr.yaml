@@ -3,7 +3,7 @@
 apiVersion: nats.io/v1alpha2
 kind: NatsCluster
 metadata:
-  name: {{ .Values.nats.fullname }}
+  name: {{ include "nats.fullname" . }}
 spec:
   size: 1
   version: "2.1.8"
