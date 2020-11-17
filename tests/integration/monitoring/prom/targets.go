@@ -13,10 +13,10 @@ type TargetsData struct {
 }
 
 type ActiveTarget struct {
-	Labels     Labels `json:"labels"`
-	ScrapePool string `json:"scrapePool"`
-	LastError  string `json:"lastError"`
-	Health     string `json:"health"`
+	Labels     TargetLabels `json:"labels"`
+	ScrapePool string       `json:"scrapePool"`
+	LastError  string       `json:"lastError"`
+	Health     string       `json:"health"`
 }
 
-type Labels map[string]string
+type TargetLabels map[string]string
