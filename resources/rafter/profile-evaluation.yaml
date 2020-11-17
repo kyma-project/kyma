@@ -3,25 +3,25 @@ controller-manager:
     resources:
       requests:
         cpu: 10m
-        memory: 64Mi
+        memory: 32Mi
 
 upload-service:
   pod:
     resources:
       requests:
         cpu: 10m
-        memory: 32Mi
+        memory: 16Mi
 
 asyncapi-service:
   pod:
     resources:
       requests:
         cpu: 10m
-        memory: 32Mi
+        memory: 16Mi
 
 front-matter-service:
   pod:
     resources:
       requests:
-        cpu: 10m
-        memory: 64Mi
+        cpu: 20m
+        memory: 32Mi
