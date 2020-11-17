@@ -19,7 +19,7 @@ data:
   gcloud-sqlproxy.cloudsql.instance.port: "5432"
   # gcloud db settings
   global.ory.hydra.persistence.user: "hydra"
-  global.ory.hydra.persistence.dbUrl: "ory-gcloud-sqlproxy.kyma-system"
+  global.ory.hydra.persistence.dbUrl: "ory-gcloud-sqlproxy.kyma-system:5432"
   global.ory.hydra.persistence.dbName: "db4hydra"
   global.ory.hydra.persistence.dbType: "postgres"
   # Oathkeeper: autoscaling and allocated resources
