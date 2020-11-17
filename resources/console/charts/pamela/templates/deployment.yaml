@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+    kyma-project.io/component: backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+        kyma-project.io/component: backend
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "dex.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        env:
+        - name: DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+        image: parostatkiem/kyma-project-stuff #temp
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+          name: {{ .Values.service.internalPortName }}
+          protocol: TCP
+        resources:
+          limits:
+            memory: 300Mi
+          requests:
+            memory: 64Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        {{ if not .Values.global.environment.gardener }}
+        volumeMounts:
+          - name: ingress-tls-cert
+            mountPath: /etc/ingress-tls-cert/
+        volumes:
+          - name: ingress-tls-cert
+            secret:
+              secretName: ingress-tls-cert
+        {{ end }}
