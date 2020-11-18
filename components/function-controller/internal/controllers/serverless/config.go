@@ -10,6 +10,7 @@ type FunctionConfig struct {
 	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
 	RequeueDuration                     time.Duration `envconfig:"default=1m"`
 	GitFetchRequeueDuration             time.Duration `envconfig:"default=30s"`
+	MaxConcurrentReconciles             int           `envconfig:"default=1"`
 	Build                               BuildConfig
 	Docker                              DockerConfig
 }

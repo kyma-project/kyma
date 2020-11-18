@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "55e5b31a"
+    tag: "PR-9800"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -136,7 +136,9 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
+        value: eu.gcr.io/kyma-project/function-build-init:PR-9800
+      funtionMaxConcurrentReconciles:
+        value: "10"
 
 services:
   manager:
