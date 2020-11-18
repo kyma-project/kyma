@@ -22,7 +22,8 @@ func (s upgradeStep) Run() error {
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
 		s.GetNamespacedName(),
-		s.overrideData.ForRelease(s.component.GetReleaseName()))
+		s.overrideData.ForRelease(s.component.GetReleaseName()),
+		string(s.step.profile))
 
 	if upgradeErr != nil {
 		return s.onError(upgradeErr)

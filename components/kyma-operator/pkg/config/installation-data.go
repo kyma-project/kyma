@@ -17,6 +17,7 @@ type InstallationData struct {
 	URL         string
 	Components  []v1alpha1.KymaComponent
 	Action      string
+	Profile     v1alpha1.KymaProfile
 }
 
 // NewInstallationData .
@@ -33,6 +34,7 @@ func NewInstallationData(installation *v1alpha1.Installation) (*InstallationData
 		URL:         installation.Spec.URL,
 		Components:  installation.Spec.Components,
 		Action:      installation.Labels["action"],
+		Profile:     installation.Spec.Profile,
 	}
 	return res, nil
 }
