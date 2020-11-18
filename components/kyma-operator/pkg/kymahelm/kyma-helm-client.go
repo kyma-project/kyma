@@ -227,7 +227,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideVal
 	install.Wait = true
 	install.CreateNamespace = true
 
-	comboValues, err := getProfileValues(*chart, profile)
+	comboValues, err := GetProfileValues(*chart, profile)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, overrideVal
 	upgrade.Recreate = false
 	upgrade.MaxHistory = hc.maxHistory
 
-	comboValues, err := getProfileValues(*chart, profile)
+	comboValues, err := GetProfileValues(*chart, profile)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +346,8 @@ func (hc *Client) newActionConfig(namespace string) (*action.Configuration, erro
 	return cfg, nil
 }
 
-func getProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
+//GetProfileValues Return Map of chart values for profileName profile file
+func GetProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
 	var profile *chart.File
 	for _, f := range ch.Files {
 		if (f.Name == fmt.Sprintf("profile-%s.yaml", profileName)) || (f.Name == fmt.Sprintf("%s.yaml", profileName)) {
