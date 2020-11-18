@@ -2,7 +2,6 @@ package uaa
 
 import (
 	"context"
-	"time"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
@@ -11,43 +10,43 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Creator provides functionality for creating UAA Instance and Binding
 type Creator struct {
-	cli    client.Client
-	config Config
+	cli        client.Client
+	config     Config
+	domainName string
 }
 
 // NewCreator returns new instance of Creator
-func NewCreator(cli client.Client, config Config) *Creator {
+func NewCreator(cli client.Client, config Config, domain string) *Creator {
 	return &Creator{
-		cli:    cli,
-		config: config,
+		cli:        cli,
+		config:     config,
+		domainName: domain,
 	}
 }
 
 // EnsureUAAInstance ensures that ServiceInstance is created and up to date.
 // Additionally, wait until ServiceInstance is in a ready state.
 func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
-	instance := p.uaaServiceInstance()
-
 	// remove not ready ServiceInstance before create new one
 	if err := p.instanceIsReady(ctx); err != nil {
-		err := p.removeUAAInstance(ctx, instance)
+		err := p.removeUAAInstance(ctx)
 		if err != nil {
 			return errors.Wrap(err, "while removing ServiceInstance in not ready state")
 		}
-		// there is a problem with communication with the UAA. If an instance after deletion is created
-		// in too short a period of time, the UAA provider will return information that the instance with
-		// the given 'xsappname' is in the deleting process and the new instance will not be triggered to create it
-		// so there is a delay before a request for a new instance is sent
-		time.Sleep(p.config.NewInstanceCreateDelay)
 	}
 
-	err := p.cli.Create(ctx, &instance)
+	instance, err := p.uaaServiceInstance()
+	if err != nil {
+		return errors.Wrap(err, "while creating new ServiceInstance")
+	}
+	err = p.cli.Create(ctx, &instance)
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
@@ -119,7 +118,12 @@ func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 	return nil
 }
 
-func (p *Creator) uaaServiceInstance() v1beta1.ServiceInstance {
+func (p *Creator) uaaServiceInstance() (v1beta1.ServiceInstance, error) {
+	parameters, err := NewInstanceParameters(p.config, p.domainName)
+	if err != nil {
+		return v1beta1.ServiceInstance{}, errors.Wrap(err, "while creating instance parameters")
+	}
+
 	return v1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      p.config.ServiceInstance.Name,
@@ -130,13 +134,9 @@ func (p *Creator) uaaServiceInstance() v1beta1.ServiceInstance {
 				ClusterServiceClassName: p.config.ClusterServiceClassName,
 				ClusterServicePlanName:  p.config.ClusterServicePlanName,
 			},
-			ParametersFrom: []v1beta1.ParametersFromSource{
-				{
-					SecretKeyRef: &p.config.ServiceInstanceParamsSecret,
-				},
-			},
+			Parameters: &runtime.RawExtension{Raw: parameters},
 		},
-	}
+	}, nil
 }
 
 func (p *Creator) uaaServiceBinding() v1beta1.ServiceBinding {
@@ -153,14 +153,27 @@ func (p *Creator) uaaServiceBinding() v1beta1.ServiceBinding {
 	}
 }
 
-func (p *Creator) removeUAAInstance(ctx context.Context, instance v1beta1.ServiceInstance) error {
-	err := p.cli.Delete(ctx, &instance)
-	switch {
-	case err == nil:
-	case apiErrors.IsNotFound(err):
+func (p *Creator) removeUAAInstance(ctx context.Context) error {
+	err := repeat.UntilSuccess(ctx, func() (err error) {
+		instance := &v1beta1.ServiceInstance{}
+
+		err = p.cli.Get(ctx, p.config.ServiceInstance, instance)
+		switch {
+		case err == nil:
+		case apiErrors.IsNotFound(err):
+			return nil
+		case err != nil:
+			return errors.Wrap(err, "while getting UAA ServiceInstance")
+		}
+
+		err = p.cli.Delete(ctx, instance)
+		if err != nil && !apiErrors.IsNotFound(err) {
+			return errors.Wrap(err, "while deleting UAA ServiceInstance")
+		}
 		return nil
-	case err != nil:
-		return errors.Wrap(err, "while deleting UAA ServiceInstance")
+	})
+	if err != nil {
+		return errors.Wrapf(err, "while removing %s", p.config.ServiceInstance.String())
 	}
 
 	err = repeat.UntilSuccess(ctx, p.instanceWasRemoved(ctx))

@@ -28,3 +28,12 @@ director:
   operationPoolingInterval: "1s"
 
 gatewayBaseURLFormat: "http://%s-gateway:8080"
+
+ctrl:
+  resources:
+    limits:
+      memory: 96Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 60m
