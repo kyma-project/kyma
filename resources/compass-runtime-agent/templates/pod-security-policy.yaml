@@ -3,19 +3,23 @@ kind: PodSecurityPolicy
 metadata:
   name: compass-runtime-agent
 spec:
-  allowPrivilegeEscalation: true
+  allowPrivilegeEscalation: false
   allowedCapabilities:
   - NET_ADMIN
   - NET_RAW
   fsGroup:
-    rule: RunAsAny
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
   runAsUser:
-    rule: RunAsAny
+    rule: MustRunAsNonRoot
   privileged: false
-  seLinux:
-    rule: RunAsAny
   supplementalGroups:
-    rule: RunAsAny
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
   volumes:
   - configMap
   - downwardAPI
