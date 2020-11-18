@@ -6,10 +6,6 @@ HELM_3_BINARY=$(which helm3)
 SECRET_NAME="helm-secret"
 NAMESPACE="kyma-installer"
 
-echo "---> Install requirements"
-
-apk add git jq
-
 echo "---> Get HELM_2 certs"
 ${HELM_2_BINARY} init -c --skip-refresh
 
@@ -38,6 +34,7 @@ fi
 echo "---> Get current releases "
 set -o pipefail
 ${HELM_2_BINARY} ls --tls --all --output json | jq '.Releases[] | .Name + " " + .Namespace + " " + .Chart' | tr -d '"' > helm2-all-releases
+echo 
 set +o pipefail
 
 echo "---> Migrate Gateway and Application releases"
