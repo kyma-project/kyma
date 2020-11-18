@@ -9,6 +9,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
@@ -18,22 +20,33 @@ func Test_SyncBebSubscription(t *testing.T) {
 	beb := Beb{
 		Log: ctrl.Log,
 	}
-	err := os.Setenv("CLIENT_ID", "foo")
+	clientId := "client-id"
+	clientSecret := "client-secret"
+	tokenEndpoint := "token-endpoint"
+	envConfig := env.Config{
+		ClientID:      clientId,
+		ClientSecret:  clientSecret,
+		TokenEndpoint: tokenEndpoint,
+	}
+	err := os.Setenv("CLIENT_ID", clientId)
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("CLIENT_SECRET", "foo")
+	err = os.Setenv("CLIENT_SECRET", clientSecret)
 	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("TOKEN_ENDPOINT", "foo")
+	err = os.Setenv("TOKEN_ENDPOINT", tokenEndpoint)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	beb.Initialize()
+	beb.Initialize(envConfig)
 
 	// when
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
+	apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
+	reconcilertesting.WithService("foo-host", "foo-svc", apiRule)
+
 	// then
-	changed, err := beb.SyncBebSubscription(subscription)
+	changed, err := beb.SyncBebSubscription(subscription, apiRule)
 	g.Expect(err).To(Not(BeNil()))
 	g.Expect(changed).To(BeFalse())
 }

@@ -17,7 +17,7 @@ data:
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: "bindings.kyma-project.io"
+  name: {{ template "fullname" . }}-mutating-webhook
   namespace: {{ .Release.Namespace }}
 webhooks:
   - name: "mutating.pods.bindings.kyma-project.io"
@@ -41,7 +41,7 @@ webhooks:
     rules:
       - apiGroups: ["bindings.kyma-project.io"]
         apiVersions: ["v1alpha1"]
-        operations: ["CREATE"]
+        operations: ["CREATE", "UPDATE"]
         resources: ["bindings"]
         scope: "Namespaced"
     failurePolicy: Ignore
@@ -54,3 +54,38 @@ webhooks:
     admissionReviewVersions: ["v1beta1"]
     sideEffects: None
     timeoutSeconds: 5
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "fullname" . }}-validating-webhook
+webhooks:
+  - name: validating.binding.kyma-project.io
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: "{{ .Release.Namespace }}"
+        path: "/binding-validating"
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["bindings.kyma-project.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["bindings"]
+        scope: "Namespaced"
+  - name: validating.targetkind.kyma-project.io
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: "{{ .Release.Namespace }}"
+        path: "/targetkind-validating"
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["bindings.kyma-project.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["targetkinds"]
+        scope: "Namespaced"

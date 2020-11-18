@@ -12,11 +12,11 @@ fi
 OPERATOR_FILE="/etc/istio/operator-1-6.yaml"
 
 echo "--> Remove deprecated resources"
-if kubectl api-versions | grep -c rbac.istio.io ; then
+if kubectl get customresourcedefinitions.apiextensions.k8s.io | grep -c clusterrbacconfigs.rbac.istio.io ; then
     kubectl delete clusterrbacconfigs.rbac.istio.io default --ignore-not-found=true
 fi
 
-if kubectl api-versions | grep -c authentication.istio.io ; then
+if kubectl get customresourcedefinitions.apiextensions.k8s.io | grep -c meshpolicies.authentication.istio.io ; then
     kubectl delete meshpolicies.authentication.istio.io -n istio-system default --ignore-not-found=true
 fi
 
@@ -27,9 +27,6 @@ kubectl delete customresourcedefinitions.apiextensions.k8s.io policies.authentic
 kubectl delete customresourcedefinitions.apiextensions.k8s.io rbacconfigs.rbac.istio.io --ignore-not-found
 kubectl delete customresourcedefinitions.apiextensions.k8s.io servicerolebindings.rbac.istio.io --ignore-not-found
 kubectl delete customresourcedefinitions.apiextensions.k8s.io serviceroles.rbac.istio.io --ignore-not-found
-
-echo "--> Temporary disable ingress-gateway"
-kubectl scale deploy -n istio-system istio-ingressgateway --replicas 0
 
 echo "--> Upgrade to Istio 1.6"
 istioctl upgrade -f "${OPERATOR_FILE}" -y

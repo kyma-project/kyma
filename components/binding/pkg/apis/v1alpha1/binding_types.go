@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	BindingLabelKey = "bindings-kyma-project-io"
+	BindingLabelKey          = "bindings.kyma.project.io"
+	BindingValidatedLabelKey = "validation.bindings.kyma.project.io"
 )
 
 const (
@@ -56,10 +57,15 @@ type BindingStatus struct {
 }
 
 func (bs *BindingStatus) IsEmpty() bool {
-	if bs.Phase == "" {
-		return true
-	}
-	return false
+	return bs.Phase == ""
+}
+
+func (bs *BindingStatus) IsPending() bool {
+	return bs.Phase == BindingPending
+}
+
+func (bs *BindingStatus) IsFailed() bool {
+	return bs.Phase == BindingFailed
 }
 
 func (bs *BindingStatus) Init() error {

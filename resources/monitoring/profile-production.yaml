@@ -2,11 +2,11 @@ prometheus:
   prometheusSpec:
     resources:
       limits:
-        cpu: 600m
-        memory: 1500Mi
+        cpu: 1
+        memory: 3Gi
       requests:
-        cpu: 150m
-        memory: 1000Mi
+        cpu: 300m
+        memory: 1Gi
     retention: 30d
     retentionSize: 15GB
     storageSpec:

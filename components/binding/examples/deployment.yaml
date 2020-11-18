@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: env-sample
+  labels:
+    app: env-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: env-sample
+  template:
+    metadata:
+      labels:
+        app: env-sample
+    spec:
+      containers:
+        - name: env-sample
+          image: eu.gcr.io/sap-se-cx-gopher/env_sample:0.1
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: env-sample
+spec:
+  selector:
+    app: env-sample
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

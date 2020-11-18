@@ -1,0 +1,23 @@
+catalog:
+  webhook:
+    # Webhook resource requests and limits
+    # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    resources:
+      requests:
+        cpu: 50m
+        memory: 30Mi
+      limits:
+        cpu: 100m
+        memory: 48Mi
+
+  controllerManager:
+    replicas: 1
+    # Controller Manager resource requests and limits
+    # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    resources:
+      requests:
+        cpu: 50m
+        memory: 48Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi

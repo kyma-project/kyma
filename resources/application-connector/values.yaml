@@ -23,15 +23,15 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "82b304ab"
+    version: "PR-9890"
   application_operator_tests:
     version: "470796a1"
   connector_service:
-    version: "470796a1"
+    version: "PR-9890"
   connector_service_tests:
     version: "470796a1"
   connection_token_handler:
-    version: "85665778"
+    version: "PR-9890"
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
@@ -39,21 +39,21 @@ global:
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
-    version: "c0341336"
+    version: "PR-9890"
   application_gateway_tests:
     version: "470796a1"
   application_gateway_legacy_tests:
     version: "470796a1"
   application_registry:
-    version: "c0341336"
+    version: "PR-9890"
   application_registry_tests:
     version: "cda9f380"
   application_broker:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "470796a1"
+    version: "PR-9890"
   application_connectivity_validator:
-    version: "c0341336"
+    version: "PR-9890"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
@@ -63,10 +63,22 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: kyma-gateway-certs-cacert
+      name: app-connector-certs
       namespace: istio-system
   certificate:
     validityTime: 92d
+
+application_connectivity_certs_sync:
+  secrets:
+    caCertificateSecret:
+      name: app-connector-certs
+      namespace: istio-system
+    tlsCertificateSecret:
+      name: kyma-gateway-certs
+      namespace: istio-system
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 tests:
   application_connector_tests:

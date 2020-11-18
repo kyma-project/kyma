@@ -37,7 +37,6 @@ The controller extends the api-server with the following custom resources:
 | ---- | ------- | ----------- |
 | **INST_NAMESPACE** | `default` | Namespace in which the Installation CR is located. |
 | **INST_RESOURCE** | `kyma-installation` | Name of the Installation custom resource. |
-| **INST_FINALIZER** | `finalizer.installer.kyma-project.io` | Name of the finalizer. |
 | **OVERRIDES_NAMESPACE** | `kyma-installer` | Namespace in which the Installer overrides are located. |
 
 ## Installer custom resource

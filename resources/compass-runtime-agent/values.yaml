@@ -3,7 +3,7 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      version: "c0341336"
+      version: "PR-9890"
     runtimeAgentTests:
       version: "cda9f380"
     compassExternalSolutionTests:
@@ -41,7 +41,7 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: kyma-gateway-certs-cacert
+        name: app-connector-certs
         namespace: istio-system
   compass:
     skipTLSVerification: true

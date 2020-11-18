@@ -6,8 +6,6 @@ metadata:
   labels:
     action: install
     kyma-project.io/installation: ""
-  finalizers:
-    - finalizer.installer.kyma-project.io
 spec:
   version: "__VERSION__"
   url: "__URL__"
@@ -20,8 +18,6 @@ spec:
       namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
-    - name: "istio-kyma-patch"
-      namespace: "istio-system"
     - name: "knative-eventing"
       namespace: "knative-eventing"
     - name: "knative-eventing-kafka"

@@ -14,3 +14,28 @@ The Istio-related instance is a Deployment named `monitoring-prometheus-istio-se
 See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
 
 ![Istio Monitoring](./assets/monitoring-istio.svg)
+
+By default, `minitoring-prometheus-istio-server` is not provided as a data source in Grafana. However, this can be enabled by adding the override: 
+
+ ```bash
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+    kyma-project.io/installation: ""
+data:
+    grafana.dataSources.prometheusIstio.enabled: "true"
+EOF
+```
+
+Run the [cluster update process](/root/kyma/#installation-update-kyma). After finishing the upgrade process, restart the Grafana deployment by using this command:
+
+```bash
+kubectl rollout restart -n kyma-system deployment monitoring-grafana
+```

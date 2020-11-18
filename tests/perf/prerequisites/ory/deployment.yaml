@@ -36,7 +36,7 @@ spec:
     spec:
       serviceAccountName: httpbin
       containers:
-        - image: docker.io/kennethreitz/httpbin
+        - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:20201004
           imagePullPolicy: IfNotPresent
           name: httpbin
           ports:
@@ -74,7 +74,7 @@ spec:
     spec:
       serviceAccountName: httpbin
       containers:
-        - image: docker.io/kennethreitz/httpbin
+        - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:20201004
           imagePullPolicy: IfNotPresent
           name: httpbin
           ports:
@@ -112,7 +112,7 @@ spec:
     spec:
       serviceAccountName: httpbin
       containers:
-        - image: docker.io/kennethreitz/httpbin
+        - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:20201004
           imagePullPolicy: IfNotPresent
           name: httpbin
           ports:
@@ -150,7 +150,7 @@ spec:
     spec:
       serviceAccountName: httpbin
       containers:
-        - image: docker.io/kennethreitz/httpbin
+        - image: eu.gcr.io/kyma-project/external/kennethreitz/httpbin:20201004
           imagePullPolicy: IfNotPresent
           name: httpbin
           ports:

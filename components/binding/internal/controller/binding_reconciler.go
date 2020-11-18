@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	bindingsv1alpha1 "github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 
 	log "github.com/sirupsen/logrus"
@@ -39,6 +39,7 @@ func NewBindingReconciler(client client.Client, worker BindingWorker, log log.Fi
 func (r *BindingReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	var binding bindingsv1alpha1.Binding
+
 	err := r.client.Get(ctx, req.NamespacedName, &binding)
 	if err != nil {
 		r.log.Warnf("Binding %s not found during reconcile process: %s", req.NamespacedName, err)

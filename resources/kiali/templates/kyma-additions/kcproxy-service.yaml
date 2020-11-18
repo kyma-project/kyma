@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kiali.name" . }}-secured
+  name: {{ template "kiali-server.name" . }}-secured
   labels:
-      {{- include "kiali.labels" . | nindent 4 }}
+      {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
   ports:
     - port: {{ .Values.kiali.spec.server.port }}
@@ -11,4 +11,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-      app: {{ template "kiali.name" . }}-kcproxy
+      app: {{ template "kiali-server.name" . }}-kcproxy
