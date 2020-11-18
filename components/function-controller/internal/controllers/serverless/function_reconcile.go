@@ -147,7 +147,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Sources update failed: %v", err),
+			Message:            fmt.Sprintf("Reading git options failed: %v", err),
 		})
 	}
 
