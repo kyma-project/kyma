@@ -48,7 +48,6 @@ The longest name that gets created adds and extra 37 characters, so truncation s
 {{- define "kube-prometheus-stack.labels" }}
 chart: {{ template "kube-prometheus-stack.chartref" . }}
 release: {{ $.Release.Name | quote }}
-heritage: {{ $.Release.Service | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
