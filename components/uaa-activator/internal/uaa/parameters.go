@@ -16,7 +16,6 @@ type Schema struct {
 	Scopes              []Scope             `json:"scopes"`
 	Authorities         []string            `json:"authorities"`
 	RoleTemplates       []RoleTemplate      `json:"role-templates"`
-	RoleCollections     []RoleCollection    `json:"role-collections"`
 	Oauth2Configuration Oauth2Configuration `json:"oauth2-configuration"`
 }
 
@@ -65,33 +64,17 @@ func NewInstanceParameters(cfg Config, domain string) ([]byte, error) {
 		},
 		RoleTemplates: []RoleTemplate{
 			{
-				Name:        cfg.DeveloperRole,
+				Name:        "KymaRuntimeNamespaceDeveloper",
 				Description: "Runtime developer access to all managed resources",
 				ScopeReferences: []string{
 					fmt.Sprintf("$XSAPPNAME.%s", cfg.DeveloperGroup),
 				},
 			},
 			{
-				Name:        cfg.NamespaceAdminRole,
+				Name:        "KymaRuntimeNamespaceAdmin",
 				Description: "Runtime admin access to all managed resources",
 				ScopeReferences: []string{
 					fmt.Sprintf("$XSAPPNAME.%s", cfg.NamespaceAdminGroup),
-				},
-			},
-		},
-		RoleCollections: []RoleCollection{
-			{
-				Name:        cfg.DeveloperRole,
-				Description: "Kyma Runtime Developer Role Collection for development tasks in given custom namespaces",
-				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.DeveloperRole),
-				},
-			},
-			{
-				Name:        cfg.NamespaceAdminRole,
-				Description: "Kyma Runtime Namespace Admin Role Collection for administration tasks across all custom namespaces",
-				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.NamespaceAdminRole),
 				},
 			},
 		},

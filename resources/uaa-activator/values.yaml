@@ -6,14 +6,11 @@ global:
   kymaRuntime:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
-  role:
-    developer: KymaRuntimeDeveloper
-    namespaceAdmin: KymaRuntimeNamespaceAdmin
 
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "94ac5eff"
+  version: "PR-9977"
 
 nameOverride: ""
 fullnameOverride: ""
