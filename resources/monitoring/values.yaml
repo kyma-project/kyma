@@ -54,6 +54,8 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
+resourceSelector:
+  namespaces:
 # Default values for kube-prometheus-stack.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -1242,7 +1244,7 @@ prometheusOperator:
     patch:
       enabled: false
       image:
-        repository: eu.gcr.io/kyma-project/external/jettech/kube-webhook-certgen
+        repository: jettech/kube-webhook-certgen # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
         tag: v1.5.0
         sha: ""
         pullPolicy: IfNotPresent
