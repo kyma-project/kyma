@@ -9,9 +9,7 @@ type Config struct {
 	ServiceInstance         client.ObjectKey
 	ServiceBinding          client.ObjectKey
 	DeveloperGroup          string
-	DeveloperRole           string
 	NamespaceAdminGroup     string
-	NamespaceAdminRole      string
 	ClusterServiceClassName string `envconfig:"default=xsuaa"`
 	ClusterServicePlanName  string `envconfig:"default=z54zhz47zdx5loz51z6z58zhvcdz59-b207b177b40ffd4b314b30635590e0ad"`
 }

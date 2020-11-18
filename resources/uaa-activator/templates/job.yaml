@@ -32,12 +32,8 @@ spec:
               value: {{ .Values.global.ingress.domainName }}
             - name: UAA_DEVELOPER_GROUP
               value: {{ .Values.global.kymaRuntime.developerGroup }}
-            - name: UAA_DEVELOPER_ROLE
-              value: {{ .Values.global.role.developer }}
             - name: UAA_NAMESPACE_ADMIN_GROUP
               value: {{ .Values.global.kymaRuntime.namespaceAdminGroup }}
-            - name: UAA_NAMESPACE_ADMIN_ROLE
-              value: {{ .Values.global.role.namespaceAdmin }}
             - name: UAA_SERVICE_INSTANCE_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: UAA_SERVICE_INSTANCE_NAME
