@@ -49,7 +49,7 @@ global:
   application_registry_tests:
     version: "cda9f380"
   application_broker:
-    version: "a8a6bca9"
+    version: "41660266"
   application_connectivity_certs_setup_job:
     version: "PR-9890"
   application_connectivity_validator:
