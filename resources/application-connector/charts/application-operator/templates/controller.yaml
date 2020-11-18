@@ -41,8 +41,8 @@ spec:
             - -c
             - |
 {{ .Files.Get "files/helm-release-migration.sh" | indent 14 }}
-          securityContext:
-            runAsUser: 1000
+          # securityContext: #TODO add after istio-init is removed
+          #   runAsUser: 1000
       containers:
       - name: {{ .Chart.Name }}
         ports:
