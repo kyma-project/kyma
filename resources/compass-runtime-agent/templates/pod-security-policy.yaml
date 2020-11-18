@@ -13,7 +13,8 @@ spec:
       - min: 1
         max: 65535
   runAsUser:
-    rule: MustRunAsNonRoot
+    # due to istio init container
+    rule: 'RunAsAny' #TODO after init-container removal set to 'MustRunAsNonRoot'
   privileged: false
   seLinux:
     rule: 'RunAsAny'
