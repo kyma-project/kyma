@@ -26,7 +26,7 @@ spec:
         heritage: "{{ .Release.Service }}"
         kyma-project.io/component: backend
     spec:
-      serviceAccountName: {{ template "fullname" . }}
+      serviceAccountName: console-backend 
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
