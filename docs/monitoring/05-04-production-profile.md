@@ -36,6 +36,8 @@ The table shows the parameters of each profile and their values:
 | **prometheus.prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `600Mi`| `1Gi` | `200Mi` |
 | **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.| `120h` | `240h` | `1h` |
 | **grafana.persistence.enabled**| Parameter that enables storing Grafana database on a PersistentVolume |`true`|`true`|`false`|
+| **prometheus-istio.server.resources.requests.memory** |  Maximum amount of memory available for the Prometheus-Istio Pod to use.| `200Mi`| `200Mi`|`200Mi`|
+| **prometheus-istio.server.resources.limits.memory** |  Maximum amount of memory available for the Prometheus-Istio Pod to use.| `3Gi`| `4Gi`|`400Mi`|
 
 ## Use profiles
 
@@ -75,6 +77,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
     prometheus.prometheusSpec.resources.limits.memory: "2Gi"
     prometheus.prometheusSpec.resources.requests.cpu: "300m"
     prometheus.prometheusSpec.resources.requests.memory: "1Gi"
+    prometheus-istio.server.resources.limits.memory: "4Gi"
     alertmanager.alertmanagerSpec.retention: "240h"
   EOF
   ```
@@ -106,6 +109,7 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
       prometheus.prometheusSpec.resources.limits.memory: "2Gi"
       prometheus.prometheusSpec.resources.requests.cpu: "300m"
       prometheus.prometheusSpec.resources.requests.memory: "1Gi"
+      prometheus-istio.server.resources.limits.memory: "4Gi"
       alertmanager.alertmanagerSpec.retention: "240h"
     EOF
   ```
