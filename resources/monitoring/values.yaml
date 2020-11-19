@@ -126,8 +126,9 @@ defaultRules:
   additionalRuleLabels: {}
 
 ## Deprecated way to provide custom recording or alerting rules to be deployed into the cluster.
-##
-# additionalPrometheusRules: []
+## Customization: has to be a multi-line string because of overrides
+# additionalPrometheusRules: |-
+
 #  - name: my-rule-file
 #    groups:
 #      - name: my_group
