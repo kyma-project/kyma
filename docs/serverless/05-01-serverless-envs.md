@@ -3,9 +3,34 @@ title: Environment variables
 type: Configuration
 ---
 
-Configuration of environment variables depends on the Function's runtime.
+Configuration of Function's environment variables.
 
-## NodeJS runtime
+## Use ConfigMap's key-values to define Function's environment variables.
+
+See example of a Function using the value of the `my-var` key, stored in `my-vars-cm` ConfigMap, as `MY_VAR` environment variable.
+
+```yaml
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: sample-cm-env-values
+  namespace: default
+spec:
+  env:
+    - name: MY_VAR
+      valueFrom:
+        configMapKeyRef:
+          name: my-vars-cm
+          key: my-var
+  source: |
+    module.exports = {
+      main: function (event, context) {
+        return process.env["MY_VAR"];
+      }
+    }
+```
+
+## NodeJS runtime-specific environment variables
 
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
@@ -38,7 +63,7 @@ spec:
     }
 ```
 
-## Python runtime
+## Python runtime-specific environment variables
 
 To configure a Function with the Python runtime, override the default values of these environment variables:
 
