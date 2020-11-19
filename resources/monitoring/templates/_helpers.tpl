@@ -1,3 +1,14 @@
+{{- /*
+  Customization: Some changes are made to the default label set.
+  Added labels recommended by Kubernetes and Helm:
+    helm.sh/chart
+    app.kubernetes.io/managed-by
+    app.kubernetes.io/name
+    app.kubernetes.io/instance
+  Removed labels:
+    heritage
+*/ -}}
+
 {{/* vim: set filetype=mustache: */}}
 {{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
 {{- define "kube-prometheus-stack.name" -}}
@@ -51,6 +62,17 @@ release: {{ $.Release.Name | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
+helm.sh/chart: {{ include "prometheus-operator.chartref" . }}
+{{ include "prometheus-operator.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "kube-prometheus-stack.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kube-prometheus-stack.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/* Create the name of kube-prometheus-stack service account to use */}}
