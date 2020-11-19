@@ -9,8 +9,6 @@ global:
         gcloud:
           enabled: false
 hydra:
-  hydra:
-    autoMigrate: true
   replicaCount: 2
 oathkeeper:
   deployment:
