@@ -180,16 +180,3 @@ metadata:
     kyma-project.io/installation: ""
 data:
   web.test.acceptance.enabled: "false"
-# TEST OVERRIDE
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: api-gateway-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: api-gateway
-    kyma-project.io/installation: ""
-data:
-  replicaCount: "1"
