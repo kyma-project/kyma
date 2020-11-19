@@ -15,7 +15,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
   - name: kube-pod-oomkilled
     rules:
     - alert: KubePodOOMKilled
@@ -24,7 +24,7 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
+        description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
   - name: prometheus-rules
     rules:
     - alert: ScrapeLimitForTargetExceeded

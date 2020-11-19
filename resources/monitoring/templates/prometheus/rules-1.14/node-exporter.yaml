@@ -1,4 +1,7 @@
 {{- /*
+  Replaced an annotation: message -> description
+*/ -}}
+{{- /*
 Generated from 'node-exporter' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/prometheus-rules.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -216,7 +219,7 @@ spec:
 {{- end }}
     - alert: NodeClockSkewDetected
       annotations:
-        message: Clock on {{`{{`}} $labels.instance {{`}}`}} is out of sync by more than 300s. Ensure NTP is configured correctly on this host.
+        description: Clock on {{`{{`}} $labels.instance {{`}}`}} is out of sync by more than 300s. Ensure NTP is configured correctly on this host.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-nodeclockskewdetected
         summary: Clock skew detected.
       expr: |-
@@ -239,7 +242,7 @@ spec:
 {{- end }}
     - alert: NodeClockNotSynchronising
       annotations:
-        message: Clock on {{`{{`}} $labels.instance {{`}}`}} is not synchronising. Ensure NTP is configured on this host.
+        description: Clock on {{`{{`}} $labels.instance {{`}}`}} is not synchronising. Ensure NTP is configured on this host.
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-nodeclocknotsynchronising
         summary: Clock not synchronising.
       expr: |-

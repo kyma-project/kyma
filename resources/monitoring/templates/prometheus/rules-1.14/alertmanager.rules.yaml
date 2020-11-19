@@ -1,4 +1,7 @@
 {{- /*
+  Replaced an annotation: message -> description
+*/ -}}
+{{- /*
 Generated from 'alertmanager.rules' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/prometheus-rules.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -28,7 +31,7 @@ spec:
     rules:
     - alert: AlertmanagerConfigInconsistent
       annotations:
-        message: 'The configuration of the instances of the Alertmanager cluster `{{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.service {{`}}`}}` are out of sync.
+        description: 'The configuration of the instances of the Alertmanager cluster `{{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.service {{`}}`}}` are out of sync.
 
           {{`{{`}} range printf "alertmanager_config_hash{namespace=\"%s\",service=\"%s\"}" $labels.namespace $labels.service | query {{`}}`}}
 
@@ -46,7 +49,7 @@ spec:
 {{- end }}
     - alert: AlertmanagerFailedReload
       annotations:
-        message: Reloading Alertmanager's configuration has failed for {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod{{`}}`}}.
+        description: Reloading Alertmanager's configuration has failed for {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod{{`}}`}}.
       expr: alertmanager_config_last_reload_successful{job="{{ $alertmanagerJob }}",namespace="{{ $namespace }}"} == 0
       for: 10m
       labels:
@@ -56,7 +59,7 @@ spec:
 {{- end }}
     - alert: AlertmanagerMembersInconsistent
       annotations:
-        message: Alertmanager has not found all other members of the cluster.
+        description: Alertmanager has not found all other members of the cluster.
       expr: |-
         alertmanager_cluster_members{job="{{ $alertmanagerJob }}",namespace="{{ $namespace }}"}
           != on (service) GROUP_LEFT()
