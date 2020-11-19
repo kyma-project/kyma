@@ -396,7 +396,7 @@ Get the TLS certificate:
 1. Install Kyma using Kyma CLI:
 
     ```bash
-    kyma install -s $KYMA_VERSION --domain $DOMAIN --tlsCert $TLS_CERT --tlsKey $TLS_KEY
+    kyma install -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
     ```
 
 ## Configure DNS for the cluster load balancer
