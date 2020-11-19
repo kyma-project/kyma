@@ -5,7 +5,12 @@ type: Configuration
 
 The Kyma Operator allows you to use pre-defined profiles to install or upgrade Kyma. To install Kyma using a profile, you must specify the **spec.profile** attribute in the [Installation custom resource](#custom-resource-installation) (CR).
 
-The profile is a subset of the default values.yaml defined in `profile-{name}.yaml` file at the component chart folder and can override only a section, or even the whole file if required. If the profile file is not present, the Kyma Operator will use default set of values from the `values.yaml` file. The following fragment of the `values.yaml` shows definition limitRange settings:
+The profile is a subset of the default values.yaml defined in `profile-{name}.yaml` file at the component chart folder and can override only a section, or even the whole file if required. If the profile file is not present, the Kyma Operator will use default set of values from the `values.yaml` file.
+Currently supported profiles are: 
+- evaluation
+- production
+
+The following fragment of the `values.yaml` shows definition limitRange settings:
 
 ```yaml
 limitRange:
