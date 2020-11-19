@@ -1,3 +1,9 @@
+{{- /*
+  Customization: 
+  * Unset timezone
+  * Prepended the name with Kubernetes
+  * Added a kube-mixin tag
+*/ -}}
 {{- /* Added manually, can be changed in-place. */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.coreDns.enabled }}
@@ -1257,7 +1263,9 @@ data:
         ],
         "schemaVersion": 16,
         "style": "dark",
-        "tags": [],
+        "tags": [
+            "kubernetes-mixin"
+        ],
         "templating": {
             "list": [
                 {
@@ -1334,8 +1342,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "utc",
-        "title": "CoreDNS",
+        "timezone": "",
+        "title": "Kubernetes / CoreDNS",
         "uid": "vkQ0UHxik",
         "version": 1
     }

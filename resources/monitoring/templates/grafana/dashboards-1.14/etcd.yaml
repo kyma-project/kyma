@@ -1,4 +1,11 @@
 {{- /*
+  Customization: 
+  * Made the dashboard not editable
+  * Unset the timezone
+  * Prepended the name with Kubernetes
+  * Added a kube-mixin tag
+*/ -}}
+{{- /*
 Generated from 'etcd' from https://raw.githubusercontent.com/etcd-io/etcd/master/Documentation/op-guide/grafana.json
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -25,7 +32,7 @@ data:
             "list": []
         },
         "description": "etcd sample Grafana dashboard with Prometheus",
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "hideControls": false,
         "links": [],
@@ -1036,7 +1043,9 @@ data:
         "schemaVersion": 13,
         "sharedCrosshair": false,
         "style": "dark",
-        "tags": [],
+        "tags": [
+            "kubernetes-mixin"
+        ],
         "templating": {
             "list": [
                 {
@@ -1108,8 +1117,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "browser",
-        "title": "etcd",
+        "timezone": "",
+        "title": "Kubernetes / etcd",
         "uid": "c2f4e12cdf69feb95caa41a5a1b423d9",
         "version": 215
     }

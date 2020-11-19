@@ -1,4 +1,11 @@
 {{- /*
+  Customization:
+  * Made the dashboard not editable
+  * Unset the timezone
+  * Prepended the name with Kubernetes
+  * Added a kube-mixin tag
+*/ -}}
+{{- /*
 Generated from 'node-rsrc-use' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
@@ -26,7 +33,7 @@ data:
 
             ]
         },
-        "editable": true,
+        "editable": false,
         "gnetId": null,
         "graphTooltip": 0,
         "hideControls": false,
@@ -905,7 +912,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-
+            "kubernetes-mixin"
         ],
         "templating": {
             "list": [
@@ -984,7 +991,7 @@ data:
             ]
         },
         "timezone": "",
-        "title": "USE Method / Node",
+        "title": "Kubernetes / USE Method / Node",
         "uid": "fac67cfbe174d3ef53eb473d73d9212f",
         "version": 0
     }
