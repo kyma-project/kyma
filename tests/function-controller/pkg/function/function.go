@@ -86,10 +86,10 @@ func (f *Function) WaitForStatusRunning() error {
 	defer cancel()
 	condition := f.isFunctionReady()
 	_, err = watchtools.Until(ctx, fn.GetResourceVersion(), f.resCli.ResCli, condition)
-	if err != nil {
-		return err
+	if err == nil || err.Error() == watchtools.ErrWatchClosed.Error() {
+		return nil
 	}
-	return nil
+	return err
 }
 
 func (f *Function) Delete() error {
