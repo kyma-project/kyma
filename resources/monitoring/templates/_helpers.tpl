@@ -62,8 +62,8 @@ release: {{ $.Release.Name | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
-helm.sh/chart: {{ include "prometheus-operator.chartref" . }}
-{{ include "prometheus-operator.selectorLabels" . }}
+helm.sh/chart: {{ include "kube-prometheus-stack.chartref" . }}
+{{ include "kube-prometheus-stack.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
