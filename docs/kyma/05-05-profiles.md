@@ -17,7 +17,7 @@ limitRange:
     memory: 32Mi
 ```
 
-To override, for example `limitRange.max.memory` put following in the `profile-{name}.yaml` file: 
+To override `limitRange.max.memory` put the following in the `profile-{name}.yaml` file: 
 
 ```yaml
 limitRange:
@@ -25,6 +25,6 @@ limitRange:
     memory: 5Gi
 ```
 
->**NOTE:** If the `profile-{name}.yaml` file doesn't exist in a component chart simply create it.
+>**NOTE:** If the `profile-{name}.yaml` file doesn't exist in a component chart you can simply create it.
 
 On top of the applied profile the Kyma Operator will put user-defined overrides. For more information, see the [overrides section](#configuration-helm-overrides-for-kyma-installation).
