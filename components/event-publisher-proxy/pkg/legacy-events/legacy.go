@@ -94,7 +94,7 @@ func parseApplicationNameFromPath(path string) string {
 			pathSegments = append(pathSegments, segment)
 		}
 	}
-	return strings.Split(path, "/")[1]
+	return pathSegments[0]
 }
 
 func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *apiv1.PublishEventResponses) {

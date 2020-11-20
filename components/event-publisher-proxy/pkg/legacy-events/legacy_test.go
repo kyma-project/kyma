@@ -1,7 +1,6 @@
 package legacy
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -77,7 +76,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	legacyEventVersion := "v1"
 	data := "{\"foo\": \"bar\"}"
 	timeNow := time.Now()
-	expectedEventType := fmt.Sprintf("%s%s.%s.%s", eventTypePrefix, appName, legacyEventType, legacyEventVersion)
+	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, legacyEventType, legacyEventVersion)
 	timeNowStr := timeNow.Format(time.RFC3339)
 	timeNowFormatted, _ := time.Parse(time.RFC3339, timeNowStr)
 	publishReqParams := &legacyapi.PublishEventParametersV1{
