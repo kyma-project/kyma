@@ -25,7 +25,7 @@ knative-eventing:
           - kyma-system
           - kyma-installer
           - istio-system
-  sources-controller:
+  sourcesController:
     resources:
       limits:
         cpu: 200m
@@ -33,7 +33,7 @@ knative-eventing:
       requests:
         cpu: 100m
         memory: 100Mi
-  eventing-webhook:
+  eventingWebhook:
     resources:
       limits:
         cpu: 200m
@@ -41,7 +41,7 @@ knative-eventing:
       requests:
         cpu: 20m
         memory: 20Mi
-  eventing-controller:
+  eventingController:
     resources:
       limits:
         cpu: 200m
