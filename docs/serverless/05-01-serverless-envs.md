@@ -3,11 +3,11 @@ title: Environment variables
 type: Configuration
 ---
 
-Configuration of Function's environment variables.
+You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a ConfigMap.
 
-## Use ConfigMap's key-values to define Function's environment variables.
+## Define environment variables in a ConfigMap
 
-See example of a Function using the value of the `my-var` key, stored in `my-vars-cm` ConfigMap, as `MY_VAR` environment variable.
+ConfigMaps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a ConfigMap, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` ConfigMap as the `MY_VAR` environment variable.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
