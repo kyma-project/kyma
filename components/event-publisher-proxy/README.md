@@ -78,5 +78,5 @@ EOF
 | CLIENT_SECRET           |               | The Client Secret used to acquire Access Tokens from the Authentication server.               |
 | TOKEN_ENDPOINT          |               | The Authentication Server Endpoint to provide Access Tokens.                                  |
 | EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |
-| BEB_NAMESPACE           |               | It is the name of the namespace in BEB                                                        |
-| EVENT_TYPE_PREFIX       |               | It is the prefix of the eventType as per BEB specification                                    |
+| BEB_NAMESPACE           |               | The name of the namespace in BEB                                                        |
+| EVENT_TYPE_PREFIX       |               | The prefix of the eventType as per BEB event specification                                    |
