@@ -9,7 +9,7 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  profile: "evaluation"
+  profile: ""
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
