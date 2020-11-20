@@ -1,0 +1,20 @@
+deployment:
+  resources:
+    cpu: 50m
+
+eventService:
+  deployment:
+    resources:
+      limits:
+        memory: 24Mi
+      requests:
+        memory: 8Mi
+
+validator:
+  deployment:
+    resources:
+      limits:
+        memory: 18Mi
+      requests:
+        memory: 6Mi
+    

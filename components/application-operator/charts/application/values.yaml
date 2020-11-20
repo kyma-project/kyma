@@ -9,6 +9,8 @@ deployment:
     proxyTimeout: 10
     proxyCacheTTL: 120
     requestLogging: false
+  resources:
+    cpu: 100m
 
 service:
   externalapi:
@@ -55,6 +57,20 @@ eventService:
       maxRequestSize: 65536
       requestTimeout: 10
       requestLogging: false
+    resources:
+      limits:
+        memory: 96Mi
+      requests:
+        memory: 32Mi
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
+
+validator:
+  deployment:
+    resources:
+      limits:
+        memory: 96Mi
+      requests:
+        memory: 32Mi
+    

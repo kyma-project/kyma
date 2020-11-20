@@ -1,0 +1,25 @@
+knative-eventing:
+  sources-controller:
+    resources:
+      limits:
+        cpu: 50m
+        memory: 50Mi
+      requests:
+        cpu: 25m
+        memory: 25Mi
+  eventing-webhook:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 10Mi
+  eventing-controller:
+    resources:
+      limits:
+        cpu: 50m
+        memory: 50Mi
+      requests:
+        cpu: 25m
+        memory: 25Mi

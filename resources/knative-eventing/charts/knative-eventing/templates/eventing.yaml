@@ -931,11 +931,11 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ index .Values "knative-eventing" "eventing-controller" "resources" "limits" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "eventing-controller" "resources" "limits" "memory" }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ index .Values "knative-eventing" "eventing-controller" "resources" "requests" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "eventing-controller" "resources" "requests" "memory" }}
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - mountPath: /etc/config-logging
@@ -991,11 +991,11 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ index .Values "knative-eventing" "sources-controller" "resources" "limits" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "sources-controller" "resources" "limits" "memory" }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ index .Values "knative-eventing" "sources-controller" "resources" "requests" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "sources-controller" "resources" "requests" "memory" }}
         volumeMounts:
         - mountPath: /etc/config-logging
           name: config-logging
@@ -1160,11 +1160,11 @@ spec:
         name: eventing-webhook
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ index .Values "knative-eventing" "eventing-webhook" "resources" "limits" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "eventing-webhook" "resources" "limits" "memory" }}
           requests:
-            cpu: 20m
-            memory: 20Mi
+            cpu: {{ index .Values "knative-eventing" "eventing-webhook" "resources" "requests" "cpu" }}
+            memory: {{ index .Values "knative-eventing" "eventing-webhook" "resources" "requests" "memory" }}
         terminationMessagePolicy: FallbackToLogsOnError
       serviceAccountName: eventing-webhook
 
