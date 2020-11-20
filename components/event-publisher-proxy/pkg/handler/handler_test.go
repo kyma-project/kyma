@@ -501,6 +501,90 @@ func TestHandlerForBEBFailures(t *testing.T) {
 	}
 }
 
+func TestHandlerForHugeRequests(t *testing.T) {
+	var (
+		port                  = 8888
+		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
+		bebNs                 = "/beb.namespace"
+		eventTypePrefix       = "event.type.prefix"
+	)
+	mockServer := testingutils.NewMockServer()
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
+	defer mockServer.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	beb400CEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsHTTP400Endpoint)
+	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
+
+	cfg := testingutils.NewEnvConfig(
+		beb400CEURL,
+		authURL,
+		testingutils.WithPort(port),
+		testingutils.WithBEBNamespace(bebNs),
+		testingutils.WithEventTypePrefix(eventTypePrefix),
+	)
+	client := oauth.NewClient(ctx, cfg)
+	defer client.CloseIdleConnections()
+
+	msgSender := sender.NewHttpMessageSender(beb400CEURL, client)
+	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+	legacyTransformer := legacy.NewTransformer(cfg.BEBNamespace, cfg.EventTypePrefix)
+
+	// Limiting the accepted size of the request to 2 Bytes
+	opts := &options.Options{MaxRequestSize: 2}
+	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, logrus.New())
+	go func() {
+		if err := handler.Start(ctx); err != nil {
+			t.Errorf("failed to start handler with error: %v", err)
+		}
+	}()
+
+	waitForHandlerToStart(t, healthEndpoint)
+
+	testCases := []struct {
+		name           string
+		targetEndpoint string
+		provideMessage func() (string, http.Header)
+		endPoint       string
+		wantStatusCode int
+	}{
+		{
+			name: "Should fail with HTTP 413 with a request which is larger than 2 Bytes as the maximum accepted size is 2 Bytes",
+			provideMessage: func() (string, http.Header) {
+				return testingutils.ValidLegacyEventPayloadWithEventId, testingutils.GetApplicationJSONHeaders()
+			},
+			endPoint:       publishLegacyEndpoint,
+			wantStatusCode: http.StatusRequestEntityTooLarge,
+		},
+		{
+			name: "Should accept a request which is lesser than 2 Bytes as the maximum accepted size is 2 Bytes",
+			provideMessage: func() (string, http.Header) {
+				return "{}", testingutils.GetBinaryMessageHeaders()
+			},
+			endPoint:       publishEndpoint,
+			wantStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			body, headers := testCase.provideMessage()
+			_ = legacyapi.PublishEventResponses{}
+			resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
+			if err != nil {
+				t.Errorf("failed to send event with error: %v", err)
+			}
+
+			if testCase.wantStatusCode != resp.StatusCode {
+				t.Errorf("test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
+			}
+		})
+	}
+}
+
 // getMissingFieldValidationErrorFor generates an Error message for a missing field
 func getMissingFieldValidationErrorFor(field string) *legacyapi.Error {
 	return &legacyapi.Error{
