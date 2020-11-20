@@ -80,3 +80,9 @@ EOF
 | EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                      |
 | BEB_NAMESPACE           |               | The name of the namespace in BEB                                                        |
 | EVENT_TYPE_PREFIX       |               | The prefix of the eventType as per BEB event specification                                    |
+
+
+## Flags
+| Flag | Default Value | Description                                                                                   |
+| ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
+| maxRequestSize | 65536 | The maximum size of the request |
