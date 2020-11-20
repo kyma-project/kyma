@@ -28,6 +28,13 @@ pod:
     securityContext:
       privileged: false
       allowPrivilegeEscalation: false
+  resources:
+    limits:
+      cpu: 150m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 service:
   name:
