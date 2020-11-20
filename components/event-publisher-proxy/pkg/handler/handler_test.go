@@ -468,7 +468,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			wantResponse: legacyapi.PublishEventResponses{
 				Error: &legacyapi.Error{
 					Status:  400,
-					Message: "invalid request to BEB"},
+					Message: "invalid request"},
 			},
 		},
 		{
