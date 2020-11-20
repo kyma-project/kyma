@@ -1,17 +1,19 @@
 package main
 
 import (
+	"math/rand"
+	"os"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/rest"
-	"math/rand"
-	"os"
+
+	"time"
 
 	controllerruntime "sigs.k8s.io/controller-runtime"
-	"time"
 )
 
 var availableScenarios = map[string][]testSuite{

@@ -62,8 +62,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		return nil, errors.Wrapf(err, "while creating nodejs10 config")
 	}
 
-	//addon := addons.New("test-addon", genericContainer)
-
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
 	cmEnvKey := "CM_ENV_KEY"
 	cmEnvValue := "Value taken as env from ConfigMap"
