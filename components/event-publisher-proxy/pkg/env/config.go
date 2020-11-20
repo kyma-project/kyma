@@ -18,7 +18,7 @@ type Config struct {
 	// BEBNamespace is the name of the namespace in BEB which is used as the event source for legacy events
 	BEBNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
 	// EventTypePrefix is the prefix of each event as per the eventing specification
-	// It follows the eventType format: <eventTypePrefix><appName>.<event-name>.<version>
+	// It follows the eventType format: <eventTypePrefix>.<appName>.<event-name>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:""`
 }
 

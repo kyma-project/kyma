@@ -42,14 +42,14 @@ func TestFormatEventType4BEB(t *testing.T) {
 		wantedEventType string
 	}{
 		{
-			eventTypePrefix: "prefix.",
+			eventTypePrefix: "prefix",
 			app:             "app",
 			eventType:       "order.foo",
 			version:         "v1",
 			wantedEventType: "prefix.app.order.foo.v1",
 		},
 		{
-			eventTypePrefix: "prefix.",
+			eventTypePrefix: "prefix",
 			app:             "app",
 			eventType:       "order-foo",
 			version:         "v1",
@@ -68,7 +68,7 @@ func TestFormatEventType4BEB(t *testing.T) {
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	bebNs := "beb.namespace"
-	eventTypePrefix := "event.type.prefix."
+	eventTypePrefix := "event.type.prefix"
 	legacyTransformer := NewTransformer(bebNs, eventTypePrefix)
 	eventID := "id"
 	appName := "foo-app"

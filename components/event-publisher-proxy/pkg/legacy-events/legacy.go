@@ -18,6 +18,10 @@ import (
 var (
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(AllowedEventIDChars).MatchString
+	// eventTypePrefixFormat is driven by BEB specification.
+	// An eventtype must have atleast 4 segments separated by dots in the form of:
+	// <domainNamespace>.<businessObjectName>.<operation>.<version>
+	eventTypePrefixFormat = "%s.%s.%s.%s"
 )
 
 type Transformer struct {
@@ -203,6 +207,6 @@ func (t Transformer) convertPublishRequestToCloudEvent(appName string, publishRe
 
 // formatEventType4BEB format eventType as per BEB spec
 func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
-	eventType4BEB := fmt.Sprintf("%s%s.%s.%s", eventTypePrefix, app, eventType, version)
+	eventType4BEB := fmt.Sprintf(eventTypePrefixFormat, eventTypePrefix, app, eventType, version)
 	return strings.ReplaceAll(eventType4BEB, "-", ".")
 }

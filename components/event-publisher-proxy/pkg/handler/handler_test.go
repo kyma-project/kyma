@@ -2,12 +2,15 @@ package handler
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -120,8 +123,12 @@ func TestHandler(t *testing.T) {
 		},
 	}
 
+	port, err := generatePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
+
 	var (
-		port            = 8888
 		healthEndpoint  = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishEndpoint = fmt.Sprintf("http://localhost:%d/publish", port)
 	)
@@ -175,14 +182,16 @@ func TestHandler(t *testing.T) {
 func TestHandlerTimeout(t *testing.T) {
 	t.Parallel()
 
+	port, err := generatePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
 	var (
-		port               = 9999
 		requestTimeout     = time.Nanosecond  // short request timeout
 		serverResponseTime = time.Millisecond // long server response time
 		healthEndpoint     = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
 	)
-
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
 	mockServer.Start(t, tokenEndpoint, eventsEndpoint, "")
 	defer mockServer.Close()
@@ -249,8 +258,12 @@ func waitForHandlerToStart(t *testing.T, healthEndpoint string) {
 }
 
 func TestHandlerForLegacyEvents(t *testing.T) {
+	t.Parallel()
+	port, err := generatePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
 	var (
-		port                  = 8888
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 		bebNs                 = "/beb.namespace"
@@ -704,3 +717,30 @@ func validateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacy
 		t.Errorf("invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
 	}
 }
+
+// generatePort generates a random 5 digit port
+func generatePort() (int, error) {
+	max := 4
+	// Add 4 as prefix to make it 5 digits but less than 65535
+	add4AsPrefix := "4"
+	b := make([]byte, max)
+	n, err := io.ReadAtLeast(rand.Reader, b, max)
+	if n != max {
+		return 0, err
+	}
+	if err != nil {
+		return 0, err
+	}
+	for i := 0; i < len(b); i++ {
+		b[i] = table[int(b[i])%len(table)]
+	}
+
+	num, err := strconv.Atoi(fmt.Sprintf("%s%s", add4AsPrefix, string(b)))
+	if err != nil {
+		return 0, err
+	}
+
+	return num, nil
+}
+
+var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
