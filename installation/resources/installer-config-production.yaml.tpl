@@ -69,7 +69,7 @@ data:
   prometheus.prometheusSpec.resources.limits.memory: "3Gi"
   prometheus.prometheusSpec.resources.requests.cpu: "300m"
   prometheus.prometheusSpec.resources.requests.memory: "1Gi"
-  prometheus-istio.server.resources.limits.memory: "3Gi"
+  prometheus-istio.server.resources.limits.memory: "4Gi"
   alertmanager.alertmanagerSpec.retention: "240h"
 
 ---

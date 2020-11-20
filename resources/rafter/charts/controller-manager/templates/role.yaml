@@ -37,6 +37,11 @@ rules:
   - get
   - update
   - patch
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs:     ['use']
+  resourceNames:
+    - {{ include "rafter.deployment.fullname" . }}
 {{- if .Values.rbac.namespaced.role.extraRules }}
 {{ toYaml .Values.rbac.namespaced.role.extraRules | nindent 0 }}
 {{- end }}
