@@ -133,6 +133,16 @@ spec:
       {{- range $namespaces }}
       - {{ . }}
       {{- end }}
+  probeSelector: {}
+  probeNamespaceSelector:
+    matchExpressions:
+    - key: name
+      operator: In
+      values:
+      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
+      {{- range $namespaces }}
+      - {{ . }}
+      {{- end }}
 {{ else }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
   serviceMonitorSelector:
