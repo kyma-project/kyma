@@ -1228,7 +1228,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "utc",
+        "timezone": "",
         "title": "Kyma / Monitoring / Prometheus",
         "uid": "",
         "version": 0
