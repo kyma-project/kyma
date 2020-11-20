@@ -422,8 +422,12 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 }
 
 func TestHandlerForBEBFailures(t *testing.T) {
+	t.Parallel()
+	port, err := generatePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
 	var (
-		port                  = 8888
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 		publishEndpoint       = fmt.Sprintf("http://localhost:%d/publish", port)
@@ -515,8 +519,12 @@ func TestHandlerForBEBFailures(t *testing.T) {
 }
 
 func TestHandlerForHugeRequests(t *testing.T) {
+	t.Parallel()
+	port, err := generatePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
 	var (
-		port                  = 8888
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 		bebNs                 = "/beb.namespace"
