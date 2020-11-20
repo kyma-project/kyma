@@ -1,0 +1,5 @@
+deployment:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi

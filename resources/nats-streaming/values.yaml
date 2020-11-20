@@ -28,7 +28,7 @@ global:
       # If set to "-", storageClassName: "", which disables dynamic provisioning
       # If defined, storageClassName: <storageClass>
       # storageClass: "-"
-      enabled: true
+      enabled: false
       accessMode: ReadWriteOnce
       # Max duration for which an event can be stored (0 for unlimited)
       maxAge: 24h
