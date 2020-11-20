@@ -57,14 +57,14 @@ func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint, eventsWi
 		case eventsWithHTTP400:
 			{
 				w.WriteHeader(http.StatusBadRequest)
-				_, err := w.Write([]byte("invalid request as foo does not comply with certain spec"))
+				_, err := w.Write([]byte("invalid request"))
 				if err != nil {
 					t.Errorf("failed to write message: %v", err)
 				}
 			}
 		default:
 			{
-				t.Errorf("m	ock server supports the following endpoints only: [%s]", tokenEndpoint)
+				t.Errorf("mock server supports the following endpoints only: [%s]", tokenEndpoint)
 			}
 		}
 	}))
