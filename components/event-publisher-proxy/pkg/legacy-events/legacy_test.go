@@ -1,6 +1,7 @@
 package legacy
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -33,6 +34,39 @@ func TestParseApplicationNameFromPath(t *testing.T) {
 	}
 }
 
+func TestFormatEventType4BEB(t *testing.T) {
+	testCases := []struct {
+		eventTypePrefix string
+		app             string
+		eventType       string
+		version         string
+		wantedEventType string
+	}{
+		{
+			eventTypePrefix: "prefix.",
+			app:             "app",
+			eventType:       "order.foo",
+			version:         "v1",
+			wantedEventType: "prefix.app.order.foo.v1",
+		},
+		{
+			eventTypePrefix: "prefix.",
+			app:             "app",
+			eventType:       "order-foo",
+			version:         "v1",
+			wantedEventType: "prefix.app.order.foo.v1",
+		},
+	}
+
+	for _, tc := range testCases {
+		gotEventType := formatEventType4BEB(tc.eventTypePrefix, tc.app, tc.eventType, tc.version)
+		if tc.wantedEventType != gotEventType {
+			t.Errorf("incorrect formatting of eventType: "+
+				"%s, wanted: %s got: %s", tc.eventType, tc.wantedEventType, gotEventType)
+		}
+	}
+}
+
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	bebNs := "beb.namespace"
 	eventTypePrefix := "event.type.prefix."
@@ -43,7 +77,7 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	legacyEventVersion := "v1"
 	data := "{\"foo\": \"bar\"}"
 	timeNow := time.Now()
-	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, legacyEventType, legacyEventVersion)
+	expectedEventType := fmt.Sprintf("%s%s.%s.%s", eventTypePrefix, appName, legacyEventType, legacyEventVersion)
 	timeNowStr := timeNow.Format(time.RFC3339)
 	timeNowFormatted, _ := time.Parse(time.RFC3339, timeNowStr)
 	publishReqParams := &legacyapi.PublishEventParametersV1{

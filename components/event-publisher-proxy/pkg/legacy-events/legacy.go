@@ -202,7 +202,7 @@ func (t Transformer) convertPublishRequestToCloudEvent(appName string, publishRe
 }
 
 // formatEventType4BEB format eventType as per BEB spec
-func formatEventType4BEB(eventTypePrefix string, app string, eventType string, version string) string {
+func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
 	eventType4BEB := fmt.Sprintf("%s%s.%s.%s", eventTypePrefix, app, eventType, version)
 	return strings.ReplaceAll(eventType4BEB, "-", ".")
 }
