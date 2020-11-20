@@ -47,7 +47,7 @@ func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint, eventsWi
 				m.generatedTokensCount++
 				token := fmt.Sprintf("access_token=token-%d&token_type=bearer&expires_in=%d", time.Now().UnixNano(), m.expiresInSec)
 				if _, err := w.Write([]byte(token)); err != nil {
-					t.Errorf("Failed to write HTTP response")
+					t.Errorf("failed to write HTTP response")
 				}
 			}
 		case eventsEndpoint:
@@ -59,12 +59,12 @@ func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint, eventsWi
 				w.WriteHeader(http.StatusBadRequest)
 				_, err := w.Write([]byte("invalid request as foo does not comply with certain spec"))
 				if err != nil {
-					t.Fatalf("failed to write message: %v", err)
+					t.Errorf("failed to write message: %v", err)
 				}
 			}
 		default:
 			{
-				t.Errorf("Mock server supports the following endpoints only: [%s]", tokenEndpoint)
+				t.Errorf("m	ock server supports the following endpoints only: [%s]", tokenEndpoint)
 			}
 		}
 	}))

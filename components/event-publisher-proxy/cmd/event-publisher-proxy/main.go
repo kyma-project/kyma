@@ -16,7 +16,7 @@ import (
 
 func main() {
 	logger := logrus.New()
-	options := options.ParseArgs()
+	opts := options.ParseArgs()
 	cfg := new(env.Config)
 	if err := envconfig.Process("", cfg); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
@@ -41,7 +41,7 @@ func main() {
 		cfg.EventTypePrefix,
 	)
 	// start handler which blocks until it receives a shutdown signal
-	if err := handler.NewHandler(messageReceiver, messageSender, cfg.RequestTimeout, legacyTransformer, options, logger).Start(ctx); err != nil {
+	if err := handler.NewHandler(messageReceiver, messageSender, cfg.RequestTimeout, legacyTransformer, opts, logger).Start(ctx); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 

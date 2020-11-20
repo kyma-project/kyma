@@ -468,7 +468,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			wantResponse: legacyapi.PublishEventResponses{
 				Error: &legacyapi.Error{
 					Status:  400,
-					Message: "invalid request as foo does not comply with certain spec"},
+					Message: "invalid request to BEB"},
 			},
 		},
 		{
@@ -537,6 +537,37 @@ func getInvalidValidationErrorFor(field string) *legacyapi.Error {
 				MoreInfo: "",
 			},
 		},
+	}
+}
+
+func TestIsARequestWithLegacyEvent(t *testing.T) {
+	testCases := []struct {
+		inputURI     string
+		wantedResult bool
+	}{
+		{
+			inputURI:     "/app/v1/events",
+			wantedResult: true,
+		},
+		{
+			inputURI:     "///app/v1/events",
+			wantedResult: true,
+		},
+		{
+			inputURI:     "///app/v1//events",
+			wantedResult: false,
+		},
+		{
+			inputURI:     "///app/v1/foo/events",
+			wantedResult: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		got := isARequestWithLegacyEvent(tc.inputURI)
+		if tc.wantedResult != got {
+			t.Errorf("incorrect result with inputURI: %s, wanted: %v, got: %v", tc.inputURI, tc.wantedResult, got)
+		}
 	}
 }
 

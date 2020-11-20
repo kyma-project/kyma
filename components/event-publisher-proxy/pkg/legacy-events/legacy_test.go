@@ -7,6 +7,32 @@ import (
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
+func TestParseApplicationNameFromPath(t *testing.T) {
+	testCases := []struct {
+		name          string
+		inputPath     string
+		wantedAppName string
+	}{
+		{
+			name:          "should return application when correct path is used",
+			inputPath:     "/application/v1/events",
+			wantedAppName: "application",
+		}, {
+			name:          "should return application when extra slash is in the path",
+			inputPath:     "//application/v1/events",
+			wantedAppName: "application",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotAppName := parseApplicationNameFromPath(tc.inputPath)
+			if tc.wantedAppName != gotAppName {
+				t.Errorf("incorrect parsing, wanted: %s, got: %s", tc.wantedAppName, gotAppName)
+			}
+		})
+	}
+}
+
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	bebNs := "beb.namespace"
 	eventTypePrefix := "event.type.prefix."

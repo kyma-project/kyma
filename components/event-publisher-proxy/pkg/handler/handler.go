@@ -110,17 +110,14 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 }
 
 func isARequestWithCE(uri string) bool {
-	if uri == publishEndpoint {
-		return true
-	}
-	return false
+	return uri == publishEndpoint
 }
 func isARequestWithLegacyEvent(uri string) bool {
 	// Assuming the path should be of the form /:application/v1/events
 	uriPathSegments := make([]string, 0)
 
 	for _, segment := range strings.Split(uri, "/") {
-		if strings.Trim(segment, " ") != "" {
+		if strings.TrimSpace(segment) != "" {
 			uriPathSegments = append(uriPathSegments, segment)
 		}
 	}
