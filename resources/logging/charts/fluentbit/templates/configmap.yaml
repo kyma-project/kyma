@@ -145,11 +145,11 @@ data:
 {{- else }}
         Index           {{ .Values.conf.Output.Elasticsearch.Index }}
 {{- end }}
-        Retry_Limit     False
+        Retry_Limit     {{ .Values.conf.Output.Elasticsearch.Retry_Limit }}
         Generate_ID     {{ .Values.conf.Output.Elasticsearch.Generate_ID }}
 {{- if .Values.conf.Output.Elasticsearch.Replace_Dots }}
         Replace_Dots    {{ .Values.conf.Output.Elasticsearch.Replace_Dots }}
-{{- end }}      
+{{- end }}
         Buffer_Size     {{ .Values.conf.Output.Elasticsearch.Buffer_Size }}
 {{- if .Values.conf.Output.Elasticsearch.Time_Key }}
         Time_Key        {{ .Values.conf.Output.Elasticsearch.Time_Key }}
