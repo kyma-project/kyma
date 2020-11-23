@@ -34,6 +34,7 @@ authentication:
   oauthClientSecret: "$bebOauthClientSecret"
   oauthTokenEndpoint: "$bebOauthTokenEndpoint"
   publishUrl: "$bebPublishUrl"
+  bebNamespace: "$bebNamespace"
 EOF
 
 $ helm install \
@@ -61,6 +62,7 @@ stringData:
     authentication.oauthClientSecret: "$bebOauthClientSecret"
     authentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
     authentication.publishUrl: "$bebPublishUrl"
+    authentication.bebNamespace: "$bebNamespace"
 EOF
 
 $ kyma install -s <source-image> -o installation-overrides-epp.yaml
