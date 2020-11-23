@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: application-operator
+  name: {{ .Chart.Name }}
 spec:
   allowPrivilegeEscalation: false
   fsGroup:
@@ -14,3 +14,5 @@ spec:
     rule: RunAsAny
   supplementalGroups:
     rule: RunAsAny
+  volumes:
+    - '*'
