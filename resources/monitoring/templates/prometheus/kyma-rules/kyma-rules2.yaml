@@ -3,8 +3,8 @@ kind: PrometheusRule
 metadata:
   name: kyma2.rules
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
   - name: kubernetes.rules
@@ -31,7 +31,7 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
+        description: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
           for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}
     - alert: APIServerLatencyHigh
       expr: apiserver_latency_seconds:quantile{quantile="0.99",subresource!="log",verb!~"^(?:WATCH|WATCHLIST|PROXY|CONNECT)$"}
@@ -40,7 +40,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        message: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
+        description: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
           for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}
     - alert: APIServerErrorsHigh2
       expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
@@ -49,7 +49,7 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
+        description: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
     - alert: APIServerErrorsHigh
       expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
         * 100 > 5
@@ -57,25 +57,25 @@ spec:
       labels:
         severity: critical
       annotations:
-        message: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
+        description: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
     - alert: K8SApiserverDown
       expr: absent(up{job="apiserver"} == 1)
       for: 20m
       labels:
         severity: critical
       annotations:
-        message: No API servers are reachable or all have disappeared from service
+        description: No API servers are reachable or all have disappeared from service
           discovery
     - alert: K8sCertificateExpirationNotice2
       labels:
         severity: warning
       annotations:
-        message: Kubernetes API Certificate is expiring soon (less than 7 days)
+        description: Kubernetes API Certificate is expiring soon (less than 7 days)
       expr: sum(apiserver_client_certificate_expiration_seconds_bucket{le="604800"}) > 0
 
     - alert: K8sCertificateExpirationNotice
       labels:
         severity: critical
       annotations:
-        message: Kubernetes API Certificate is expiring in less than 1 day
+        description: Kubernetes API Certificate is expiring in less than 1 day
       expr: sum(apiserver_client_certificate_expiration_seconds_bucket{le="86400"}) > 0

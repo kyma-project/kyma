@@ -21,6 +21,13 @@ deployment:
   labels: {}
   annotations: {}
   extraProperties: {}
+  resources:
+    requests:
+      cpu: 30m
+      memory: 50Mi
+    limits:
+      cpu: 300m
+      memory: 300Mi
 
 pod:
   annotations:

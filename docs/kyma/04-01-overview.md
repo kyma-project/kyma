@@ -49,6 +49,7 @@ Follow these installation guides to install Kyma locally or on a cluster:
 
 Read the rest of the installation documents to learn how to:
 - [Disable the selected components' installation or install them separately](#configuration-custom-component-installation)
+- [Enable installation profiles](#configuration-profiles)
 - [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
 

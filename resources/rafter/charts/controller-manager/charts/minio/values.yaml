@@ -284,3 +284,7 @@ metrics:
     # namespace: monitoring
     # interval: 30s
     # scrapeTimeout: 10s
+
+pod:
+  extraProperties: {}
+  extraContainerProperties: {}

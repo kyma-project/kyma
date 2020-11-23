@@ -1,0 +1,19 @@
+webhook:
+  values:
+    buildJob:
+      resources:
+        defaultPreset: "slow"
+    function:
+      replicas:
+        defaultPreset: "S"
+      resources:
+        defaultPreset: "XS"
+  deployment:
+    resources:
+      requests:
+        cpu: 10m
+
+docker-registry:
+  resources:
+    requests:
+      cpu: 10m

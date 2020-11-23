@@ -1,0 +1,17 @@
+{{- if .Values.install.enabled }}
+
+apiVersion: nats.io/v1alpha2
+kind: NatsCluster
+metadata:
+  name: {{ include "nats.fullname" . }}
+spec:
+  size: 1
+  version: "2.1.8"
+  pod:
+    annotations:
+      sidecar.istio.io/inject: "false"
+  natsConfig:
+    debug: true
+    trace: true
+
+ {{- end }}
