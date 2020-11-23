@@ -51,7 +51,7 @@ EOF
 ```
 
 This command supports **legacy events**:
-```
+```bash
 curl -v -X POST \
     -H "Content-Type: application/json" \
     --data @<(<<EOF
