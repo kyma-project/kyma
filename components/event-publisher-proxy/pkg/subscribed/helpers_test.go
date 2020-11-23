@@ -1,9 +1,10 @@
 package subscribed
 
 import (
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"reflect"
 	"testing"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 func TestFilterEventTypeVersions(t *testing.T) {

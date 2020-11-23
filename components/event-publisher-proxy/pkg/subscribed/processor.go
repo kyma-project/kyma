@@ -1,12 +1,13 @@
 package subscribed
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
-	"net/http"
 )
 
 type Processor struct {

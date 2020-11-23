@@ -3,10 +3,11 @@ package receiver
 import (
 	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"go.opencensus.io/plugin/ochttp"
 )

@@ -1,9 +1,10 @@
 package subscribed
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/sirupsen/logrus"
-	"net/http"
 
 	"encoding/json"
 )

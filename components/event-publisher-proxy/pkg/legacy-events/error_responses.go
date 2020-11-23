@@ -1,8 +1,9 @@
 package legacy
 
 import (
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
 // An ErrorResponse represents an error with a status code and an error message

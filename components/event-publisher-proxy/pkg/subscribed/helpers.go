@@ -3,6 +3,10 @@ package subscribed
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -11,9 +15,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
-	"log"
-	"strings"
-	"time"
 )
 
 const (

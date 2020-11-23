@@ -2,6 +2,7 @@ package legacy
 
 import (
 	"fmt"
+
 	api "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	log "github.com/sirupsen/logrus"
 
