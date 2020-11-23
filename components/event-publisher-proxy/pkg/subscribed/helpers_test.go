@@ -92,12 +92,12 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 		{
 			name: "should return events from the map in a slice",
 			inputMap: map[Event]bool{
-				NewEvent("bar", "v2"): true,
 				NewEvent("foo", "v1"): true,
+				NewEvent("bar", "v2"): true,
 			},
 			wantedEvents: []Event{
-				NewEvent("bar", "v2"),
 				NewEvent("foo", "v1"),
+				NewEvent("bar", "v2"),
 			},
 		}, {
 			name:         "should return no events for an empty map of events",
@@ -108,8 +108,17 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotEvents := ConvertEventsMapToSlice(tc.inputMap)
-			if !reflect.DeepEqual(tc.wantedEvents, gotEvents) {
-				t.Errorf("incorrect slice of events, wanted: %v, got: %v", tc.wantedEvents, gotEvents)
+			for _, event := range gotEvents {
+				found := false
+				for _, wantEvent := range tc.wantedEvents {
+					if event == wantEvent {
+						found = true
+						continue
+					}
+				}
+				if !found {
+					t.Errorf("incorrect slice of events, wanted: %v, got: %v", tc.wantedEvents, gotEvents)
+				}
 			}
 		})
 	}
