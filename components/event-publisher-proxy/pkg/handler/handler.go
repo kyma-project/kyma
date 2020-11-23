@@ -4,7 +4,11 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 
 	"github.com/sirupsen/logrus"
 
@@ -23,6 +27,9 @@ import (
 const (
 	// noDuration signals that the dispatch step has not started yet.
 	noDuration = -1
+
+	publishEndpoint      = "/publish"
+	legacyEndpointSuffix = "/v1/events"
 )
 
 var (
@@ -43,15 +50,26 @@ type Handler struct {
 	Sender *sender.HttpMessageSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
+	// LegacyTransformer handles transformations needed to handle legacy events
+	LegacyTransformer *legacy.Transformer
 	// RequestTimeout timeout for outgoing requests
 	RequestTimeout time.Duration
 	// Logger default logger
 	Logger *logrus.Logger
+	// Options configures HTTP server
+	Options *options.Options
 }
 
 // NewHandler returns a new Handler instance for the Event Publisher Proxy.
-func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, logger *logrus.Logger) *Handler {
-	return &Handler{Receiver: receiver, Sender: sender, RequestTimeout: requestTimeout, Logger: logger}
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, options *options.Options, logger *logrus.Logger) *Handler {
+	return &Handler{
+		Receiver:          receiver,
+		Sender:            sender,
+		RequestTimeout:    requestTimeout,
+		LegacyTransformer: legacyTransformer,
+		Logger:            logger,
+		Options:           options,
+	}
 }
 
 // Start starts the Handler with the given context.
@@ -69,13 +87,65 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		h.writeResponse(writer, http.StatusMethodNotAllowed, nil)
 		return
 	}
+	// Limit server from reading a huge payload
+	request.Body = http.MaxBytesReader(writer, request.Body, h.Options.MaxRequestSize)
+	uri := request.RequestURI
 
-	// validate request URI
-	if request.RequestURI != "/publish" {
-		h.writeResponse(writer, http.StatusNotFound, nil)
+	// Process /publish endpoint
+	// Gets a CE and sends it to BEB
+	if isARequestWithCE(uri) {
+		h.publishCloudEvents(writer, request)
 		return
 	}
 
+	// Process /:application/v1/events
+	// Publishes a legacy event as CE v1.0 to BEB
+	if isARequestWithLegacyEvent(uri) {
+		h.publishLegacyEventsAsCE(writer, request)
+		return
+	}
+
+	h.writeResponse(writer, http.StatusNotFound, nil)
+	return
+}
+
+func isARequestWithCE(uri string) bool {
+	return uri == publishEndpoint
+}
+func isARequestWithLegacyEvent(uri string) bool {
+	// Assuming the path should be of the form /:application/v1/events
+	uriPathSegments := make([]string, 0)
+
+	for _, segment := range strings.Split(uri, "/") {
+		if strings.TrimSpace(segment) != "" {
+			uriPathSegments = append(uriPathSegments, segment)
+		}
+	}
+	if len(uriPathSegments) != 3 {
+		return false
+	}
+	if !strings.HasSuffix(uri, legacyEndpointSuffix) {
+		return false
+	}
+	return true
+}
+
+func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
+	event := h.LegacyTransformer.TransformsLegacyRequestsToCE(writer, request)
+	if event == nil {
+		h.Logger.Debug("failed to transform legacy event to CE, event is nil")
+		return
+	}
+	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
+	defer cancel()
+	h.receive(ctx, event)
+	statusCode, dispatchTime, respBody := h.send(ctx, event)
+	// Change response as per old error codes
+	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
+	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+}
+
+func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 
@@ -128,7 +198,7 @@ func (h *Handler) receive(ctx context.Context, event *cev2event.Event) {
 func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.Duration, []byte) {
 	request, err := h.Sender.NewRequestWithTarget(ctx, h.Sender.Target)
 	if err != nil {
-		h.Logger.Errorf("Failed to prepare a cloudevent request with error: %s", err)
+		h.Logger.Errorf("failed to prepare a cloudevent request with error: %s", err)
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
 
@@ -137,20 +207,20 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 
 	err = cloudevents.WriteRequestWithHeaders(ctx, message, request, additionalHeaders)
 	if err != nil {
-		h.Logger.Errorf("Failed to add additional headers to the request with error: %s", err)
+		h.Logger.Errorf("failed to add additional headers to the request with error: %s", err)
 		return http.StatusInternalServerError, noDuration, []byte{}
 	}
 
 	resp, dispatchTime, err := h.sendAndRecordDispatchTime(request)
 	if err != nil {
-		h.Logger.Errorf("Failed to send event and record dispatch time with error: %s", err)
+		h.Logger.Errorf("failed to send event and record dispatch time with error: %s", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		h.Logger.Errorf("Failed to read response body with error: %s", err)
+		h.Logger.Errorf("failed to read response body with error: %s", err)
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 
