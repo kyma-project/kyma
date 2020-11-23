@@ -5,14 +5,20 @@ metadata:
 spec:
   allowPrivilegeEscalation: false
   fsGroup:
-    rule: RunAsAny
+    rule: MustRunAs
+    ranges:
+    - min: 1
+      max: 65535
   runAsUser:
-    rule: RunAsAny
-  # due to fact that helm-release-migration runs as script and requires root privileges
-  privileged: true  #TODO move it to Dockerfile and set USER
+    rule: RunAsAny # due to fact that helm-release-migration runs as script and requires root privileges
+  privileged: false
   seLinux:
     rule: RunAsAny
   supplementalGroups:
-    rule: RunAsAny
+    rule: MustRunAs  
+    ranges:
+    - min: 1
+      max: 65535
   volumes:
-    - '*'
+  - configMap
+  - secret
