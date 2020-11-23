@@ -2,11 +2,12 @@ package receiver
 
 import (
 	"context"
-	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
+
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 // a mocked http.Handler
