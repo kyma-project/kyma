@@ -50,7 +50,7 @@ EOF
     http://<hostname>/publish
 ```
 
-- Supports legacy events
+This command supports **legacy events**:
 ```
 curl -v -X POST \
     -H "Content-Type: application/json" \
