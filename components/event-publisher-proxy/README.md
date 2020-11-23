@@ -31,7 +31,7 @@ $ ko apply -f config/
 
 ### Send Events
 
-- Supports cloud events
+This command supports **cloud events**: 
 ```bash
 curl -v -X POST \
     -H "Content-Type: application/cloudevents+json" \
