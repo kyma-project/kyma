@@ -26,7 +26,7 @@ spec:
     rules:
     - alert: TargetDown
       annotations:
-        desription: '{{`{{`}} printf "%.4g" $value {{`}}`}}% of the {{`{{`}} $labels.job {{`}}`}}/{{`{{`}} $labels.service {{`}}`}} targets in {{`{{`}} $labels.namespace {{`}}`}} namespace are down.'
+        description: '{{`{{`}} printf "%.4g" $value {{`}}`}}% of the {{`{{`}} $labels.job {{`}}`}}/{{`{{`}} $labels.service {{`}}`}} targets in {{`{{`}} $labels.namespace {{`}}`}} namespace are down.'
       expr: 100 * (count(up == 0) BY (job, namespace, service) / count(up) BY (job, namespace, service)) > 10
       for: 10m
       labels:
@@ -36,7 +36,7 @@ spec:
 {{- end }}
     - alert: Watchdog
       annotations:
-        desription: 'This is an alert meant to ensure that the entire alerting pipeline is functional.
+        description: 'This is an alert meant to ensure that the entire alerting pipeline is functional.
 
           This alert is always firing, therefore it should always be firing in Alertmanager
 
