@@ -1,21 +1,23 @@
 {{- /*
-Generated from 'kubelet' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'kubelet' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
-https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.kubelet.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ $.Release.Namespace }}
-  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "kubelet" | trunc 63 | trimSuffix "-" }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "kubelet" | trunc 63 | trimSuffix "-" }}
+  annotations:
+{{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
     {{- end }}
-    app: {{ template "prometheus-operator.name" $ }}-grafana
-{{ include "prometheus-operator.labels" $ | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
 data:
   kubelet.json: |-
     {
@@ -189,7 +191,7 @@ data:
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(kubelet_running_pod_count{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"})",
+                                "expr": "sum(kubelet_running_pods{cluster=\"$cluster\", job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"})",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}instance{{`}}`}}",
@@ -582,6 +584,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -673,6 +676,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -777,6 +781,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -881,6 +886,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -979,6 +985,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1092,6 +1099,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1185,6 +1193,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1291,6 +1300,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1395,6 +1405,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1486,6 +1497,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1591,6 +1603,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1682,6 +1695,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1786,6 +1800,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -1890,6 +1905,7 @@ data:
                             "min": false,
                             "rightSide": false,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": false
                         },
@@ -2015,6 +2031,7 @@ data:
                             "min": false,
                             "rightSide": true,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": true
                         },
@@ -2038,7 +2055,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{cluster=\"$cluster\",job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"}[5m])) by (instance, verb, url, le))",
+                                "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{cluster=\"$cluster\",job=\"kubelet\", metrics_path=\"/metrics\", instance=~\"$instance\"}[5m])) by (instance, verb, url, le))",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}instance{{`}}`}} {{`{{`}}verb{{`}}`}} {{`{{`}}url{{`}}`}}",
@@ -2119,6 +2136,7 @@ data:
                             "min": false,
                             "rightSide": false,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": false
                         },
@@ -2210,6 +2228,7 @@ data:
                             "min": false,
                             "rightSide": false,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": false
                         },
@@ -2301,6 +2320,7 @@ data:
                             "min": false,
                             "rightSide": false,
                             "show": true,
+                            "sideWidth": null,
                             "total": false,
                             "values": false
                         },
