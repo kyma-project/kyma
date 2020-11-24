@@ -81,8 +81,8 @@ rules:
     resources: ["secrets"]
     verbs: ["get", "list", "patch"]
     resourceNames:
-      - {{ .Values.application_connectivity_certs_sync.secrets.oldConnectorGatewaySecret.name }}
-      - {{ .Values.application_connectivity_certs_sync.secrets.newConnectorGatewaySecret.name }}
+      - {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.name }}
+      - {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
