@@ -360,7 +360,7 @@ Get the TLS certificate:
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a JSON file with the Azure Client ID, Client Secret, Subscription ID and Tenant ID:
+3. Create a [service principal](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a JSON file with the Azure Client ID, Client Secret, Subscription ID, and Tenant ID:
 
     ```json
     {
