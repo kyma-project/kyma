@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -115,11 +116,15 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
 		log.Error(err, "Cannot list runtime configmap")
-		return ctrl.Result{}, err
+		// sometimes when the namespace is created and then the function CR is added to that namespace
+		// we have a nasty datarace -> configmap controller couldn't copy needed configmaps in time, before we've reconciled function CR several times
+		// this leads to situation in which the function CR is no longer being reconciled (throwing err several times stop reconcilation, observed in our k3s pipeline)
+		// that's why this RequeueAfter is needed here
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, err
 	}
 
 	if len(runtimeConfigMap.Items) != 1 {
-		return ctrl.Result{}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
 	}
 
 	var deployments appsv1.DeploymentList
