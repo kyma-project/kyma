@@ -2,11 +2,14 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ template "prometheus-operator.fullname" . }}-operator
-  namespace: {{ $.Release.Namespace }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-operator
   labels:
-    app: {{ template "prometheus-operator.name" . }}-operator
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}-operator
+{{- if .Values.global.rbac.pspAnnotations }}
+  annotations:
+{{ toYaml .Values.global.rbac.pspAnnotations | indent 4 }}
+{{- end }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   privileged: false
   # Required to prevent escalations to root.
@@ -23,7 +26,7 @@ spec:
     - 'secret'
     - 'downwardAPI'
     - 'persistentVolumeClaim'
-  hostNetwork: false
+  hostNetwork: {{ .Values.prometheusOperator.hostNetwork }}
   hostIPC: false
   hostPID: false
   runAsUser:

@@ -2,11 +2,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "prometheus-operator.fullname" . }}-alertmanager
-  namespace: {{ $.Release.Namespace }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}-alertmanager
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
+    self-monitor: {{ .Values.alertmanager.serviceMonitor.selfMonitor | quote }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 {{- if .Values.alertmanager.service.labels }}
 {{ toYaml .Values.alertmanager.service.labels | indent 4 }}
 {{- end }}
@@ -41,6 +42,6 @@ spec:
       protocol: TCP
   selector:
     app: alertmanager
-    alertmanager: {{ template "prometheus-operator.fullname" . }}-alertmanager
+    alertmanager: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
   type: "{{ .Values.alertmanager.service.type }}"
 {{- end }}
