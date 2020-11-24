@@ -12,9 +12,7 @@
 #  2. Helm updates deployment of Compass Runtime Agent, and new secret is set as APP_CA_CERTIFICATES_SECRET kyma-gatewy-certs-cacert -> app-connector-certs
 #
 #  Secret app-connector-certs has initially empty field cacert.
-#  W secrecie  app-connector-certs powinien sie znaleść wpis cacert który CRA ustawił wcześniej w secrecie kyma-gatewy-certs-cacert
-#  In our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into app-connector-certs
-#  Zatem w jobie powinniśmy przepisać cacert ze starego kyma-gatewy-certs-cacert do app-connector-certs
+#  So during upgrade in our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into new secret app-connector-certs
 #
 #  Currently is will be populated only after new connection with Compass is established
 
