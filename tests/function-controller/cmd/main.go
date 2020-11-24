@@ -36,7 +36,7 @@ func main() {
 	}
 
 	cfg, err := loadConfig("APP")
-	failOnError(err)
+	failOnError(err, logf)
 	logf.Printf("loaded config")
 
 	restConfig := controllerruntime.GetConfigOrDie()
@@ -50,6 +50,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	rand.Seed(time.Now().UnixNano())
 	for _, scenario := range pickedScenarios {
 		runScenario(scenario, scenarioName, logf, cfg, restConfig)
 	}
@@ -58,14 +59,12 @@ func main() {
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
 func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) {
-	rand.Seed(time.Now().UnixNano())
-
 	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", name))
-	failOnError(err)
+	failOnError(err, logf)
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
-	failOnError(err)
+	failOnError(err, logf)
 }
 
 func loadConfig(prefix string) (config, error) {
@@ -74,8 +73,9 @@ func loadConfig(prefix string) (config, error) {
 	return cfg, err
 }
 
-func failOnError(err error) {
+func failOnError(err error, logf *logrus.Logger) {
 	if err != nil {
-		panic(err)
+		logf.Error(err)
+		os.Exit(1)
 	}
 }
