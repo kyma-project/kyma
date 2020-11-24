@@ -3,6 +3,7 @@ package dex
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/kubernetess/util"
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 	"github.com/pkg/errors"
@@ -234,4 +235,3 @@ func (c *Configurator) isDeploymentReady(rs *appsv1.ReplicaSet, dep *appsv1.Depl
 	}
 	return nil
 }
-

@@ -22,14 +22,15 @@ package util
 import (
 	"errors"
 	"fmt"
-	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
-	apiequality "k8s.io/apimachinery/pkg/api/equality"
-	intstrutil "k8s.io/apimachinery/pkg/util/intstr"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
+
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	intstrutil "k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func FindNewReplicaSet(deployment *appsv1.Deployment, rsList []*appsv1.ReplicaSet) *appsv1.ReplicaSet {
