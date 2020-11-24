@@ -24,7 +24,7 @@ fi
 function makeNewSecretWithCaCert() {
   echo "---> Creating secret ${NEW_SECRET_NAMESPACE}/${NEW_SECRET_NAME} based on cacert value from ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
   set +e
-  msg=$(kubectl create secret generic "${NEW_SECRET_NAME}" -n "${NEW_SECRET_NAMESPACE}" --from-literal=.data.cacert="$1" 2>&1)
+  msg=$(kubectl create secret generic "${NEW_SECRET_NAME}" -n "${NEW_SECRET_NAMESPACE}" --from-literal=cacert="$1" 2>&1)
   status=$?
   set -e
 
@@ -34,13 +34,17 @@ function makeNewSecretWithCaCert() {
 fi
 }
 
-SECRET_OLD_CACERT=$(kubectl -n "${OLD_SECRET_NAMESPACE}" get secret "${OLD_SECRET_NAME}" -o jsonpath='{.data.cacert}' --ignore-not-found)
-if [ -n "SECRET_OLD_CACERT" ]; then
+echo "---> Starting script"
+
+SECRET_OLD_CACERT_BASE64=$(kubectl -n "${OLD_SECRET_NAMESPACE}" get secret "${OLD_SECRET_NAME}" -o jsonpath='{.data.cacert}' --ignore-not-found)
+
+if [ -n "$SECRET_OLD_CACERT_BASE64" ]; then
 
   NEW_SECRET=$(kubectl -n "${NEW_SECRET_NAMESPACE}" get secret "${NEW_SECRET_NAME}" --ignore-not-found)
-  if [-n "NEW_SECRET" ]; then
-    copyOldCaCertToNewSecret "${SECRET_OLD_CACERT}"
+  if [-n "$NEW_SECRET" ]; then
+    copyOldCaCertToNewSecret "${SECRET_OLD_CACERT_BASE64}"
   elif
-    makeNewSecretWithCaCert "${SECRET_OLD_CACERT}"
+    SECRET_OLD_CACERT_DECODED=$(echo"${SECRET_OLD_CACERT_BASE64}" | base64 --decode)
+    makeNewSecretWithCaCert "${SECRET_OLD_CACERT_DECODED}"
   fi
 fi
