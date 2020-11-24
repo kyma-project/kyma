@@ -4,3 +4,12 @@ global:
       secret:
         name: kyma-gateway-certs
       host: compass-gateway-mtls
+
+cacert_migrate_setup_job:
+  secrets:
+    oldConnectorGatewaySecret:
+      namespace: "istio-system"
+      name: "kyma-gatewy-certs-cacert"
+    newConnectorGatewaySecret:
+      namespace: "istio-system"
+      name: "app-connector-certs"

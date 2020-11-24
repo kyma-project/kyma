@@ -1,25 +1,23 @@
-# migrate app-connector-certs for cacert value
-# problem
-#  core/charts/gateway/templates
+# Migrate app-connector-certs for cacert value
+# This script is meant to fix problem with api empty gateway cert that remains after migration to from Kyma 1.16 to Kyma 1.17
 #
-#  Compass Runtime Agent podczas polaczenia wypełnia certyfikat dla API gateway ustawiajac pole cacert w sekrecie
+#  Compass Runtime Agent while establishing SKR connection with management plane fills certificate for API gateway by
+#  setting cacert filed in secret
 #
-#  W 1.16 secret nazywal się kyma-gatewy-certs-cacert
-#  W 1.17 ten secret nazywa się app-connector-certs
+#  In 1.16 secret name is kyma-gatewy-certs-cacert
+#  W 1.17 secret name is app-connector-certs
 #
-# Moment upgrade:
-#  1. Tworzony jest nowy cert app-connector-certs stary kyma-gatewy-certs-cacert zaraz zniknie
-#  2. Helm updateuje deployment CRA, wskazujemy na nowy cert jako APP_CA_CERTIFICATES_SECRET kyma-gatewy-certs-cacert -> app-connector-certs
+# During upgrade:
+#  1. New secret is created app-connector-certs the old one kyma-gatewy-certs-cacert is going to dissapear
+#  2. Helm updates deployment of Compass Runtime Agent, and new secret is set as APP_CA_CERTIFICATES_SECRET kyma-gatewy-certs-cacert -> app-connector-certs
 #
+#  Secret app-connector-certs has initially empty field cacert.
 #  W secrecie  app-connector-certs powinien sie znaleść wpis cacert który CRA ustawił wcześniej w secrecie kyma-gatewy-certs-cacert
+#  In our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into app-connector-certs
 #  Zatem w jobie powinniśmy przepisać cacert ze starego kyma-gatewy-certs-cacert do app-connector-certs
 #
-#  Teraz jest tak, że dopiero przy regenracji polaczenia Compass connection ta wartość jest wpisywana
-#  Secret jest definicja secretu helmowego
-#
-# Pytania: namespace? / uruchomienie? / zależności do utworzenia secretu? / job goatów czy może dałoby sie wykorzystać
-# 3 zmieznne / 3 klucze by przerzucic zawratosc calego secretu. Create secret from literal
-#
+#  Currently is will be populated only after new connection with Compass is established
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -53,9 +51,15 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-cacert-migrate-job
           image: "{{ .Values.global.containerRegistry.path }}/compass-runtime-agent-cacert-migrate-job:{{ .Values.global.cacert_migrate_setup_job.version }}"
-          args:
-#            - "--oldConnectorGatewayCertificateSecret={{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.namespace }}/{{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.name }}"
-#            - "--newConnectorGatewaySecret={{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.namespace }}/{{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}"
+          env:
+            - name: OLD_SECRET_NAME
+              value: {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.name }}
+            - name: OLD_SECRET_NAMESPACE
+              value: {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.namespace }}
+            - name: NEW_SECRET_NAME
+              value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}
+            - name: NEW_SECRET_NAMESPACE
+              value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.namespace }}
           command:
             - bash
             - -c
