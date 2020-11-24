@@ -15,6 +15,15 @@ global:
 
 managementPlane: {} # default value
 
+cacert_migrate_setup_job:
+  secrets:
+    oldConnectorGatewaySecret:
+      namespace: "istio-system"
+      name: "kyma-gatewy-certs-cacert"
+    newConnectorGatewaySecret:
+      namespace: "istio-system"
+      name: "app-connector-certs"
+
 compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
