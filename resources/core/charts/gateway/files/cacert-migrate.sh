@@ -1,7 +1,7 @@
 set -e
 set -o pipefail
 
-function migrateOldCaCertForSecret() {
+function copyOldCaCertToNewSecret() {
   TLS_CERT_YAML=$(cat << EOF
 ---
 data:
