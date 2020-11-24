@@ -79,7 +79,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "list", "patch"]
+    verbs: ["get", "list", "create", "patch"]
     resourceNames:
       - {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.name }}
       - {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}
