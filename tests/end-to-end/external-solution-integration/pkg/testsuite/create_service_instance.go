@@ -78,7 +78,7 @@ func (s *CreateServiceInstance) Run() error {
 		return err
 	}
 
-	return retry.Do(s.isServiceInstanceCreated, retrygo.Attempts(180), retrygo.Delay(time.Second))
+	return retry.Do(s.isServiceInstanceCreated, retrygo.Attempts(40), retrygo.Delay(5*time.Second))
 }
 
 func (s *CreateServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
@@ -113,7 +113,7 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 		return err
 	}
 
-	if svcInstance.Status.ProvisionStatus != "Provisioned" {
+	if svcInstance.Status.ProvisionStatus != scv1beta1.ServiceInstanceProvisionStatusProvisioned {
 		return errors.Errorf("unexpected provision status: %s", svcInstance.Status.ProvisionStatus)
 	}
 	return nil

@@ -39,7 +39,7 @@ func RegisterEmptyApplicationInCompass(name string, director *testkit.CompassDir
 
 // Name returns name of the step
 func (s *RegisterLegacyApplicationInCompass) Name() string {
-	return fmt.Sprintf("Register application %s in compass", s.name)
+	return fmt.Sprintf("Register legacy application %s in compass", s.name)
 }
 
 // Run executes the step
