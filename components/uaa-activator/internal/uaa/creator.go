@@ -50,23 +50,6 @@ func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
-		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			old := v1beta1.ServiceInstance{}
-			if err := p.cli.Get(ctx, p.config.ServiceInstance, &old); err != nil {
-				return errors.Wrap(err, "while fetching service instance")
-			}
-
-			// Updating only PlanReference and Parameters, other fields are immutable
-			// and need to remain the same, otherwise you get such an error:
-			//   admission webhook "validating.serviceinstances.servicecatalog.k8s.io" denied the request: spec.externalID: Invalid value: "": field is immutable
-			toUpdate := old.DeepCopy()
-			toUpdate.Spec.PlanReference = instance.Spec.PlanReference
-			toUpdate.Spec.ParametersFrom = instance.Spec.ParametersFrom
-			return p.cli.Update(ctx, toUpdate)
-		})
-		if err != nil {
-			return errors.Wrap(err, "while updating UAA ServiceInstance")
-		}
 	default:
 		return err
 	}
