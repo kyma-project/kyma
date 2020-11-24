@@ -18,7 +18,13 @@ tracing:
   debug: false
   serviceSpanName: console-backend-service
 deployment:
-  resources: {}
+  resources:
+    requests:
+      cpu: 75m
+      memory: 64Mi
+    limits:
+      cpu: 150m
+      memory: 256Mi
 tests:
   enabled: true
   labels:
