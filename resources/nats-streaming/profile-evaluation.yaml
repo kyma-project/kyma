@@ -2,4 +2,4 @@ global:
   natsStreaming:
     resources:
       limits:
-        memory: 256M
+        memory: 32M
