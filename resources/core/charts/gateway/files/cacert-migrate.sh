@@ -22,11 +22,16 @@ fi
 }
 
 function makeNewSecretWithCaCert() {
-  echo "---> Creating secret ${NEW_SECRET_NAMESPACE}/${NEW_SECRET_NAME} based on the value from ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
+  echo "---> Creating secret ${NEW_SECRET_NAMESPACE}/${NEW_SECRET_NAME} based on cacert value from ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
   set +e
   msg=$(kubectl create secret generic "${NEW_SECRET_NAME}" -n "${NEW_SECRET_NAMESPACE}" --from-literal=.data.cacert="$1" 2>&1)
   status=$?
   set -e
+
+  if [[ $status -ne 0 ]]; then
+    echo "$msg"
+    exit $status
+fi
 }
 
 SECRET_OLD_CACERT=$(kubectl -n "${OLD_SECRET_NAMESPACE}" get secret "${OLD_SECRET_NAME}" -o jsonpath='{.data.cacert}' --ignore-not-found)
