@@ -35,7 +35,8 @@ func NewCreator(cli client.Client, config Config, domain string) *Creator {
 // Additionally, wait until ServiceInstance is in a ready state.
 func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 	// remove not ready ServiceInstance before create new one
-	if err := p.instanceIsReady(ctx); err != nil {
+	f := p.instanceIsReady(ctx)
+	if err := f(); err != nil {
 		err := p.removeUAAInstance(ctx)
 		if err != nil {
 			return errors.Wrap(err, "while removing ServiceInstance in not ready state")
