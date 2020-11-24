@@ -17,7 +17,8 @@ verifySSL: false
 tracing:
   debug: false
   serviceSpanName: console-backend-service
-
+deployment:
+  resources: {}
 tests:
   enabled: true
   labels:

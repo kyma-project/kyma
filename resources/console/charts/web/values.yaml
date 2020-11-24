@@ -33,7 +33,8 @@ core_ui:
   statusPort: 6081
 managementPlane: {}
 replicaCount: 1
-resources: {}
+deployment:
+  resources: {}
 test:
   acceptance:
     labels:

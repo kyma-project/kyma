@@ -1,0 +1,20 @@
+web:
+  deployment:
+    resources:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+      limits:
+        cpu: 1m
+        memory: 128Mi
+
+backend: 
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+        
