@@ -22,6 +22,8 @@ import (
 
 const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
+	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy(https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy#send-events)
+	BEBEnabledPublishEndpoint = "/publish"
 )
 
 type ProxyHandler interface {
@@ -47,6 +49,7 @@ type proxyHandler struct {
 	eventServiceHost         string
 	eventMeshPathPrefix      string
 	eventMeshHost            string
+	isBEBEnabled             bool
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 
@@ -66,11 +69,15 @@ func NewProxyHandler(
 	eventServiceHost string,
 	eventMeshPathPrefix string,
 	eventMeshHost string,
+	eventMeshDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
 	applicationGetter ApplicationGetter,
 	cache Cache) *proxyHandler {
-
+	isBEBEnabled := false
+	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
+		isBEBEnabled = true
+	}
 	return &proxyHandler{
 		group:                    group,
 		tenant:                   tenant,
@@ -79,11 +86,12 @@ func NewProxyHandler(
 		eventServiceHost:         eventServiceHost,
 		eventMeshPathPrefix:      eventMeshPathPrefix,
 		eventMeshHost:            eventMeshHost,
+		isBEBEnabled:             isBEBEnabled,
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
 		eventsProxy:      createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL("/"), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		applicationGetter: applicationGetter,
@@ -164,9 +172,14 @@ func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]stri
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
 	switch {
-	case strings.HasPrefix(path, ph.eventServicePathPrefixV1), strings.HasPrefix(path, ph.eventServicePathPrefixV2):
+	case strings.HasPrefix(path, ph.eventServicePathPrefixV1):
 		return ph.eventsProxy, nil
 
+	case strings.HasPrefix(path, ph.eventServicePathPrefixV2):
+		if ph.isBEBEnabled {
+			return ph.eventMeshProxy, nil
+		}
+		return ph.eventsProxy, nil
 	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
 		return ph.eventMeshProxy, nil
 
