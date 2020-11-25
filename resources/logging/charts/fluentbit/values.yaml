@@ -125,7 +125,8 @@ conf:
       enabled: false
       Match: "*"
       Generate_ID: On
-      Buffer_Size: false
+      Buffer_Size: False
+      Retry_Limit: False
       # default Time_Key: @timestamp
       Time_Key:
       Replace_Dots: On
