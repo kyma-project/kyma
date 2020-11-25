@@ -14,8 +14,8 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
-	k8s.io/api v0.17.11
-	k8s.io/apimachinery v0.17.12-rc.0
-	k8s.io/client-go v0.17.11
+	k8s.io/api v0.17.14
+	k8s.io/apimachinery v0.17.14
+	k8s.io/client-go v0.17.14
 	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6 // indirect
 )
