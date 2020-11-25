@@ -32,7 +32,7 @@ spec:
       - name: cf-for-k8s-0-8-0-beta-apply
         image: wonderix/shalm:latest
         command: ["/usr/bin/shalm"]
-        args: 
+        args:
         - apply
         - '/tmp/charts/chart.tgz'
         {{ if .Values.global.domainName -}}
@@ -91,7 +91,7 @@ spec:
       - name: cf-for-k8s-0-8-0-beta-delete
         image: wonderix/shalm:latest
         command: ["/usr/bin/shalm"]
-        args: 
+        args:
         - delete
         - '/tmp/charts/chart.tgz'
         {{ if .Values.global.domainName -}}
