@@ -38,19 +38,20 @@ echo "---> Starting script"
 echo "The old secret is ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
 echo "The new secret is ${NEW_SECRET_NAMESPACE}/${NEW_SECRET_NAME}"
 
+echo "---> Checking old secret"
 SECRET_OLD_CACERT_BASE64=$(kubectl -n "${OLD_SECRET_NAMESPACE}" get secret "${OLD_SECRET_NAME}" -o jsonpath='{.data.cacert}' --ignore-not-found)
 
 if [ -n "$SECRET_OLD_CACERT_BASE64" ]
 then
+  echo "---> Checking new secret"
   NEW_SECRET=$(kubectl -n "${NEW_SECRET_NAMESPACE}" get secret "${NEW_SECRET_NAME}" --ignore-not-found)
 
-  echo "---> checking new secret"
   if [ -n "$NEW_SECRET" ]
   then
-    echo "---> If new secret already exists"
+    echo "---> Destination secret already exists"
     copyOldCaCertToNewSecret "${SECRET_OLD_CACERT_BASE64}"
   else
-    echo "---> If exising secret"
+    echo "---> Destination secret does not exist"
     SECRET_OLD_CACERT_DECODED=$(echo "${SECRET_OLD_CACERT_BASE64}" | base64 --decode)
     makeNewSecretWithCaCert "${SECRET_OLD_CACERT_DECODED}"
   fi

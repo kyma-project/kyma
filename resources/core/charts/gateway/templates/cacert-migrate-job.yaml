@@ -11,11 +11,11 @@
 #  1. New secret is created app-connector-certs the old one kyma-gatewy-certs-cacert is going to dissapear
 #  2. Helm updates deployment of Compass Runtime Agent, and new secret is set as APP_CA_CERTIFICATES_SECRET kyma-gatewy-certs-cacert -> app-connector-certs
 #
-#  Secret app-connector-certs has initially empty field cacert.
+#  Newly created secret app-connector-certs has initially empty field cacert.
 #  So during upgrade in our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into new secret app-connector-certs
 #  To do that we need to use two jobs pre and post upgrade
 #  First job backups cacert into created secret/second one restores the value after upgrade
-#  Currently is will be populated only after new connection with Compass is established
+#  Without this solution cacert would be populated only after new connection with Compass is established
 
 apiVersion: batch/v1
 kind: Job
