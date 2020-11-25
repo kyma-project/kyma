@@ -1,0 +1,20 @@
+
+
+domain: ~
+
+docker_registry: ~
+
+readonly_docker_registry: ~
+
+sub_domains: ~
+
+certificate: ~
+
+default_identity_provider: ~
+
+api_server_ip: ~
+
+remove_resource_requirements: ~
+
+existing_istio_namespace: ~
+
