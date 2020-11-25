@@ -9,7 +9,7 @@ cacert_migrate_setup_job:
   secrets:
     oldConnectorGatewaySecret:
       namespace: "istio-system"
-      name: "kyma-gatewy-certs-cacert"
+      name: "kyma-gateway-certs-cacert"
     newConnectorGatewaySecret:
       namespace: "istio-system"
       name: "app-connector-certs"
