@@ -62,7 +62,7 @@ spec:
             - bash
             - -c
             - |
-            {{ tpl (.Files.Get "files/cacert-migrate.sh" | printf "%s" | indent 12) . }}
+{{ tpl (.Files.Get "files/cacert-migrate.sh" | printf "%s" | indent 14) . }}
 
 ---
 apiVersion: v1
