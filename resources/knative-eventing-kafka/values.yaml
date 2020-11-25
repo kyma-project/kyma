@@ -11,7 +11,7 @@ image:
   controller: kafka-channel-controller
   dispatcher: knative-kafka-dispatcher
   channel: knative-kafka-channel
-  tag: v0.12.3
+  tag: v0.12.4
   pullPolicy: Always
 
 # Networking Configuration for the Pods container and the K8S Service
@@ -59,6 +59,9 @@ controller:
   memoryLimit: 50Mi
   cpuRequest: 20m
   cpuLimit: 100m
+
+  # reconciliation interval in minutes, this will force the controller to reconcile its managed resources even without a change to the resource.
+  syncPeriod: 10
 
 test:
   dir: ''

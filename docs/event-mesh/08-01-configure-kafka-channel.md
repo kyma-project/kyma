@@ -54,7 +54,7 @@ Follow these steps:
     environment.kafkaProvider: $kafkaProvider
   ```
 
-  >**NOTE:** For additional values, see the [`values.yaml`](https://github.com/kyma-incubator/knative-kafka/blob/master/resources/knative-kafka/values.yaml) file.
+  >**NOTE:** For additional values, see the [`values.yaml`](https://github.com/kyma-incubator/knative-kafka/blob/release-0.12/resources/knative-kafka/values.yaml) file.
 
 5. Use Kyma CLI to install Kyma with the override to the [`installer-cr-azure-eventhubs.yaml.tpl`](installation/resources/installer-cr-azure-eventhubs.yaml.tpl) installer file.
     ```bash
