@@ -23,12 +23,12 @@ metadata:
   name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-backup
   namespace: istio-system
   annotations:
+    helm.sh/hook-weight: "1"
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
@@ -41,7 +41,6 @@ spec:
       labels:
         release: {{ .Release.Name }}
         helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
-        app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
@@ -72,12 +71,12 @@ metadata:
   name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-restore
   namespace: istio-system
   annotations:
+    helm.sh/hook-weight: "1"
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
@@ -90,7 +89,6 @@ spec:
       labels:
         release: {{ .Release.Name }}
         helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
-        app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
@@ -123,12 +121,20 @@ kind: ServiceAccount
 metadata:
   name: {{ .Chart.Name | lower |replace " " "-"}}-cacert-migrate
   namespace:  istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate
   namespace: istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -140,6 +146,10 @@ kind: RoleBinding
 metadata:
   name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate
   namespace: istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
