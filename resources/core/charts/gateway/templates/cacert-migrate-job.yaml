@@ -48,7 +48,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-cacert-migrate-job
-          image: "{{ .Values.global.containerRegistry.path }}/compass-runtime-agent-cacert-migrate-job:{{ .Values.global.cacert_migrate_setup_job.version }}"
+          image:  eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           env:
             - name: OLD_SECRET_NAME
               value: {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.name }}
