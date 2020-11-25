@@ -70,7 +70,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			// that's why this special ratelimiter is needed here
 			// it waits baseDelay, then 2*baseDelay etc
 			RateLimiter: workqueue.NewMaxOfRateLimiter(
-				workqueue.NewItemExponentialFailureRateLimiter(500*time.Millisecond, 1000*time.Second),
+				workqueue.NewItemExponentialFailureRateLimiter(100*time.Millisecond, 1000*time.Second),
 				// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
 				&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
 			),
