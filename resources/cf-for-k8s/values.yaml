@@ -15,4 +15,3 @@ api_server_ip: ~
 remove_resource_requirements: ~
 
 existing_istio_namespace: ~
-

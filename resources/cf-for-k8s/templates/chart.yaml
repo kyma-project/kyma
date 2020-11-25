@@ -26,6 +26,9 @@ metadata:
     "helm.sh/hook": "post-install,post-upgrade"
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: cf-for-k8s-0-8-0-beta
       containers:
@@ -77,6 +80,7 @@ spec:
         configMap:
           name: cf-for-k8s-0-8-0-beta
   backoffLimit: 4
+
 ---
 apiVersion: batch/v1
 kind: Job
@@ -86,7 +90,11 @@ metadata:
     "helm.sh/hook": "pre-delete"
 spec:
   template:
+    metadata:
+     annotations:
+       sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: cf-for-k8s-0-8-0-beta
       containers:
       - name: cf-for-k8s-0-8-0-beta-delete
         image: wonderix/shalm:latest
