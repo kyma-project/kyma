@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -13,6 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -60,6 +62,18 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: r.config.MaxConcurrentReconciles,
+			// https://github.com/kubernetes-sigs/controller-runtime/blob/v0.5.12/pkg/controller/controller.go#L84
+			// https://github.com/kubernetes/client-go/blob/v0.17.14/util/workqueue/default_rate_limiters.go#L39-L45
+			// sometimes when the namespace is created and then the function CR is added to that namespace
+			// we have a nasty datarace -> configmap controller couldn't copy needed configmaps in time, before we've reconciled function CR several times
+			// this leads to situation in which the function CR is no longer being reconciled (throwing err several times stop reconcilation, observed in our k3s pipeline)
+			// that's why this special ratelimiter is needed here
+			// it waits baseDelay, then 2*baseDelay etc
+			RateLimiter: workqueue.NewMaxOfRateLimiter(
+				workqueue.NewItemExponentialFailureRateLimiter(500*time.Millisecond, 1000*time.Second),
+				// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+				&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+			),
 		}).
 		Complete(r)
 }
@@ -116,15 +130,11 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	}
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
 		log.Error(err, "Cannot list runtime configmap")
-		// sometimes when the namespace is created and then the function CR is added to that namespace
-		// we have a nasty datarace -> configmap controller couldn't copy needed configmaps in time, before we've reconciled function CR several times
-		// this leads to situation in which the function CR is no longer being reconciled (throwing err several times stop reconcilation, observed in our k3s pipeline)
-		// that's why this RequeueAfter is needed here
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, err
+		return ctrl.Result{}, err
 	}
 
 	if len(runtimeConfigMap.Items) != 1 {
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
+		return ctrl.Result{}, fmt.Errorf("expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
 	}
 
 	var deployments appsv1.DeploymentList
