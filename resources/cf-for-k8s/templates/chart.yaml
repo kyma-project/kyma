@@ -35,9 +35,9 @@ spec:
         args: 
         - apply
         - '/tmp/charts/chart.tgz'
-        {{ if .Values.domain -}}
+        {{ if .Values.global.domainName -}}
         - '--set'
-        - 'domain={{ .Values.domain }}'
+        - 'domain=cf.{{ .Values.global.domainName }}'
         {{- end }}{{ if .Values.docker_registry -}}
         - '--set'
         - 'docker_registry={{ .Values.docker_registry }}'
@@ -94,9 +94,9 @@ spec:
         args: 
         - delete
         - '/tmp/charts/chart.tgz'
-        {{ if .Values.domain -}}
+        {{ if .Values.global.domainName -}}
         - '--set'
-        - 'domain={{ .Values.domain }}'
+        - 'domain=cf.{{ .Values.global.domainName }}'
         {{- end }}{{ if .Values.docker_registry -}}
         - '--set'
         - 'docker_registry={{ .Values.docker_registry }}'
