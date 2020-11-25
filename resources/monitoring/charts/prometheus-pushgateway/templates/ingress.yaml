@@ -14,10 +14,7 @@ metadata:
 {{ toYaml .Values.ingress.annotations | indent 4}}
 {{- end }}
   labels:
-    app: {{ template "prometheus-pushgateway.name" . }}
-    chart: {{ template "prometheus-pushgateway.chart" . }}
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
   name: {{ template "prometheus-pushgateway.fullname" . }}
 spec:
   rules:

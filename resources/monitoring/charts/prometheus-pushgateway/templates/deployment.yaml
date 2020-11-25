@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "prometheus-pushgateway.fullname" . }}
   labels:
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
+    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
 spec:
   replicas: {{ .Values.replicaCount }}
   {{- if .Values.strategy }}

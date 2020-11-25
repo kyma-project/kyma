@@ -5,7 +5,7 @@ metadata:
   annotations:
 {{ .Values.serviceAnnotations | toYaml | indent 4 }}
   labels:
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.serviceLabels) .  }}
+    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -17,5 +17,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "prometheus-pushgateway.name" . }}
-    release: {{ .Release.Name }}
+    {{- include "prometheus-pushgateway.selectorLabels" . | nindent 4 }}

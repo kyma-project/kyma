@@ -8,7 +8,7 @@ metadata:
 {{ toYaml .Values.persistentVolume.annotations | indent 4 }}
   {{- end }}
   labels:
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.persistentVolumeLabels) .  }}
+    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
   name: {{ template "prometheus-pushgateway.fullname" . }}
 spec:
   accessModes:
