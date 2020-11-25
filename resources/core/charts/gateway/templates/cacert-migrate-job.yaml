@@ -20,7 +20,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job
-  namespace: compass-system
+  namespace: istio-system
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
@@ -44,7 +44,7 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job
+      serviceAccountName: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate-job
