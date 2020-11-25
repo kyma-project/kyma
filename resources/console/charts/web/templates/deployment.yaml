@@ -36,12 +36,7 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
           resources: 
-            requests:
-              cpu: {{ .Values.deployment.resources.requests.cpu }}
-              memory: {{ .Values.deployment.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.deployment.resources.limits.cpu }}
-              memory: {{ .Values.deployment.resources.limits.memory }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz

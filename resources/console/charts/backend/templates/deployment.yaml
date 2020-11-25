@@ -40,11 +40,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources: 
           requests:
-            cpu: {{ .Values.deployment.resources.requests.cpu }}
-            memory: {{ .Values.deployment.resources.requests.memory }}
-          limits:
-            cpu: {{ .Values.deployment.resources.limits.cpu }}
-            memory: {{ .Values.deployment.resources.limits.memory }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
         env:
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"

@@ -34,13 +34,7 @@ core_ui:
 managementPlane: {}
 replicaCount: 1
 deployment:
-  resources:
-    requests:
-      cpu: 1m
-      memory: 64Mi
-    limits:
-      cpu: 1m
-      memory: 128Mi
+  resources: {}
 test:
   acceptance:
     labels:
