@@ -6,7 +6,7 @@ rbacJob:
     tag: "20201023-5de446cf"
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
+  repository: eu.gcr.io/kyma-project/incubator/pr/api-gateway-controller
   tag: "PR-104"
   # Image pull policy
   pullPolicy: IfNotPresent
