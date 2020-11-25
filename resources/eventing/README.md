@@ -8,7 +8,7 @@ Components:
 
 ## Event Publisher Proxy
 
-This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. Click [here](../../components/event-publisher-proxy) for more details.
+This component receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application. Click [here](../../components/event-publisher-proxy) for more details.
 
 ## Controller
 
