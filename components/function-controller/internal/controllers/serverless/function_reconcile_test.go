@@ -914,8 +914,7 @@ var _ = ginkgo.Describe("Function", func() {
 
 		_, err := reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.HaveOccurred())
-		gomega.Expect(err.Error()).To(gomega.ContainSubstring("Expected one config map, found 0"))
-
+		gomega.Expect(err.Error()).To(gomega.ContainSubstring("expected one config map, found 0"))
 	})
 })
 
