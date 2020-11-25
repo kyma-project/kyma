@@ -13,13 +13,14 @@
 #
 #  Secret app-connector-certs has initially empty field cacert.
 #  So during upgrade in our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into new secret app-connector-certs
-#
+#  To do that we need to use two jobs pre and post upgrade
+#  First job backups cacert into created secret/second one restores the value after upgrade
 #  Currently is will be populated only after new connection with Compass is established
 
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job
+  name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-backup
   namespace: istio-system
   annotations:
     helm.sh/hook: pre-upgrade
@@ -33,7 +34,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job
+      name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-backup
       namespace: {{ .Values.global.namespace }}
       annotations:
         sidecar.istio.io/inject: “false”
@@ -47,7 +48,7 @@ spec:
       serviceAccountName: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate
       restartPolicy: Never
       containers:
-        - name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate-job
+        - name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate-backup
           image:  eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           env:
             - name: OLD_SECRET_NAME
@@ -55,9 +56,60 @@ spec:
             - name: OLD_SECRET_NAMESPACE
               value: {{ .Values.cacert_migrate_setup_job.secrets.oldConnectorGatewaySecret.namespace }}
             - name: NEW_SECRET_NAME
+              value: {{ .Values.cacert_migrate_setup_job.secrets.backupConnectorGatewaySecret.name }}
+            - name: NEW_SECRET_NAMESPACE
+              value: {{ .Values.cacert_migrate_setup_job.secrets.backupConnectorGatewaySecret.namespace }}
+          command:
+            - bash
+            - -c
+            - |
+{{ tpl (.Files.Get "files/cacert-migrate.sh" | printf "%s" | indent 14) . }}
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-restore
+  namespace: istio-system
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  template:
+    metadata:
+      name: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate-job-restore
+      namespace: {{ .Values.global.namespace }}
+      annotations:
+        sidecar.istio.io/inject: “false”
+      labels:
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name | lower | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Chart.Name | lower | replace " " "-" }}-cacert-migrate
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name | lower | replace " " "-"}}-cacert-migrate-job-restore
+          image:  eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+          env:
+            - name: OLD_SECRET_NAME
+              value: {{ .Values.cacert_migrate_setup_job.secrets.backupConnectorGatewaySecret.name }}
+            - name: OLD_SECRET_NAMESPACE
+              value: {{ .Values.cacert_migrate_setup_job.secrets.backupConnectorGatewaySecret.namespace }}
+            - name: NEW_SECRET_NAME
               value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}
             - name: NEW_SECRET_NAMESPACE
               value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.namespace }}
+            - name: DELETE_OLD_SECRET_FLAG
+              value: "TRUE"
           command:
             - bash
             - -c
