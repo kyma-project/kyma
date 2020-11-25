@@ -1,3 +1,7 @@
+
+# Customizations:
+# 1. Added Selector labels
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
@@ -46,10 +50,11 @@ Create the name of the service account to use
 {{/*
 Create default labels
 */}}
-{{- define "prometheus-pushgateway.labels" -}}
-helm.sh/chart: {{ include "prometheus-pushgateway.chart" . }}
-{{ include "prometheus-pushgateway.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- define "prometheus-pushgateway.defaultLabels" -}}
+{{- $labelChart := include "prometheus-pushgateway.chart" $ -}}
+{{- $labelApp := include "prometheus-pushgateway.name" $ -}}
+{{- $labels := dict "app" $labelApp "chart" $labelChart "release" .Release.Name "heritage" .Release.Service -}}
+{{ merge .extraLabels $labels | toYaml | indent 4 }}
 {{- end -}}
 
 {{/*

@@ -4,7 +4,8 @@ kind: PeerAuthentication
 metadata:
   name: {{ template "prometheus-pushgateway.name" . }}
   labels:
-    {{- include "prometheus-pushgateway.labels" . | nindent 4 }}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.persistentVolumeLabels) .  }}
+  name: {{ template "prometheus-pushgateway.fullname" . }}
 spec:
   selector:
     matchLabels:
