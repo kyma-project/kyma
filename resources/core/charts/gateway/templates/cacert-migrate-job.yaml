@@ -19,35 +19,35 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Chart.Name }}-cacert-migrate-job
+  name: {{ .Chart.Name | replace " " "-" }}-cacert-migrate-job
   namespace: compass-system
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    helm.sh/chart: {{ .Chart.Name | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   template:
     metadata:
-      name: {{ .Chart.Name }}-cacert-migrate-job
+      name: {{ .Chart.Name | replace " " "-" }}-cacert-migrate-job
       namespace: {{ .Values.global.namespace }}
       annotations:
         sidecar.istio.io/inject: “false”
       labels:
         release: {{ .Release.Name }}
-        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        helm.sh/chart: {{ .Chart.Name | replace " " "-" }}-{{ .Chart.Version | replace "+" "_" }}
         app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Chart.Name }}-cacert-migrate-job
+      serviceAccountName: {{ .Chart.Name | replace " " "-" }}-cacert-migrate-job
       restartPolicy: Never
       containers:
-        - name: {{ .Chart.Name }}-cacert-migrate-job
+        - name: {{ .Chart.Name | replace " " "-"}}-cacert-migrate-job
           image:  eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           env:
             - name: OLD_SECRET_NAME
@@ -63,6 +63,7 @@ spec:
             - -c
             - |
 {{ tpl (.Files.Get "files/cacert-migrate.sh" | printf "%s" | indent 14) . }}
+
 
 ---
 apiVersion: v1
