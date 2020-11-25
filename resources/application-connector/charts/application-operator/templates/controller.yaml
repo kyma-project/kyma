@@ -66,9 +66,9 @@ spec:
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
           limits:
-            cpu: 100m
-            memory: 256Mi
+            cpu: {{ .Values.controller.resources.limits.cpu }}
+            memory: {{ .Values.controller.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.controller.resources.requests.cpu }}
+            memory: {{ .Values.controller.resources.requests.memory }}
       terminationGracePeriodSeconds: 10
