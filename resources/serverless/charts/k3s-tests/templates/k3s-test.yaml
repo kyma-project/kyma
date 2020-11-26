@@ -38,4 +38,4 @@ spec:
             - name: APP_TEST_VERBOSE
               value: "false"
             - name: APP_TEST_CLEANUP
-              value: "no"
+              value: "no" # do not clean, we'll kubectl get those resources after job completion/fail
