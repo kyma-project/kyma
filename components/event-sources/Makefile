@@ -51,7 +51,7 @@ build-local: $(cmds) test-local ;
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local istio-injection $(patched_trace)
+$(cmds): %: resolve-local $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -64,8 +64,6 @@ $(patched_trace): hack/set-span-id.patch vendor
 	patch -p0 < $<
 	cp $< $@
 
-
-test-local: istio-injection $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
@@ -107,7 +105,7 @@ ISTIO_API_GROUPS := "security/v1beta1"
 # generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
 istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
 
-generators := deepcopy client lister informer injection istio-injection
+generators := deepcopy client lister informer injection
 generators_bin := $(foreach x,$(generators),bin/$(x)-gen)
 
 .PHONY: codegen $(generators) $(generators_bin)
@@ -163,15 +161,6 @@ injection: bin/injection-gen
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
-istio-injection: bin/injection-gen
-	@echo "+ Generating injection for $(ISTIO_API_GROUPS)"
-	@rm -rf client/generated/injection/istio
-	@bin/injection-gen \
-        --go-header-file hack/boilerplate.go.txt \
-        --input-dirs $(subst $(space),$(comma),$(istio-api-import-paths)) \
-        --output-package $(PKG)/client/generated/injection/istio \
-        --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
-        --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
 $(generators_bin): gomod-vendor-local
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
