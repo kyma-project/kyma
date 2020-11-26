@@ -39,3 +39,5 @@ spec:
               value: "false"
             - name: APP_TEST_CLEANUP
               value: "no" # do not clean, we'll kubectl get those resources after job completion/fail
+            - name: APP_TEST_ISTIO_ENABLED
+              value: "false"  
