@@ -131,6 +131,7 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		ApplicationGatewayImage:      options.applicationGatewayImage,
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
 		GatewayOncePerNamespace:      options.gatewayOncePerNamespace,
+		Profile:                      options.profile,
 	}
 
 	serviceCatalogueClient, err := v1beta1.NewForConfig(cfg)
@@ -152,6 +153,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
+		Profile:                               options.profile,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)

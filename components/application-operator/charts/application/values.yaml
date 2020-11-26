@@ -9,12 +9,20 @@ deployment:
     proxyTimeout: 10
     proxyCacheTTL: 120
     requestLogging: false
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 service:
   externalapi:
     port: *externalAPIPort
 
 autoscaling:
+  enable: true
   minReplicas: 1
   maxReplicas: 10
   cpuUsagePercent: 40
