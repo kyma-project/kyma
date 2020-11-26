@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"math/rand"
 	"os"
 	"time"
@@ -17,7 +18,7 @@ import (
 )
 
 var availableScenarios = map[string][]testSuite{
-	"serverless-integration": {scenarios.SimpleFunctionTest},
+	"serverless-integration": {scenarios.SimpleFunctionTest, scenarios.GitopsSteps},
 	"kyma-integration":       {scenarios.FunctionTestStep, scenarios.GitopsSteps},
 }
 
@@ -55,6 +56,7 @@ func main() {
 		// TODO: run those in parallel, return error here and `failOnError` once at the end
 		runScenario(scenario, scenarioName, logf, cfg, restConfig)
 	}
+	failOnError(errors.New("delibaretly fail"), logf)
 }
 
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
