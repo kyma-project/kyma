@@ -16,4 +16,3 @@ backend:
       limits:
         cpu: 15m
         memory: 150Mi
-        
