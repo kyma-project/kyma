@@ -4,4 +4,4 @@ dependencies:
   - name: webhook
     condition: webhook.enabled  
   - name: k3s-tests
-    condition: false # this chart is installed manually
+    condition: k3s-tests.enabled # this chart is installed manually
