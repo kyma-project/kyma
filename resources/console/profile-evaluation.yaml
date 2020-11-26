@@ -2,10 +2,10 @@ web:
   deployment:
     resources:
       requests:
-        cpu: 5m
+        cpu: 10m
         memory: 16Mi
       limits:
-        cpu: 10m
+        cpu: 15m
         memory: 32Mi
 backend: 
   deployment:
