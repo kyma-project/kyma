@@ -58,11 +58,12 @@ func main() {
 
 	// g, ctx := errgroup.WithContext(context.WithTimeout(context.Background(), cfg.Test.WaitTimeout))
 	for _, scenario := range pickedScenarios {
-		// this prevents nasty bugs
-		pinnedScenario := scenario
-		g.Go(func() error {
-			return runScenario(pinnedScenario, scenarioName, logf, cfg, restConfig)
-		})
+		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
+		func(val testSuite) {
+			g.Go(func() error {
+				return runScenario(val, scenarioName, logf, cfg, restConfig)
+			})
+		}(scenario)
 	}
 	failOnError(g.Wait(), logf)
 }
