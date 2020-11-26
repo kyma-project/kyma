@@ -10,6 +10,9 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 release:
 	$(MAKE) gomod-release
 
+# This target patch opencensus lib (add required method). This patch is required by knative.dev/eventing
+gomod-deps-local:: vendor/go.opencensus.io/trace/trace.go.patched
+
 #########
 #       #
 #  Dev  #
@@ -45,8 +48,6 @@ resolve_clean:
 
 licenses_clean:
 	rm -rf licenses
-
-build-local: $(cmds) test-local ;
 
 # Example:
 #   make controller-manager
