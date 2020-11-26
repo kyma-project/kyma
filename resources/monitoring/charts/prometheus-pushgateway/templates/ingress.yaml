@@ -14,7 +14,7 @@ metadata:
 {{ toYaml .Values.ingress.annotations | indent 4}}
 {{- end }}
   labels:
-    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" dict) .}}
   name: {{ template "prometheus-pushgateway.fullname" . }}
 spec:
   rules:

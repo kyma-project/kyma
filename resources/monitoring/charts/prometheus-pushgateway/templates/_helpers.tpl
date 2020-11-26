@@ -52,9 +52,21 @@ Create the name of the service account to use
 Create default labels
 */}}
 {{- define "prometheus-pushgateway.defaultLabels" -}}
-helm.sh/chart: {{ include "prometheus-pushgateway.chart" . }}
-{{ include "prometheus-pushgateway.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- $labelChart := include "prometheus-pushgateway.chart" $ -}}
+{{- $labelApp := include "prometheus-pushgateway.name" $ -}}
+{{- $labels := dict "app.kubernetes.io/name" $labelApp -}}
+{{- $_ := set $labels "helm.sh/chart" $labelChart -}}
+{{- $_ := set $labels "app.kubernetes.io/instance" .Release.Name -}}
+{{- $_ := set $labels "app.kubernetes.io/managed-by" .Release.Service -}}
+{{ merge .extraLabels $labels | toYaml | indent 4 }}
+{{- end -}}
+
+{{/*
+Selector labels
+*/}}
+{{- define "prometheus-pushgateway.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-pushgateway.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
@@ -66,12 +78,4 @@ Return the appropriate apiVersion for networkpolicy.
 {{- else if semverCompare "^1.7-0" .Capabilities.KubeVersion.GitVersion -}}
 {{- print "networking.k8s.io/v1" -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Selector labels
-*/}}
-{{- define "prometheus-pushgateway.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "prometheus-pushgateway.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

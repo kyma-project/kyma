@@ -4,7 +4,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ template "prometheus-pushgateway.fullname" . }}
   labels:
-    {{ include "prometheus-pushgateway.defaultLabels" . | nindent 4}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
 spec:
   selector:
     matchLabels:
