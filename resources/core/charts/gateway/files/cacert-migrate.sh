@@ -59,10 +59,3 @@ else
   echo "---> Could not read cacert from old secret ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
 fi
 
-if [ -n "$DELETE_OLD_SECRET_FLAG" ]
-then
-  echo "---> Delete backup secret ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
-  set +e
-  kubectl delete secret "${OLD_SECRET_NAME}" -n "${OLD_SECRET_NAMESPACE}" --ignore-not-found
-  set -e
-fi
