@@ -52,6 +52,7 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	for _, scenario := range pickedScenarios {
+		// TODO: run those in parallel, return error here and `failOnError` once at the end
 		runScenario(scenario, scenarioName, logf, cfg, restConfig)
 	}
 }
