@@ -58,8 +58,10 @@ func main() {
 
 	// g, ctx := errgroup.WithContext(context.WithTimeout(context.Background(), cfg.Test.WaitTimeout))
 	for _, scenario := range pickedScenarios {
+		// this prevents nasty bugs
+		pinnedScenario := scenario
 		g.Go(func() error {
-			return runScenario(scenario, scenarioName, logf, cfg, restConfig)
+			return runScenario(pinnedScenario, scenarioName, logf, cfg, restConfig)
 		})
 	}
 	failOnError(g.Wait(), logf)
