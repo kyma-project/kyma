@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway.
+The Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application.
 
 ## Prerequisites
 
@@ -64,6 +64,14 @@ curl -v -X POST \
 EOF
     ) \
     http://<hostname>/application-name/v1/events
+```
+
+### Get a list of subscriptions for a connected application
+
+```bash
+curl -v -X GET \
+    -H "Content-Type: application/json" \
+    http://hostname/:application-name/v1/events/subscribed
 ```
 
 ## Environment Variables
