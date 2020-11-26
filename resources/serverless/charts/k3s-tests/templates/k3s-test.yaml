@@ -1,0 +1,42 @@
+{{- $job_name := "k3s-serverless-test" -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $job_name | quote }}
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user-crb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin # yeah, cluster admin - we do NOT run those tests in cluster, only in k3s, so it's the easiest way
+subjects:
+  - kind: ServiceAccount
+    name: {{ $job_name | quote }}
+    namespace: default
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $job_name | quote }}
+  namespace: default
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: {{ $job_name | quote }}
+      restartPolicy: Never
+      containers:
+        - name: test
+          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          args: ["serverless-integration"]
+          env:
+            - name: APP_TEST_WAIT_TIMEOUT
+              value: "5m"
+            - name: APP_TEST_VERBOSE
+              value: "false"
+            - name: APP_TEST_CLEANUP
+              value: "no"

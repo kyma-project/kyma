@@ -1,0 +1,4 @@
+tests:
+  image:
+    repository: "overriden-during-installation"
+    tag: "overriden-during-installation"
