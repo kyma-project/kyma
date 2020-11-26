@@ -56,7 +56,7 @@ func (h HTTPCheck) Run() error {
 	}, func() error {
 		err := errors.Wrap(h.poll.PollForAnswer(h.endpoint, "", h.expectedMsg), "while checking connection to function")
 		if err != nil {
-			h.log.Warnf("while checking connection to %s, err: %s", h.endpoint, err)
+			h.log.Warn(err)
 		}
 		return err
 	})
