@@ -63,8 +63,6 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	g, _ := errgroup.WithContext(context.Background())
-
-	// g, ctx := errgroup.WithContext(context.WithTimeout(context.Background(), cfg.Test.WaitTimeout))
 	for _, scenario := range pickedScenarios {
 		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
 		scenarioDisplayName := fmt.Sprintf("%s-%s", scenarioName, scenario.displayName)
