@@ -106,8 +106,6 @@ spec:
               value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.name }}
             - name: NEW_SECRET_NAMESPACE
               value: {{ .Values.cacert_migrate_setup_job.secrets.newConnectorGatewaySecret.namespace }}
-            - name: DELETE_OLD_SECRET_FLAG
-              value: "TRUE"
           command:
             - bash
             - -c
