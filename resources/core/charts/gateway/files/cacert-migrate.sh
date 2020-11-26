@@ -63,13 +63,6 @@ if [ -n "$DELETE_OLD_SECRET_FLAG" ]
 then
   echo "---> Delete backup secret ${OLD_SECRET_NAMESPACE}/${OLD_SECRET_NAME}"
   set +e
-  msg=$(kubectl delete secret "${OLD_SECRET_NAME}" -n "${OLD_SECRET_NAMESPACE}" 2>&1)
-  status=$?
+  kubectl delete secret "${OLD_SECRET_NAME}" -n "${OLD_SECRET_NAMESPACE}" --ignore-not-found
   set -e
-
-  if [[ $status -ne 0 ]]
-  then
-    echo "$msg"
-    exit $status
-  fi
 fi
