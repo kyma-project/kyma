@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
@@ -18,9 +19,16 @@ import (
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
-var availableScenarios = map[string][]testSuite{
-	"serverless-integration": {scenarios.SimpleFunctionTest, scenarios.GitopsSteps},
-	"kyma-integration":       {scenarios.FunctionTestStep, scenarios.GitopsSteps},
+type scenario struct {
+	displayName string
+	testSuite   testSuite
+}
+
+var availableScenarios = map[string][]scenario{
+	"serverless-integration": {
+		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
+		{displayName: "gitops", testSuite: scenarios.GitopsSteps}},
+	"kyma-integration": {{displayName: "full", testSuite: scenarios.FunctionTestStep}},
 }
 
 type config struct {
@@ -59,11 +67,12 @@ func main() {
 	// g, ctx := errgroup.WithContext(context.WithTimeout(context.Background(), cfg.Test.WaitTimeout))
 	for _, scenario := range pickedScenarios {
 		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
-		func(val testSuite) {
+		scenarioDisplayName := fmt.Sprintf("%s-%s", scenarioName, scenario.displayName)
+		func(testSuite testSuite, name string) {
 			g.Go(func() error {
-				return runScenario(val, scenarioName, logf, cfg, restConfig)
+				return runScenario(testSuite, name, logf, cfg, restConfig)
 			})
-		}(scenario)
+		}(scenario.testSuite, scenarioDisplayName)
 	}
 	failOnError(g.Wait(), logf)
 }
