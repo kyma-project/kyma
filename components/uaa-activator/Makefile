@@ -7,3 +7,6 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 ENTRYPOINT:=main.go
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
+
+release:
+	$(MAKE) gomod-release

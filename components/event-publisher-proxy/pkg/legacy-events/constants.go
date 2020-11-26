@@ -36,4 +36,5 @@ const (
 // HTTP ContentType constants
 const (
 	ContentTypeApplicationJSON = "application/json"
+	HeaderContentType          = "Content-Type"
 )
