@@ -1,9 +1,8 @@
-{{- $job_name := "k3s-serverless-test" -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ $job_name | quote }}
-  namespace: default
+  name: {{ .Values.jobName | quote }}
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -15,19 +14,19 @@ roleRef:
   name: cluster-admin # yeah, cluster admin - we do NOT run those tests in cluster, only in k3s, so it's the easiest way
 subjects:
   - kind: ServiceAccount
-    name: {{ $job_name | quote }}
+    name: {{ .Values.jobName | quote }}
     namespace: default
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $job_name | quote }}
-  namespace: default
+  name: {{ .Values.jobName | quote }}
+  namespace: {{ .Release.Namespace }}
 spec:
   backoffLimit: 0
   template:
     spec:
-      serviceAccountName: {{ $job_name | quote }}
+      serviceAccountName: {{ .Values.jobName | quote }}
       restartPolicy: Never
       containers:
         - name: test
