@@ -1,13 +1,14 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"math/rand"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
@@ -52,22 +53,35 @@ func main() {
 	}
 
 	rand.Seed(time.Now().UnixNano())
+
+	g, _ := errgroup.WithContext(context.Background())
+
+	// g, ctx := errgroup.WithContext(context.WithTimeout(context.Background(), cfg.Test.WaitTimeout))
 	for _, scenario := range pickedScenarios {
-		// TODO: run those in parallel, return error here and `failOnError` once at the end
-		runScenario(scenario, scenarioName, logf, cfg, restConfig)
+		g.Go(func() error {
+			return runScenario(scenario, scenarioName, logf, cfg, restConfig)
+		})
 	}
-	failOnError(errors.New("delibaretly fail"), logf)
+	failOnError(g.Wait(), logf)
 }
 
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
-func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) {
+func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
 	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", name))
-	failOnError(err, logf)
+	if err != nil {
+		logf.Error(err)
+		return err
+	}
+
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
-	failOnError(err, logf)
+	if err != nil {
+		logf.Error(err)
+		return err
+	}
+	return nil
 }
 
 func loadConfig(prefix string) (config, error) {
