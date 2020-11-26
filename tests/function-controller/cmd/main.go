@@ -3,15 +3,15 @@ package main
 import (
 	"math/rand"
 	"os"
+	"time"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/rest"
 
-	"time"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
 
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
@@ -27,7 +27,7 @@ type config struct {
 
 func main() {
 	logf := logrus.New()
-	logf.SetFormatter(&logrus.TextFormatter{})
+	logf.SetFormatter(&logrus.JSONFormatter{})
 	logf.SetReportCaller(false)
 
 	if len(os.Args) < 2 {
@@ -52,6 +52,7 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	for _, scenario := range pickedScenarios {
+		// TODO: run those in parallel, return error here and `failOnError` once at the end
 		runScenario(scenario, scenarioName, logf, cfg, restConfig)
 	}
 }
