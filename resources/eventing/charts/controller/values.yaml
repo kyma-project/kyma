@@ -1,0 +1,32 @@
+# override name to avoid collision with knative eventing resources
+nameOverride:
+replicaCount: 1
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+  annotations: ""
+
+
+clusterRole:
+  # name defines optionally another name than the default name for the cluster role
+  name: ""
+
+image:
+  # name is the name of the container image for the eventing-controller
+  name: "eventing-controller"
+  # tag is the container tag of the eventing-controller image
+  tag: "62918ff4"
+  # pullPolicy is the pullPolicy for the eventing-controller image
+  pullPolicy: "IfNotPresent"
+
+podSecurityContext:
+
+bebSecret:
+  nameSuffix: "-beb-oauth2"
+
+metrics:
+  service:
+    nameSuffix: "-metrics"
+
+#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/9984
+clusterRoleBindingSuffix: "-crole-binding"

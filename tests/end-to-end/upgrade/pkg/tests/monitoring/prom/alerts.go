@@ -19,4 +19,5 @@ type Alert struct {
 
 type AlertLabels struct {
 	AlertName string `json:"alertname"`
+	Severity  string `json:"severity"`
 }

@@ -2,26 +2,22 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "prometheus-operator.fullname" . }}-prometheus
-  namespace: {{ $.Release.Namespace }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-prometheus
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}-prometheus
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}-prometheus
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "prometheus-operator.name" . }}-prometheus
+      app: {{ template "kube-prometheus-stack.name" . }}-prometheus
       release: {{ $.Release.Name | quote }}
       self-monitor: "true"
   namespaceSelector:
     matchNames:
-      - {{ $.Release.Namespace | quote }}
+      - {{ printf "%s" (include "kube-prometheus-stack.namespace" .) | quote }}
   endpoints:
   - port: {{ .Values.prometheus.prometheusSpec.portName }}
-    metricRelabelings:
-    - sourceLabels: [ __name__ ]
-      regex: ^(go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|prometheus_build_info|prometheus_config_last_reload_successful|prometheus_engine_query_duration_seconds|prometheus_engine_query_duration_seconds_count|prometheus_notifications_alertmanagers_discovered|prometheus_notifications_errors_total|prometheus_notifications_queue_capacity|prometheus_notifications_queue_length|prometheus_notifications_sent_total|prometheus_remote_storage_highest_timestamp_in_seconds|prometheus_remote_storage_samples_in_total|prometheus_rule_evaluation_failures_total|prometheus_rule_group_iterations_missed_total|prometheus_sd_discovered_targets|prometheus_target_interval_length_seconds_sum|prometheus_target_interval_length_seconds_count|prometheus_target_scrapes_exceeded_sample_limit_total|prometheus_target_scrapes_sample_duplicate_timestamp_total|prometheus_target_scrapes_sample_out_of_bounds_total|prometheus_target_scrapes_sample_out_of_order_total|prometheus_target_sync_length_seconds_sum|prometheus_tsdb_compactions_failed_total|prometheus_tsdb_head_chunks|prometheus_tsdb_head_samples_appended_total|prometheus_tsdb_head_series|prometheus_tsdb_reloads_failures_total|prometheus_tsdb_wal_segment_current)$
-      action: keep
     {{- if .Values.prometheus.serviceMonitor.interval }}
     interval: {{ .Values.prometheus.serviceMonitor.interval }}
     {{- end }}

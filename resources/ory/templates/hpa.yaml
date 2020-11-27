@@ -1,4 +1,5 @@
-{{ if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
+{{- if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
+{{- if .Values.hpa.oathkeeper.enabled }}
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -14,6 +15,8 @@ spec:
   maxReplicas: {{ .Values.hpa.oathkeeper.maxReplicas }}
   metrics:
 {{ toYaml .Values.hpa.oathkeeper.metrics | trim | indent 2 }}
+{{- end }}
+{{- if .Values.hpa.hydra.enabled }}
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -29,4 +32,5 @@ spec:
   maxReplicas: {{ .Values.hpa.hydra.maxReplicas }}
   metrics:
 {{ toYaml .Values.hpa.hydra.metrics | trim | indent 2 }}
-{{ end }}
+{{- end }}
+{{- end }}

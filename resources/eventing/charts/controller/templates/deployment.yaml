@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "controller.fullname" . }}
+  labels: {{- include "controller.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "controller.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels: {{- include "controller.selectorLabels" . | nindent 8 }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ include "controller.fullname" . }}
+      terminationGracePeriodSeconds: 10
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: controller
+          env:
+          - name: CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "eventing.secretName" . }}
+                key: client-id
+          - name: CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "eventing.secretName" . }}
+                key: client-secret
+          - name: TOKEN_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "eventing.secretName" . }}
+                key: token-endpoint
+          - name: EMS_PUBLISH_URL
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "eventing.secretName" . }}
+                key: ems-publish-url
+          - name: WEBHOOK_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
+                key: client_id
+          - name: WEBHOOK_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
+                key: client_secret
+          - name: WEBHOOK_TOKEN_ENDPOINT
+            value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
+          - name: DOMAIN
+            value: {{ .Values.global.domainName }}
+          resources:
+            limits:
+              cpu: 100m
+              memory: 30Mi
+            requests:
+              cpu: 100m
+              memory: 20Mi
+

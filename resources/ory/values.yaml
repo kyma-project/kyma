@@ -32,6 +32,7 @@ headerRewrite:
   workloadLabel: oathkeeper
 hpa:
   oathkeeper:
+    enabled: true
     minReplicas: 1
     maxReplicas: 3
     cpu: 80
@@ -45,6 +46,7 @@ hpa:
         name: cpu
         targetAverageUtilization: 80
   hydra:
+    enabled: true
     minReplicas: 1
     maxReplicas: 3
     cpu: 80
@@ -111,6 +113,7 @@ hydra:
     globalAccess: true
     config:
       hydraSecret: "ory-hydra-credentials"
+
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:

@@ -19,23 +19,30 @@ spec:
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  name: {{ include "eventing.secretName" . }}
                   key: client-id
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  name: {{ include "eventing.secretName" . }}
                   key: client-secret
             - name: TOKEN_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  name: {{ include "eventing.secretName" . }}
                   key: token-endpoint
             - name: EMS_PUBLISH_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "event-publisher-proxy.secretName" . }}
+                  name: {{ include "eventing.secretName" . }}
                   key: ems-publish-url
+            - name: BEB_NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "eventing.secretName" . }}
+                  key: beb-namespace
+            - name: EVENT_TYPE_PREFIX
+              value: {{ .Values.beb.config.eventTypePrefix }}
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: event-publisher-proxy
