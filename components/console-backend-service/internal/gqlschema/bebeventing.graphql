@@ -1,0 +1,9 @@
+type EventSubscription {
+    name: String!
+    namespace: String!
+}
+
+
+extend type Query {
+    eventSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "get", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
