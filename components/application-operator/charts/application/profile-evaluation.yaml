@@ -1,11 +1,12 @@
 ---
-deployment:
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
-autoscaling:
-  enable: false
+global:
+  deployment:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+  autoscaling:
+    enable: false

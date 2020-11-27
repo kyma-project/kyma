@@ -131,7 +131,6 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		ApplicationGatewayImage:      options.applicationGatewayImage,
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
 		GatewayOncePerNamespace:      options.gatewayOncePerNamespace,
-		Profile:                      options.profile,
 	}
 
 	serviceCatalogueClient, err := v1beta1.NewForConfig(cfg)
@@ -140,7 +139,7 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		return nil, err
 	}
 
-	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances("")), nil
+	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances(""), options.profile), nil
 }
 
 func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
@@ -153,7 +152,6 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
-		Profile:                               options.profile,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)
@@ -161,7 +159,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		log.Fatal(err)
 	}
 
-	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
+	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace, options.profile)
 
 	return releaseManager, nil
 }

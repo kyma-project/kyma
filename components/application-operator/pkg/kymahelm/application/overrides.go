@@ -11,5 +11,4 @@ type OverridesData struct {
 	Group                                 string `json:"group,omitempty"`
 	GatewayOncePerNamespace               bool   `json:"deployGatewayOncePerNamespace,omitempty"`
 	StrictMode                            string `json:"strictMode,omitempty"`
-	Profile                               string `json:"profile,omitempty"`
 }
