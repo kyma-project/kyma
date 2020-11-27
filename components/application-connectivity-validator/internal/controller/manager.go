@@ -3,6 +3,7 @@ package controller
 import (
 	"time"
 
+	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 
@@ -14,7 +15,7 @@ import (
 	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 )
 
-func Start(kubeConfig string, masterURL string, syncPeriod time.Duration) {
+func Start(kubeConfig string, masterURL string, syncPeriod time.Duration, cache *gocache.Cache) {
 	klog.InitFlags(nil)
 
 	// set up signals so we handle the first shutdown signal gracefully
@@ -32,7 +33,7 @@ func Start(kubeConfig string, masterURL string, syncPeriod time.Duration) {
 
 	applicationInformerFactory := informers.NewSharedInformerFactory(applicationClient, syncPeriod)
 
-	controller := NewController(applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications())
+	controller := NewController(applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), cache)
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

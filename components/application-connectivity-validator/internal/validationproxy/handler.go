@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -139,13 +138,8 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		var err apperrors.AppError
-		applicationClientIDs, err = ph.getClientIDsFromResource(applicationName)
-		if err != nil {
-			return []string{}, err
-		}
-
-		ph.cache.Set(applicationName, applicationClientIDs, cache.DefaultExpiration)
+		// TODO: retry logic should be implemented here
+		log.Errorf("Application with name %s is not found in the cache. Please retry.", applicationName)
 	}
 	return applicationClientIDs, nil
 }

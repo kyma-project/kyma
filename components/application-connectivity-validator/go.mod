@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/go-logr/logr v0.3.0 // indirect
+	github.com/google/ko v0.6.2 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/mux v1.7.4
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
@@ -13,9 +14,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
-	k8s.io/api v0.18.6
-	k8s.io/apimachinery v0.18.6
-	k8s.io/client-go v0.18.6
+	k8s.io/api v0.18.8
+	k8s.io/apimachinery v0.18.8
+	k8s.io/client-go v0.18.8
 	k8s.io/klog/v2 v2.2.0
 	sigs.k8s.io/controller-runtime v0.6.2
 )

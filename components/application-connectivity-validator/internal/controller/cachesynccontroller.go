@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -48,17 +50,22 @@ type Controller struct {
 	// time, and makes it easy to ensure we are never processing the same item
 	// simultaneously in two different workers.
 	workqueue workqueue.RateLimitingInterface
+
+	// Cache to store Application CRs
+	appCache *gocache.Cache
 }
 
 func NewController(
 	clientset clientset.Interface,
-	applicationInformer informers.ApplicationInformer) *Controller {
+	applicationInformer informers.ApplicationInformer,
+	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
 		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Applications"),
+		appCache:          appCache,
 	}
 
 	applicationInformer.Informer().AddEventHandler(
@@ -178,22 +185,12 @@ func (c *Controller) processNextWorkItem() bool {
 	return true
 }
 
-// syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Foo resource
-// with the current status of the resource.
+// syncHandler compares the actual state with the desired, and attempts to converge the two.
 func (c *Controller) syncHandler(key string) error {
-	// Convert the namespace/name string into a distinct namespace and name
-	// namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	// if err != nil {
-	// 	utilruntime.HandleError(fmt.Errorf("invalid resource key: %s", key))
-	// 	return nil
-	// }
-
 	// Get the Application resource with this namespace/name
 	application, err := c.applicationLister.Get(key)
 	if err != nil {
-		// The Application resource may no longer exist, in which case we stop
-		// processing.
+		// the Application resource may no longer exist, in which case we stop processing.
 		if errors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("Application '%s' in work queue no longer exists", key))
 			return nil
@@ -202,16 +199,17 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	//TODO: cache must be updated here
-
-	// If an error occurs during Get/Create, we'll requeue the item so we can
-	// attempt processing again later. This could have been caused by a
-	// temporary network failure, or any other transient reason.
-	if err != nil {
-		return err
-	}
-
-	log.Info("Application %s synced successfully", application.Name)
+	//Add or update the cache for Application resource
+	applicationClientIDs := c.getClientIDsFromResource(application)
+	c.appCache.Set(application.Name, applicationClientIDs, gocache.DefaultExpiration)
 
 	return nil
+}
+
+func (c *Controller) getClientIDsFromResource(application *v1alpha1.Application) []string {
+	if application.Spec.CompassMetadata == nil {
+		return []string{}
+	}
+
+	return application.Spec.CompassMetadata.Authentication.ClientIds
 }
