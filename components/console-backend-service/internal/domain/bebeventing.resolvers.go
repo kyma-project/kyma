@@ -5,11 +5,11 @@ package domain
 
 import (
 	"context"
-	"fmt"
+	// "fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 func (r *queryResolver) EventSubscription(ctx context.Context, name string, namespace string) (*gqlschema.EventSubscription, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.bebEventing.EventSubscriptionQuery(ctx, namespace, name)
 }

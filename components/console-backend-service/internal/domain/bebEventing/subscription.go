@@ -1,7 +1,6 @@
 package bebEventing
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 )
 

@@ -1,16 +1,14 @@
 package bebEventing
 
 import (
-	"fmt"
-	"net"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	// "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
-	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	"knative.dev/pkg/apis"
+	// "k8s.io/client-go/tools/cache"
+	// "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	// "knative.dev/pkg/apis"
 )
 
 var subscriptionsKind = "Subscription"
@@ -27,7 +25,7 @@ type Service struct {
 }
 
 func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
-	return serviceFactory.ForResource(subscriptionsGroupVersionResource)
+	return serviceFactory.ForResource(subscriptionsGroupVersionResource), nil
 }
 
 // func NewEventHandler(channel chan<- *gqlschema.TriggerEvent, filter func(trigger v1alpha1.Trigger) bool) resource.EventHandlerProvider {
