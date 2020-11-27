@@ -8,6 +8,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
 {{ toYaml .Values.podDisruptionBudget | indent 2 }}
 {{- end -}}
