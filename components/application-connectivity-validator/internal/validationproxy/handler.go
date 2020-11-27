@@ -172,14 +172,21 @@ func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]stri
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
 	switch {
+	// For a cluster which is BEB enabled, events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
+	// For a cluster which is not BEB enabled, events reaching with prefix /{application}/events will be routed to /{application}/v1/events endpoint of event-service
 	case strings.HasPrefix(path, ph.eventServicePathPrefixV1):
 		return ph.eventsProxy, nil
 
+	// For a cluster which is BEB enabled, events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
+	// For a cluster which is not BEB enabled, events reaching /{application}/v2/events will be routed to /{application}/v2/events endpoint of event-service
 	case strings.HasPrefix(path, ph.eventServicePathPrefixV2):
 		if ph.isBEBEnabled {
 			return ph.eventMeshProxy, nil
 		}
 		return ph.eventsProxy, nil
+
+	// For a cluster which is BEB enabled, events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
+	// For a cluster which is not BEB enabled, events reaching /{application}/events will be routed to / endpoint of http-source-adapter
 	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
 		return ph.eventMeshProxy, nil
 
