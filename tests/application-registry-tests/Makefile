@@ -10,7 +10,7 @@ release:
 
 VERIFY_IGNORE := /vendor\|/mocks
 
-test: 
+test-local:
 	@echo "Tests are not to be run at this stage."
 
 .PHONY: path-to-referenced-charts
