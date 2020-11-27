@@ -5,6 +5,9 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+release:
+	gomod-release
+
 VERIFY_IGNORE := /vendor\|/mocks
 
 test: 
