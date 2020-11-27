@@ -1,5 +1,6 @@
 ---
 controller:
+  profile: "production"
   resources:
     limits:
       cpu: 100m

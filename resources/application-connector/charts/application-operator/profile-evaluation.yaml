@@ -1,5 +1,6 @@
 ---
 controller:
+  profile: "evaluation"
   resources:
     limits:
       cpu: 50m

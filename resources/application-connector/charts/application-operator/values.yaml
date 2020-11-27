@@ -8,6 +8,7 @@ controller:
     installationTimeout: 240
     healthPort: 8090
   resources:
+    profile: ""
     limits:
       cpu: 100m
       memory: 256Mi

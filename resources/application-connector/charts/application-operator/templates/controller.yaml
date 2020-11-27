@@ -62,6 +62,7 @@ spec:
         - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
         - "--strictMode={{ .Values.global.strictMode }}"
         - "--healthPort={{ .Values.controller.args.healthPort }}"
+        - "--profile={{ .Values.controller.resources.profile }}"
         image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
