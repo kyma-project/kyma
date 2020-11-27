@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
-  name: pamela
-  pullPolicy: IfNotPresent
+  name: parostatkiem/pamela #temp
+  pullPolicy: Always
 service:
   internalPort: 3001
   internalPortName: http-pamela
@@ -11,6 +11,7 @@ virtualservice:
   enabled: true
   host: pamela
   annotations: {}
+serviceAccountName: apiserver-proxy # !!!
 istio:
   namespace: istio-system
 verifySSL: false
