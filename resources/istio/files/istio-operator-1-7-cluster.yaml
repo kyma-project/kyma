@@ -61,24 +61,24 @@ spec:
         - name: ISTIO_META_ROUTER_MODE
           value: sni-dnat
         hpaSpec:
-          maxReplicas: 5
+          maxReplicas: {{ .Values.components.ingressGateways.hpaSpec.maxReplicas }}
           metrics:
           - resource:
               name: cpu
               targetAverageUtilization: 80
             type: Resource
-          minReplicas: 1
+          minReplicas: {{ .Values.components.ingressGateways.hpaSpec.minReplicas }}
           scaleTargetRef:
             apiVersion: apps/v1
             kind: Deployment
             name: istio-ingressgateway
         resources:
           limits:
-            cpu: 2000m
-            memory: 1024Mi
+            cpu: {{ .Values.components.ingressGateways.resources.limits.cpu }}
+            memory: {{ .Values.components.ingressGateways.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.components.ingressGateways.resources.requests.cpu }}
+            memory: {{ .Values.components.ingressGateways.resources.requests.memory }}
         service:
           type: LoadBalancer
           ports:
@@ -145,11 +145,11 @@ spec:
           timeoutSeconds: 5
         resources:
           limits:
-            cpu: 500m
-            memory: 1024Mi
+            cpu: {{ .Values.components.pilot.resources.limits.cpu }}
+            memory: {{ .Values.components.pilot.resources.limits.memory }}
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: {{ .Values.components.pilot.resources.requests.cpu }}
+            memory: {{ .Values.components.pilot.resources.requests.memory }}
         strategy:
           rollingUpdate:
             maxSurge: 100%
@@ -319,22 +319,22 @@ spec:
         readinessPeriodSeconds: 5
         resources:
           requests:
-            cpu: 75m
-            memory: 64Mi
+            cpu: {{ .Values.values.global.proxy.resources.requests.cpu }}
+            memory: {{ .Values.values.global.proxy.resources.requests.memory }}
           limits:
-            cpu: 250m
-            memory: 256Mi
+            cpu: {{ .Values.values.global.proxy.resources.limits.cpu }}
+            memory: {{ .Values.values.global.proxy.resources.limits.memory }}
         statusPort: 15020
         tracer: zipkin
       proxy_init:
         image: proxyv2
         resources:
           limits:
-            cpu: 100m
-            memory: 50Mi
+            cpu: {{ .Values.values.global.proxy_init.resources.limits.cpu }}
+            memory: {{ .Values.values.global.proxy_init.resources.limits.memory }}
           requests:
-            cpu: 10m
-            memory: 10Mi
+            cpu: {{ .Values.values.global.proxy_init.resources.requests.cpu }}
+            memory: {{ .Values.values.global.proxy_init.resources.requests.memory }}
       sds:
         token:
           aud: istio-ca

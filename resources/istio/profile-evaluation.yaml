@@ -4,7 +4,7 @@ global:
   tracing:
     enabled: true
     zipkinAddress: "zipkin.kyma-system:9411"
-    
+
 kyma:
   namespaces2Label:
     - istio-system
@@ -23,34 +23,34 @@ istio:
 components:
   ingressGateways:
     hpaSpec:
-      maxReplicas: 5
+      maxReplicas: 1
       minReplicas: 1
     resources:
       limits:
-        cpu: 2000m
-        memory: 1024Mi
+        cpu: 1000m
+        memory: 256Mi
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 50m
+        memory: 64Mi
   pilot:
     resources:
       limits:
-        cpu: 500m
-        memory: 1024Mi
-      requests:
-        cpu: 250m
+        cpu: 256m
         memory: 512Mi
+      requests:
+        cpu: 125m
+        memory: 256Mi
 
 values:
   global:
     proxy:
       resources:
         requests:
-          cpu: 75m
-          memory: 64Mi
+          cpu: 25m
+          memory: 32Mi
         limits:
           cpu: 250m
-          memory: 256Mi
+          memory: 254Mi
     proxy_init:
       resources:
         limits:
@@ -59,7 +59,6 @@ values:
         requests:
           cpu: 10m
           memory: 10Mi
-
 
 monitoring:
   enabled: true
