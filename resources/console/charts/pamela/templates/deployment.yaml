@@ -58,8 +58,8 @@ spec:
         volumeMounts:
           - name: ingress-tls-cert
             mountPath: /etc/ingress-tls-cert/
-        volumes:
-          - name: ingress-tls-cert
-            secret:
-              secretName: ingress-tls-cert
+      volumes:
+        - name: ingress-tls-cert
+          secret:
+            secretName: ingress-tls-cert
         {{ end }}
