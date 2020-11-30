@@ -60,7 +60,7 @@ type config struct {
 	FeatureToggles       experimental.FeatureToggles
 	Tracing              tracing.Config
 	DebugDomain          string `envconfig:"optional"`
-	EventSubscription    bool `envconfig:"optional"`
+	EventSubscription    bool   `envconfig:"optional"`
 }
 
 func main() {

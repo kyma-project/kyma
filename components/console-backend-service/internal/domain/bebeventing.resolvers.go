@@ -5,11 +5,14 @@ package domain
 
 import (
 	"context"
-	// "fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-func (r *queryResolver) EventSubscription(ctx context.Context, name string, namespace string) (*gqlschema.EventSubscription, error) {
+func (r *queryResolver) EventSubscription(ctx context.Context, name string, namespace string) (*v1alpha1.Subscription, error) {
 	return r.bebEventing.EventSubscriptionQuery(ctx, namespace, name)
+}
+
+func (r *queryResolver) EventSubscriptions(ctx context.Context, namespace string) ([]*v1alpha1.Subscription, error) {
+	return r.bebEventing.EventSubscriptionsQuery(ctx, namespace)
 }

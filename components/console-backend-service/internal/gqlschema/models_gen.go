@@ -285,11 +285,6 @@ type EventActivationEvent struct {
 	Schema      JSON   `json:"schema"`
 }
 
-type EventSubscription struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-}
-
 type File struct {
 	URL      string `json:"url"`
 	Metadata JSON   `json:"metadata"`
