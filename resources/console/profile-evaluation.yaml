@@ -2,13 +2,13 @@ web:
   deployment:
     resources:
       requests:
-        memory: 64Mi
+        memory: 16Mi
       limits:
-        memory: 128Mi
+        memory: 32Mi
 backend: 
   deployment:
     resources:
       requests:
-        memory: 64Mi
+        memory: 32Mi
       limits:
-        memory: 300Mi
+        memory: 150Mi
