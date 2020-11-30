@@ -19,4 +19,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.6.0
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
+replace (
+	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.18.8
+)
