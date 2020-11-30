@@ -16,7 +16,7 @@ The defaulting webhook:
 - Adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
 - Sets the default runtime `nodejs12` unless specified otherwise.
 
-   | Parameter         | Default value |
+   | Parameter        | Default value |
    | ----------------- | ------------- |
    | **resources.requests.cpu**    | `50m`         |
    | **resources.requests.memory** | `64Mi`        |
@@ -29,7 +29,7 @@ The defaulting webhook:
    | **minReplicas**   | `1`           |
    | **maxReplicas**   | `1`           |
    | **runtime**       | `nodejs12`    |
-  
+
 > **NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
 
 ## Validation webhook
@@ -68,6 +68,6 @@ It checks the following conditions for these CRs:
      - **spec.auth.secretName** must not be empty
 
    - If you use HTTP(S) to point to the repository that requires authentication (**spec.auth**):
-   
+
       - **spec.auth.type** must be set to either `key` (SSH key) or `basic` (password or token)
       - **spec.auth.secretName** must not be empty
