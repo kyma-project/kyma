@@ -167,7 +167,7 @@ Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
 
-2. Go to the **Addons** view in the left navigation panel and select **Add New Configuration**.
+2. In the left navigation panel, go to **Configuration** > **Addons** and select **Add New Configuration**.
 
 3. Enter `https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
 
@@ -177,7 +177,7 @@ Follow these steps:
 
 ### Create a ServiceInstance
 
-1. Go to the **Catalog** view where you can see the list of all available Addons and select **[Experimental] Redis**.
+1. In the left navigation panel, go to **Service Management** > **Catalog** where you can see the list of all available Addons. Select **[Experimental] Redis**.
 
 2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
 
@@ -191,7 +191,7 @@ Follow these steps:
 
 ### Bind the Function to the ServiceInstance
 
-1. Go to the **Functions** view in the left navigation panel and select the Function you want to bind to the ServiceInstance.
+1. In the left navigation panel, go to **Development** > **Functions** and select the Function you want to bind to the ServiceInstance.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 

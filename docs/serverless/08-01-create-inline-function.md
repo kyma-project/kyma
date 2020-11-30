@@ -63,7 +63,7 @@ Follows these steps:
 
 1. From the drop-down list in the top navigation panel, create a Namespace or select one.
 
-2.  Go to the **Functions** view in the left navigation panel and select **Create Function**.
+2.  In the left navigation panel, go to **Development** > **Functions** and select **Create Function**.
 
 3.  In the pop-up box, provide the Function's name, leave the default runtime `Node.js 12`, and select **Create** to confirm changes.
 
