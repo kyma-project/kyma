@@ -27,7 +27,7 @@ components:
       minReplicas: 1
     resources:
       limits:
-        cpu: 500m
+        cpu: 2000m
         memory: 128Mi
       requests:
         cpu: 25m
@@ -35,7 +35,7 @@ components:
   pilot:
     resources:
       limits:
-        cpu: 128m
+        cpu: 500m
         memory: 256Mi
       requests:
         cpu: 75m
