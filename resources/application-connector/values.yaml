@@ -47,7 +47,7 @@ global:
   application_registry:
     version: "PR-9890"
   application_registry_tests:
-    version: "cda9f380"
+    version: "PR-10066"
   application_broker:
     version: "41660266"
   application_connectivity_certs_setup_job:
