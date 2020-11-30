@@ -15,7 +15,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "kube-state-metrics.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
   replicas: {{ .Values.replicas }}
 {{- if .Values.autosharding.enabled }}
   serviceName: {{ template "kube-state-metrics.fullname" . }}
