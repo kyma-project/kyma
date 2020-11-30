@@ -1,25 +1,4 @@
 ---
-global:
-  isLocalEnv: false
-  tracing:
-    enabled: true
-    zipkinAddress: "zipkin.kyma-system:9411"
-
-kyma:
-  namespaces2Label:
-    - istio-system
-    - kube-system
-  labelJob:
-    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
-
-istio:
-  installer:
-    image: eu.gcr.io/kyma-project/istio-installer
-    tag: 6fd499b9
-    tag16: fb388134
-    tag17: f93bf007
-
 components:
   ingressGateways:
     hpaSpec:
@@ -33,6 +12,9 @@ components:
         cpu: 25m
         memory: 32Mi
   pilot:
+    hpaSpec:
+      maxReplicas: 1
+      minReplicas: 1
     resources:
       limits:
         cpu: 500m
@@ -61,18 +43,9 @@ values:
           memory: 10Mi
 
 monitoring:
-  enabled: true
+  enabled: false
   dashboards:
-    enabled: true
+    enabled: false
   istioServiceMonitor:
-    enabled: true
+    enabled: false
     scrapeInterval: ""
-
-test:
-  istio_kyma_validate:
-    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
-    enabled: true
-    labels:
-      integration: true
-      after-upgrade: true

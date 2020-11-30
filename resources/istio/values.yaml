@@ -33,6 +33,9 @@ components:
         cpu: 100m
         memory: 128Mi
   pilot:
+    hpaSpec:
+      maxReplicas: 5
+      minReplicas: 1
     resources:
       limits:
         cpu: 500m
