@@ -43,7 +43,7 @@ global:
   application_gateway_tests:
     version: "470796a1"
   application_gateway_legacy_tests:
-    version: "PR-10072"
+    version: "d0f17bff"
   application_registry:
     version: "PR-9890"
   application_registry_tests:
