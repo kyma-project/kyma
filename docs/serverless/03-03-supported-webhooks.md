@@ -16,7 +16,7 @@ The defaulting webhook:
 - Adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
 - Sets the default runtime `nodejs12` unless specified otherwise.
 
-   | Parameter        | Default value |
+   | Parameter       | Default value |
    | ----------------- | ------------- |
    | **resources.requests.cpu**    | `50m`         |
    | **resources.requests.memory** | `64Mi`        |
