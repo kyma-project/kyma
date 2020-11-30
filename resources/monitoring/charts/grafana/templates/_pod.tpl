@@ -1,3 +1,17 @@
+{{- /*
+  Customization:
+  Added additional OAuth related env vars:
+    GF_AUTH_GENERIC_OAUTH_AUTH_URL
+    GF_SERVER_ROOT_URL
+  Added a value check in the env range loop:
+  {{- range $key, $value := .Values.env }}
+  {{- if $value }}
+      - name: "{{ tpl $key $ }}"
+        value: "{{ tpl (print $value) $ }}"
+  {{- end }}
+  {{- end }}
+*/ -}}
+
 {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
 schedulerName: "{{ .Values.schedulerName }}"
@@ -334,14 +348,24 @@ containers:
       - name: GF_RENDERING_CALLBACK_URL
         value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}/
       {{ end }}
+      {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_AUTH_URL }}
+      - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+        value: "https://dex.{{ .Values.global.ingress.domainName }}/auth"
+      {{- end }}
+      {{- if not .Values.env.GF_SERVER_ROOT_URL }}
+      - name: GF_SERVER_ROOT_URL
+        value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
+      {{- end }}
     {{- range $key, $value := .Values.envValueFrom }}
       - name: {{ $key | quote }}
         valueFrom:
 {{ toYaml $value | indent 10 }}
     {{- end }}
 {{- range $key, $value := .Values.env }}
+{{- if $value }}
       - name: "{{ tpl $key $ }}"
         value: "{{ tpl (print $value) $ }}"
+{{- end }}
 {{- end }}
     {{- if .Values.envFromSecret }}
     envFrom:
