@@ -1,26 +1,11 @@
 knative-eventing:
-  sourcesController:
-    resources:
-      limits:
-        cpu: 50m
-        memory: 50Mi
-      requests:
-        cpu: 25m
-        memory: 25Mi
   eventingWebhook:
     resources:
-      limits:
-        cpu: 100m
-        memory: 100Mi
       requests:
         cpu: 10m
         memory: 10Mi
   eventingController:
     resources:
-      limits:
-        cpu: 50m
-        memory: 50Mi
       requests:
         cpu: 25m
         memory: 25Mi
-        

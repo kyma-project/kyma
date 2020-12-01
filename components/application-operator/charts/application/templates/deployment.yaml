@@ -59,7 +59,7 @@ spec:
           periodSeconds: 10
         resources:
           requests:
-            cpu: {{ .Values.deployment.resources.cpu }}
+            cpu: 100m
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port
@@ -125,7 +125,5 @@ spec:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
         resources:
-          limits:
-            memory: {{ .Values.eventService.deployment.resources.limits.memory }}
           requests:
             memory: {{ .Values.eventService.deployment.resources.requests.memory }}
