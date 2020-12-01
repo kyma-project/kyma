@@ -1,0 +1,10 @@
+---
+deployment:
+  profile: "evaluation"
+  resources:
+    limits:
+      cpu: 5m
+      memory: 24Mi
+    requests:
+      cpu: 1m
+      memory: 16Mi

@@ -125,6 +125,13 @@ spec:
             port: {{ .Values.eventService.deployment.args.externalAPIPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.eventService.deployment.resources.limits.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.eventService.deployment.resources.requests.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.requests.memory }}
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
