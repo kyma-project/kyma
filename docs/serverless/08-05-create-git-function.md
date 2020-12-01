@@ -148,6 +148,7 @@ Follows these steps:
 
     - SSH key:
 
+
       ```yaml
       apiVersion: v1
       kind: Secret
@@ -159,7 +160,7 @@ Follows these steps:
         key: {SSH_KEY}
       ```
 
-  >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
   - Go to your Namespace view and select **Deploy new resource**.
 
