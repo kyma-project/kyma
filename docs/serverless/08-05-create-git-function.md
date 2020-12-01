@@ -77,13 +77,11 @@ Follows these steps:
 
       >**NOTE:** If you use a secured repository, add the **auth** object with the adequate **type** and **secretName** fields to the spec:
       >
-      >   ```yaml
       >   spec:
       >     ...
       >     auth:
       >        type: basic | type: key
       >        secretName: git-creds-basic | secretName: git-creds-key
-      >   ```
 
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
@@ -105,7 +103,7 @@ Follows these steps:
 
     >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/master/orders-service/function).
 
-4. Check if your Function was created and all conditions are set to `True`:
+5. Check if your Function was created and all conditions are set to `True`:
 
     ```bash
     kubectl get functions $GIT_FUNCTION -n $NAMESPACE
@@ -130,7 +128,7 @@ Follows these steps:
 
     If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-    a. On your machine, create this YAML file with one of these Secret definitions: <br>
+    - On your machine, create this YAML file with one of these Secret definitions:
 
       - Basic authentication:
 
@@ -161,9 +159,9 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-    b. Go to your Namespace view and select **Deploy new resource**. <br>
+    - Go to your Namespace view and select **Deploy new resource**.
 
-    c. Locate the YAML file with the Secret and select **Deploy**. <br>
+    - Locate the YAML file with the Secret and select **Deploy**.
 
 3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
 
