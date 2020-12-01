@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows how you can create a Function in an alternative way -  building it from code and dependencies stored in a Git repository instead of keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/master/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
 
-> **NOTE:** This tutorial shows an alternative way of storing Function's code and dependencies. If you want to follow the whole end-to-end flow described in the Serverless tutorials, [create an inline Function](#tutorials-create-an-inline-function) instead. To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
+> **NOTE:** This tutorial shows an alternative way of storing Function's code and dependencies. If you want to follow the whole end-to-end flow described for Functions in the Serverless tutorials, [create an inline Function](#tutorials-create-an-inline-function) instead. To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
 
 ## Steps
 
@@ -28,7 +28,7 @@ Follows these steps:
 
     If you use a secured repository, you must first create a Secret for one of these authentication methods:
 
-    - Basic authentication (username and password) to this repository in the same Namespace as the Function:
+    - Basic authentication (username and password or token) to this repository in the same Namespace as the Function:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -40,7 +40,7 @@ Follows these steps:
     type: Opaque
     data:
       username: {USERNAME}
-      password: {PASSWORD}
+      password: {PASSWORD_OR_TOKEN}
     EOF
     ```
 
@@ -128,44 +128,42 @@ Follows these steps:
 
 2. Create a Secret (optional).
 
-    If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
+  If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-    - On your machine, create this YAML file with one of these Secret definitions:
+  - On your machine, create this YAML file with one of these Secret definitions:
 
+    - Basic authentication:
 
-          - Basic authentication:
+      ```yaml
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: git-creds-basic
+        namespace: {NAMESPACE}
+      type: Opaque
+      data:
+        username: {USERNAME}
+        password: {PASSWORD_OR_TOKEN}
+      ```
 
-          ```yaml
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: git-creds-basic
-            namespace: {NAMESPACE}
-          type: Opaque
-          data:
-            username: {USERNAME}
-            password: {PASSWORD}
-          ```
+    - SSH key:
 
+      ```yaml
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: git-creds-key
+        namespace: {NAMESPACE}
+      type: Opaque
+      data:
+        key: {SSH_KEY}
+      ```
 
-          - SSH key:
+  >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-          ```yaml
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: git-creds-key
-            namespace: {NAMESPACE}
-          type: Opaque
-          data:
-            key: {SSH_KEY}
-          ```
+  - Go to your Namespace view and select **Deploy new resource**.
 
-    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
-
-    - Go to your Namespace view and select **Deploy new resource**.
-
-    - Locate the YAML file with the Secret and select **Deploy**.
+  - Locate the YAML file with the Secret and select **Deploy**.
 
 3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
 
