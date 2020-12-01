@@ -909,6 +909,9 @@ var _ = ginkgo.Describe("Function", func() {
 		fnName := "function"
 		function := newFixFunction(testNamespace, fnName, 1, 2)
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
+		gomega.Expect(resourceClient.Create(context.TODO(), &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{
+			Name: testNamespace,
+		}})).To(gomega.Succeed())
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 		defer deleteFunction(context.TODO(), function)
 
