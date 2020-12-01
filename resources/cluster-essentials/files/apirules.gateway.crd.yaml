@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -20,12 +21,12 @@ spec:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
             of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
         kind:
           description: 'Kind is a string value representing the REST resource this
             object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
           type: string
         metadata:
           properties:
@@ -48,7 +49,7 @@ spec:
                 time when this object was created. It is not guaranteed to be set
                 in happens-before order across separate operations. Clients may not
                 set this value. It is represented in RFC3339 form and is in UTC. \n
-                Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata"
+                Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
               format: date-time
               type: string
             deletionGracePeriodSeconds:
@@ -76,14 +77,24 @@ spec:
                 an administrator or automated process can determine the resource is
                 fully terminated. If not set, graceful deletion of the object has
                 not been requested. \n Populated by the system when a graceful deletion
-                is requested. Read-only. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata"
+                is requested. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata"
               format: date-time
               type: string
             finalizers:
               description: Must be empty before the object is deleted from the registry.
                 Each entry is an identifier for the responsible component that will
                 remove the entry from the list. If the deletionTimestamp of the object
-                is non-nil, entries in this list can only be removed.
+                is non-nil, entries in this list can only be removed. Finalizers may
+                be processed and removed in any order.  Order is NOT enforced because
+                it introduces significant risk of stuck finalizers. finalizers is
+                a shared field, any actor with permission can reorder it. If the finalizer
+                list is processed in order, then this can lead to a situation in which
+                the component responsible for the first finalizer in the list is waiting
+                for a signal (field value, external system, or other) produced by
+                a component responsible for a finalizer later in the list, resulting
+                in a deadlock. Without enforced ordering finalizers are free to order
+                amongst themselves and are not vulnerable to ordering changes in the
+                list.
               items:
                 type: string
               type: array
@@ -100,173 +111,13 @@ spec:
                 indicating a unique name could not be found in the time allotted,
                 and the client should retry (optionally after the time indicated in
                 the Retry-After header). \n Applied only if Name is not specified.
-                More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#idempotency"
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency"
               type: string
             generation:
               description: A sequence number representing a specific generation of
                 the desired state. Populated by the system. Read-only.
               format: int64
               type: integer
-            initializers:
-              description: "An initializer is a controller which enforces some system
-                invariant at object creation time. This field is a list of initializers
-                that have not yet acted on this object. If nil or empty, this object
-                has been completely initialized. Otherwise, the object is considered
-                uninitialized and is hidden (in list/watch and get calls) from clients
-                that haven't explicitly asked to observe uninitialized objects. \n
-                When an object is created, the system will populate this list with
-                the current set of initializers. Only privileged users may set or
-                modify this list. Once it is empty, it may not be modified further
-                by any user. \n DEPRECATED - initializers are an alpha field and will
-                be removed in v1.15."
-              properties:
-                pending:
-                  description: Pending is a list of initializers that must execute
-                    in order before this object is visible. When the last pending
-                    initializer is removed, and no failing result is set, the initializers
-                    struct will be set to nil and the object is considered as initialized
-                    and visible to all clients.
-                  items:
-                    properties:
-                      name:
-                        description: name of the process that is responsible for initializing
-                          this object.
-                        type: string
-                    required:
-                      - name
-                    type: object
-                  type: array
-                result:
-                  description: If result is set with the Failure field, the object
-                    will be persisted to storage and then deleted, ensuring that other
-                    clients can observe the deletion.
-                  properties:
-                    apiVersion:
-                      description: 'APIVersion defines the versioned schema of this
-                        representation of an object. Servers should convert recognized
-                        schemas to the latest internal value, and may reject unrecognized
-                        values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
-                      type: string
-                    code:
-                      description: Suggested HTTP return code for this status, 0 if
-                        not set.
-                      format: int32
-                      type: integer
-                    details:
-                      description: Extended data associated with the reason.  Each
-                        reason may define its own extended details. This field is
-                        optional and the data returned is not guaranteed to conform
-                        to any schema except that defined by the reason type.
-                      properties:
-                        causes:
-                          description: The Causes array includes more details associated
-                            with the StatusReason failure. Not all StatusReasons may
-                            provide detailed causes.
-                          items:
-                            properties:
-                              field:
-                                description: "The field of the resource that has caused
-                                  this error, as named by its JSON serialization.
-                                  May include dot and postfix notation for nested
-                                  attributes. Arrays are zero-indexed.  Fields may
-                                  appear more than once in an array of causes due
-                                  to fields having multiple errors. Optional. \n Examples:
-                                  \  \"name\" - the field \"name\" on the current
-                                  resource   \"items[0].name\" - the field \"name\"
-                                  on the first array entry in \"items\""
-                                type: string
-                              message:
-                                description: A human-readable description of the cause
-                                  of the error.  This field may be presented as-is
-                                  to a reader.
-                                type: string
-                              reason:
-                                description: A machine-readable description of the
-                                  cause of the error. If this value is empty there
-                                  is no information available.
-                                type: string
-                            type: object
-                          type: array
-                        group:
-                          description: The group attribute of the resource associated
-                            with the status StatusReason.
-                          type: string
-                        kind:
-                          description: 'The kind attribute of the resource associated
-                            with the status StatusReason. On some operations may differ
-                            from the requested resource Kind. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
-                          type: string
-                        name:
-                          description: The name attribute of the resource associated
-                            with the status StatusReason (when there is a single name
-                            which can be described).
-                          type: string
-                        retryAfterSeconds:
-                          description: If specified, the time in seconds before the
-                            operation should be retried. Some errors may indicate
-                            the client must take an alternate action - for those errors
-                            this field may indicate how long to wait before taking
-                            the alternate action.
-                          format: int32
-                          type: integer
-                        uid:
-                          description: 'UID of the resource. (when there is a single
-                            resource which can be described). More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
-                          type: string
-                      type: object
-                    kind:
-                      description: 'Kind is a string value representing the REST resource
-                        this object represents. Servers may infer this from the endpoint
-                        the client submits requests to. Cannot be updated. In CamelCase.
-                        More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
-                      type: string
-                    message:
-                      description: A human-readable description of the status of this
-                        operation.
-                      type: string
-                    metadata:
-                      description: 'Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
-                      properties:
-                        continue:
-                          description: continue may be set if the user set a limit
-                            on the number of items returned, and indicates that the
-                            server has more data available. The value is opaque and
-                            may be used to issue another request to the endpoint that
-                            served this list to retrieve the next set of available
-                            objects. Continuing a consistent list may not be possible
-                            if the server configuration has changed or more than a
-                            few minutes have passed. The resourceVersion field returned
-                            when using this continue value will be identical to the
-                            value in the first response, unless you have received
-                            this token from an error message.
-                          type: string
-                        resourceVersion:
-                          description: 'String that identifies the server''s internal
-                            version of this object that can be used by clients to
-                            determine when objects have changed. Value must be treated
-                            as opaque by clients and passed unmodified back to the
-                            server. Populated by the system. Read-only. More info:
-                            https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency'
-                          type: string
-                        selfLink:
-                          description: selfLink is a URL representing this object.
-                            Populated by the system. Read-only.
-                          type: string
-                      type: object
-                    reason:
-                      description: A machine-readable description of why this operation
-                        is in the "Failure" status. If this value is empty there is
-                        no information available. A Reason clarifies an HTTP status
-                        code but does not override it.
-                      type: string
-                    status:
-                      description: 'Status of the operation. One of: "Success" or
-                        "Failure". More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status'
-                      type: string
-                  type: object
-              required:
-                - pending
-              type: object
             labels:
               additionalProperties:
                 type: string
@@ -275,14 +126,13 @@ spec:
                 replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
               type: object
             managedFields:
-              description: "ManagedFields maps workflow-id and version to the set
-                of fields that are managed by that workflow. This is mostly for internal
+              description: ManagedFields maps workflow-id and version to the set of
+                fields that are managed by that workflow. This is mostly for internal
                 housekeeping, and users typically shouldn't need to set or understand
                 this field. A workflow can be the user's name, a controller's name,
-                or the name of a specific apply path like \"ci-cd\". The set of fields
+                or the name of a specific apply path like "ci-cd". The set of fields
                 is always in the version that the workflow used when modifying the
-                object. \n This field is alpha and can be changed or removed without
-                notice."
+                object.
               items:
                 properties:
                   apiVersion:
@@ -292,9 +142,14 @@ spec:
                       the version of a field set because it cannot be automatically
                       converted.
                     type: string
-                  fields:
-                    additionalProperties: true
-                    description: Fields identifies a set of fields.
+                  fieldsType:
+                    description: 'FieldsType is the discriminator for the different
+                      fields format and version. There is currently only one possible
+                      value: "FieldsV1"'
+                    type: string
+                  fieldsV1:
+                    description: FieldsV1 holds the first JSON version format as described
+                      in the "FieldsV1" type.
                     type: object
                   manager:
                     description: Manager is an identifier of the workflow managing
@@ -349,7 +204,7 @@ spec:
                     description: If true, this reference points to the managing controller.
                     type: boolean
                   kind:
-                    description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+                    description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
                     type: string
                   name:
                     description: 'Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
@@ -358,10 +213,10 @@ spec:
                     description: 'UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
                     type: string
                 required:
-                  - apiVersion
-                  - kind
-                  - name
-                  - uid
+                - apiVersion
+                - kind
+                - name
+                - uid
                 type: object
               type: array
             resourceVersion:
@@ -372,11 +227,13 @@ spec:
                 must treat these values as opaque and passed unmodified back to the
                 server. They may only be valid for a particular resource or set of
                 resources. \n Populated by the system. Read-only. Value must be treated
-                as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency"
+                as opaque by clients and . More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency"
               type: string
             selfLink:
-              description: SelfLink is a URL representing this object. Populated by
-                the system. Read-only.
+              description: "SelfLink is a URL representing this object. Populated
+                by the system. Read-only. \n DEPRECATED Kubernetes will stop propagating
+                this field in 1.20 release and the field is planned to be removed
+                in 1.21 release."
               type: string
             uid:
               description: "UID is the unique in time and space value for this object.
@@ -407,7 +264,7 @@ spec:
                           description: Name is the name of a handler
                           type: string
                       required:
-                        - handler
+                      - handler
                       type: object
                     minItems: 1
                     type: array
@@ -415,6 +272,7 @@ spec:
                     description: Set of allowed HTTP methods
                     items:
                       type: string
+                    minItems: 1
                     type: array
                   mutators:
                     description: Mutators to be used
@@ -428,16 +286,17 @@ spec:
                           description: Name is the name of a handler
                           type: string
                       required:
-                        - handler
+                      - handler
                       type: object
                     type: array
                   path:
                     description: Path to be exposed
-                    pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
+                    pattern: ^/([0-9a-zA-Z./*]+)
                     type: string
                 required:
-                  - path
-                  - accessStrategies
+                - path
+                - methods
+                - accessStrategies
                 type: object
               minItems: 1
               type: array
@@ -449,7 +308,7 @@ spec:
                     external
                   type: boolean
                 host:
-                  description: Target hostname or FQDN of the service. If only a hostname is provided, the default domain name will be used.
+                  description: URL on which the service will be visible
                   maxLength: 256
                   minLength: 3
                   pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
@@ -464,14 +323,14 @@ spec:
                   minimum: 1
                   type: integer
               required:
-                - name
-                - port
-                - host
+              - name
+              - port
+              - host
               type: object
           required:
-            - service
-            - gateway
-            - rules
+          - service
+          - gateway
+          - rules
           type: object
         status:
           properties:
@@ -505,9 +364,9 @@ spec:
           type: object
       type: object
   versions:
-    - name: v1alpha1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""
