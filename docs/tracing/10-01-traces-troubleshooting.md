@@ -5,7 +5,7 @@ type: Troubleshooting
 
 By default, only 1% of the requests are sent to Jaeger for trace recording. To change this system behavior, you can override the existing settings or change the value in the Runtime.
 
-> Note: You can also manually set `x-b3-sampled: 1` header in order to force sampling for a particular request 
+> **NOTE:** You can also manually set the `x-b3-sampled: 1` header to force sampling for a particular request.
 
 ## Create an override
 
