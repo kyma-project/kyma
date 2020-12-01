@@ -68,7 +68,7 @@ image:
   #   - myRegistrKeySecretName
 
 testFramework:
-  enabled: true
+  enabled: false
   image: "bats/bats"
   tag: "v1.1.0"
   imagePullPolicy: IfNotPresent
