@@ -20,50 +20,6 @@ istio:
     tag16: fb388134
     tag17: f93bf007
 
-components:
-  ingressGateways:
-    hpaSpec:
-      maxReplicas: 5
-      minReplicas: 1
-    resources:
-      limits:
-        cpu: 2000m
-        memory: 1024Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-  pilot:
-    hpaSpec:
-      maxReplicas: 5
-      minReplicas: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 1024Mi
-      requests:
-        cpu: 250m
-        memory: 512Mi
-
-values:
-  global:
-    proxy:
-      resources:
-        requests:
-          cpu: 75m
-          memory: 64Mi
-        limits:
-          cpu: 250m
-          memory: 256Mi
-    proxy_init:
-      resources:
-        limits:
-          cpu: 100m
-          memory: 50Mi
-        requests:
-          cpu: 10m
-          memory: 10Mi
-
-
 monitoring:
   enabled: true
   dashboards:
@@ -80,3 +36,6 @@ test:
     labels:
       integration: true
       after-upgrade: true
+
+istio_operator_cluster_file: istio-operator-1-7-cluster.yaml
+istio_operator_minikube_file: istio-operator-1-7-minikube.yaml

@@ -1,46 +1,4 @@
 ---
-components:
-  ingressGateways:
-    hpaSpec:
-      maxReplicas: 1
-      minReplicas: 1
-    resources:
-      limits:
-        cpu: 2000m
-        memory: 128Mi
-      requests:
-        cpu: 25m
-        memory: 32Mi
-  pilot:
-    hpaSpec:
-      maxReplicas: 1
-      minReplicas: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 75m
-        memory: 128Mi
-
-values:
-  global:
-    proxy:
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 250m
-          memory: 254Mi
-    proxy_init:
-      resources:
-        limits:
-          cpu: 100m
-          memory: 50Mi
-        requests:
-          cpu: 10m
-          memory: 10Mi
 
 monitoring:
   enabled: false
@@ -49,3 +7,6 @@ monitoring:
   istioServiceMonitor:
     enabled: false
     scrapeInterval: ""
+
+istio_operator_cluster_file: istio-operator-1-7-cluster-evaluation.yaml
+istio_operator_minikube_file: istio-operator-1-7-minikube-evaluation.yaml

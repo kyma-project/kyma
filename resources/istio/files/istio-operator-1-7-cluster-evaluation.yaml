@@ -36,8 +36,8 @@ spec:
             cpu: 2000m
             memory: 1024Mi
           requests:
-            cpu: 10m
-            memory: 40Mi
+            cpu: 100m
+            memory: 120Mi
         service:
           ports:
           - name: http2
@@ -75,12 +75,12 @@ spec:
         resources:
           limits:
             cpu: 2000m
-            memory: 256Mi
+            memory: 128Mi
           requests:
-            cpu: 100m
-            memory: 96Mi
+            cpu: 25m
+            memory: 32Mi
         service:
-          type: NodePort
+          type: LoadBalancer
           ports:
           - name: status-port
             port: 15021
@@ -113,14 +113,6 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
-        overlays:
-        - kind: Deployment
-          name: istio-ingressgateway
-          patches:
-          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8080].hostPort
-            value: 80
-          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
-            value: 443
       name: istio-ingressgateway
 
     istiodRemote:
@@ -166,10 +158,10 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 1024Mi
+            memory: 256Mi
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 75m
+            memory: 128Mi
         strategy:
           rollingUpdate:
             maxSurge: 100%
@@ -264,7 +256,7 @@ spec:
         zvpn: {}
       istio-ingressgateway:
         applicationPorts: ""
-        autoscaleEnabled: false
+        autoscaleEnabled: true
         debug: info
         domain: ""
         env: {}
@@ -467,11 +459,11 @@ spec:
           kubernetesenv:
             enabled: true
           useAdapterCRDs: false
-        autoscaleEnabled: false
+        autoscaleEnabled: true
         image: mixer
         sessionAffinityEnabled: false
       telemetry:
-        autoscaleEnabled: false
+        autoscaleEnabled: true
         env:
           GOMAXPROCS: "6"
         image: mixer
@@ -486,7 +478,7 @@ spec:
         tolerations: []
     pilot:
       appNamespaces: []
-      autoscaleEnabled: false
+      autoscaleEnabled: true
       configMap: true
       configNamespace: istio-config
       cpu:

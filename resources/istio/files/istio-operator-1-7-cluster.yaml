@@ -61,24 +61,24 @@ spec:
         - name: ISTIO_META_ROUTER_MODE
           value: sni-dnat
         hpaSpec:
-          maxReplicas: {{ .Values.components.ingressGateways.hpaSpec.maxReplicas }}
+          maxReplicas: 5
           metrics:
           - resource:
               name: cpu
               targetAverageUtilization: 80
             type: Resource
-          minReplicas: {{ .Values.components.ingressGateways.hpaSpec.minReplicas }}
+          minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
             kind: Deployment
             name: istio-ingressgateway
         resources:
           limits:
-            cpu: {{ .Values.components.ingressGateways.resources.limits.cpu }}
-            memory: {{ .Values.components.ingressGateways.resources.limits.memory }}
+            cpu: 2000m
+            memory: 1024Mi
           requests:
-            cpu: {{ .Values.components.ingressGateways.resources.requests.cpu }}
-            memory: {{ .Values.components.ingressGateways.resources.requests.memory }}
+            cpu: 100m
+            memory: 128Mi
         service:
           type: LoadBalancer
           ports:
@@ -144,24 +144,24 @@ spec:
           periodSeconds: 3
           timeoutSeconds: 5
         hpaSpec:
-          maxReplicas: {{ .Values.components.pilot.hpaSpec.maxReplicas }}
+          maxReplicas: 5
           metrics:
             - resource:
                 name: cpu
                 targetAverageUtilization: 80
               type: Resource
-          minReplicas: {{ .Values.components.pilot.hpaSpec.minReplicas }}
+          minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
             kind: Deployment
             name: istiod
         resources:
           limits:
-            cpu: {{ .Values.components.pilot.resources.limits.cpu }}
-            memory: {{ .Values.components.pilot.resources.limits.memory }}
+            cpu: 500m
+            memory: 1024Mi
           requests:
-            cpu: {{ .Values.components.pilot.resources.requests.cpu }}
-            memory: {{ .Values.components.pilot.resources.requests.memory }}
+            cpu: 250m
+            memory: 512Mi
         strategy:
           rollingUpdate:
             maxSurge: 100%
@@ -331,22 +331,22 @@ spec:
         readinessPeriodSeconds: 5
         resources:
           requests:
-            cpu: {{ .Values.values.global.proxy.resources.requests.cpu }}
-            memory: {{ .Values.values.global.proxy.resources.requests.memory }}
+            cpu: 75m
+            memory: 64Mi
           limits:
-            cpu: {{ .Values.values.global.proxy.resources.limits.cpu }}
-            memory: {{ .Values.values.global.proxy.resources.limits.memory }}
+            cpu: 250m
+            memory: 256Mi
         statusPort: 15020
         tracer: zipkin
       proxy_init:
         image: proxyv2
         resources:
           limits:
-            cpu: {{ .Values.values.global.proxy_init.resources.limits.cpu }}
-            memory: {{ .Values.values.global.proxy_init.resources.limits.memory }}
+            cpu: 100m
+            memory: 50Mi
           requests:
-            cpu: {{ .Values.values.global.proxy_init.resources.requests.cpu }}
-            memory: {{ .Values.values.global.proxy_init.resources.requests.memory }}
+            cpu: 10m
+            memory: 10Mi
       sds:
         token:
           aud: istio-ca
