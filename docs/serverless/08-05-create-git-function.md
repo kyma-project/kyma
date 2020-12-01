@@ -130,40 +130,40 @@ Follows these steps:
 
     If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-    - On your machine, create this YAML file with one of these Secret definitions:
+      - On your machine, create this YAML file with one of these Secret definitions:
 
-        - Basic authentication:
+          - Basic authentication:
 
-        ```yaml
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: git-creds-basic
-          namespace: {NAMESPACE}
-        type: Opaque
-        data:
-          username: {USERNAME}
-          password: {PASSWORD}
-        ```
+          ```yaml
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: git-creds-basic
+            namespace: {NAMESPACE}
+          type: Opaque
+          data:
+            username: {USERNAME}
+            password: {PASSWORD}
+          ```
 
-        - SSH key:
+          - SSH key:
 
-        ```yaml
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: git-creds-key
-          namespace: {NAMESPACE}
-        type: Opaque
-        data:
-          key: {SSH_KEY}
-        ```
+          ```yaml
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: git-creds-key
+            namespace: {NAMESPACE}
+          type: Opaque
+          data:
+            key: {SSH_KEY}
+          ```
 
-    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-    - Go to your Namespace view and select **Deploy new resource**.
+      - Go to your Namespace view and select **Deploy new resource**.
 
-    - Locate the YAML file with the Secret and select **Deploy**.
+      - Locate the YAML file with the Secret and select **Deploy**.
 
 3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
 
