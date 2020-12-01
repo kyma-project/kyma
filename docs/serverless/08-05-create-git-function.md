@@ -75,13 +75,15 @@ Follows these steps:
     EOF
     ```
 
-      >**NOTE:** If you use a secured repository, add the **auth** object with the adequate **type** and **secretName** fields to the spec:
-      >
-      >   spec:
-      >     ...
-      >     auth:
-      >        type: basic | type: key
-      >        secretName: git-creds-basic | secretName: git-creds-key
+    >**NOTE:** If you use a secured repository, add the **auth** object with the adequate **type** and **secretName** fields to the spec:
+
+    ```yaml
+    spec:
+      ...
+      auth:
+        type: basic | type: key
+        secretName: git-creds-basic | secretName: git-creds-key
+    ```
 
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
@@ -128,9 +130,9 @@ Follows these steps:
 
     If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-    - On your machine, create this YAML file with one of these Secret definitions:
+  - On your machine, create this YAML file with one of these Secret definitions:
 
-      - Basic authentication:
+        - Basic authentication:
 
         ```yaml
         apiVersion: v1
@@ -144,7 +146,7 @@ Follows these steps:
           password: {PASSWORD}
         ```
 
-      - SSH key:
+        - SSH key:
 
         ```yaml
         apiVersion: v1
@@ -159,9 +161,9 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-    - Go to your Namespace view and select **Deploy new resource**.
+  - Go to your Namespace view and select **Deploy new resource**.
 
-    - Locate the YAML file with the Secret and select **Deploy**.
+  - Locate the YAML file with the Secret and select **Deploy**.
 
 3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
 
