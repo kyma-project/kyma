@@ -132,6 +132,7 @@ Follows these steps:
 
     - On your machine, create this YAML file with one of these Secret definitions:
 
+
           - Basic authentication:
 
           ```yaml
@@ -145,6 +146,7 @@ Follows these steps:
             username: {USERNAME}
             password: {PASSWORD}
           ```
+
 
           - SSH key:
 
