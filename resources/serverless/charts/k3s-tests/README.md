@@ -2,10 +2,10 @@
 
 ## Overview
 
-This project contains the chart with test Job for function-controller.
+This project contains a chart with the test Job for the Function Controller.
 
 ## Details
 
-This chart _SHOULD NOT_ be installed with Kyma.
+> **CAUTION:** This chart should not be installed with Kyma.
 
-This chart is installed in pre-master-serverless-integration-k3s Prow job. `values.yaml` file has to have the same shape as [values.yaml](../../values.yaml) in parent Chart to properly inject needed fields.
+This chart is installed in the `pre-master-serverless-integration-k3s` Prow job. The `values.yaml` file must have the same shape as [`values.yaml`](../../values.yaml) in the parent chart to properly inject required fields.
