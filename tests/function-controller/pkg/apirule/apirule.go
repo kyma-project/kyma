@@ -80,7 +80,7 @@ func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) 
 		},
 	}
 
-	resourceVersion, err := a.resCli.Create(apirule)
+	resourceVersion, err := a.resCli.Create(&apirule)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating APIRule %s in namespace %s", a.name, a.namespace)
 	}
