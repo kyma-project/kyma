@@ -54,7 +54,7 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
           resources: 
-            {{- toYaml .Values.core-ui.resources | nindent 12 }}
+            {{- toYaml .Values.core_ui.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz
