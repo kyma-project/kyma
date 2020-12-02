@@ -84,28 +84,6 @@ func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.Gr
 	return res, nil
 }
 
-//ListResource returns list of resources in namespace
-func (m *Manager) ListResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string) (*unstructured.UnstructuredList, error) {
-	var items *unstructured.UnstructuredList
-
-	err := retry.Do(
-		func() error {
-			var err error
-			items, err = client.Resource(resourceSchema).Namespace(namespace).List(metav1.ListOptions{})
-			if err != nil {
-				log.Printf("Error: %+v", err)
-				return err
-			}
-			return nil
-		}, m.RetryOptions...)
-
-	if err != nil {
-		log.Panicf("Error: %+v", err)
-		return nil, err
-	}
-	return items, nil
-}
-
 //GetStatus do a GetResource and extract status field
 func (m *Manager) GetStatus(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) (map[string]interface{}, error) {
 	obj, err := m.GetResource(client, resourceSchema, namespace, resourceName)
