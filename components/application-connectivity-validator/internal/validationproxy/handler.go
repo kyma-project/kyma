@@ -139,7 +139,8 @@ func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]s
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
 		// TODO: retry logic should be implemented here
-		log.Errorf("Application with name %s is not found in the cache. Please retry.", applicationName)
+		err := apperrors.Internal("Application with name %s is not found in the cache. Please retry.", applicationName)
+		return nil, err
 	}
 	return applicationClientIDs, nil
 }
@@ -150,18 +151,6 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 		return []string{}, found
 	}
 	return clientIDs.([]string), found
-}
-
-func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
-	if err != nil {
-		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
-	}
-	if application.Spec.CompassMetadata == nil {
-		return []string{}, nil
-	}
-
-	return application.Spec.CompassMetadata.Authentication.ClientIds, nil
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {

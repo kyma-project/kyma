@@ -2,7 +2,6 @@ package validationproxy
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -73,19 +72,6 @@ var (
 )
 
 func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
-
-	eventServiceHandler := mux.NewRouter()
-	eventServiceServer := httptest.NewServer(eventServiceHandler)
-	eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-	eventMeshHandler := mux.NewRouter()
-	eventMeshServer := httptest.NewServer(eventMeshHandler)
-	eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
-
-	appRegistryHandler := mux.NewRouter()
-	appRegistryServer := httptest.NewServer(appRegistryHandler)
-	appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
-
 	testCases := []struct {
 		caseDescription string
 		tenant          string
@@ -228,13 +214,33 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	}
 
 	t.Run("should proxy requests", func(t *testing.T) {
+		eventServiceHandler := mux.NewRouter()
+		eventServiceServer := httptest.NewServer(eventServiceHandler)
+		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+		eventMeshHandler := mux.NewRouter()
+		eventMeshServer := httptest.NewServer(eventMeshHandler)
+		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
 		for _, testCase := range testCases {
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			idCache := cache.New(time.Minute, time.Minute)
+			if testCase.application.Spec.CompassMetadata != nil {
+				idCache.Set(testCase.application.ObjectMeta.Name, testCase.application.Spec.CompassMetadata.Authentication.ClientIds, cache.DefaultExpiration)
+			} else {
+				idCache.Set(testCase.application.ObjectMeta.Name, []string{}, cache.DefaultExpiration)
+			}
 
+			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.ObjectMeta.Name)
+			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.ObjectMeta.Name)
+			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.ObjectMeta.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.ObjectMeta.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -254,7 +260,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				eventServiceHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
+					assert.Equal(t, testCase.application.ObjectMeta.Name, appName, `Error reading "application" route variable from request context`)
 
 					var receivedEvent event
 
@@ -268,10 +274,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
 
-				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", applicationName), bytes.NewReader(body))
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", testCase.application.ObjectMeta.Name), bytes.NewReader(body))
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 
 				recorder := httptest.NewRecorder()
 
@@ -287,7 +293,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				eventServiceHandler.PathPrefix("/{application}/v2/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
+					assert.Equal(t, testCase.application.ObjectMeta.Name, appName, `Error reading "application" route variable from request context`)
 
 					var receivedEvent event
 
@@ -301,10 +307,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
 
-				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", applicationName), bytes.NewReader(body))
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", testCase.application.ObjectMeta.Name), bytes.NewReader(body))
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 
 				recorder := httptest.NewRecorder()
 
@@ -334,10 +340,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
 
-				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/events", applicationName), bytes.NewReader(body))
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/events", testCase.application.ObjectMeta.Name), bytes.NewReader(body))
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 
 				// mock request Host to assert it gets rewritten by the proxy
 				req.Host = mockIncomingRequestHost
@@ -354,14 +360,14 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
+					assert.Equal(t, testCase.application.ObjectMeta.Name, appName, `Error reading "application" route variable from request context`)
 					w.WriteHeader(http.StatusOK)
 				})
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.ObjectMeta.Name), nil)
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 
 				recorder := httptest.NewRecorder()
 
@@ -375,16 +381,33 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
+		eventServiceHandler := mux.NewRouter()
+		eventServiceServer := httptest.NewServer(eventServiceHandler)
+		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+		eventMeshHandler := mux.NewRouter()
+		eventMeshServer := httptest.NewServer(eventMeshHandler)
+		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
 		for _, testCase := range testCases {
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			idCache := cache.New(time.Minute, time.Minute)
 			if testCase.application.Spec.CompassMetadata != nil {
-				idCache.Set(applicationName, testCase.application.Spec.CompassMetadata.Authentication.ClientIds, cache.DefaultExpiration)
+				idCache.Set(testCase.application.ObjectMeta.Name, testCase.application.Spec.CompassMetadata.Authentication.ClientIds, cache.DefaultExpiration)
+			} else {
+				idCache.Set(testCase.application.ObjectMeta.Name, []string{}, cache.DefaultExpiration)
 			}
 
+			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.ObjectMeta.Name)
+			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.ObjectMeta.Name)
+			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.ObjectMeta.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.ObjectMeta.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -402,14 +425,14 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
-					assert.Equal(t, applicationName, appName)
+					assert.Equal(t, testCase.application.ObjectMeta.Name, appName)
 					w.WriteHeader(http.StatusOK)
 				})
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.ObjectMeta.Name), nil)
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 				recorder := httptest.NewRecorder()
 
 				// when
@@ -417,18 +440,42 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				// then
 				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+				if testCase.expectedStatus != recorder.Code {
+					cv, found := idCache.Get(testCase.application.ObjectMeta.Name)
+					fmt.Printf("debugging 2: %s %t", cv, found)
+				}
 			})
 		}
 	})
 
-	t.Run("should return 500 when failed to get Application resource", func(t *testing.T) {
+	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
+		eventServiceHandler := mux.NewRouter()
+		eventServiceServer := httptest.NewServer(eventServiceHandler)
+		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+		eventMeshHandler := mux.NewRouter()
+		eventMeshServer := httptest.NewServer(eventMeshHandler)
+		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
 		for _, testCase := range testCases {
+
+			if testCase.caseDescription == "Application without group and tenant and with invalid Common Name" {
+				fmt.Printf("debugging 1")
+			}
+
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
 
 			idCache := cache.New(time.Minute, time.Minute)
 
+			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.ObjectMeta.Name)
+			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.ObjectMeta.Name)
+			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.ObjectMeta.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.ObjectMeta.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -443,10 +490,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				applicationGetter,
 				idCache)
 
-			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.ObjectMeta.Name), nil)
 			require.NoError(t, err)
 			req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-			req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+			req = mux.SetURLVars(req, map[string]string{"application": testCase.application.ObjectMeta.Name})
 			recorder := httptest.NewRecorder()
 
 			// when
@@ -458,14 +505,25 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 400 when application not specified in path", func(t *testing.T) {
+		eventServiceHandler := mux.NewRouter()
+		eventServiceServer := httptest.NewServer(eventServiceHandler)
+		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+		eventMeshHandler := mux.NewRouter()
+		eventMeshServer := httptest.NewServer(eventMeshHandler)
+		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
 
 		applicationGetter := &mocks.ApplicationGetter{}
-		applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
 		idCache := cache.New(time.Minute, time.Minute)
+		idCache.Set(applicationName, []string{}, cache.DefaultExpiration)
 
 		proxyHandler := NewProxyHandler(
 			group,
@@ -494,6 +552,17 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 404 when path is invalid", func(t *testing.T) {
+		eventServiceHandler := mux.NewRouter()
+		eventServiceServer := httptest.NewServer(eventServiceHandler)
+		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
+
+		eventMeshHandler := mux.NewRouter()
+		eventMeshServer := httptest.NewServer(eventMeshHandler)
+		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
@@ -502,9 +571,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
 
 		applicationGetter := &mocks.ApplicationGetter{}
-		applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
+		// mock cache sync controller that it fills cache
 		idCache := cache.New(time.Minute, time.Minute)
+		idCache.Set(applicationMetaName, []string{applicationID}, cache.DefaultExpiration)
 
 		proxyHandler := NewProxyHandler(
 			"",
@@ -520,10 +590,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter,
 			idCache)
 
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationName), nil)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationMetaName), nil)
 		require.NoError(t, err)
 		req.Header.Set(CertificateInfoHeader, certInfoHeader)
-		req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+		req = mux.SetURLVars(req, map[string]string{"application": applicationMetaName})
 		recorder := httptest.NewRecorder()
 
 		// when
