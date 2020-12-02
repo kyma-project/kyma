@@ -74,7 +74,7 @@ spec:
             name: istio-ingressgateway
         resources:
           limits:
-            cpu: 2000m
+            cpu: 500m
             memory: 128Mi
           requests:
             cpu: 25m
@@ -157,7 +157,7 @@ spec:
             name: istiod
         resources:
           limits:
-            cpu: 500m
+            cpu: 250m
             memory: 256Mi
           requests:
             cpu: 75m
