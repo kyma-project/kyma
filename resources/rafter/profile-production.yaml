@@ -2,8 +2,8 @@ controller-manager:
   pod:
     resources:
       requests:
-        cpu: 200m
-        memory: 128Mi
+        cpu: 150m
+        memory: 64Mi
 
 upload-service:
   pod:
@@ -24,4 +24,4 @@ front-matter-service:
     resources:
       requests:
         cpu: 100m
-        memory: 128Mi
+        memory: 64Mi
