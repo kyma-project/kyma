@@ -1084,7 +1084,7 @@ webhooks:
     service:
       name: eventing-webhook
       namespace: knative-eventing
-  failurePolicy: Fail
+  failurePolicy: Ignore
   name: sinkbindings.webhook.sources.knative.dev
   sideEffects: None
   namespaceSelector:
@@ -1105,7 +1105,7 @@ webhooks:
     service:
       name: eventing-webhook
       namespace: knative-eventing
-  failurePolicy: Fail
+  failurePolicy: Ignore
   name: legacysinkbindings.webhook.sources.knative.dev
   sideEffects: None
   namespaceSelector:
