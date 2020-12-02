@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"golang.org/x/sync/errgroup"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
@@ -16,9 +19,16 @@ import (
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
-var availableScenarios = map[string][]testSuite{
-	"serverless-integration": {scenarios.SimpleFunctionTest},
-	"kyma-integration":       {scenarios.FunctionTestStep, scenarios.GitopsSteps},
+type scenario struct {
+	displayName string
+	testSuite   testSuite
+}
+
+var availableScenarios = map[string][]scenario{
+	"serverless-integration": {
+		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
+		{displayName: "gitops", testSuite: scenarios.GitopsSteps}},
+	"kyma-integration": {{displayName: "full", testSuite: scenarios.FunctionTestStep}},
 }
 
 type config struct {
@@ -51,21 +61,37 @@ func main() {
 	}
 
 	rand.Seed(time.Now().UnixNano())
+
+	g, _ := errgroup.WithContext(context.Background())
 	for _, scenario := range pickedScenarios {
-		// TODO: run those in parallel, return error here and `failOnError` once at the end
-		runScenario(scenario, scenarioName, logf, cfg, restConfig)
+		// https://eli.thegreenplace.net/2019/go-internals-capturing-loop-variables-in-closures/
+		scenarioDisplayName := fmt.Sprintf("%s-%s", scenarioName, scenario.displayName)
+		func(testSuite testSuite, name string) {
+			g.Go(func() error {
+				return runScenario(testSuite, name, logf, cfg, restConfig)
+			})
+		}(scenario.testSuite, scenarioDisplayName)
 	}
+	failOnError(g.Wait(), logf)
 }
 
 type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
 
-func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) {
+func runScenario(testFunc testSuite, name string, logf *logrus.Logger, cfg config, restConfig *rest.Config) error {
 	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", name))
-	failOnError(err, logf)
+	if err != nil {
+		logf.Error(err)
+		return err
+	}
+
 	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
 
 	err = runner.Execute(steps)
-	failOnError(err, logf)
+	if err != nil {
+		logf.Error(err)
+		return err
+	}
+	return nil
 }
 
 func loadConfig(prefix string) (config, error) {
