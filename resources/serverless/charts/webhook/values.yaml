@@ -16,6 +16,13 @@ commonLabels:
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
 
+webhook:
+  webhookMatchExp:
+  - key: name
+    operator: NotIn
+    values:
+    - kube-system
+
 deployment:
   replicas: 1
   labels: {}

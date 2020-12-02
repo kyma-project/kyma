@@ -20,14 +20,17 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: defaulting.webhook.serverless.kyma-project.io
   labels:
-    {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
+  {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 webhooks:
-  - admissionReviewVersions:
-      - v1beta1
-    clientConfig:
-      service:
-        name: {{ template "webhook.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-    failurePolicy: Fail
-    sideEffects: None
-    name: defaulting.webhook.serverless.kyma-project.io
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ template "webhook.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+  failurePolicy: Fail
+  namespaceSelector:
+    matchExpressions:
+{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+  sideEffects: None
+  name: defaulting.webhook.serverless.kyma-project.io
