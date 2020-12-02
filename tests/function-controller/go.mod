@@ -9,11 +9,9 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
-	github.com/kyma-incubator/api-gateway v0.0.0-20201127140450-8af556cde95f
 	github.com/kyma-project/helm-broker v1.1.0
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201201100156-840f2b1a3da8
 	github.com/onsi/gomega v1.10.2
-	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/pflag v1.0.5
