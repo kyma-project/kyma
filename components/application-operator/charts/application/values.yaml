@@ -55,15 +55,6 @@ eventService:
       maxRequestSize: 65536
       requestTimeout: 10
       requestLogging: false
-    resources:
-      requests:
-        memory: 32Mi
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
-
-validator:
-  deployment:
-    resources:
-      requests:
-        memory: 32Mi

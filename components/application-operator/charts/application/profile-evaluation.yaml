@@ -2,10 +2,5 @@ eventService:
   deployment:
     resources:
       requests:
-        memory: 8Mi
-
-validator:
-  deployment:
-    resources:
-      requests:
-        memory: 6Mi
+        memory: 10Mi
+        cpu: 10m
