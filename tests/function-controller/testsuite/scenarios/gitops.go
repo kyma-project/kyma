@@ -5,6 +5,7 @@ import (
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
@@ -60,7 +61,7 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 	}
 	return step.NewSerialTestRunner(logf, "create git func",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
+		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.IstioEnabled),
 		teststep.NewCreateGitRepository(genericContainer.Log, gitCfg.Repo, "Create GitRepository", gitops.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
 		teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.RepoName, serverlessv1alpha1.Nodejs12)),
 		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),

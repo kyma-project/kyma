@@ -3,8 +3,8 @@ kind: PrometheusRule
 metadata:
   name: logging.rules
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
   - name: logging.rules
@@ -15,18 +15,18 @@ spec:
       labels:
         severity: critical
       annotations:
-        message: 'Data throughput for logging is too high: {{`{{$value}}`}} KB/s'
+        description: 'Data throughput for logging is too high: {{`{{$value}}`}} KB/s'
     - alert: LoggingHighRequestCount
       expr: rate(loki_request_duration_seconds_sum{route="api_prom_push"}[5m]) > 100
       for: 30m
       labels:
         severity: critical
       annotations:
-        message:  'High counts of requests for logging: Number of requests is {{`{{$value}}`}} Req/s'
+        description:  'High counts of requests for logging: Number of requests is {{`{{$value}}`}} Req/s'
     - alert: LoggingFailedRequestPercentage
       expr: rate(loki_request_duration_seconds_sum{route="api_prom_push",status_code!~"2.*"}[5m]) / rate(loki_request_duration_seconds_sum{route="api_prom_push"}[5m]) * 100 > 30
       for: 30m
       labels:
         severity: critical
       annotations:
-        message: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'
+        description: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'
