@@ -1,7 +1,12 @@
-
-# Customizations:
-# 1. Added Selector labels
-# 2. Modifed "prometheus-pushgateway.defaultLabels"
+{{- /*
+  Customization:
+  Added labels recommended by Kubernetes and Helm:
+    helm.sh/chart
+    app.kubernetes.io/managed-by
+    app.kubernetes.io/instance
+  Removed labels:
+    heritage
+*/ -}}
 
 {{/* vim: set filetype=mustache: */}}
 {{/*
