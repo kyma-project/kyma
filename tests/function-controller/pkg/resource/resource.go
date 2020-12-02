@@ -2,20 +2,16 @@ package resource
 
 import (
 	"context"
-	"time"
-
-	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
-	watchtools "k8s.io/client-go/tools/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
 )
@@ -45,7 +41,7 @@ func (r *Resource) Create(res interface{}) (string, error) {
 	err = retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
 
-		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
+		resource, err = r.ResCli.Create(context.Background(), unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -70,7 +66,7 @@ func (r *Resource) List(set map[string]string) (*unstructured.UnstructuredList, 
 
 	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var err error
-		result, err = r.ResCli.List(metav1.ListOptions{
+		result, err = r.ResCli.List(context.Background(), metav1.ListOptions{
 			LabelSelector: selector,
 		})
 		return err
@@ -94,7 +90,7 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	var result *unstructured.Unstructured
 	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var err error
-		result, err = r.ResCli.Get(name, metav1.GetOptions{})
+		result, err = r.ResCli.Get(context.Background(), name, metav1.GetOptions{})
 		return err
 	}, r.log)
 	if err != nil {
@@ -112,23 +108,36 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	return result, nil
 }
 
-func (r *Resource) Delete(name string, timeout time.Duration) error {
-	var initialResourceVersion string
-	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
-		u, err := r.ResCli.Get(name, metav1.GetOptions{})
-		if err != nil {
-			return err
+func WaitUntilConditionSatisfied(ctx context.Context, resCli dynamic.ResourceInterface, isReady func(event watch.Event) (bool, error)) error {
+	watcher, err := resCli.Watch(ctx, metav1.ListOptions{})
+	defer func() {
+		if watcher != nil {
+			watcher.Stop()
 		}
-		initialResourceVersion = u.GetResourceVersion()
-		return nil
-	}, r.log)
-	if apierrors.IsNotFound(err) {
-		return nil
-	}
+	}()
 	if err != nil {
+
 		return err
 	}
-	err = retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case result := <-watcher.ResultChan():
+			ready, err := isReady(result)
+			if err != nil {
+				return err
+			}
+			if ready {
+				return nil
+			}
+		}
+	}
+}
+
+func (r *Resource) Delete(name string) error {
+	return retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
 		namespace := "-"
 		if r.namespace != "" {
 			namespace = r.namespace
@@ -138,31 +147,15 @@ func (r *Resource) Delete(name string, timeout time.Duration) error {
 			r.log.Infof("DELETE %s: namespace:%s name:%s", r.kind, namespace, name)
 		}
 
-		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
+		// if the DeletePropagationForeground is not enough then we'll need to somehow watch specified resource
+		// and make sure that it was deleted manually
+		// in the moment of writing this comment we do not have such a case in those tests
+		// that's why we'll just hope DeletePropagationForeground is enough
+		deletePropagationPolicy := metav1.DeletePropagationForeground
+		return r.ResCli.Delete(context.Background(), name, metav1.DeleteOptions{
+			PropagationPolicy: &deletePropagationPolicy,
+		})
 	}, r.log)
-
-	if err != nil {
-		return err
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	condition := func(event watch.Event) (bool, error) {
-		if event.Type != watch.Deleted {
-			return false, nil
-		}
-		u, ok := event.Object.(*unstructured.Unstructured)
-		if !ok || u.GetName() != name {
-			return false, nil
-		}
-		return true, nil
-	}
-	_, err = watchtools.Until(ctx, initialResourceVersion, r.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
@@ -180,7 +173,7 @@ func (r *Resource) Update(res interface{}) (*unstructured.Unstructured, error) {
 	var result *unstructured.Unstructured
 	err = retry.WithIgnoreOnConflict(retry.DefaultBackoff, func() error {
 		var errUpdate error
-		result, errUpdate = r.ResCli.Update(unstructuredObj, metav1.UpdateOptions{})
+		result, errUpdate = r.ResCli.Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
 		return errUpdate
 	}, r.log)
 	if err != nil {

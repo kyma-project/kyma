@@ -4,15 +4,17 @@ import (
 	"context"
 	"time"
 
+	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
-	apiruleTypes "github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
+	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -31,7 +33,7 @@ type APIRule struct {
 
 func New(name string, c shared.Container) *APIRule {
 	return &APIRule{
-		resCli:      resource.New(c.DynamicCli, apiruleTypes.GroupVersion.WithResource("apirules"), c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, v1alpha1.GroupVersion.WithResource("apirules"), c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -43,31 +45,34 @@ func New(name string, c shared.Container) *APIRule {
 func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) {
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
-	rule := &apiruleTypes.APIRule{
+	rule := &v1alpha1.APIRule{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "APIRule",
-			APIVersion: apiruleTypes.GroupVersion.String(),
+			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      a.name,
 			Namespace: a.namespace,
 		},
-		Spec: apiruleTypes.APIRuleSpec{
+		Spec: v1alpha1.APIRuleSpec{
 			Gateway: &gateway,
-			Rules: []apiruleTypes.Rule{
+			Rules: []v1alpha1.Rule{
 				{
-					Path:    "/.*",
+					Path:    "*",
 					Methods: []string{"GET"},
-					AccessStrategies: []*apiruleTypes.Authenticator{
+					AccessStrategies: []*rulev1alpha1.Authenticator{
 						{
-							Handler: &apiruleTypes.Handler{
+							Handler: &rulev1alpha1.Handler{
 								Name: "allow",
+								Config: &runtime.RawExtension{
+									Raw: []byte("{}"),
+								},
 							},
 						},
 					},
 				},
 			},
-			Service: &apiruleTypes.Service{
+			Service: &v1alpha1.Service{
 				Name: &serviceName,
 				Port: &port,
 				Host: &host,
@@ -83,7 +88,7 @@ func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) 
 }
 
 func (a *APIRule) Delete() error {
-	err := a.resCli.Delete(a.name, a.waitTimeout)
+	err := a.resCli.Delete(a.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting APIRule %s in namespace %s", a.name, a.namespace)
 	}
@@ -91,15 +96,15 @@ func (a *APIRule) Delete() error {
 	return nil
 }
 
-func (a *APIRule) Get() (*apiruleTypes.APIRule, error) {
+func (a *APIRule) Get() (*v1alpha1.APIRule, error) {
 	u, err := a.resCli.Get(a.name)
 	if err != nil {
-		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
+		return &v1alpha1.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
 	}
 
 	apirule, err := convertFromUnstructuredToAPIRule(u)
 	if err != nil {
-		return &apiruleTypes.APIRule{}, err
+		return &v1alpha1.APIRule{}, err
 	}
 
 	return &apirule, nil
@@ -119,11 +124,7 @@ func (a *APIRule) WaitForStatusRunning() error {
 	defer cancel()
 
 	condition := a.isApiRuleReady(a.name)
-	_, err = watchtools.Until(ctx, apirule.GetResourceVersion(), a.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, a.resCli.ResCli, condition)
 }
 
 func (a *APIRule) LogResource() error {
@@ -161,23 +162,23 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 	}
 }
 
-func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
+func (a *APIRule) isStateReady(apirule v1alpha1.APIRule) bool {
 	status := apirule.Status
 	if status.VirtualServiceStatus == nil || status.APIRuleStatus == nil || status.AccessRuleStatus == nil {
 		return false
 	}
 
-	ready := status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
-		status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
-		status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+	ready := status.AccessRuleStatus.Code == v1alpha1.StatusOK &&
+		status.APIRuleStatus.Code == v1alpha1.StatusOK &&
+		status.VirtualServiceStatus.Code == v1alpha1.StatusOK
 
 	shared.LogReadiness(ready, a.verbose, a.name, a.log, apirule)
 
 	return ready
 }
 
-func convertFromUnstructuredToAPIRule(u *unstructured.Unstructured) (apiruleTypes.APIRule, error) {
-	apirule := apiruleTypes.APIRule{}
+func convertFromUnstructuredToAPIRule(u *unstructured.Unstructured) (v1alpha1.APIRule, error) {
+	apirule := v1alpha1.APIRule{}
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
 	return apirule, err
 }

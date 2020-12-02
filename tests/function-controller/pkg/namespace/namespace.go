@@ -1,6 +1,7 @@
 package namespace
 
 import (
+	"context"
 	"time"
 
 	"github.com/pkg/errors"
@@ -11,7 +12,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	k8sretry "k8s.io/client-go/util/retry"
-	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/retry"
@@ -54,7 +54,7 @@ func (n Namespace) LogResource() error {
 }
 
 func (n Namespace) get() (*corev1.Namespace, error) {
-	return n.coreCli.Namespaces().Get(n.name, metav1.GetOptions{})
+	return n.coreCli.Namespaces().Get(context.Background(), n.name, metav1.GetOptions{})
 }
 
 func (n *Namespace) Create() (string, error) {
@@ -62,8 +62,8 @@ func (n *Namespace) Create() (string, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: n.name,
 			Labels: map[string]string{
-				eventingv1alpha1.InjectionAnnotation: "enabled",               // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
-				TestNamespaceLabelKey:                TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
+				"knative-eventing-injection": "enabled",               // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
+				TestNamespaceLabelKey:        TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
 			},
 		},
 	}
@@ -78,7 +78,7 @@ func (n *Namespace) Create() (string, error) {
 	err := k8sretry.OnError(backoff, func(err error) bool {
 		return true
 	}, func() error {
-		_, err := n.coreCli.Namespaces().Create(ns)
+		_, err := n.coreCli.Namespaces().Create(context.Background(), ns, metav1.CreateOptions{})
 		if apierrors.IsAlreadyExists(err) {
 			return nil
 		}
@@ -101,7 +101,7 @@ func (n *Namespace) Delete() error {
 		if n.verbose {
 			n.log.Infof("DELETE: namespace: %s", n.name)
 		}
-		return n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
+		return n.coreCli.Namespaces().Delete(context.Background(), n.name, metav1.DeleteOptions{})
 	}, n.log)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting namespace %s", n.name)

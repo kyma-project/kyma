@@ -1,6 +1,7 @@
 package gitserver
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -119,7 +120,7 @@ func (gs *GitServer) createDeployment() error {
 			},
 		},
 	}
-	_, err := gs.deployments.Create(deployment)
+	_, err := gs.deployments.Create(context.Background(), deployment, metav1.CreateOptions{})
 	return errors.Wrapf(err, "while creating Deployment %s in namespace %s", gs.name, gs.namespace)
 }
 
@@ -143,7 +144,8 @@ func (gs *GitServer) createService() error {
 			},
 		},
 	}
-	_, err := gs.services.Create(service)
+
+	_, err := gs.services.Create(context.Background(), service, metav1.CreateOptions{})
 	return errors.Wrapf(err, "while creating Service %s in namespace %s", gs.name, gs.namespace)
 }
 
@@ -174,11 +176,11 @@ func (gs *GitServer) createDestinationRule() error {
 func (gs *GitServer) Delete() error {
 	var errDestRule error = nil
 	if gs.istioEnabled {
-		errDestRule = gs.resCli.Delete(gs.name, gs.waitTimeout)
+		errDestRule = gs.resCli.Delete(gs.name)
 	}
 
-	errService := gs.services.Delete(gs.name, &metav1.DeleteOptions{})
-	errDeployment := gs.deployments.Delete(gs.name, &metav1.DeleteOptions{})
+	errService := gs.services.Delete(context.Background(), gs.name, metav1.DeleteOptions{})
+	errDeployment := gs.deployments.Delete(context.Background(), gs.name, metav1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errDestRule)
 	return err.ErrorOrNil()
 }
@@ -196,7 +198,7 @@ func (gs *GitServer) LogResource() error {
 		gs.log.Info(out)
 	}
 
-	svc, err := gs.services.Get(gs.name, metav1.GetOptions{})
+	svc, err := gs.services.Get(context.Background(), gs.name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while getting service")
 	}
@@ -208,7 +210,7 @@ func (gs *GitServer) LogResource() error {
 	}
 	gs.log.Info(out)
 
-	deployment, err := gs.deployments.Get(gs.name, metav1.GetOptions{})
+	deployment, err := gs.deployments.Get(context.Background(), gs.name, metav1.GetOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while getting deployment")
 	}
