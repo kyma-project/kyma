@@ -11,6 +11,7 @@ import (
 	// "knative.dev/pkg/apis"
 )
 
+var subscriptionsKind = "Subscription"
 var subscriptionsGroupVersionResource = schema.GroupVersionResource{
 	Version:  "v1alpha1",
 	Group:    "eventing.kyma-project.io",

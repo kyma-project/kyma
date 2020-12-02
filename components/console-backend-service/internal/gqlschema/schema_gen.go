@@ -16,7 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	v1alpha14 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	v1alpha13 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1alpha11 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	v1alpha12 "github.com/ory/hydra-maester/api/v1alpha1"
 	v1alpha15 "github.com/ory/oathkeeper-maester/api/v1alpha1"
@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	v1alpha14 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v13 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -655,6 +655,7 @@ type ComplexityRoot struct {
 		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters JSON) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		CreateServiceInstance                      func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
+		CreateSubscription                         func(childComplexity int, name string, namespace string, params v1alpha13.SubscriptionSpec) int
 		CreateTrigger                              func(childComplexity int, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) int
 		DeleteAPIRule                              func(childComplexity int, name string, namespace string) int
 		DeleteAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
@@ -1336,10 +1337,11 @@ type MutationResolver interface {
 	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha13.Trigger, error)
-	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha13.Trigger, error)
-	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
-	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
+	CreateSubscription(ctx context.Context, name string, namespace string, params v1alpha13.SubscriptionSpec) (*v1alpha13.Subscription, error)
+	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha14.Trigger, error)
+	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha14.Trigger, error)
+	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha14.Trigger, error)
+	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha14.Trigger, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*v11.LimitRange, error)
 	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
 	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*v11.ResourceQuota, error)
@@ -1413,9 +1415,9 @@ type QueryResolver interface {
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	EventSubscription(ctx context.Context, name string, namespace string) (*v1alpha14.Subscription, error)
-	EventSubscriptions(ctx context.Context, namespace string) ([]*v1alpha14.Subscription, error)
-	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha13.Trigger, error)
+	EventSubscription(ctx context.Context, name string, namespace string) (*v1alpha13.Subscription, error)
+	EventSubscriptions(ctx context.Context, namespace string) ([]*v1alpha13.Subscription, error)
+	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha14.Trigger, error)
 	LimitRanges(ctx context.Context, namespace string) ([]*v11.LimitRange, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]*v11.ResourceQuota, error)
 	OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha12.OAuth2Client, error)
@@ -1488,12 +1490,12 @@ type SubscriptionResolver interface {
 	ClusterRoleBindingEvent(ctx context.Context) (<-chan *ClusterRoleBindingEvent, error)
 }
 type TriggerResolver interface {
-	Status(ctx context.Context, obj *v1alpha13.Trigger) (*TriggerStatus, error)
+	Status(ctx context.Context, obj *v1alpha14.Trigger) (*TriggerStatus, error)
 }
 type TriggerSpecResolver interface {
-	Filter(ctx context.Context, obj *v1alpha13.TriggerSpec) (JSON, error)
-	Port(ctx context.Context, obj *v1alpha13.TriggerSpec) (uint32, error)
-	Path(ctx context.Context, obj *v1alpha13.TriggerSpec) (string, error)
+	Filter(ctx context.Context, obj *v1alpha14.TriggerSpec) (JSON, error)
+	Port(ctx context.Context, obj *v1alpha14.TriggerSpec) (uint32, error)
+	Path(ctx context.Context, obj *v1alpha14.TriggerSpec) (string, error)
 }
 
 type executableSchema struct {
@@ -3899,6 +3901,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateServiceInstance(childComplexity, args["namespace"].(string), args["params"].(ServiceInstanceCreateInput)), true
+
+	case "Mutation.createSubscription":
+		if e.complexity.Mutation.CreateSubscription == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSubscription_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSubscription(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha13.SubscriptionSpec)), true
 
 	case "Mutation.createTrigger":
 		if e.complexity.Mutation.CreateTrigger == nil {
@@ -7401,6 +7415,47 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
     value: String
 }
 
+
+input EventSubscriptionSpecInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionSpec") {
+    filter: BebFiltersInput!
+    id: String
+    protocol: String
+    protocolSettings: ProtocolSettingsInput
+    sink: String
+}
+
+input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
+    contentMode: String
+    exemptHandshake: Boolean
+    qos: String
+    webhookAuth: WebhookAuthInput
+}
+
+input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
+    clientId: String
+    clientSecret: String
+    grantType: String
+    scope: [String!]
+    tokenUrl: String
+    type: String!
+}
+
+input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
+    dialect: String!
+    filters: [BebFilterInput!]!
+}
+
+input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
+    eventSource: FilterInput
+    eventType: FilterInput
+}
+
+input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
+    property: String
+    type: String!
+    value: String
+}
+
 type EventSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionStatus") {
     apiRuleName: String
     conditions: [Condition]
@@ -7431,7 +7486,10 @@ extend type Query {
     eventSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "get", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
     eventSubscriptions(namespace: String!): [EventSubscription!]! @HasAccess(attributes: {resource: "subscriptions", verb: "list", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
-`, BuiltIn: false},
+
+extend type Mutation {
+    createSubscription(name: String!, namespace: String!, params: EventSubscriptionSpecInput!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "create", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
     namespace: String!
@@ -9701,6 +9759,36 @@ func (ec *executionContext) field_Mutation_createServiceInstance_args(ctx contex
 		}
 	}
 	args["params"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createSubscription_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 v1alpha13.SubscriptionSpec
+	if tmp, ok := rawArgs["params"]; ok {
+		arg2, err = ec.unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
 	return args, nil
 }
 
@@ -15509,7 +15597,7 @@ func (ec *executionContext) _BackendModule_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BebFilter_eventSource(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.BebFilter) (ret graphql.Marshaler) {
+func (ec *executionContext) _BebFilter_eventSource(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.BebFilter) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15535,12 +15623,12 @@ func (ec *executionContext) _BebFilter_eventSource(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.Filter)
+	res := resTmp.(*v1alpha13.Filter)
 	fc.Result = res
 	return ec.marshalOFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BebFilter_eventType(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.BebFilter) (ret graphql.Marshaler) {
+func (ec *executionContext) _BebFilter_eventType(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.BebFilter) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15566,12 +15654,12 @@ func (ec *executionContext) _BebFilter_eventType(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.Filter)
+	res := resTmp.(*v1alpha13.Filter)
 	fc.Result = res
 	return ec.marshalOFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BebFilters_dialect(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.BebFilters) (ret graphql.Marshaler) {
+func (ec *executionContext) _BebFilters_dialect(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.BebFilters) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15605,7 +15693,7 @@ func (ec *executionContext) _BebFilters_dialect(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BebFilters_filters(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.BebFilters) (ret graphql.Marshaler) {
+func (ec *executionContext) _BebFilters_filters(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.BebFilters) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -15634,7 +15722,7 @@ func (ec *executionContext) _BebFilters_filters(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha14.BebFilter)
+	res := resTmp.([]*v1alpha13.BebFilter)
 	fc.Result = res
 	return ec.marshalNBebFilter2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx, field.Selections, res)
 }
@@ -17838,7 +17926,7 @@ func (ec *executionContext) _ClusterServicePlan_clusterAssetGroup(ctx context.Co
 	return ec.marshalOClusterAssetGroup2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroup(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Condition_message(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Condition) (ret graphql.Marshaler) {
+func (ec *executionContext) _Condition_message(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Condition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17869,7 +17957,7 @@ func (ec *executionContext) _Condition_message(ctx context.Context, field graphq
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Condition_reason(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Condition) (ret graphql.Marshaler) {
+func (ec *executionContext) _Condition_reason(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Condition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17895,12 +17983,12 @@ func (ec *executionContext) _Condition_reason(ctx context.Context, field graphql
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha14.ConditionReason)
+	res := resTmp.(v1alpha13.ConditionReason)
 	fc.Result = res
 	return ec.marshalOConditionReason2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionReason(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Condition_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Condition) (ret graphql.Marshaler) {
+func (ec *executionContext) _Condition_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Condition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17934,7 +18022,7 @@ func (ec *executionContext) _Condition_status(ctx context.Context, field graphql
 	return ec.marshalNCoreStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐConditionStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Condition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Condition) (ret graphql.Marshaler) {
+func (ec *executionContext) _Condition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Condition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17960,7 +18048,7 @@ func (ec *executionContext) _Condition_type(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha14.ConditionType)
+	res := resTmp.(v1alpha13.ConditionType)
 	fc.Result = res
 	return ec.marshalOConditionType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionType(ctx, field.Selections, res)
 }
@@ -19356,7 +19444,7 @@ func (ec *executionContext) _DeploymentStatus_conditions(ctx context.Context, fi
 	return ec.marshalNDeploymentCondition2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐDeploymentConditionᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDelivery(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.EmsSubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDelivery(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.EmsSubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19387,7 +19475,7 @@ func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDelivery(ctx contex
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDeliveryReason(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.EmsSubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDeliveryReason(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.EmsSubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19418,7 +19506,7 @@ func (ec *executionContext) _EmsSubscriptionStatus_lastFailedDeliveryReason(ctx 
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EmsSubscriptionStatus_lastSuccessfulDelivery(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.EmsSubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EmsSubscriptionStatus_lastSuccessfulDelivery(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.EmsSubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19449,7 +19537,7 @@ func (ec *executionContext) _EmsSubscriptionStatus_lastSuccessfulDelivery(ctx co
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EmsSubscriptionStatus_subscriptionStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.EmsSubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EmsSubscriptionStatus_subscriptionStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.EmsSubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19480,7 +19568,7 @@ func (ec *executionContext) _EmsSubscriptionStatus_subscriptionStatus(ctx contex
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EmsSubscriptionStatus_subscriptionStatusReason(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.EmsSubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EmsSubscriptionStatus_subscriptionStatusReason(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.EmsSubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19916,7 +20004,7 @@ func (ec *executionContext) _EventActivationEvent_schema(ctx context.Context, fi
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscription_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Subscription) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscription_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Subscription) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19950,7 +20038,7 @@ func (ec *executionContext) _EventSubscription_name(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscription_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Subscription) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscription_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Subscription) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -19984,7 +20072,7 @@ func (ec *executionContext) _EventSubscription_namespace(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscription_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Subscription) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscription_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Subscription) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20013,12 +20101,12 @@ func (ec *executionContext) _EventSubscription_spec(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha14.SubscriptionSpec)
+	res := resTmp.(v1alpha13.SubscriptionSpec)
 	fc.Result = res
 	return ec.marshalNEventSubscriptionSpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscription_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Subscription) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscription_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Subscription) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20047,12 +20135,12 @@ func (ec *executionContext) _EventSubscription_status(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha14.SubscriptionStatus)
+	res := resTmp.(v1alpha13.SubscriptionStatus)
 	fc.Result = res
 	return ec.marshalNEventSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20081,12 +20169,12 @@ func (ec *executionContext) _EventSubscriptionSpec_filter(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.BebFilters)
+	res := resTmp.(*v1alpha13.BebFilters)
 	fc.Result = res
 	return ec.marshalNBebFilters2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionSpec_id(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionSpec_id(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20117,7 +20205,7 @@ func (ec *executionContext) _EventSubscriptionSpec_id(ctx context.Context, field
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionSpec_protocol(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionSpec_protocol(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20148,7 +20236,7 @@ func (ec *executionContext) _EventSubscriptionSpec_protocol(ctx context.Context,
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionSpec_protocolSettings(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionSpec_protocolSettings(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20174,12 +20262,12 @@ func (ec *executionContext) _EventSubscriptionSpec_protocolSettings(ctx context.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.ProtocolSettings)
+	res := resTmp.(*v1alpha13.ProtocolSettings)
 	fc.Result = res
 	return ec.marshalOProtocolSettings2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionSpec_sink(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionSpec_sink(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20210,7 +20298,7 @@ func (ec *executionContext) _EventSubscriptionSpec_sink(ctx context.Context, fie
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_apiRuleName(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_apiRuleName(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20241,7 +20329,7 @@ func (ec *executionContext) _EventSubscriptionStatus_apiRuleName(ctx context.Con
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20267,12 +20355,12 @@ func (ec *executionContext) _EventSubscriptionStatus_conditions(ctx context.Cont
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]v1alpha14.Condition)
+	res := resTmp.([]v1alpha13.Condition)
 	fc.Result = res
 	return ec.marshalOCondition2ᚕgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐCondition(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_emsSubscriptionStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_emsSubscriptionStatus(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20298,12 +20386,12 @@ func (ec *executionContext) _EventSubscriptionStatus_emsSubscriptionStatus(ctx c
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha14.EmsSubscriptionStatus)
+	res := resTmp.(v1alpha13.EmsSubscriptionStatus)
 	fc.Result = res
 	return ec.marshalOEmsSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐEmsSubscriptionStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_emshash(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_emshash(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20334,7 +20422,7 @@ func (ec *executionContext) _EventSubscriptionStatus_emshash(ctx context.Context
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_ev2hash(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_ev2hash(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20365,7 +20453,7 @@ func (ec *executionContext) _EventSubscriptionStatus_ev2hash(ctx context.Context
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_externalSink(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_externalSink(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20396,7 +20484,7 @@ func (ec *executionContext) _EventSubscriptionStatus_externalSink(ctx context.Co
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_failedActivation(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_failedActivation(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20427,7 +20515,7 @@ func (ec *executionContext) _EventSubscriptionStatus_failedActivation(ctx contex
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _EventSubscriptionStatus_ready(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.SubscriptionStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _EventSubscriptionStatus_ready(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.SubscriptionStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20526,7 +20614,7 @@ func (ec *executionContext) _File_metadata(ctx context.Context, field graphql.Co
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Filter_property(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Filter) (ret graphql.Marshaler) {
+func (ec *executionContext) _Filter_property(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Filter) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20557,7 +20645,7 @@ func (ec *executionContext) _Filter_property(ctx context.Context, field graphql.
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Filter_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Filter) (ret graphql.Marshaler) {
+func (ec *executionContext) _Filter_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Filter) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -20591,7 +20679,7 @@ func (ec *executionContext) _Filter_type(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Filter_value(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Filter) (ret graphql.Marshaler) {
+func (ec *executionContext) _Filter_value(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Filter) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -25608,6 +25696,68 @@ func (ec *executionContext) _Mutation_deleteAPIRule(ctx context.Context, field g
 	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createSubscription(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSubscription_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateSubscription(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha13.SubscriptionSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha13.Subscription); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha13.Subscription)
+	fc.Result = res
+	return ec.marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -25653,7 +25803,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v1alpha13.Trigger); ok {
+		if data, ok := tmp.(*v1alpha14.Trigger); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
@@ -25665,7 +25815,7 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha13.Trigger)
+	res := resTmp.(*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
@@ -25715,7 +25865,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha14.Trigger); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
@@ -25727,7 +25877,7 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha13.Trigger)
+	res := resTmp.([]*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
@@ -25777,7 +25927,7 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v1alpha13.Trigger); ok {
+		if data, ok := tmp.(*v1alpha14.Trigger); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
@@ -25789,7 +25939,7 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha13.Trigger)
+	res := resTmp.(*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
@@ -25839,7 +25989,7 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha14.Trigger); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
@@ -25851,7 +26001,7 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha13.Trigger)
+	res := resTmp.([]*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
@@ -28521,7 +28671,7 @@ func (ec *executionContext) _PolicyRule_verbs(ctx context.Context, field graphql
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ProtocolSettings_contentMode(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.ProtocolSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _ProtocolSettings_contentMode(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.ProtocolSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28552,7 +28702,7 @@ func (ec *executionContext) _ProtocolSettings_contentMode(ctx context.Context, f
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ProtocolSettings_exemptHandshake(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.ProtocolSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _ProtocolSettings_exemptHandshake(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.ProtocolSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28583,7 +28733,7 @@ func (ec *executionContext) _ProtocolSettings_exemptHandshake(ctx context.Contex
 	return ec.marshalOBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ProtocolSettings_qos(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.ProtocolSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _ProtocolSettings_qos(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.ProtocolSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28614,7 +28764,7 @@ func (ec *executionContext) _ProtocolSettings_qos(ctx context.Context, field gra
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ProtocolSettings_webhookAuth(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.ProtocolSettings) (ret graphql.Marshaler) {
+func (ec *executionContext) _ProtocolSettings_webhookAuth(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.ProtocolSettings) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28640,7 +28790,7 @@ func (ec *executionContext) _ProtocolSettings_webhookAuth(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.WebhookAuth)
+	res := resTmp.(*v1alpha13.WebhookAuth)
 	fc.Result = res
 	return ec.marshalOWebhookAuth2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx, field.Selections, res)
 }
@@ -31457,7 +31607,7 @@ func (ec *executionContext) _Query_eventSubscription(ctx context.Context, field 
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v1alpha14.Subscription); ok {
+		if data, ok := tmp.(*v1alpha13.Subscription); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription`, tmp)
@@ -31469,7 +31619,7 @@ func (ec *executionContext) _Query_eventSubscription(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha14.Subscription)
+	res := resTmp.(*v1alpha13.Subscription)
 	fc.Result = res
 	return ec.marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx, field.Selections, res)
 }
@@ -31519,7 +31669,7 @@ func (ec *executionContext) _Query_eventSubscriptions(ctx context.Context, field
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha14.Subscription); ok {
+		if data, ok := tmp.([]*v1alpha13.Subscription); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription`, tmp)
@@ -31534,7 +31684,7 @@ func (ec *executionContext) _Query_eventSubscriptions(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha14.Subscription)
+	res := resTmp.([]*v1alpha13.Subscription)
 	fc.Result = res
 	return ec.marshalNEventSubscription2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionᚄ(ctx, field.Selections, res)
 }
@@ -31584,7 +31734,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha14.Trigger); ok {
 			return data, nil
 		}
 		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
@@ -31596,7 +31746,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha13.Trigger)
+	res := resTmp.([]*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
@@ -39681,7 +39831,7 @@ func (ec *executionContext) _Subscription_clusterRoleBindingEvent(ctx context.Co
 	}
 }
 
-func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39715,7 +39865,7 @@ func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39749,7 +39899,7 @@ func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39778,12 +39928,12 @@ func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha13.TriggerSpec)
+	res := resTmp.(v1alpha14.TriggerSpec)
 	fc.Result = res
 	return ec.marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39880,12 +40030,12 @@ func (ec *executionContext) _TriggerEvent_trigger(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha13.Trigger)
+	res := resTmp.(*v1alpha14.Trigger)
 	fc.Result = res
 	return ec.marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39919,7 +40069,7 @@ func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39950,7 +40100,7 @@ func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graph
 	return ec.marshalOJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -39984,7 +40134,7 @@ func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql
 	return ec.marshalNPort2uint32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40018,7 +40168,7 @@ func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40386,7 +40536,7 @@ func (ec *executionContext) _VersionInfo_kymaVersion(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_clientId(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_clientId(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40417,7 +40567,7 @@ func (ec *executionContext) _WebhookAuth_clientId(ctx context.Context, field gra
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_clientSecret(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_clientSecret(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40448,7 +40598,7 @@ func (ec *executionContext) _WebhookAuth_clientSecret(ctx context.Context, field
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_grantType(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_grantType(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40479,7 +40629,7 @@ func (ec *executionContext) _WebhookAuth_grantType(ctx context.Context, field gr
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_scope(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_scope(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40510,7 +40660,7 @@ func (ec *executionContext) _WebhookAuth_scope(ctx context.Context, field graphq
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_tokenUrl(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_tokenUrl(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -40541,7 +40691,7 @@ func (ec *executionContext) _WebhookAuth_tokenUrl(ctx context.Context, field gra
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebhookAuth_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.WebhookAuth) (ret graphql.Marshaler) {
+func (ec *executionContext) _WebhookAuth_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.WebhookAuth) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -41847,6 +41997,54 @@ func (ec *executionContext) unmarshalInputAddonsConfigurationRepositoryInput(ctx
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputBebFilterInput(ctx context.Context, obj interface{}) (v1alpha13.BebFilter, error) {
+	var it v1alpha13.BebFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "eventSource":
+			var err error
+			it.EventSource, err = ec.unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "eventType":
+			var err error
+			it.EventType, err = ec.unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputBebFiltersInput(ctx context.Context, obj interface{}) (v1alpha13.BebFilters, error) {
+	var it v1alpha13.BebFilters
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "dialect":
+			var err error
+			it.Dialect, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "filters":
+			var err error
+			it.Filters, err = ec.unmarshalNBebFilterInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputClusterRoleBindingInput(ctx context.Context, obj interface{}) (ClusterRoleBindingInput, error) {
 	var it ClusterRoleBindingInput
 	var asMap = obj.(map[string]interface{})
@@ -41916,6 +42114,78 @@ func (ec *executionContext) unmarshalInputEnvPrefixInput(ctx context.Context, ob
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context.Context, obj interface{}) (v1alpha13.SubscriptionSpec, error) {
+	var it v1alpha13.SubscriptionSpec
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "filter":
+			var err error
+			it.Filter, err = ec.unmarshalNBebFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "protocol":
+			var err error
+			it.Protocol, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "protocolSettings":
+			var err error
+			it.ProtocolSettings, err = ec.unmarshalOProtocolSettingsInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sink":
+			var err error
+			it.Sink, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFilterInput(ctx context.Context, obj interface{}) (v1alpha13.Filter, error) {
+	var it v1alpha13.Filter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "property":
+			var err error
+			it.Property, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "value":
+			var err error
+			it.Value, err = ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42300,6 +42570,42 @@ func (ec *executionContext) unmarshalInputOwnerReference(ctx context.Context, ob
 		case "UID":
 			var err error
 			it.UID, err = ec.unmarshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputProtocolSettingsInput(ctx context.Context, obj interface{}) (v1alpha13.ProtocolSettings, error) {
+	var it v1alpha13.ProtocolSettings
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "contentMode":
+			var err error
+			it.ContentMode, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "exemptHandshake":
+			var err error
+			it.ExemptHandshake, err = ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "qos":
+			var err error
+			it.Qos, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "webhookAuth":
+			var err error
+			it.WebhookAuth, err = ec.unmarshalOWebhookAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42750,6 +43056,54 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 		case "subscriber":
 			var err error
 			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputWebhookAuthInput(ctx context.Context, obj interface{}) (v1alpha13.WebhookAuth, error) {
+	var it v1alpha13.WebhookAuth
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "clientId":
+			var err error
+			it.ClientId, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "clientSecret":
+			var err error
+			it.ClientSecret, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "grantType":
+			var err error
+			it.GrantType, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scope":
+			var err error
+			it.Scope, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tokenUrl":
+			var err error
+			it.TokenUrl, err = ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43804,7 +44158,7 @@ func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.Selectio
 
 var bebFilterImplementors = []string{"BebFilter"}
 
-func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.BebFilter) graphql.Marshaler {
+func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.BebFilter) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bebFilterImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -43830,7 +44184,7 @@ func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet
 
 var bebFiltersImplementors = []string{"BebFilters"}
 
-func (ec *executionContext) _BebFilters(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.BebFilters) graphql.Marshaler {
+func (ec *executionContext) _BebFilters(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.BebFilters) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bebFiltersImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -44519,7 +44873,7 @@ func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.Sel
 
 var conditionImplementors = []string{"Condition"}
 
-func (ec *executionContext) _Condition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Condition) graphql.Marshaler {
+func (ec *executionContext) _Condition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Condition) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, conditionImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45049,7 +45403,7 @@ func (ec *executionContext) _DeploymentStatus(ctx context.Context, sel ast.Selec
 
 var emsSubscriptionStatusImplementors = []string{"EmsSubscriptionStatus"}
 
-func (ec *executionContext) _EmsSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.EmsSubscriptionStatus) graphql.Marshaler {
+func (ec *executionContext) _EmsSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.EmsSubscriptionStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, emsSubscriptionStatusImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45235,7 +45589,7 @@ func (ec *executionContext) _EventActivationEvent(ctx context.Context, sel ast.S
 
 var eventSubscriptionImplementors = []string{"EventSubscription"}
 
-func (ec *executionContext) _EventSubscription(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) _EventSubscription(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Subscription) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventSubscriptionImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45277,7 +45631,7 @@ func (ec *executionContext) _EventSubscription(ctx context.Context, sel ast.Sele
 
 var eventSubscriptionSpecImplementors = []string{"EventSubscriptionSpec"}
 
-func (ec *executionContext) _EventSubscriptionSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.SubscriptionSpec) graphql.Marshaler {
+func (ec *executionContext) _EventSubscriptionSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.SubscriptionSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventSubscriptionSpecImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45312,7 +45666,7 @@ func (ec *executionContext) _EventSubscriptionSpec(ctx context.Context, sel ast.
 
 var eventSubscriptionStatusImplementors = []string{"EventSubscriptionStatus"}
 
-func (ec *executionContext) _EventSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.SubscriptionStatus) graphql.Marshaler {
+func (ec *executionContext) _EventSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.SubscriptionStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, eventSubscriptionStatusImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -45382,7 +45736,7 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 
 var filterImplementors = []string{"Filter"}
 
-func (ec *executionContext) _Filter(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Filter) graphql.Marshaler {
+func (ec *executionContext) _Filter(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Filter) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, filterImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -46198,6 +46552,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
 		case "deleteAPIRule":
 			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
+		case "createSubscription":
+			out.Values[i] = ec._Mutation_createSubscription(ctx, field)
 		case "createTrigger":
 			out.Values[i] = ec._Mutation_createTrigger(ctx, field)
 		case "createManyTriggers":
@@ -46827,7 +47183,7 @@ func (ec *executionContext) _PolicyRule(ctx context.Context, sel ast.SelectionSe
 
 var protocolSettingsImplementors = []string{"ProtocolSettings"}
 
-func (ec *executionContext) _ProtocolSettings(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.ProtocolSettings) graphql.Marshaler {
+func (ec *executionContext) _ProtocolSettings(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.ProtocolSettings) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, protocolSettingsImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -49513,7 +49869,7 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 
 var triggerImplementors = []string{"Trigger"}
 
-func (ec *executionContext) _Trigger(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) _Trigger(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Trigger) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, triggerImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -49596,7 +49952,7 @@ func (ec *executionContext) _TriggerEvent(ctx context.Context, sel ast.Selection
 
 var triggerSpecImplementors = []string{"TriggerSpec"}
 
-func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.TriggerSpec) graphql.Marshaler {
+func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.TriggerSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, triggerSpecImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -49799,7 +50155,7 @@ func (ec *executionContext) _VersionInfo(ctx context.Context, sel ast.SelectionS
 
 var webhookAuthImplementors = []string{"WebhookAuth"}
 
-func (ec *executionContext) _WebhookAuth(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.WebhookAuth) graphql.Marshaler {
+func (ec *executionContext) _WebhookAuth(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.WebhookAuth) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, webhookAuthImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -50853,11 +51209,11 @@ func (ec *executionContext) marshalNBackendModule2ᚖgithubᚗcomᚋkymaᚑproje
 	return ec._BackendModule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNBebFilter2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, sel ast.SelectionSet, v v1alpha14.BebFilter) graphql.Marshaler {
+func (ec *executionContext) marshalNBebFilter2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, sel ast.SelectionSet, v v1alpha13.BebFilter) graphql.Marshaler {
 	return ec._BebFilter(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBebFilter2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.BebFilter) graphql.Marshaler {
+func (ec *executionContext) marshalNBebFilter2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.BebFilter) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -50894,7 +51250,7 @@ func (ec *executionContext) marshalNBebFilter2ᚕᚖgithubᚗcomᚋkymaᚑprojec
 	return ret
 }
 
-func (ec *executionContext) marshalNBebFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.BebFilter) graphql.Marshaler {
+func (ec *executionContext) marshalNBebFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.BebFilter) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -50904,11 +51260,43 @@ func (ec *executionContext) marshalNBebFilter2ᚖgithubᚗcomᚋkymaᚑproject�
 	return ec._BebFilter(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNBebFilters2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, sel ast.SelectionSet, v v1alpha14.BebFilters) graphql.Marshaler {
+func (ec *executionContext) unmarshalNBebFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, v interface{}) (v1alpha13.BebFilter, error) {
+	return ec.unmarshalInputBebFilterInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNBebFilterInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx context.Context, v interface{}) ([]*v1alpha13.BebFilter, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*v1alpha13.BebFilter, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNBebFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNBebFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, v interface{}) (*v1alpha13.BebFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNBebFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNBebFilters2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, sel ast.SelectionSet, v v1alpha13.BebFilters) graphql.Marshaler {
 	return ec._BebFilters(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNBebFilters2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.BebFilters) graphql.Marshaler {
+func (ec *executionContext) marshalNBebFilters2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.BebFilters) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -50916,6 +51304,18 @@ func (ec *executionContext) marshalNBebFilters2ᚖgithubᚗcomᚋkymaᚑproject�
 		return graphql.Null
 	}
 	return ec._BebFilters(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBebFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, v interface{}) (v1alpha13.BebFilters, error) {
+	return ec.unmarshalInputBebFiltersInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNBebFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, v interface{}) (*v1alpha13.BebFilters, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNBebFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalNBindableResourcesOutputItem2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐBindableResourcesOutputItem(ctx context.Context, sel ast.SelectionSet, v BindableResourcesOutputItem) graphql.Marshaler {
@@ -51879,11 +52279,11 @@ func (ec *executionContext) marshalNEventActivationEvent2ᚖgithubᚗcomᚋkyma�
 	return ec._EventActivationEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNEventSubscription2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalNEventSubscription2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Subscription) graphql.Marshaler {
 	return ec._EventSubscription(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEventSubscription2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalNEventSubscription2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Subscription) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -51920,7 +52320,7 @@ func (ec *executionContext) marshalNEventSubscription2ᚕᚖgithubᚗcomᚋkyma�
 	return ret
 }
 
-func (ec *executionContext) marshalNEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalNEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Subscription) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -51930,11 +52330,15 @@ func (ec *executionContext) marshalNEventSubscription2ᚖgithubᚗcomᚋkymaᚑp
 	return ec._EventSubscription(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNEventSubscriptionSpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha14.SubscriptionSpec) graphql.Marshaler {
+func (ec *executionContext) marshalNEventSubscriptionSpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha13.SubscriptionSpec) graphql.Marshaler {
 	return ec._EventSubscriptionSpec(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEventSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha14.SubscriptionStatus) graphql.Marshaler {
+func (ec *executionContext) unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx context.Context, v interface{}) (v1alpha13.SubscriptionSpec, error) {
+	return ec.unmarshalInputEventSubscriptionSpecInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNEventSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha13.SubscriptionStatus) graphql.Marshaler {
 	return ec._EventSubscriptionStatus(ctx, sel, &v)
 }
 
@@ -54341,11 +54745,11 @@ func (ec *executionContext) marshalNTimestamp2timeᚐTime(ctx context.Context, s
 	return res
 }
 
-func (ec *executionContext) marshalNTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Trigger) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -54401,7 +54805,7 @@ func (ec *executionContext) marshalNTriggerEvent2ᚖgithubᚗcomᚋkymaᚑprojec
 	return ec._TriggerEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha13.TriggerSpec) graphql.Marshaler {
+func (ec *executionContext) marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha14.TriggerSpec) graphql.Marshaler {
 	return ec._TriggerSpec(ctx, sel, &v)
 }
 
@@ -55113,11 +55517,11 @@ func (ec *executionContext) marshalOClusterServicePlan2ᚖgithubᚗcomᚋkymaᚑ
 	return ec._ClusterServicePlan(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOCondition2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐCondition(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Condition) graphql.Marshaler {
+func (ec *executionContext) marshalOCondition2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐCondition(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Condition) graphql.Marshaler {
 	return ec._Condition(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOCondition2ᚕgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐCondition(ctx context.Context, sel ast.SelectionSet, v []v1alpha14.Condition) graphql.Marshaler {
+func (ec *executionContext) marshalOCondition2ᚕgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐCondition(ctx context.Context, sel ast.SelectionSet, v []v1alpha13.Condition) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -55157,21 +55561,21 @@ func (ec *executionContext) marshalOCondition2ᚕgithubᚗcomᚋkymaᚑproject�
 	return ret
 }
 
-func (ec *executionContext) unmarshalOConditionReason2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionReason(ctx context.Context, v interface{}) (v1alpha14.ConditionReason, error) {
+func (ec *executionContext) unmarshalOConditionReason2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionReason(ctx context.Context, v interface{}) (v1alpha13.ConditionReason, error) {
 	tmp, err := graphql.UnmarshalString(v)
-	return v1alpha14.ConditionReason(tmp), err
+	return v1alpha13.ConditionReason(tmp), err
 }
 
-func (ec *executionContext) marshalOConditionReason2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionReason(ctx context.Context, sel ast.SelectionSet, v v1alpha14.ConditionReason) graphql.Marshaler {
+func (ec *executionContext) marshalOConditionReason2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionReason(ctx context.Context, sel ast.SelectionSet, v v1alpha13.ConditionReason) graphql.Marshaler {
 	return graphql.MarshalString(string(v))
 }
 
-func (ec *executionContext) unmarshalOConditionType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionType(ctx context.Context, v interface{}) (v1alpha14.ConditionType, error) {
+func (ec *executionContext) unmarshalOConditionType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionType(ctx context.Context, v interface{}) (v1alpha13.ConditionType, error) {
 	tmp, err := graphql.UnmarshalString(v)
-	return v1alpha14.ConditionType(tmp), err
+	return v1alpha13.ConditionType(tmp), err
 }
 
-func (ec *executionContext) marshalOConditionType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionType(ctx context.Context, sel ast.SelectionSet, v v1alpha14.ConditionType) graphql.Marshaler {
+func (ec *executionContext) marshalOConditionType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐConditionType(ctx context.Context, sel ast.SelectionSet, v v1alpha13.ConditionType) graphql.Marshaler {
 	return graphql.MarshalString(string(v))
 }
 
@@ -55271,7 +55675,7 @@ func (ec *executionContext) marshalODeleteServiceBindingUsageOutput2ᚖgithubᚗ
 	return ec._DeleteServiceBindingUsageOutput(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOEmsSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐEmsSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha14.EmsSubscriptionStatus) graphql.Marshaler {
+func (ec *executionContext) marshalOEmsSubscriptionStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐEmsSubscriptionStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha13.EmsSubscriptionStatus) graphql.Marshaler {
 	return ec._EmsSubscriptionStatus(ctx, sel, &v)
 }
 
@@ -55389,11 +55793,11 @@ func (ec *executionContext) marshalOEventActivationEvent2ᚕᚖgithubᚗcomᚋky
 	return ret
 }
 
-func (ec *executionContext) marshalOEventSubscription2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalOEventSubscription2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Subscription) graphql.Marshaler {
 	return ec._EventSubscription(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Subscription) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -55423,15 +55827,27 @@ func (ec *executionContext) marshalOExtension2ᚖk8sᚗioᚋapimachineryᚋpkg�
 	return ec.marshalOExtension2k8sᚗioᚋapimachineryᚋpkgᚋruntimeᚐRawExtension(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOFilter2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Filter) graphql.Marshaler {
+func (ec *executionContext) marshalOFilter2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Filter) graphql.Marshaler {
 	return ec._Filter(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Filter) graphql.Marshaler {
+func (ec *executionContext) marshalOFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Filter) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Filter(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, v interface{}) (v1alpha13.Filter, error) {
+	return ec.unmarshalInputFilterInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, v interface{}) (*v1alpha13.Filter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalOFunction2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunction(ctx context.Context, sel ast.SelectionSet, v Function) graphql.Marshaler {
@@ -55832,15 +56248,27 @@ func (ec *executionContext) marshalOPort2ᚖuint32(ctx context.Context, sel ast.
 	return ec.marshalOPort2uint32(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOProtocolSettings2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, sel ast.SelectionSet, v v1alpha14.ProtocolSettings) graphql.Marshaler {
+func (ec *executionContext) marshalOProtocolSettings2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, sel ast.SelectionSet, v v1alpha13.ProtocolSettings) graphql.Marshaler {
 	return ec._ProtocolSettings(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOProtocolSettings2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.ProtocolSettings) graphql.Marshaler {
+func (ec *executionContext) marshalOProtocolSettings2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.ProtocolSettings) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ProtocolSettings(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOProtocolSettingsInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, v interface{}) (v1alpha13.ProtocolSettings, error) {
+	return ec.unmarshalInputProtocolSettingsInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOProtocolSettingsInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, v interface{}) (*v1alpha13.ProtocolSettings, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOProtocolSettingsInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalOReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
@@ -56159,11 +56587,11 @@ func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapis�
 	return ec._SubscriberRef(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -56203,22 +56631,34 @@ func (ec *executionContext) marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkg
 	return ret
 }
 
-func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Trigger(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOWebhookAuth2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, sel ast.SelectionSet, v v1alpha14.WebhookAuth) graphql.Marshaler {
+func (ec *executionContext) marshalOWebhookAuth2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, sel ast.SelectionSet, v v1alpha13.WebhookAuth) graphql.Marshaler {
 	return ec._WebhookAuth(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOWebhookAuth2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.WebhookAuth) graphql.Marshaler {
+func (ec *executionContext) marshalOWebhookAuth2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.WebhookAuth) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._WebhookAuth(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOWebhookAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, v interface{}) (v1alpha13.WebhookAuth, error) {
+	return ec.unmarshalInputWebhookAuthInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOWebhookAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, v interface{}) (*v1alpha13.WebhookAuth, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOWebhookAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
