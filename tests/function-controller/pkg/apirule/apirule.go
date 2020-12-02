@@ -66,7 +66,7 @@ func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) 
 					{
 						"accessStrategies": []map[string]interface{}{
 							{
-								"config":  "{}",
+								"config":  map[string]interface{}{},
 								"handler": "allow",
 							},
 						},
