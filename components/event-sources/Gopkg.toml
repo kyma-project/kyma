@@ -14,6 +14,10 @@ required = [
   name = "golang.org/x/crypto"
   revision = "b7391e95e576cacdcdd422573063bc057239113d"
 
+[[override]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "v1.36.0"
+
 # Direct dependencies
 [[constraint]]
   name = "knative.dev/pkg"
