@@ -25,6 +25,10 @@ knative-eventing:
           - kyma-system
           - kyma-installer
           - istio-system
+      - key: name
+        operator: NotIn
+        values:
+          - kube-system
 
 
 # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
