@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  name: parostatkiem/pamela:1.0 #temp
+  name: eu.gcr.io/kyma-project/pamela:PR-1
   pullPolicy: Always
 service:
   internalPort: 3001
