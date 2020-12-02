@@ -1,14 +1,28 @@
 web:
-  deployment:
-    resources:
-      requests:
-        memory: 64Mi
-      limits:
-        memory: 128Mi
+  console:
+    deployment:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 15m
+          memory: 64Mi
+  core-ui:
+    deployment:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          cpu: 20m
+          memory: 128Mi
 backend: 
   deployment:
     resources:
       requests:
+        cpu: 60m
         memory: 64Mi
       limits:
-        memory: 300Mi
+        cpu: 30m
+        memory: 3000Mi

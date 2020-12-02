@@ -22,6 +22,8 @@ console:
     internalPort: 8080
     name: nginx
   statusPort: 6080
+  deployment:
+    resources: {}
 core_ui:
   image:
     pullPolicy: IfNotPresent
@@ -31,10 +33,10 @@ core_ui:
     internalPort: 80
     name: nginx
   statusPort: 6081
+  deployment:
+    resources: {}
 managementPlane: {}
 replicaCount: 1
-deployment:
-  resources: {}
 test:
   acceptance:
     labels:

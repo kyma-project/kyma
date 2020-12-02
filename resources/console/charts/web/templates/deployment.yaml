@@ -36,7 +36,7 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
           resources: 
-            {{- toYaml .Values.deployment.resources | nindent 12 }}
+            {{- toYaml .Values.console.deployment.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -53,6 +53,8 @@ spec:
         - name: core-ui
           image: "{{ .Values.global.containerRegistry.path }}/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
+          resources: 
+            {{- toYaml .Values.core-ui.deployment.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /healthz
