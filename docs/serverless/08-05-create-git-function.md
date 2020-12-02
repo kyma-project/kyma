@@ -3,7 +3,7 @@ title: Create a Function from Git repository sources
 type: Tutorials
 ---
 
-This tutorial shows how you can create a Function in an alternative way -  building it from code and dependencies stored in a Git repository instead of keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/master/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
+This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/master/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
 
 > **NOTE:** This tutorial shows an alternative way of storing Function's code and dependencies. If you want to follow the whole end-to-end flow described for Functions in the Serverless tutorials, [create an inline Function](#tutorials-create-an-inline-function) instead. To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
 
@@ -168,16 +168,16 @@ Follows these steps:
 
 3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
 
-4. Select **Connect Repository**, fill in the **Url** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
+4. Select **Connect Repository**, fill in the **URL** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
 
     >**NOTE:** If you want to connect a secured repository, change the **Authorization** field from `Public` to `Basic` or `SSH key` and fill in the required fields.
 
 5. Go to the **Functions** tab and select **Create Function**.
 
-6. In the pop-up box, change `Source Type` to `From Repository`, select created Repository's name, fill in the `Reference` field with `master` and `Base Directory` field with `orders-service/function` values, and select **Create** to confirm changes.
+6. In the pop-up box, change `Source Type` to `From Repository`. Select the created repository's name and fill in the `Reference` field with `master` and the `Base Directory` field with `orders-service/function`. Select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
-    Make sure that new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
+    Make sure that the new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
 
     </details>
 </div>

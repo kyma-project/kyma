@@ -177,7 +177,7 @@ Follow these steps:
 
 ### Create a ServiceInstance
 
-1. In the left navigation panel, go to **Service Management** > **Catalog** where you can see the list of all available Addons. Select **[Experimental] Redis**.
+1. In the left navigation panel, go to **Service Management** > **Catalog**. In the **Add-Ons** tab, you can see the list of all available Addons. Select **[Experimental] Redis**.
 
 2. Select **Add** to provision the Redis ServiceClass and create its instance in your Namespace.
 
