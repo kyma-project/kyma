@@ -5,7 +5,6 @@ metadata:
   namespace: {{ template "grafana.namespace" . }}
   labels:
     {{- include "grafana.labels" . | nindent 4 }}
-    app.kubernetes.io/component: grafana
 {{- if .Values.service.labels }}
 {{ toYaml .Values.service.labels | indent 4 }}
 {{- end }}
@@ -44,7 +43,8 @@ spec:
       nodePort: {{.Values.service.nodePort}}
 {{ end }}
   {{- if .Values.extraExposePorts }}
-  {{- tpl (.Values.extraExposePorts) . | indent 4 }}
+  {{- tpl (toYaml .Values.extraExposePorts) . | indent 4 }}
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}
+

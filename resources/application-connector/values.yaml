@@ -35,7 +35,7 @@ global:
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
-    version: "24c55551"
+    version: "f98272bd"
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
@@ -43,11 +43,11 @@ global:
   application_gateway_tests:
     version: "470796a1"
   application_gateway_legacy_tests:
-    version: "470796a1"
+    version: "d0f17bff"
   application_registry:
     version: "PR-9890"
   application_registry_tests:
-    version: "cda9f380"
+    version: "d556963d"
   application_broker:
     version: "41660266"
   application_connectivity_certs_setup_job:

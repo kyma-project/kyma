@@ -437,7 +437,7 @@ func (t TargetsAndRulesTest) checkAlerts() error {
 			alerts := resp.Data.Alerts
 			timeoutMessage = ""
 			for _, alert := range alerts {
-				if shouldIgnoreAlert(alert.Labels.AlertName) {
+				if shouldIgnoreAlert(alert) {
 					continue
 				}
 				if alert.State == "firing" {
@@ -452,17 +452,22 @@ func (t TargetsAndRulesTest) checkAlerts() error {
 	}
 }
 
-func shouldIgnoreAlert(alertName string) bool {
-	var alertsToBeIgnored = []string{
+func shouldIgnoreAlert(alert prom.Alert) bool {
+	if alert.Labels.Severity != "critical" {
+		return true
+	}
+
+	var alertNamesToIgnore = []string{
 		// Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
 		"Watchdog",
 	}
 
-	for _, alert := range alertsToBeIgnored {
-		if alert == alertName {
+	for _, name := range alertNamesToIgnore {
+		if name == alert.Labels.AlertName {
 			return true
 		}
 	}
+
 	return false
 }
 

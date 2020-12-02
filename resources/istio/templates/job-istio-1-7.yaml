@@ -22,7 +22,7 @@ spec:
 {{- else }}
 {{ .Files.Get "files/istio-install-1-7.sh" | printf "%s" | indent 16 }}
 {{- end }}
-          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag17 }}
+          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
           name: installer
           volumeMounts:
           - name: config
