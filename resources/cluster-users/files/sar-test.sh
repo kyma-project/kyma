@@ -445,6 +445,9 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
 	testPermissions "delete" "deployment" "${NAMESPACE}" "yes"
 
+	echo "--> ${ADMIN_EMAIL} should be able to delete apirules.gateway.kyma-project.io in the cluster"
+	testPermissionsClusterScoped "delete" "apirules.gateway.kyma-project.io" "yes"
+
 	echo "--> ${ADMIN_EMAIL} should be able to get ory Access Rule"
 	testPermissions "get" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
@@ -565,6 +568,12 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
+	echo "--> ${VIEW_EMAIL} should NOT be able to create apirules.gateway.kyma-project.io"
+	testPermissions "create" "apirules.gateway.kyma-project.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get apirules.gateway.kyma-project.io"
+	testPermissions "get" "apirules.gateway.kyma-project.io" "${NAMESPACE}" "yes"
+
 	echo "--> ${VIEW_EMAIL} should be able to get serverless-webhook-envs configmap"
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
 
@@ -623,6 +632,9 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to get ory Access Rule in system namespace"
 	testPermissions "get" "rule.oathkeeper.ory.sh" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create apirules.gateway.kyma-project.io in system namespace"
+	testPermissions "create" "apirules.gateway.kyma-project.io" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
@@ -722,6 +734,9 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete ORY Access Rule in the namespace they created"
 	testPermissions "delete" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete apirules.gateway.kyma-project.io in the namespace they created"
+	testPermissions "delete" "apirules.gateway.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Secrets in the namespace they created"
 	testPermissions "list" "secrets" "${CUSTOM_NAMESPACE}" "yes"

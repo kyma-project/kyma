@@ -5,8 +5,7 @@ metadata:
   name: {{ template "prometheus.server.fullname" . }}-server
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: {{ template "prometheus.server.fullname" . }}-server
-{{ include "prometheus.server.labels" . | indent 4 }}
+    {{- include "prometheus.server.labels" . | nindent 4 }}
 spec:
   namespaceSelector:
     matchNames:

@@ -277,10 +277,6 @@ func (r *namespaceListItemResolver) ApplicationsCount(ctx context.Context, obj *
 	return r.k8s.ApplicationsCountField(ctx, obj)
 }
 
-func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
-	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
-}
-
 func (r *queryResolver) ServiceInstance(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.ServiceInstanceQuery(ctx, name, namespace)
 }
