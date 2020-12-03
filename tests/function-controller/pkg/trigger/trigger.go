@@ -5,23 +5,17 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 )
 
 type Trigger struct {
@@ -34,8 +28,12 @@ type Trigger struct {
 }
 
 func New(name string, c shared.Container) *Trigger {
+	gvr := schema.GroupVersionResource{
+		Group: "eventing.knative.dev", Version: "v1alpha1",
+		Resource: "triggers",
+	}
 	return &Trigger{
-		resCli:      resource.New(c.DynamicCli, eventingv1alpha1.SchemeGroupVersion.WithResource("triggers"), c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, gvr, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -45,29 +43,29 @@ func New(name string, c shared.Container) *Trigger {
 }
 
 func (t *Trigger) Create(serviceName string) error {
-	br := &eventingv1alpha1.Trigger{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Trigger",
-			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      t.name,
-			Namespace: t.namespace,
-		},
-		Spec: eventingv1alpha1.TriggerSpec{
-			Broker: broker.DefaultName,
-			Subscriber: duckv1.Destination{
-				Ref: &corev1.ObjectReference{
-					Kind:       "Service",
-					Namespace:  t.namespace,
-					Name:       serviceName,
-					APIVersion: corev1.SchemeGroupVersion.Version,
+	tr := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "eventing.knative.dev/v1alpha1",
+			"kind":       "Trigger",
+			"metadata": map[string]interface{}{
+				"name":      t.name,
+				"namespace": t.namespace,
+			},
+			"spec": map[string]interface{}{
+				"broker": "default",
+				"subscriber": map[string]interface{}{
+					"ref": map[string]interface{}{
+						"kind":       "Service",
+						"name":       serviceName,
+						"namespace":  t.namespace,
+						"apiVersion": corev1.SchemeGroupVersion.Version,
+					},
 				},
 			},
 		},
 	}
 
-	_, err := t.resCli.Create(br)
+	_, err := t.resCli.Create(tr)
 	if err != nil {
 		return errors.Wrapf(err, "while creating Trigger %s in namespace %s", t.name, t.namespace)
 	}
@@ -76,7 +74,7 @@ func (t *Trigger) Create(serviceName string) error {
 }
 
 func (t *Trigger) Delete() error {
-	err := t.resCli.Delete(t.name, t.waitTimeout)
+	err := t.resCli.Delete(t.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Trigger %s in namespace %s", t.name, t.namespace)
 	}
@@ -84,18 +82,12 @@ func (t *Trigger) Delete() error {
 	return nil
 }
 
-func (t *Trigger) Get() (*eventingv1alpha1.Trigger, error) {
-	u, err := t.resCli.Get(t.name)
+func (t *Trigger) Get() (*unstructured.Unstructured, error) {
+	tr, err := t.resCli.Get(t.name)
 	if err != nil {
-		return &eventingv1alpha1.Trigger{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
+		return &unstructured.Unstructured{}, errors.Wrapf(err, "while getting Trigger %s in namespace %s", t.name, t.namespace)
 	}
-
-	tr, err := convertFromUnstructuredToTrigger(*u)
-	if err != nil {
-		return &eventingv1alpha1.Trigger{}, err
-	}
-
-	return &tr, nil
+	return tr, nil
 }
 
 func (t *Trigger) LogResource() error {
@@ -126,11 +118,7 @@ func (t *Trigger) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), t.waitTimeout)
 	defer cancel()
 	condition := t.isTriggerReady(t.name)
-	_, err = watchtools.Until(ctx, tr.GetResourceVersion(), t.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, t.resCli.ResCli, condition)
 }
 
 func (t *Trigger) isTriggerReady(name string) func(event watch.Event) (bool, error) {
@@ -138,31 +126,47 @@ func (t *Trigger) isTriggerReady(name string) func(event watch.Event) (bool, err
 		if event.Type != watch.Modified {
 			return false, nil
 		}
-		u, ok := event.Object.(*unstructured.Unstructured)
+		trigger, ok := event.Object.(*unstructured.Unstructured)
 		if !ok {
 			return false, shared.ErrInvalidDataType
 		}
-		if u.GetName() != name {
+		if trigger.GetName() != name {
 			return false, nil
 		}
 
-		trigger, err := convertFromUnstructuredToTrigger(*u)
-		if err != nil {
-			return false, err
-		}
-
-		return t.isStateReady(trigger), nil
+		return t.isStateReady(*trigger), nil
 	}
 }
 
-func convertFromUnstructuredToTrigger(u unstructured.Unstructured) (eventingv1alpha1.Trigger, error) {
-	trigger := eventingv1alpha1.Trigger{}
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &trigger)
-	return trigger, err
-}
+func (t Trigger) isStateReady(trigger unstructured.Unstructured) bool {
+	conditions, found, err := unstructured.NestedSlice(trigger.Object, "status", "conditions")
+	if err != nil {
+		// status.conditions may have not been added by eventing controller by now
+		t.log.Warn("Trigger does not have status.conditions")
+		return false
+	}
+	if !found {
+		// or it may not even exist, but it should not be the case
+		t.log.Warn("Trigger not found")
+		return false
+	}
 
-func (t Trigger) isStateReady(trigger eventingv1alpha1.Trigger) bool {
-	ready := trigger.Status.IsReady()
+	ready := false
+	for _, cond := range conditions {
+		// casting to map[string]string here doesn't work, ok is false
+		cond, ok := cond.(map[string]interface{})
+		if !ok {
+			t.log.Warn("couldn't cast trigger's condition to map[string]interface{}")
+			ready = false
+			break
+		}
+		if cond["type"].(string) != "Ready" {
+			continue
+		}
+
+		ready = cond["status"].(string) == "True"
+		break
+	}
 
 	shared.LogReadiness(ready, t.verbose, t.name, t.log, trigger)
 

@@ -17,8 +17,9 @@ require (
 	k8s.io/client-go v0.18.2
 	k8s.io/code-generator v0.18.2
 	sigs.k8s.io/controller-runtime v0.6.0
-	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e // indirect
-	sigs.k8s.io/testing_frameworks v0.1.2 // indirect
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
+replace (
+	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.18.8
+)

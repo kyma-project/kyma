@@ -7,121 +7,121 @@ spec:
   addonComponents:
     istiocoredns:
       enabled: false
-  
+
   components:
     base:
       enabled: true
     cni:
       enabled: false
     egressGateways:
-    - enabled: false
-      k8s:
-        env:
-        - name: ISTIO_META_ROUTER_MODE
-          value: sni-dnat
-        hpaSpec:
-          maxReplicas: 5
-          metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
-          minReplicas: 1
-          scaleTargetRef:
-            apiVersion: apps/v1
-            kind: Deployment
-            name: istio-egressgateway
-        resources:
-          limits:
-            cpu: 2000m
-            memory: 1024Mi
-          requests:
-            cpu: 10m
-            memory: 40Mi
-        service:
-          ports:
-          - name: http2
-            port: 80
-            targetPort: 8080
-          - name: https
-            port: 443
-            targetPort: 8443
-          - name: tls
-            port: 15443
-            targetPort: 15443
-        strategy:
-          rollingUpdate:
-            maxSurge: 100%
-            maxUnavailable: 25%
-      name: istio-egressgateway
+      - enabled: false
+        k8s:
+          env:
+            - name: ISTIO_META_ROUTER_MODE
+              value: sni-dnat
+          hpaSpec:
+            maxReplicas: 5
+            metrics:
+              - resource:
+                  name: cpu
+                  targetAverageUtilization: 80
+                type: Resource
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: istio-egressgateway
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+          service:
+            ports:
+              - name: http2
+                port: 80
+                targetPort: 8080
+              - name: https
+                port: 443
+                targetPort: 8443
+              - name: tls
+                port: 15443
+                targetPort: 15443
+          strategy:
+            rollingUpdate:
+              maxSurge: 100%
+              maxUnavailable: 25%
+        name: istio-egressgateway
     ingressGateways:
-    - enabled: true
-      k8s:
-        env:
-        - name: ISTIO_META_ROUTER_MODE
-          value: sni-dnat
-        hpaSpec:
-          maxReplicas: 1
-          metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
-          minReplicas: 1
-          scaleTargetRef:
-            apiVersion: apps/v1
-            kind: Deployment
-            name: istio-ingressgateway
-        resources:
-          limits:
-            cpu: 2000m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 96Mi
-        service:
-          type: NodePort
-          ports:
-          - name: status-port
-            port: 15021
-            targetPort: 15021
-          - name: http2
-            port: 80
-            targetPort: 8080
-          - name: https
-            port: 443
-            targetPort: 8443
-          - name: tcp
-            port: 31400
-            targetPort: 31400
-          - name: tls
-            port: 15443
-            targetPort: 15443
-          - port: 15029
-            targetPort: 15029
-            name: kiali
-          - port: 15030
-            targetPort: 15030
-            name: prometheus
-          - port: 15031
-            targetPort: 15031
-            name: grafana
-          - port: 15032
-            targetPort: 15032
-            name: tracing
-        strategy:
-          rollingUpdate:
-            maxSurge: 100%
-            maxUnavailable: 0
-        overlays:
-        - kind: Deployment
-          name: istio-ingressgateway
-          patches:
-          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8080].hostPort
-            value: 80
-          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
-            value: 443
-      name: istio-ingressgateway
+      - enabled: true
+        k8s:
+          env:
+            - name: ISTIO_META_ROUTER_MODE
+              value: sni-dnat
+          hpaSpec:
+            maxReplicas: 1
+            metrics:
+              - resource:
+                  name: cpu
+                  targetAverageUtilization: 80
+                type: Resource
+            minReplicas: 1
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: istio-ingressgateway
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 25m
+              memory: 32Mi
+          service:
+            type: NodePort
+            ports:
+              - name: status-port
+                port: 15021
+                targetPort: 15021
+              - name: http2
+                port: 80
+                targetPort: 8080
+              - name: https
+                port: 443
+                targetPort: 8443
+              - name: tcp
+                port: 31400
+                targetPort: 31400
+              - name: tls
+                port: 15443
+                targetPort: 15443
+              - port: 15029
+                targetPort: 15029
+                name: kiali
+              - port: 15030
+                targetPort: 15030
+                name: prometheus
+              - port: 15031
+                targetPort: 15031
+                name: grafana
+              - port: 15032
+                targetPort: 15032
+                name: tracing
+          strategy:
+            rollingUpdate:
+              maxSurge: 100%
+              maxUnavailable: 0
+          overlays:
+            - kind: Deployment
+              name: istio-ingressgateway
+              patches:
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8080].hostPort
+                  value: 80
+                - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
+                  value: 443
+        name: istio-ingressgateway
 
     istiodRemote:
       enabled: false
@@ -130,20 +130,20 @@ spec:
       enabled: true
       k8s:
         env:
-        - name: PILOT_TRACE_SAMPLING
-          value: "100"
-        - name: PILOT_HTTP10
-          value: "1"
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
+          - name: PILOT_TRACE_SAMPLING
+            value: "100"
+          - name: PILOT_HTTP10
+            value: "1"
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
         readinessProbe:
           httpGet:
             path: /ready
@@ -165,11 +165,11 @@ spec:
             name: istiod
         resources:
           limits:
-            cpu: 500m
-            memory: 1024Mi
-          requests:
             cpu: 250m
-            memory: 512Mi
+            memory: 256Mi
+          requests:
+            cpu: 75m
+            memory: 128Mi
         strategy:
           rollingUpdate:
             maxSurge: 100%
@@ -179,18 +179,18 @@ spec:
       enabled: false
       k8s:
         env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
         hpaSpec:
           maxReplicas: 5
           metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -200,25 +200,25 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
-    
+
     telemetry:
       enabled: false
       k8s:
         env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        - name: GOMAXPROCS
-          value: "6"
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: GOMAXPROCS
+            value: "6"
         hpaSpec:
           maxReplicas: 5
           metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -236,7 +236,7 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
-  
+
   meshConfig:
     accessLogFile: /dev/stdout
     defaultConfig:
@@ -254,12 +254,12 @@ spec:
         env: {}
         name: istio-egressgateway
         secretVolumes:
-        - mountPath: /etc/istio/egressgateway-certs
-          name: egressgateway-certs
-          secretName: istio-egressgateway-certs
-        - mountPath: /etc/istio/egressgateway-ca-certs
-          name: egressgateway-ca-certs
-          secretName: istio-egressgateway-ca-certs
+          - mountPath: /etc/istio/egressgateway-certs
+            name: egressgateway-certs
+            secretName: istio-egressgateway-certs
+          - mountPath: /etc/istio/egressgateway-ca-certs
+            name: egressgateway-ca-certs
+            secretName: istio-egressgateway-ca-certs
         type: ClusterIP
         zvpn: {}
       istio-ingressgateway:
@@ -269,22 +269,22 @@ spec:
         domain: ""
         env: {}
         meshExpansionPorts:
-        - name: tcp-istiod
-          port: 15012
-          targetPort: 15012
-        - name: tcp-dns-tls
-          port: 853
-          targetPort: 8853
+          - name: tcp-istiod
+            port: 15012
+            targetPort: 15012
+          - name: tcp-dns-tls
+            port: 853
+            targetPort: 8853
         name: istio-ingressgateway
         secretVolumes:
-        - mountPath: /etc/istio/ingressgateway-certs
-          name: ingressgateway-certs
-          secretName: istio-ingressgateway-certs
-        - mountPath: /etc/istio/ingressgateway-ca-certs
-          name: ingressgateway-ca-certs
-          secretName: istio-ingressgateway-ca-certs
+          - mountPath: /etc/istio/ingressgateway-certs
+            name: ingressgateway-certs
+            secretName: istio-ingressgateway-certs
+          - mountPath: /etc/istio/ingressgateway-ca-certs
+            name: ingressgateway-ca-certs
+            secretName: istio-ingressgateway-ca-certs
         zvpn: {}
-    
+
     global:
       arch:
         amd64: 2
@@ -382,13 +382,13 @@ spec:
         dashboardproviders.yaml:
           apiVersion: 1
           providers:
-          - disableDeletion: false
-            folder: istio
-            name: istio
-            options:
-              path: /var/lib/grafana/dashboards/istio
-            orgId: 1
-            type: file
+            - disableDeletion: false
+              folder: istio
+              name: istio
+              options:
+                path: /var/lib/grafana/dashboards/istio
+              orgId: 1
+              type: file
       datasources:
         datasources.yaml:
           apiVersion: 1

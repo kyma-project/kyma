@@ -9,6 +9,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
+  isBEBEnabled: false
   ingress:
     domainName: "TBD"
   helm:
@@ -23,7 +24,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9890"
+    version: "PR-10051"
   application_operator_tests:
     version: "470796a1"
   connector_service:
@@ -31,7 +32,7 @@ global:
   connector_service_tests:
     version: "470796a1"
   connection_token_handler:
-    version: "PR-9890"
+    version: "PR-10075"
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
@@ -53,7 +54,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9890"
   application_connectivity_validator:
-    version: "PR-9890"
+    version: "PR-10051"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 

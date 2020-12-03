@@ -34,3 +34,6 @@ test:
     labels:
       integration: true
       after-upgrade: true
+
+istio_operator_cluster_file: istio-operator-1-7-cluster.yaml
+istio_operator_minikube_file: istio-operator-1-7-minikube.yaml
