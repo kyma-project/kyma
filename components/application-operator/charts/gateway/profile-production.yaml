@@ -8,3 +8,6 @@ deployment:
       memory: 64Mi
 autoscaling:
   enable: true
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40
