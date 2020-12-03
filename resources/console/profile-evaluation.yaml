@@ -18,8 +18,8 @@ web:
 backend:
   resources:
     requests:
-      cpu: 30m
+      cpu: 10m
       memory: 32Mi
     limits:
-      cpu: 60m
+      cpu: 30m
       memory: 150Mi
