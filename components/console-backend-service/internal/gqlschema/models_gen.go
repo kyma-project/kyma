@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	"k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/types"
 	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
@@ -288,6 +289,7 @@ type EventActivationEvent struct {
 type EventSubscriptionSpecInput struct {
 	Filters     []*FiltersInput `json:"filters"`
 	ServiceName string          `json:"serviceName"`
+	Function    *FunctionInput  `json:"function"`
 }
 
 type File struct {
@@ -348,6 +350,11 @@ type FunctionEnvValueFromInput struct {
 type FunctionEvent struct {
 	Type     SubscriptionEventType `json:"type"`
 	Function *Function             `json:"function"`
+}
+
+type FunctionInput struct {
+	ID   types.UID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type FunctionMetadata struct {

@@ -678,6 +678,7 @@ type ComplexityRoot struct {
 		DeleteServiceBindingUsage                  func(childComplexity int, serviceBindingUsageName string, namespace string) int
 		DeleteServiceBindingUsages                 func(childComplexity int, serviceBindingUsageNames []string, namespace string) int
 		DeleteServiceInstance                      func(childComplexity int, name string, namespace string) int
+		DeleteSubscription                         func(childComplexity int, name string, namespace string) int
 		DeleteTrigger                              func(childComplexity int, namespace string, triggerName string) int
 		DisableApplication                         func(childComplexity int, application string, namespace string) int
 		EnableApplication                          func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
@@ -1338,6 +1339,7 @@ type MutationResolver interface {
 	UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
 	CreateSubscription(ctx context.Context, name string, namespace string, params EventSubscriptionSpecInput) (*v1alpha13.Subscription, error)
+	DeleteSubscription(ctx context.Context, name string, namespace string) (*v1alpha13.Subscription, error)
 	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha14.Trigger, error)
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha14.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha14.Trigger, error)
@@ -4177,6 +4179,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteServiceInstance(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Mutation.deleteSubscription":
+		if e.complexity.Mutation.DeleteSubscription == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteSubscription_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteSubscription(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Mutation.deleteTrigger":
 		if e.complexity.Mutation.DeleteTrigger == nil {
@@ -7418,6 +7432,12 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
 input EventSubscriptionSpecInput {
     filters: [FiltersInput!]!
     serviceName: String!
+    function: FunctionInput!
+}
+
+input FunctionInput {
+    id: UID!
+    name: String!
 }
 
 input FiltersInput {
@@ -7491,6 +7511,7 @@ extend type Query {
 
 extend type Mutation {
     createSubscription(name: String!, namespace: String!, params: EventSubscriptionSpecInput!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "create", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "delete", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
@@ -10233,6 +10254,28 @@ func (ec *executionContext) field_Mutation_deleteServiceInstance_args(ctx contex
 }
 
 func (ec *executionContext) field_Mutation_deleteService_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteSubscription_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -25727,6 +25770,68 @@ func (ec *executionContext) _Mutation_createSubscription(ctx context.Context, fi
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha13.Subscription); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha13.Subscription)
+	fc.Result = res
+	return ec.marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteSubscription(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteSubscription_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteSubscription(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -42095,6 +42200,12 @@ func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context
 			if err != nil {
 				return it, err
 			}
+		case "function":
+			var err error
+			it.Function, err = ec.unmarshalNFunctionInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -42188,6 +42299,30 @@ func (ec *executionContext) unmarshalInputFunctionEnvValueFromInput(ctx context.
 		case "optional":
 			var err error
 			it.Optional, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFunctionInput(ctx context.Context, obj interface{}) (FunctionInput, error) {
+	var it FunctionInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -46406,6 +46541,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		case "createSubscription":
 			out.Values[i] = ec._Mutation_createSubscription(ctx, field)
+		case "deleteSubscription":
+			out.Values[i] = ec._Mutation_deleteSubscription(ctx, field)
 		case "createTrigger":
 			out.Values[i] = ec._Mutation_createTrigger(ctx, field)
 		case "createManyTriggers":
@@ -52388,6 +52525,18 @@ func (ec *executionContext) marshalNFunctionEvent2ᚖgithubᚗcomᚋkymaᚑproje
 		return graphql.Null
 	}
 	return ec._FunctionEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFunctionInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx context.Context, v interface{}) (FunctionInput, error) {
+	return ec.unmarshalInputFunctionInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNFunctionInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx context.Context, v interface{}) (*FunctionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNFunctionInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalNFunctionMetadata2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionMetadata(ctx context.Context, sel ast.SelectionSet, v FunctionMetadata) graphql.Marshaler {

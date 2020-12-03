@@ -52,6 +52,12 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
 input EventSubscriptionSpecInput {
     filters: [FiltersInput!]!
     serviceName: String!
+    function: FunctionInput!
+}
+
+input FunctionInput {
+    id: UID!
+    name: String!
 }
 
 input FiltersInput {
@@ -125,4 +131,5 @@ extend type Query {
 
 extend type Mutation {
     createSubscription(name: String!, namespace: String!, params: EventSubscriptionSpecInput!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "create", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "delete", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 }

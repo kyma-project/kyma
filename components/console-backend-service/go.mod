@@ -15,7 +15,7 @@ require (
 	github.com/googleapis/gnostic v0.4.0
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
@@ -58,11 +58,11 @@ require (
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
-	k8s.io/api => k8s.io/api v0.17.11
-    k8s.io/apimachinery => k8s.io/apimachinery v0.17.11
-    k8s.io/apiserver => k8s.io/apiserver v0.17.9
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/api => k8s.io/api v0.17.11
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.11
+	k8s.io/apiserver => k8s.io/apiserver v0.17.9
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 )

@@ -28,11 +28,7 @@ func (r *Resolver) EventSubscriptionsQuery(ctx context.Context, namespace string
 	return items, err
 }
 
-//protocolSettings: ProtocolSettingsInput
-//bebfilters.protocol = 'beb'
-
 func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string,  name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
-
 	protocolSettings := &v1alpha1.ProtocolSettings{
 		ContentMode:     "",
 		ExemptHandshake: true,
@@ -40,30 +36,9 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 		WebhookAuth:     nil,
 	}
 
-	eventSource := v1alpha1.Filter{
-		Type:     "exact",
-		Property: "/default/sap.kyma/kh", //TODO
-		Value:    "source",
-	}
-
-	eventType := v1alpha1.Filter{
-		Type:     "exact",
-		Property: "sap.kyma.custom.varkes.quote.orderplaced.v1", //TODO
-		Value:    "type",
-	}
-
-	filter := &v1alpha1.BebFilter{
-		EventSource: &eventSource,
-		EventType:   &eventType,
-	}
-
-	filters := []*v1alpha1.BebFilter{
-		filter,
-	}
-
 	bebFilters := &v1alpha1.BebFilters{
 		Dialect: "beb,",
-		Filters: filters,
+		Filters: r.createBebFilters(params.Filters),
 	}
 
 	spec := v1alpha1.SubscriptionSpec{
@@ -72,7 +47,8 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.ServiceName, namespace),
 		Filter:           bebFilters,
 	}
-	
+
+
 	eventSubscription := &v1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: subscriptionsGroupVersionResource.GroupVersion().String(),
@@ -81,10 +57,49 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: "serverless.kyma-project.io/v1alpha1",
+					Kind:       "Function",
+					UID: 		params.Function.ID,
+					Name: 		params.Function.Name,
+				},
+			},
 		},
 		Spec: spec,
 	}
+
 	result := &v1alpha1.Subscription{}
 	err := r.Service().Create(eventSubscription, result)
 	return result, err
+}
+
+func (r *Resolver) DeleteEventSubscription(ctx context.Context, namespace string, name string) (*v1alpha1.Subscription, error) {
+	result := &v1alpha1.Subscription{}
+	err := r.Service().DeleteInNamespace(namespace, name, result)
+	return result, err
+}
+
+func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput) []*v1alpha1.BebFilter {
+	eventSource := v1alpha1.Filter{
+		Type:     "exact",
+		Property: "/default/sap.kyma/kh", //TODO
+		Value:    "source",
+	}
+
+	var bebFilters []*v1alpha1.BebFilter
+
+	for _, filter := range filters {
+		eventType := v1alpha1.Filter{
+			Type:     "exact",
+			Property: fmt.Sprintf("sap.kyma.custom.%s.%s.%s", filter.ApplicationName, filter.EventName, filter.Version),
+			Value:    "type",
+		}
+		bebFilters = append(bebFilters, &v1alpha1.BebFilter{
+			EventSource: &eventSource,
+			EventType:   &eventType,
+		})
+	}
+
+	return bebFilters
 }
