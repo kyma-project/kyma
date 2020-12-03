@@ -26,7 +26,7 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Chart.Name }}-runtime-resync
+      serviceAccountName: {{ .Chart.Name }}-runtime-resync-sa
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-runtime-resync-job
@@ -43,7 +43,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-runtime-resync
+  name: {{ .Chart.Name }}-runtime-resync-sa
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-weight: "0"
@@ -52,9 +52,9 @@ metadata:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: {{ .Chart.Name }}-runtime-resync
+  name: {{ .Chart.Name }}-runtime-resync-cluster-role
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-weight: "0"
@@ -67,9 +67,9 @@ rules:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: {{ .Chart.Name }}-runtime-resync
+  name: {{ .Chart.Name }}-runtime-resync-rb
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-weight: "0"
@@ -77,9 +77,10 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ .Chart.Name }}-runtime-resync
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-runtime-resync-cluster-role
 subjects:
   - kind: ServiceAccount
-    name: {{ .Chart.Name }}-runtime-resync
+    name: {{ .Chart.Name }}-runtime-resync-sa
     namespace: {{ .Release.Namespace }}
+
