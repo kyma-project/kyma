@@ -80,6 +80,26 @@ func (r *Resolver) DeleteEventSubscription(ctx context.Context, namespace string
 	return result, err
 }
 
+func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {
+	channel := make(chan *gqlschema.SubscriptionEvent, 1)
+	filter := func(subscription v1alpha1.Subscription) bool {
+		return subscription.ObjectMeta.Namespace == namespace
+	}
+
+	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		defer close(channel)
+		defer unsubscribe()
+		<-ctx.Done()
+	}()
+
+	return channel, nil
+}
+
 func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput) []*v1alpha1.BebFilter {
 	eventSource := v1alpha1.Filter{
 		Type:     "exact",

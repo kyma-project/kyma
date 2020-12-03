@@ -12,8 +12,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/oauth"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/bebEventing"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
 

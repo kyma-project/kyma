@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha12 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	"k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/types"
-	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v11 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -721,6 +722,11 @@ type SubscriberInput struct {
 	Path *string         `json:"path"`
 }
 
+type SubscriptionEvent struct {
+	Type         SubscriptionEventType   `json:"type"`
+	Subscription *v1alpha12.Subscription `json:"subscription"`
+}
+
 type TriggerCreateInput struct {
 	Name             *string          `json:"name"`
 	Broker           string           `json:"broker"`
@@ -730,7 +736,7 @@ type TriggerCreateInput struct {
 
 type TriggerEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Trigger *v1alpha12.Trigger    `json:"trigger"`
+	Trigger *v1alpha13.Trigger    `json:"trigger"`
 }
 
 type TriggerStatus struct {

@@ -1,14 +1,11 @@
 package bebEventing
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
-	// "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	// "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	// "k8s.io/client-go/tools/cache"
-	// "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	// "knative.dev/pkg/apis"
 )
 
 var subscriptionsKind = "Subscription"
@@ -26,33 +23,33 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 	return serviceFactory.ForResource(subscriptionsGroupVersionResource), nil
 }
 
-// func NewEventHandler(channel chan<- *gqlschema.TriggerEvent, filter func(trigger v1alpha1.Trigger) bool) resource.EventHandlerProvider {
-// 	return func() resource.EventHandler {
-// 		return &EventHandler{
-// 			channel: channel,
-// 			filter:  filter,
-// 			res:     &v1alpha1.Trigger{},
-// 		}
-// 	}
-// }
+func NewEventHandler(channel chan<- *gqlschema.SubscriptionEvent, filter func(subscription v1alpha1.Subscription) bool) resource.EventHandlerProvider {
+	return func() resource.EventHandler {
+		return &EventHandler{
+			channel: channel,
+			filter:  filter,
+			res:     &v1alpha1.Subscription{},
+		}
+	}
+}
 
-// type EventHandler struct {
-// 	channel chan<- *gqlschema.TriggerEvent
-// 	filter  func(v1alpha1.Trigger) bool
-// 	res     *v1alpha1.Trigger
-// }
+type EventHandler struct {
+	channel chan<- *gqlschema.SubscriptionEvent
+	filter  func(v1alpha1.Subscription) bool
+	res     *v1alpha1.Subscription
+}
 
-// func (h *EventHandler) K8sResource() interface{} {
-// 	return h.res
-// }
+func (h *EventHandler) K8sResource() interface{} {
+	return h.res
+}
 
-// func (h *EventHandler) ShouldNotify() bool {
-// 	return h.filter(*h.res)
-// }
+func (h *EventHandler) ShouldNotify() bool {
+	return h.filter(*h.res)
+}
 
-// func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
-// 	h.channel <- &gqlschema.TriggerEvent{
-// 		Type:    eventType,
-// 		Trigger: h.res,
-// 	}
-// }
+func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
+	h.channel <- &gqlschema.SubscriptionEvent{
+		Type:    eventType,
+		Subscription: h.res,
+	}
+}
