@@ -9,8 +9,8 @@ application-broker:
         cpu: 20m
 application-operator:
   controller:
-    profile: "evaluation"
     resources:
+      profile: "evaluation"
       limits:
         cpu: 50m
         memory: 128Mi
