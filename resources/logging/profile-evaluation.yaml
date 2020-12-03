@@ -22,7 +22,7 @@ logui:
   resources: 
     requests:
       cpu: 1m
-      memory: 4Mi
+      memory: 3Mi
     limits:
-      cpu: 1m
+      cpu: 3m
       memory: 8Mi

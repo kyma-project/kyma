@@ -2,24 +2,24 @@ web:
   console:
     resources:
       requests:
-        cpu: 10m
-        memory: 32Mi
+        cpu: 2m
+        memory: 2Mi
       limits:
         cpu: 15m
-        memory: 64Mi
+        memory: 32Mi
   core-ui:
     resources:
       requests:
-        cpu: 10m
-        memory: 64Mi
+        cpu: 2m
+        memory: 16Mi
       limits:
         cpu: 20m
-        memory: 128Mi
+        memory: 64Mi
 backend:
   resources:
     requests:
-      cpu: 30m
-      memory: 64Mi
+      cpu: 5m
+      memory: 40Mi
     limits:
-      cpu: 60m
-      memory: 200Mi
+      cpu: 20m
+      memory: 100Mi

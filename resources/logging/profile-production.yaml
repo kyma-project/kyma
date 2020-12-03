@@ -12,7 +12,7 @@ logui:
   resources: 
     requests:
       cpu: 1m
-      memory: 8Mi
+      memory: 3Mi
     limits:
-      cpu: 2m
+      cpu: 4m
       memory: 16Mi

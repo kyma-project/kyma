@@ -11,7 +11,7 @@ service-catalog-ui:
   resources: 
     requests:
       cpu: 1m
-      memory: 32Mi
+      memory: 16Mi
     limits:
-      cpu: 2m
-      memory: 64Mi
+      cpu: 4m
+      memory: 32Mi
