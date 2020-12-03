@@ -71,6 +71,7 @@ spec:
             name: http-api-port
 {{- end }}
 ---
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -135,3 +136,4 @@ spec:
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
+{{- end }}

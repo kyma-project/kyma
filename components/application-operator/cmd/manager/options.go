@@ -22,6 +22,7 @@ type options struct {
 	healthPort                            string
 	helmDriver                            string
 	profile                               string
+	isBEBEnabled                          bool
 }
 
 func parseArgs() *options {
@@ -41,8 +42,9 @@ func parseArgs() *options {
 	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
 	profile := flag.String("profile", "", "Profile name")
+	isBEBEnabled := flag.Bool("isBEBEnabled", false, "Toggles creation of eventing infrastructure based on BEB if BEB is enabled")
 
-	flag.Parse()
+  flag.Parse()
 
 	return &options{
 		appName:                               *appName,
@@ -60,6 +62,7 @@ func parseArgs() *options {
 		healthPort:                            *healthPort,
 		helmDriver:                            *helmDriver,
 		profile:                               *profile,
+		isBEBEnabled:                          *isBEBEnabled,
 	}
 }
 
@@ -67,9 +70,9 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s"+
 		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
 		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
-		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s",
+		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s --isBEBEnabled=%v",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
-		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile)
-}
+		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile, o.isBEBEnabled)
+ }
