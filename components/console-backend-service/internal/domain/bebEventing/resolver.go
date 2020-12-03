@@ -46,7 +46,20 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 		Value:    "source",
 	}
 
-	filters := []
+	eventType := v1alpha1.Filter{
+		Type:     "exact",
+		Property: "sap.kyma.custom.varkes.quote.orderplaced.v1", //TODO
+		Value:    "type",
+	}
+
+	filter := &v1alpha1.BebFilter{
+		EventSource: &eventSource,
+		EventType:   &eventType,
+	}
+
+	filters := []*v1alpha1.BebFilter{
+		filter,
+	}
 
 	bebFilters := &v1alpha1.BebFilters{
 		Dialect: "beb,",
