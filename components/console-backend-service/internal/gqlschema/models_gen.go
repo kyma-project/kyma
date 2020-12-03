@@ -285,9 +285,20 @@ type EventActivationEvent struct {
 	Schema      JSON   `json:"schema"`
 }
 
+type EventSubscriptionSpecInput struct {
+	Filters     []*FiltersInput `json:"filters"`
+	ServiceName string          `json:"serviceName"`
+}
+
 type File struct {
 	URL      string `json:"url"`
 	Metadata JSON   `json:"metadata"`
+}
+
+type FiltersInput struct {
+	ApplicationName string `json:"applicationName"`
+	Version         string `json:"version"`
+	EventName       string `json:"eventName"`
 }
 
 type Function struct {

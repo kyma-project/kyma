@@ -655,7 +655,7 @@ type ComplexityRoot struct {
 		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters JSON) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		CreateServiceInstance                      func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
-		CreateSubscription                         func(childComplexity int, name string, namespace string, params v1alpha13.SubscriptionSpec) int
+		CreateSubscription                         func(childComplexity int, name string, namespace string, params EventSubscriptionSpecInput) int
 		CreateTrigger                              func(childComplexity int, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) int
 		DeleteAPIRule                              func(childComplexity int, name string, namespace string) int
 		DeleteAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
@@ -1337,7 +1337,7 @@ type MutationResolver interface {
 	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	CreateSubscription(ctx context.Context, name string, namespace string, params v1alpha13.SubscriptionSpec) (*v1alpha13.Subscription, error)
+	CreateSubscription(ctx context.Context, name string, namespace string, params EventSubscriptionSpecInput) (*v1alpha13.Subscription, error)
 	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha14.Trigger, error)
 	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha14.Trigger, error)
 	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha14.Trigger, error)
@@ -3912,7 +3912,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateSubscription(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha13.SubscriptionSpec)), true
+		return e.complexity.Mutation.CreateSubscription(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(EventSubscriptionSpecInput)), true
 
 	case "Mutation.createTrigger":
 		if e.complexity.Mutation.CreateTrigger == nil {
@@ -7415,46 +7415,48 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
     value: String
 }
 
-
-input EventSubscriptionSpecInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionSpec") {
-    filter: BebFiltersInput!
-    id: String
-    protocol: String
-    protocolSettings: ProtocolSettingsInput
-    sink: String
+input EventSubscriptionSpecInput {
+    filters: [FiltersInput!]!
+    serviceName: String!
 }
 
-input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
-    contentMode: String
-    exemptHandshake: Boolean
-    qos: String
-    webhookAuth: WebhookAuthInput
+input FiltersInput {
+    applicationName: String!
+    version: String!
+    eventName: String!
 }
 
-input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
-    clientId: String
-    clientSecret: String
-    grantType: String
-    scope: [String!]
-    tokenUrl: String
-    type: String!
-}
+#input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
+#    contentMode: String
+#    exemptHandshake: Boolean
+#    qos: String
+#    webhookAuth: WebhookAuthInput
+#}
 
-input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
-    dialect: String!
-    filters: [BebFilterInput!]!
-}
+#input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
+#    clientId: String
+#    clientSecret: String
+#    grantType: String
+#    scope: [String!]
+#    tokenUrl: String
+#    type: String!
+#}
 
-input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
-    eventSource: FilterInput
-    eventType: FilterInput
-}
+#input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
+#    dialect: String!
+#    filters: [BebFilterInput!]!
+#}
 
-input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
-    property: String
-    type: String!
-    value: String
-}
+#input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
+#    eventSource: FilterInput
+#    github.com/sap/xf-addons//addons/index.yaml?ref=0.11
+#}
+
+#input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
+#    property: String
+#    type: String!
+#    value: String
+#}
 
 type EventSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionStatus") {
     apiRuleName: String
@@ -9781,9 +9783,9 @@ func (ec *executionContext) field_Mutation_createSubscription_args(ctx context.C
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 v1alpha13.SubscriptionSpec
+	var arg2 EventSubscriptionSpecInput
 	if tmp, ok := rawArgs["params"]; ok {
-		arg2, err = ec.unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx, tmp)
+		arg2, err = ec.unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐEventSubscriptionSpecInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -25721,7 +25723,7 @@ func (ec *executionContext) _Mutation_createSubscription(ctx context.Context, fi
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateSubscription(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha13.SubscriptionSpec))
+			return ec.resolvers.Mutation().CreateSubscription(rctx, args["name"].(string), args["namespace"].(string), args["params"].(EventSubscriptionSpecInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "create"})
@@ -41997,54 +41999,6 @@ func (ec *executionContext) unmarshalInputAddonsConfigurationRepositoryInput(ctx
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputBebFilterInput(ctx context.Context, obj interface{}) (v1alpha13.BebFilter, error) {
-	var it v1alpha13.BebFilter
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "eventSource":
-			var err error
-			it.EventSource, err = ec.unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "eventType":
-			var err error
-			it.EventType, err = ec.unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputBebFiltersInput(ctx context.Context, obj interface{}) (v1alpha13.BebFilters, error) {
-	var it v1alpha13.BebFilters
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "dialect":
-			var err error
-			it.Dialect, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "filters":
-			var err error
-			it.Filters, err = ec.unmarshalNBebFilterInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputClusterRoleBindingInput(ctx context.Context, obj interface{}) (ClusterRoleBindingInput, error) {
 	var it ClusterRoleBindingInput
 	var asMap = obj.(map[string]interface{})
@@ -42123,39 +42077,21 @@ func (ec *executionContext) unmarshalInputEnvPrefixInput(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context.Context, obj interface{}) (v1alpha13.SubscriptionSpec, error) {
-	var it v1alpha13.SubscriptionSpec
+func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context.Context, obj interface{}) (EventSubscriptionSpecInput, error) {
+	var it EventSubscriptionSpecInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "filter":
+		case "filters":
 			var err error
-			it.Filter, err = ec.unmarshalNBebFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx, v)
+			it.Filters, err = ec.unmarshalNFiltersInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "id":
+		case "serviceName":
 			var err error
-			it.ID, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "protocol":
-			var err error
-			it.Protocol, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "protocolSettings":
-			var err error
-			it.ProtocolSettings, err = ec.unmarshalOProtocolSettingsInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "sink":
-			var err error
-			it.Sink, err = ec.unmarshalOString2string(ctx, v)
+			it.ServiceName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42165,27 +42101,27 @@ func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputFilterInput(ctx context.Context, obj interface{}) (v1alpha13.Filter, error) {
-	var it v1alpha13.Filter
+func (ec *executionContext) unmarshalInputFiltersInput(ctx context.Context, obj interface{}) (FiltersInput, error) {
+	var it FiltersInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "property":
+		case "applicationName":
 			var err error
-			it.Property, err = ec.unmarshalOString2string(ctx, v)
+			it.ApplicationName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "type":
+		case "version":
 			var err error
-			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			it.Version, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "value":
+		case "eventName":
 			var err error
-			it.Value, err = ec.unmarshalOString2string(ctx, v)
+			it.EventName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42570,42 +42506,6 @@ func (ec *executionContext) unmarshalInputOwnerReference(ctx context.Context, ob
 		case "UID":
 			var err error
 			it.UID, err = ec.unmarshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputProtocolSettingsInput(ctx context.Context, obj interface{}) (v1alpha13.ProtocolSettings, error) {
-	var it v1alpha13.ProtocolSettings
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "contentMode":
-			var err error
-			it.ContentMode, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "exemptHandshake":
-			var err error
-			it.ExemptHandshake, err = ec.unmarshalOBoolean2bool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "qos":
-			var err error
-			it.Qos, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "webhookAuth":
-			var err error
-			it.WebhookAuth, err = ec.unmarshalOWebhookAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43056,54 +42956,6 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 		case "subscriber":
 			var err error
 			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputWebhookAuthInput(ctx context.Context, obj interface{}) (v1alpha13.WebhookAuth, error) {
-	var it v1alpha13.WebhookAuth
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "clientId":
-			var err error
-			it.ClientId, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "clientSecret":
-			var err error
-			it.ClientSecret, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "grantType":
-			var err error
-			it.GrantType, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "scope":
-			var err error
-			it.Scope, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "tokenUrl":
-			var err error
-			it.TokenUrl, err = ec.unmarshalOString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "type":
-			var err error
-			it.Type, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -51260,38 +51112,6 @@ func (ec *executionContext) marshalNBebFilter2ᚖgithubᚗcomᚋkymaᚑproject�
 	return ec._BebFilter(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNBebFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, v interface{}) (v1alpha13.BebFilter, error) {
-	return ec.unmarshalInputBebFilterInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNBebFilterInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilterᚄ(ctx context.Context, v interface{}) ([]*v1alpha13.BebFilter, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*v1alpha13.BebFilter, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNBebFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNBebFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx context.Context, v interface{}) (*v1alpha13.BebFilter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNBebFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilter(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) marshalNBebFilters2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, sel ast.SelectionSet, v v1alpha13.BebFilters) graphql.Marshaler {
 	return ec._BebFilters(ctx, sel, &v)
 }
@@ -51304,18 +51124,6 @@ func (ec *executionContext) marshalNBebFilters2ᚖgithubᚗcomᚋkymaᚑproject�
 		return graphql.Null
 	}
 	return ec._BebFilters(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNBebFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, v interface{}) (v1alpha13.BebFilters, error) {
-	return ec.unmarshalInputBebFiltersInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNBebFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx context.Context, v interface{}) (*v1alpha13.BebFilters, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNBebFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐBebFilters(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalNBindableResourcesOutputItem2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐBindableResourcesOutputItem(ctx context.Context, sel ast.SelectionSet, v BindableResourcesOutputItem) graphql.Marshaler {
@@ -52334,7 +52142,7 @@ func (ec *executionContext) marshalNEventSubscriptionSpec2githubᚗcomᚋkymaᚑ
 	return ec._EventSubscriptionSpec(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscriptionSpec(ctx context.Context, v interface{}) (v1alpha13.SubscriptionSpec, error) {
+func (ec *executionContext) unmarshalNEventSubscriptionSpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐEventSubscriptionSpecInput(ctx context.Context, v interface{}) (EventSubscriptionSpecInput, error) {
 	return ec.unmarshalInputEventSubscriptionSpecInput(ctx, v)
 }
 
@@ -52391,6 +52199,38 @@ func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋkymaᚑprojectᚋkyma
 		return graphql.Null
 	}
 	return ec._File(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInput(ctx context.Context, v interface{}) (FiltersInput, error) {
+	return ec.unmarshalInputFiltersInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNFiltersInput2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInputᚄ(ctx context.Context, v interface{}) ([]*FiltersInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*FiltersInput, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNFiltersInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInput(ctx context.Context, v interface{}) (*FiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNFiltersInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFiltersInput(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalNFunction2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunction(ctx context.Context, sel ast.SelectionSet, v Function) graphql.Marshaler {
@@ -55838,18 +55678,6 @@ func (ec *executionContext) marshalOFilter2ᚖgithubᚗcomᚋkymaᚑprojectᚋky
 	return ec._Filter(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, v interface{}) (v1alpha13.Filter, error) {
-	return ec.unmarshalInputFilterInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOFilterInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx context.Context, v interface{}) (*v1alpha13.Filter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOFilterInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐFilter(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) marshalOFunction2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunction(ctx context.Context, sel ast.SelectionSet, v Function) graphql.Marshaler {
 	return ec._Function(ctx, sel, &v)
 }
@@ -56259,18 +56087,6 @@ func (ec *executionContext) marshalOProtocolSettings2ᚖgithubᚗcomᚋkymaᚑpr
 	return ec._ProtocolSettings(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOProtocolSettingsInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, v interface{}) (v1alpha13.ProtocolSettings, error) {
-	return ec.unmarshalInputProtocolSettingsInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOProtocolSettingsInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx context.Context, v interface{}) (*v1alpha13.ProtocolSettings, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOProtocolSettingsInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐProtocolSettings(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) marshalOReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
 	return ec._ReplicaSet(ctx, sel, &v)
 }
@@ -56647,18 +56463,6 @@ func (ec *executionContext) marshalOWebhookAuth2ᚖgithubᚗcomᚋkymaᚑproject
 		return graphql.Null
 	}
 	return ec._WebhookAuth(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOWebhookAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, v interface{}) (v1alpha13.WebhookAuth, error) {
-	return ec.unmarshalInputWebhookAuthInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOWebhookAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx context.Context, v interface{}) (*v1alpha13.WebhookAuth, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOWebhookAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐWebhookAuth(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

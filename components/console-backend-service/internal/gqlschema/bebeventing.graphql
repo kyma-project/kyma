@@ -49,46 +49,48 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
     value: String
 }
 
-
-input EventSubscriptionSpecInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionSpec") {
-    filter: BebFiltersInput!
-    id: String
-    protocol: String
-    protocolSettings: ProtocolSettingsInput
-    sink: String
+input EventSubscriptionSpecInput {
+    filters: [FiltersInput!]!
+    serviceName: String!
 }
 
-input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
-    contentMode: String
-    exemptHandshake: Boolean
-    qos: String
-    webhookAuth: WebhookAuthInput
+input FiltersInput {
+    applicationName: String!
+    version: String!
+    eventName: String!
 }
 
-input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
-    clientId: String
-    clientSecret: String
-    grantType: String
-    scope: [String!]
-    tokenUrl: String
-    type: String!
-}
+#input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
+#    contentMode: String
+#    exemptHandshake: Boolean
+#    qos: String
+#    webhookAuth: WebhookAuthInput
+#}
 
-input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
-    dialect: String!
-    filters: [BebFilterInput!]!
-}
+#input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
+#    clientId: String
+#    clientSecret: String
+#    grantType: String
+#    scope: [String!]
+#    tokenUrl: String
+#    type: String!
+#}
 
-input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
-    eventSource: FilterInput
-    eventType: FilterInput
-}
+#input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
+#    dialect: String!
+#    filters: [BebFilterInput!]!
+#}
 
-input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
-    property: String
-    type: String!
-    value: String
-}
+#input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
+#    eventSource: FilterInput
+#    github.com/sap/xf-addons//addons/index.yaml?ref=0.11
+#}
+
+#input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
+#    property: String
+#    type: String!
+#    value: String
+#}
 
 type EventSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionStatus") {
     apiRuleName: String

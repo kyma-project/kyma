@@ -6,10 +6,11 @@ package domain
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-func (r *mutationResolver) CreateSubscription(ctx context.Context, name string, namespace string, params v1alpha1.SubscriptionSpec) (*v1alpha1.Subscription, error) {
+func (r *mutationResolver) CreateSubscription(ctx context.Context, name string, namespace string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
 	return r.bebEventing.CreateEventSubscription(ctx, namespace, name, params)
 }
 
