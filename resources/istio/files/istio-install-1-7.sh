@@ -19,4 +19,7 @@ echo "Apply custom kyma manifests"
 kubectl apply -f /etc/manifests
 
 echo "Apply Kyma related checks and patches"
-kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/-","value":{"key":"gardener.cloud/purpose","operator":"NotIn","values":["kube-system"]}},{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/-","value":{"key":"name","operator":"NotIn","values":["kube-system"]}}]'
+kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/-","value":{"key":"gardener.cloud/purpose","operator":"NotIn","values":["kube-system"]}}'
+
+echo "patching namespace selector of mutating webhook istio-sidecar-injector with kube-system"
+kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/0/values/-","value": "kube-system"}]'
