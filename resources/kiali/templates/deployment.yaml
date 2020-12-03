@@ -137,7 +137,7 @@ spec:
         configMap:
           name: {{ include "kiali-server.fullname" . }}-cabundle
       {{- end }}
-      {{- if or (.Values.kiali.spec.deployment.affinity.node) (or (.Values.kiali.spec.deployment.pod) (.Values.kiali.spec.deployment.pod_anti)) }}
+      {{- if or (.Values.kiali.spec.deployment.affinity.node) (or (.Values.kiali.spec.deployment.affinity.pod) (.Values.kiali.spec.deployment.affinity.pod_anti)) }}
       affinity:
         {{- if .Values.kiali.spec.deployment.affinity.node }}
         nodeAffinity:
