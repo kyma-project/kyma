@@ -29,25 +29,7 @@ func (r *Resolver) EventSubscriptionsQuery(ctx context.Context, namespace string
 }
 
 func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string,  name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
-	protocolSettings := &v1alpha1.ProtocolSettings{
-		ContentMode:     "",
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST-ONCE",
-		WebhookAuth:     nil,
-	}
-
-	bebFilters := &v1alpha1.BebFilters{
-		Dialect: "beb,",
-		Filters: r.createBebFilters(params.Filters),
-	}
-
-	spec := v1alpha1.SubscriptionSpec{
-		Protocol:         "BEB",
-		ProtocolSettings: protocolSettings,
-		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.ServiceName, namespace),
-		Filter:           bebFilters,
-	}
-
+	spec := r.createSpec(params, namespace)
 
 	eventSubscription := &v1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -61,8 +43,8 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 				{
 					APIVersion: "serverless.kyma-project.io/v1alpha1",
 					Kind:       "Function",
-					UID: 		params.Function.ID,
-					Name: 		params.Function.Name,
+					UID:        params.Function.ID,
+					Name:       params.Function.Name,
 				},
 			},
 		},
@@ -71,6 +53,15 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 
 	result := &v1alpha1.Subscription{}
 	err := r.Service().Create(eventSubscription, result)
+	return result, err
+}
+
+func (r *Resolver) UpdateEventSubscription(ctx context.Context, namespace string,  name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
+	result := &v1alpha1.Subscription{}
+	err := r.Service().UpdateInNamespace(name, namespace, result, func() error {
+		result.Spec = r.createSpec(params, namespace)
+		return nil
+	})
 	return result, err
 }
 
@@ -98,6 +89,28 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace str
 	}()
 
 	return channel, nil
+}
+
+func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, namespace string) v1alpha1.SubscriptionSpec {
+	protocolSettings := &v1alpha1.ProtocolSettings{
+		ContentMode:     "",
+		ExemptHandshake: true,
+		Qos:             "AT-LEAST-ONCE",
+		WebhookAuth:     nil,
+	}
+
+	bebFilters := &v1alpha1.BebFilters{
+		Dialect: "beb,",
+		Filters: r.createBebFilters(params.Filters),
+	}
+
+	spec := v1alpha1.SubscriptionSpec{
+		Protocol:         "BEB",
+		ProtocolSettings: protocolSettings,
+		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.ServiceName, namespace),
+		Filter:           bebFilters,
+	}
+	return spec
 }
 
 func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput) []*v1alpha1.BebFilter {

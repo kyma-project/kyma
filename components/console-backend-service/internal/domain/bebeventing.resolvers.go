@@ -13,6 +13,10 @@ func (r *mutationResolver) CreateSubscription(ctx context.Context, name string, 
 	return r.bebEventing.CreateEventSubscription(ctx, namespace, name, params)
 }
 
+func (r *mutationResolver) UpdateSubscription(ctx context.Context, name string, namespace string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
+	return r.bebEventing.UpdateEventSubscription(ctx, namespace, name, params)
+}
+
 func (r *mutationResolver) DeleteSubscription(ctx context.Context, name string, namespace string) (*v1alpha1.Subscription, error) {
 	return r.bebEventing.DeleteEventSubscription(ctx, namespace, name)
 }
