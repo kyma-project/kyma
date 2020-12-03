@@ -1,3 +1,14 @@
+{{- /*
+  Customization: Some changes are made to the default label set.
+  Added labels recommended by Kubernetes and Helm:
+    helm.sh/chart
+    app.kubernetes.io/managed-by
+    app.kubernetes.io/name
+    app.kubernetes.io/instance
+  Removed labels:
+    heritage
+*/ -}}
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
@@ -38,6 +49,14 @@ chart: {{ template "prometheus-node-exporter.chart" . }}
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "prometheus-node-exporter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-node-exporter.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "prometheus-node-exporter.chart" -}}
@@ -65,12 +84,4 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
   {{- else -}}
     {{- .Release.Namespace -}}
   {{- end -}}
-{{- end -}}
-
-{{/*
-Selector labels
-*/}}
-{{- define "prometheus-node-exporter.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "prometheus-node-exporter.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

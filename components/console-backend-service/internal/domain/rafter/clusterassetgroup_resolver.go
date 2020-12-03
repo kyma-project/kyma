@@ -28,6 +28,8 @@ func newClusterAssetGroupResolver(clusterAssetGroupService clusterAssetGroupSvc,
 	}
 }
 
+// possibly not used anymore after removing content-ui from the Console
+// this query is to be deleted during the Rafter removal
 func (r *clusterAssetGroupResolver) ClusterAssetGroupsQuery(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
 	items, err := r.clusterAssetGroupService.List(viewContext, groupName)
 	if err != nil {

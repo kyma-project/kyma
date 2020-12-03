@@ -16,9 +16,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: 6fd499b9
-    tag16: fb388134
-    tag17: f93bf007
+    tag: f93bf007
 
 monitoring:
   enabled: true
@@ -36,3 +34,6 @@ test:
     labels:
       integration: true
       after-upgrade: true
+
+istio_operator_cluster_file: istio-operator-1-7-cluster.yaml
+istio_operator_minikube_file: istio-operator-1-7-minikube.yaml
