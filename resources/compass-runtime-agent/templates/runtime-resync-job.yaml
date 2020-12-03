@@ -1,20 +1,3 @@
-# Migrate app-connector-certs for cacert value
-# This script is meant to fix problem with api empty gateway cert that remains after migration to from Kyma 1.16 to Kyma 1.17
-#
-#  Compass Runtime Agent while establishing SKR connection with management plane fills certificate for API gateway by
-#  setting cacert filed in secret
-#
-#  In 1.16 secret name is kyma-gatewy-certs-cacert
-#  W 1.17 secret name is app-connector-certs
-#
-# During upgrade:
-#  1. New secret is created app-connector-certs the old one kyma-gatewy-certs-cacert is going to dissapear
-#  2. Helm updates deployment of Compass Runtime Agent, and new secret is set as APP_CA_CERTIFICATES_SECRET kyma-gatewy-certs-cacert -> app-connector-certs
-#
-#  Secret app-connector-certs has initially empty field cacert.
-#  So during upgrade in our job we should pass cacert value from old secret kyma-gatewy-certs-cacert into new secret app-connector-certs
-#
-#  Currently is will be populated only after new connection with Compass is established
 ---
 apiVersion: batch/v1
 kind: Job
@@ -22,6 +5,7 @@ metadata:
   name: {{ .Chart.Name }}-runtime-resync-job
   namespace: {{ .Release.Namespace }}
   annotations:
+    helm.sh/hook-weight: "1"
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
@@ -33,7 +17,7 @@ spec:
   template:
     metadata:
       name: {{ .Chart.Name }}-runtime-resync-job
-      namespace: {{ .Values.global.namespace }}
+      namespace: {{ .Release.Namespace }}
       annotations:
         sidecar.istio.io/inject: “false”
       labels:
@@ -48,10 +32,11 @@ spec:
         - name: {{ .Chart.Name }}-runtime-resync-job
           image:  eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
-            - /bin/sh
+            - /bin/bash
             - -c
           args:
             - |
+              set -e
               kubectl patch compassconnection compass-connection --type=merge -p '{"spec":{"refreshCredentialsNow":true}}'
 
 ---
@@ -59,25 +44,37 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Chart.Name }}-runtime-resync
-  namespace:  istio-system
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}-runtime-resync
-  namespace: istio-system
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 rules:
   - apiGroups: ["compass.kyma-project.io"]
     resources: ["compassconnections"]
     verbs: ["create", "get", "list", "update", "delete", "watch", "patch"]
-
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ .Chart.Name }}-runtime-resync
-  namespace: istio-system
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: pre-upgrade, post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -85,4 +82,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-runtime-resync
-    namespace: istio-system
+    namespace: {{ .Release.Namespace }}
