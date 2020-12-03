@@ -44,7 +44,7 @@ func parseArgs() *options {
 	profile := flag.String("profile", "", "Profile name")
 	isBEBEnabled := flag.Bool("isBEBEnabled", false, "Toggles creation of eventing infrastructure based on BEB if BEB is enabled")
 
-  flag.Parse()
+	flag.Parse()
 
 	return &options{
 		appName:                               *appName,
@@ -75,4 +75,4 @@ func (o *options) String() string {
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
 		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile, o.isBEBEnabled)
- }
+}
