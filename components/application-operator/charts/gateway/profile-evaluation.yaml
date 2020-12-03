@@ -1,4 +1,3 @@
----
 deployment:
   resources:
     limits:
