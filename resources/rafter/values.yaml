@@ -9,6 +9,7 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
