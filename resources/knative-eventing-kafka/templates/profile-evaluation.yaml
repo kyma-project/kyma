@@ -1,0 +1,3 @@
+dispatcher:
+  memoryRequest: 25Mi
+  cpuRequest: 50m
