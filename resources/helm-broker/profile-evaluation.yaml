@@ -33,5 +33,5 @@ addons-ui:
       cpu: 1m
       memory: 16Mi
     limits:
-      cpu: 3m
+      cpu: 30m
       memory: 32Mi

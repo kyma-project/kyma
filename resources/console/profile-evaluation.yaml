@@ -5,7 +5,7 @@ web:
         cpu: 2m
         memory: 2Mi
       limits:
-        cpu: 5m
+        cpu: 40m
         memory: 16Mi
   core-ui:
     resources:
@@ -13,7 +13,7 @@ web:
         cpu: 2m
         memory: 16Mi
       limits:
-        cpu: 10m
+        cpu: 40m
         memory: 32Mi
 backend:
   resources:
@@ -21,5 +21,5 @@ backend:
       cpu: 2m
       memory: 40Mi
     limits:
-      cpu: 10m
+      cpu: 50m
       memory: 80Mi
