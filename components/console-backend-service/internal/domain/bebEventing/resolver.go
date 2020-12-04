@@ -40,12 +40,7 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 			Name:      name,
 			Namespace: namespace,
 			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: "serverless.kyma-project.io/v1alpha1",
-					Kind:       "Function",
-					UID:        params.Function.ID,
-					Name:       params.Function.Name,
-				},
+				*params.OwnerRef,
 			},
 		},
 		Spec: spec,
@@ -107,7 +102,7 @@ func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, names
 	spec := v1alpha1.SubscriptionSpec{
 		Protocol:         "BEB",
 		ProtocolSettings: protocolSettings,
-		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.ServiceName, namespace),
+		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.OwnerRef.Name, namespace),
 		Filter:           bebFilters,
 	}
 	return spec

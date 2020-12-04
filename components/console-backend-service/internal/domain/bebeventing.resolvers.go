@@ -5,6 +5,7 @@ package domain
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )

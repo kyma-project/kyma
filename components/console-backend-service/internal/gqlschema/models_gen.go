@@ -12,9 +12,9 @@ import (
 	v1alpha12 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	"k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/types"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	v11 "knative.dev/pkg/apis/duck/v1"
+	v12 "knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -288,9 +288,8 @@ type EventActivationEvent struct {
 }
 
 type EventSubscriptionSpecInput struct {
-	Filters     []*FiltersInput `json:"filters"`
-	ServiceName string          `json:"serviceName"`
-	Function    *FunctionInput  `json:"function"`
+	Filters  []*FiltersInput     `json:"filters"`
+	OwnerRef *v11.OwnerReference `json:"ownerRef"`
 }
 
 type File struct {
@@ -351,11 +350,6 @@ type FunctionEnvValueFromInput struct {
 type FunctionEvent struct {
 	Type     SubscriptionEventType `json:"type"`
 	Function *Function             `json:"function"`
-}
-
-type FunctionInput struct {
-	ID   types.UID `json:"id"`
-	Name string    `json:"name"`
 }
 
 type FunctionMetadata struct {
@@ -717,7 +711,7 @@ type ServiceStatus struct {
 }
 
 type SubscriberInput struct {
-	Ref  *v11.KReference `json:"ref"`
+	Ref  *v12.KReference `json:"ref"`
 	Port *uint32         `json:"port"`
 	Path *string         `json:"path"`
 }

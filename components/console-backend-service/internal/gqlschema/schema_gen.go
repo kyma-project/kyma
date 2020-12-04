@@ -7478,13 +7478,7 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
 
 input EventSubscriptionSpecInput {
     filters: [FiltersInput!]!
-    serviceName: String!
-    function: FunctionInput!
-}
-
-input FunctionInput {
-    id: UID!
-    name: String!
+    ownerRef: OwnerReference!
 }
 
 input FiltersInput {
@@ -7492,38 +7486,6 @@ input FiltersInput {
     version: String!
     eventName: String!
 }
-
-#input ProtocolSettingsInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
-#    contentMode: String
-#    exemptHandshake: Boolean
-#    qos: String
-#    webhookAuth: WebhookAuthInput
-#}
-
-#input WebhookAuthInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
-#    clientId: String
-#    clientSecret: String
-#    grantType: String
-#    scope: [String!]
-#    tokenUrl: String
-#    type: String!
-#}
-
-#input BebFiltersInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
-#    dialect: String!
-#    filters: [BebFilterInput!]!
-#}
-
-#input BebFilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
-#    eventSource: FilterInput
-#    github.com/sap/xf-addons//addons/index.yaml?ref=0.11
-#}
-
-#input FilterInput @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
-#    property: String
-#    type: String!
-#    value: String
-#}
 
 type EventSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionStatus") {
     apiRuleName: String
@@ -7626,15 +7588,6 @@ input TriggerCreateInput {
     broker: String!
     filterAttributes: JSON
     subscriber: SubscriberInput!
-}
-
-input OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
-    apiVersion: String!
-    blockOwnerDeletion: Boolean
-    controller: Boolean
-    kind: String!
-    name: String!
-    UID: UID!
 }
 
 type TriggerEvent {
@@ -7954,6 +7907,14 @@ scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/consol
 scalar UID @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.UID")
 scalar URI @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.URI")
 
+input OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: UID!
+}
 
 input ResourceValuesInput {
   memory: String
@@ -42501,15 +42462,9 @@ func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context
 			if err != nil {
 				return it, err
 			}
-		case "serviceName":
+		case "ownerRef":
 			var err error
-			it.ServiceName, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "function":
-			var err error
-			it.Function, err = ec.unmarshalNFunctionInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx, v)
+			it.OwnerRef, err = ec.unmarshalNOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42606,30 +42561,6 @@ func (ec *executionContext) unmarshalInputFunctionEnvValueFromInput(ctx context.
 		case "optional":
 			var err error
 			it.Optional, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputFunctionInput(ctx context.Context, obj interface{}) (FunctionInput, error) {
-	var it FunctionInput
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-			it.ID, err = ec.unmarshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "name":
-			var err error
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -52868,18 +52799,6 @@ func (ec *executionContext) marshalNFunctionEvent2ᚖgithubᚗcomᚋkymaᚑproje
 		return graphql.Null
 	}
 	return ec._FunctionEvent(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNFunctionInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx context.Context, v interface{}) (FunctionInput, error) {
-	return ec.unmarshalInputFunctionInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNFunctionInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx context.Context, v interface{}) (*FunctionInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNFunctionInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionInput(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalNFunctionMetadata2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionMetadata(ctx context.Context, sel ast.SelectionSet, v FunctionMetadata) graphql.Marshaler {
