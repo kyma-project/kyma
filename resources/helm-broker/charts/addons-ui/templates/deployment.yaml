@@ -27,6 +27,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
           ports:
           - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
