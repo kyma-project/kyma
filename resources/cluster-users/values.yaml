@@ -80,11 +80,8 @@ clusterRoles:
       - "get"
       - "list"
 global:
-  # groups for Kyma runtime e.g. for UAA integration or RBAC group bindings
-  # BE AWARE: If you are changing the name here then you need to adjust also
-  # values.yaml in `uaa-activator` chart.
   kymaRuntime:
-    # Note that admin is not deleted although uaa-activator does not have it
+    # Note that admin is not deleted although XSUAA role list does not have it
     # Because it is also used in RBAC bindings but will not be available in the XSUAA role list
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator
