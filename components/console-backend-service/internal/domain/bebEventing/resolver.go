@@ -3,6 +3,7 @@ package bebEventing
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,19 +17,13 @@ func (l *EventSubscriptionList) Append() interface{} {
 	return e
 }
 
-func (r *Resolver) EventSubscriptionQuery(ctx context.Context, namespace string, name string) (*v1alpha1.Subscription, error) {
-	var result *v1alpha1.Subscription
-	err := r.Service().GetInNamespace(name, namespace, &result)
-	return result, err
-}
-
-func (r *Resolver) EventSubscriptionsQuery(ctx context.Context, namespace string) ([]*v1alpha1.Subscription, error) {
+func (r *Resolver) EventSubscriptionsQuery(ctx context.Context, ownerName string, namespace string) ([]*v1alpha1.Subscription, error) {
 	items := EventSubscriptionList{}
-	err := r.Service().ListInNamespace(namespace, &items)
+	err := r.Service().ListByIndex(eventSubscriptionServiceIndex, eventSubscriptionServiceIndexKey(namespace, ownerName), &items)
 	return items, err
 }
 
-func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string,  name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
+func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string, name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
 	spec := r.createSpec(params, namespace)
 
 	eventSubscription := &v1alpha1.Subscription{
@@ -51,7 +46,7 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 	return result, err
 }
 
-func (r *Resolver) UpdateEventSubscription(ctx context.Context, namespace string,  name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
+func (r *Resolver) UpdateEventSubscription(ctx context.Context, namespace string, name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
 	result := &v1alpha1.Subscription{}
 	err := r.Service().UpdateInNamespace(name, namespace, result, func() error {
 		result.Spec = r.createSpec(params, namespace)

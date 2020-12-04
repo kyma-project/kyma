@@ -14,7 +14,7 @@ func New(factory *resource.GenericServiceFactory) *Resolver {
 	})
 
 	return &Resolver{
-		Module:       module,
+		Module: module,
 	}
 }
 

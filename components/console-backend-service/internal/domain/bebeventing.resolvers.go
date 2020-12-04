@@ -22,12 +22,8 @@ func (r *mutationResolver) DeleteSubscription(ctx context.Context, name string, 
 	return r.bebEventing.DeleteEventSubscription(ctx, namespace, name)
 }
 
-func (r *queryResolver) EventSubscription(ctx context.Context, name string, namespace string) (*v1alpha1.Subscription, error) {
-	return r.bebEventing.EventSubscriptionQuery(ctx, namespace, name)
-}
-
-func (r *queryResolver) EventSubscriptions(ctx context.Context, namespace string) ([]*v1alpha1.Subscription, error) {
-	return r.bebEventing.EventSubscriptionsQuery(ctx, namespace)
+func (r *queryResolver) EventSubscriptions(ctx context.Context, ownerName string, namespace string) ([]*v1alpha1.Subscription, error) {
+	return r.bebEventing.EventSubscriptionsQuery(ctx, ownerName, namespace)
 }
 
 func (r *subscriptionResolver) SubscriptionSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {

@@ -1,8 +1,12 @@
 package bebEventing
 
 import (
+	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -15,12 +19,34 @@ var subscriptionsGroupVersionResource = schema.GroupVersionResource{
 	Resource: "subscriptions",
 }
 
+var eventSubscriptionServiceIndex = "service"
+
+func eventSubscriptionServiceIndexKey(namespace string, serviceName string) string {
+	return namespace + ":" + serviceName
+}
+
 type Service struct {
 	*resource.Service
 }
 
 func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
-	return serviceFactory.ForResource(subscriptionsGroupVersionResource), nil
+	service := serviceFactory.ForResource(subscriptionsGroupVersionResource)
+	err := service.AddIndexers(cache.Indexers{
+		eventSubscriptionServiceIndex: func(obj interface{}) ([]string, error) {
+			subscription := &v1alpha1.Subscription{}
+			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), subscription)
+			if err != nil {
+				return nil, err
+			}
+			if len(subscription.ObjectMeta.OwnerReferences) == 0 {
+				fmt.Println(len(subscription.ObjectMeta.OwnerReferences))
+				fmt.Println(subscription.ObjectMeta.OwnerReferences)
+				return nil, nil
+			}
+			return []string{eventSubscriptionServiceIndexKey(subscription.ObjectMeta.Namespace, subscription.ObjectMeta.OwnerReferences[0].Name)}, nil
+		},
+	})
+	return service, err
 }
 
 func NewEventHandler(channel chan<- *gqlschema.SubscriptionEvent, filter func(subscription v1alpha1.Subscription) bool) resource.EventHandlerProvider {
@@ -49,7 +75,7 @@ func (h *EventHandler) ShouldNotify() bool {
 
 func (h *EventHandler) Notify(eventType gqlschema.SubscriptionEventType) {
 	h.channel <- &gqlschema.SubscriptionEvent{
-		Type:    eventType,
+		Type:         eventType,
 		Subscription: h.res,
 	}
 }

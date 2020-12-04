@@ -24,7 +24,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha14 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -826,8 +826,7 @@ type ComplexityRoot struct {
 		ConnectorService            func(childComplexity int, application string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
 		EventActivations            func(childComplexity int, namespace string) int
-		EventSubscription           func(childComplexity int, name string, namespace string) int
-		EventSubscriptions          func(childComplexity int, namespace string) int
+		EventSubscriptions          func(childComplexity int, ownerName string, namespace string) int
 		Function                    func(childComplexity int, name string, namespace string) int
 		Functions                   func(childComplexity int, namespace string) int
 		GitRepositories             func(childComplexity int, namespace string) int
@@ -1425,8 +1424,7 @@ type QueryResolver interface {
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	EventSubscription(ctx context.Context, name string, namespace string) (*v1alpha13.Subscription, error)
-	EventSubscriptions(ctx context.Context, namespace string) ([]*v1alpha13.Subscription, error)
+	EventSubscriptions(ctx context.Context, ownerName string, namespace string) ([]*v1alpha13.Subscription, error)
 	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha14.Trigger, error)
 	LimitRanges(ctx context.Context, namespace string) ([]*v11.LimitRange, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]*v11.ResourceQuota, error)
@@ -5161,18 +5159,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.EventActivations(childComplexity, args["namespace"].(string)), true
 
-	case "Query.eventSubscription":
-		if e.complexity.Query.EventSubscription == nil {
-			break
-		}
-
-		args, err := ec.field_Query_eventSubscription_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.EventSubscription(childComplexity, args["name"].(string), args["namespace"].(string)), true
-
 	case "Query.eventSubscriptions":
 		if e.complexity.Query.EventSubscriptions == nil {
 			break
@@ -5183,7 +5169,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.EventSubscriptions(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Query.EventSubscriptions(childComplexity, args["ownerName"].(string), args["namespace"].(string)), true
 
 	case "Query.function":
 		if e.complexity.Query.Function == nil {
@@ -7519,8 +7505,7 @@ type SubscriptionEvent {
 }
 
 extend type Query {
-    eventSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "get", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    eventSubscriptions(namespace: String!): [EventSubscription!]! @HasAccess(attributes: {resource: "subscriptions", verb: "list", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    eventSubscriptions(ownerName: String!, namespace: String!): [EventSubscription!]! @HasAccess(attributes: {resource: "subscriptions", verb: "list", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -11488,17 +11473,17 @@ func (ec *executionContext) field_Query_eventActivations_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_eventSubscription_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_eventSubscriptions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
+	if tmp, ok := rawArgs["ownerName"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["name"] = arg0
+	args["ownerName"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["namespace"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
@@ -11507,20 +11492,6 @@ func (ec *executionContext) field_Query_eventSubscription_args(ctx context.Conte
 		}
 	}
 	args["namespace"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_eventSubscriptions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg0
 	return args, nil
 }
 
@@ -31794,68 +31765,6 @@ func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.Co
 	return ec.marshalOAPIRule2ᚖgithubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐAPIRule(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_eventSubscription(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_eventSubscription_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().EventSubscription(rctx, args["name"].(string), args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "get"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*v1alpha13.Subscription); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha13.Subscription)
-	fc.Result = res
-	return ec.marshalOEventSubscription2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋeventingᚑcontrollerᚋapiᚋv1alpha1ᚐSubscription(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_eventSubscriptions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -31881,7 +31790,7 @@ func (ec *executionContext) _Query_eventSubscriptions(ctx context.Context, field
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().EventSubscriptions(rctx, args["namespace"].(string))
+			return ec.resolvers.Query().EventSubscriptions(rctx, args["ownerName"].(string), args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "list"})
@@ -48021,17 +47930,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_APIRule(ctx, field)
-				return res
-			})
-		case "eventSubscription":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_eventSubscription(ctx, field)
 				return res
 			})
 		case "eventSubscriptions":

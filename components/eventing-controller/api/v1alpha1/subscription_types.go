@@ -85,7 +85,7 @@ type SubscriptionStatus struct {
 // Subscription is the Schema for the subscriptions API
 type Subscription struct {
 	metav1.TypeMeta   `json:",inline"`
-	metav1.OwbjectMeta `json:"metadata,omitempty"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   SubscriptionSpec   `json:"spec,omitempty"`
 	Status SubscriptionStatus `json:"status,omitempty"`
