@@ -56,8 +56,7 @@ type proxyHandler struct {
 	eventMeshProxy   *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 
-	applicationGetter ApplicationGetter
-	cache             Cache
+	cache Cache
 }
 
 func NewProxyHandler(
@@ -71,7 +70,6 @@ func NewProxyHandler(
 	eventMeshDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
-	applicationGetter ApplicationGetter,
 	cache Cache) *proxyHandler {
 	isBEBEnabled := false
 	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
@@ -93,8 +91,7 @@ func NewProxyHandler(
 		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
-		applicationGetter: applicationGetter,
-		cache:             cache,
+		cache: cache,
 	}
 }
 

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -13,13 +12,9 @@ import (
 	// allow client authentication against GKE clusters
 	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 )
 
 func main() {
@@ -32,12 +27,6 @@ func main() {
 
 	options := parseArgs()
 	log.Infof("Options: %s", options)
-
-	applicationGetter, err := newApplicationGetter()
-	if err != nil {
-		log.Errorf("Failed to create Application Getter: %s", err)
-		os.Exit(1)
-	}
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
@@ -55,7 +44,6 @@ func main() {
 		options.eventMeshDestinationPath,
 		options.appRegistryPathPrefix,
 		options.appRegistryHost,
-		applicationGetter,
 		idCache)
 
 	proxyServer := http.Server{
@@ -86,20 +74,4 @@ func main() {
 	}()
 
 	wg.Wait()
-}
-
-func newApplicationGetter() (validationproxy.ApplicationGetter, apperrors.AppError) {
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return nil, apperrors.Internal("failed to get k8s config: %s", err)
-	}
-
-	applicationClientset, err := versioned.NewForConfig(cfg)
-	if err != nil {
-		return nil, apperrors.Internal("failed to create k8s application client: %s", err)
-	}
-
-	applicationInterface := applicationClientset.ApplicationconnectorV1alpha1().Applications()
-
-	return applicationInterface, nil
 }

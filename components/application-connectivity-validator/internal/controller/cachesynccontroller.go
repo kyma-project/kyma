@@ -74,6 +74,7 @@ func NewController(
 			UpdateFunc: func(old, new interface{}) {
 				controller.enqueueApplication((new))
 			},
+			DeleteFunc: controller.enqueueApplication,
 		})
 
 	return controller
@@ -173,7 +174,6 @@ func (c *Controller) processNextWorkItem() bool {
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		c.workqueue.Forget(obj)
-		log.Infof("Successfully synced '%s'", key)
 		return nil
 	}(obj)
 
@@ -190,9 +190,10 @@ func (c *Controller) syncHandler(key string) error {
 	// Get the Application resource with this namespace/name
 	application, err := c.applicationLister.Get(key)
 	if err != nil {
-		// the Application resource may no longer exist, in which case we stop processing.
+		// the Application resource may no longer exist, in which case we should delete it from cache
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("Application '%s' in work queue no longer exists", key))
+			c.appCache.Delete(key)
+			log.Infof("Deleted the application '%s' from the cache", key)
 			return nil
 		}
 
@@ -201,8 +202,8 @@ func (c *Controller) syncHandler(key string) error {
 
 	//Add or update the cache for Application resource
 	applicationClientIDs := c.getClientIDsFromResource(application)
-	c.appCache.Set(application.Name, applicationClientIDs, gocache.DefaultExpiration)
-
+	c.appCache.Set(application.Name, applicationClientIDs, gocache.NoExpiration)
+	log.Infof("Added/Updated the application '%s' in the cache", key)
 	return nil
 }
 

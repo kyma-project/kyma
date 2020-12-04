@@ -43,7 +43,7 @@ func parseArgs() *options {
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	syncPeriod := flag.Duration("syncPeriod", 60, "Sync period in seconds how often controller should periodically reconcile Application resource.")
+	syncPeriod := flag.Duration("syncPeriod", 120, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
 
