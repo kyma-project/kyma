@@ -329,12 +329,20 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.26.0-cfbe109c"
+      image_version: "1.27.0-85eb5cc7"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
     #    ---
     #    ingress_enabled: true
+    #
+    # Determines which priority levels of log messages Kiali will output.
+    #    ---
+      logger:
+        log_format: "text"
+        log_level: "info"
+        time_field_format: "2006-01-02T15:04:05Z07:00"
+        sampler_rate: "1"
     #
     # The namespace into which Kiali is to be installed. If this is empty or not defined,
     # the default will be the namespace where the Kiali CR is located.
@@ -413,11 +421,6 @@ kiali:
     # See the Kubernetes documentation on Taints and Tolerations for more details.
     #    ---
     #    tolerations: []
-    #
-    # Determines which priority levels of log messages Kiali will output.
-    # Typical values are "3" for INFO and higher priority, "4" for DEBUG and higher priority.
-    #    ---
-      verbose_mode: "3"
     #
     # Kiali resources will be assigned a "version" label when they are deployed.
     # This determines what value those "version" labels will have.

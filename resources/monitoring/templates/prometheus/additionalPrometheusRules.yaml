@@ -1,19 +1,45 @@
+{{- /*
+  Customization: additionalPrometheusRules has to be a multi-line string because of overrides
+*/ -}}
+{{- if or .Values.additionalPrometheusRules .Values.additionalPrometheusRulesMap}}
+apiVersion: v1
+kind: List
+items:
+{{- if .Values.additionalPrometheusRulesMap }}
+{{- range $prometheusRuleName, $prometheusRule := .Values.additionalPrometheusRulesMap }}
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: {{ template "kube-prometheus-stack.name" $ }}-{{ $prometheusRuleName }}
+      namespace: {{ template "kube-prometheus-stack.namespace" $ }}
+      labels:
+        app: {{ template "kube-prometheus-stack.name" $ }}
+{{ include "kube-prometheus-stack.labels" $ | indent 8 }}
+    {{- if $prometheusRule.additionalLabels }}
+{{ toYaml $prometheusRule.additionalLabels | indent 8 }}
+    {{- end }}
+    spec:
+      groups:
+{{ toYaml $prometheusRule.groups| indent 8 }}
+{{- end }}
+{{- else }}
 {{- if .Values.additionalPrometheusRules }}
 {{- range $name, $config := .Values.additionalPrometheusRules | fromYaml }}
----
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  name: {{ template "prometheus-operator.name" $ }}-{{ $name }}
-  namespace: {{ $.Release.Namespace }}
-  labels:
-    app: {{ template "prometheus-operator.name" $ -}}
-{{ include "prometheus-operator.labels" $ | indent 4 -}}
-{{ if $config.additionalLabels }}
-{{ toYaml $config.additionalLabels | trim | indent 4 -}}
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: {{ template "kube-prometheus-stack.name" $ }}-{{ $name }}
+      namespace: {{ template "kube-prometheus-stack.namespace" $ }}
+      labels:
+        app: {{ template "kube-prometheus-stack.name" $ }}
+{{ include "kube-prometheus-stack.labels" $ | indent 8 }}
+    {{- if $config.additionalLabels }}
+{{ toYaml $config.additionalLabels | trim | indent 8 }}
+    {{- end }}
+    spec:
+      groups:
+{{ toYaml $config.groups| indent 8 }}
 {{- end }}
-spec:
-  groups:
-{{ toYaml $config.groups | indent 4 -}}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -19,4 +19,6 @@ authentication:
   oauthTokenEndpoint: ""
   # publishUrl is the URL for publishing events to BEB
   publishUrl: ""
+  # bebNamespace is the name of the namespace BEB is provisioned with
+  bebNamespace: ""
 

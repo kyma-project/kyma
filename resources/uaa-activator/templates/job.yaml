@@ -30,6 +30,9 @@ spec:
           env:
             - name: CLUSTER_DOMAIN_NAME
               value: {{ .Values.global.ingress.domainName }}
+
+            - name: UAA_IS_UPGRADE
+              value: "{{ .Release.IsUpgrade }}"
             - name: UAA_DEVELOPER_GROUP
               value: {{ .Values.global.kymaRuntime.developerGroup }}
             - name: UAA_DEVELOPER_ROLE
@@ -57,7 +60,7 @@ spec:
               value: "dex"
 
             - name: GLOBAL_REPEAT_INTERVAL
-              value: "1s"
+              value: "5s"
             - name: GLOBAL_REPEAT_TIMEOUT
               value: "5m"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

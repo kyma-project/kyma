@@ -40,7 +40,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-9980"
+    tag: "PR-10094"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -76,7 +76,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-9978"
+    tag: "PR-10081"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -136,7 +136,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:PR-9800
+        value: eu.gcr.io/kyma-project/function-build-init:PR-10081
       funtionMaxConcurrentReconciles:
         value: "10"
 
@@ -213,3 +213,6 @@ webhook:
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
     tag: "858bc2c2"
+
+k3s-tests:
+  enabled: false # this chart is installed manually, do not flip this value
