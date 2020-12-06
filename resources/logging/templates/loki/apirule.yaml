@@ -1,0 +1,27 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "loki.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateway: {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+  rules:
+    - accessStrategies:
+        - config:
+            jwks_urls:
+              - http://dex-service.kyma-system.svc.cluster.local:5556/keys
+            trusted_issuers:
+              - https://dex.{{ .Values.global.ingress.domainName }}
+          handler: jwt
+      methods:
+        - GET
+        - OPTIONS
+      path: /.*
+  service:
+    host: loki.{{ .Values.global.ingress.domainName }}
+    name: {{ template "loki.fullname" . }}
+    port: {{ .Values.loki.service.port }}
