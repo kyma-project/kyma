@@ -21,6 +21,7 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
 
   long:
     initTimeout: 120s
