@@ -46,7 +46,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 ## Create an override
 Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and **drop the labels** from Istio metrics.
+1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and/or **drop the labels** from Istio metrics.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -64,3 +64,4 @@ data:
   prometheus-istio.server.resources.limits.memory: "4Gi"
 EOF
 ```
+> **CAUTION:** The side effect of the change to `prometheus-istio.envoyStats.labeldropRegex` (to drop additional labels ) is graphs in Kiali will not work.
