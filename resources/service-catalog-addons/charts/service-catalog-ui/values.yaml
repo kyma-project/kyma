@@ -10,3 +10,4 @@ virtualservice:
   enabled: true
   annotations: {}
   hostname: catalog
+resources: {}

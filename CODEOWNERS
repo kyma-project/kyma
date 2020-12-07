@@ -308,6 +308,9 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 # Compass Runtime Agent Tests
 /tests/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
+# Fast Integration Tests
+/tests/fast-integration/ @crabtree @pbochynski @adamwalach @dariadomagala @parostatkiem @akucharska @aerfio @kwiatekus
+
 # Tools
 
 # The failery directory

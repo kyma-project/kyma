@@ -22,18 +22,19 @@ console:
     internalPort: 8080
     name: nginx
   statusPort: 6080
+  resources: {}
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 2fcce8ab
+    tag: 58bfddfe
   service:
     externalPort: 80
     internalPort: 80
     name: nginx
   statusPort: 6081
+  resources: {}
 managementPlane: {}
 replicaCount: 1
-resources: {}
 test:
   acceptance:
     labels:

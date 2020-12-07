@@ -67,3 +67,4 @@ test:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
