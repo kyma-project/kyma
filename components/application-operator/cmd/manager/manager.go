@@ -139,7 +139,7 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		return nil, err
 	}
 
-	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances("")), nil
+	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances(""), options.profile), nil
 }
 
 func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
@@ -160,7 +160,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		log.Fatal(err)
 	}
 
-	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
+	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace, options.profile)
 
 	return releaseManager, nil
 }

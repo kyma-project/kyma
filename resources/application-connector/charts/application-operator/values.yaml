@@ -7,6 +7,14 @@ controller:
     syncPeriod: 30
     installationTimeout: 240
     healthPort: 8090
+  resources:
+    profile: ""
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 tests:
   enabled: true
