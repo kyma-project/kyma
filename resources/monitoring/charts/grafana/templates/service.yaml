@@ -1,3 +1,7 @@
+{{- /*
+  # Customization: due to kyma-installer limitations, extraExposePorts has to be a multi-line string and not a list
+*/ -}}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -43,7 +47,7 @@ spec:
       nodePort: {{.Values.service.nodePort}}
 {{ end }}
   {{- if .Values.extraExposePorts }}
-  {{- tpl (toYaml .Values.extraExposePorts) . | indent 4 }}
+  {{- tpl (.Values.extraExposePorts) . | indent 4 }}
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}

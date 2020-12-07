@@ -40,6 +40,7 @@ The Application Operator has the following parameters:
  - **gatewayOncePerNamespace** is a flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application. The default value is `false`.
  - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
  - **healthPort** is the number of the TCP port used to perform health checking of the Application Operator.
+ - **isBEBEnabled** is a toggle used to enable or disable eventing based on BEB. The default value is `false`.
  
 ## Testing on a local deployment
 
