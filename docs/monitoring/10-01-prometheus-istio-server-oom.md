@@ -25,7 +25,7 @@ Prometheus Istio Server scrapes metricd from all the envoy side car. It can rest
    ```bash
     kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
     ```
-    Edit following Regex
+    Edit following
     ```yaml
     metric_relabel_configs:
       - separator: ;
