@@ -9,3 +9,8 @@ knative-eventing:
       requests:
         cpu: 25m
         memory: 25Mi
+  sourcesController:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 25Mi
