@@ -1,15 +1,15 @@
 ---
-title: Prometheus Istio Server restarting or in crashback loop due to OOM
+title: Prometheus Istio Server restarting or in crashback loop
 type: Troubleshooting
 ---
 
-Prometheus Istio Server scrapes metrics from all the envoy side car. It might crash because of OOM when the cardinality of the istio metrics is increasing too much. This is usually is happening for a high amount of workloads performing a lot of communication to other workloads. This issue can be tackled in following ways:
+Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash because of OOM when the cardinality of the Istio metrics increases too much. This usually happens when a high amount of workloads perform a lot of communication to other workloads. This issue can be tackled by following these steps:
 
-1. Increase the memory for prometheus-istio server
+1. Increase the memory for `prometheus-istio-server`:
     ```bash
     kubect edit deployment -n kyma monitoring-prometheus-istio-server
     ```
-    Increase the limits for memory
+    Increase the limits for memory:
     ```yaml
     resources:
       limits:
@@ -19,13 +19,13 @@ Prometheus Istio Server scrapes metrics from all the envoy side car. It might cr
         cpu: 40m
         memory: 200Mi
     ```
-2. Drop labels for the istio metrics.
+2. Drop labels for the Istio metrics. 
     
-   Edit the configmap for prometheus-istio server
+   Edit the ConfigMap for `prometheus-istio server`: 
    ```bash
     kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
     ```
-    Edit following
+    Edit:
     ```yaml
     metric_relabel_configs:
       - separator: ;
@@ -33,20 +33,20 @@ Prometheus Istio Server scrapes metrics from all the envoy side car. It might cr
         replacement: $1
         action: labeldrop
     ```
-    Change regex to
+    Change regex to:
     ```yaml
     regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
     ```
-    save the configmap and restart prometheus-istio server for the config map changes to take effect
+    Save the ConfigMap and restart `prometheus-istio-server` for the changes to take effect:
     ```bash
     kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
     ```
-    > Warning: The side effect of this change is graphs in kiali would not work.
+    > **CAUTION:** The side effect of this change is graphs in Kiali will not work.
 
 ## Create an override
 Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and **dropping the labels** from istio metrics.
+1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and **drop the labels** from Istio metrics.
 
 ```bash
 cat <<EOF | kubectl apply -f -
