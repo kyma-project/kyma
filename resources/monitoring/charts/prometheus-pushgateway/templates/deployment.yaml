@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "prometheus-pushgateway.fullname" . }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
-    {{- if .Values.serviceAccountLabels }}
-    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
-    {{- end }}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
 spec:
   replicas: {{ .Values.replicaCount }}
   {{- if .Values.strategy }}
@@ -15,14 +12,11 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: {{ template "prometheus-pushgateway.name" . }}
-      release: {{ .Release.Name }}
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "prometheus-pushgateway.labels" . | nindent 8 }}
-        app: {{ template "prometheus-pushgateway.name" . }}
-        release: {{ .Release.Name }}
+        {{- include "prometheus-pushgateway.selectorLabels" . | nindent 8 }}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}
     spec:

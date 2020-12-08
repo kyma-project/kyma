@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"os"
@@ -70,20 +71,20 @@ func loadKubeConfigOrDie() (*rest.Config, error) {
 
 func testLogStream(namespace string) error {
 	httpClient := getHttpClient()
-	token, err := jwt.GetToken()
+	token, domain, err := jwt.GetToken()
 	if err != nil {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test("container", "count", authHeader, httpClient)
+	err = logstream.Test(domain, "container", "count", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("app", "test-counter-pod", authHeader, httpClient)
+	err = logstream.Test(domain, "app", "test-counter-pod", authHeader, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test("namespace", namespace, authHeader, httpClient)
+	err = logstream.Test(domain, "namespace", namespace, authHeader, httpClient)
 	if err != nil {
 		return err
 	}
@@ -91,7 +92,11 @@ func testLogStream(namespace string) error {
 }
 
 func getHttpClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	client := &http.Client{
+		Transport: tr,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}}

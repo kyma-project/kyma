@@ -5,11 +5,10 @@ import (
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/sirupsen/logrus"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"

@@ -33,6 +33,17 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Identifies the log_level with the old verbose_mode and the new log_level considered.
+*/}}
+{{- define "kiali-server.logLevel" -}}
+{{- if .Values.kiali.spec.deployment.verbose_mode -}}
+{{- .Values.kiali.spec.deployment.verbose_mode -}}
+{{- else -}}
+{{- .Values.kiali.spec.deployment.logger.log_level -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "kiali-server.labels" -}}
@@ -42,6 +53,7 @@ app: {{ include "kiali-server.name" . }}
 version: {{ .Values.kiali.spec.deployment.version_label | default .Chart.AppVersion | quote }}
 app.kubernetes.io/version: {{ .Values.kiali.spec.deployment.version_label | default .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: "kiali"
 {{- end }}
 
 {{/*

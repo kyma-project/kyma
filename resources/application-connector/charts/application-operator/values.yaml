@@ -7,12 +7,21 @@ controller:
     syncPeriod: 30
     installationTimeout: 240
     healthPort: 8090
+  resources:
+    profile: ""
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 tests:
   enabled: true
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
   image:
     pullPolicy: IfNotPresent
   gateway:
