@@ -296,7 +296,6 @@ spec:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
       trustDomain: cluster.local
       useMCP: false
-    grafana: {}
     istiocoredns:
       coreDNSImage: coredns/coredns
       coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
