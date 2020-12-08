@@ -36,7 +36,7 @@ spec:
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.image.name }}
+        image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: jwksUri
