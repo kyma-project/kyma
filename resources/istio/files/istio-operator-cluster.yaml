@@ -221,7 +221,6 @@ spec:
         ppc64le: 2
         s390x: 2
       configValidation: true
-      controlPlaneSecurityEnabled: true
       defaultNodeSelector: {}
       defaultPodDisruptionBudget:
         enabled: true
@@ -372,7 +371,6 @@ spec:
     #     annotations: {}
     #   tag: v1.22
     pilot:
-      appNamespaces: []
       autoscaleEnabled: true
       autoscaleMax: 5
       autoscaleMin: 1
@@ -387,7 +385,6 @@ spec:
       keepaliveMaxServerConnectionAge: 30m
       nodeSelector: {}
       replicaCount: 1
-      tolerations: []
       traceSampling: 1
     sidecarInjectorWebhook:
       enableNamespacesByDefault: true
