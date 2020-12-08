@@ -1,8 +1,8 @@
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
-  hub: eu.gcr.io/kyma-project/external/istio
-  tag: 1.7.4-distroless
+  # hub: eu.gcr.io/kyma-project/external/istio
+  tag: 1.8.0-distroless
 
   addonComponents:
     istiocoredns:
@@ -43,12 +43,15 @@ spec:
           - name: http2
             port: 80
             targetPort: 8080
+            protocol: TCP
           - name: https
             port: 443
             targetPort: 8443
+            protocol: TCP
           - name: tls
             port: 15443
             targetPort: 15443
+            protocol: TCP
         strategy:
           rollingUpdate:
             maxSurge: 100%
