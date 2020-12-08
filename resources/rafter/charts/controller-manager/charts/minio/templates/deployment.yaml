@@ -48,7 +48,6 @@ spec:
 {{ toYaml .Values.podLabels | indent 8 }}
 {{- end }}
       annotations:
-        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | trimSuffix "\n" | indent 8 }}
@@ -137,12 +136,12 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+                  name: {{ template "minio.fullname" . }}
                   key: accesskey
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+                  name: {{ template "minio.fullname" . }}
                   key: secretkey
             {{- if .Values.gcsgateway.enabled }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -152,13 +151,6 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end}}
-          # CHANGES
-          {{- if .Release.IsUpgrade }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.patchCredentials.secretName }}
-          {{- end }}
-          # --CHANGES
           livenessProbe:
             httpGet:
               path: /minio/health/live
