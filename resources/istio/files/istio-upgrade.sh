@@ -9,16 +9,16 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
 
     CM_PRESENT=$(kubectl get cm -n "${NAMESPACE}" "${CONFIGMAP_NAME}" --ignore-not-found)
     if [[ -z "${CM_PRESENT}" ]]; then
-    	kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-	        --from-file "${OPERATOR_FILE}" \
-	        --from-file /etc/istio/overrides.yaml \
-	        --from-file /etc/combo.yaml
+        kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+            --from-file "${OPERATOR_FILE}" \
+            --from-file /etc/istio/overrides.yaml \
+            --from-file /etc/combo.yaml
     else
-    	kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-	        --from-file "${OPERATOR_FILE}" \
-	        --from-file /etc/istio/overrides.yaml \
-	        --from-file /etc/combo.yaml \
-	        -o yaml --dry-run | kubectl replace -f -
+        kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+            --from-file "${OPERATOR_FILE}" \
+            --from-file /etc/istio/overrides.yaml \
+            --from-file /etc/combo.yaml \
+            -o yaml --dry-run | kubectl replace -f -
     fi
     OPERATOR_FILE="/etc/combo.yaml"
 fi
