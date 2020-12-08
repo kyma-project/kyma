@@ -27,13 +27,6 @@ spec:
         kyma-project.io/component: backend
     spec:
       serviceAccountName: apiserver-proxy
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "minio.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
