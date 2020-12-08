@@ -6,7 +6,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "30"
-  name: istio-job-1-7
+  name: istio-job
 spec:
   activeDeadlineSeconds: 1000
   backoffLimit: 1
@@ -18,9 +18,9 @@ spec:
             - "-c"
             - |
 {{- if .Release.IsUpgrade }}
-{{ .Files.Get "files/istio-upgrade-1-7.sh" | printf "%s" | indent 16 }}
+{{ .Files.Get "files/istio-upgrade.sh" | printf "%s" | indent 16 }}
 {{- else }}
-{{ .Files.Get "files/istio-install-1-7.sh" | printf "%s" | indent 16 }}
+{{ .Files.Get "files/istio-install.sh" | printf "%s" | indent 16 }}
 {{- end }}
           image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
           name: installer

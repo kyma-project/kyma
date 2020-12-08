@@ -1,7 +1,7 @@
 set -ex
 set -o pipefail
 
-OPERATOR_FILE="/etc/istio/operator-1-7.yaml"
+OPERATOR_FILE="/etc/istio/operator.yaml"
 
 echo "--> Check overrides"
 if [ -f "/etc/istio/overrides.yaml" ]; then
@@ -23,7 +23,7 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
     OPERATOR_FILE="/etc/combo.yaml"
 fi
 
-echo "--> Install Istio 1.7"
+echo "--> Install Istio"
 istioctl upgrade -f "${OPERATOR_FILE}" -y
 
 echo "Apply custom kyma manifests"
