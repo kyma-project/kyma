@@ -1,3 +1,7 @@
 dispatcher:
   memoryRequest: 25Mi
-  cpuRequest: 50m
+  cpuRequest: 150m
+
+controller:
+  memoryRequest: 12Mi
+  cpuRequest: 25m
