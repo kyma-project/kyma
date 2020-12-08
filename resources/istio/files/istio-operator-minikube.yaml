@@ -3,11 +3,9 @@ kind: IstioOperator
 spec:
 #  hub: eu.gcr.io/kyma-project/external/istio
   tag: 1.8.0-distroless
-
   addonComponents:
     istiocoredns:
       enabled: false
-  
   components:
     base:
       enabled: true
@@ -83,7 +81,6 @@ spec:
             cpu: 100m
             memory: 96Mi
         service:
-          type: NodePort
           ports:
           - name: status-port
             port: 15021
@@ -125,10 +122,8 @@ spec:
           - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
             value: 443
       name: istio-ingressgateway
-
     istiodRemote:
       enabled: false
-
     pilot:
       enabled: true
       k8s:
@@ -177,13 +172,11 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
-  
   meshConfig:
     accessLogFile: /dev/stdout
     defaultConfig:
       proxyMetadata: {}
     enablePrometheusMerge: false
-
   values:
     base:
       enableCRDTemplates: false
@@ -221,8 +214,8 @@ spec:
         - mountPath: /etc/istio/ingressgateway-ca-certs
           name: ingressgateway-ca-certs
           secretName: istio-ingressgateway-ca-certs
+        type: NodePort
         zvpn: {}
-    
     global:
       arch:
         amd64: 2
@@ -318,7 +311,6 @@ spec:
     istiodRemote:
       injectionURL: ""
     pilot:
-      appNamespaces: []
       autoscaleEnabled: false
       configMap: true
       configNamespace: istio-config
@@ -334,7 +326,6 @@ spec:
       traceSampling: 1
     sidecarInjectorWebhook:
       enableNamespacesByDefault: true
-      injectLabel: istio-injection
       objectSelector:
         autoInject: true
         enabled: false
@@ -354,4 +345,3 @@ spec:
           logging: false
           monitoring: false
           topology: false
-    version: ""
