@@ -296,14 +296,12 @@ spec:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
       trustDomain: cluster.local
       useMCP: false
-    grafana: {}
     istiocoredns:
       coreDNSImage: coredns/coredns
       coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
       coreDNSTag: 1.6.2
     istiodRemote:
       injectionURL: ""
-    kiali: {}
     pilot:
       autoscaleEnabled: true
       autoscaleMax: 5
@@ -341,4 +339,3 @@ spec:
           logging: false
           monitoring: false
           topology: false
-    tracing: {}
