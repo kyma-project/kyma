@@ -3,11 +3,9 @@ kind: IstioOperator
 spec:
   # hub: eu.gcr.io/kyma-project/external/istio
   tag: 1.8.0-distroless
-
   addonComponents:
     istiocoredns:
       enabled: false
-  
   components:
     base:
       enabled: true
@@ -116,10 +114,8 @@ spec:
             maxSurge: 100%
             maxUnavailable: 0
       name: istio-ingressgateway
-
     istiodRemote:
       enabled: false
-
     pilot:
       enabled: true
       k8s:
@@ -168,13 +164,11 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
-  
   meshConfig:
     accessLogFile: /dev/stdout
     defaultConfig:
       proxyMetadata: {}
     enablePrometheusMerge: false
-
   values:
     base:
       enableCRDTemplates: false
@@ -214,7 +208,6 @@ spec:
           secretName: istio-ingressgateway-ca-certs
         type: LoadBalancer
         zvpn: {}
-    
     global:
       arch:
         amd64: 2
@@ -303,73 +296,14 @@ spec:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
       trustDomain: cluster.local
       useMCP: false
-    # grafana:
-    #   accessMode: ReadWriteMany
-    #   contextPath: /grafana
-    #   dashboardProviders:
-    #     dashboardproviders.yaml:
-    #       apiVersion: 1
-    #       providers:
-    #       - disableDeletion: false
-    #         folder: istio
-    #         name: istio
-    #         options:
-    #           path: /var/lib/grafana/dashboards/istio
-    #         orgId: 1
-    #         type: file
-    #   datasources:
-    #     datasources.yaml:
-    #       apiVersion: 1
-    #   env: {}
-    #   envSecrets: {}
-    #   image:
-    #     repository: grafana/grafana
-    #     tag: 7.0.5
-    #   nodeSelector: {}
-    #   persist: false
-    #   podAntiAffinityLabelSelector: []
-    #   podAntiAffinityTermLabelSelector: []
-    #   security:
-    #     enabled: false
-    #     passphraseKey: passphrase
-    #     secretName: grafana
-    #     usernameKey: username
-    #   service:
-    #     annotations: {}
-    #     externalPort: 3000
-    #     name: http
-    #     type: ClusterIP
-    #   storageClassName: ""
-    #   tolerations: []
+    grafana: {}
     istiocoredns:
       coreDNSImage: coredns/coredns
       coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
       coreDNSTag: 1.6.2
     istiodRemote:
       injectionURL: ""
-    # kiali:
-    #   contextPath: /kiali
-    #   createDemoSecret: false
-    #   dashboard:
-    #     auth:
-    #       strategy: login
-    #     grafanaInClusterURL: http://grafana:3000
-    #     jaegerInClusterURL: http://tracing/jaeger
-    #     passphraseKey: passphrase
-    #     secretName: kiali
-    #     usernameKey: username
-    #     viewOnlyMode: false
-    #   hub: quay.io/kiali
-    #   nodeSelector: {}
-    #   podAntiAffinityLabelSelector: []
-    #   podAntiAffinityTermLabelSelector: []
-    #   security:
-    #     cert_file: /kiali-cert/cert-chain.pem
-    #     enabled: false
-    #     private_key_file: /kiali-cert/key.pem
-    #   service:
-    #     annotations: {}
-    #   tag: v1.22
+    kiali: {}
     pilot:
       autoscaleEnabled: true
       autoscaleMax: 5
@@ -407,51 +341,4 @@ spec:
           logging: false
           monitoring: false
           topology: false
-    # tracing:
-    #   jaeger:
-    #     accessMode: ReadWriteMany
-    #     hub: docker.io/jaegertracing
-    #     memory:
-    #       max_traces: 50000
-    #     persist: false
-    #     spanStorageType: badger
-    #     storageClassName: ""
-    #     tag: "1.18"
-    #   nodeSelector: {}
-    #   opencensus:
-    #     exporters:
-    #       stackdriver:
-    #         enable_tracing: true
-    #     hub: docker.io/omnition
-    #     resources:
-    #       limits:
-    #         cpu: "1"
-    #         memory: 2Gi
-    #       requests:
-    #         cpu: 200m
-    #         memory: 400Mi
-    #     tag: 0.1.9
-    #   podAntiAffinityLabelSelector: []
-    #   podAntiAffinityTermLabelSelector: []
-    #   provider: jaeger
-    #   service:
-    #     annotations: {}
-    #     externalPort: 9411
-    #     name: http-query
-    #     type: ClusterIP
-    #   zipkin:
-    #     hub: docker.io/openzipkin
-    #     javaOptsHeap: 700
-    #     maxSpans: 500000
-    #     node:
-    #       cpus: 2
-    #     probeStartupDelay: 10
-    #     queryPort: 9411
-    #     resources:
-    #       limits:
-    #         cpu: 1000m
-    #         memory: 2048Mi
-    #       requests:
-    #         cpu: 150m
-    #         memory: 900Mi
-    #     tag: 2.20.0
+    tracing: {}
