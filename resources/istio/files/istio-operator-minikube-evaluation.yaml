@@ -174,8 +174,12 @@ spec:
             maxUnavailable: 25%
   meshConfig:
     accessLogFile: /dev/stdout
+    trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}
+      tracing:    
+        zipkin:   
+          address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
   values:
     base:
@@ -199,13 +203,6 @@ spec:
       istio-ingressgateway:
         autoscaleEnabled: false
         env: {}
-        meshExpansionPorts:
-        - name: tcp-istiod
-          port: 15012
-          targetPort: 15012
-        - name: tcp-dns-tls
-          port: 853
-          targetPort: 8853
         name: istio-ingressgateway
         secretVolumes:
         - mountPath: /etc/istio/ingressgateway-certs
@@ -289,20 +286,6 @@ spec:
           aud: istio-ca
       sts:
         servicePort: 0
-      tracer:
-        datadog:
-          address: $(HOST_IP):8126
-        lightstep:
-          accessToken: ""
-          address: ""
-        stackdriver:
-          debug: false
-          maxNumberOfAnnotations: 200
-          maxNumberOfAttributes: 200
-          maxNumberOfMessageEvents: 200
-        zipkin:
-          address: "{{ .Values.global.tracing.zipkinAddress }}"
-      trustDomain: cluster.local
       useMCP: false
     istiocoredns:
       coreDNSImage: coredns/coredns
