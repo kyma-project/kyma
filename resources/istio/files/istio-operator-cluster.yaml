@@ -388,7 +388,6 @@ spec:
       traceSampling: 1
     sidecarInjectorWebhook:
       enableNamespacesByDefault: true
-      injectLabel: istio-injection
       objectSelector:
         autoInject: true
         enabled: false
@@ -456,4 +455,3 @@ spec:
     #         cpu: 150m
     #         memory: 900Mi
     #     tag: 2.20.0
-    version: ""
