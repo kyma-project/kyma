@@ -17,11 +17,7 @@ commonLabels:
   role: webhook
 
 webhook:
-  webhookMatchExp:
-  - key: name
-    operator: NotIn
-    values:
-    - kube-system
+  webhookMatchExp: {}
 
 deployment:
   replicas: 1

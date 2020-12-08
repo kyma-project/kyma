@@ -31,6 +31,6 @@ webhooks:
   failurePolicy: Fail
   namespaceSelector:
     matchExpressions:
-{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
+{{- toYaml .Values.webhook.webhookMatchExp | nindent 6 }}
   sideEffects: None
   name: defaulting.webhook.serverless.kyma-project.io
