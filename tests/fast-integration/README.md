@@ -46,9 +46,10 @@ npm test
 ## Why don't you use Octopus?
 Octopus is a great tool for running tests inside Kubernetes cluster in a declarative way. But it is not the right tool for fast integration testing. The goal is to execute the tests in 4 minutes. With Octopus you need 4 minutes or more before test even start (2 minutes to build test image and push it to docker registry, 1 minute to deploy Octopus, 1 minute to deploy the test pod). 
 
-## Why tests are written in node.js not in golang?
+## Why tests are written in node.js not in Go?
 
 Several reasons:
 - no compilation time 
 - consise syntax (handling json responses from api-server or our test fixtures)
+- lighter dependencies (@kubernetes/client-node) 
 - educational value for our customers who can read tests to learn how to use Kyma features (none of our customers write code in Go, they use JavaScript, Java or Python)
