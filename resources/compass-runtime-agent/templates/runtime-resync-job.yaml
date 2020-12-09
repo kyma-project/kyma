@@ -49,7 +49,36 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook: pre-upgrade, post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation, hook-succeeded
-
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: runtime-resync-job
+spec:
+  allowPrivilegeEscalation: false
+  allowedCapabilities:
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    # due to istio init container
+    rule: 'MustRunAsNonRoot' #TODO after init-container removal set to 'MustRunAsNonRoot'
+  privileged: false
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -64,7 +93,11 @@ rules:
   - apiGroups: ["compass.kyma-project.io"]
     resources: ["compassconnections"]
     verbs: ["create", "get", "list", "update", "delete", "watch", "patch"]
-
+  - apiGroups: ['policy']
+    resources: ['podsecuritypolicies']
+    verbs:     ['use']
+    resourceNames:
+    - "runtime-resync-job"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
