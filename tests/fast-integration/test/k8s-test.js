@@ -25,7 +25,7 @@ const appConnectorObjs = k8s.loadAllYaml(appConnectorYaml);
 const tokenRequestObj = k8s.loadYaml(tokenRequestYaml);
 
 describe("dummy test", function () {
-  this.timeout(50 * 1000); // 50s
+  this.timeout(180 * 1000); // 50s
 
   after(async function () {
     this.timeout(10 * 10000);
@@ -86,7 +86,7 @@ describe("dummy test", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    await sleep(20000); // TODO: add retries for axios.get instead of sleep
+    await sleep(40000); // TODO: add retries for axios.get instead of sleep
 
     let response;
     try {
@@ -99,7 +99,7 @@ describe("dummy test", function () {
     expect(response.data[0].provider).not.to.be.empty;
     const provider = response.data[0].provider;
 
-    await sleep(3000); // TODO: introduce proper mechanism that waits till commerce-application-gateway exists
+    await sleep(5000); // TODO: introduce proper mechanism that waits till commerce-application-gateway exists
 
     let deploy;
     try {
@@ -128,19 +128,21 @@ describe("dummy test", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    await sleep(5 * 1000);
+    await sleep(10 * 1000);
 
-    let token;
+    let tokenObj;
     try {
-      token = await k8sDynamicApi.read(tokenRequestObj);
+      tokenObj = await k8sDynamicApi.read(tokenRequestObj);
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
     // TODO make sure that .status.token exists first
-    expect(token.body.status.token).not.to.be.empty;
+    expect(tokenObj.body.status?.token).not.to.be.empty;
 
-    await sleep(5 * 1000);
+    const token = tokenObj.body.status.token;
+
+    await sleep(15 * 1000);
 
     const host = "local.kyma.dev"; // TODO: extract this from some secret/configmap/ parse some virtualservice
     try {
@@ -155,8 +157,9 @@ describe("dummy test", function () {
         },
       });
     } catch (error) {
-      console.log(Object.entries(error.response));
-      expect(error.response).to.be.empty;
+      console.error(error.response.status);
+      console.error(error.response.data);
+      expect(error.response.data).to.be.empty;
     }
   });
 });
