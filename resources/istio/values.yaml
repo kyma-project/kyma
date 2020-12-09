@@ -13,7 +13,6 @@ kyma:
     image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
     tag: "20201023-5de446cf"
   proxyResetJob:
-    expectedIstioProxyImage: "eu.gcr.io/kyma-project/external/istio/proxyv2:1.7.4-distroless"
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
 
 istio:
