@@ -38,7 +38,7 @@
 /resources/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
 # The `rafter` chart
-/resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu
+/resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
@@ -279,7 +279,7 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 /tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Rafter tests
-/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu
+/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # Function Controller tests
 /tests/function-controller/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
@@ -341,7 +341,7 @@ components/etcd-tls-setup-job/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @ksp
 /tests/end-to-end/upgrade/pkg/tests/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # E2E Rafter Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu
+/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # All .md files
 *.md @kazydek @klaudiagrz @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
