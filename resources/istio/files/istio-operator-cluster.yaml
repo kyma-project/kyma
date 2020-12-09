@@ -2,7 +2,7 @@ apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   # hub: eu.gcr.io/kyma-project/external/istio
-  tag: 1.8.0-distroless
+  tag: {{ .Chart.Version }}
   addonComponents:
     istiocoredns:
       enabled: false
@@ -82,6 +82,9 @@ spec:
             memory: 128Mi
         service:
           ports:
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
           - name: status-port
             port: 15021
             targetPort: 15021
