@@ -170,8 +170,60 @@ kind: TokenRequest
 metadata:
   name: commerce`;
 
+const genericServiceClass = (name, namespace) => `
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceClass
+metadata:
+  name: ${name}
+  namespace: ${namespace}
+`;
+
+const serviceCatalogResources = (
+  webServicesExternalName,
+  eventsExternalName
+) => `
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: commerce-webservices
+spec:
+  serviceClassExternalName: ${webServicesExternalName}
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: commerce-events
+spec:
+  serviceClassExternalName: ${eventsExternalName}
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  labels:
+    function: lastorder
+  name: commerce-lastorder-binding
+spec:
+  instanceRef:
+    name: commerce-webservices
+---
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  labels:
+    function: lastorder
+    serviceBinding: commerce-lastorder-binding
+  name: commerce-lastorder-sbu
+spec:
+  serviceBindingRef:
+    name: commerce-lastorder-binding
+  usedBy:
+    kind: serverless-function
+    name: lastorder`;
+
 module.exports = {
   commerceMockYaml,
   appConnectorYaml,
   tokenRequestYaml,
+  genericServiceClass,
+  serviceCatalogResources,
 };
