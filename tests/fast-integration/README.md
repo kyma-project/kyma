@@ -35,14 +35,9 @@ cd kyma/tests/fast-integration
 npm install
 ```
 
-Install mocha:
-```
-npm install -g mocha
-```
-
 Execute the tests:
 ```
-mocha
+npm test
 ```
 
 
