@@ -1,7 +1,7 @@
 # Fast integration tests
 
 ## Why?
-We need fast, reliable integration tests to speed up Kyma development. The developer productivity is directly propotional to the number of iterations you can make per day/hour/minute. The iteration includes writing code/test, executing tests, refactoring, and executing test after refactoring, and the lenght of such iteration is a turnaround time. The goal is to decrease the minimal turnaround time from current 90 minutes to less than 10 minutes (ten times). Fast integration tests will solve the problem partially. Other initiatives that are executed in parallel are equally important: switching to k3s starting to reduce kubernetes provisioning time, and implement parallel installation of Kyma components.
+We need fast, reliable integration tests to speed up Kyma development. The developer productivity is directly proportional to the number of iterations you can make per day/hour/minute. The iteration includes writing code/test, executing tests, refactoring, and executing test after refactoring, and the length of such iteration is a turnaround time. The goal is to decrease the minimal turnaround time from current 90 minutes to less than 10 minutes (ten times). Fast integration tests will solve the problem partially. Other initiatives that are executed in parallel are equally important: switching to k3s starting to reduce kubernetes provisioning time, and implement parallel installation of Kyma components.
 
 ## How to speed up integration tests?
 
