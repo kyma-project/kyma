@@ -4,15 +4,15 @@ const {
   appConnectorYaml,
   tokenRequestYaml,
 } = require("./fixtures");
-const { expect } = require("chai");
-const https = require("https");
+const { expect, config } = require("chai");
+config.truncateThreshold = 0;
 
+const https = require("https");
 const axios = require("axios").default;
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
-axios.defaults.httpsAgent = httpsAgent; // create separate axios instance with that httpsAgent
-
+axios.defaults.httpsAgent = httpsAgent; // create separate axios instance with that httpsAgent https://github.com/axios/axios#custom-instance-defaults
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
@@ -49,6 +49,7 @@ describe("dummy test", function () {
 
   it("commerce mock create", async function () {
     try {
+      // we can extract namespace creation into seperate step, and _not_ fail test wgeb
       await Promise.all(commerceObjs.map((obj) => k8sDynamicApi.create(obj)));
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -78,13 +79,11 @@ describe("dummy test", function () {
 
     const mockHost = virtualservice.body.items[0].spec.hosts[0];
 
-    try {
-      await Promise.all(
-        appConnectorObjs.map((obj) => k8sDynamicApi.create(obj))
-      );
-    } catch (err) {
-      expect(err.body.message).to.be.empty;
-    }
+    // try {
+    await Promise.all(appConnectorObjs.map((obj) => k8sDynamicApi.create(obj)));
+    // } catch (err) {
+    // expect(err.body.message).to.be.empty;
+    // }
 
     await sleep(40000); // TODO: add retries for axios.get instead of sleep
 
@@ -138,7 +137,7 @@ describe("dummy test", function () {
     }
 
     // TODO make sure that .status.token exists first
-    expect(tokenObj.body.status?.token).not.to.be.empty;
+    expect(tokenObj.body.status.token).not.to.be.empty;
 
     const token = tokenObj.body.status.token;
 
@@ -146,20 +145,22 @@ describe("dummy test", function () {
 
     const host = "local.kyma.dev"; // TODO: extract this from some secret/configmap/ parse some virtualservice
     try {
-      await axios.get(`https://${mockHost}/connection`, {
-        headers: {
-          "content-type": "application/json",
-        },
-        data: {
+      await axios.post(
+        `https://${mockHost}/connection`,
+        {
           token: `https://connector-service.${host}/v1/applications/signingRequests/info?token=${token}`,
           baseUrl: `https://${mockHost}`,
-          insecure: "true",
+          insecure: true,
         },
-      });
+        {
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
     } catch (error) {
-      console.error(error.response.status);
-      console.error(error.response.data);
-      expect(error.response.data).to.be.empty;
+      // https://github.com/axios/axios#handling-errors
+      expect(error.response.data).to.deep.eq({});
     }
   });
 });
