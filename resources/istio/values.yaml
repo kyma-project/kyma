@@ -4,7 +4,7 @@ global:
   tracing:
     enabled: true
     zipkinAddress: "zipkin.kyma-system:9411"
-    
+
 kyma:
   namespaces2Label:
     - istio-system
@@ -12,6 +12,8 @@ kyma:
   labelJob:
     image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
     tag: "20201023-5de446cf"
+  proxyResetJob:
+    commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
 
 istio:
   installer:
