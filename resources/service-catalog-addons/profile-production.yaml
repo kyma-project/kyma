@@ -8,10 +8,10 @@ service-binding-usage-controller":
       cpu: 50m
 
 service-catalog-ui:
-  resources: 
+  resources:
     requests:
-      cpu: 1m
+      cpu: 10m
       memory: 16Mi
     limits:
-      cpu: 30m
-      memory: 32Mi
+      cpu: 60m
+      memory: 64Mi
