@@ -26,12 +26,20 @@ spec:
           hostnames:
             - "storage.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        runAsGroup: 1000
       serviceAccountName:  {{ include "rafterTests.fullname" . }}
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
         - name: {{ include "rafterTests.name" . }}
           image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
           command:
             - "/bin/sh"
           args:

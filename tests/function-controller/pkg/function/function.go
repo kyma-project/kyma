@@ -6,16 +6,16 @@ import (
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 
@@ -85,15 +85,15 @@ func (f *Function) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), f.waitTimeout)
 	defer cancel()
 	condition := f.isFunctionReady()
-	_, err = watchtools.Until(ctx, fn.GetResourceVersion(), f.resCli.ResCli, condition)
-	if err != nil {
-		return err
+	err = resource.WaitUntilConditionSatisfied(ctx, f.resCli.ResCli, condition)
+	if err == nil {
+		return nil
 	}
-	return nil
+	return err
 }
 
 func (f *Function) Delete() error {
-	err := f.resCli.Delete(f.name, f.waitTimeout)
+	err := f.resCli.Delete(f.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Function %s in namespace %s", f.name, f.namespace)
 	}

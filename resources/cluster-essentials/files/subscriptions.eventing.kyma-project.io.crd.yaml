@@ -1,0 +1,188 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: subscriptions.eventing.kyma-project.io
+spec:
+  group: eventing.kyma-project.io
+  names:
+    kind: Subscription
+    listKind: SubscriptionList
+    plural: subscriptions
+    singular: subscription
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Subscription is the Schema for the subscriptions API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SubscriptionSpec defines the desired state of Subscription
+            properties:
+              filter:
+                description: BebFilters defines the list of BEB filters
+                properties:
+                  dialect:
+                    type: string
+                  filters:
+                    items:
+                      description: BebFilter defines the BEB filter element as a combination
+                        of two CE filter elements
+                      properties:
+                        eventSource:
+                          description: Filter defines the CE filter element
+                          properties:
+                            property:
+                              type: string
+                            type:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - property
+                          - value
+                          type: object
+                        eventType:
+                          description: Filter defines the CE filter element
+                          properties:
+                            property:
+                              type: string
+                            type:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - property
+                          - value
+                          type: object
+                      required:
+                      - eventSource
+                      - eventType
+                      type: object
+                    type: array
+                required:
+                - filters
+                type: object
+              id:
+                description: ID is the unique identifier of Subscription, read-only.
+                type: string
+              protocol:
+                type: string
+              protocolsettings:
+                description: ProtocolSettings defines the CE protocol setting specification
+                  implementation
+                properties:
+                  contentMode:
+                    type: string
+                  exemptHandshake:
+                    type: boolean
+                  qos:
+                    type: string
+                  webhookAuth:
+                    description: Webhook defines the Webhook called by an active subscription
+                      in BEB
+                    properties:
+                      clientId:
+                        type: string
+                      clientSecret:
+                        type: string
+                      grantType:
+                        type: string
+                      scope:
+                        items:
+                          type: string
+                        type: array
+                      tokenUrl:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - clientId
+                    - clientSecret
+                    - grantType
+                    - tokenUrl
+                    type: object
+                type: object
+              sink:
+                type: string
+            required:
+            - filter
+            - protocol
+            - protocolsettings
+            - sink
+            type: object
+          status:
+            description: SubscriptionStatus defines the observed state of Subscription
+            properties:
+              apiRuleName:
+                type: string
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  type: object
+                type: array
+              emsSubscriptionStatus:
+                properties:
+                  lastFailedDelivery:
+                    type: string
+                  lastFailedDeliveryReason:
+                    type: string
+                  lastSuccessfulDelivery:
+                    type: string
+                  subscriptionStatus:
+                    type: string
+                  subscriptionStatusReason:
+                    type: string
+                type: object
+              emshash:
+                format: int64
+                type: integer
+              ev2hash:
+                format: int64
+                type: integer
+              externalSink:
+                type: string
+              failedActivation:
+                type: string
+              ready:
+                type: boolean
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

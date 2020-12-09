@@ -4,10 +4,10 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ template "prometheus-operator.name" . }}-prometheus
+  name: {{ template "kube-prometheus-stack.name" . }}-prometheus
   namespace: {{ $.Release.Namespace }}
 spec:
-  host: {{ template "prometheus-operator.name" . }}-prometheus.{{ $.Release.Namespace }}.svc.cluster.local
+  host: {{ template "kube-prometheus-stack.name" . }}-prometheus.{{ $.Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

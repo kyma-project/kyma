@@ -77,7 +77,7 @@ const (
 type InstallationSpec struct {
 	KymaVersion string          `json:"version"`
 	URL         string          `json:"url"`
-	Profile     KymaProfile     `json:"profile"`
+	Profile     KymaProfile     `json:"profile,omitempty"`
 	Components  []KymaComponent `json:"components"`
 }
 

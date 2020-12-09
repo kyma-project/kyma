@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"go.opencensus.io/plugin/ochttp"
 )
 
@@ -36,7 +38,6 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	}
 
 	recv.handler = createHandler(handler)
-
 	recv.server = &http.Server{
 		Addr:    recv.listener.Addr().String(),
 		Handler: recv.handler,
@@ -46,6 +47,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	go func() {
 		errChan <- recv.server.Serve(recv.listener)
 	}()
+	logrus.Info("Event Publisher Proxy server has started.")
 
 	// wait for the server to return or ctx.Done().
 	select {

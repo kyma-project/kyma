@@ -7,8 +7,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 )
+
+type ParametersBuilder struct {
+	domain         string
+	redirectURL    string
+	developerGroup string
+	adminGroup     string
+	developerRole  string
+	adminRole      string
+}
+
+func NewParametersBuilder(cfg Config, domain string) *ParametersBuilder {
+	shootName := strings.Split(domain, ".")[0]
+	return &ParametersBuilder{
+		domain:         domain,
+		redirectURL:    fmt.Sprintf("https://dex.%s/callback", strings.Trim(domain, "/")),
+		developerGroup: cfg.DeveloperGroup,
+		adminGroup:     cfg.NamespaceAdminGroup,
+		developerRole:  roleName(cfg.DeveloperRole, shootName),
+		adminRole:      roleName(cfg.NamespaceAdminRole, shootName),
+	}
+}
 
 type Schema struct {
 	Xsappname           string              `json:"xsappname"`
@@ -42,9 +64,13 @@ type Oauth2Configuration struct {
 	SystemAttributes []string `json:"system-attributes"`
 }
 
-func NewInstanceParameters(cfg Config, domain string) ([]byte, error) {
+func (pb *ParametersBuilder) Generate(instance *v1beta1.ServiceInstance) ([]byte, error) {
+	xsappname, err := pb.xsappname(instance)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, "while generating xsappname")
+	}
 	parameters := Schema{
-		Xsappname:  fmt.Sprintf("%s_%s", strings.ReplaceAll(domain, ".", "_"), randomString(5)),
+		Xsappname:  xsappname,
 		TenantMode: "shared",
 		Scopes: []Scope{
 			{
@@ -52,11 +78,11 @@ func NewInstanceParameters(cfg Config, domain string) ([]byte, error) {
 				Description: "get user email",
 			},
 			{
-				Name:        fmt.Sprintf("$XSAPPNAME.%s", cfg.DeveloperGroup),
+				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.developerGroup),
 				Description: "Runtime developer access to all managed resources",
 			},
 			{
-				Name:        fmt.Sprintf("$XSAPPNAME.%s", cfg.NamespaceAdminGroup),
+				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.adminGroup),
 				Description: "Runtime admin access to all managed resources",
 			},
 		},
@@ -65,39 +91,39 @@ func NewInstanceParameters(cfg Config, domain string) ([]byte, error) {
 		},
 		RoleTemplates: []RoleTemplate{
 			{
-				Name:        cfg.DeveloperRole,
+				Name:        pb.developerRole,
 				Description: "Runtime developer access to all managed resources",
 				ScopeReferences: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.DeveloperGroup),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.developerGroup),
 				},
 			},
 			{
-				Name:        cfg.NamespaceAdminRole,
+				Name:        pb.adminRole,
 				Description: "Runtime admin access to all managed resources",
 				ScopeReferences: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.NamespaceAdminGroup),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.adminGroup),
 				},
 			},
 		},
 		RoleCollections: []RoleCollection{
 			{
-				Name:        cfg.DeveloperRole,
+				Name:        pb.developerRole,
 				Description: "Kyma Runtime Developer Role Collection for development tasks in given custom namespaces",
 				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.DeveloperRole),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.developerRole),
 				},
 			},
 			{
-				Name:        cfg.NamespaceAdminRole,
+				Name:        pb.adminRole,
 				Description: "Kyma Runtime Namespace Admin Role Collection for administration tasks across all custom namespaces",
 				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", cfg.NamespaceAdminRole),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.adminRole),
 				},
 			},
 		},
 		Oauth2Configuration: Oauth2Configuration{
 			RedirectUris: []string{
-				fmt.Sprintf("https://dex.%s/callback", strings.Trim(domain, "/")),
+				pb.redirectURL,
 			},
 			SystemAttributes: []string{
 				"groups",
@@ -114,6 +140,23 @@ func NewInstanceParameters(cfg Config, domain string) ([]byte, error) {
 	return marshalledParams, nil
 }
 
+func (pb *ParametersBuilder) xsappname(instance *v1beta1.ServiceInstance) (string, error) {
+	if instance == nil {
+		return fmt.Sprintf("%s_%s", strings.ReplaceAll(pb.domain, ".", "_"), randomString(5)), nil
+	}
+	if instance.Spec.ParametersFrom != nil {
+		// if ParametersFrom are not nil, it means ServiceInstance comes from SKR before 1.17
+		// which means xsappname was just a domain name with replaced chars
+		return strings.ReplaceAll(pb.domain, ".", "_"), nil
+	}
+	schema := &Schema{}
+	err := json.Unmarshal(instance.Spec.Parameters.Raw, schema)
+	if err != nil {
+		return "", errors.Wrap(err, "while unmarshal ServiceInstance parameters")
+	}
+	return schema.Xsappname, nil
+}
+
 func randomString(n int) string {
 	rand.Seed(time.Now().UnixNano())
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyz")
@@ -123,4 +166,11 @@ func randomString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+// roleName creates proper name for RoleTemplates and RoleCollections
+// according to SM the name may only include characters 'a'-'z', 'A'-'Z', '0'-'9', and '_'
+func roleName(name, domain string) string {
+	r := strings.NewReplacer(".", "_", ",", "_", ":", "", ";", "", "-", "_", "/", "", "\\", "")
+	return fmt.Sprintf("%s_%s", r.Replace(name), r.Replace(domain))
 }

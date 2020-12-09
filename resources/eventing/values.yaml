@@ -3,3 +3,22 @@ global:
   image:
     # repository is the container registry where the image for event-publisher-proxy is located in
     repository: "eu.gcr.io/kyma-project"
+
+  # secretName defines optionally another name than the default secret name
+  secretName: ""
+
+  # domainName is the global domain used in Kyma
+  domainName: ""
+
+authentication:
+  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
+  oauthClientId: ""
+  # oauthClientSecret is the Oauth2 secret used in order to get an Oauth2 token from BEB
+  oauthClientSecret: ""
+  # oauthTokenEndpoint is the Oauth2 endpoint from BEB from where Oauth2 tokens can be retrieved
+  oauthTokenEndpoint: ""
+  # publishUrl is the URL for publishing events to BEB
+  publishUrl: ""
+  # bebNamespace is the name of the namespace BEB is provisioned with
+  bebNamespace: ""
+

@@ -6,7 +6,7 @@ nameOverride:
 fullnameOverride:
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "68f2c44e"
+  tag: "c44616f0"
   pullPolicy: IfNotPresent
 
 commonLabels:
@@ -21,6 +21,13 @@ deployment:
   labels: {}
   annotations: {}
   extraProperties: {}
+  resources:
+    requests:
+      cpu: 30m
+      memory: 50Mi
+    limits:
+      cpu: 300m
+      memory: 300Mi
 
 pod:
   annotations:

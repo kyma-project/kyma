@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "5d3f2107"
+  tag: "8af556cd"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -83,7 +83,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: 9b08e575
+    version: 2546ae71
   env:
     testUser: "admin-user"
     timeout: 120
