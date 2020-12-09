@@ -5,6 +5,8 @@ expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/
 #We use this image prefix to detect if there's an istio proxy in the Pod. If you have different prefixes (shouldn't be the case), just define several jobs.
 istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-project/external/istio/proxyv2}"
 
+dryRun="${DRY_RUN:-false}"
+
 for NS in $(kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2); do
     "kubectl delete rs -n $NS --all"
 done
@@ -64,7 +66,11 @@ do
     namespace="${attributes[1]}"
     name="${attributes[2]}"
 
-    kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+    if [[ "${dryRun}" == "false" ]]; then
+        kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+    else
+        echo "[dryrun]" kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+    fi
 
 done
 
