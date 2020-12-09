@@ -2,12 +2,15 @@
   "name": "fast-integration",
   "version": "0.0.1",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --trace-warnings"
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.2.1",
     "@kubernetes/client-node": "^0.13.0"
+  },
+  "dependencies": {
+    "axios": "^0.21.0"
   }
 }
