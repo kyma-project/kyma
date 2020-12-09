@@ -1,4 +1,4 @@
-{{- if not .Values.global.deployGatewayOncePerNamespace }}
+{{- if and (not .Values.global.deployGatewayOncePerNamespace) .Values.autoscaling.enable }}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:

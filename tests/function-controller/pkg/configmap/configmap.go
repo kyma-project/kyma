@@ -10,10 +10,11 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 )
 
 type ConfigMap struct {
@@ -57,7 +58,7 @@ func (c *ConfigMap) Create(data map[string]string) error {
 }
 
 func (c *ConfigMap) Delete() error {
-	err := c.resCli.Delete(c.name, c.waitTimeout)
+	err := c.resCli.Delete(c.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ConfigMap %s in namespace %s", c.name, c.namespace)
 	}
