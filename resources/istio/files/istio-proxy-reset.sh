@@ -36,7 +36,6 @@ do
     parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
 
     case "${parentObjectKind}" in
-        #https://github.tools.sap/kyma/backlog/issues/1074
         ("null")
             ;&
         ("")
