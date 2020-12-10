@@ -19,7 +19,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/excludeInboundPorts: "8443"
+        traffic.sidecar.istio.io/excludeInboundPorts: "{{ .Values.port.secure }}"
         prometheus.io/port: "{{ .Values.port.metrics }}"
         prometheus.io/path: "/"
         prometheus.io/scrape: "true"
