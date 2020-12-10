@@ -1,0 +1,27 @@
+deployment:
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+autoscaling:
+  enable: false
+eventService:
+  deployment:
+    resources:
+      limits:
+        cpu: 10m
+        memory: 64Mi
+      requests:
+        cpu: 5m
+        memory: 16Mi
+applicationConnectivityValidator:
+  resources:
+    limits:
+      cpu: 10m
+      memory: 64Mi
+    requests:
+      cpu: 1m
+      memory: 16Mi

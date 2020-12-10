@@ -57,8 +57,6 @@ spec:
         - "/opt/kiali/kiali"
         - "-config"
         - "/kiali-configuration/config.yaml"
-        - "-v"
-        - "{{ .Values.kiali.spec.deployment.verbose_mode }}"
         ports:
         - name: api-port
           containerPort: {{ .Values.kiali.spec.server.port | default 20001 }}
@@ -93,8 +91,16 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        - name: LOG_LEVEL
+          value: "{{ include "kiali-server.logLevel" . }}"
+        - name: LOG_FORMAT
+          value: "{{ .Values.kiali.spec.deployment.logger.log_format }}"
+        - name: LOG_TIME_FIELD_FORMAT
+          value: "{{ .Values.kiali.spec.deployment.logger.time_field_format }}" 
+        - name: LOG_SAMPLER_RATE
+          value: "{{ .Values.kiali.spec.deployment.logger.sampler_rate }}"
         volumeMounts:
-        - name: {{ include "kiali-server.fullname" . }}
+        - name: {{ include "kiali-server.fullname" . }}-configuration
           mountPath: "/kiali-configuration"
         - name: {{ include "kiali-server.fullname" . }}-cert
           mountPath: "/kiali-cert"
@@ -109,7 +115,7 @@ spec:
         {{- toYaml .Values.kiali.spec.deployment.resources | nindent 10 }}
         {{- end }}
       volumes:
-      - name: {{ include "kiali-server.fullname" . }}
+      - name: {{ include "kiali-server.fullname" . }}-configuration
         configMap:
           name: {{ include "kiali-server.fullname" . }}-server
       - name: {{ include "kiali-server.fullname" . }}-cert
@@ -154,3 +160,4 @@ spec:
       nodeSelector:
       {{- toYaml .Values.kiali.spec.deployment.node_selector | nindent 8 }}
       {{- end }}
+...

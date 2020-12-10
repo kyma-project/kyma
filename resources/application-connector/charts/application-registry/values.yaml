@@ -12,6 +12,13 @@ deployment:
     insecureAssetDownload: true
     insecureSpecDownload: false
     detailedErrorResponse: false
+  resources:
+    limits:
+      cpu: 100m
+      memory: 96Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
 
 service:
   externalapi:

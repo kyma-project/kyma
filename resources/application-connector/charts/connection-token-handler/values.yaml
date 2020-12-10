@@ -1,6 +1,13 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 100m
+      memory: 96Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
 tests:
   central: false
   image:
