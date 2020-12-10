@@ -9,7 +9,7 @@ By default, only 1% of the requests are sent to Jaeger for trace recording. To c
 
 ## Create an override
 
-Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
+Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
 
 1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **trace sampling** attribute to `60`.
 

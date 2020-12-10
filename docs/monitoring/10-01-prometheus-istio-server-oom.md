@@ -44,7 +44,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
     > **CAUTION:** The side effect of this change is graphs in Kiali will not work.
 
 ## Create an override
-Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
+Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
 
 1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and/or **drop the labels** from Istio metrics.
 
