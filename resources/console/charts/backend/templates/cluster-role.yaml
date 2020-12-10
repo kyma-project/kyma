@@ -71,3 +71,6 @@ rules:
   - apiGroups: ["hydra.ory.sh"]
     resources: ["oauth2clients"]
     verbs: ["list", "get", "create", "update", "delete", "watch"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["list", "create", "update", "delete", "watch"]
