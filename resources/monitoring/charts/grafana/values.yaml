@@ -128,7 +128,8 @@ service:
   targetPort: 3000
     # targetPort: 4181 To be used with a proxy extraContainer
   annotations: {}
-  labels: {}
+  labels:
+    app.kubernetes.io/component: grafana
   portName: http-service
 
 serviceMonitor:
