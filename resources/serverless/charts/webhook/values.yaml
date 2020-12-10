@@ -16,8 +16,6 @@ commonLabels:
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
 
-webhook:
-  webhookMatchExp: []
 
 deployment:
   replicas: 1

@@ -1,10 +1,4 @@
 webhook:
-  webhook:
-    webhookMatchExp:
-    - key: name
-      operator: NotIn
-      values:
-      - kube-system
   values:
     buildJob:
       resources:
