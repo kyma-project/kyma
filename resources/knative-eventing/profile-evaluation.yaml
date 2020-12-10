@@ -1,0 +1,15 @@
+knative-eventing:
+  webhook:
+    failuePolicy: Ignore
+    webhookMatchExp:
+    - key: gardener.cloud/purpose
+      operator: NotIn
+      values:
+      - kube-system
+      - kyma-system
+      - kyma-installer
+      - istio-system
+    - key: name
+      operator: NotIn
+      values:
+      - kube-system
