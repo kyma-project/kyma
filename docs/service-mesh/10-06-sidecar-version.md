@@ -12,24 +12,35 @@ Kyma contains an `istio-proxy-reset` job, that performs a rollout for most commo
 Certain kinds of user-defined workloads can't be rolled out automatically, for example, a standalone Pod without any backing management mechanism (like ReplicaSet or a Job).
 Such user-defined workloads (that are not part of Kyma) must be manually restarted to work correctly with the updated Istio version.
 
-To find if any pods/workloads require a manual restart, you can:
+To find if any pods/workloads require a manual restart please follow the steps:
 
-* Get the list of Pods with outdated sidecar version. You can get the Istio version for a Kyma release from the Istio chart version located in `resources/Istio/Chart.yaml` file. The returned list is in `name/namespace` format, empty output means no Pods require migration. Use the following command:
+1) Get the installed Istio version using either method:
 
-    ```bash
-    EXPECTED_ISTIO_PROXY_IMAGE="1.7.4-distroless" #Valid for Kyma: 1.17.x, 1.18.x
-    COMMON_ISTIO_PROXY_IMAGE_PREFIX="eu.gcr.io/kyma-project/external/istio/proxyv2"
-    kubectl get pods -A -o json | jq -rc '.items | .[] | select(.spec.containers[].image | startswith("'"${COMMON_ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${EXPECTED_ISTIO_PROXY_IMAGE}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
-    ```
+    * From istiod deployment
+        ```bash
+        export KYMA_ISTIO_VERSION=$(kubectl get deployment istiod -n istio-system -o json | jq '.spec.template.spec.containers | .[].image' | sed 's/[^:"]*[:]//' | sed 's/["]//g')
+        ```
+
+    * From Kyma sources:
+        ```bash
+        export KYMA_ISTIO_VERSION=$(cat resources/istio/Chart.yaml | grep version | sed 's/[^:]*[:]//' | sed 's/ //g')
+        ```
+
+2) Get the list of objects which require rollout, using any method:
+
+    * Find all Pods with outdated sidecars. The returned list is in `name/namespace` format, empty output means no Pods require migration.
+        ```bash
+        COMMON_ISTIO_PROXY_IMAGE_PREFIX="eu.gcr.io/kyma-project/external/istio/proxyv2"
+        kubectl get pods -A -o json | jq -rc '.items | .[] | select(.spec.containers[].image | startswith("'"${COMMON_ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${KYMA_ISTIO_VERSION}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
+        ```
 
 
-* Run the `istio-proxy-reset` script in dry-run mode. Execute the command from within the directory with checked-out Kyma sources. You can get the Istio version for the Kyma release from the Istio chart version located in `resources/Istio/Chart.yaml` file. The output contains information about objects (Pods, Deployments, etc.) that require rollout.
-
-    ```bash
-    EXPECTED_ISTIO_PROXY_IMAGE="1.7.4-distroless" #Valid for Kyma: 1.17.x, 1.18.x
-    COMMON_ISTIO_PROXY_IMAGE_PREFIX="eu.gcr.io/kyma-project/external/istio/proxyv2"
-    DRY_RUN="true"
-    ./resources/istio/files/istio-proxy-reset.sh
-    ```
+    * Run the `istio-proxy-reset` script in dry-run mode. Execute the command from within the directory with checked-out Kyma sources. The output contains information about objects (Pods, Deployments, etc.) that require rollout.
+        ```bash
+        EXPECTED_ISTIO_PROXY_IMAGE="${KYMA_ISTIO_VERSION}"
+        COMMON_ISTIO_PROXY_IMAGE_PREFIX="eu.gcr.io/kyma-project/external/istio/proxyv2"
+        DRY_RUN="true"
+        ./resources/istio/files/istio-proxy-reset.sh
+        ```
 
 After you found a set of objects that require the manual update, restart their related workloads so that new Istio sidecars are injected into the Pods.
