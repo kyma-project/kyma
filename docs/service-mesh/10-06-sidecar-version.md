@@ -4,7 +4,7 @@ type: Troubleshooting
 ---
 
 
-Kyma has sidecar injection enabled by default - a sidecar is injected to every Deployment in a cluster, without the need to add any labels. For more information, read [this document](#details-sidecar-proxy-injection).
+Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster, without the need to add any labels. For more information, read [this document](#details-sidecar-proxy-injection).
 
 The sidecar version in Pods must match the installed Istio version, otherwise mesh connectivity may be broken.
 This is not an issue when installing Kyma, but it may be a problem during upgrades. When Kyma is upgraded to a new version along with a new Istio version, existing sidecars injected into Pods remain in an original version.
