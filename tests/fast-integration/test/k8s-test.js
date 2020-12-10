@@ -26,7 +26,7 @@ const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const tokenRequestObj = k8s.loadYaml(tokenRequestYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
 
-function retryPromise(fn, retriesLeft = 3, interval = 200) {
+function retryPromise(fn, retriesLeft = 10, interval = 30) {
   return new Promise((resolve, reject) => {
     return fn()
       .then(resolve)
@@ -47,7 +47,7 @@ function retryPromise(fn, retriesLeft = 3, interval = 200) {
 }
 
 describe("Commerce Mock tests", function () {
-  this.timeout(300 * 1000); // 50s
+  this.timeout(300 * 1000);
 
   after(async function () {
     this.timeout(10 * 10000);
@@ -84,31 +84,38 @@ describe("Commerce Mock tests", function () {
       await Promise.all(commerceObjs.map((obj) => k8sDynamicApi.create(obj)));
     } catch (err) {
       // console.error(err);
-      expect(err.body.message).to.be.empty;
     }
 
-    await sleep(5000); // TODO: add waiting for virtualservice
-
-    console.log("Waiting for virtual service to be ready...");
     let virtualservice;
     try {
-      virtualservice = await k8sCRDApi.listNamespacedCustomObject(
-        "networking.istio.io",
-        "v1beta1",
-        "mocks",
-        "virtualservices",
-        "true",
-        undefined,
-        undefined,
-        "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks"
+      console.log("Waiting for virtual service to be ready...");
+      virtualservice = await retryPromise(
+        () => {
+          return k8sCRDApi
+            .listNamespacedCustomObject(
+              "networking.istio.io",
+              "v1beta1",
+              "mocks",
+              "virtualservices",
+              "true",
+              undefined,
+              undefined,
+              "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks"
+            )
+            .then((res) => {
+              expect(res.body.items).to.have.lengthOf(1);
+              expect(res.body.items[0]).to.have.nested.property("spec.hosts");
+              expect(res.body.items[0].spec.hosts).to.have.lengthOf(1);
+              expect(res.body.items[0].spec.hosts[0]).not.to.be.empty;
+              return res;
+            });
+        },
+        10,
+        100
       );
     } catch (err) {
-      console.error(err.body.message);
+      expect(err.body.message).to.be.empty;
     }
-
-    expect(virtualservice.body.items).to.have.lengthOf(1);
-    expect(virtualservice.body.items[0].spec.hosts).to.have.lengthOf(1);
-    expect(virtualservice.body.items[0].spec.hosts[0]).not.to.be.empty;
 
     const mockHost = virtualservice.body.items[0].spec.hosts[0];
     const host = mockHost.split(".").slice(1).join(".");
@@ -133,21 +140,11 @@ describe("Commerce Mock tests", function () {
       expect(err).to.be.empty;
     }
 
-    // let response;
-    // try {
-    //   console.log(`Calling https://${mockHost}/local/apis`);
-    //   response = await axios.get(`https://${mockHost}/local/apis`);
-    // } catch (error) {
-    //   expect(error).to.be.empty;
-    // }
-
     expect(response.data).to.have.lengthOf(2);
     expect(response.data[0].provider).not.to.be.empty;
     // TODO: discuss with PB whether it's needed
     // TODO2: tests do not seem to pass without it, but we do not use provider variable anywhere, needs to be discussed
     const provider = response.data[0].provider;
-
-    await sleep(5000); // TODO: introduce proper mechanism that waits till commerce-application-gateway exists
 
     let commerceApplicationGatewayDeployment;
     try {
@@ -180,17 +177,24 @@ describe("Commerce Mock tests", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    await sleep(10 * 1000);
-
     let tokenObj;
     try {
-      console.log("Reading TokenRequest .status.token");
-      tokenObj = await k8sDynamicApi.read(tokenRequestObj);
+      tokenObj = await retryPromise(
+        async () => {
+          console.log("Reading TokenRequest .status.token");
+          return k8sDynamicApi.read(tokenRequestObj).then((res) => {
+            expect(res.body).to.have.nested.property("status.token");
+            return res;
+          });
+        },
+        5,
+        5000
+      );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
-    // TODO make sure that .status.token exists first
+    expect(tokenObj.body).to.have.nested.property("status.token");
     expect(tokenObj.body.status.token).not.to.be.empty;
 
     const token = tokenObj.body.status.token;
@@ -242,8 +246,6 @@ describe("Commerce Mock tests", function () {
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
-
-    // await sleep(10000);
 
     let commerceWebservicesResp;
     try {
@@ -315,8 +317,8 @@ describe("Commerce Mock tests", function () {
             k8s.loadYaml(genericServiceClass(commerceWebservicesID, "default"))
           );
         },
-        10,
-        3000
+        15,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -377,8 +379,10 @@ describe("Commerce Mock tests", function () {
 
           console.log("Checking if event reached lambda");
           return axios.get(`https://lastorder.${host}`).then((res) => {
-            expect(res.data).to.have.property("totalPriceWithTax.value", 100);
-            console.log(res.data);
+            expect(res.data).to.have.nested.property(
+              "totalPriceWithTax.value",
+              100
+            );
             return res;
           });
         },
@@ -388,7 +392,11 @@ describe("Commerce Mock tests", function () {
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
+
     console.timeEnd("waiting for sbu...");
+    expect(functionResp.data).to.have.nested.property(
+      "totalPriceWithTax.value"
+    );
     expect(functionResp.data.totalPriceWithTax.value).to.equal(100);
     console.log("Done!");
   });
