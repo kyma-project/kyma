@@ -409,10 +409,9 @@ function testIstio() {
 	local -r resources=(
 	    "authorizationpolicies.security.istio.io" "destinationrules.networking.istio.io" 
 	    "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
-	    "peerauthentications.security.istio.io" "quotaspecbindings.config.istio.io"
-	    "requestauthentications.security.istio.io" "serviceentries.networking.istio.io" 
-	    "sidecars.networking.istio.io" "virtualservices.networking.istio.io" 
-	    "workloadentries.networking.istio.io" )
+	    "peerauthentications.security.istio.io" "requestauthentications.security.istio.io" 
+	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" 
+	    "virtualservices.networking.istio.io" "workloadentries.networking.istio.io" )
 
 	# View
 	for resource in "${resources[@]}"; do
