@@ -201,9 +201,9 @@ endpoints:
 func fixService(namespace, name, testID string) v1.Service {
 	return v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Labels:      map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
