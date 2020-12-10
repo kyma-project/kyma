@@ -227,7 +227,6 @@ func fixService(namespace, name string) v1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
-			Annotations: map[string]string{"auth.istio.io/80": "NONE"},
 			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 		Spec: v1.ServiceSpec{

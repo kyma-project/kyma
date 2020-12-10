@@ -203,7 +203,6 @@ func fixService(namespace, name, testID string) v1.Service {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
-			Annotations: map[string]string{"auth.istio.io/80": "NONE"},
 			Labels:      map[string]string{"owner": "rafter-tests", "app": name, "test-id": testID},
 		},
 		Spec: v1.ServiceSpec{
