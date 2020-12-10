@@ -7,6 +7,7 @@ package domain
 import (
 	"math/rand"
 	"time"
+
 	// "fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/roles"
@@ -132,12 +133,11 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 
 	// if useEventSubscription == true {
 	// 	fmt.Printf("Enabling module bebeventing...\n")
-		makePluggable(bebEventingResolver)
+	makePluggable(bebEventingResolver)
 	// } else {
 	// 	fmt.Printf("Enabling module eventing...\n")
-		makePluggable(eventingResolver)
+	makePluggable(eventingResolver)
 	// }
-	
 
 	oAuthResolver := oauth.New(genericServiceFactory)
 	makePluggable(oAuthResolver)

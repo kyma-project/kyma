@@ -3,7 +3,7 @@ package bebEventing
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -93,9 +93,9 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace str
 	return channel, nil
 }
 
-func (r *Resolver) getBEBSourceName() (string, error){
-	name:="test-beb-secret"
-	namespace:="default"
+func (r *Resolver) getBEBSourceName() (string, error) {
+	name := "test-beb-secret"
+	namespace := "default"
 
 	var result *v1.Secret
 	err := r.SecretsService().GetInNamespace(name, namespace, &result)
@@ -103,10 +103,9 @@ func (r *Resolver) getBEBSourceName() (string, error){
 		return "", err
 	}
 	sourceName := result.Data["beb-namespace"]
-   
+
 	return string(sourceName), nil
 }
-
 
 func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, namespace string, sourceName string) v1alpha1.SubscriptionSpec {
 	protocolSettings := &v1alpha1.ProtocolSettings{

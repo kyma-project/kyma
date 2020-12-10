@@ -11,7 +11,7 @@ type Resolver struct {
 func New(factory *resource.GenericServiceFactory) *Resolver {
 	module := resource.NewModule("eventing", factory, resource.ServiceCreators{
 		subscriptionsGroupVersionResource: NewService,
-		secretsGroupVersionResource: NewSecretsService,
+		secretsGroupVersionResource:       NewSecretsService,
 	})
 
 	return &Resolver{

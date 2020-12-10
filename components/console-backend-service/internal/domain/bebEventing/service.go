@@ -2,12 +2,12 @@ package bebEventing
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
-	v1 "k8s.io/api/core/v1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/tools/cache"
 )
 
 var subscriptionsKind = "Subscription"
