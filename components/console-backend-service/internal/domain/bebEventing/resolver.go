@@ -3,10 +3,14 @@ package bebEventing
 import (
 	"context"
 	"fmt"
+	
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1 "k8s.io/api/core/v1"
 )
 
 type EventSubscriptionList []*v1alpha1.Subscription
@@ -24,7 +28,11 @@ func (r *Resolver) EventSubscriptionsQuery(ctx context.Context, ownerName string
 }
 
 func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string, name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
-	spec := r.createSpec(params, namespace)
+	sourceName, err := r.getBEBSourceName()
+	if err != nil {
+		return nil, errors.Wrapf(err, "while fetching sourceName")
+	}
+	spec := r.createSpec(params, namespace, sourceName)
 
 	eventSubscription := &v1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -42,14 +50,18 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 	}
 
 	result := &v1alpha1.Subscription{}
-	err := r.Service().Create(eventSubscription, result)
+	err = r.Service().Create(eventSubscription, result)
 	return result, err
 }
 
 func (r *Resolver) UpdateEventSubscription(ctx context.Context, namespace string, name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
 	result := &v1alpha1.Subscription{}
-	err := r.Service().UpdateInNamespace(name, namespace, result, func() error {
-		result.Spec = r.createSpec(params, namespace)
+	sourceName, err := r.getBEBSourceName()
+	if err != nil {
+		return nil, errors.Wrapf(err, "while fetching sourceName")
+	}
+	err = r.Service().UpdateInNamespace(name, namespace, result, func() error {
+		result.Spec = r.createSpec(params, namespace, sourceName)
 		return nil
 	})
 	return result, err
@@ -81,7 +93,22 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace str
 	return channel, nil
 }
 
-func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, namespace string) v1alpha1.SubscriptionSpec {
+func (r *Resolver) getBEBSourceName() (string, error){
+	name:="test-beb-secret"
+	namespace:="default"
+
+	var result *v1.Secret
+	err := r.SecretsService().GetInNamespace(name, namespace, &result)
+	if err != nil {
+		return "", err
+	}
+	sourceName := result.Data["beb-namespace"]
+   
+	return string(sourceName), nil
+}
+
+
+func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, namespace string, sourceName string) v1alpha1.SubscriptionSpec {
 	protocolSettings := &v1alpha1.ProtocolSettings{
 		ContentMode:     "",
 		ExemptHandshake: true,
@@ -91,7 +118,7 @@ func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, names
 
 	bebFilters := &v1alpha1.BebFilters{
 		Dialect: "beb,",
-		Filters: r.createBebFilters(params.Filters),
+		Filters: r.createBebFilters(params.Filters, sourceName),
 	}
 
 	spec := v1alpha1.SubscriptionSpec{
@@ -103,10 +130,11 @@ func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, names
 	return spec
 }
 
-func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput) []*v1alpha1.BebFilter {
+func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput, sourceName string) []*v1alpha1.BebFilter {
+
 	eventSource := v1alpha1.Filter{
 		Type:     "exact",
-		Property: "/default/sap.kyma/kh", //TODO
+		Property: fmt.Sprintf("/default/sap.kyma/%s", sourceName),
 		Value:    "source",
 	}
 

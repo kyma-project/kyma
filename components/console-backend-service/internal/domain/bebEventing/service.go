@@ -1,13 +1,11 @@
 package bebEventing
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/tools/cache"
-
+	v1 "k8s.io/api/core/v1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -17,6 +15,11 @@ var subscriptionsGroupVersionResource = schema.GroupVersionResource{
 	Version:  "v1alpha1",
 	Group:    "eventing.kyma-project.io",
 	Resource: "subscriptions",
+}
+var secretsGroupVersionResource = schema.GroupVersionResource{
+	Version:  v1.SchemeGroupVersion.Version,
+	Group:    v1.SchemeGroupVersion.Group,
+	Resource: "secrets",
 }
 
 var eventSubscriptionServiceIndex = "service"
@@ -29,6 +32,10 @@ type Service struct {
 	*resource.Service
 }
 
+func NewSecretsService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
+	return serviceFactory.ForResource(secretsGroupVersionResource), nil
+}
+
 func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
 	service := serviceFactory.ForResource(subscriptionsGroupVersionResource)
 	err := service.AddIndexers(cache.Indexers{
@@ -39,8 +46,6 @@ func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.Gener
 				return nil, err
 			}
 			if len(subscription.ObjectMeta.OwnerReferences) == 0 {
-				fmt.Println(len(subscription.ObjectMeta.OwnerReferences))
-				fmt.Println(subscription.ObjectMeta.OwnerReferences)
 				return nil, nil
 			}
 			return []string{eventSubscriptionServiceIndexKey(subscription.ObjectMeta.Namespace, subscription.ObjectMeta.OwnerReferences[0].Name)}, nil
