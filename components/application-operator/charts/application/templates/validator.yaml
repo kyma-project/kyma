@@ -81,7 +81,7 @@ spec:
               name: http-api-port
           resources:
             requests:
-              memory: {{ .Values.validator.deployment.resources.requests.memory }}
+              memory: {{ .Values.applicationConnectivityValidator.deployment.resources.requests.memory }}
 ---
 apiVersion: v1
 kind: Service

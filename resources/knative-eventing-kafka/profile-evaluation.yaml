@@ -4,4 +4,4 @@ dispatcher:
 
 controller:
   memoryRequest: 12Mi
-  cpuRequest: 25m
+  cpuRequest: 20m
