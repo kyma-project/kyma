@@ -30,14 +30,8 @@ deployment:
 pod:
   labels: {}
   annotations: {}
-  extraProperties:
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-  extraContainerProperties:
-    securityContext:
-      privileged: false
-      allowPrivilegeEscalation: false
+  extraProperties: {}
+  extraContainerProperties: {}
   resources:
     requests:
       memory: 64Mi

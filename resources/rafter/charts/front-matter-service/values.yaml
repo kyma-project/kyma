@@ -20,21 +20,15 @@ deployment:
 pod:
   labels: {}
   annotations: {}
-  extraProperties:
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-  extraContainerProperties:
-    securityContext:
-      privileged: false
-      allowPrivilegeEscalation: false
+  extraProperties: {}
+  extraContainerProperties: {}
   resources:
     limits:
       cpu: 150m
       memory: 128Mi
     requests:
       cpu: 50m
-      memory: 64Mi
+      memory: 64M
 
 service:
   name:

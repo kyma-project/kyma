@@ -42,6 +42,5 @@ COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 #
 # Run tests
 #
-USER 1000
 
 CMD ["/app/main.test"]

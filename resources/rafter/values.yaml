@@ -56,13 +56,7 @@ controller-manager:
       - mountPath: /tmp
         name: tmp-empty-dir
     extraProperties:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-    extraContainerProperties:
-      securityContext:
-        privileged: false
-        allowPrivilegeEscalation: false
+      terminationGracePeriodSeconds: 10
 
   webhooksConfigMap:
     create: true
@@ -212,18 +206,6 @@ controller-manager:
     image:
       tag: RELEASE.2020-09-21T22-31-59Z-1d81f948
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
-
-    pod:
-      extraProperties:
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
-          fsGroup: 1000
-          runAsGroup: 1000
-      extraContainerProperties:
-        securityContext:
-          privileged: false
-          allowPrivilegeEscalation: false
 
     persistence:
       enabled: true
