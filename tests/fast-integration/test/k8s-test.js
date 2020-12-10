@@ -59,7 +59,12 @@ describe("Commerce Mock tests", function () {
     try {
       // we can extract namespace creation into seperate step and ignore AlreadyExists error
       console.log("Creating commerce resources...");
-      await Promise.all(commerceObjs.map((obj) => k8sDynamicApi.create(obj)));
+      await Promise.all(
+        // TODO: merge commerceObjs and appConnectorObjs into one big yaml
+        [...commerceObjs, ...appConnectorObjs].map((obj) =>
+          k8sDynamicApi.create(obj)
+        )
+      );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
@@ -88,16 +93,9 @@ describe("Commerce Mock tests", function () {
     expect(virtualservice.body.items[0].spec.hosts[0]).not.to.be.empty;
 
     const mockHost = virtualservice.body.items[0].spec.hosts[0];
+    const host = mockHost.split(".").slice(1).join(".");
+    console.log(`Host: ${host}`);
     console.log(`Mock host: ${mockHost}`);
-
-    try {
-      console.log("Creating application connector resources");
-      await Promise.all(
-        appConnectorObjs.map((obj) => k8sDynamicApi.create(obj))
-      );
-    } catch (err) {
-      expect(err.body.message).to.be.empty;
-    }
 
     await sleep(40000); // TODO: add retries for axios.get instead of sleep
 
@@ -111,7 +109,9 @@ describe("Commerce Mock tests", function () {
 
     expect(response.data).to.have.lengthOf(2);
     expect(response.data[0].provider).not.to.be.empty;
-    const provider = response.data[0].provider; // TODO: discuss with PB whether it's needed
+    // TODO: discuss with PB whether it's needed
+    // TODO2: tests do not seem to pass without it, but we do not use provider variable anywhere, needs to be discussed
+    const provider = response.data[0].provider;
 
     await sleep(5000); // TODO: introduce proper mechanism that waits till commerce-application-gateway exists
 
@@ -163,8 +163,6 @@ describe("Commerce Mock tests", function () {
 
     await sleep(15 * 1000);
 
-    const host = mockHost.split(".").slice(1).join(".");
-    console.log(`Host: ${host}`);
     try {
       console.log(`Conneting to https://${mockHost}/connection`);
       await axios.post(
