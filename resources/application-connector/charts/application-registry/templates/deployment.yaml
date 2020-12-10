@@ -25,6 +25,7 @@ spec:
   template:
     metadata:
       annotations:
+        traffic.sidecar.istio.io/excludeInboundPorts: "{{ .Values.service.externalapi.port }}"
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Chart.Name }}

@@ -23,6 +23,7 @@ spec:
   template:
     metadata:
       annotations:
+        traffic.sidecar.istio.io/excludeInboundPorts: "{{ .Values.service.externalPort }}"
         sidecar.istio.io/inject: "true"
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:

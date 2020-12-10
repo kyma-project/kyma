@@ -237,8 +237,7 @@ controller-manager:
       persistence: "on"
 
     service:
-      annotations:
-        auth.istio.io/9000: NONE
+      annotations: {}
 
     environment:
       MINIO_BROWSER: "off"
