@@ -403,6 +403,8 @@ func shouldIgnoreAlert(alert prom.Alert) bool {
 	var alertNamesToIgnore = []string{
 		// Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
 		"Watchdog",
+		// Scrape limits can be exceeded on long-running clusters and can be ignored
+		"ScrapeLimitForTargetExceeded",
 	}
 
 	for _, name := range alertNamesToIgnore {
