@@ -18,6 +18,7 @@ spec:
   template:
     metadata:
       annotations:
+        traffic.sidecar.istio.io/excludeInboundPorts: "{{.Values.compassRuntimeAgent.director.proxy.port}}"
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Chart.Name }}

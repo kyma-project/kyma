@@ -6,6 +6,7 @@ deploy:
   annotations:
     sidecar.istio.io/inject: "true"
     sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    traffic.sidecar.istio.io/excludeInboundPorts: "80"
 
 ctrl:
   tmpDirSizeLimit: 1Gi
