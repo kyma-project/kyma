@@ -73,4 +73,4 @@ rules:
     verbs: ["list", "get", "create", "update", "delete", "watch"]
   - apiGroups: ["eventing.kyma-project.io"]
     resources: ["subscriptions"]
-    verbs: ["get", "create", "update", "delete", "watch"]
+    verbs: ["list", "create", "update", "delete", "watch"]
