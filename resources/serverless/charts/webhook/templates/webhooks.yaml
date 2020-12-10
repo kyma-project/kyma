@@ -23,7 +23,7 @@ metadata:
     {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
 webhooks:
   - admissionReviewVersions:
-    - v1beta1
+      - v1beta1
     clientConfig:
       service:
         name: {{ template "webhook.fullname" . }}
