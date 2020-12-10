@@ -16,7 +16,7 @@ knative-eventing:
       apiVersion: messaging.knative.dev/v1alpha1
       kind: NatssChannel
   webhook:
-    failuePolicy: Fail
+    failurePolicy: Fail
     # default timeout for Mutating and Validating Webhooks
     timeout: 10
     # Additional matchExpressions for Webhook Configuration
