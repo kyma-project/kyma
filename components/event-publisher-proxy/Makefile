@@ -71,7 +71,7 @@ push-image: $(cmds_images_push) ;
 #   make event-publisher-proxy
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/event-publisher-proxy
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: resolve-local
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
