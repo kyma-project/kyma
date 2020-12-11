@@ -138,7 +138,7 @@ spec:
         image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
         imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
         {{- end }}
         command:
         - bash
@@ -152,7 +152,7 @@ spec:
         image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
         imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
         {{- end }}
         command:
         - /bin/sh
@@ -225,7 +225,7 @@ spec:
         image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
         imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
         {{- end }}
         command: ["/bin/sh", "/config/initialize"]
         env:

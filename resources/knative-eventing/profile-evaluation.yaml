@@ -1,6 +1,6 @@
 knative-eventing:
   webhook:
-    failuePolicy: Ignore
+    failurePolicy: Ignore
     webhookMatchExp:
     - key: gardener.cloud/purpose
       operator: NotIn
