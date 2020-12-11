@@ -2,13 +2,15 @@ package bebEventing
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	"k8s.io/client-go/kubernetes"
 )
 
 type Resolver struct {
 	*resource.Module
+	client *kubernetes.Clientset
 }
 
-func New(factory *resource.GenericServiceFactory) *Resolver {
+func New(factory *resource.GenericServiceFactory, client *kubernetes.Clientset) *Resolver {
 	module := resource.NewModule("eventing", factory, resource.ServiceCreators{
 		subscriptionsGroupVersionResource: NewService,
 		secretsGroupVersionResource:       NewSecretsService,
@@ -16,6 +18,7 @@ func New(factory *resource.GenericServiceFactory) *Resolver {
 
 	return &Resolver{
 		Module: module,
+		client: client,
 	}
 }
 

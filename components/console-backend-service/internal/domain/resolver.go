@@ -5,6 +5,8 @@ package domain
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
+	"fmt"
+	"k8s.io/client-go/kubernetes"
 	"math/rand"
 	"time"
 
@@ -63,7 +65,7 @@ func GetRandomNumber() time.Duration {
 	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string, useEventSubscription bool) (*Resolver, error) {
+func New(kubeClient *kubernetes.Clientset, restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string, useEventSubscription bool) (*Resolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -129,15 +131,17 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	makePluggable(newServerlessResolver)
 
 	eventingResolver := eventing.New(genericServiceFactory)
-	bebEventingResolver := bebEventing.New(genericServiceFactory)
+	bebEventingResolver := bebEventing.New(genericServiceFactory, kubeClient)
 
-	// if useEventSubscription == true {
-	// 	fmt.Printf("Enabling module bebeventing...\n")
-	makePluggable(bebEventingResolver)
-	// } else {
-	// 	fmt.Printf("Enabling module eventing...\n")
-	makePluggable(eventingResolver)
-	// }
+	if useEventSubscription {
+		fmt.Printf("Enabling module bebeventing...\n")
+		makePluggable(bebEventingResolver)
+		eventingResolver.Disable()
+	} else {
+		fmt.Printf("Enabling module eventing...\n")
+		makePluggable(eventingResolver)
+		bebEventingResolver.Disable()
+	}
 
 	oAuthResolver := oauth.New(genericServiceFactory)
 	makePluggable(oAuthResolver)

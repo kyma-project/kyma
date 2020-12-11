@@ -71,11 +71,11 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath, cfg.Burst)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.Rafter, cfg.Serverless, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces, cfg.EventSubscription)
-	exitOnError(err, "Error while creating resolvers")
-
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
 	exitOnError(err, "Failed to instantiate Kubernetes client")
+
+	resolvers, err := domain.New(kubeClient, k8sConfig, cfg.Application, cfg.Rafter, cfg.Serverless, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces, cfg.EventSubscription)
+	exitOnError(err, "Error while creating resolvers")
 
 	gqlCfg := gqlschema.Config{Resolvers: resolvers}
 

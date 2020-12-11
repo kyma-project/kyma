@@ -9,8 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "k8s.io/api/core/v1"
 )
 
 type EventSubscriptionList []*v1alpha1.Subscription
@@ -33,7 +31,6 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 		return nil, errors.Wrapf(err, "while fetching sourceName")
 	}
 	spec := r.createSpec(params, namespace, sourceName)
-
 	eventSubscription := &v1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: subscriptionsGroupVersionResource.GroupVersion().String(),
@@ -98,16 +95,15 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace str
 }
 
 func (r *Resolver) getBEBSourceName() (string, error) {
-	name := "test-beb-secret"
-	namespace := "default"
+	secrets, err := r.client.CoreV1().Secrets("kyma-installer").List(metav1.ListOptions{
+		LabelSelector:       "component=eventing",
+	})
 
-	var result *v1.Secret
-	err := r.SecretsService().GetInNamespace(name, namespace, &result)
 	if err != nil {
 		return "", err
 	}
-	sourceName := result.Data["beb-namespace"]
 
+	sourceName := secrets.Items[0].Data["authentication.bebNamespace"]
 	return string(sourceName), nil
 }
 
@@ -137,7 +133,7 @@ func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput, sourceNam
 
 	eventSource := v1alpha1.Filter{
 		Type:     "exact",
-		Property: fmt.Sprintf("/default/sap.kyma/%s", sourceName),
+		Property: sourceName,
 		Value:    "source",
 	}
 
