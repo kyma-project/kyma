@@ -8,7 +8,11 @@ istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-pro
 dryRun="${DRY_RUN:-false}"
 
 for NS in $(kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2); do
-    "kubectl delete rs -n $NS --all"
+    if [[ "${dryRun}" == "false" ]]; then
+        kubectl delete rs -n "${NS}" --all
+    else
+        echo "[dryrun] kubectl delete rs -n ${NS}"
+    fi
 done
 
 declare -A objectsToRestart
@@ -68,7 +72,7 @@ do
     if [[ "${dryRun}" == "false" ]]; then
         kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
     else
-        echo "[dryrun]" kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+        echo "[dryrun] kubectl rollout restart ${kind} ${name} -n ${namespace}"
     fi
 
 done
