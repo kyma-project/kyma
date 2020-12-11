@@ -7,13 +7,12 @@ import (
 
 type Resolver struct {
 	*resource.Module
-	client *kubernetes.Clientset
+	client kubernetes.Interface
 }
 
-func New(factory *resource.GenericServiceFactory, client *kubernetes.Clientset) *Resolver {
+func New(factory *resource.GenericServiceFactory, client kubernetes.Interface) *Resolver {
 	module := resource.NewModule("eventing", factory, resource.ServiceCreators{
 		subscriptionsGroupVersionResource: NewService,
-		secretsGroupVersionResource:       NewSecretsService,
 	})
 
 	return &Resolver{
@@ -24,8 +23,4 @@ func New(factory *resource.GenericServiceFactory, client *kubernetes.Clientset) 
 
 func (r *Resolver) Service() *resource.GenericService {
 	return r.Module.Service(subscriptionsGroupVersionResource)
-}
-
-func (r *Resolver) SecretsService() *resource.GenericService {
-	return r.Module.Service(secretsGroupVersionResource)
 }

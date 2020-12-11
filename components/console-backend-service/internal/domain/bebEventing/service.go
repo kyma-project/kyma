@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
@@ -16,11 +15,6 @@ var subscriptionsGroupVersionResource = schema.GroupVersionResource{
 	Group:    "eventing.kyma-project.io",
 	Resource: "subscriptions",
 }
-var secretsGroupVersionResource = schema.GroupVersionResource{
-	Version:  v1.SchemeGroupVersion.Version,
-	Group:    v1.SchemeGroupVersion.Group,
-	Resource: "secrets",
-}
 
 var eventSubscriptionServiceIndex = "service"
 
@@ -30,10 +24,6 @@ func eventSubscriptionServiceIndexKey(namespace string, serviceName string) stri
 
 type Service struct {
 	*resource.Service
-}
-
-func NewSecretsService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
-	return serviceFactory.ForResource(secretsGroupVersionResource), nil
 }
 
 func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {

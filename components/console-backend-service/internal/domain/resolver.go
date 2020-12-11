@@ -66,7 +66,7 @@ func GetRandomNumber() time.Duration {
 	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
-func New(kubeClient *kubernetes.Clientset, restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string, useEventSubscription bool) (*Resolver, error) {
+func New(kubeClient kubernetes.Interface, restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string, useEventSubscription bool) (*Resolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
