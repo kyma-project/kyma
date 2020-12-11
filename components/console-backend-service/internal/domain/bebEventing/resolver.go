@@ -55,6 +55,10 @@ func (r *Resolver) CreateEventSubscription(ctx context.Context, namespace string
 }
 
 func (r *Resolver) UpdateEventSubscription(ctx context.Context, namespace string, name string, params gqlschema.EventSubscriptionSpecInput) (*v1alpha1.Subscription, error) {
+	if len(params.Filters) == 0 {
+		return r.DeleteEventSubscription(ctx, namespace, name)
+	}
+
 	result := &v1alpha1.Subscription{}
 	sourceName, err := r.getBEBSourceName()
 	if err != nil {
