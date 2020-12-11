@@ -10,7 +10,7 @@ Kyma comes equipped with these out-of-the-box functionalities:
 - Service-to-service communication and proxying (Istio-based [Service Mesh](/components/service-mesh/#overview-overview))
 - Built-in [monitoring](/components/monitoring/#overview-overview), [tracing](/components/tracing/#overview-overview), and [logging](/components/logging/#overview-overview) (Grafana, Prometheus, Jaeger, Loki, Kiali)
 - Secure [authentication and authorization](/components/security/#overview-overview) (Dex, Ory, Service Identity, TLS, Role Based Access Control)
-- The catalog of services to choose from ([Service Catalog](/components/service-catalog/#overview-service-catalog), [Service Brokers](/components/service-catalog/#overview-service-brokers)
+- The catalog of services to choose from ([Service Catalog](/components/service-catalog/#overview-service-catalog), [Service Brokers](/components/service-catalog/#overview-service-brokers))
 - The development platform to run lightweight Functions in a cost-efficient and scalable way ([Serverless](/components/serverless/#overview-overview))
 - The endpoint to register Events and APIs of external applications ([Application Connector](/components/application-connector/#overview-overview))
 - Secure API exposure ([API Gateway](/components/api-gateway/#overview-overview))
