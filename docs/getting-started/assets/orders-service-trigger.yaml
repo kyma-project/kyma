@@ -1,0 +1,18 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: orders-service
+  namespace: orders-service
+spec:
+  broker: default
+  filter:
+    attributes:
+      eventtypeversion: v1
+      source: commerce-mock
+      type: order.deliverysent
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: orders-service
+      namespace: orders-service

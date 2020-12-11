@@ -1,0 +1,5 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: ApplicationMapping
+metadata:
+  name: commerce-mock
+  namespace: orders-service

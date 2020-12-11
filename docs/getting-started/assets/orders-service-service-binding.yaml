@@ -1,0 +1,8 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: orders-service
+  namespace: orders-service
+spec:
+  instanceRef:
+    name: redis-service

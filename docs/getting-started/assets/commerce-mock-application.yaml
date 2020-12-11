@@ -1,0 +1,9 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: commerce-mock
+spec:
+  description: "Application for Commerce mock"
+  labels:
+    app: orders-service
+    example: orders-service

@@ -1,0 +1,14 @@
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  serviceBindingRef:
+    name: orders-function
+  usedBy:
+    kind: serverless-function
+    name: orders-function
+  parameters:
+    envPrefix:
+      name: "REDIS_"

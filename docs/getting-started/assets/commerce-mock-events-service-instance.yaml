@@ -1,0 +1,8 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: commerce-mock-events
+  namespace: orders-service
+spec:
+  serviceClassExternalName: $EVENTS_EXTERNAL_NAME
+  servicePlanExternalName: default

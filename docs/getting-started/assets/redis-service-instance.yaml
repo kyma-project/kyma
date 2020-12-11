@@ -1,0 +1,10 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: redis-service
+  namespace: orders-service
+spec:
+  serviceClassExternalName: redis
+  servicePlanExternalName: micro
+  parameters:
+    imagePullPolicy: Always

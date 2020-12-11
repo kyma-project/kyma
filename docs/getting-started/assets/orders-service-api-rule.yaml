@@ -1,0 +1,20 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: orders-service
+  namespace: orders-service
+  labels:
+    app: orders-service
+    example: orders-service
+spec:
+  service:
+    host: orders-service
+    name: orders-service
+    port: 80
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      methods: ["GET","POST"]
+      accessStrategies:
+        - handler: noop
+      mutators: []
