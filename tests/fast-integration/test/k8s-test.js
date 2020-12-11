@@ -27,6 +27,7 @@ const tokenRequestObj = k8s.loadYaml(tokenRequestYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
 
 function retryPromise(fn, retriesLeft = 10, interval = 30) {
+  // add metadata argument
   return new Promise((resolve, reject) => {
     return fn()
       .then(resolve)
@@ -38,7 +39,7 @@ function retryPromise(fn, retriesLeft = 10, interval = 30) {
         }
 
         setTimeout(() => {
-          console.log("retriesLeft: ", retriesLeft);
+          console.log(`retriesLeft: ${retriesLeft}`);
           // Passing on "reject" is the important part
           retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
         }, interval);
@@ -47,7 +48,7 @@ function retryPromise(fn, retriesLeft = 10, interval = 30) {
 }
 
 describe("Commerce Mock tests", function () {
-  this.timeout(300 * 1000);
+  this.timeout(400 * 1000);
 
   after(async function () {
     this.timeout(10 * 10000);
@@ -330,6 +331,7 @@ describe("Commerce Mock tests", function () {
     let eventsServiceClass;
     try {
       console.log("Reading Events service class");
+      // TODO add retries here
       eventsServiceClass = await k8sDynamicApi.read(
         k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
       );
@@ -352,8 +354,9 @@ describe("Commerce Mock tests", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    console.time("waiting for sbu...");
-
+    console.time(
+      "waiting for sbu, which waits for servicebinding, which waits for serviceinstance..."
+    );
     let functionResp;
     try {
       functionResp = await retryPromise(
@@ -393,7 +396,10 @@ describe("Commerce Mock tests", function () {
       expect(err.response.data).to.deep.eq({});
     }
 
-    console.timeEnd("waiting for sbu...");
+    console.timeEnd(
+      "waiting for sbu, which waits for servicebinding, which waits for serviceinstance..."
+    );
+
     expect(functionResp.data).to.have.nested.property(
       "totalPriceWithTax.value"
     );
