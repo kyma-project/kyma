@@ -102,5 +102,5 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    subscriptionSubscription(namespace: String!): SubscriptionEvent! @HasAccess(attributes: {resource: "subscriptions", verb: "watch", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    subscriptionSubscription(ownerName: String!, namespace: String!): SubscriptionEvent! @HasAccess(attributes: {resource: "subscriptions", verb: "watch", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }

@@ -26,6 +26,6 @@ func (r *queryResolver) EventSubscriptions(ctx context.Context, ownerName string
 	return r.bebEventing.EventSubscriptionsQuery(ctx, ownerName, namespace)
 }
 
-func (r *subscriptionResolver) SubscriptionSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {
-	return r.bebEventing.SubscribeEventSubscription(ctx, namespace)
+func (r *subscriptionResolver) SubscriptionSubscription(ctx context.Context, ownerName string, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {
+	return r.bebEventing.SubscribeEventSubscription(ctx, ownerName, namespace)
 }

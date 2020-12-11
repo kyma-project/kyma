@@ -74,10 +74,12 @@ func (r *Resolver) DeleteEventSubscription(ctx context.Context, namespace string
 	return result, err
 }
 
-func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {
+func (r *Resolver) SubscribeEventSubscription(ctx context.Context, ownerName, namespace string) (<-chan *gqlschema.SubscriptionEvent, error) {
 	channel := make(chan *gqlschema.SubscriptionEvent, 1)
 	filter := func(subscription v1alpha1.Subscription) bool {
-		return subscription.ObjectMeta.Namespace == namespace
+		namespaceMatches := subscription.ObjectMeta.Namespace == namespace
+		ownerNameMatches := len(subscription.ObjectMeta.OwnerReferences) != 0 && subscription.ObjectMeta.OwnerReferences[0].Name == ownerName
+		return namespaceMatches && ownerNameMatches
 	}
 
 	unsubscribe, err := r.Service().Subscribe(NewEventHandler(channel, filter))

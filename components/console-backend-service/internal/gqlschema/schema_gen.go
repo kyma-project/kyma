@@ -24,7 +24,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/rbac/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	v1alpha14 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -1178,7 +1178,7 @@ type ComplexityRoot struct {
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
 		ServiceEvent                    func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
-		SubscriptionSubscription        func(childComplexity int, namespace string) int
+		SubscriptionSubscription        func(childComplexity int, ownerName string, namespace string) int
 		TriggerEvent                    func(childComplexity int, namespace string, serviceName string) int
 	}
 
@@ -1490,7 +1490,7 @@ type SubscriptionResolver interface {
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
-	SubscriptionSubscription(ctx context.Context, namespace string) (<-chan *SubscriptionEvent, error)
+	SubscriptionSubscription(ctx context.Context, ownerName string, namespace string) (<-chan *SubscriptionEvent, error)
 	TriggerEvent(ctx context.Context, namespace string, serviceName string) (<-chan *TriggerEvent, error)
 	OAuth2ClientEvent(ctx context.Context, namespace string) (<-chan *OAuth2ClientEvent, error)
 	RoleBindingEvent(ctx context.Context, namespace string) (<-chan *RoleBindingEvent, error)
@@ -6983,7 +6983,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.SubscriptionSubscription(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Subscription.SubscriptionSubscription(childComplexity, args["ownerName"].(string), args["namespace"].(string)), true
 
 	case "Subscription.triggerEvent":
 		if e.complexity.Subscription.TriggerEvent == nil {
@@ -7501,7 +7501,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    subscriptionSubscription(namespace: String!): SubscriptionEvent! @HasAccess(attributes: {resource: "subscriptions", verb: "watch", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    subscriptionSubscription(ownerName: String!, namespace: String!): SubscriptionEvent! @HasAccess(attributes: {resource: "subscriptions", verb: "watch", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
@@ -12479,13 +12479,21 @@ func (ec *executionContext) field_Subscription_subscriptionSubscription_args(ctx
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["namespace"]; ok {
+	if tmp, ok := rawArgs["ownerName"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["namespace"] = arg0
+	args["ownerName"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
 	return args, nil
 }
 
@@ -39601,7 +39609,7 @@ func (ec *executionContext) _Subscription_subscriptionSubscription(ctx context.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().SubscriptionSubscription(rctx, args["namespace"].(string))
+			return ec.resolvers.Subscription().SubscriptionSubscription(rctx, args["ownerName"].(string), args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "subscriptions", "verb": "watch"})
