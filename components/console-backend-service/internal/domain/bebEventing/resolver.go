@@ -96,7 +96,7 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, namespace str
 
 func (r *Resolver) getBEBSourceName() (string, error) {
 	secrets, err := r.client.CoreV1().Secrets("kyma-installer").List(metav1.ListOptions{
-		LabelSelector:       "component=eventing",
+		LabelSelector: "component=eventing",
 	})
 
 	if err != nil {
