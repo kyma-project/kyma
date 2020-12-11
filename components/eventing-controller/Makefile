@@ -173,7 +173,7 @@ push-image: $(cmds_images_push) ;
 #   make eventing-controller
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: resolve-local
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
