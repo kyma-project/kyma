@@ -1,5 +1,5 @@
 ---
-title: Istio sidecar version after Kyma upgrade
+title: Incompatible Istio sidecar version after Kyma upgrade
 type: Troubleshooting
 ---
 
@@ -9,7 +9,7 @@ Kyma has sidecar injection enabled by default - a sidecar is injected to every P
 The sidecar version in Pods must match the installed Istio version. Otherwise, mesh connectivity may be broken.
 This issue may appear during Kyma upgrade. When Kyma is upgraded to a new version along with a new Istio version, existing sidecars injected into Pods remain in an original version.
 Kyma contains the `istio-proxy-reset` job that performs a rollout for most common workload types, such as Deployments, DaemonSets, etc. The job ensures all Kyma components are properly updated.
-Some user-defined workloads can't be rolled out automatically. This applies, for example, to a standalone Pod without any backing management mechanism, such as ReplicaSet or a Job.
+However, some user-defined workloads can't be rolled out automatically. This applies, for example, to a standalone Pod without any backing management mechanism, such as a ReplicaSet or a Job.
 Such user-defined workloads, that are not part of Kyma, must be manually restarted to work correctly with the updated Istio version.
 
 To check if any Pods or workloads require a manual restart, follow these steps:
