@@ -137,9 +137,6 @@ spec:
       - name: mode-checker
         image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
         imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
-        {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
-        {{- end }}
         command:
         - bash
         - -c
