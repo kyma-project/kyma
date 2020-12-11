@@ -4,7 +4,7 @@ type: Troubleshooting
 ---
 
 
-Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster, without the need adding any labels. For more information, read [this document](#details-sidecar-proxy-injection).
+Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read [this document](#details-sidecar-proxy-injection).
 If a Pod doesn't have a sidecar and you did not disable sidecar injection on purpose, follow these steps to troubleshoot:
 
 1. Check if sidecar injection is disabled in the Namespace of the Pod. Run this command to check the `istio-injection` label:
