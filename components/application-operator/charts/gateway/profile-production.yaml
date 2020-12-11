@@ -1,0 +1,13 @@
+deployment:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+autoscaling:
+  enable: true
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40

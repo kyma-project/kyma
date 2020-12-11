@@ -26,6 +26,8 @@ spec:
           exact: /v1/runtimes/signingRequests/info
       - uri:
           exact: /v1/runtimes/certificates
+      - uri:
+          exact: /v1/api.yaml
       route:
         - destination:
             port:

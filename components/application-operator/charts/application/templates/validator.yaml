@@ -67,6 +67,13 @@ spec:
               port: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
+          resources:
+            limits:
+              cpu: {{ .Values.applicationConnectivityValidator.resources.limits.cpu }}
+              memory: {{ .Values.applicationConnectivityValidator.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.applicationConnectivityValidator.resources.requests.cpu }}
+              memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
           ports:
             - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
               name: http-proxy
