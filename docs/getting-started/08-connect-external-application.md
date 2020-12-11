@@ -25,18 +25,9 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 1. Provision an [AddonsConfiguration custom resource (CR)](/components/helm-broker/#custom-resource-addons-configuration) with the mock application set:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-  apiVersion: addons.kyma-project.io/v1alpha1
-  kind: AddonsConfiguration
-  metadata:
-    name: xf-mocks
-    namespace: orders-service
-  spec:
-    repositories:
-      - url: github.com/sap/xf-addons/addons/index.yaml
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/xf-mocks-addons-configuration.yaml
+   ```
 
    > **NOTE:** The `index.yaml` file is a manifest for APIs of SAP Marketing Cloud, SAP Cloud for Customer, and SAP Commerce Cloud applications.
 
@@ -48,18 +39,9 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 3. Create a ServiceInstance CR with Commerce mock:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: servicecatalog.k8s.io/v1beta1
-  kind: ServiceInstance
-  metadata:
-    name: commerce-mock
-    namespace: orders-service
-  spec:
-    serviceClassExternalName: commerce-mock
-    servicePlanExternalName: default
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/commerce-mock-service-instance.yaml
+   ```
 
 4. Check that the ServiceInstance CR was created. This is indicated by the last condition in the CR status equal to `Ready True`:
 
@@ -122,19 +104,9 @@ Follow these steps:
 
 1. Apply the [Application CR](/components/application-connector/#custom-resource-application) definition to the cluster:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: Application
-  metadata:
-    name: commerce-mock
-  spec:
-    description: "Application for Commerce mock"
-    labels:
-      app: orders-service
-      example: orders-service
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/commerce-mock-application.yaml
+   ```
 
 2. Check that the Application CR was created. This is indicated by the status `deployed`:
 
@@ -144,14 +116,9 @@ Follow these steps:
 
 3. Get a token required to connect Commerce mock to the Application CR. To do that, create a [TokenRequest CR](/components/application-connector/#custom-resource-token-request). The CR name must match the name of the application for which you want to get the configuration details. Run this command:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: TokenRequest
-  metadata:
-    name: commerce-mock
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/commerce-mock-token-request.yaml
+   ```
 
 4. Fetch the TokenRequest CR you created to get the configuration URL with the token from the status section:
 
@@ -218,15 +185,9 @@ Follow these steps:
 
 1. Create an [ApplicationMapping CR](/components/application-connector/#custom-resource-application-mapping) and apply it to the cluster:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: ApplicationMapping
-  metadata:
-    name: commerce-mock
-    namespace: orders-service
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/commerce-mock-application-mapping.yaml
+   ```
 
 2. List the available ServiceClass CRs in the `orders-service` Namespace:
 
@@ -241,18 +202,9 @@ Follow these steps:
 
 3. Enable the events in the `orders-service` Namespace by creating a ServiceInstance CR:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: servicecatalog.k8s.io/v1beta1
-  kind: ServiceInstance
-  metadata:
-    name: commerce-mock-events
-    namespace: orders-service
-  spec:
-    serviceClassExternalName: $EVENTS_EXTERNAL_NAME
-    servicePlanExternalName: default
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/commerce-mock-events-service-instance.yaml
+   ```
 
 4. Check that the ServiceInstance CR was created. This is indicated by the last condition in the CR status equal to `Ready True`:
 

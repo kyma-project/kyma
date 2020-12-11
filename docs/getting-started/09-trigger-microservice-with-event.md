@@ -29,28 +29,9 @@ Follow these steps:
 
 2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Trigger
-    metadata:
-      name: orders-service
-      namespace: orders-service
-    spec:
-      broker: default
-      filter:
-        attributes:
-          eventtypeversion: v1
-          source: commerce-mock
-          type: order.deliverysent
-      subscriber:
-        ref:
-          apiVersion: v1
-          kind: Service
-          name: orders-service
-          namespace: orders-service
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-service-trigger.yaml
+   ```
 
 - **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.

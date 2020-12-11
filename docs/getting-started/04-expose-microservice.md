@@ -27,30 +27,9 @@ Follow these steps:
 
 1. Open the terminal window and apply the [APIRule CR](/components/api-gateway#custom-resource-api-rule):
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
-  kind: APIRule
-  metadata:
-    name: orders-service
-    namespace: orders-service
-    labels:
-      app: orders-service
-      example: orders-service
-  spec:
-    service:
-      host: orders-service
-      name: orders-service
-      port: 80
-    gateway: kyma-gateway.kyma-system.svc.cluster.local
-    rules:
-      - path: /.*
-        methods: ["GET","POST"]
-        accessStrategies:
-          - handler: noop
-        mutators: []
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-service-api-rule.yaml
+   ```
 2. Check that the API Rule was created and has the status `OK`:
 
    ```bash

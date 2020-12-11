@@ -17,19 +17,8 @@ Follows these steps:
 
 1. Create a [ServiceInstance CR](https://svc-cat.io/docs/walkthrough/#step-4---creating-a-new-serviceinstance). You will provision the [Redis](https://redis.io/) service with its `micro` plan:
 
-   ```yaml
-   cat <<EOF | kubectl apply -f -
-   apiVersion: servicecatalog.k8s.io/v1beta1
-   kind: ServiceInstance
-   metadata:
-     name: redis-service
-     namespace: orders-service
-   spec:
-     serviceClassExternalName: redis
-     servicePlanExternalName: micro
-     parameters:
-       imagePullPolicy: Always
-   EOF
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/redis-service-instance.yaml
    ```
 
 2. Check that the ServiceInstance CR was created. This is indicated by the last condition in the CR status being `Ready True`:

@@ -19,28 +19,9 @@ Follows these steps:
 
 1. Create a Trigger custom resource (CR) for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-  apiVersion: eventing.knative.dev/v1alpha1
-  kind: Trigger
-  metadata:
-    name: orders-function
-    namespace: orders-service
-  spec:
-    broker: default
-    filter:
-      attributes:
-        eventtypeversion: v1
-        source: commerce-mock
-        type: order.deliverysent
-    subscriber:
-      ref:
-        apiVersion: v1
-        kind: Service
-        name: orders-function
-        namespace: orders-service
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-function-trigger.yaml
+   ```
 
 - **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.

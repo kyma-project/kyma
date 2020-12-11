@@ -26,27 +26,9 @@ Follow these steps:
 
 1. Create an APIRule CR for the Function. It is exposed on port `80`, which is the default port of the [Service](/components/serverless/#architecture-architecture).
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-    apiVersion: gateway.kyma-project.io/v1alpha1
-    kind: APIRule
-    metadata:
-      name: orders-function
-      namespace: orders-service
-    spec:
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
-      rules:
-        - path: /.*
-          accessStrategies:
-            - config: {}
-              handler: noop
-          methods: ["GET","POST"]
-      service:
-        host: orders-function
-        name: orders-function
-        port: 80
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-function-api-rule.yaml
+   ```
 
 2. Check that the APIRule was created and has the status `OK`:
 

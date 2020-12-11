@@ -21,17 +21,8 @@ Follows these steps:
 
 1. Provision an [AddonsConfiguration custom resource (CR)](/components/helm-broker/#custom-resource-addons-configuration) with the Redis service:
 
-   ```yaml
-   cat <<EOF | kubectl apply -f  -
-   apiVersion: addons.kyma-project.io/v1alpha1
-   kind: AddonsConfiguration
-   metadata:
-     name: redis-addon
-     namespace: orders-service
-   spec:
-     repositories:
-       - url: https://github.com/kyma-project/addons/releases/download/0.12.0/index-testing.yaml
-   EOF
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/redis-addons-configuration.yaml
    ```
 
 2. Check that the AddonsConfiguration CR was created. This is indicated by the status phase `Ready`:

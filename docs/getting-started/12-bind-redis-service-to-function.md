@@ -19,18 +19,9 @@ Follow these steps:
 
 1. Create a ServiceBinding custom resource (CR) that points to the existing Redis instance in the **spec.instanceRef** field:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: servicecatalog.k8s.io/v1beta1
-  kind: ServiceBinding
-  metadata:
-    name: orders-function
-    namespace: orders-service
-  spec:
-    instanceRef:
-      name: redis-service
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-function-service-binding.yaml
+   ```
 
 2. Check that the ServiceBinding CR was created. This is indicated by the last condition in the CR status equal to `Ready True`:
 
@@ -40,24 +31,9 @@ Follow these steps:
 
 3. Create a ServiceBindingUsage CR:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f -
-  apiVersion: servicecatalog.kyma-project.io/v1alpha1
-  kind: ServiceBindingUsage
-  metadata:
-    name: orders-function
-    namespace: orders-service
-  spec:
-    serviceBindingRef:
-      name: orders-function
-    usedBy:
-      kind: serverless-function
-      name: orders-function
-    parameters:
-      envPrefix:
-        name: "REDIS_"
-  EOF
-  ```
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-function-service-binding-usage.yaml
+   ```
 
    - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
