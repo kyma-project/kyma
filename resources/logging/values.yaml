@@ -71,7 +71,6 @@ loki:
 
   ## Pod Annotations
   podAnnotations:
-    traffic.sidecar.istio.io/excludeInboundPorts: "3100"
     sidecar.istio.io/inject: "true"
 
   ## StatefulSet annotations
