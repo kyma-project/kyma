@@ -24,6 +24,6 @@ global:
   ui_acceptance_tests:
     version: "b4e910fc"
   console_backend_service:
-    version: 42c6dd4b
+    version: PR-10186
   console_backend_service_test:
     version: "dd363da2"
