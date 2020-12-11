@@ -18,7 +18,7 @@ Provisioning a service means creating an instance of a service. To provision a s
 Binding is a process of connecting a ServiceInstance and an application. The binding process consists of two parts:
 
 - User creates a ServiceBinding. When you create a ServiceBinding, the Service Catalog creates a Secret with credentials needed to access the application.
-- User creates a ServiceBindingUsage. After creating this custom resource, ServiceBindingUsage uses the [PodPreset](https://kubernetes.io/docs/concepts/workloads/pods/podpreset/) to inject credentials into the application, which allows you to consume the service.
+- User creates a ServiceBindingUsage. After creating this custom resource, ServiceBindingUsage uses the [PodPreset](https://v1-19.docs.kubernetes.io/docs/concepts/workloads/pods/podpreset/) to inject credentials into the application, which allows you to consume the service.
 
 ![Binding](./assets/binding.svg)
 
