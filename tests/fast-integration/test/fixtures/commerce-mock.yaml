@@ -110,7 +110,8 @@ spec:
       console.log("URL: %s", url); 
       let response = await axios.get(url,{headers:{"X-B3-Sampled":1}})
       console.log(response.data); 
-      return response.data;}
+      return response.data;
+    }
     module.exports = { 
       main: function (event, context) {
         if (event.data && event.data.orderCode){

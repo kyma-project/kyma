@@ -48,7 +48,7 @@ function retryPromise(fn, retriesLeft = 10, interval = 30) {
 }
 
 describe("Commerce Mock tests", function () {
-  this.timeout(400 * 1000);
+  this.timeout(10 * 60 * 1000);
 
   after(async function () {
     this.timeout(10 * 10000);
@@ -76,7 +76,7 @@ describe("Commerce Mock tests", function () {
     }
   });
 
-  it("should pass with ", async function () {
+  it("should pass with 😄", async function () {
     try {
       console.log("Creating mocks namespace...");
       await k8sDynamicApi.create(mocksNamespaceObj);
@@ -112,7 +112,7 @@ describe("Commerce Mock tests", function () {
             });
         },
         10,
-        100
+        1000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -134,7 +134,7 @@ describe("Commerce Mock tests", function () {
             return res;
           });
         },
-        10,
+        20,
         5000
       );
     } catch (err) {
@@ -188,7 +188,7 @@ describe("Commerce Mock tests", function () {
             return res;
           });
         },
-        5,
+        15,
         5000
       );
     } catch (err) {
@@ -312,13 +312,13 @@ describe("Commerce Mock tests", function () {
     let webServicesServiceClass;
     try {
       webServicesServiceClass = await retryPromise(
-        () => {
+        async () => {
           console.log("Reading Web Services service class");
           return k8sDynamicApi.read(
             k8s.loadYaml(genericServiceClass(commerceWebservicesID, "default"))
           );
         },
-        15,
+        20,
         5000
       );
     } catch (err) {
@@ -330,16 +330,24 @@ describe("Commerce Mock tests", function () {
 
     let eventsServiceClass;
     try {
-      console.log("Reading Events service class");
-      // TODO add retries here
-      eventsServiceClass = await k8sDynamicApi.read(
-        k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
+      await retryPromise(
+        async () => {
+          console.log("Reading Events service class");
+          return k8sDynamicApi.read(
+            k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
+          );
+        },
+        10,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
-    const eventsSCExternalName = eventsServiceClass.body.spec.externalName; // TODO: check if .spec.externalName exists first
+    expect(eventsServiceClass.body).to.have.nested.property(
+      "spec.externalName"
+    );
+    const eventsSCExternalName = eventsServiceClass.body.spec.externalName;
 
     const serviceCatalogObjs = k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
@@ -354,9 +362,6 @@ describe("Commerce Mock tests", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    console.time(
-      "waiting for sbu, which waits for servicebinding, which waits for serviceinstance..."
-    );
     let functionResp;
     try {
       functionResp = await retryPromise(
@@ -382,23 +387,16 @@ describe("Commerce Mock tests", function () {
 
           console.log("Checking if event reached lambda");
           return axios.get(`https://lastorder.${host}`).then((res) => {
-            expect(res.data).to.have.nested.property(
-              "totalPriceWithTax.value",
-              100
-            );
+            expect(res.data).to.have.nested.property("totalPriceWithTax.value");
             return res;
           });
         },
         30,
-        10000
+        10 * 1000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
-
-    console.timeEnd(
-      "waiting for sbu, which waits for servicebinding, which waits for serviceinstance..."
-    );
 
     expect(functionResp.data).to.have.nested.property(
       "totalPriceWithTax.value"
