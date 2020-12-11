@@ -7,14 +7,15 @@ const {
   mocksNamespaceYaml,
 } = require("./fixtures");
 const { expect, config } = require("chai");
-config.truncateThreshold = 0;
+config.truncateThreshold = 0; // more verbose errors
 
 const https = require("https");
 const axios = require("axios").default;
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
-axios.defaults.httpsAgent = httpsAgent; // create separate axios instance with that httpsAgent https://github.com/axios/axios#custom-instance-defaults
+axios.defaults.httpsAgent = httpsAgent;
+
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
@@ -27,7 +28,6 @@ const tokenRequestObj = k8s.loadYaml(tokenRequestYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
 
 function retryPromise(fn, retriesLeft = 10, interval = 30) {
-  // add metadata argument
   return new Promise((resolve, reject) => {
     return fn()
       .then(resolve)
@@ -59,7 +59,7 @@ describe("Commerce Mock tests", function () {
           mocksNamespaceObj,
           tokenRequestObj,
           ...commerceObjs,
-          ...k8s.loadAllYaml(serviceCatalogResources("", "")), // hope it'll delete those resources, even though .spec.externalName=""
+          ...k8s.loadAllYaml(serviceCatalogResources("", "")),
         ].map((obj) =>
           k8sDynamicApi.delete(
             obj,
@@ -79,19 +79,18 @@ describe("Commerce Mock tests", function () {
   it("should pass with 😄", async function () {
     try {
       console.log("Creating mocks namespace...");
-      await k8sDynamicApi.create(mocksNamespaceObj);
-      // we can extract namespace creation into seperate step and ignore AlreadyExists error
+      await k8sDynamicApi.create(mocksNamespaceObj); // we can extract namespace creation into seperate step and ignore AlreadyExists error
       console.log("Creating commerce resources...");
       await Promise.all(commerceObjs.map((obj) => k8sDynamicApi.create(obj)));
     } catch (err) {
-      // console.error(err);
+      expect(err.body.message).to.be.empty;
     }
 
     let virtualservice;
     try {
       console.log("Waiting for virtual service to be ready...");
       virtualservice = await retryPromise(
-        () => {
+        async () => {
           return k8sCRDApi
             .listNamespacedCustomObject(
               "networking.istio.io",
@@ -120,13 +119,13 @@ describe("Commerce Mock tests", function () {
 
     const mockHost = virtualservice.body.items[0].spec.hosts[0];
     const host = mockHost.split(".").slice(1).join(".");
-    console.log(`Host: ${host}`);
-    console.log(`Mock host: ${mockHost}`);
+    console.log(`Host: https://${host}`);
+    console.log(`Mock host: https://${mockHost}`);
 
     let response;
     try {
       response = await retryPromise(
-        () => {
+        async () => {
           console.log(`Calling https://${mockHost}/local/apis`);
           return axios.get(`https://${mockHost}/local/apis`).then((res) => {
             expect(res.data).to.have.lengthOf(2);
@@ -143,15 +142,25 @@ describe("Commerce Mock tests", function () {
 
     expect(response.data).to.have.lengthOf(2);
     expect(response.data[0].provider).not.to.be.empty;
-    // TODO: discuss with PB whether it's needed
-    // TODO2: tests do not seem to pass without it, but we do not use provider variable anywhere, needs to be discussed
+
+    // tests do not seem to pass without it calling https://${mockHost}/local/apis first, but we do not use provider variable anywhere, needs to be discussed
+    // discussed with PB - it's probably a bug in varkes
     const provider = response.data[0].provider;
 
     let commerceApplicationGatewayDeployment;
     try {
-      commerceApplicationGatewayDeployment = await k8sAppsApi.readNamespacedDeployment(
-        "commerce-application-gateway",
-        "kyma-integration"
+      commerceApplicationGatewayDeployment = await retryPromise(
+        async () => {
+          console.log(
+            "Waiting for commerce-application-gateway deployment to appear"
+          );
+          return k8sAppsApi.readNamespacedDeployment(
+            "commerce-application-gateway",
+            "kyma-integration"
+          );
+        },
+        10,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -202,7 +211,7 @@ describe("Commerce Mock tests", function () {
 
     try {
       await retryPromise(
-        () => {
+        async () => {
           console.log(`Conneting to https://${mockHost}/connection`);
           return axios.post(
             `https://${mockHost}/connection`,
@@ -219,7 +228,7 @@ describe("Commerce Mock tests", function () {
           );
         },
         10,
-        3000
+        5000
       );
     } catch (error) {
       // https://github.com/axios/axios#handling-errors
@@ -228,7 +237,7 @@ describe("Commerce Mock tests", function () {
 
     try {
       await retryPromise(
-        () => {
+        async () => {
           console.log("Registering Commerce Webservices");
           return axios.post(
             `https://${mockHost}/local/apis/Commerce%20Webservices/register`,
@@ -241,8 +250,8 @@ describe("Commerce Mock tests", function () {
             }
           );
         },
-        10,
-        3000
+        15,
+        5000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
@@ -251,7 +260,7 @@ describe("Commerce Mock tests", function () {
     let commerceWebservicesResp;
     try {
       commerceWebservicesResp = await retryPromise(
-        () => {
+        async () => {
           console.log("Listing remote apis");
           return axios.get(`https://${mockHost}/remote/apis`);
         },
@@ -270,7 +279,7 @@ describe("Commerce Mock tests", function () {
 
     try {
       await retryPromise(
-        () => {
+        async () => {
           console.log("Registering Events");
           return axios.post(
             `https://${mockHost}/local/apis/Events/register`, // TODO: can we do this in parallel to registering commerce webservices?
@@ -292,7 +301,7 @@ describe("Commerce Mock tests", function () {
 
     try {
       commerceWebservicesResp = await retryPromise(
-        () => {
+        async () => {
           console.log("Listing remote apis");
           return axios.get(`https://${mockHost}/remote/apis`);
         },
@@ -330,7 +339,7 @@ describe("Commerce Mock tests", function () {
 
     let eventsServiceClass;
     try {
-      await retryPromise(
+      eventsServiceClass = await retryPromise(
         async () => {
           console.log("Reading Events service class");
           return k8sDynamicApi.read(
