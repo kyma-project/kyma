@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "909f75b6"
+    tag: "PR-10185"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -237,8 +237,7 @@ controller-manager:
       persistence: "on"
 
     service:
-      annotations:
-        auth.istio.io/9000: NONE
+      annotations: {}
 
     environment:
       MINIO_BROWSER: "off"
@@ -295,8 +294,7 @@ upload-service:
       recreate: "{{ now }}"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -401,8 +399,7 @@ front-matter-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -438,8 +435,7 @@ asyncapi-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true

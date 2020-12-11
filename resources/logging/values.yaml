@@ -46,8 +46,7 @@ loki:
     port: 3100
     type: ClusterIP
     nodePort:
-    annotations:
-      auth.istio.io/3100: NONE
+    annotations: {}
     labels: {}
 
   readinessProbe:
