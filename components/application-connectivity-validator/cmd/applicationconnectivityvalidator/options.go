@@ -19,6 +19,7 @@ type options struct {
 	eventMeshDestinationPath string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
+	appName                  string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
 	kubeConfig               string
@@ -39,11 +40,12 @@ func parseArgs() *options {
 	eventMeshDestinationPath := flag.String("eventMeshDestinationPath", "/", "Path of the destination of the requests to the Event Mesh")
 	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
+	appName := flag.String("appName", "", "Name of the application CR the validator is created for")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	syncPeriod := flag.Duration("syncPeriod", 120, "Sync period in seconds how often controller should periodically reconcile Application resource.")
+	syncPeriod := flag.Duration("syncPeriod", 120*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
 
@@ -60,6 +62,7 @@ func parseArgs() *options {
 		eventMeshDestinationPath: *eventMeshDestinationPath,
 		appRegistryPathPrefix:    *appRegistryPathPrefix,
 		appRegistryHost:          *appRegistryHost,
+		appName:                  *appName,
 		cacheExpirationMinutes:   *cacheExpirationMinutes,
 		cacheCleanupMinutes:      *cacheCleanupMinutes,
 		kubeConfig:               *kubeConfig,
@@ -73,13 +76,13 @@ func (o *options) String() string {
 		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s --eventServiceHost=%s "+
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
-		"--appRegistryPathPrefix=%s --appRegistryHost=%s"+
+		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d"+
 		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
-		o.appRegistryPathPrefix, o.appRegistryHost,
+		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
 		o.kubeConfig, o.masterURL, o.syncPeriod)
 }

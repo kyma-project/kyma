@@ -62,7 +62,7 @@ func main() {
 	// Starting the Cache Controller for Application CRs
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(options.kubeConfig, options.masterURL, options.syncPeriod, idCache)
+		controller.Start(options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
 	}()
 
 	go func() {

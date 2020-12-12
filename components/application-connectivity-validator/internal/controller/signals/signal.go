@@ -3,9 +3,11 @@ package signals
 import (
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 var onlyOneSignalHandler = make(chan struct{})
+var shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
 
 // SetupSignalHandler registered for SIGTERM and SIGINT. A stop channel is returned
 // which is closed on one of these signals. If a second signal is caught, the program

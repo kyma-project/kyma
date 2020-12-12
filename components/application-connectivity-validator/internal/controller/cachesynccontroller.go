@@ -19,8 +19,6 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
 )
 
-const controllerAgentName = "application-cache-controller"
-
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Application is synced
 	SuccessSynced = "Synced"
@@ -51,6 +49,9 @@ type Controller struct {
 	// simultaneously in two different workers.
 	workqueue workqueue.RateLimitingInterface
 
+	// Name of the application CR the controller syncs the cache for
+	appName string
+
 	// Cache to store Application CRs
 	appCache *gocache.Cache
 }
@@ -58,6 +59,7 @@ type Controller struct {
 func NewController(
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
+	appName string,
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
@@ -65,6 +67,7 @@ func NewController(
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Applications"),
+		appName:           appName,
 		appCache:          appCache,
 	}
 
@@ -80,9 +83,7 @@ func NewController(
 	return controller
 }
 
-// enqueueApplication takes a Application resource and converts it into a namespace/name
-// string which is then put onto the work queue. This method should *not* be
-// passed resources of any type other than Application.
+// Queues a given application CR if the validator instance belongs to it
 func (c *Controller) enqueueApplication(obj interface{}) {
 	var key string
 	var err error
@@ -90,7 +91,10 @@ func (c *Controller) enqueueApplication(obj interface{}) {
 		utilruntime.HandleError(err)
 		return
 	}
-	c.workqueue.Add(key)
+
+	if key == c.appName {
+		c.workqueue.Add(key)
+	}
 }
 
 // Run will set up the event handlers for types we are interested in, as well

@@ -53,6 +53,7 @@ spec:
             - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
+            - "--appName={{ .Release.Name }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
             - "--cacheCleanupMinutes={{ .Values.applicationConnectivityValidator.args.cacheCleanupMinutes }}"
           readinessProbe:
