@@ -49,9 +49,9 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		mgr.GetEventRecorderFor("eventing-controller"),
+		mgr.GetEventRecorderFor("eventing-controller-nats"),
 	).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to setup the Subscription controller")
+		setupLog.Error(err, "unable to setup the NATS Subscription controller")
 		os.Exit(1)
 	}
 
