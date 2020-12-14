@@ -26,3 +26,12 @@ etcd-stateful:
       requests:
         cpu: 20m
         memory: 28Mi
+
+addons-ui:
+  resources: 
+    requests:
+      cpu: 1m
+      memory: 16Mi
+    limits:
+      cpu: 30m
+      memory: 32Mi

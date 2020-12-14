@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: PR-10010
+    version: 0d453d76
     enabled: true
     labels:
       integration: true
@@ -486,11 +486,11 @@ alertmanager:
     ##
     resources:
       limits:
-        cpu: 100m
-        memory: 400Mi
+        cpu: 20m
+        memory: 200Mi
       requests:
-        cpu: 100m
-        memory: 400Mi
+        cpu: 1m
+        memory: 15Mi
 
     ## Pod anti-affinity can prevent the scheduler from placing Prometheus replicas on the same node.
     ## The default value "soft" means that the scheduler should *prefer* to not schedule two replica pods onto the same node but no guarantee is provided.

@@ -5,15 +5,15 @@ import (
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/sirupsen/logrus"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
@@ -68,6 +68,12 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	cmData := map[string]string{
 		cmEnvKey: cmEnvValue,
 	}
+	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs10Logger))
+	secEnvKey := "SECRET_ENV_KEY"
+	secEnvValue := "Value taken as env from Secret"
+	secretData := map[string]string{
+		secEnvKey: secEnvValue,
+	}
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
@@ -87,8 +93,9 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 			),
 			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
 				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
-				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMap(cm.Name(), cmEnvKey, serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), cmEnvValue),
+				teststep.CreateSecret(nodejs10Logger, sec, "Create Test ConfigMap", secretData),
+				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs10)),
+				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),

@@ -16,12 +16,13 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: a45de29e
+    tag: 55fec02f
   service:
     externalPort: 80
     internalPort: 8080
     name: nginx
   statusPort: 6080
+  resources: {}
 core_ui:
   image:
     pullPolicy: IfNotPresent
@@ -31,9 +32,9 @@ core_ui:
     internalPort: 80
     name: nginx
   statusPort: 6081
+  resources: {}
 managementPlane: {}
 replicaCount: 1
-resources: {}
 test:
   acceptance:
     labels:

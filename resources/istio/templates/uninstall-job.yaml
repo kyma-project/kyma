@@ -19,7 +19,7 @@ spec:
             - "-c"
             - |
 {{.Files.Get "files/uninstall.sh" | printf "%s" | indent 16}}
-          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag17 }}
+          image: {{ .Values.istio.installer.image }}:{{ .Values.istio.installer.tag }}
           name: uninstaller
           volumeMounts:
           - name: config

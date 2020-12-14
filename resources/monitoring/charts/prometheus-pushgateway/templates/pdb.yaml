@@ -4,13 +4,10 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ template "prometheus-pushgateway.fullname" . }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
-    {{- if .Values.serviceAccountLabels -}}
-    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
-    {{- end -}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
 spec:
   selector:
     matchLabels:
-      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
 {{ toYaml .Values.podDisruptionBudget | indent 2 }}
 {{- end -}}
