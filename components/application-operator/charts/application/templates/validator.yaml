@@ -79,6 +79,9 @@ spec:
               name: http-proxy
             - containerPort: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
               name: http-api-port
+          resources:
+            requests:
+              memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
 ---
 apiVersion: v1
 kind: Service

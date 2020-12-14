@@ -28,7 +28,30 @@ knative-eventing:
           - kyma-system
           - kyma-installer
           - istio-system
-
+  sourcesController:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  eventingWebhook:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 20m
+        memory: 20Mi
+  eventingController:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
 
 # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
 event-mesh-dashboard:

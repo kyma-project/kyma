@@ -193,7 +193,6 @@ spec:
 {{ else }}
   ruleSelector: {}
 {{- end }}
-{{- end }}
 {{- if .Values.prometheus.prometheusSpec.probeSelector }}
   probeSelector:
 {{ toYaml .Values.prometheus.prometheusSpec.probeSelector | indent 4 }}
@@ -209,6 +208,7 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.probeNamespaceSelector | indent 4 }}
 {{ else }}
   probeNamespaceSelector: {}
+{{- end }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.remoteRead }}
   remoteRead:
