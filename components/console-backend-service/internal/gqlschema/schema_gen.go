@@ -744,7 +744,6 @@ type ComplexityRoot struct {
 		BackendModules              func(childComplexity int) int
 		BindableResources           func(childComplexity int, namespace string) int
 		ClusterAddonsConfigurations func(childComplexity int, first *int, offset *int) int
-		ClusterAssetGroups          func(childComplexity int, viewContext *string, groupName *string) int
 		ClusterMicroFrontends       func(childComplexity int) int
 		ClusterRole                 func(childComplexity int, name string) int
 		ClusterRoleBindings         func(childComplexity int) int
@@ -1293,7 +1292,6 @@ type OAuth2ClientResolver interface {
 	Error(ctx context.Context, obj *v1alpha12.OAuth2Client) (*v1alpha12.ReconciliationError, error)
 }
 type QueryResolver interface {
-	ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*ClusterAssetGroup, error)
 	ServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
 	ServiceInstances(ctx context.Context, namespace string, first *int, offset *int, status *InstanceStatusType) ([]*ServiceInstance, error)
 	ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]*ClusterServiceClass, error)
@@ -4622,18 +4620,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ClusterAddonsConfigurations(childComplexity, args["first"].(*int), args["offset"].(*int)), true
 
-	case "Query.clusterAssetGroups":
-		if e.complexity.Query.ClusterAssetGroups == nil {
-			break
-		}
-
-		args, err := ec.field_Query_clusterAssetGroups_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ClusterAssetGroups(childComplexity, args["viewContext"].(*string), args["groupName"].(*string)), true
-
 	case "Query.clusterMicroFrontends":
 		if e.complexity.Query.ClusterMicroFrontends == nil {
 			break
@@ -7056,13 +7042,7 @@ type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
   json: JSON!
 }
 
-# # RESOURCE QUOTA
-
-# type ResourceQuotaHard @goModel(model: "k8s.io/api/core/v1.ResourceList") {
-#   # limits: ResourceLimits!
-#   # requests: ResourceLimits!
-#   pods: String
-# }
+# RESOURCE QUOTA
 
 type ResourceQuotaHard {
   limits: ResourceLimits!
@@ -7147,7 +7127,7 @@ extend type Mutation {
   @HasAccess(
     attributes: {
       resource: "limitrange"
-      verb: "create"
+      verb: "update"
       apiGroup: ""
       apiVersion: "v1"
       namespaceArg: "namespace"
@@ -8306,8 +8286,6 @@ type VersionInfo {
 # Queries
 
 type Query {
-    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "list", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
-
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
@@ -10614,28 +10592,6 @@ func (ec *executionContext) field_Query_clusterAddonsConfigurations_args(ctx con
 		}
 	}
 	args["offset"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_clusterAssetGroups_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["viewContext"]; ok {
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["viewContext"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["groupName"]; ok {
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["groupName"] = arg1
 	return args, nil
 }
 
@@ -24381,7 +24337,7 @@ func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, fiel
 			return ec.resolvers.Mutation().UpdateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "update"})
 			if err != nil {
 				return nil, err
 			}
@@ -26954,71 +26910,6 @@ func (ec *executionContext) _PolicyRule_verbs(ctx context.Context, field graphql
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_clusterAssetGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_clusterAssetGroups_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().ClusterAssetGroups(rctx, args["viewContext"].(*string), args["groupName"].(*string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rafter.kyma-project.io", "apiVersion": "v1beta1", "resource": "clusterassetgroups", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*ClusterAssetGroup); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterAssetGroup`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ClusterAssetGroup)
-	fc.Result = res
-	return ec.marshalNClusterAssetGroup2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroupᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -44566,20 +44457,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "clusterAssetGroups":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_clusterAssetGroups(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "serviceInstance":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -48633,43 +48510,6 @@ func (ec *executionContext) marshalNClusterAssetEvent2ᚖgithubᚗcomᚋkymaᚑp
 
 func (ec *executionContext) marshalNClusterAssetGroup2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroup(ctx context.Context, sel ast.SelectionSet, v ClusterAssetGroup) graphql.Marshaler {
 	return ec._ClusterAssetGroup(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNClusterAssetGroup2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*ClusterAssetGroup) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNClusterAssetGroup2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroup(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalNClusterAssetGroup2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterAssetGroup(ctx context.Context, sel ast.SelectionSet, v *ClusterAssetGroup) graphql.Marshaler {

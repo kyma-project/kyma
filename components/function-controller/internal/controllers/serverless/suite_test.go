@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -79,6 +80,12 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 			Namespace: testNamespace,
 		},
 	}
+	ns := corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testNamespace,
+		},
+	}
+	gomega.Expect(resourceClient.Create(context.TODO(), &ns)).To(gomega.Succeed())
 	gomega.Expect(resourceClient.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
 
 	close(done)

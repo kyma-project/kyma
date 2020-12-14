@@ -1,21 +1,28 @@
 {{- /*
-Generated from 'k8s-resources-pod' from https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+  Customization:
+  * Made the dashboard not editable
+  * Unset the timezone
+*/ -}}
+{{- /*
+Generated from 'k8s-resources-pod' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
-https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ $.Release.Namespace }}
-  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "k8s-resources-pod" | trunc 63 | trimSuffix "-" }}
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "k8s-resources-pod" | trunc 63 | trimSuffix "-" }}
+  annotations:
+{{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
     {{- end }}
-    app: {{ template "prometheus-operator.name" $ }}-grafana
-{{ include "prometheus-operator.labels" $ | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
 data:
   k8s-resources-pod.json: |-
     {
@@ -206,7 +213,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum(increase(container_cpu_cfs_throttled_periods_total{namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", cluster=\"$cluster\"}[5m])) by (container) /sum(increase(container_cpu_cfs_periods_total{namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", cluster=\"$cluster\"}[5m])) by (container)",
+                                "expr": "sum(increase(container_cpu_cfs_throttled_periods_total{namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\", cluster=\"$cluster\"}[5m])) by (container) /sum(increase(container_cpu_cfs_periods_total{namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\", cluster=\"$cluster\"}[5m])) by (container)",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}container{{`}}`}}",
@@ -325,6 +332,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #A",
@@ -343,6 +351,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #B",
@@ -361,6 +370,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #C",
@@ -379,6 +389,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #D",
@@ -397,6 +408,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #E",
@@ -415,6 +427,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "container",
@@ -597,10 +610,10 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\"}) by (container, instance)",
+                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\", image!=\"\"}) by (container)",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "{{`{{`}}container{{`}}`}}-{{`{{`}}instance{{`}}`}}",
+                                "legendFormat": "{{`{{`}}container{{`}}`}}",
                                 "legendLink": null,
                                 "step": 10
                             },
@@ -725,6 +738,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #A",
@@ -743,6 +757,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #B",
@@ -761,6 +776,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #C",
@@ -779,6 +795,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #D",
@@ -797,6 +814,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #E",
@@ -815,6 +833,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #F",
@@ -833,6 +852,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #G",
@@ -851,6 +871,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "Value #H",
@@ -869,6 +890,7 @@ data:
                                 "dateFormat": "YYYY-MM-DD HH:mm:ss",
                                 "decimals": 2,
                                 "link": false,
+                                "linkTargetBlank": false,
                                 "linkTooltip": "Drill down",
                                 "linkUrl": "",
                                 "pattern": "container",
@@ -896,7 +918,7 @@ data:
                         ],
                         "targets": [
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\"}) by (container)",
+                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\", image!=\"\"}) by (container)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -914,7 +936,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\"}) by (container) / sum(kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\", pod=\"$pod\"}) by (container)",
+                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}) by (container) / sum(kube_pod_container_resource_requests_memory_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\"}) by (container)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -932,7 +954,7 @@ data:
                                 "step": 10
                             },
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"\"}) by (container) / sum(kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\", pod=\"$pod\"}) by (container)",
+                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"\", image!=\"\"}) by (container) / sum(kube_pod_container_resource_limits_memory_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\"}) by (container)",
                                 "format": "table",
                                 "instant": true,
                                 "intervalFactor": 2,
@@ -1031,6 +1053,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 6,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,
@@ -1129,6 +1152,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 7,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,
@@ -1227,6 +1251,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 8,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,
@@ -1325,6 +1350,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 9,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,
@@ -1423,6 +1449,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 10,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,
@@ -1521,6 +1548,7 @@ data:
                         "datasource": "$datasource",
                         "fill": 10,
                         "id": 11,
+                        "interval": "1m",
                         "legend": {
                             "avg": false,
                             "current": false,

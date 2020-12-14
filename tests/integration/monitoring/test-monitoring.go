@@ -379,7 +379,7 @@ func checkAlerts() {
 			alerts := resp.Data.Alerts
 			timeoutMessage = ""
 			for _, alert := range alerts {
-				if shouldIgnoreAlert(alert.Labels.AlertName) {
+				if shouldIgnoreAlert(alert) {
 					continue
 				}
 				if alert.State == "firing" {
@@ -395,14 +395,20 @@ func checkAlerts() {
 	}
 }
 
-func shouldIgnoreAlert(alertName string) bool {
-	var alertsToBeIgnored = []string{
-		// Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
-		"Watchdog",
+func shouldIgnoreAlert(alert prom.Alert) bool {
+	if alert.Labels.Severity != "critical" {
+		return true
 	}
 
-	for _, alert := range alertsToBeIgnored {
-		if alert == alertName {
+	var alertNamesToIgnore = []string{
+		// Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
+		"Watchdog",
+		// Scrape limits can be exceeded on long-running clusters and can be ignored
+		"ScrapeLimitForTargetExceeded",
+	}
+
+	for _, name := range alertNamesToIgnore {
+		if name == alert.Labels.AlertName {
 			return true
 		}
 	}
