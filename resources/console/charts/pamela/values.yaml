@@ -12,7 +12,7 @@ virtualservice:
   enabled: true
   host: pamela
   annotations: {}
-serviceAccountName: apiserver-proxy # !!!
+serviceAccountName: console-backend
 istio:
   namespace: istio-system
 verifySSL: false
