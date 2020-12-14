@@ -23,8 +23,8 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.controllerManager.dir }}{{ .Values.global.controllerManager.image }}:{{ .Values.global.controllerManager.version }}"
         resources:
           requests:
-            cpu: 10m
-            memory: 50Mi
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
           - name: metrics
             containerPort: 9090
