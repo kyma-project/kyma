@@ -150,7 +150,7 @@ spec:
           {{- if .Release.IsUpgrade }}
           envFrom:
             - secretRef:
-                name: {{ .Values.patchCredentials.secretName }}
+                name: {{ .Values.ensureSecret.secretName }}
           {{- end }}
           # --CHANGES
           livenessProbe:
