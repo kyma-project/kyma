@@ -10,7 +10,9 @@ Two different components use the Root CA certificate. As a result, the certifica
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
   - The `app-connector-certs` Istio Secret responsible for security in the Connector Service API
 
-Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered Applications can access its API.
+Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered Applications can access its API. 
+
+> **NOTE:** You as the user are responsible for rotating and renewing the certificates.
 
 The Root CA certificate has a set expiration date and must be renewed periodically to prevent its expiration. You must also renew the Root CA certificate and key every time they are compromised.
 
