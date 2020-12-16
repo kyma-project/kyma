@@ -17,6 +17,7 @@ const {
   removeServiceBindingFinalizer,
   sleep,
   promiseAllSettled,
+  waitForTokenRequestReady,
 } = require("../utils");
 
 const https = require("https");
@@ -46,11 +47,12 @@ const xfMockObjs = k8s.loadAllYaml(xfMocksYaml);
 
 const orderService = "orders-service";
 
-function printDeletionStatus(objects) {
-  const failedDeletions = (objects || []).filter(
-    (elem) => elem.status !== "fulfilled"
-  );
-  failedDeletions.map((elem) => elem.body).forEach((elem) => console.log(elem));
+function extractFailMessages(arg) {
+  return (arg || [])
+    .filter((elem) => elem.status !== "fulfilled")
+    .map(
+      (elem) => !!elem.reason && !!elem.reason.body && elem.reason.body.message
+    );
 }
 
 describe("Getting Started Guides tests", function () {
@@ -97,9 +99,11 @@ describe("Getting Started Guides tests", function () {
       )
     ).catch(expectNoK8sErr);
 
-    printDeletionStatus(deletionStatuses);
+    expect(extractFailMessages(deletionStatuses)).to.have.lengthOf(0);
   });
 
+  // TODO: check if we can split this one big "it" into several smaller ones
+  // mocha should preserve the order of test inside "describe", but I'm not sure
   it("should pass with 😄", async function () {
     // https://kyma-project.io/docs/root/getting-started/#getting-started-create-a-namespace
     console.log("Creating orders-service namespace...");
@@ -116,8 +120,6 @@ describe("Getting Started Guides tests", function () {
     // https://kyma-project.io/docs/root/getting-started/#getting-started-add-the-redis-service
     // https://kyma-project.io/docs/root/getting-started/#getting-started-create-a-service-instance-for-the-redis-service
     // https://kyma-project.io/docs/root/getting-started/#getting-started-bind-the-redis-service-instance-to-the-microservice
-    // also some reosurces from https://kyma-project.io/docs/root/getting-started/#getting-started-connect-an-external-application
-    // We're NOT creating SBU here
     console.log("Creating addon, serviceinstance, servicebinding...");
     await Promise.all(
       addonServiceBindingServiceInstanceObjs.map((obj) =>
@@ -162,6 +164,7 @@ describe("Getting Started Guides tests", function () {
 
     await waitForSbuReady(orderService, orderService);
 
+    // TODO @aerfio I think that this step with checking if secret exists is kinda redundant, would get rid of it, we already check if
     const secret = await retryPromise(
       async () => {
         console.log("Waiting for SBU's secret to appear");
@@ -178,6 +181,11 @@ describe("Getting Started Guides tests", function () {
     expect(secret.body.data).to.have.property("HOST");
     expect(secret.body.data).to.have.property("PORT");
     expect(secret.body.data).to.have.property("REDIS_PASSWORD");
+
+    await deletePodsByLabel(orderService, `app=${orderService}`);
+    // TODO jesus christ another nasty datarace, old pods that are already being deleted are still receiving traffic
+    // we might have to introduce some function that not only deletes the pods, but also waits till they're completly gone
+    await sleep(20000);
 
     await getOrders(serviceDomain, (resp) =>
       expect(resp).to.be.an("Array").of.length(0)
@@ -210,6 +218,8 @@ describe("Getting Started Guides tests", function () {
       expectNoK8sErr
     );
   });
+  // https://kyma-project.io/docs/root/getting-started/#getting-started-connect-an-external-application-connect-events
+  // TODO: this step requires us to use UI, needs to be handled somehow here in nodejs
 });
 
 async function waitForApiRuleReady() {
@@ -237,7 +247,7 @@ async function waitForApiRuleReady() {
 async function waitForSbuReady(
   name,
   namespace,
-  retriesLeft = 30,
+  retriesLeft = 40,
   interval = 5000
 ) {
   await retryPromise(
@@ -299,7 +309,7 @@ async function getOrders(
   serviceDomain,
   expectFn,
   retriesLeft = 10,
-  interval = 3000
+  interval = 5000
 ) {
   return await retryPromise(
     async () => {

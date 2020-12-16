@@ -58,6 +58,8 @@ describe("Commerce Mock tests", function () {
     ).catch(expectNoK8sErr);
   });
 
+  // TODO: check if we can split this one big "it" into several smaller ones
+  // mocha should preserve the order of test inside "describe" block, but I'm not sure
   it("should pass with 😄", async function () {
     console.log("Creating mocks namespace...");
     await k8sDynamicApi.create(mocksNamespaceObj).catch(expectNoK8sErr); // we can extract namespace creation into seperate step and ignore AlreadyExists error
@@ -74,8 +76,8 @@ describe("Commerce Mock tests", function () {
     console.log(`Host: https://${host}`);
     console.log(`Mock host: https://${mockHost}`);
 
-    // tests do not seem to pass without calling https://${mockHost}/local/apis first
-    // discussed with PB - it's probably a bug in varkes
+    // @aerfio tests do not seem to pass without calling https://${mockHost}/local/apis first
+    // @aerfio discussed with PB - it's probably a bug in varkes
     await retryPromise(
       async () => {
         console.log(`Calling https://${mockHost}/local/apis`);
