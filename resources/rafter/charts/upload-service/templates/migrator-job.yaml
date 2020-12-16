@@ -119,6 +119,10 @@ spec:
     spec:
       serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator
       restartPolicy: OnFailure
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+        fsGroup: 1000
+      {{- end }}
       volumes:
         - name: minio-configuration
           projected:
@@ -134,6 +138,9 @@ spec:
       - name: mode-checker
         image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
         imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
+        {{- if .Values.pod.extraContainerProperties }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
+        {{- end }}
         command:
         - bash
         - -c
@@ -200,6 +207,10 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+        fsGroup: 1000
+      {{- end }}
       volumes:
         - name: minio-configuration
           projected:
@@ -321,6 +332,9 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
       serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
       containers:
         - name: pvc-remover

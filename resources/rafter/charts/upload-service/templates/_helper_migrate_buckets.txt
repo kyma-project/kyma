@@ -1,13 +1,16 @@
 #!/bin/sh
 set -e ;
 
+MC_CONFIG_DIR="/tmp/.mc"
+MC="/usr/bin/mc --config-dir ${MC_CONFIG_DIR}"
+
 connectToMinio() {
   ATTEMPTS=0 ; LIMIT=29 ;
   set -e ;
   ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;
   set +e ;
   echo "Connecting to Minio server: http://$MINIO_ENDPOINT:$MINIO_PORT" ;
-  MC_COMMAND="mc config host add myminio http://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
+  MC_COMMAND="${MC} config host add myminio http://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
   $MC_COMMAND ;
   STATUS=$? ;
   until [ $STATUS = 0 ]
@@ -27,7 +30,7 @@ connectToMinio() {
 
 checkBucketExists() {
   BUCKET=$1
-  CMD=$(/usr/bin/mc ls myminio/$BUCKET > /dev/null 2>&1)
+  CMD=$(${MC} ls myminio/$BUCKET > /dev/null 2>&1)
   return $?
 }
 
@@ -37,13 +40,13 @@ createBucket() {
 
   if ! checkBucketExists "$BUCKET" ; then
     echo "Creating bucket '$BUCKET'"
-    /usr/bin/mc mb "myminio/$BUCKET"
+    ${MC} mb "myminio/$BUCKET"
   else
     echo "Bucket '$BUCKET' already exists."
   fi
 
   echo "Setting policy of bucket '$BUCKET' to '$POLICY'."
-  /usr/bin/mc policy "$POLICY" "myminio/$BUCKET"
+  ${MC} policy "$POLICY" "myminio/$BUCKET"
 }
 
 copyToBucket() {
@@ -52,7 +55,7 @@ copyToBucket() {
 
   createBucket "$BUCKET" "$POLICY"
   echo "Copying to bucket '$BUCKET'"
-  mc mirror "$LOCAL_STORAGE/$BUCKET/" "myminio/$BUCKET"
+  ${MC} mirror "$LOCAL_STORAGE/$BUCKET/" "myminio/$BUCKET"
 }
 
 copyFromBucket() {
@@ -61,7 +64,7 @@ copyFromBucket() {
 
   if checkBucketExists "$BUCKET"; then
     echo "Copying from bucket '$BUCKET'"
-    mc mirror "myminio/$BUCKET" "$LOCAL_STORAGE/$BUCKET/"
+    ${MC} mirror "myminio/$BUCKET" "$LOCAL_STORAGE/$BUCKET/"
   fi
 }
 
