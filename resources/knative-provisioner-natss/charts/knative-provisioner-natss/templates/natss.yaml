@@ -268,6 +268,10 @@ spec:
           volumeMounts:
             - mountPath: /etc/config-logging
               name: config-logging
+          {{- if .Values.controller.resources }}
+          resources:
+          {{- toYaml .Values.controller.resources | nindent 12 }}
+          {{- end }}
       serviceAccountName: natss-ch-controller
       volumes:
         - configMap:
@@ -329,6 +333,10 @@ spec:
           image:  {{ .Values.dispatcher.image.location }}
           imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
           name: dispatcher
+          {{- if .Values.dispatcher.resources }}
+          resources:
+          {{- toYaml .Values.dispatcher.resources | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: 9090
               name: metrics

@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "axios": "^0.21.0"
+  },
+  "engines": {
+    "node": ">=12"
   }
 }

@@ -1,20 +1,21 @@
 const k8s = require("@kubernetes/client-node");
 const {
   commerceMockYaml,
-  appConnectorYaml,
   tokenRequestYaml,
   genericServiceClass,
   serviceCatalogResources,
+  mocksNamespaceYaml,
 } = require("./fixtures");
 const { expect, config } = require("chai");
-config.truncateThreshold = 0;
+config.truncateThreshold = 0; // more verbose errors
 
 const https = require("https");
 const axios = require("axios").default;
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
-axios.defaults.httpsAgent = httpsAgent; // create separate axios instance with that httpsAgent https://github.com/axios/axios#custom-instance-defaults
+axios.defaults.httpsAgent = httpsAgent;
+
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
@@ -23,11 +24,31 @@ const k8sCRDApi = kc.makeApiClient(k8s.CustomObjectsApi);
 const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
 
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
-const appConnectorObjs = k8s.loadAllYaml(appConnectorYaml);
 const tokenRequestObj = k8s.loadYaml(tokenRequestYaml);
+const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
+
+function retryPromise(fn, retriesLeft = 10, interval = 30) {
+  return new Promise((resolve, reject) => {
+    return fn()
+      .then(resolve)
+      .catch((error) => {
+        if (retriesLeft === 1) {
+          // reject('maximum retries exceeded');
+          reject(error);
+          return;
+        }
+
+        setTimeout(() => {
+          console.log(`retriesLeft: ${retriesLeft}`);
+          // Passing on "reject" is the important part
+          retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
+        }, interval);
+      });
+  });
+}
 
 describe("Commerce Mock tests", function () {
-  this.timeout(300 * 1000); // 50s
+  this.timeout(10 * 60 * 1000);
 
   after(async function () {
     this.timeout(10 * 10000);
@@ -35,10 +56,10 @@ describe("Commerce Mock tests", function () {
       console.log("Deleting test resources...");
       await Promise.all(
         [
+          mocksNamespaceObj,
           tokenRequestObj,
-          ...appConnectorObjs,
           ...commerceObjs,
-          ...k8s.loadAllYaml(serviceCatalogResources("", "")), // hope it'll delete those resources, even though .spec.externalName=""
+          ...k8s.loadAllYaml(serviceCatalogResources("", "")),
         ].map((obj) =>
           k8sDynamicApi.delete(
             obj,
@@ -55,71 +76,91 @@ describe("Commerce Mock tests", function () {
     }
   });
 
-  it("should pass with ", async function () {
+  it("should pass with 😄", async function () {
     try {
-      // we can extract namespace creation into seperate step and ignore AlreadyExists error
+      console.log("Creating mocks namespace...");
+      await k8sDynamicApi.create(mocksNamespaceObj); // we can extract namespace creation into seperate step and ignore AlreadyExists error
       console.log("Creating commerce resources...");
-      await Promise.all(
-        // TODO: merge commerceObjs and appConnectorObjs into one big yaml
-        [...commerceObjs, ...appConnectorObjs].map((obj) =>
-          k8sDynamicApi.create(obj)
-        )
+      await Promise.all(commerceObjs.map((obj) => k8sDynamicApi.create(obj)));
+    } catch (err) {
+      expect(err.body.message).to.be.empty;
+    }
+
+    let virtualservice;
+    try {
+      console.log("Waiting for virtual service to be ready...");
+      virtualservice = await retryPromise(
+        async () => {
+          return k8sCRDApi
+            .listNamespacedCustomObject(
+              "networking.istio.io",
+              "v1beta1",
+              "mocks",
+              "virtualservices",
+              "true",
+              undefined,
+              undefined,
+              "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks"
+            )
+            .then((res) => {
+              expect(res.body.items).to.have.lengthOf(1);
+              expect(res.body.items[0]).to.have.nested.property("spec.hosts");
+              expect(res.body.items[0].spec.hosts).to.have.lengthOf(1);
+              expect(res.body.items[0].spec.hosts[0]).not.to.be.empty;
+              return res;
+            });
+        },
+        10,
+        1000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
-    await sleep(5000); // TODO: add waiting for virtualservice
-
-    console.log("Waiting for virtual service to be ready...");
-    let virtualservice;
-    try {
-      virtualservice = await k8sCRDApi.listNamespacedCustomObject(
-        "networking.istio.io",
-        "v1beta1",
-        "mocks",
-        "virtualservices",
-        "true",
-        undefined,
-        undefined,
-        "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks"
-      );
-    } catch (err) {
-      console.error(err.body.message);
-    }
-
-    expect(virtualservice.body.items).to.have.lengthOf(1);
-    expect(virtualservice.body.items[0].spec.hosts).to.have.lengthOf(1);
-    expect(virtualservice.body.items[0].spec.hosts[0]).not.to.be.empty;
-
     const mockHost = virtualservice.body.items[0].spec.hosts[0];
     const host = mockHost.split(".").slice(1).join(".");
-    console.log(`Host: ${host}`);
-    console.log(`Mock host: ${mockHost}`);
-
-    await sleep(40000); // TODO: add retries for axios.get instead of sleep
+    console.log(`Host: https://${host}`);
+    console.log(`Mock host: https://${mockHost}`);
 
     let response;
     try {
-      console.log(`Calling https://${mockHost}/local/apis`);
-      response = await axios.get(`https://${mockHost}/local/apis`);
-    } catch (error) {
-      expect(error).to.be.empty;
+      response = await retryPromise(
+        async () => {
+          console.log(`Calling https://${mockHost}/local/apis`);
+          return axios.get(`https://${mockHost}/local/apis`).then((res) => {
+            expect(res.data).to.have.lengthOf(2);
+            expect(res.data[0].provider).not.to.be.empty;
+            return res;
+          });
+        },
+        20,
+        5000
+      );
+    } catch (err) {
+      expect(err).to.be.empty;
     }
 
     expect(response.data).to.have.lengthOf(2);
     expect(response.data[0].provider).not.to.be.empty;
-    // TODO: discuss with PB whether it's needed
-    // TODO2: tests do not seem to pass without it, but we do not use provider variable anywhere, needs to be discussed
-    const provider = response.data[0].provider;
 
-    await sleep(5000); // TODO: introduce proper mechanism that waits till commerce-application-gateway exists
+    // tests do not seem to pass without it calling https://${mockHost}/local/apis first, but we do not use provider variable anywhere, needs to be discussed
+    // discussed with PB - it's probably a bug in varkes
+    const provider = response.data[0].provider;
 
     let commerceApplicationGatewayDeployment;
     try {
-      commerceApplicationGatewayDeployment = await k8sAppsApi.readNamespacedDeployment(
-        "commerce-application-gateway",
-        "kyma-integration"
+      commerceApplicationGatewayDeployment = await retryPromise(
+        async () => {
+          console.log(
+            "Waiting for commerce-application-gateway deployment to appear"
+          );
+          return k8sAppsApi.readNamespacedDeployment(
+            "commerce-application-gateway",
+            "kyma-integration"
+          );
+        },
+        10,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -146,68 +187,85 @@ describe("Commerce Mock tests", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    await sleep(10 * 1000);
-
     let tokenObj;
     try {
-      console.log("Reading TokenRequest .status.token");
-      tokenObj = await k8sDynamicApi.read(tokenRequestObj);
+      tokenObj = await retryPromise(
+        async () => {
+          console.log("Reading TokenRequest .status.token");
+          return k8sDynamicApi.read(tokenRequestObj).then((res) => {
+            expect(res.body).to.have.nested.property("status.token");
+            return res;
+          });
+        },
+        15,
+        5000
+      );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
-    // TODO make sure that .status.token exists first
+    expect(tokenObj.body).to.have.nested.property("status.token");
     expect(tokenObj.body.status.token).not.to.be.empty;
 
     const token = tokenObj.body.status.token;
 
-    await sleep(15 * 1000);
-
     try {
-      console.log(`Conneting to https://${mockHost}/connection`);
-      await axios.post(
-        `https://${mockHost}/connection`,
-        {
-          token: `https://connector-service.${host}/v1/applications/signingRequests/info?token=${token}`,
-          baseUrl: `https://${mockHost}`,
-          insecure: true,
+      await retryPromise(
+        async () => {
+          console.log(`Conneting to https://${mockHost}/connection`);
+          return axios.post(
+            `https://${mockHost}/connection`,
+            {
+              token: `https://connector-service.${host}/v1/applications/signingRequests/info?token=${token}`,
+              baseUrl: `https://${mockHost}`,
+              insecure: true,
+            },
+            {
+              headers: {
+                "content-type": "application/json",
+              },
+            }
+          );
         },
-        {
-          headers: {
-            "content-type": "application/json",
-          },
-        }
+        10,
+        5000
       );
     } catch (error) {
       // https://github.com/axios/axios#handling-errors
       expect(error.response.data).to.deep.eq({});
     }
 
-    await sleep(5 * 1000);
-
     try {
-      console.log("Registering Commerce Webservices");
-      await axios.post(
-        `https://${mockHost}/local/apis/Commerce%20Webservices/register`,
-        {},
-        {
-          headers: {
-            "content-type": "application/json",
-            origin: `https://${mockHost}`,
-          },
-        }
+      await retryPromise(
+        async () => {
+          console.log("Registering Commerce Webservices");
+          return axios.post(
+            `https://${mockHost}/local/apis/Commerce%20Webservices/register`,
+            {},
+            {
+              headers: {
+                "content-type": "application/json",
+                origin: `https://${mockHost}`,
+              },
+            }
+          );
+        },
+        15,
+        5000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
 
-    await sleep(10000);
-
     let commerceWebservicesResp;
     try {
-      console.log("Listing remote apis");
-      commerceWebservicesResp = await axios.get(
-        `https://${mockHost}/remote/apis`
+      commerceWebservicesResp = await retryPromise(
+        async () => {
+          console.log("Listing remote apis");
+          return axios.get(`https://${mockHost}/remote/apis`);
+        },
+        10,
+        3000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
@@ -219,29 +277,36 @@ describe("Commerce Mock tests", function () {
     ).id;
     expect(commerceWebservicesID).not.to.be.empty;
 
-    await sleep(5000);
-
     try {
-      console.log("Registering Events");
-      await axios.post(
-        `https://${mockHost}/local/apis/Events/register`, // TODO: can we do this in parallel to registering commerce webservices?
-        {},
-        {
-          headers: {
-            "content-type": "application/json",
-            origin: `https://${mockHost}`,
-          },
-        }
+      await retryPromise(
+        async () => {
+          console.log("Registering Events");
+          return axios.post(
+            `https://${mockHost}/local/apis/Events/register`, // TODO: can we do this in parallel to registering commerce webservices?
+            {},
+            {
+              headers: {
+                "content-type": "application/json",
+                origin: `https://${mockHost}`,
+              },
+            }
+          );
+        },
+        10,
+        3000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
-    await sleep(5000);
 
     try {
-      console.log("Listing remote apis");
-      commerceWebservicesResp = await axios.get(
-        `https://${mockHost}/remote/apis`
+      commerceWebservicesResp = await retryPromise(
+        async () => {
+          console.log("Listing remote apis");
+          return axios.get(`https://${mockHost}/remote/apis`);
+        },
+        10,
+        3000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
@@ -253,13 +318,17 @@ describe("Commerce Mock tests", function () {
     ).id;
     expect(commerceEventsID).not.to.be.empty;
 
-    await sleep(10 * 1000);
-
     let webServicesServiceClass;
     try {
-      console.log("Reading Web Services service class");
-      webServicesServiceClass = await k8sDynamicApi.read(
-        k8s.loadYaml(genericServiceClass(commerceWebservicesID, "default"))
+      webServicesServiceClass = await retryPromise(
+        async () => {
+          console.log("Reading Web Services service class");
+          return k8sDynamicApi.read(
+            k8s.loadYaml(genericServiceClass(commerceWebservicesID, "default"))
+          );
+        },
+        20,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
@@ -270,15 +339,24 @@ describe("Commerce Mock tests", function () {
 
     let eventsServiceClass;
     try {
-      console.log("Reading Events service class");
-      eventsServiceClass = await k8sDynamicApi.read(
-        k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
+      eventsServiceClass = await retryPromise(
+        async () => {
+          console.log("Reading Events service class");
+          return k8sDynamicApi.read(
+            k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
+          );
+        },
+        10,
+        5000
       );
     } catch (err) {
       expect(err.body.message).to.be.empty;
     }
 
-    const eventsSCExternalName = eventsServiceClass.body.spec.externalName; // TODO: check if .spec.externalName exists first
+    expect(eventsServiceClass.body).to.have.nested.property(
+      "spec.externalName"
+    );
+    const eventsSCExternalName = eventsServiceClass.body.spec.externalName;
 
     const serviceCatalogObjs = k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
@@ -293,40 +371,45 @@ describe("Commerce Mock tests", function () {
       expect(err.body.message).to.be.empty;
     }
 
-    console.log("Waiting for Service Catalog resources");
-    await sleep(80 * 1000);
-
+    let functionResp;
     try {
-      console.log("Sending order.created event");
-      await axios.post(
-        `https://${mockHost}/events`,
-        {
-          "event-type": "order.created",
-          "event-type-version": "v1",
-          "event-time": "2020-09-28T14:47:16.491Z",
-          data: { orderCode: "123" },
-          "event-tracing": true,
+      functionResp = await retryPromise(
+        async () => {
+          console.log("Sending order.created event");
+          await axios.post(
+            `https://${mockHost}/events`,
+            {
+              "event-type": "order.created",
+              "event-type-version": "v1",
+              "event-time": "2020-09-28T14:47:16.491Z",
+              data: { orderCode: "123" },
+              "event-tracing": true,
+            },
+            {
+              headers: {
+                "content-type": "application/json",
+              },
+            }
+          );
+
+          await sleep(500);
+
+          console.log("Checking if event reached lambda");
+          return axios.get(`https://lastorder.${host}`).then((res) => {
+            expect(res.data).to.have.nested.property("totalPriceWithTax.value");
+            return res;
+          });
         },
-        {
-          headers: {
-            "content-type": "application/json",
-          },
-        }
+        30,
+        10 * 1000
       );
     } catch (err) {
       expect(err.response.data).to.deep.eq({});
     }
 
-    await sleep(5 * 1000);
-
-    let functionResp;
-    try {
-      console.log("Checking if event reached lambda");
-      functionResp = await axios.get(`https://lastorder.${host}`);
-    } catch (err) {
-      expect(err.response.data).to.deep.eq({});
-    }
-
+    expect(functionResp.data).to.have.nested.property(
+      "totalPriceWithTax.value"
+    );
     expect(functionResp.data.totalPriceWithTax.value).to.equal(100);
     console.log("Done!");
   });

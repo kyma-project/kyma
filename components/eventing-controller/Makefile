@@ -1,14 +1,15 @@
 APP_NAME = eventing-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200930-31e9b318
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# DEV_IMG is the image used during development workflow only
-DEV_IMG = ko://github.com/kyma-project/kyma/components/eventing-controller
+# DEV images used during development workflow only
+DEV_IMG_DEFAULT = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+DEV_IMG_NATS = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller-nats
 NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -54,14 +55,28 @@ deploy-local: manifests deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
+# Deploy eventing-controller-nats in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-eventing-controller-nats-local: manifests deploy-eventing-controller-nats-local-dry-run
+	kubectl create ns ${NAMESPACE} || true
+	kustomize build config/nats | ko apply -f -
+
 undeploy-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
+undeploy-eventing-controller-nats-local: manifests
+	kustomize build config/nats | kubectl delete -f -
+
 # Dry run for deploying controller for local development
 deploy-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMG} && kustomize edit set namespace ${NAMESPACE}
+	cd config/manager && kustomize edit set image controller=${DEV_IMG_DEFAULT} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
+
+# Dry run for deploying eventing-controller-nats for local development
+deploy-eventing-controller-nats-local-dry-run: manifests
+	cd config/manager-nats && kustomize edit set image controller=${DEV_IMG_NATS} && kustomize edit set namespace ${NAMESPACE}
+	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
+	kustomize build config/nats
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
@@ -122,3 +137,59 @@ $(eval $(call buildpack-mount,test))
 $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))
 $(eval $(call buildpack-mount,manifests))
+
+# produce goals for each cmd program ("bin1 bin2 ...")
+cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
+# produce goals to build images for each cmd program ("bin1.image bin2.image ...")
+cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
+cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
+# produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
+cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
+
+MOUNT_TARGETS = $(cmds)
+$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+
+.PHONY: clean
+clean: $(cmds_clean) resolve_clean licenses_clean
+
+$(cmds_clean): %.clean:
+	rm -f $*
+
+resolve_clean:
+	rm -rf vendor
+
+licenses_clean:
+	rm -rf licenses
+
+build-local: $(cmds) test-local ;
+
+.PHONY: $(cmds_images) $(cmds_images_push)
+
+# override image goals from common Makefile because we need to build several images
+build-image: $(cmds_images) ;
+push-image: $(cmds_images_push) ;
+
+# Example:
+#   make eventing-controller
+GOBUILD_FLAGS := -v
+PKG := github.com/kyma-project/kyma/components/eventing-controller
+$(cmds): %: resolve-local
+	@echo "+ Building $*"
+	@CGO_ENABLED=0 go build -o $* \
+		$(GOBUILD_FLAGS) \
+		$(PKG)/cmd/$*
+
+# Example:
+#   make eventing-controller.image
+$(cmds_images): %.image: build pull-licenses
+	$(eval $@_img_name := $*)
+	@echo "+ Building container image $($@_img_name)"
+	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
+
+# Example:
+#   make eventing-controller.image.push
+$(cmds_images_push): %.push: %
+	$(eval $@_img_name := $(subst .image,,$*))
+	@echo "+ Pushing container image $($@_img_name)"
+	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
+	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
