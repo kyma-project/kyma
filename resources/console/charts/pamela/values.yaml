@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: eu.gcr.io/kyma-project/pamela
-  tag: b761ce02
+  tag: 27c5fb3d
   pullPolicy: IfNotPresent
 service:
   internalPort: 3001
@@ -12,7 +12,7 @@ virtualservice:
   enabled: true
   host: pamela
   annotations: {}
-serviceAccountName: apiserver-proxy # !!!
+serviceAccountName: console-backend
 istio:
   namespace: istio-system
 verifySSL: false
