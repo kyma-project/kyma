@@ -84,18 +84,17 @@ func testLogStream(spec logstream.PodSpec) error {
 	}
 	authHeader := jwt.SetAuthHeader(token)
 
-	err = logstream.Test(domain, authHeader, "container", spec.ContainerName, spec.LogPrefix, httpClient)
+	labelsToSelect := map[string]string{
+		"container": spec.ContainerName,
+		"app":       spec.PodName,
+		"namespace": spec.Namespace,
+	}
+
+	err = logstream.Test(domain, authHeader, spec.LogPrefix, labelsToSelect, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test(domain, authHeader, "app", spec.PodName, spec.LogPrefix, httpClient)
-	if err != nil {
-		return err
-	}
-	err = logstream.Test(domain, authHeader, "namespace", spec.Namespace, spec.LogPrefix, httpClient)
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 

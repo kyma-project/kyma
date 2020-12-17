@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -78,16 +79,17 @@ func WaitForDummyPodToRun(spec PodSpec, coreInterface kubernetes.Interface) erro
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(domain, authHeader, labelKey, labelValue, logPrefix string, httpClient *http.Client) error {
+func Test(domain, authHeader, logPrefix string, labelsToSelect map[string]string, httpClient *http.Client) error {
 	start := time.Now().UnixNano()
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
-	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query={%s="%s"}&start=%d`, domain, labelKey, labelValue, start)
+	query := logQLEncode(labelsToSelect)
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query=%s}&start=%d`, domain, query, start)
 	for {
 		select {
 		case <-timeout:
 			tick.Stop()
-			return errors.Errorf(`the string "%s" is not present in logs when using the following query: {%s="%s"}`, logPrefix, labelKey, labelValue)
+			return errors.Errorf(`the string "%s" is not present in logs when using the following query: %s`, logPrefix, query)
 		case <-tick.C:
 			respBody, err := doGet(httpClient, lokiURL, authHeader)
 			if err != nil {
@@ -100,6 +102,17 @@ func Test(domain, authHeader, labelKey, labelValue, logPrefix string, httpClient
 			}
 		}
 	}
+}
+
+func logQLEncode(labelsToSelect map[string]string) string {
+	var sb strings.Builder
+	sb.WriteRune('{')
+	for key, value := range labelsToSelect {
+		sb.WriteString(fmt.Sprintf(`%s:"%s"`, key, value))
+		sb.WriteRune(',')
+	}
+	sb.WriteRune('}')
+	return sb.String()
 }
 
 // Cleanup terminates the dummy pod
