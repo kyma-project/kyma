@@ -84,7 +84,7 @@ func Test(domain, authHeader, logPrefix string, labelsToSelect map[string]string
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	query := logQLEncode(labelsToSelect)
-	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query=%s}&start=%d`, domain, query, start)
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query=%s&start=%d`, domain, query, start)
 	for {
 		select {
 		case <-timeout:
@@ -107,9 +107,15 @@ func Test(domain, authHeader, logPrefix string, labelsToSelect map[string]string
 func logQLEncode(labelsToSelect map[string]string) string {
 	var sb strings.Builder
 	sb.WriteRune('{')
+	keyIndex := 0
 	for key, value := range labelsToSelect {
-		sb.WriteString(fmt.Sprintf(`%s:"%s"`, key, value))
-		sb.WriteRune(',')
+		sb.WriteString(fmt.Sprintf(`%s="%s"`, key, value))
+
+		if keyIndex < len(labelsToSelect) {
+			sb.WriteRune(',')
+		}
+
+		keyIndex++
 	}
 	sb.WriteRune('}')
 	return sb.String()
