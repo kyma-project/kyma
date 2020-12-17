@@ -111,7 +111,7 @@ func logQLEncode(labelsToSelect map[string]string) string {
 	for key, value := range labelsToSelect {
 		sb.WriteString(fmt.Sprintf(`%s="%s"`, key, value))
 
-		if keyIndex < len(labelsToSelect) {
+		if keyIndex < len(labelsToSelect)-1 {
 			sb.WriteRune(',')
 		}
 
