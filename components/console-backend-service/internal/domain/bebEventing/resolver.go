@@ -135,8 +135,8 @@ func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput, sourceNam
 
 	eventSource := v1alpha1.Filter{
 		Type:     "exact",
-		Property: sourceName,
-		Value:    "source",
+		Property: "source",
+		Value:    sourceName,
 	}
 
 	var bebFilters []*v1alpha1.BebFilter
@@ -144,8 +144,8 @@ func (r *Resolver) createBebFilters(filters []*gqlschema.FiltersInput, sourceNam
 	for _, filter := range filters {
 		eventType := v1alpha1.Filter{
 			Type:     "exact",
-			Property: fmt.Sprintf("sap.kyma.custom.%s.%s.%s", filter.ApplicationName, filter.EventName, filter.Version),
-			Value:    "type",
+			Property: "type",
+			Value:    fmt.Sprintf("sap.kyma.custom.%s.%s.%s", filter.ApplicationName, filter.EventName, filter.Version),
 		}
 		bebFilters = append(bebFilters, &v1alpha1.BebFilter{
 			EventSource: &eventSource,

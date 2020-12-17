@@ -81,8 +81,8 @@ func TestBebEventingService_Create(t *testing.T) {
 		require.Equal(t, "owner-name", result.ObjectMeta.OwnerReferences[0].Name)
 		require.Equal(t, "default", result.ObjectMeta.Namespace)
 		require.Equal(t, "test-sub-1", result.ObjectMeta.Name)
-		require.Equal(t, "sap.kyma.custom.app.test-passed.v1", result.Spec.Filter.Filters[0].EventType.Property)
-		require.Equal(t, "test-secret-data", result.Spec.Filter.Filters[0].EventSource.Property)
+		require.Equal(t, "sap.kyma.custom.app.test-passed.v1", result.Spec.Filter.Filters[0].EventType.Value)
+		require.Equal(t, "test-secret-data", result.Spec.Filter.Filters[0].EventSource.Value)
 	})
 
 	t.Run("Should return error for duplicates", func(t *testing.T) {
@@ -132,7 +132,7 @@ func TestBebEventingService_Update(t *testing.T) {
 		require.NoError(t, err)
 
 		filter := result.Spec.Filter.Filters[0]
-		assert.Equal(t, "sap.kyma.custom.app-2.test.v2", filter.EventType.Property)
+		assert.Equal(t, "sap.kyma.custom.app-2.test.v2", filter.EventType.Value)
 	})
 
 	t.Run("Should return error if not found", func(t *testing.T) {
