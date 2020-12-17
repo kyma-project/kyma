@@ -166,5 +166,5 @@ curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_C
 Use this command to call the Event Service:
 
 ```bash
-curl -X POST https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -H "Content-Type: application/json" https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
 ```
