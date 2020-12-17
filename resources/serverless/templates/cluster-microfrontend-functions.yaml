@@ -15,7 +15,7 @@ spec:
     - label: Functions
       navigationPath: functions
       viewUrl: '/lambdas'
-      order: 1
+      order: -1
       viewGroup: "_core_ui_"
       requiredBackendModules:
         - serverless
