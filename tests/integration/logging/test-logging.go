@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/integration/logging/pkg/logstream"
@@ -31,6 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Deploying test-counter-pod")
+	loggingStartTime := time.Now()
 	err = logstream.DeployDummyPod(namespace, k8sClient)
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Test if logs from test-counter-pod are streamed by Loki")
-	err = testLogStream(namespace)
+	err = testLogStream(namespace, loggingStartTime)
 	if err != nil {
 		logstream.Cleanup(namespace, k8sClient)
 		log.Fatal(err)
@@ -69,22 +71,22 @@ func loadKubeConfigOrDie() (*rest.Config, error) {
 	return cfg, nil
 }
 
-func testLogStream(namespace string) error {
+func testLogStream(namespace string, loggingStartTime time.Time) error {
 	httpClient := getHttpClient()
 	token, domain, err := jwt.GetToken()
 	if err != nil {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test(domain, "container", "count", authHeader, httpClient)
+	err = logstream.Test(domain, authHeader, "container", "count", loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test(domain, "app", "test-counter-pod", authHeader, httpClient)
+	err = logstream.Test(domain, authHeader, "app", "test-counter-pod", loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test(domain, "namespace", namespace, authHeader, httpClient)
+	err = logstream.Test(domain, authHeader, "namespace", namespace, loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
