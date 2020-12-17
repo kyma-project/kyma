@@ -3,7 +3,7 @@ title: Revoke a client certificate
 type: Tutorials
 ---
 
-You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](#tutorials-renew-the-client-certificate). A revoked certificate, however, continues to be valid until it expires.
+You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](#tutorials-renew-the-client-certificate). A revoked certificate, however, continues to be valid until it expires. 
 
 To revoke a client certificate, send a request to the `certificates/revocations` endpoint. Pass the certificate you want to revoke and a key that matches this certificate in the call. Run:
     
