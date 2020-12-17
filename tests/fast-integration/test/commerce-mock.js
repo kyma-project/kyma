@@ -130,7 +130,7 @@ describe("Commerce Mock tests", function () {
 
     await retryPromise(
       async () => {
-        console.log(`Conneting to https://${mockHost}/connection`);
+        console.log(`Connecting to https://${mockHost}/connection`);
         return axios.post(
           `https://${mockHost}/connection`,
           {
@@ -145,7 +145,7 @@ describe("Commerce Mock tests", function () {
           }
         );
       },
-      10,
+      30, // azure+gardener combo ❤️
       5000
     ).catch(expectNoAxiosErr);
 
