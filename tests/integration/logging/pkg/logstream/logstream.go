@@ -100,7 +100,7 @@ func Test(domain, authHeader, labelKey, labelValue string, start time.Time, http
 func Cleanup(spec PodSpec, coreInterface kubernetes.Interface) error {
 	gracePeriod := int64(0)
 	deleteOptions := metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod}
-	listOptions := metav1.ListOptions{LabelSelector: fmt.Sprint("app=%s", spec.PodName)}
+	listOptions := metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%s", spec.PodName)}
 	err := coreInterface.CoreV1().Pods(spec.Namespace).DeleteCollection(&deleteOptions, listOptions)
 	if err != nil {
 		return errors.Wrapf(err, "cannot delete %s", spec.PodName)
