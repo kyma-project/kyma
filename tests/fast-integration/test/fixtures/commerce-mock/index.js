@@ -65,9 +65,15 @@ spec:
     kind: serverless-function
     name: lastorder`;
 
+const tokenRequestYaml = `apiVersion: applicationconnector.kyma-project.io/v1alpha1	
+kind: TokenRequest	
+metadata:	
+  name: commerce`;
+
 module.exports = {
   commerceMockYaml,
   genericServiceClass,
   serviceCatalogResources,
   mocksNamespaceYaml,
+  tokenRequestYaml,
 };

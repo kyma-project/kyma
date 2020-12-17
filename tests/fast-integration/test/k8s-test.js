@@ -5,7 +5,7 @@ const {
   genericServiceClass,
   serviceCatalogResources,
   mocksNamespaceYaml,
-} = require("./fixtures");
+} = require("./fixtures/commerce-mock");
 const { expect, config } = require("chai");
 config.truncateThreshold = 0; // more verbose errors
 
@@ -414,6 +414,7 @@ describe("Commerce Mock tests", function () {
     console.log("Done!");
   });
 });
+
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
