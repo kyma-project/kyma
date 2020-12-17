@@ -8,7 +8,7 @@ metadata:
 spec:
   displayName: Functions
   version: v1
-  category: Development
+  category: Workloads
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
