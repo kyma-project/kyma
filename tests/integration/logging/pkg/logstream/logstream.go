@@ -15,23 +15,30 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+//PodSpec represents a test logging pod configuration
+type PodSpec struct {
+	PodName       string
+	ContainerName string
+	Namespace     string
+}
+
 // DeployDummyPod deploys a pod which keeps logging a counter
-func DeployDummyPod(namespace string, coreInterface kubernetes.Interface) error {
+func DeployDummyPod(spec PodSpec, coreInterface kubernetes.Interface) error {
 	labels := map[string]string{
-		"app": "test-counter-pod",
+		"app": spec.PodName,
 	}
 	args := []string{"sh", "-c", "let i=1; while true; do echo \"$i: logTest-$(date)\"; let i++; sleep 2; done"}
 
-	_, err := coreInterface.CoreV1().Pods(namespace).Create(&corev1.Pod{
+	_, err := coreInterface.CoreV1().Pods(spec.Namespace).Create(&corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "test-counter-pod",
+			Name:   spec.PodName,
 			Labels: labels,
 		},
 		Spec: corev1.PodSpec{
 			RestartPolicy: "Never",
 			Containers: []corev1.Container{
 				{
-					Name:  "count",
+					Name:  spec.ContainerName,
 					Image: "alpine:3.8",
 					Args:  args,
 				},
@@ -39,24 +46,24 @@ func DeployDummyPod(namespace string, coreInterface kubernetes.Interface) error 
 		},
 	})
 	if err != nil {
-		return errors.Wrap(err, "cannot create test-counter-pod")
+		return errors.Wrapf(err, "cannot create %s", spec.PodName)
 	}
 	return nil
 }
 
 // WaitForDummyPodToRun waits until the dummy pod is running
-func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) error {
+func WaitForDummyPodToRun(spec PodSpec, coreInterface kubernetes.Interface) error {
 	timeout := time.After(2 * time.Minute)
 	tick := time.NewTicker(1 * time.Second)
 	for {
 		select {
 		case <-timeout:
 			tick.Stop()
-			return errors.Errorf("timed out while waiting for test-counter-pod to be Running!")
+			return errors.Errorf("timed out while waiting for %s to be Running!", spec.PodName)
 		case <-tick.C:
-			pod, err := coreInterface.CoreV1().Pods(namespace).Get("test-counter-pod", metav1.GetOptions{})
+			pod, err := coreInterface.CoreV1().Pods(spec.Namespace).Get(spec.PodName, metav1.GetOptions{})
 			if err != nil {
-				return errors.Wrap(err, "cannot get test-counter-pod")
+				return errors.Wrapf(err, "cannot get %s", spec.PodName)
 			}
 			if pod.Status.Phase == corev1.PodRunning {
 				return nil
@@ -90,13 +97,13 @@ func Test(domain, authHeader, labelKey, labelValue string, start time.Time, http
 }
 
 // Cleanup terminates the dummy pod
-func Cleanup(namespace string, coreInterface kubernetes.Interface) error {
+func Cleanup(spec PodSpec, coreInterface kubernetes.Interface) error {
 	gracePeriod := int64(0)
 	deleteOptions := metav1.DeleteOptions{GracePeriodSeconds: &gracePeriod}
-	listOptions := metav1.ListOptions{LabelSelector: "app=test-counter-pod"}
-	err := coreInterface.CoreV1().Pods(namespace).DeleteCollection(&deleteOptions, listOptions)
+	listOptions := metav1.ListOptions{LabelSelector: fmt.Sprint("app=%s", spec.PodName)}
+	err := coreInterface.CoreV1().Pods(spec.Namespace).DeleteCollection(&deleteOptions, listOptions)
 	if err != nil {
-		return errors.Wrap(err, "cannot delete test-counter-pod")
+		return errors.Wrapf(err, "cannot delete %s", spec.PodName)
 	}
 	return nil
 }

@@ -15,7 +15,13 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const namespace = "kyma-system"
+var (
+	loggingPodSpec = logstream.PodSpec{
+		PodName:       "logging-test-app",
+		ContainerName: "logging-test-counter",
+		Namespace:     "kyma-system",
+	}
+)
 
 func main() {
 	kubeConfig, err := loadKubeConfigOrDie()
@@ -27,29 +33,29 @@ func main() {
 		log.Fatalf("cannot create k8s clientset: %v", err)
 	}
 	log.Println("Cleaning up before starting logging test")
-	err = logstream.Cleanup(namespace, k8sClient)
+	err = logstream.Cleanup(loggingPodSpec, k8sClient)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Deploying test-counter-pod")
+	log.Println("Deploying logging test pod")
 	loggingStartTime := time.Now()
-	err = logstream.DeployDummyPod(namespace, k8sClient)
+	err = logstream.DeployDummyPod(loggingPodSpec, k8sClient)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Waiting for test-counter-pod to run...")
-	err = logstream.WaitForDummyPodToRun(namespace, k8sClient)
+	log.Println("Waiting for logging test pod to run...")
+	err = logstream.WaitForDummyPodToRun(loggingPodSpec, k8sClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Test if logs from test-counter-pod are streamed by Loki")
-	err = testLogStream(namespace, loggingStartTime)
+	err = testLogStream(loggingPodSpec, loggingStartTime)
 	if err != nil {
-		logstream.Cleanup(namespace, k8sClient)
+		logstream.Cleanup(loggingPodSpec, k8sClient)
 		log.Fatal(err)
 	}
 	log.Println("Deleting test-counter-pod")
-	err = logstream.Cleanup(namespace, k8sClient)
+	err = logstream.Cleanup(loggingPodSpec, k8sClient)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,22 +77,22 @@ func loadKubeConfigOrDie() (*rest.Config, error) {
 	return cfg, nil
 }
 
-func testLogStream(namespace string, loggingStartTime time.Time) error {
+func testLogStream(spec logstream.PodSpec, loggingStartTime time.Time) error {
 	httpClient := getHttpClient()
 	token, domain, err := jwt.GetToken()
 	if err != nil {
 		return err
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	err = logstream.Test(domain, authHeader, "container", "count", loggingStartTime, httpClient)
+	err = logstream.Test(domain, authHeader, "container", spec.ContainerName, loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test(domain, authHeader, "app", "test-counter-pod", loggingStartTime, httpClient)
+	err = logstream.Test(domain, authHeader, "app", spec.PodName, loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
-	err = logstream.Test(domain, authHeader, "namespace", namespace, loggingStartTime, httpClient)
+	err = logstream.Test(domain, authHeader, "namespace", spec.Namespace, loggingStartTime, httpClient)
 	if err != nil {
 		return err
 	}
