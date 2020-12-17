@@ -26,7 +26,7 @@ $ make test-local
 ### Deploy inside a cluster
 
 ```bash
-$ ko apply -f config/
+$ ko apply -f config/event-publisher-proxy/
 ```
 
 ### Send Events
