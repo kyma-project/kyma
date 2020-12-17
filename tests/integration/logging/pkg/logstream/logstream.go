@@ -69,7 +69,7 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 func Test(domain, authHeader, labelKey, labelValue string, start time.Time, httpClient *http.Client) error {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
-	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query={%s="%s"}&start=%d`, domain, labelKey, labelValue, start.Local().Unix())
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query={%s="%s"}&start=%d`, domain, labelKey, labelValue, start.UnixNano())
 	for {
 		select {
 		case <-timeout:
