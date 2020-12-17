@@ -272,9 +272,28 @@ func TestApiRuleService_Update(t *testing.T) {
 		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, updateGeneration, newRule.Spec)
 
 		require.Error(t, err)
-
 	})
 
+	t.Run("Should throw an error on updating readonly APIRule", func(t *testing.T) {
+		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+		existingApiRule.OwnerReferences = []v1.OwnerReference{{
+			Kind: "Subscription",
+			Name: "sup",
+		}}
+
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+		require.NoError(t, err)
+
+		service := New(serviceFactory)
+		err = service.Enable()
+		require.NoError(t, err)
+
+		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+
+		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, defaultGeneration, newRule.Spec)
+
+		require.Error(t, err)
+	})
 }
 
 // Apaprently watch does not work with fake client

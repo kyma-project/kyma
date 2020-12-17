@@ -84,11 +84,12 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	APIRule struct {
-		Generation func(childComplexity int) int
-		JSON       func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Spec       func(childComplexity int) int
-		Status     func(childComplexity int) int
+		Generation        func(childComplexity int) int
+		JSON              func(childComplexity int) int
+		Name              func(childComplexity int) int
+		OwnerSubscription func(childComplexity int) int
+		Spec              func(childComplexity int) int
+		Status            func(childComplexity int) int
 	}
 
 	APIRuleAccessStrategy struct {
@@ -773,6 +774,15 @@ type ComplexityRoot struct {
 		SecretName    func(childComplexity int) int
 	}
 
+	OwnerReference struct {
+		APIVersion         func(childComplexity int) int
+		BlockOwnerDeletion func(childComplexity int) int
+		Controller         func(childComplexity int) int
+		Kind               func(childComplexity int) int
+		Name               func(childComplexity int) int
+		UID                func(childComplexity int) int
+	}
+
 	Pod struct {
 		ContainerStates   func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
@@ -1251,6 +1261,7 @@ type ComplexityRoot struct {
 
 type APIRuleResolver interface {
 	JSON(ctx context.Context, obj *v1alpha1.APIRule) (JSON, error)
+	OwnerSubscription(ctx context.Context, obj *v1alpha1.APIRule) (*v1.OwnerReference, error)
 }
 type ApplicationResolver interface {
 	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
@@ -1540,6 +1551,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.APIRule.Name(childComplexity), true
+
+	case "APIRule.ownerSubscription":
+		if e.complexity.APIRule.OwnerSubscription == nil {
+			break
+		}
+
+		return e.complexity.APIRule.OwnerSubscription(childComplexity), true
 
 	case "APIRule.spec":
 		if e.complexity.APIRule.Spec == nil {
@@ -4787,6 +4805,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OAuth2ClientSpec.SecretName(childComplexity), true
 
+	case "OwnerReference.apiVersion":
+		if e.complexity.OwnerReference.APIVersion == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.APIVersion(childComplexity), true
+
+	case "OwnerReference.blockOwnerDeletion":
+		if e.complexity.OwnerReference.BlockOwnerDeletion == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.BlockOwnerDeletion(childComplexity), true
+
+	case "OwnerReference.controller":
+		if e.complexity.OwnerReference.Controller == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.Controller(childComplexity), true
+
+	case "OwnerReference.kind":
+		if e.complexity.OwnerReference.Kind == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.Kind(childComplexity), true
+
+	case "OwnerReference.name":
+		if e.complexity.OwnerReference.Name == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.Name(childComplexity), true
+
+	case "OwnerReference.UID":
+		if e.complexity.OwnerReference.UID == nil {
+			break
+		}
+
+		return e.complexity.OwnerReference.UID(childComplexity), true
+
 	case "Pod.containerStates":
 		if e.complexity.Pod.ContainerStates == nil {
 			break
@@ -7317,6 +7377,7 @@ type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1
     status: APIRuleStatuses!
     generation: Int!
     json: JSON!
+    ownerSubscription: OwnerReference
 }
 
 type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
@@ -7450,7 +7511,7 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
 
 input EventSubscriptionSpecInput {
     filters: [FiltersInput!]!
-    ownerRef: OwnerReference!
+    ownerRef: OwnerReferenceInput!
 }
 
 input FiltersInput {
@@ -7571,8 +7632,8 @@ extend type Query {
 }
 
 extend type Mutation {
-    createTrigger(namespace: String!, trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    createManyTriggers(namespace: String!, triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    createTrigger(namespace: String!, trigger: TriggerCreateInput!, ownerRef: [OwnerReferenceInput!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    createManyTriggers(namespace: String!, triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReferenceInput!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteTrigger(namespace: String!, triggerName: String!): Trigger @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteManyTriggers(namespace: String!, triggerNames: [String!]!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
@@ -7878,7 +7939,16 @@ scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/consol
 scalar UID @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.UID")
 scalar URI @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.URI")
 
-input OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: UID!
+}
+
+input OwnerReferenceInput @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
     apiVersion: String!
     blockOwnerDeletion: Boolean
     controller: Boolean
@@ -9548,7 +9618,7 @@ func (ec *executionContext) field_Mutation_createManyTriggers_args(ctx context.C
 	args["triggers"] = arg1
 	var arg2 []*v1.OwnerReference
 	if tmp, ok := rawArgs["ownerRef"]; ok {
-		arg2, err = ec.unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalOOwnerReferenceInput2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -9824,7 +9894,7 @@ func (ec *executionContext) field_Mutation_createTrigger_args(ctx context.Contex
 	args["trigger"] = arg1
 	var arg2 []*v1.OwnerReference
 	if tmp, ok := rawArgs["ownerRef"]; ok {
-		arg2, err = ec.unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx, tmp)
+		arg2, err = ec.unmarshalOOwnerReferenceInput2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -12723,6 +12793,37 @@ func (ec *executionContext) _APIRule_json(ctx context.Context, field graphql.Col
 	res := resTmp.(JSON)
 	fc.Result = res
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRule_ownerSubscription(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.APIRule().OwnerSubscription(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1.OwnerReference)
+	fc.Result = res
+	return ec.marshalOOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha15.Authenticator) (ret graphql.Marshaler) {
@@ -28368,6 +28469,204 @@ func (ec *executionContext) _OAuth2ClientSpec_secretName(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _OwnerReference_apiVersion(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIVersion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OwnerReference_blockOwnerDeletion(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BlockOwnerDeletion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OwnerReference_controller(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Controller, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OwnerReference_kind(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OwnerReference_name(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OwnerReference_UID(ctx context.Context, field graphql.CollectedField, obj *v1.OwnerReference) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OwnerReference",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(types.UID)
+	fc.Result = res
+	return ec.marshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Pod_name(ctx context.Context, field graphql.CollectedField, obj *Pod) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -42278,7 +42577,7 @@ func (ec *executionContext) unmarshalInputEventSubscriptionSpecInput(ctx context
 			}
 		case "ownerRef":
 			var err error
-			it.OwnerRef, err = ec.unmarshalNOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, v)
+			it.OwnerRef, err = ec.unmarshalNOwnerReferenceInput2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -42654,7 +42953,7 @@ func (ec *executionContext) unmarshalInputOAuth2ClientSpecInput(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputOwnerReference(ctx context.Context, obj interface{}) (v1.OwnerReference, error) {
+func (ec *executionContext) unmarshalInputOwnerReferenceInput(ctx context.Context, obj interface{}) (v1.OwnerReference, error) {
 	var it v1.OwnerReference
 	var asMap = obj.(map[string]interface{})
 
@@ -43203,6 +43502,17 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "ownerSubscription":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._APIRule_ownerSubscription(ctx, field, obj)
 				return res
 			})
 		default:
@@ -47074,6 +47384,52 @@ func (ec *executionContext) _OAuth2ClientSpec(ctx context.Context, sel ast.Selec
 			}
 		case "secretName":
 			out.Values[i] = ec._OAuth2ClientSpec_secretName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ownerReferenceImplementors = []string{"OwnerReference"}
+
+func (ec *executionContext) _OwnerReference(ctx context.Context, sel ast.SelectionSet, obj *v1.OwnerReference) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ownerReferenceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OwnerReference")
+		case "apiVersion":
+			out.Values[i] = ec._OwnerReference_apiVersion(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "blockOwnerDeletion":
+			out.Values[i] = ec._OwnerReference_blockOwnerDeletion(ctx, field, obj)
+		case "controller":
+			out.Values[i] = ec._OwnerReference_controller(ctx, field, obj)
+		case "kind":
+			out.Values[i] = ec._OwnerReference_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._OwnerReference_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UID":
+			out.Values[i] = ec._OwnerReference_UID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -53276,15 +53632,15 @@ func (ec *executionContext) unmarshalNOAuth2ClientSpecInput2githubᚗcomᚋory�
 	return ec.unmarshalInputOAuth2ClientSpecInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNOwnerReference2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (v1.OwnerReference, error) {
-	return ec.unmarshalInputOwnerReference(ctx, v)
+func (ec *executionContext) unmarshalNOwnerReferenceInput2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (v1.OwnerReference, error) {
+	return ec.unmarshalInputOwnerReferenceInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (*v1.OwnerReference, error) {
+func (ec *executionContext) unmarshalNOwnerReferenceInput2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (*v1.OwnerReference, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNOwnerReference2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, v)
+	res, err := ec.unmarshalNOwnerReferenceInput2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, v)
 	return &res, err
 }
 
@@ -56159,7 +56515,18 @@ func (ec *executionContext) marshalOOAuth2ClientError2ᚖgithubᚗcomᚋoryᚋhy
 	return ec._OAuth2ClientError(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx context.Context, v interface{}) ([]*v1.OwnerReference, error) {
+func (ec *executionContext) marshalOOwnerReference2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, sel ast.SelectionSet, v v1.OwnerReference) graphql.Marshaler {
+	return ec._OwnerReference(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, sel ast.SelectionSet, v *v1.OwnerReference) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OwnerReference(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOOwnerReferenceInput2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx context.Context, v interface{}) ([]*v1.OwnerReference, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -56171,7 +56538,7 @@ func (ec *executionContext) unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachine
 	var err error
 	res := make([]*v1.OwnerReference, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNOwnerReference2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNOwnerReferenceInput2ᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}

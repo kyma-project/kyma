@@ -51,7 +51,7 @@ type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-co
 
 input EventSubscriptionSpecInput {
     filters: [FiltersInput!]!
-    ownerRef: OwnerReference!
+    ownerRef: OwnerReferenceInput!
 }
 
 input FiltersInput {

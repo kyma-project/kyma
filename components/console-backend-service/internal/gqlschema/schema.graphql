@@ -15,7 +15,16 @@ scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/consol
 scalar UID @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.UID")
 scalar URI @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.URI")
 
-input OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: UID!
+}
+
+input OwnerReferenceInput @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
     apiVersion: String!
     blockOwnerDeletion: Boolean
     controller: Boolean
