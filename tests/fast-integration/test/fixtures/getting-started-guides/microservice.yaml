@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-service
+  namespace: orders-service
+  labels:
+    app: orders-service
+    example: orders-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-service
+      example: orders-service
+  template:
+    metadata:
+      labels:
+        app: orders-service
+        example: orders-service
+    spec:
+      containers:
+        - name: orders-service
+          image: "eu.gcr.io/kyma-project/develop/orders-service:e8175c63"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+            requests:
+              cpu: 10m
+              memory: 16Mi
+          env:
+            - name: APP_PORT
+              value: "8080"
+            - name: APP_REDIS_PREFIX
+              value: "REDIS_"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-service
+  namespace: orders-service
+  labels:
+    app: orders-service
+    example: orders-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: orders-service
+    example: orders-service
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: orders-service
+  namespace: orders-service
+  labels:
+    app: orders-service
+    example: orders-service
+spec:
+  service:
+    host: orders-service
+    name: orders-service
+    port: 80
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      methods: ["GET", "POST"]
+      accessStrategies:
+        - handler: noop
+      mutators: []
