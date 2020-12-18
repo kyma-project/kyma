@@ -19,6 +19,7 @@ image:
   # Image pull policy
   pullPolicy: IfNotPresent
 
+
 limitRange:
   max:
     memory: 4Gi
