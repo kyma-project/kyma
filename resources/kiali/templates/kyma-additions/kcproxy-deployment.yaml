@@ -86,5 +86,9 @@ spec:
         - name: http
           containerPort: {{ .Values.kcproxy.port }}
           protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
         resources:
 {{ toYaml .Values.kcproxy.resources | indent 10 }}
