@@ -120,8 +120,7 @@ spec:
       serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator
       restartPolicy: OnFailure
       {{- if .Values.pod.extraProperties }}
-      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
-        fsGroup: 1000
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraPropertiesWithFsGroup "context" . ) | nindent 6 }}
       {{- end }}
       volumes:
         - name: minio-configuration
@@ -208,8 +207,7 @@ spec:
     spec:
       restartPolicy: OnFailure
       {{- if .Values.pod.extraProperties }}
-      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
-        fsGroup: 1000
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraPropertiesWithFsGroup "context" . ) | nindent 6 }}
       {{- end }}
       volumes:
         - name: minio-configuration
