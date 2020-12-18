@@ -92,6 +92,10 @@ spec:
         - name: http
           containerPort: {{ .Values.kyma.authProxy.port }}
           protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
         resources:
 {{ toYaml .Values.kyma.authProxy.resources | indent 10 }}
 {{- end}}
