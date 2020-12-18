@@ -136,4 +136,8 @@ spec:
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
+        {{- if .Values.eventService.deployment.resources }}
+        resources:
+        {{- toYaml .Values.eventService.deployment.resources | nindent 10 }}
+        {{- end }}
 {{- end }}

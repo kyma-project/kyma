@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventing-controller-nats
+  namespace: system
+  labels:
+    control-plane: eventing-controller-nats
+spec:
+  selector:
+    matchLabels:
+      control-plane: eventing-controller-nats
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: eventing-controller-nats
+    spec:
+      serviceAccountName: default
+      containers:
+      - image: controller
+        name: controller
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+      terminationGracePeriodSeconds: 10

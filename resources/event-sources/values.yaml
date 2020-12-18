@@ -11,3 +11,9 @@ global:
     dir: ''
     version: "e6a594cf" 
     tracingEnabled: "true"
+
+deployment:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi

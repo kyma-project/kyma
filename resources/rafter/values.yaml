@@ -202,7 +202,7 @@ controller-manager:
     enabled: true
 
     # Values for patches old credentials in minio release. More info: https://github.com/minio/minio/tree/master/docs/config#rotating-encryption-with-new-credentials
-    patchCredentials:
+    ensureSecret:
       secretName: "rafter-minio-old-credentials"
       image:
         repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"

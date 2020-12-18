@@ -1,11 +1,3 @@
-const commerceMockYaml = `
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    istio-injection: enabled
-  name: mocks
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,32 +19,32 @@ spec:
         app: commerce-mock
     spec:
       containers:
-#      - image: eu.gcr.io/kyma-project/xf-application-mocks/commerce-mock:latest
-      - image: pbochynski/commerce-mock-lite:0.3
-        imagePullPolicy: Always
-        name: commerce-mock
-        ports:
-        - name: http
-          containerPort: 10000
-        env:
-        - name: DEBUG
-          value: "true"
-        - name: RENEWCERT_JOB_CRON
-          value: "00 00 */12 * * *"
-        # volumeMounts:
-        # - mountPath: "/app/keys"
-        #   name: commerce-mock-volume
-        resources:
-          requests:
-            memory: "150Mi"
-            cpu: "10m"
-          limits:
-            memory: "350Mi"
-            cpu: "300m"
+        #      - image: eu.gcr.io/kyma-project/xf-application-mocks/commerce-mock:latest
+        - image: pbochynski/commerce-mock-lite:0.3
+          imagePullPolicy: Always
+          name: commerce-mock
+          ports:
+            - name: http
+              containerPort: 10000
+          env:
+            - name: DEBUG
+              value: "true"
+            - name: RENEWCERT_JOB_CRON
+              value: "00 00 */12 * * *"
+          # volumeMounts:
+          # - mountPath: "/app/keys"
+          #   name: commerce-mock-volume
+          resources:
+            requests:
+              memory: "150Mi"
+              cpu: "10m"
+            limits:
+              memory: "350Mi"
+              cpu: "300m"
       # volumes:
       # - name: commerce-mock-volume
       #   persistentVolumeClaim:
-      #     claimName: commerce-mock 
+      #     claimName: commerce-mock
 ---
 apiVersion: v1
 kind: Service
@@ -63,8 +55,8 @@ metadata:
     app: commerce-mock
 spec:
   ports:
-  - name: http
-    port: 10000
+    - name: http
+      port: 10000
   selector:
     app: commerce-mock
 ---
@@ -76,17 +68,16 @@ metadata:
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-  - accessStrategies:
-    - config: {}
-      handler: allow
-    methods: ["*"]
-    path: /.*
+    - accessStrategies:
+        - config: {}
+          handler: allow
+      methods: ["*"]
+      path: /.*
   service:
     host: commerce
     name: commerce-mock
-    port: 10000`;
-
-const appConnectorYaml = `
+    port: 10000
+---
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
@@ -119,14 +110,15 @@ spec:
       console.log("URL: %s", url); 
       let response = await axios.get(url,{headers:{"X-B3-Sampled":1}})
       console.log(response.data); 
-      return response.data;}
+      return response.data;
+    }
     module.exports = { 
       main: function (event, context) {
         if (event.data && event.data.orderCode){
           lastOrder = getOrder(event.data.orderCode)
         }
         return lastOrder;
-     }}
+    }}
 ---
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
@@ -135,11 +127,11 @@ metadata:
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-  - accessStrategies:
-    - config: {}
-      handler: allow
-    methods: ["*"]
-    path: /.*
+    - accessStrategies:
+        - config: {}
+          handler: allow
+      methods: ["*"]
+      path: /.*
   service:
     host: lastorder
     name: lastorder
@@ -162,68 +154,4 @@ spec:
     ref:
       apiVersion: v1
       kind: Service
-      name: lastorder`;
-
-const tokenRequestYaml = `
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: TokenRequest
-metadata:
-  name: commerce`;
-
-const genericServiceClass = (name, namespace) => `
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceClass
-metadata:
-  name: ${name}
-  namespace: ${namespace}
-`;
-
-const serviceCatalogResources = (
-  webServicesExternalName,
-  eventsExternalName
-) => `
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: commerce-webservices
-spec:
-  serviceClassExternalName: ${webServicesExternalName}
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: commerce-events
-spec:
-  serviceClassExternalName: ${eventsExternalName}
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  labels:
-    function: lastorder
-  name: commerce-lastorder-binding
-spec:
-  instanceRef:
-    name: commerce-webservices
----
-apiVersion: servicecatalog.kyma-project.io/v1alpha1
-kind: ServiceBindingUsage
-metadata:
-  labels:
-    function: lastorder
-    serviceBinding: commerce-lastorder-binding
-  name: commerce-lastorder-sbu
-spec:
-  serviceBindingRef:
-    name: commerce-lastorder-binding
-  usedBy:
-    kind: serverless-function
-    name: lastorder`;
-
-module.exports = {
-  commerceMockYaml,
-  appConnectorYaml,
-  tokenRequestYaml,
-  genericServiceClass,
-  serviceCatalogResources,
-};
+      name: lastorder
