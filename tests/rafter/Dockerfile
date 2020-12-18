@@ -19,7 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 RUN CGO_ENABLED=0 go test main_test.go -c
 
-FROM alpine:edge
+FROM alpine:3.12.2
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
@@ -29,7 +29,7 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 # Install certificates and tools
 #
 
-RUN apk update --no-cache && apk upgrade --no-cache && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
+RUN apk update --no-cache && apk upgrade --no-cache && apk add ca-certificates && apk add curl --no-cache && rm -rf /var/cache/apk/*
 
 #
 # Copy binaries
