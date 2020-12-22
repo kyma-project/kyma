@@ -221,7 +221,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
         clearTimeout(timer)
         resolve(watchObj.object)
       }
-    }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
+    },()=>{}).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
   });
   return result;
 }
