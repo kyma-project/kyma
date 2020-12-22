@@ -126,33 +126,6 @@ async function promiseAllSettled(promises) {
   );
 }
 
-async function waitForTokenRequestReady(
-  client,
-  name,
-  namespace,
-  retriesLeft = 10,
-  interval = 3000
-) {
-  return await retryPromise(
-    async () => {
-      console.log("Trying to read TokenRequest .status");
-      return client
-        .getNamespacedCustomObject(
-          "applicationconnector.kyma-project.io",
-          "v1alpha1",
-          namespace,
-          "tokenrequests",
-          name
-        )
-        .then((res) => {
-          expect(res.body).to.have.nested.property("status.url");
-          return res;
-        });
-    },
-    retriesLeft,
-    interval
-  ).catch(expectNoK8sErr);
-}
 
 module.exports = {
   retryPromise,
@@ -162,5 +135,4 @@ module.exports = {
   removeServiceBindingFinalizer,
   sleep,
   promiseAllSettled,
-  waitForTokenRequestReady,
 };
