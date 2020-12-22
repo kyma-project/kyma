@@ -2,6 +2,8 @@ package subscription_nats
 
 import (
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
 	"k8s.io/client-go/tools/record"
 
@@ -20,7 +22,12 @@ type Reconciler struct {
 	recorder record.EventRecorder
 }
 
-func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder,
+	cfg env.NatsConfig) *Reconciler {
+	natsClient := &handlers.Nats{
+		Log: log,
+	}
+	natsClient.Initialize(cfg)
 	return &Reconciler{
 		Client:   client,
 		Cache:    cache,

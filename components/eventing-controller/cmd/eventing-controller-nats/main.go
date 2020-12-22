@@ -2,8 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	log "github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -26,6 +30,13 @@ func main() {
 	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls.")
 	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
 	flag.Parse()
+
+	cfg := env.GetNatsConfig()
+	log.Info("Nats config URL: ", cfg.Url)
+	if len(cfg.Url) == 0 {
+		setupLog.Error(fmt.Errorf("env var URL should be a non-empty value"), "unable to start manager")
+		os.Exit(1)
+	}
 
 	scheme, err := setupScheme()
 	if err != nil {
@@ -50,6 +61,7 @@ func main() {
 		mgr.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		mgr.GetEventRecorderFor("eventing-controller-nats"),
+		cfg,
 	).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to setup the NATS Subscription controller")
 		os.Exit(1)
