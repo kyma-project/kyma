@@ -228,7 +228,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
 
 async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) {
   const localApis = await axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr);
-  for (api of localApis.data) {
+  for (let api of localApis.data) {
     await retryPromise(async () => {
       await axios.post(`https://${mockHost}/local/apis/${api.id}/register`, {},
         {
