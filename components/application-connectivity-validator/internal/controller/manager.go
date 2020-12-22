@@ -15,7 +15,6 @@ import (
 func Start(kubeConfig string, masterURL string, syncPeriod time.Duration, appName string, cache *gocache.Cache) {
 	klog.InitFlags(nil)
 
-	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeConfig)
@@ -31,9 +30,6 @@ func Start(kubeConfig string, masterURL string, syncPeriod time.Duration, appNam
 	applicationInformerFactory := informers.NewSharedInformerFactory(applicationClient, syncPeriod)
 
 	controller := NewController(applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), appName, cache)
-
-	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
-	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	applicationInformerFactory.Start(stopCh)
 
 	if err = controller.Run(2, stopCh); err != nil {

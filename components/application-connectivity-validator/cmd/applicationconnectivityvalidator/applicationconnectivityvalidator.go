@@ -9,9 +9,6 @@ import (
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 
-	// allow client authentication against GKE clusters
-	//_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
@@ -59,7 +56,6 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
-	// Starting the Cache Controller for Application CRs
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
 		controller.Start(options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
