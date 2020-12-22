@@ -1,7 +1,6 @@
 const k8s = require("@kubernetes/client-node");
 const {
   commerceMockYaml,
-  genericServiceClass,
   serviceCatalogResources,
   mocksNamespaceYaml,
 } = require("./fixtures/commerce-mock");
@@ -13,7 +12,6 @@ const {
   expectNoK8sErr,
   expectNoAxiosErr,
   sleep,
-  waitForTokenRequestReady,
 } = require("../utils");
 
 const https = require("https");
@@ -32,12 +30,13 @@ const watch = new k8s.Watch(kc);
 
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
-let mockHost;
-let host;
+const alreadyExists = 'AlreadyExists';
 
 describe("Commerce Mock tests", function () {
   this.timeout(10 * 60 * 1000);
-  this.slow(1000);
+  this.slow(5000);
+  let mockHost;
+  let host;
 
   after(async function () {
     // return;
@@ -64,14 +63,14 @@ describe("Commerce Mock tests", function () {
 
   it("mocks namespace should be created or fail with reason AlreadyExists ", async function () {
     await k8sDynamicApi.create(mocksNamespaceObj).catch((e) => {
-      expect(e.body.reason).to.be.equal('AlreadyExists')
+      expect(e.body.reason).to.be.equal(alreadyExists)
     });
   })
 
   it("commerce mock and application should be created", async function () {
     await Promise.all(
       commerceObjs.map((obj) => k8sDynamicApi.create(obj))
-    ).catch((e) => { expect(e.body.reason).to.be.equal('AlreadyExists') });
+    ).catch((e) => { expect(e.body.reason).to.be.equal(alreadyExists) });
   });
 
   it("commerce mock should be exposed with VirtualService", async function () {
@@ -136,29 +135,28 @@ describe("Commerce Mock tests", function () {
           "content-type": "application/json",
         },
       }
-    );
+    ).catch(expectNoAxiosErr);
   });
 
   it("commerce mock should register Commerce Webservices API and Events", async function () {
-    this.retries(10);
-    const remoteApis = await registerAllApis(mockHost, "default", watch, 5000);
+    this.retries(3);
 
+    const remoteApis = await registerAllApis(mockHost, "default", watch, 30 *1000);
     const webServicesSCExternalName = remoteApis.data.find((elem) =>
       elem.name.includes("Commerce Webservices")
     ).externalName;
-
     const eventsSCExternalName = remoteApis.data.find((elem) =>
       elem.name.includes("Events")
     ).externalName;
 
-    const serviceCatalogObjs = await k8s.loadAllYaml(
+    const serviceCatalogObjs = k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
     );
 
     await Promise.all(
       serviceCatalogObjs.map((obj) => k8sDynamicApi.create(obj))
     ).catch((e) => {
-      expect(e.body.reason).to.be.equal('AlreadyExists')
+      expect(e.body.reason).to.be.equal(alreadyExists)
     })
   });
 
@@ -185,7 +183,10 @@ async function sendEventAndCheckResponse(mockHost, host) {
             "content-type": "application/json",
           },
         }
-      ).catch(e => console.dir({ status: e.response.status, data: e.response.data }));
+      ).catch(e => {
+        console.dir({ status: e.response.status, data: e.response.data });
+        throw e
+      });
 
       await sleep(500);
 
@@ -204,17 +205,15 @@ async function sendEventAndCheckResponse(mockHost, host) {
       });
     },
     30,
-    10 * 1000
+    5 * 1000
   ).catch(expectNoAxiosErr);
 }
 
 function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
   let res
   let timer
-  console.log("Wait for", path)
   const result = new Promise((resolve, reject) => {
     watch.watch(path, query, (type, apiObj, watchObj) => {
-      console.log(type, watchObj)
       if (checkFn(type, apiObj, watchObj)) {
         if (res) {
           res.abort();
@@ -222,7 +221,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
         clearTimeout(timer)
         resolve(watchObj.object)
       }
-    }, ()=>{console.log("done")}).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, 2000); })
+    }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
   });
   return result;
 }
@@ -230,14 +229,16 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
 async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) {
   const localApis = await axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr);
   for (api of localApis.data) {
-    await axios.post(`https://${mockHost}/local/apis/${api.id}/register`, {},
-      {
-        headers: {
-          "content-type": "application/json",
-          origin: `https://${mockHost}`,
-        },
-      }
-    ).catch(expectNoAxiosErr)
+    await retryPromise(async () => {
+      await axios.post(`https://${mockHost}/local/apis/${api.id}/register`, {},
+        {
+          headers: {
+            "content-type": "application/json",
+            origin: `https://${mockHost}`,
+          },
+        }
+      ).catch(expectNoAxiosErr)
+    }, 3, 5000)
   }
   const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(expectNoAxiosErr);
   expect(remoteApis.data).to.have.lengthOf(localApis.data.length)
