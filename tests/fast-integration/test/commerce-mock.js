@@ -211,8 +211,10 @@ async function sendEventAndCheckResponse(mockHost, host) {
 function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
   let res
   let timer
+  console.log("Wait for", path)
   const result = new Promise((resolve, reject) => {
     watch.watch(path, query, (type, apiObj, watchObj) => {
+      console.log(type, watchObj)
       if (checkFn(type, apiObj, watchObj)) {
         if (res) {
           res.abort();
@@ -220,7 +222,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
         clearTimeout(timer)
         resolve(watchObj.object)
       }
-    }, ()=>{}).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
+    }, ()=>{console.log("done")}).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, 2000); })
   });
   return result;
 }
