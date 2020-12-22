@@ -84,6 +84,7 @@ describe("Commerce Mock tests", function () {
   });
 
   it("commerce-application gateway should be deployed", async function () {
+    this.retries(3);
     const commerceApplicationGatewayDeployment = await retryPromise(
       async () => {
         return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
@@ -101,6 +102,10 @@ describe("Commerce Mock tests", function () {
     await k8sDynamicApi
       .patch(commerceApplicationGatewayDeployment.body)
       .catch(expectNoK8sErr);
+
+    const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
+    expect(
+      patchedDeployment.body.spec.template.spec.containers[0].args[6]).to.equal("--skipVerify=true");
   });
 
   it("commerce mock local apis should be available", async function () {
@@ -141,7 +146,7 @@ describe("Commerce Mock tests", function () {
   it("commerce mock should register Commerce Webservices API and Events", async function () {
     this.retries(3);
 
-    const remoteApis = await registerAllApis(mockHost, "default", watch, 30 *1000);
+    const remoteApis = await registerAllApis(mockHost, "default", watch, 30 * 1000);
     const webServicesSCExternalName = remoteApis.data.find((elem) =>
       elem.name.includes("Commerce Webservices")
     ).externalName;
@@ -221,7 +226,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
         clearTimeout(timer)
         resolve(watchObj.object)
       }
-    },()=>{}).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
+    }, () => { }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
   });
   return result;
 }
