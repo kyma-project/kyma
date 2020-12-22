@@ -27,18 +27,20 @@ const kc = new k8s.KubeConfig();
 kc.loadFromDefault();
 
 const k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
-const k8sCRDApi = kc.makeApiClient(k8s.CustomObjectsApi);
 const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+const watch = new k8s.Watch(kc);
 
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
+let mockHost;
+let host;
 
 describe("Commerce Mock tests", function () {
   this.timeout(10 * 60 * 1000);
+  this.slow(1000);
 
   after(async function () {
-    this.timeout(10 * 10000);
-
+    // return;
     console.log("Deleting test resources...");
     await Promise.all(
       [
@@ -55,169 +57,113 @@ describe("Commerce Mock tests", function () {
           "Foreground" // namespaces seem to ignore this
         )
       )
-    ).catch(expectNoK8sErr);
+    ).catch((e) => {
+      expect(e.body.reason).to.be.equal('NotFound')
+    });
   });
 
-  // TODO: check if we can split this one big "it" into several smaller ones
-  // mocha should preserve the order of test inside "describe" block, but I'm not sure
-  it("should pass with 😄", async function () {
-    console.log("Creating mocks namespace...");
-    await k8sDynamicApi.create(mocksNamespaceObj).catch(expectNoK8sErr); // we can extract namespace creation into seperate step and ignore AlreadyExists error
+  it("mocks namespace should be created or fail with reason AlreadyExists ", async function () {
+    await k8sDynamicApi.create(mocksNamespaceObj).catch((e) => {
+      expect(e.body.reason).to.be.equal('AlreadyExists')
+    });
+  })
 
-    console.log("Creating commerce resources...");
+  it("commerce mock and application should be created", async function () {
     await Promise.all(
       commerceObjs.map((obj) => k8sDynamicApi.create(obj))
-    ).catch(expectNoK8sErr);
+    ).catch((e) => { expect(e.body.reason).to.be.equal('AlreadyExists') });
+  });
 
-    console.log("Waiting for virtual service to be ready...");
+  it("commerce mock should be exposed with VirtualService", async function () {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/mocks/virtualservices`
+    const query = { labelSelector: "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks" }
+    const vs = await waitForK8sObject(watch, path, query, (type, apiObj, watchObj) => {
+      return watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
+    }, 30 * 1000, "Wait for VirtualService Timeout");
+    mockHost = vs.spec.hosts[0]
+    host = mockHost.split(".").slice(1).join(".");
+  });
 
-    const mockHost = await getMockVirtualHost();
-    const host = mockHost.split(".").slice(1).join(".");
-    console.log(`Host: https://${host}`);
-    console.log(`Mock host: https://${mockHost}`);
-
-    // @aerfio tests do not seem to pass without calling https://${mockHost}/local/apis first
-    // @aerfio discussed with PB - it's probably a bug in varkes
-    await retryPromise(
-      async () => {
-        console.log(`Calling https://${mockHost}/local/apis`);
-        return axios.get(`https://${mockHost}/local/apis`).then((res) => {
-          expect(res.data).to.have.lengthOf(2);
-          expect(res.data[0].provider).not.to.be.empty;
-          return res;
-        });
-      },
-      40, // sometimes we need to wait this long, especially in Gardener on Azure
-      5000
-    ).catch(expectNoAxiosErr);
-
+  it("commerce-application gateway should be deployed", async function () {
     const commerceApplicationGatewayDeployment = await retryPromise(
       async () => {
-        console.log(
-          "Waiting for commerce-application-gateway deployment to appear"
-        );
-        return k8sAppsApi.readNamespacedDeployment(
-          "commerce-application-gateway",
-          "kyma-integration"
-        );
+        return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
       },
       10,
       5000
     ).catch(expectNoK8sErr);
 
     expect(
-      commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0]
-        .args[6]
-    ).to.equal("--skipVerify=false");
+      commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
+    ).to.match(/^--skipVerify/);
     commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6] =
       "--skipVerify=true";
 
-    console.log("Patching commerce-application-gateway deployment");
     await k8sDynamicApi
       .patch(commerceApplicationGatewayDeployment.body)
       .catch(expectNoK8sErr);
+  });
 
-    const tokenObj = await waitForTokenRequestReady(
-      k8sCRDApi,
-      "commerce",
-      "default",
-      15,
-      5000
-    );
-
-    expect(tokenObj.body).to.have.nested.property("status.token");
-    expect(tokenObj.body.status.token).not.to.be.empty;
-
+  it("commerce mock local apis should be available", async function () {
     await retryPromise(
-      async () => {
-        console.log(`Connecting to https://${mockHost}/connection`);
-        return axios.post(
-          `https://${mockHost}/connection`,
-          {
-            token: tokenObj.body.status.url,
-            baseUrl: `https://${mockHost}`,
-            insecure: true,
-          },
-          {
-            headers: {
-              "content-type": "application/json",
-            },
-          }
-        );
+      () => axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr), 30, 3000);
+  })
+
+  it("commerce mock should connect to Kyma", async function () {
+    this.retries(4)
+    const tokenRequest = {
+      apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
+      kind: 'TokenRequest',
+      metadata: { name: 'commerce', namespace: 'default' }
+    }
+    const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/default/tokenrequests`
+
+    await k8sDynamicApi.delete(tokenRequest).catch(() => { })// Ignore delete error
+    await k8sDynamicApi.create(tokenRequest)
+    const tokenObj = await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
+      return (watchObj.object.status && watchObj.object.status.state == 'OK' && watchObj.object.status.url)
+    }, 5 * 1000, "Wait for TokenRequest timeout")
+
+    await axios.post(
+      `https://${mockHost}/connection`,
+      {
+        token: tokenObj.status.url,
+        baseUrl: `https://${mockHost}`,
+        insecure: true,
       },
-      30, // azure+gardener combo ❤️
-      5000
-    ).catch(expectNoAxiosErr);
-
-    await registerApis(
-      `https://${mockHost}/local/apis/Commerce%20Webservices/register`,
-      mockHost
+      {
+        headers: {
+          "content-type": "application/json",
+        },
+      }
     );
+  });
 
-    const commerceWebservicesResp = await listRemoteApis(mockHost);
-    expect(commerceWebservicesResp.data).to.have.length.above(0);
-    const commerceWebservicesID = commerceWebservicesResp.data.find((elem) =>
+  it("commerce mock should register Commerce Webservices API and Events", async function () {
+    this.retries(10);
+    const remoteApis = await registerAllApis(mockHost, "default", watch, 5000);
+
+    const webServicesSCExternalName = remoteApis.data.find((elem) =>
       elem.name.includes("Commerce Webservices")
-    ).id;
-    expect(commerceWebservicesID).not.to.be.empty;
+    ).externalName;
 
-    await registerApis(
-      `https://${mockHost}/local/apis/Events/register`,
-      mockHost
-    );
-
-    const remoteApis = await listRemoteApis(mockHost);
-
-    expect(remoteApis.data).to.have.length.above(1);
-    const commerceEventsID = remoteApis.data.find((elem) =>
+    const eventsSCExternalName = remoteApis.data.find((elem) =>
       elem.name.includes("Events")
-    ).id;
-    expect(commerceEventsID).not.to.be.empty;
+    ).externalName;
 
-    const webServicesServiceClass = await retryPromise(
-      async () => {
-        console.log("Reading Web Services service class");
-        return k8sDynamicApi.read(
-          k8s.loadYaml(genericServiceClass(commerceWebservicesID, "default"))
-        );
-      },
-      20,
-      5000
-    ).catch(expectNoK8sErr);
-
-    expect(webServicesServiceClass.body).to.have.nested.property(
-      "spec.externalName"
-    );
-    const webServicesSCExternalName =
-      webServicesServiceClass.body.spec.externalName;
-
-    const eventsServiceClass = await retryPromise(
-      async () => {
-        console.log("Reading Events service class");
-        return k8sDynamicApi.read(
-          k8s.loadYaml(genericServiceClass(commerceEventsID, "default"))
-        );
-      },
-      10,
-      5000
-    ).catch(expectNoK8sErr);
-
-    expect(eventsServiceClass.body).to.have.nested.property(
-      "spec.externalName"
-    );
-    const eventsSCExternalName = eventsServiceClass.body.spec.externalName;
-
-    const serviceCatalogObjs = k8s.loadAllYaml(
+    const serviceCatalogObjs = await k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
     );
 
-    console.log("Creating Service Catalog resources");
     await Promise.all(
       serviceCatalogObjs.map((obj) => k8sDynamicApi.create(obj))
-    ).catch(expectNoK8sErr);
+    ).catch((e) => {
+      expect(e.body.reason).to.be.equal('AlreadyExists')
+    })
+  });
 
+  it("order.created.v1 event should trigger the lastorder function", async function () {
     await sendEventAndCheckResponse(mockHost, host);
-    console.log("Done!");
   });
 });
 
@@ -239,7 +185,7 @@ async function sendEventAndCheckResponse(mockHost, host) {
             "content-type": "application/json",
           },
         }
-      );
+      ).catch(e => console.dir({ status: e.response.status, data: e.response.data }));
 
       await sleep(500);
 
@@ -262,63 +208,45 @@ async function sendEventAndCheckResponse(mockHost, host) {
   ).catch(expectNoAxiosErr);
 }
 
-async function getMockVirtualHost() {
-  const virtualservice = await retryPromise(
-    async () => {
-      return k8sCRDApi
-        .listNamespacedCustomObject(
-          "networking.istio.io",
-          "v1beta1",
-          "mocks",
-          "virtualservices",
-          "true",
-          undefined,
-          undefined,
-          "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks"
-        )
-        .then((res) => {
-          expect(res.body).to.have.property("items");
-          expect(res.body.items).to.have.lengthOf(1);
-          expect(res.body.items[0]).to.have.nested.property("spec.hosts");
-          expect(res.body.items[0].spec.hosts).to.have.lengthOf(1);
-          expect(res.body.items[0].spec.hosts[0]).not.to.be.empty;
-          return res;
-        });
-    },
-    10,
-    1000
-  ).catch(expectNoK8sErr);
-
-  return virtualservice.body.items[0].spec.hosts[0];
-}
-
-async function listRemoteApis(mockHost, retriesLeft = 10, interval = 3000) {
-  return await retryPromise(
-    async () => {
-      console.log("Listing remote apis");
-      return axios.get(`https://${mockHost}/remote/apis`);
-    },
-    retriesLeft,
-    interval
-  ).catch(expectNoAxiosErr);
-}
-
-async function registerApis(url, mockHost, retriesLeft = 15, interval = 5000) {
-  await retryPromise(
-    async () => {
-      console.log(`Registering Apis, calling ${url}`);
-      return axios.post(
-        url,
-        {},
-        {
-          headers: {
-            "content-type": "application/json",
-            origin: `https://${mockHost}`,
-          },
+function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
+  let res
+  let timer
+  const result = new Promise((resolve, reject) => {
+    watch.watch(path, query, (type, apiObj, watchObj) => {
+      if (checkFn(type, apiObj, watchObj)) {
+        if (res) {
+          res.abort();
         }
-      );
-    },
-    retriesLeft,
-    interval
-  ).catch(expectNoAxiosErr);
+        clearTimeout(timer)
+        resolve(watchObj.object)
+      }
+    }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
+  });
+  return result;
+}
+
+async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) {
+  const localApis = await axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr);
+  for (api of localApis.data) {
+    await axios.post(`https://${mockHost}/local/apis/${api.id}/register`, {},
+      {
+        headers: {
+          "content-type": "application/json",
+          origin: `https://${mockHost}`,
+        },
+      }
+    ).catch(expectNoAxiosErr)
+  }
+  const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(expectNoAxiosErr);
+  expect(remoteApis.data).to.have.lengthOf(localApis.data.length)
+
+  const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`
+  await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
+    let api = remoteApis.data.find(item => item.id == watchObj.object.spec.externalID);
+    if (api) {
+      api.externalName = watchObj.object.spec.externalName
+    }
+    return remoteApis.data.every(item => item.externalName)
+  }, timeout, "Wait for ServiceClasses Timeout");
+  return remoteApis;
 }
