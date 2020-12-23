@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-6-g8e85904-dirty
+image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.1-3-g87e8bc4-dirty
 # imagePullSecrets pre-existing secrets to use to pull images from a private registry
 imagePullSecrets: []
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
@@ -44,10 +44,10 @@ webhook:
   resources:
     requests:
       cpu: 100m
-      memory: 20Mi
+      memory: 35Mi
     limits:
       cpu: 100m
-      memory: 30Mi
+      memory: 45Mi
 controllerManager:
   replicas: 1
   # deployment strategy for service-catalog controllerManager

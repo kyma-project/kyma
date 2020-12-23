@@ -9,8 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   replicas: 1
-  strategy:
-    type: {{ toYaml .Values.webhook.strategy | nindent 4 }}
+  strategy: {{ toYaml .Values.webhook.strategy | nindent 4 }}
   minReadySeconds: {{ .Values.webhook.minReadySeconds }}
   selector:
     matchLabels:
