@@ -4,3 +4,7 @@ BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930
 SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
+
+# Override to use go modules
+release:
+	$(MAKE) gomod-release
