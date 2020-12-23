@@ -3,6 +3,8 @@ package subscription_nats
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -83,7 +85,24 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			if err := r.Update(context.Background(), desiredSubscription); err != nil {
 				return ctrl.Result{}, err
 			}
+			result.Requeue = true
 		}
+
+		if result.Requeue {
+			return result, nil
+		}
+
+		// TODO refactor the common code between NATS reconciler and BEB reconciler
+		// sync the initial Subscription status
+		if err := r.syncInitialStatus(desiredSubscription, &result, ctx); err != nil {
+			return ctrl.Result{}, errors.Wrap(err, "failed to sync status")
+		}
+		if result.Requeue {
+			return result, nil
+		}
+
+		//TODO Create subscription
+
 	} else {
 		// The object is being deleted
 		if containsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
@@ -140,4 +159,35 @@ func removeString(slice []string, s string) (result []string) {
 		result = append(result, item)
 	}
 	return
+}
+
+// syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context) error {
+	currentStatus := subscription.Status
+	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
+	expectedStatus.InitializeConditions()
+	currentReadyStatusFromConditions := currentStatus.IsReady()
+
+	var updateReadyStatus bool
+	if currentReadyStatusFromConditions && !currentStatus.Ready {
+		currentStatus.Ready = true
+		updateReadyStatus = true
+	} else if !currentReadyStatusFromConditions && currentStatus.Ready {
+		currentStatus.Ready = false
+		updateReadyStatus = true
+	}
+	// case: conditions are already initialized
+	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) && !updateReadyStatus {
+		return nil
+	}
+	if len(currentStatus.Conditions) == 0 {
+		subscription.Status = expectedStatus
+	} else {
+		subscription.Status.Ready = currentStatus.Ready
+	}
+	if err := r.Status().Update(ctx, subscription); err != nil {
+		return err
+	}
+	result.Requeue = true
+	return nil
 }
