@@ -170,9 +170,9 @@ describe("Commerce Mock tests", function () {
         return watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
       }
       return false;
-    },
-      90 * 1000, "Waiting for ServiceBindingUsage to be ready timeout");
+    }, 90 * 1000, "Waiting for ServiceBindingUsage to be ready timeout");
   });
+
   it("function should reach Commerce mock API through app gateway", async function () {
     let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "123" }), 5, 5000);
     expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
@@ -263,7 +263,6 @@ async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) 
       api.externalName = watchObj.object.spec.externalName
     }
     return remoteApis.data.every(item => item.externalName)
-  },
-    timeout, "Wait for ServiceClasses Timeout");
+  }, timeout, "Wait for ServiceClasses Timeout");
   return remoteApis;
 }
