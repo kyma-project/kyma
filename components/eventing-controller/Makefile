@@ -39,7 +39,7 @@ install: manifests
 	kustomize build config/crd | ko apply -f -
 
 # Install sample CRs into a cluster
-install-samples: manifests
+install-samples:
 	ko apply -f config/samples
 
 # Uninstall sample CRs into a cluster
@@ -56,7 +56,7 @@ deploy-local: manifests deploy-local-dry-run
 	kustomize build config/default | ko apply -f -
 
 # Deploy eventing-controller-nats in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-eventing-controller-nats-local: manifests deploy-eventing-controller-nats-local-dry-run
+deploy-eventing-controller-nats-local: deploy-eventing-controller-nats-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/nats | ko apply -f -
 
