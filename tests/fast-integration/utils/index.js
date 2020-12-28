@@ -24,9 +24,7 @@ async function retryPromise(fn, retriesLeft = 10, interval = 30) {
           reject(error);
           return;
         }
-
         setTimeout(() => {
-          console.log(`retriesLeft: ${retriesLeft}`);
           // Passing on "reject" is the important part
           retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
         }, interval);
