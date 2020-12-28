@@ -76,6 +76,11 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get"]
+  - apiGroups: ['policy']
+    resources: ['podsecuritypolicies']
+    verbs:     ['use']
+    resourceNames:
+      - {{ template "rafter.fullname" . }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -200,6 +205,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: "{{ include "rafterUploadService.fullname" . }}-migrator"
       volumes:
         - name: minio-configuration
           projected:
