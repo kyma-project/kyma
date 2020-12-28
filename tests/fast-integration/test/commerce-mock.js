@@ -39,8 +39,6 @@ describe("Commerce Mock tests", function () {
   let host;
 
   after(async function () {
-    // return;
-    console.log("Deleting test resources...");
     await Promise.all(
       [
         mocksNamespaceObj,
@@ -165,6 +163,21 @@ describe("Commerce Mock tests", function () {
     })
   });
 
+  it("service binding usage for function should be ready", async function () {
+    const path = '/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/default/servicebindingusages';
+    await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
+      if (watchObj.object.metadata.name == 'commerce-lastorder-sbu' && watchObj.object.status.conditions) {
+        return watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
+      }
+      return false;
+    }, 90 * 1000, "Waiting for ServiceBindingUsage to be ready timeout");
+  });
+
+  it("function should reach Commerce mock API through app gateway", async function () {
+    let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "123" }), 5, 5000);
+    expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
+  })
+
   it("order.created.v1 event should trigger the lastorder function", async function () {
     await sendEventAndCheckResponse(mockHost, host);
   });
@@ -173,14 +186,13 @@ describe("Commerce Mock tests", function () {
 async function sendEventAndCheckResponse(mockHost, host) {
   await retryPromise(
     async () => {
-      console.log("Sending order.created event");
       await axios.post(
         `https://${mockHost}/events`,
         {
           "event-type": "order.created",
           "event-type-version": "v1",
           "event-time": "2020-09-28T14:47:16.491Z",
-          data: { orderCode: "123" },
+          data: { orderCode: "567" },
           "event-tracing": true,
         },
         {
@@ -195,22 +207,18 @@ async function sendEventAndCheckResponse(mockHost, host) {
 
       await sleep(500);
 
-      console.log("Checking if event reached lambda");
       return axios.get(`https://lastorder.${host}`).then((res) => {
-        expect(res.data).to.have.nested.property(
-          "totalPriceWithTax.value",
-          100
-        );
-
-        expect(res.data.totalPriceWithTax.value).to.equal(
-          100,
-          "totalPriceWithTax.value send by function is different than expected"
-        );
+        expect(res.data).to.have.nested.property("event.ce-type", 'order.created');
+        expect(res.data).to.have.nested.property("event.ce-source", 'commerce');
+        expect(res.data).to.have.nested.property("event.ce-eventtypeversion", 'v1');
+        expect(res.data).to.have.nested.property("event.ce-specversion", "1.0");
+        expect(res.data).to.have.nested.property("event.ce-id");
+        expect(res.data).to.have.nested.property("event.ce-time");
         return res;
       });
     },
     30,
-    5 * 1000
+    2 * 1000
   ).catch(expectNoAxiosErr);
 }
 
