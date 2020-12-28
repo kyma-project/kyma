@@ -91,9 +91,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ include "rafterUploadService.fullname" . }}-migrator
@@ -113,9 +113,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
@@ -137,9 +137,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "-2"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -255,7 +255,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: "{{ include "rafterUploadService.fullname" . }}-migrator"
+      serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator
       {{- if .Values.pod.extraProperties }}
       {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraPropertiesWithFsGroup "context" . ) | nindent 6 }}
       {{- end }}
@@ -311,7 +311,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
@@ -338,6 +338,7 @@ rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["delete"]
+
 ---
 apiVersion: v1
 kind: ServiceAccount
