@@ -2,9 +2,6 @@ package subscription_nats
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
-
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -15,12 +12,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
+	"github.com/nats-io/nats.go"
 )
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
 	client.Client
 	cache.Cache
+	natsClient *handlers.Nats
 	Log      logr.Logger
 	recorder record.EventRecorder
 }
@@ -38,6 +38,7 @@ func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, rec
 	return &Reconciler{
 		Client:   client,
 		Cache:    cache,
+		natsClient: natsClient,
 		Log:      log,
 		recorder: recorder,
 	}
@@ -93,15 +94,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		// TODO refactor the common code between NATS reconciler and BEB reconciler
-		// sync the initial Subscription status
-		if err := r.syncInitialStatus(desiredSubscription, &result, ctx); err != nil {
-			return ctrl.Result{}, errors.Wrap(err, "failed to sync status")
-		}
-		if result.Requeue {
-			return result, nil
-		}
+		//// sync the initial Subscription status
+		//if err := r.syncInitialStatus(desiredSubscription, &result, ctx); err != nil {
+		//	return ctrl.Result{}, errors.Wrap(err, "failed to sync status")
+		//}
+		//if result.Requeue {
+		//	return result, nil
+		//}
 
 		//TODO Create subscription
+		r.natsClient.Client.Subscribe("foo", func(msg *nats.Msg) {
+			panic("Hey!")
+		})
 
 	} else {
 		// The object is being deleted
@@ -128,6 +132,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	// mark if the subscription status was changed
+	//statusChanged := false
+	//if statusChangedForBeb, err := r.syncBEBSubscription(desiredSubscription, &result, ctx, log, apiRule); err != nil {
+	//	log.Error(err, "error while syncing BEB subscription")
+	//	return ctrl.Result{}, err
+	//} else {
+	//	statusChanged = statusChanged || statusChangedForBeb
+	//}
 	return result, nil
 }
 
@@ -161,6 +173,11 @@ func removeString(slice []string, s string) (result []string) {
 	return
 }
 
+// isInDeletion checks if the Subscription shall be deleted
+func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
+	return !subscription.DeletionTimestamp.IsZero()
+}
+
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context) error {
 	currentStatus := subscription.Status
@@ -190,4 +207,65 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	}
 	result.Requeue = true
 	return nil
+}
+
+func (r Reconciler) deleteNATSSubscription(subscription *eventingv1alpha1.Subscription, logger logr.Logger,
+	ctx context.Context) error {
+	//TODO
+	r.natsClient.DeleteSubscription(nil)
+	panic("Implement me")
+	return nil
+}
+
+// syncBEBSubscription delegates the subscription synchronization to the backend client. It returns true if the subscription status was changed.
+func (r *Reconciler) syncNATSSubscription(subscription *eventingv1alpha1.Subscription, result *ctrl.Result,
+	ctx context.Context, logger logr.Logger) (bool, error) {
+	logger.Info("Syncing subscription with NATS")
+
+	// if object is marked for deletion, we need to delete the BEB subscription
+	if isInDeletion(subscription) {
+		return false, r.deleteNATSSubscription(subscription, logger, ctx)
+	}
+
+	var statusChanged bool
+	//var err error
+	//if statusChanged, err = r.natsClient.SyncBebSubscription(subscription, apiRule); err != nil {
+	//	logger.Error(err, "Update BEB subscription failed")
+	//	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse)
+	//	if err := r.updateCondition(subscription, condition, ctx); err != nil {
+	//		return statusChanged, err
+	//	}
+	//	return false, err
+	//}
+	//
+	//if !subscription.Status.IsConditionSubscribed() {
+	//	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
+	//	if err := r.updateCondition(subscription, condition, ctx); err != nil {
+	//		return statusChanged, err
+	//	}
+	//	statusChanged = true
+	//}
+	//
+	//statusChangedAtCheck, retry, errTimeout := r.checkStatusActive(subscription)
+	//statusChanged = statusChanged || statusChangedAtCheck
+	//if errTimeout != nil {
+	//	logger.Error(errTimeout, "timeout at retry")
+	//	result.Requeue = false
+	//	return statusChanged, errTimeout
+	//}
+	//if retry {
+	//	logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
+	//	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse)
+	//	if err := r.updateCondition(subscription, condition, ctx); err != nil {
+	//		return statusChanged, err
+	//	}
+	//	result.RequeueAfter = time.Second * 1
+	//} else if statusChanged {
+	//	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue)
+	//	if err := r.updateCondition(subscription, condition, ctx); err != nil {
+	//		return statusChanged, err
+	//	}
+	//}
+	//// OK
+	return statusChanged, nil
 }

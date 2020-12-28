@@ -11,6 +11,7 @@ var _ NatsInterface = &Nats{}
 
 type NatsInterface interface {
 	Initialize(cfg env.NatsConfig)
+	DeleteSubscription(subscription *nats.Subscription)
 }
 
 type Nats struct {
@@ -36,4 +37,10 @@ func (n *Nats) Initialize(cfg env.NatsConfig) {
 	n.Client.Subscribe("foo", func(m *nats.Msg) {
 		n.Log.Info("Received a message:", "message:", string(m.Data))
 	})
+}
+
+func (n *Nats) DeleteSubscription(subscription *nats.Subscription) {
+	n.Log.Info("Deleting NATS subscription...")
+	subscription.Unsubscribe()
+	panic("implement me")
 }
