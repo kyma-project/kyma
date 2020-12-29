@@ -1,7 +1,7 @@
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
-  # hub: eu.gcr.io/kyma-project/external/istio
+  hub: eu.gcr.io/kyma-project/external/istio
   tag: {{ .Chart.Version }}
   addonComponents:
     istiocoredns:
@@ -176,6 +176,7 @@ spec:
         zipkin: 
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
+    enableTracing: true
   values:
     base:
       enableCRDTemplates: false
