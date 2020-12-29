@@ -254,7 +254,7 @@ async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) 
     }, 3, 5000)
   }
   const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(expectNoAxiosErr);
-  expect(remoteApis.data).to.have.lengthOf(localApis.data.length)
+  expect(remoteApis.data).to.have.lengthOf.at.least(2)
 
   const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`
   await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
