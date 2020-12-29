@@ -1,0 +1,2 @@
+package subscription_nats
+

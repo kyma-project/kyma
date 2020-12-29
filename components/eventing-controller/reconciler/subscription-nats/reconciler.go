@@ -14,6 +14,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -89,7 +90,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object. This is equivalent
 		// registering our finalizer.
-		if !containsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
+		if !utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
 			log.Info("Adding finalizer to subscription object")
 			desiredSubscription.ObjectMeta.Finalizers = append(desiredSubscription.ObjectMeta.Finalizers, Finalizer)
 			if err := r.Update(context.Background(), desiredSubscription); err != nil {
@@ -135,7 +136,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	} else {
 		// The object is being deleted
-		if containsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
+		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
 			// our finalizer is present, so lets handle any external dependency
 			if err := r.deleteSubscriptions(req); err != nil {
 				log.Info("failed to delete the external dependency of the subscription object")
@@ -146,7 +147,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			// remove our finalizer from the list and update it.
 			log.Info("Removing finalizer from subscription object")
-			desiredSubscription.ObjectMeta.Finalizers = removeString(desiredSubscription.ObjectMeta.Finalizers,
+			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers,
 				Finalizer)
 			if err := r.Update(context.Background(), desiredSubscription); err != nil {
 				log.Info("failed to remove finalizer from subscription object")
@@ -198,26 +199,6 @@ func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	//event.SetType(eventType)
 	//event.SetDataContentType("application/json")
 	return &event, nil
-}
-
-// Helper functions to check and remove string from a slice of strings.
-func containsString(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
-func removeString(slice []string, s string) (result []string) {
-	for _, item := range slice {
-		if item == s {
-			continue
-		}
-		result = append(result, item)
-	}
-	return
 }
 
 // isInDeletion checks if the Subscription shall be deleted
