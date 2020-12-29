@@ -2,14 +2,16 @@ package subscription_nats
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 
 	natsgosdk "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	ceclient "github.com/cloudevents/sdk-go/v2/client"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -60,6 +62,11 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&eventingv1alpha1.Subscription{}).
 		Complete(r)
 }
+
+//type natsMsg struct {
+//	eventType string
+//
+//}
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
@@ -117,10 +124,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		eventType := "kyma.ev2.poc.event1.v1"
 		_, err := r.natsClient.Client.Subscribe(eventType, func(msg *nats.Msg) {
 			log.Info(string(msg.Data), "payload", "value")
-			log.Info("headers", fmt.Sprintf("%v", msg.Header), "")
-			ce, _ := convertMsgToCE(msg)
-			ctx := context.Background()
+			ce, _ := r.convertMsgToCE(msg)
+			ctx := cloudevents.ContextWithTarget(context.Background(), "http://myapp.default")
 			cev2Client, _ := ceclient.NewDefault()
+
 			err := cev2Client.Send(ctx, *ce)
 			if err != nil {
 				log.Error(err, "failed to send event")
@@ -133,24 +140,34 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		// Test: send a sample CE event to NATS
 		natsSender, _ := natsgosdk.NewSender(r.config.Url, eventType, []nats.Option{})
+		ceEvent := cev2event.New()
+		ceEvent.SetType(eventType)
+		ceEvent.SetTime(time.Now())
+		ceEvent.SetID("id")
+		ceEvent.SetSource("source")
+		ceEvent.SetData("application/json", "hello world")
+		data, err := json.Marshal(ceEvent)
+		if err != nil {
+			log.Error(err, "failed to marshal")
+		}
 		msg := &nats.Msg{
 			Subject: eventType,
 			Reply:   "reply",
-			Header: map[string][]string{
-				"ce-time": []string{"time"},
-				"ce-id":   []string{"id"},
-				"ce-type": []string{eventType},
-			},
-			Data: []byte("hello world"),
+			//Header: map[string][]string{
+			//	"ce-time": []string{"time"},
+			//	"ce-id":   []string{"id"},
+			//	"ce-type": []string{eventType},
+			//},
+			Data: data,
 			Sub:  nil,
 		}
 		ctx := context.Background()
-		ceNatsMsg := natsgosdk.Message{
-			Msg: msg,
-		}
+		ceNatsMsg := natsgosdk.NewMessage(msg)
+
 		log.Info("encoding", ceNatsMsg.ReadEncoding(), "")
-		log.Info("cenatsmsg", fmt.Sprintf("%v", ceNatsMsg), "")
-		err = natsSender.Send(ctx, &ceNatsMsg)
+		log.Info(fmt.Sprintf("cenatsmsg: %+v", ceNatsMsg), "")
+		log.Info(fmt.Sprintf("natsmsg %+v", *ceNatsMsg.Msg), "")
+		err = natsSender.Send(ctx, ceNatsMsg)
 		if err != nil {
 			log.Error(err, "failed to send message")
 		}
@@ -191,24 +208,28 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return result, nil
 }
 
-func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
+func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	event := cev2event.New(cev2event.CloudEventsVersionV1)
-
-	evTime, err := time.Parse(time.RFC3339, msg.Header["ce-time"][0])
+	err := json.Unmarshal(msg.Data, &event)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse time")
+		return nil, err
 	}
-	event.SetTime(evTime)
-
-	if err := event.SetData("application/json", msg.Data); err != nil {
-		return nil, errors.Wrap(err, "failed to set data to CE data field")
-	}
-
-	event.SetID(msg.Header["ce-id"][0])
-
-	eventType := msg.Header["ce-type"][0]
-	event.SetType(eventType)
-	event.SetDataContentType("application/json")
+	r.Log.Info("cloud event received", "type", event.Type(), "id", event.ID(), "time", event.Time(), "data", string(event.Data()))
+	//evTime, err := time.Parse(time.RFC3339, msg.Header["ce-time"][0])
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "failed to parse time")
+	//}
+	//event.SetTime(evTime)
+	//
+	//if err := event.SetData("application/json", msg.Data); err != nil {
+	//	return nil, errors.Wrap(err, "failed to set data to CE data field")
+	//}
+	//
+	//event.SetID(msg.Header["ce-id"][0])
+	//
+	//eventType := msg.Header["ce-type"][0]
+	//event.SetType(eventType)
+	//event.SetDataContentType("application/json")
 	return &event, nil
 }
 
