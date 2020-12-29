@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/cloudevents/sdk-go v1.2.0 // indirect
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1 // indirect
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.1.0
 	github.com/google/uuid v1.1.1 // indirect
