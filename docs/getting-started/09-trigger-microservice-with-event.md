@@ -86,7 +86,7 @@ Console UI
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:  
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Discovery and Network** > **API Rules** view in the `order-service` Namespace.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
