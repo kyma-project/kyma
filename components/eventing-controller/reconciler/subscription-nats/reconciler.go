@@ -3,12 +3,9 @@ package subscription_nats
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
-	natsgosdk "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	ceclient "github.com/cloudevents/sdk-go/v2/client"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -31,10 +28,11 @@ import (
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	natsClient *handlers.Nats
-	Log        logr.Logger
-	recorder   record.EventRecorder
-	config     env.NatsConfig
+	natsClient    *handlers.Nats
+	Log           logr.Logger
+	recorder      record.EventRecorder
+	config        env.NatsConfig
+	subscriptions map[string]*nats.Subscription
 }
 
 var (
@@ -48,12 +46,13 @@ func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, rec
 	}
 	natsClient.Initialize(cfg)
 	return &Reconciler{
-		Client:     client,
-		Cache:      cache,
-		natsClient: natsClient,
-		Log:        log,
-		recorder:   recorder,
-		config:     cfg,
+		Client:        client,
+		Cache:         cache,
+		natsClient:    natsClient,
+		Log:           log,
+		recorder:      recorder,
+		config:        cfg,
+		subscriptions: make(map[string]*nats.Subscription),
 	}
 }
 
@@ -121,56 +120,64 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		//}
 
 		//TODO Create subscription
-		eventType := "kyma.ev2.poc.event1.v1"
-		_, err := r.natsClient.Client.Subscribe(eventType, func(msg *nats.Msg) {
-			log.Info(string(msg.Data), "payload", "value")
-			ce, _ := r.convertMsgToCE(msg)
-			ctx := cloudevents.ContextWithTarget(context.Background(), "http://myapp.default")
-			cev2Client, _ := ceclient.NewDefault()
+		var filters []*eventingv1alpha1.BebFilter
+		if desiredSubscription.Spec.Filter != nil {
+			filters = desiredSubscription.Spec.Filter.Filters
+		}
+		for _, filter := range filters {
+			eventType := filter.EventType.Value
+			sub, err := r.natsClient.Client.Subscribe(eventType, func(msg *nats.Msg) {
+				log.Info(string(msg.Data), "payload", "value")
+				ce, _ := r.convertMsgToCE(msg)
+				ctx := cloudevents.ContextWithTarget(context.Background(), desiredSubscription.Spec.Sink)
+				cev2Client, _ := ceclient.NewDefault()
 
-			err := cev2Client.Send(ctx, *ce)
+				err := cev2Client.Send(ctx, *ce)
+				if err != nil {
+					log.Error(err, "failed to send event")
+				}
+			})
+			r.subscriptions[req.NamespacedName.String()] = sub
 			if err != nil {
-				log.Error(err, "failed to send event")
+				log.Error(err, "failed to create a Nats subscription")
+				return result, err
 			}
-		})
-
-		if err != nil {
-			log.Error(err, "failed to create a Nats subscription")
 		}
 
-		// Test: send a sample CE event to NATS
-		natsSender, _ := natsgosdk.NewSender(r.config.Url, eventType, []nats.Option{})
-		ceEvent := cev2event.New()
-		ceEvent.SetType(eventType)
-		ceEvent.SetTime(time.Now())
-		ceEvent.SetID("id")
-		ceEvent.SetSource("source")
-		ceEvent.SetData("application/json", "hello world")
-		data, err := json.Marshal(ceEvent)
-		if err != nil {
-			log.Error(err, "failed to marshal")
-		}
-		msg := &nats.Msg{
-			Subject: eventType,
-			Reply:   "reply",
-			//Header: map[string][]string{
-			//	"ce-time": []string{"time"},
-			//	"ce-id":   []string{"id"},
-			//	"ce-type": []string{eventType},
-			//},
-			Data: data,
-			Sub:  nil,
-		}
-		ctx := context.Background()
-		ceNatsMsg := natsgosdk.NewMessage(msg)
-
-		log.Info("encoding", ceNatsMsg.ReadEncoding(), "")
-		log.Info(fmt.Sprintf("cenatsmsg: %+v", ceNatsMsg), "")
-		log.Info(fmt.Sprintf("natsmsg %+v", *ceNatsMsg.Msg), "")
-		err = natsSender.Send(ctx, ceNatsMsg)
-		if err != nil {
-			log.Error(err, "failed to send message")
-		}
+		//// Test publisher: send a sample CE event to NATS
+		//natsSender, _ := natsgosdk.NewSender(r.config.Url, eventType, []nats.Option{})
+		//ceEvent := cev2event.New()
+		//ceEvent.SetType(eventType)
+		//ceEvent.SetTime(time.Now())
+		//ceEvent.SetID("id")
+		//ceEvent.SetSource("source")
+		//ceEvent.SetData("application/json", "hello world")
+		//data, err := json.Marshal(ceEvent)
+		//if err != nil {
+		//	log.Error(err, "failed to marshal")
+		//}
+		//log.Info("data in json", string(data))
+		//msg := &nats.Msg{
+		//	Subject: eventType,
+		//	Reply:   "reply",
+		//	//Header: map[string][]string{
+		//	//	"ce-time": []string{"time"},
+		//	//	"ce-id":   []string{"id"},
+		//	//	"ce-type": []string{eventType},
+		//	//},
+		//	Data: data,
+		//	Sub:  nil,
+		//}
+		//ctx := context.Background()
+		//ceNatsMsg := natsgosdk.NewMessage(msg)
+		//
+		//log.Info("encoding", ceNatsMsg.ReadEncoding(), "")
+		//log.Info(fmt.Sprintf("cenatsmsg: %+v", ceNatsMsg), "")
+		//log.Info(fmt.Sprintf("natsmsg %+v", *ceNatsMsg.Msg), "")
+		//err = natsSender.Send(ctx, ceNatsMsg)
+		//if err != nil {
+		//	log.Error(err, "failed to send message")
+		//}
 
 	} else {
 		// The object is being deleted
