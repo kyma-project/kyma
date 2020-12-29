@@ -3,6 +3,7 @@ package subscription_nats
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
@@ -62,11 +63,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-//type natsMsg struct {
-//	eventType string
-//
-//}
-
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 
@@ -124,6 +120,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if desiredSubscription.Spec.Filter != nil {
 			filters = desiredSubscription.Spec.Filter.Filters
 		}
+
+		for k, v := range r.subscriptions {
+			if strings.HasPrefix(k, req.NamespacedName.String()) {
+				err := v.Unsubscribe()
+				if err != nil {
+					r.Log.Error(err, "Couldn't unsubscribe from NATS", "Subscription name: ", k)
+				}
+			}
+		}
+
 		for _, filter := range filters {
 			eventType := filter.EventType.Value
 			sub, err := r.natsClient.Client.Subscribe(eventType, func(msg *nats.Msg) {
@@ -137,7 +143,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					log.Error(err, "failed to send event")
 				}
 			})
-			r.subscriptions[req.NamespacedName.String()] = sub
+			r.subscriptions[req.NamespacedName.String() + "." + filter.EventType.Value] = sub
 			if err != nil {
 				log.Error(err, "failed to create a Nats subscription")
 				return result, err
