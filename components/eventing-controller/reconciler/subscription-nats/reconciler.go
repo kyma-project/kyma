@@ -3,6 +3,7 @@ package subscription_nats
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
@@ -115,19 +116,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		//	return result, nil
 		//}
 
-		//TODO Create subscription
+		//TODO Create/Update subscription
 		var filters []*eventingv1alpha1.BebFilter
 		if desiredSubscription.Spec.Filter != nil {
 			filters = desiredSubscription.Spec.Filter.Filters
 		}
 
-		for k, v := range r.subscriptions {
-			if strings.HasPrefix(k, req.NamespacedName.String()) {
-				err := v.Unsubscribe()
-				if err != nil {
-					r.Log.Error(err, "Couldn't unsubscribe from NATS", "Subscription name: ", k)
-				}
-			}
+		err := r.deleteSubscriptions(req)
+		if err != nil {
+			log.Error(err, "failed to delete subscriptions")
+			return ctrl.Result{}, err
 		}
 
 		for _, filter := range filters {
@@ -143,54 +141,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					log.Error(err, "failed to send event")
 				}
 			})
-			r.subscriptions[req.NamespacedName.String() + "." + filter.EventType.Value] = sub
+			r.subscriptions[req.NamespacedName.String()+"."+filter.EventType.Value] = sub
 			if err != nil {
 				log.Error(err, "failed to create a Nats subscription")
 				return result, err
 			}
 		}
 
-		//// Test publisher: send a sample CE event to NATS
-		//natsSender, _ := natsgosdk.NewSender(r.config.Url, eventType, []nats.Option{})
-		//ceEvent := cev2event.New()
-		//ceEvent.SetType(eventType)
-		//ceEvent.SetTime(time.Now())
-		//ceEvent.SetID("id")
-		//ceEvent.SetSource("source")
-		//ceEvent.SetData("application/json", "hello world")
-		//data, err := json.Marshal(ceEvent)
-		//if err != nil {
-		//	log.Error(err, "failed to marshal")
-		//}
-		//log.Info("data in json", string(data))
-		//msg := &nats.Msg{
-		//	Subject: eventType,
-		//	Reply:   "reply",
-		//	//Header: map[string][]string{
-		//	//	"ce-time": []string{"time"},
-		//	//	"ce-id":   []string{"id"},
-		//	//	"ce-type": []string{eventType},
-		//	//},
-		//	Data: data,
-		//	Sub:  nil,
-		//}
-		//ctx := context.Background()
-		//ceNatsMsg := natsgosdk.NewMessage(msg)
-		//
-		//log.Info("encoding", ceNatsMsg.ReadEncoding(), "")
-		//log.Info(fmt.Sprintf("cenatsmsg: %+v", ceNatsMsg), "")
-		//log.Info(fmt.Sprintf("natsmsg %+v", *ceNatsMsg.Msg), "")
-		//err = natsSender.Send(ctx, ceNatsMsg)
-		//if err != nil {
-		//	log.Error(err, "failed to send message")
-		//}
-
 	} else {
 		// The object is being deleted
 		if containsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
 			// our finalizer is present, so lets handle any external dependency
-			if err := r.deleteExternalResources(desiredSubscription); err != nil {
-				log.Info("fail to delete the external dependency of the subscription object")
+			if err := r.deleteSubscriptions(req); err != nil {
+				log.Info("failed to delete the external dependency of the subscription object")
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return ctrl.Result{}, err
@@ -201,9 +164,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			desiredSubscription.ObjectMeta.Finalizers = removeString(desiredSubscription.ObjectMeta.Finalizers,
 				Finalizer)
 			if err := r.Update(context.Background(), desiredSubscription); err != nil {
-				log.Info("Failed to remove finalizer from subscription object")
+				log.Info("failed to remove finalizer from subscription object")
 				return ctrl.Result{}, err
 			}
+		}
+
+		for _, v := range r.subscriptions {
+			log.Info("sub: ", fmt.Sprintf("%+v", *v), "")
 		}
 
 		// Stop reconciliation as the item is being deleted
@@ -219,6 +186,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	//	statusChanged = statusChanged || statusChangedForBeb
 	//}
 	return result, nil
+}
+
+func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
+	for k, v := range r.subscriptions {
+		if strings.HasPrefix(k, req.NamespacedName.String()) {
+			err := v.Unsubscribe()
+			if err != nil {
+				r.Log.Error(err, "Couldn't unsubscribe from NATS", "Subscription name: ", k)
+				return err
+			}
+			delete(r.subscriptions, k)
+		}
+	}
+	return nil
 }
 
 func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
