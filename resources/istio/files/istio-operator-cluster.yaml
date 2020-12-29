@@ -176,7 +176,7 @@ spec:
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
-    enableTracing: true
+    enableTracing: {{ .Values.global.tracing.enabled }}
   values:
     base:
       enableCRDTemplates: false
