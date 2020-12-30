@@ -70,7 +70,7 @@ Console UI
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
-2. Go to **Operation** > **Services** in the left navigation panel and select `orders-service`.
+2. Go to **Discovery and Network** > **Services** in the left navigation panel and select `orders-service`.
 
 3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
 

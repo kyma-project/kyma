@@ -162,11 +162,11 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-  - Go to your Namespace view and select **Deploy new resource**.
+  - Go to your Namespace view, select **Deploy new workload** > **Upload YAML**.
 
   - Locate the YAML file with the Secret and select **Deploy**.
 
-3. In the left navigation panel, go to **Development** > **Functions** and select the **Repositories** tab.
+3. In the left navigation panel, go to **Workloads** > **Functions** and select the **Repositories** tab.
 
 4. Select **Connect Repository**, fill in the **URL** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
 

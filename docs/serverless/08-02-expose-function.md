@@ -86,7 +86,7 @@ Follows these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
 
-2. In the left navigation panel, go to **Development** > **Functions** and select the Function you want to expose.
+2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
 
 3. Switch to the **Configuration** tab and select **Expose Function** in the **API Rules** section. A pop-up box with the form will appear on the screen.
 
