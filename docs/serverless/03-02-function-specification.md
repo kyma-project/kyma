@@ -68,7 +68,7 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
 }
 ```
 
-See detailed descriptions of these fields:
+See the detailed descriptions of these fields:
 
 | Field | Description |
 |-------|-------------|
@@ -95,7 +95,7 @@ See sample context details:
   "memory-limit": 200Mi }
 ```
 
-See detailed descriptions of these fields:
+See the detailed descriptions of these fields:
 
 | Field | Description |
 |-------|-------------|
@@ -114,13 +114,13 @@ You can use the **event.extensions.request** object to access headers, request a
 
 ### Custom HTTP responses in Node.js
 
-By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. An HTTP-based function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
+By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. An HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
 Apart from these two default codes, you can define custom responses in both Node.js 10 and Node.js 12 environments using the **event.extensions.response** object.
 
 This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation][https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse].
 
-This example shows how to set such a custom response in Node.js for HTTP status code `400`:
+This example shows how to set such a custom response in Node.js for the HTTP status code `400`:
 
 ```js
 module.exports = {    
