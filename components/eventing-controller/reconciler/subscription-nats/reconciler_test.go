@@ -37,7 +37,7 @@ const (
 	bigPollingInterval = 3 * time.Second
 )
 
-var _ = Describe("Subscription Reconciliation Tests", func() {
+var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 	var namespaceName string
 
 	// enable me for debugging
@@ -47,19 +47,19 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	BeforeEach(func() {
 		namespaceName = "test"
 		// we need to reset the http requests which the mock captured
-		beb.Reset()
+		//beb.Reset()
 	})
 
 	AfterEach(func() {
 		// detailed request logs
-		logf.Log.V(1).Info("beb requests", "number", len(beb.Requests))
-
-		i := 0
-		for req, payloadObject := range beb.Requests {
-			reqDescription := fmt.Sprintf("method: %q, url: %q, payload object: %+v", req.Method, req.RequestURI, payloadObject)
-			fmt.Printf("request[%d]: %s\n", i, reqDescription)
-			i++
-		}
+		//logf.Log.V(1).Info("beb requests", "number", len(beb.Requests))
+		//
+		//i := 0
+		//for req, payloadObject := range beb.Requests {
+		//	reqDescription := fmt.Sprintf("method: %q, url: %q, payload object: %+v", req.Method, req.RequestURI, payloadObject)
+		//	fmt.Printf("request[%d]: %s\n", i, reqDescription)
+		//	i++
+		//}
 
 		//// print all subscriptions in the namespace for debugging purposes
 		//if err := printSubscriptions(namespaceName); err != nil {
@@ -68,7 +68,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Creating a Subscription with a valid Sink", func() {
-		It("Should create a subscription in Nats and make it ready", func() {
+		It("Should create a subscription in NATS and make it ready", func() {
 			ctx := context.Background()
 			subscriptionName := "sub-create-with-sink"
 
@@ -167,7 +167,8 @@ const (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
-var beb *reconcilertesting.BebMock
+
+//var beb *reconcilertesting.BebMock
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -208,8 +209,9 @@ var _ = BeforeSuite(func(done Done) {
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:     scheme.Scheme,
-		SyncPeriod: &syncPeriod,
+		Scheme:             scheme.Scheme,
+		SyncPeriod:         &syncPeriod,
+		MetricsBindAddress: ":7070",
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{

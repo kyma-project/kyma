@@ -877,8 +877,9 @@ var _ = BeforeSuite(func(done Done) {
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
-		Scheme:     scheme.Scheme,
-		SyncPeriod: &syncPeriod,
+		Scheme:             scheme.Scheme,
+		SyncPeriod:         &syncPeriod,
+		MetricsBindAddress: ":9090",
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{
