@@ -91,7 +91,7 @@ Follow these steps to deploy XF addons and add Commerce mock to the `orders-serv
 
 You will be redirected to the **Service Management** > **Instances** > **commerce-mock** view. Wait for it to have the status `RUNNING`.
 
-When Commerce mock is provisioned, a corresponding API Rule is automatically created. When you go to the **API Rules** view in the `orders-service` Namespace and select `commerce-mock`, you will see the direct link to it under **Host**.
+When Commerce mock is provisioned, a corresponding API Rule is automatically created. When you go to the **Discovery and Network** > **API Rules** view in the `orders-service` Namespace and select `commerce-mock`, you will see the direct link to it under **Host**.
 
   </details>
 </div>
@@ -169,7 +169,7 @@ Follow these steps:
    Save this URL with the token to the clipboard, as you will need it in the next steps.
 
    > **CAUTION:** The token included in the output is valid for 5 minutes.
-   
+
   </details>
   <details>
   <summary label="console-ui">

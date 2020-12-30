@@ -84,7 +84,7 @@ These variables refer to the following:
 
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
 
-2. In the left navigation panel, go to **Development** > **Functions** and navigate to your Function.
+2. In the left navigation panel, go to **Workloads** > **Functions** and navigate to your Function.
 
 3. Once in the Function details view, Switch to the **Configuration** tab, and select **Add Event Trigger** in the **Event Triggers** section.
 

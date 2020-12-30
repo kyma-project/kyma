@@ -91,7 +91,7 @@ To see the Secret details and retrieve them from the ServiceBinding, run this co
   Console UI
   </summary>
 
-1. Go to **Development** > **Functions** in the left navigation panel and select `orders-function`.
+1. Go to **Workloads** > **Functions** in the left navigation panel and select `orders-function`.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 

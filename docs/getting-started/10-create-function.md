@@ -46,7 +46,7 @@ Follows these steps:
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
-2. Go to **Development** > **Functions** in the left navigation panel and select **Create Function**.
+2. Go to **Workloads** > **Functions** in the left navigation panel and select **Create Function**.
 
 3. In the pop-up box, provide the `orders-function` name. Add the `app=orders-function` and `example=orders-function` labels, and select **Create** to confirm the changes.
 
