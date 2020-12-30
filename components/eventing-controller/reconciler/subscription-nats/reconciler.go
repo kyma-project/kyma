@@ -175,13 +175,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return result, nil
 }
 
-func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool) error {
+func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
+	isNatsSubReady bool) error {
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive, corev1.ConditionTrue)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive, corev1.ConditionTrue)
 	if isNatsSubReady {
-		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue)
+		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
+			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue)
 	}
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
@@ -201,7 +204,8 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	desiredSubscription.Status.Conditions = desiredConditions
 	desiredSubscription.Status.Ready = isNatsSubReady
 
-	r.Log.Info("desiredSubscription.Status", "status", fmt.Sprintf("%+v", desiredSubscription))
+	r.Log.Info("desiredSubscription.Status", "status",
+		fmt.Sprintf("%+v", desiredSubscription))
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
@@ -220,7 +224,8 @@ func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
 				return err
 			}
 			delete(r.subscriptions, k)
-			r.Log.Info("successfully deleted subscription", "namespace/name", req.NamespacedName.String())
+			r.Log.Info("successfully deleted subscription", "namespace/name",
+				req.NamespacedName.String())
 		}
 	}
 	return nil
@@ -232,42 +237,7 @@ func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.Log.Info("cloud event received", "type", event.Type(), "id", event.ID(), "time", event.Time(), "data", string(event.Data()))
+	r.Log.Info("cloud event received", "type", event.Type(), "id", event.ID(), "time", event.Time(),
+		"data", string(event.Data()))
 	return &event, nil
-}
-
-// isInDeletion checks if the Subscription shall be deleted
-func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
-	return !subscription.DeletionTimestamp.IsZero()
-}
-
-// syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, result *ctrl.Result, ctx context.Context) error {
-	currentStatus := subscription.Status
-	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
-	expectedStatus.InitializeConditions()
-	currentReadyStatusFromConditions := currentStatus.IsReady()
-
-	var updateReadyStatus bool
-	if currentReadyStatusFromConditions && !currentStatus.Ready {
-		currentStatus.Ready = true
-		updateReadyStatus = true
-	} else if !currentReadyStatusFromConditions && currentStatus.Ready {
-		currentStatus.Ready = false
-		updateReadyStatus = true
-	}
-	// case: conditions are already initialized
-	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) && !updateReadyStatus {
-		return nil
-	}
-	if len(currentStatus.Conditions) == 0 {
-		subscription.Status = expectedStatus
-	} else {
-		subscription.Status.Ready = currentStatus.Ready
-	}
-	if err := r.Status().Update(ctx, subscription); err != nil {
-		return err
-	}
-	result.Requeue = true
-	return nil
 }
