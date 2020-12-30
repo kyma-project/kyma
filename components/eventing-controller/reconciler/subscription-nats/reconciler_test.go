@@ -9,24 +9,22 @@ import (
 	"time"
 
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -38,14 +36,14 @@ const (
 )
 
 var _ = Describe("NATS Subscription Reconciliation Tests", func() {
-	var namespaceName string
+	var namespaceName = "test"
 
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
 	// SetDefaultEventuallyPollingInterval(time.Second)
 
 	BeforeEach(func() {
-		namespaceName = "test"
+		//namespaceName = "test"
 		// we need to reset the http requests which the mock captured
 		//beb.Reset()
 	})
@@ -61,10 +59,10 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		//	i++
 		//}
 
-		//// print all subscriptions in the namespace for debugging purposes
-		//if err := printSubscriptions(namespaceName); err != nil {
-		//	logf.Log.Error(err, "error while printing subscriptions")
-		//}
+		// print all subscriptions in the namespace for debugging purposes
+		if err := printSubscriptions(namespaceName); err != nil {
+			logf.Log.Error(err, "error while printing subscriptions")
+		}
 	})
 
 	When("Creating a Subscription with a valid Sink", func() {
@@ -77,7 +75,8 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			//ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilterForNats, reconcilertesting.WithWebhookForNats)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilterForNats, reconcilertesting.WithWebhookForNats)
 			givenSubscription.Spec.Sink = "invalid"
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -173,9 +172,7 @@ var testEnv *envtest.Environment
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecsWithDefaultAndCustomReporters(t, "NATS Controller Suite", []Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
@@ -220,7 +217,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = NewReconciler(
 		k8sManager.GetClient(),
 		k8sManager.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("Subscription"),
+		ctrl.Log.WithName("nats-reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
 	).SetupWithManager(k8sManager)
@@ -243,3 +240,20 @@ var _ = AfterSuite(func() {
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
+
+// printSubscriptions prints all subscriptions in the given namespace
+func printSubscriptions(namespace string) error {
+	// print subscription details
+	ctx := context.TODO()
+	subscriptionList := eventingv1alpha1.SubscriptionList{}
+	if err := k8sClient.List(ctx, &subscriptionList, client.InNamespace(namespace)); err != nil {
+		logf.Log.V(1).Info("error while getting subscription list", "error", err)
+		return err
+	}
+	subscriptions := make([]string, 0)
+	for _, sub := range subscriptionList.Items {
+		subscriptions = append(subscriptions, sub.Name)
+	}
+	log.Printf("subscriptions: %v", subscriptions)
+	return nil
+}
