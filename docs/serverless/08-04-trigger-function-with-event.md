@@ -124,11 +124,11 @@ To test if the Trigger CR is properly connected to the Function:
     ```bash
     curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
       '{
-        "specversion": "1.0",
-        "source": "{APP_NAME}",
-        "type": "{EVENT_TYPE}",
-        "eventtypeversion": "{EVENT_VERSION}",
-        "id": "A234-1234-1234",
+        "ce-specversion": "1.0",
+        "ce-source": "{APP_NAME}",
+        "ce-type": "{EVENT_TYPE}",
+        "ce-eventtypeversion": "{EVENT_VERSION}",
+        "ce-id": "A234-1234-1234",
         "data": "123456789",
         "datacontenttype": "application/json"
       }'
