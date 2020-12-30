@@ -32,8 +32,4 @@ func (n *Nats) Initialize(cfg env.NatsConfig) {
 			n.Log.Error(err, "Can't connect to NATS Server")
 		}
 	}
-	//TODO remove me, only for testing
-	n.Client.Subscribe("foo", func(m *nats.Msg) {
-		n.Log.Info("Received a message:", "message:", string(m.Data))
-	})
 }
