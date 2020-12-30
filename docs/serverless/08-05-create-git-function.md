@@ -162,7 +162,7 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-  - Go to your Namespace view, select **Deploy new workload** > **Upload YAML**.
+  - Go to your Namespace view and select **Deploy new workload** > **Upload YAML**.
 
   - Locate the YAML file with the Secret and select **Deploy**.
 
