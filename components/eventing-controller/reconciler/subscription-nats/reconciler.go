@@ -205,13 +205,12 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	desiredSubscription.Status.Conditions = desiredConditions
 	desiredSubscription.Status.Ready = isNatsSubReady
 
-	r.Log.Info("desiredSubscription.Status", "status",
-		fmt.Sprintf("%+v", desiredSubscription))
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
 			return err
 		}
+		r.Log.Info("successfully updated subscription", "namespace/name", fmt.Sprintf("%s/%s", sub.Namespace, sub.Name))
 	}
 	return nil
 }
