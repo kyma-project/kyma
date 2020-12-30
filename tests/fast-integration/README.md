@@ -13,14 +13,6 @@ The current integration testing flow looks like this:
 6. Execute the test (5 sec/test).
 7. Wait for the test completion and collect results (~1 min).
 
-The plan is to keep only two steps:
-- Deploy octopus, ~1 min
-- Deploy test pod (test image), ~ 1min/image
-- Sleep 20 seconds to wait for sidecar (in many tests)
-- Deploy "test scene", ~1 min/image
-- Execute the test, 5 sec/test
-- Wait for test completion and collect results. ~1 min
-
 The plan is to keep only 2 steps:
 1. Deploy the "test scene" (~1-2 minutes, one scene for all the tests).
 2. Execute the test (5 sec/test).
