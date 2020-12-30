@@ -147,9 +147,33 @@ func WithWebhook(s *eventingv1alpha1.Subscription) {
 	}
 }
 
+func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
+	s.Spec.Protocol = "NATS"
+	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
+}
+
 func WithFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BebFilters{
 		Dialect: "beb",
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    "/default/kyma/myinstance",
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    "kyma.ev2.poc.event1.v1",
+				},
+			},
+		},
+	}
+}
+
+func WithFilterForNats(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
 		Filters: []*eventingv1alpha1.BebFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{

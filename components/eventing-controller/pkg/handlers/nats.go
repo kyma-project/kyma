@@ -14,8 +14,8 @@ type NatsInterface interface {
 }
 
 type Nats struct {
-	Client *nats.Conn
-	Log    logr.Logger
+	Connection *nats.Conn
+	Log        logr.Logger
 }
 
 type NatsResponse struct {
@@ -25,9 +25,9 @@ type NatsResponse struct {
 
 func (n *Nats) Initialize(cfg env.NatsConfig) {
 	n.Log.Info("Initialize NATS connection")
-	if n.Client == nil {
+	if n.Connection == nil {
 		var err error
-		n.Client, err = nats.Connect(cfg.Url)
+		n.Connection, err = nats.Connect(cfg.Url)
 		if err != nil {
 			n.Log.Error(err, "Can't connect to NATS Server")
 		}

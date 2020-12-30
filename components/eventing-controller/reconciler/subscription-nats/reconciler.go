@@ -155,7 +155,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				log.Error(err, "failed to send event")
 			}
 		}
-		sub, err := r.natsClient.Client.Subscribe(eventType, callback)
+		sub, err := r.natsClient.Connection.Subscribe(eventType, callback)
 		if err != nil {
 			log.Error(err, "failed to create a Nats subscription")
 			// TODO retry once to create a new connection
