@@ -138,6 +138,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.deleteSubscriptions(req)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
+		err = r.syncSubscriptionStatus(ctx, actualSubscription, false)
 		return ctrl.Result{}, err
 	}
 
@@ -155,15 +156,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		sub, err := r.natsClient.Client.Subscribe(eventType, callback)
-		r.subscriptions[fmt.Sprintf("%s.%s", req.NamespacedName.String(), filter.EventType.Value)] = sub
 		if err != nil {
 			log.Error(err, "failed to create a Nats subscription")
+			// TODO retry once to create a new connection
 			err = r.syncSubscriptionStatus(ctx, actualSubscription, false)
 			if err != nil {
 				log.Error(err, "failed to update subscription status")
 			}
 			return result, err
 		}
+		r.subscriptions[fmt.Sprintf("%s.%s", req.NamespacedName.String(), filter.EventType.Value)] = sub
 	}
 
 	// Update status
@@ -180,8 +182,7 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive, corev1.ConditionTrue)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse)
 	if isNatsSubReady {
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue)
