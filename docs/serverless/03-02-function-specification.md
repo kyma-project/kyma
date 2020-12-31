@@ -7,7 +7,7 @@ Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) an
 
 ## Signature
 
-Function's code is represented by a handler that is a method that processes events. When your Function is invoked, it runs this handler method to request event details and return a given response.
+Function's code is represented by a handler that is a method that processes events. When your Function is invoked, it runs this handler method to process a given request and return a response.
 
 All Functions have a predefined signature with elements common for all available runtimes:
 - Functions' code must be introduced by the `main` handler name.
@@ -110,7 +110,7 @@ See the detailed descriptions of these fields:
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
-### Context object
+## Context object
 
 The `context` object contains information about the Function invocation, such as runtime details, execution timeout, or memory limits.
 
@@ -133,13 +133,9 @@ See the detailed descriptions of these fields:
 | **runtime** | Environment used to run the Function. You can use `nodejs10`, `nodejs10`, or `python3.8`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |  
 
-## Requests and responses
+## HTTP requests
 
-Functions in Kyma support two execution types: **HTTP** (request or response) and **Events**. In both types, the **return** statement identifies a successful execution of the Function. For the event type, the event is reinjected until the execution is successful. Functions of the HTTP type can return data to the requesting entity.
-
-### HTTP requests
-
-You can use the **event.extensions.request** object to access headers, request a status, parse and access form data, cookies, file uploads, or other metadata. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
+You can use the **event.extensions.request** object to access properties and methods of a given request that vary depending on the runtime. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
 
 ### Custom HTTP responses in Node.js
 
