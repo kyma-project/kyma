@@ -1,7 +1,7 @@
 set -ex
 set -o pipefail
 
-OPERATOR_FILE="/etc/istio/operator-1-7.yaml"
+OPERATOR_FILE="/etc/istio/operator.yaml"
 
 echo "--> Check overrides"
 if [ -f "/etc/istio/overrides.yaml" ]; then
@@ -9,21 +9,21 @@ if [ -f "/etc/istio/overrides.yaml" ]; then
 
     CM_PRESENT=$(kubectl get cm -n "${NAMESPACE}" "${CONFIGMAP_NAME}" --ignore-not-found)
     if [[ -z "${CM_PRESENT}" ]]; then
-    	kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-	        --from-file "${OPERATOR_FILE}" \
-	        --from-file /etc/istio/overrides.yaml \
-	        --from-file /etc/combo.yaml
+        kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+            --from-file "${OPERATOR_FILE}" \
+            --from-file /etc/istio/overrides.yaml \
+            --from-file /etc/combo.yaml
     else
-    	kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
-	        --from-file "${OPERATOR_FILE}" \
-	        --from-file /etc/istio/overrides.yaml \
-	        --from-file /etc/combo.yaml \
-	        -o yaml --dry-run | kubectl replace -f -
+        kubectl create cm "${CONFIGMAP_NAME}" -n "${NAMESPACE}" \
+            --from-file "${OPERATOR_FILE}" \
+            --from-file /etc/istio/overrides.yaml \
+            --from-file /etc/combo.yaml \
+            -o yaml --dry-run | kubectl replace -f -
     fi
     OPERATOR_FILE="/etc/combo.yaml"
 fi
 
-echo "--> Install Istio 1.7"
+echo "--> Install Istio"
 istioctl upgrade -f "${OPERATOR_FILE}" -y
 
 echo "Apply custom kyma manifests"

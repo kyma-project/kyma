@@ -407,12 +407,10 @@ function testIstio() {
 	readonly editPermissionText viewAccessText
 
 	local -r resources=(
-	    "adapters.config.istio.io" "attributemanifests.config.istio.io" "authorizationpolicies.security.istio.io"
-	    "destinationrules.networking.istio.io" "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
-	    "handlers.config.istio.io" "httpapispecbindings.config.istio.io" "httpapispecs.config.istio.io"
-	    "instances.config.istio.io" "peerauthentications.security.istio.io" "quotaspecbindings.config.istio.io"
-	    "quotaspecs.config.istio.io" "requestauthentications.security.istio.io" "rules.config.istio.io"
-	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" "templates.config.istio.io"
+	    "authorizationpolicies.security.istio.io" "destinationrules.networking.istio.io" 
+	    "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
+	    "peerauthentications.security.istio.io" "requestauthentications.security.istio.io" 
+	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" 
 	    "virtualservices.networking.istio.io" "workloadentries.networking.istio.io" )
 
 	# View

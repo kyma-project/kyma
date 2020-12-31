@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   mtls:
-    mode: PERMISSIVE
+    mode: DISABLE
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-webhook
