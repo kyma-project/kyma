@@ -3,11 +3,11 @@ title: Function's specification
 type: Details
 ---
 
-Serverless in Kyma allows you to create Functions in both Node.js (10 & 12) and Python (3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
+Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
 
 ## Signature
 
-Function's code is represented by a handler that is a method processing events. When your Function is invoked, it runs this handler method to request event details and return a given response.
+Function's code is represented by a handler that is a method that processes events. When your Function is invoked, it runs this handler method to request event details and return a given response.
 
 All Functions have a predefined signature with elements common for all available runtimes:
 - Functions' code must be introduced by the `main` handler name.
@@ -51,6 +51,12 @@ The `event` object contains information about the event the Function refers to. 
 
 Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with the following specification:
 
+<div tabs name="signature" group="function-specification">
+  <details>
+  <summary label="Node.js">
+  Node.js
+  </summary>
+
 ```json
 ...
 {
@@ -67,6 +73,29 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     }
 }
 ```
+</details>
+<details>
+<summary label="Python">
+Python
+</summary>
+
+```json
+{
+    "ce-type": "com.github.pull_request.opened",
+    "ce-source": "/cloudevents/spec/pull/123",
+    "ce-eventtypeversion": "v1",
+    "ce-specversion": "1.0",
+    "ce-id": "abc123",
+    "ce-time": "2020-12-20T13:37:33.647Z",
+    "data": b"",
+    "extensions": {
+        "request": {PICKLABLE_BOTTLE_REQUEST},
+    }
+}
+```
+
+</details>
+</div>
 
 See the detailed descriptions of these fields:
 
@@ -74,12 +103,12 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **ce-type** | Type of the CloudEvent data related to the originating occurrence |
 | **ce-source** | Unique context in which an event happened and can relate to an organization or a process |
-| **ce-eventtypeversion** | The version of the CloudEvent type |
+| **ce-eventtypeversion** | Version of the CloudEvent type |
 | **ce-specversion** | Version of the CloudEvent specification used for this event |
 | **ce-id** | Unique identifier of the event |
 | **ce-time** | Time at which the event was sent |
-| **data** | [Buffer](https://nodejs.org/api/buffer.html) that contains the request body. It can be either JSON or a string, depending on a request type |
-| **extensions** | JSON object that can contain event payload, a Function's incoming request, and an outgoing response |
+| **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
+| **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
 ### Context object
 
@@ -110,15 +139,15 @@ Functions in Kyma support two execution types: **HTTP** (request or response) an
 
 ### HTTP requests
 
-You can use the **event.extensions.request** object to access headers, request a status, parse and access form data, cookies, file uploads, and other metadata. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
+You can use the **event.extensions.request** object to access headers, request a status, parse and access form data, cookies, file uploads, or other metadata. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
 
 ### Custom HTTP responses in Node.js
 
-By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. An HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
+By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
 Apart from these two default codes, you can define custom responses in both Node.js 10 and Node.js 12 environments using the **event.extensions.response** object.
 
-This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation][https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse].
+This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse).
 
 This example shows how to set such a custom response in Node.js for the HTTP status code `400`:
 
