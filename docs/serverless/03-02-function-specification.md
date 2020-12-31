@@ -110,7 +110,7 @@ See the detailed descriptions of these fields:
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
-## Context object
+### Context object
 
 The `context` object contains information about the Function invocation, such as runtime details, execution timeout, or memory limits.
 
@@ -137,7 +137,7 @@ See the detailed descriptions of these fields:
 
 You can use the **event.extensions.request** object to access properties and methods of a given request that vary depending on the runtime. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
 
-### Custom HTTP responses in Node.js
+## Custom HTTP responses in Node.js
 
 By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
