@@ -49,16 +49,6 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 	})
 
 	AfterEach(func() {
-		// detailed request logs
-		//logf.Log.V(1).Info("beb requests", "number", len(beb.Requests))
-		//
-		//i := 0
-		//for req, payloadObject := range beb.Requests {
-		//	reqDescription := fmt.Sprintf("method: %q, url: %q, payload object: %+v", req.Method, req.RequestURI, payloadObject)
-		//	fmt.Printf("request[%d]: %s\n", i, reqDescription)
-		//	i++
-		//}
-
 		// print all subscriptions in the namespace for debugging purposes
 		if err := printSubscriptions(namespaceName); err != nil {
 			logf.Log.Error(err, "error while printing subscriptions")
@@ -80,13 +70,18 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			givenSubscription.Spec.Sink = "invalid"
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
+			//TODO Assertion is not happening!
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionFalse)),
 			))
 
-			//By("Deleting the object to not provoke more reconciliation requests")
-			//Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			////getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			By("Deleting the object to not provoke more reconciliation requests")
+			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			//By("Emitting a Subscription deleted event")
 			////var subscriptionEvents = v1.EventList{}
@@ -145,7 +140,8 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
-		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace, subscription.Status.APIRuleName)
+		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace,
+			subscription.Status.APIRuleName)
 		return *subscription
 	}, bigTimeOut, bigPollingInterval)
 }
