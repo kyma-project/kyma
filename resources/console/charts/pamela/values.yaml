@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: eu.gcr.io/kyma-project/pamela
-  tag: 3d08fc6f
+  tag: 7bb7a850
   pullPolicy: IfNotPresent
 service:
   internalPort: 3001
