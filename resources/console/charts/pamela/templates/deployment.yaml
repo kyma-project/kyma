@@ -26,7 +26,7 @@ spec:
         heritage: "{{ .Release.Service }}"
         kyma-project.io/component: backend
     spec:
-      serviceAccountName: apiserver-proxy
+      serviceAccountName: {{ .Values.serviceAccountName }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
