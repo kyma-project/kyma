@@ -32,6 +32,17 @@ const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
 const alreadyExists = 'AlreadyExists';
 
+const sbu = {
+  apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
+  kind: 'ServiceBindingUsage',
+  metadata: { name: 'commerce-lastorder-sbu' },
+  spec: {
+    serviceBindingRef: { name: 'commerce-binding' },
+    usedBy: { kind: 'serverless-function', name: 'lastorder' }
+  }
+}
+
+
 describe("Commerce Mock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
@@ -39,11 +50,13 @@ describe("Commerce Mock tests", function () {
   let host;
 
   after(async function () {
+    return;
     await Promise.all(
       [
         mocksNamespaceObj,
         ...commerceObjs,
         ...k8s.loadAllYaml(serviceCatalogResources("", "")),
+        sbu
       ].map((obj) =>
         k8sDynamicApi.delete(
           obj,
@@ -141,7 +154,7 @@ describe("Commerce Mock tests", function () {
     ).catch(expectNoAxiosErr);
   });
 
-  it("commerce mock should register Commerce Webservices API and Events", async function () {
+  it("Commerce Webservices API and Events service instances should be ready", async function () {
     this.retries(3);
 
     const remoteApis = await registerAllApis(mockHost, "default", watch, 30 * 1000);
@@ -161,9 +174,14 @@ describe("Commerce Mock tests", function () {
     ).catch((e) => {
       expect(e.body.reason).to.be.equal(alreadyExists)
     })
+    await waitForServiceInstance('commerce-webservices');
+    await waitForServiceInstance('commerce-events');
+
   });
 
+
   it("service binding usage for function should be ready", async function () {
+    k8sDynamicApi.create(sbu);
     const path = '/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/default/servicebindingusages';
     await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
       if (watchObj.object.metadata.name == 'commerce-lastorder-sbu' && watchObj.object.status.conditions) {
@@ -182,7 +200,13 @@ describe("Commerce Mock tests", function () {
     await sendEventAndCheckResponse(mockHost, host);
   });
 });
+function waitForServiceInstance(name) {
+  waitForK8sObject(watch, '/apis/servicecatalog.k8s.io/v1beta1/namespaces/default/serviceinstances', {}, (_type, _apiObj, watchObj) => {
+    return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
+      && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
+  }, 60 * 1000, `Waiting for ${name} service instance timeout`);
 
+}
 async function sendEventAndCheckResponse(mockHost, host) {
   await retryPromise(
     async () => {
@@ -227,6 +251,7 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
   let timer
   const result = new Promise((resolve, reject) => {
     watch.watch(path, query, (type, apiObj, watchObj) => {
+      console.dir(watchObj)
       if (checkFn(type, apiObj, watchObj)) {
         if (res) {
           res.abort();
