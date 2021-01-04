@@ -137,7 +137,6 @@ describe("Getting Started Guides tests", function () {
         k8sDynamicApi.create(obj)
       )
     ).catch(expectNoK8sErr);
-    await waitForServiceInstance(watch,'redis-service',orderService);
   });
 
   it("APIRule should be ready", async function () {
@@ -176,6 +175,7 @@ describe("Getting Started Guides tests", function () {
 
   it("ServiceBindingUsage should be created", async function () {
     // https://kyma-project.io/docs/root/getting-started/#getting-started-bind-the-redis-service-instance-to-the-microservice
+    await waitForServiceInstance(watch,'redis-service',orderService);
     await k8sDynamicApi.create(sbuObj).catch(expectNoK8sErr);
     await waitForServiceBinding(watch, orderService, orderService);
     const secret = await retryPromise(
