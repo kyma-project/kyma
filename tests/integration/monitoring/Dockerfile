@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine3.12 as builder
+FROM golang:1.15-alpine3.12 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/integration/monitoring
 ADD . $SRC_DIR
