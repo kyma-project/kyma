@@ -7,10 +7,7 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
-COPY ./dex/ ${BASE_APP_DIR}/dex/
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
-COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
+COPY . ${BASE_APP_DIR}
 
 #
 # Build tests
