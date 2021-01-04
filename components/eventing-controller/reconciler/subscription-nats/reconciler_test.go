@@ -107,6 +107,28 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	When("Creating a Subscription with invalid protocol", func() {
+		It("Should mark the subscription as not ready", func() {
+			ctx := context.Background()
+			subscriptionName := "invalid-sub-protocol"
+
+			// Create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilterForNats, reconcilertesting.WithWebhookForNats)
+			reconcilertesting.WithValidSink("foo", "bar", givenSubscription)
+			givenSubscription.Spec.Protocol = "invalid"
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionFalse, "invalid protocol: invalid")),
+			))
+		})
+	})
+
 	PWhen("Creating a Subscription and NATS is unavailable", func() {
 		It("Should mark the subscription as not ready", func() {
 

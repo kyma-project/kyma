@@ -44,6 +44,10 @@ var (
 	Finalizer = eventingv1alpha1.GroupVersion.Group
 )
 
+const (
+	NATSPROTOCOL = "NATS"
+)
+
 func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder,
 	cfg env.NatsConfig) *Reconciler {
 	natsClient := &handlers.Nats{
@@ -121,6 +125,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		log.Error(err, "failed to delete subscriptions")
 		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
 		return ctrl.Result{}, err
+	}
+
+	// Check for valid protocol
+	actualProtocol := actualSubscription.Spec.Protocol
+	if err := r.assertProtocolValidity(actualProtocol); err != nil {
+		r.Log.Error(err, "invalid subscription protocol")
+		err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err != nil {
+			r.Log.Error(err, "failed to sync subscription status")
+			return ctrl.Result{}, err
+		}
+		// No point in reconciling as the sink is invalid
+		return ctrl.Result{}, nil
 	}
 
 	// Check for valid sink
@@ -259,4 +276,11 @@ func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 func (r Reconciler) assertSinkValidity(sink string) error {
 	_, err := url.ParseRequestURI(sink)
 	return err
+}
+
+func (r Reconciler) assertProtocolValidity(protocol string) error {
+	if protocol != NATSPROTOCOL {
+		return fmt.Errorf("invalid protocol: %s", protocol)
+	}
+	return nil
 }
