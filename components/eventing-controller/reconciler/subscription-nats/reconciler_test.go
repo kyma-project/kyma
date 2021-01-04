@@ -8,6 +8,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nats-io/nats.go"
+
+	"github.com/nats-io/nats-server/v2/server"
+	natsserver "github.com/nats-io/nats-server/v2/server"
+	natstestserver "github.com/nats-io/nats-server/v2/test"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,8 +36,10 @@ import (
 )
 
 const (
-	bigTimeOut         = 40 * time.Second
-	bigPollingInterval = 3 * time.Second
+	bigTimeOut           = 40 * time.Second
+	bigPollingInterval   = 3 * time.Second
+	smallTimeOut         = 5 * time.Second
+	smallPollingInterval = 1 * time.Second
 )
 
 var _ = Describe("NATS Subscription Reconciliation Tests", func() {
@@ -55,14 +62,34 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		}
 	})
 
-	When("Creating a Subscription with a valid Sink", func() {
-		It("Should create a subscription in NATS and make it ready", func() {
+	When("Creating/deleting a Subscription", func() {
+		It("Should create/delete a subscription in NATS", func() {
 			ctx := context.Background()
-			subscriptionName := "sub-create-with-sink"
+			subscriptionName := "sub"
 
-			// Ensuring subscriber svc
-			_ = reconcilertesting.NewSubscriberSvc("test", namespaceName)
-			//ensureSubscriberSvcCreated(subscriberSvc, ctx)
+			// Create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilterForNats, reconcilertesting.WithWebhookForNats)
+			givenSubscription.Spec.Sink = "http://valid.sink"
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")),
+			))
+
+			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+			isSubscriptionDeleted(givenSubscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+		})
+	})
+
+	When("Creating a Subscription with invalid sink", func() {
+		It("Should mark the subscription as not ready", func() {
+			ctx := context.Background()
+			subscriptionName := "sub"
 
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
@@ -70,29 +97,22 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			givenSubscription.Spec.Sink = "invalid"
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
-			//TODO Assertion is not happening!
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
 					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse)),
+					v1.ConditionFalse, "parse \"invalid\": invalid URI for request")),
 			))
-
-			By("Deleting the object to not provoke more reconciliation requests")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
-
-			//By("Emitting a Subscription deleted event")
-			////var subscriptionEvents = v1.EventList{}
-			//_ = v1.Event{
-			//	Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
-			//	Message: "",
-			//	Type:    v1.EventTypeWarning,
-			//}
-			//getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 		})
 	})
+
+	PWhen("Creating a Subscription and NATS is unavailable", func() {
+		It("Should mark the subscription as not ready", func() {
+
+		})
+	})
+
 })
 
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
@@ -140,10 +160,27 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
 			return eventingv1alpha1.Subscription{}
 		}
-		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace,
-			subscription.Status.APIRuleName)
+		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
+			subscription.Status)
 		return *subscription
-	}, bigTimeOut, bigPollingInterval)
+	}, smallTimeOut, smallPollingInterval)
+}
+
+// isSubscriptionDeleted checks a subscription is deleted and allows to make assertions on it
+func isSubscriptionDeleted(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+	return Eventually(func() bool {
+		lookupKey := types.NamespacedName{
+			Namespace: subscription.Namespace,
+			Name:      subscription.Name,
+		}
+		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
+			return k8serrors.IsNotFound(err)
+		}
+		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
+			subscription.Status)
+		return false
+	}, smallTimeOut, smallPollingInterval)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +213,12 @@ var _ = BeforeSuite(func(done Done) {
 
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
+
+	s := RunDefaultServer()
+	defer s.Shutdown()
+	nc := NewDefaultConnection()
+	defer nc.Close()
+
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("../../", "config", "crd", "bases"),
@@ -208,7 +251,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{
-		Url: "",
+		Url: nats.DefaultURL,
 	}
 	err = NewReconciler(
 		k8sManager.GetClient(),
@@ -252,4 +295,46 @@ func printSubscriptions(namespace string) error {
 	}
 	log.Printf("subscriptions: %v", subscriptions)
 	return nil
+}
+
+// NATS tests helper
+
+func NewDefaultConnection() *nats.Conn {
+	return NewConnection(nats.DefaultPort)
+}
+
+// So that we can pass tests and benchmarks...
+type tLogger interface {
+	Fatalf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
+}
+
+// NewConnection forms connection on a given port.
+func NewConnection(port int) *nats.Conn {
+	url := fmt.Sprintf("nats://127.0.0.1:%d", port)
+	nc, err := nats.Connect(url)
+	if err != nil {
+		//t.Fatalf("Failed to create default connection: %v\n", err)
+		panic("Failed to create default connection")
+		//return nil
+	}
+	return nc
+}
+
+// RunDefaultServer will run a server on the default port.
+func RunDefaultServer() *server.Server {
+	return RunServerOnPort(nats.DefaultPort)
+}
+
+// RunServerOnPort will run a server on the given port.
+func RunServerOnPort(port int) *server.Server {
+	opts := natstestserver.DefaultTestOptions
+	opts.Port = port
+	//opts.Cluster.Name = "testing"
+	return RunServerWithOptions(opts)
+}
+
+// RunServerWithOptions will run a server with the given options.
+func RunServerWithOptions(opts natsserver.Options) *server.Server {
+	return natstestserver.RunServer(&opts)
 }

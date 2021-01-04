@@ -118,14 +118,14 @@ func containConditionType(conditions []Condition, conditionType ConditionType) b
 	return false
 }
 
-func MakeCondition(conditionType ConditionType, reason ConditionReason, status corev1.ConditionStatus) Condition {
+func MakeCondition(conditionType ConditionType, reason ConditionReason, status corev1.ConditionStatus, message string) Condition {
 	return Condition{
 		Type:               conditionType,
 		Status:             status,
 		LastTransitionTime: metav1.Now(),
 		Reason:             reason,
 		// TODO: https://github.com/kyma-project/kyma/issues/9770
-		Message: "",
+		Message: message,
 	}
 }
 
@@ -150,12 +150,13 @@ func (s *SubscriptionStatus) GetConditionAPIRuleStatus() corev1.ConditionStatus 
 func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
 	reason := ConditionReasonAPIRuleStatusNotReady
 	status := corev1.ConditionFalse
+	message := ""
 	if ready {
 		reason = ConditionReasonAPIRuleStatusReady
 		status = corev1.ConditionTrue
 	}
 
-	newConditions := []Condition{MakeCondition(ConditionAPIRuleStatus, reason, status)}
+	newConditions := []Condition{MakeCondition(ConditionAPIRuleStatus, reason, status, message)}
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionAPIRuleStatus {
 			continue

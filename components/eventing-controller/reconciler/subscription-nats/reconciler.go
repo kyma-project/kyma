@@ -3,6 +3,7 @@ package subscription_nats
 import (
 	"context"
 	"encoding/json"
+	"net/url"
 
 	"fmt"
 
@@ -113,6 +114,27 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 	}
+
+	// Clean up the old subscriptions
+	err = r.deleteSubscriptions(req)
+	if err != nil {
+		log.Error(err, "failed to delete subscriptions")
+		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Check for valid sink
+	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
+		r.Log.Error(err, "failed to parse sink URL")
+		err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err != nil {
+			r.Log.Error(err, "failed to sync subscription status")
+			return ctrl.Result{}, err
+		}
+		// No point in reconciling as the sink is invalid
+		return ctrl.Result{}, nil
+	}
+
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent
 	// registering our finalizer.
@@ -134,14 +156,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		filters = desiredSubscription.Spec.Filter.Filters
 	}
 
-	// Clean up the old subscriptions
-	err = r.deleteSubscriptions(req)
-	if err != nil {
-		log.Error(err, "failed to delete subscriptions")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false)
-		return ctrl.Result{}, err
-	}
-
 	// Create subscriptions in Nats
 	for _, filter := range filters {
 		eventType := filter.EventType.Value
@@ -159,7 +173,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if err != nil {
 			log.Error(err, "failed to create a Nats subscription")
 			// TODO retry once to create a new connection
-			err = r.syncSubscriptionStatus(ctx, actualSubscription, false)
+			err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
 			if err != nil {
 				log.Error(err, "failed to update subscription status")
 			}
@@ -169,7 +183,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// Update status
-	err = r.syncSubscriptionStatus(ctx, actualSubscription, true)
+	err = r.syncSubscriptionStatus(ctx, actualSubscription, true, "")
 	if err != nil {
 		log.Error(err, "failed to update subscription status")
 	}
@@ -178,14 +192,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
-	isNatsSubReady bool) error {
+	isNatsSubReady bool, message string) error {
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue)
+			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, "")
 	}
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
@@ -240,4 +254,9 @@ func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	r.Log.Info("cloud event received", "type", event.Type(), "id", event.ID(), "time", event.Time(),
 		"data", string(event.Data()))
 	return &event, nil
+}
+
+func (r Reconciler) assertSinkValidity(sink string) error {
+	_, err := url.ParseRequestURI(sink)
+	return err
 }
