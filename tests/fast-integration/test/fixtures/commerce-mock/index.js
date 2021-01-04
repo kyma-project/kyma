@@ -8,6 +8,13 @@ const commerceMockYaml = fs.readFileSync(
   }
 );
 
+const lastorderFunctionYaml = fs.readFileSync(
+  path.join(__dirname, "./lastorder-function.yaml"),
+  {
+    encoding: "utf8",
+  }
+);
+
 const mocksNamespaceYaml = fs.readFileSync(
   path.join(__dirname, "./mocks-namespace.yaml"),
   {
@@ -47,4 +54,5 @@ module.exports = {
   commerceMockYaml,
   serviceCatalogResources,
   mocksNamespaceYaml,
+  lastorderFunctionYaml,
 };

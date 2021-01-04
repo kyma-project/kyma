@@ -3,6 +3,7 @@ const {
   commerceMockYaml,
   serviceCatalogResources,
   mocksNamespaceYaml,
+  lastorderFunctionYaml,
 } = require("./fixtures/commerce-mock");
 const { expect, config } = require("chai");
 config.truncateThreshold = 0; // more verbose errors
@@ -29,8 +30,14 @@ const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
 const watch = new k8s.Watch(kc);
 
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
+const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 const mocksNamespaceObj = k8s.loadYaml(mocksNamespaceYaml);
-const alreadyExists = 'AlreadyExists';
+
+const tokenRequest = {
+  apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
+  kind: 'TokenRequest',
+  metadata: { name: 'commerce', namespace: 'default' }
+}
 
 const sbu = {
   apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
@@ -50,13 +57,15 @@ describe("Commerce Mock tests", function () {
   let host;
 
   after(async function () {
-    return;
+    // return;
     await Promise.all(
       [
         mocksNamespaceObj,
         ...commerceObjs,
+        ...lastorderObjs,
         ...k8s.loadAllYaml(serviceCatalogResources("", "")),
-        sbu
+        sbu,
+        tokenRequest
       ].map((obj) =>
         k8sDynamicApi.delete(
           obj,
@@ -72,16 +81,16 @@ describe("Commerce Mock tests", function () {
     });
   });
 
-  it("mocks namespace should be created or fail with reason AlreadyExists ", async function () {
-    await k8sDynamicApi.create(mocksNamespaceObj).catch((e) => {
-      expect(e.body.reason).to.be.equal(alreadyExists)
-    });
+  it("mocks namespace should be created", async function () {
+    k8sApply(k8sDynamicApi, [mocksNamespaceObj]);
   })
 
   it("commerce mock and application should be created", async function () {
-    await Promise.all(
-      commerceObjs.map((obj) => k8sDynamicApi.create(obj))
-    ).catch((e) => { expect(e.body.reason).to.be.equal(alreadyExists) });
+    k8sApply(k8sDynamicApi, commerceObjs);
+  });
+
+  it("lastorder function should be created", async function () {
+    k8sApply(k8sDynamicApi, lastorderObjs);
   });
 
   it("commerce mock should be exposed with VirtualService", async function () {
@@ -126,11 +135,6 @@ describe("Commerce Mock tests", function () {
 
   it("commerce mock should connect to Kyma", async function () {
     this.retries(4)
-    const tokenRequest = {
-      apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-      kind: 'TokenRequest',
-      metadata: { name: 'commerce', namespace: 'default' }
-    }
     const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/default/tokenrequests`
 
     await k8sDynamicApi.delete(tokenRequest).catch(() => { })// Ignore delete error
@@ -154,28 +158,27 @@ describe("Commerce Mock tests", function () {
     ).catch(expectNoAxiosErr);
   });
 
-  it("Commerce Webservices API and Events service instances should be ready", async function () {
+  it("Commerce mock should register Websevices API and Events API", async function () {
     this.retries(3);
-
     const remoteApis = await registerAllApis(mockHost, "default", watch, 30 * 1000);
-    const webServicesSCExternalName = remoteApis.data.find((elem) =>
-      elem.name.includes("Commerce Webservices")
-    ).externalName;
-    const eventsSCExternalName = remoteApis.data.find((elem) =>
-      elem.name.includes("Events")
-    ).externalName;
 
+  })
+
+  it("Commerce Webservices API and Events service instances should be ready", async function () {
+    const webServicesSC = await waitForServiceClass("webservices");
+    const eventsSC = await waitForServiceClass("events");
+
+    const webServicesSCExternalName = webServicesSC.spec.externalName;
+    const eventsSCExternalName = eventsSC.spec.externalName;
+    await sleep(5000);
     const serviceCatalogObjs = k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
     );
+    await retryPromise(() => k8sApply(k8sDynamicApi, serviceCatalogObjs, false), 5, 2000);
 
-    await Promise.all(
-      serviceCatalogObjs.map((obj) => k8sDynamicApi.create(obj))
-    ).catch((e) => {
-      expect(e.body.reason).to.be.equal(alreadyExists)
-    })
     await waitForServiceInstance('commerce-webservices');
     await waitForServiceInstance('commerce-events');
+    await waitForServiceBinding('commerce-binding');
 
   });
 
@@ -192,7 +195,7 @@ describe("Commerce Mock tests", function () {
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
-    let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "123" }), 5, 5000);
+    let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "123" }), 10, 2000);
     expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
   })
 
@@ -200,13 +203,53 @@ describe("Commerce Mock tests", function () {
     await sendEventAndCheckResponse(mockHost, host);
   });
 });
-function waitForServiceInstance(name) {
-  waitForK8sObject(watch, '/apis/servicecatalog.k8s.io/v1beta1/namespaces/default/serviceinstances', {}, (_type, _apiObj, watchObj) => {
+
+
+async function k8sApply(k8sDynamicApi, listOfSpecs, patch=true) {
+  const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
+  return Promise.all(
+    listOfSpecs.map(async (obj) => {
+      try {
+        const existing = await k8sDynamicApi.read(obj)
+        if (patch) {
+          obj.metadata.resourceVersion = existing.body.metadata.resourceVersion;
+          return await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options);
+        } 
+        return existing;
+      }
+      catch (e) {
+        if (e.body && e.body.reason == 'NotFound') {
+          return await k8sDynamicApi.create(obj)
+        }
+        else {
+          console.log(e.body)
+          throw e
+        }
+      }
+    })
+  );
+}
+
+function waitForServiceClass(name, namespace = "default") {
+  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
+    return watchObj.object.spec.externalName.includes(name)
+  }, 60 * 1000, `Waiting for ${name} service class timeout`);
+}
+
+function waitForServiceInstance(name, namespace = "default") {
+  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
   }, 60 * 1000, `Waiting for ${name} service instance timeout`);
-
 }
+
+function waitForServiceBinding(name, namespace = "default") {
+  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`, {}, (_type, _apiObj, watchObj) => {
+    return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
+      && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
+  }, 60 * 1000, `Waiting for ${name} service binding timeout`);
+}
+
 async function sendEventAndCheckResponse(mockHost, host) {
   await retryPromise(
     async () => {
@@ -251,7 +294,6 @@ function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
   let timer
   const result = new Promise((resolve, reject) => {
     watch.watch(path, query, (type, apiObj, watchObj) => {
-      console.dir(watchObj)
       if (checkFn(type, apiObj, watchObj)) {
         if (res) {
           res.abort();
@@ -280,14 +322,5 @@ async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) 
   }
   const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(expectNoAxiosErr);
   expect(remoteApis.data).to.have.lengthOf.at.least(2)
-
-  const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`
-  await waitForK8sObject(watch, path, {}, (type, apiObj, watchObj) => {
-    let api = remoteApis.data.find(item => item.id == watchObj.object.spec.externalID);
-    if (api) {
-      api.externalName = watchObj.object.spec.externalName
-    }
-    return remoteApis.data.every(item => item.externalName)
-  }, timeout, "Wait for ServiceClasses Timeout");
   return remoteApis;
 }
