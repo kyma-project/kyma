@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/integration/event-service
 
-go 1.13
+go 1.14
 
 require (
 	github.com/avast/retry-go v2.6.0+incompatible
