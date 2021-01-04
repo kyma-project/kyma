@@ -17,7 +17,8 @@ const {
   waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
-  waitForServiceBinding
+  waitForServiceBinding,
+  waitForVirtualService
 } = require("../utils");
 
 const https = require("https");
@@ -107,11 +108,7 @@ describe("Commerce Mock tests", function () {
   });
 
   it("commerce mock should be exposed with VirtualService", async function () {
-    const path = `/apis/networking.istio.io/v1beta1/namespaces/mocks/virtualservices`
-    const query = { labelSelector: "apirule.gateway.kyma-project.io/v1alpha1=commerce-mock.mocks" }
-    const vs = await waitForK8sObject(watch, path, query, (type, apiObj, watchObj) => {
-      return watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
-    }, 30 * 1000, "Wait for VirtualService Timeout");
+    const vs = await waitForVirtualService(watch,'mocks','commerce-mock')
     mockHost = vs.spec.hosts[0]
     host = mockHost.split(".").slice(1).join(".");
   });

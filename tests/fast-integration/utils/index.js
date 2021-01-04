@@ -185,6 +185,13 @@ function waitForServiceBinding(watch, name, namespace = "default") {
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
   }, 60 * 1000, `Waiting for ${name} service binding timeout`);
 }
+function waitForVirtualService(watch, namespace, apiRuleName) {
+  const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
+  const query = { labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}` }
+  return waitForK8sObject(watch, path, query, (_type, _apiObj, watchObj) => {
+    return watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
+  }, 30 * 1000, `Wait for VirtualService ${apiRuleName} timeout`);
+}
 
 module.exports = {
   retryPromise,
@@ -198,5 +205,6 @@ module.exports = {
   waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
-  waitForServiceBinding
+  waitForServiceBinding,
+  waitForVirtualService,
 };
