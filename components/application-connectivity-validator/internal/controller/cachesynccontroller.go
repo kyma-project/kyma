@@ -19,7 +19,6 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
 )
 
-
 type Controller struct {
 	clientset         clientset.Interface
 	applicationLister listers.ApplicationLister
