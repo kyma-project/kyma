@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
+FROM golang:1.13-alpine3.11 as builder
 
 ENV SRC_DIR=/workspace/go/src/github.com/kyma-project/kyma/tests/integration/event-service
 
