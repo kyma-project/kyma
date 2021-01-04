@@ -22,12 +22,12 @@ backend:
       memory: 40Mi
     limits:
       cpu: 50m
-      memory: 150Mi
+      memory: 200Mi
 pamela:
   resources:
-    limits:
-      cpu: 100m
-      memory: 300Mi
     requests:
       cpu: 20m
       memory: 70Mi
+    limits:
+      cpu: 100m
+      memory: 300Mi
