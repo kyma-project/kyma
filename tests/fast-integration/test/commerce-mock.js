@@ -43,6 +43,14 @@ const tokenRequest = {
   kind: 'TokenRequest',
   metadata: { name: 'commerce', namespace: 'default' }
 }
+const serviceBinding = {
+  apiVersion: 'servicecatalog.k8s.io/v1beta1',
+  kind: 'ServiceBinding',
+  metadata: { name: 'commerce-binding' },
+  spec: {
+    instanceRef: { name: 'commerce-webservices' }
+  }
+}
 
 const sbu = {
   apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
@@ -68,6 +76,7 @@ describe("Commerce Mock tests", function () {
         ...commerceObjs,
         ...lastorderObjs,
         ...k8s.loadAllYaml(serviceCatalogResources("", "")),
+        serviceBinding,
         sbu,
         tokenRequest
       ].map((obj) =>
@@ -168,7 +177,7 @@ describe("Commerce Mock tests", function () {
 
   })
 
-  it("Commerce Webservices API and Events service instances should be ready", async function () {
+  it("Commerce service classes should be ready and service instances should be created", async function () {
     const webServicesSC = await waitForServiceClass(watch, "webservices");
     const eventsSC = await waitForServiceClass(watch, "events");
 
@@ -179,13 +188,17 @@ describe("Commerce Mock tests", function () {
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
     );
     await retryPromise(() => k8sApply(k8sDynamicApi, serviceCatalogObjs, false), 5, 2000);
-
-    await waitForServiceInstance(watch, 'commerce-webservices');
-    await waitForServiceInstance(watch, 'commerce-events');
-    await waitForServiceBinding(watch, 'commerce-binding');
-
   });
 
+  it("Commerce Webservices API and Events service instances should be ready", async function () {
+    await waitForServiceInstance(watch, 'commerce-webservices');
+    await waitForServiceInstance(watch, 'commerce-events');
+  });
+
+  it("service binding should be ready", async function () {
+    k8sApply(k8sDynamicApi,[serviceBinding]);
+    await waitForServiceBinding(watch, 'commerce-binding');
+  });
 
   it("service binding usage for function should be ready", async function () {
     k8sDynamicApi.create(sbu);

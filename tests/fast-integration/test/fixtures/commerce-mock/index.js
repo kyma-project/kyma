@@ -39,15 +39,7 @@ kind: ServiceInstance
 metadata:
   name: commerce-events
 spec:
-  serviceClassExternalName: ${eventsExternalName}
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: commerce-binding
-spec:
-  instanceRef:
-    name: commerce-webservices`;
+  serviceClassExternalName: ${eventsExternalName}`;
 
 
 module.exports = {
