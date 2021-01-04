@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/integration/monitoring
 
-go 1.15
+go 1.14
 
 require (
 	cloud.google.com/go v0.56.0 // indirect
