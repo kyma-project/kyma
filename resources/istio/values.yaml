@@ -18,7 +18,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: f93bf007
+    tag: "PR-10158"
 
 monitoring:
   enabled: true
@@ -37,5 +37,5 @@ test:
       integration: true
       after-upgrade: true
 
-istio_operator_cluster_file: istio-operator-1-7-cluster.yaml
-istio_operator_minikube_file: istio-operator-1-7-minikube.yaml
+istio_operator_cluster_file: istio-operator-cluster.yaml
+istio_operator_minikube_file: istio-operator-minikube.yaml
