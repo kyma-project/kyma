@@ -120,8 +120,8 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 
 - the Application Registry API
 - the Event Service API
-- the `certificate renewal` endpoint
-- the `certificate revocation` endpoint
+- the certificate renewal endpoint
+- the certificate revocation endpoint
 
 The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
 
@@ -166,5 +166,5 @@ curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_C
 Use this command to call the Event Service:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/events/subscribed --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -H "Content-Type: application/json" https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
 ```

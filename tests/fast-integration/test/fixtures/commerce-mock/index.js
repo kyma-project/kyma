@@ -2,24 +2,18 @@ const fs = require("fs");
 const path = require("path");
 
 const commerceMockYaml = fs.readFileSync(
-  path.join(__dirname, "./fixtures/commerce-mock.yaml"),
+  path.join(__dirname, "./commerce-mock.yaml"),
   {
     encoding: "utf8",
   }
 );
 
 const mocksNamespaceYaml = fs.readFileSync(
-  path.join(__dirname, "./fixtures/mocks-namespace.yaml"),
+  path.join(__dirname, "./mocks-namespace.yaml"),
   {
     encoding: "utf8",
   }
 );
-
-const tokenRequestYaml = `
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: TokenRequest
-metadata:
-  name: commerce`;
 
 const genericServiceClass = (name, namespace) => `
 apiVersion: servicecatalog.k8s.io/v1beta1
@@ -71,10 +65,15 @@ spec:
     kind: serverless-function
     name: lastorder`;
 
+const tokenRequestYaml = `apiVersion: applicationconnector.kyma-project.io/v1alpha1	
+kind: TokenRequest	
+metadata:	
+  name: commerce`;
+
 module.exports = {
   commerceMockYaml,
-  tokenRequestYaml,
   genericServiceClass,
   serviceCatalogResources,
   mocksNamespaceYaml,
+  tokenRequestYaml,
 };

@@ -84,7 +84,7 @@ These variables refer to the following:
 
 1. From the drop-down list in the top navigation panel, select the Namespace in which your Application exposes events.
 
-2. In the left navigation panel, go to **Development** > **Functions** and navigate to your Function.
+2. In the left navigation panel, go to **Workloads** > **Functions** and navigate to your Function.
 
 3. Once in the Function details view, Switch to the **Configuration** tab, and select **Add Event Trigger** in the **Event Triggers** section.
 
@@ -124,11 +124,11 @@ To test if the Trigger CR is properly connected to the Function:
     ```bash
     curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
       '{
-        "specversion": "1.0",
-        "source": "{APP_NAME}",
-        "type": "{EVENT_TYPE}",
-        "eventtypeversion": "{EVENT_VERSION}",
-        "id": "A234-1234-1234",
+        "ce-specversion": "1.0",
+        "ce-source": "{APP_NAME}",
+        "ce-type": "{EVENT_TYPE}",
+        "ce-eventtypeversion": "{EVENT_VERSION}",
+        "ce-id": "A234-1234-1234",
         "data": "123456789",
         "datacontenttype": "application/json"
       }'

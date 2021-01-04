@@ -1,0 +1,266 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: AddonsConfiguration
+metadata:
+  name: xf-mocks
+  namespace: orders-service
+spec:
+  repositories:
+    - url: github.com/sap/xf-addons/addons/index.yaml
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: commerce-mock
+  namespace: orders-service
+spec:
+  serviceClassExternalName: commerce-mock
+  servicePlanExternalName: default
+---
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: commerce-mock
+spec:
+  description: "Application for Commerce mock"
+  labels:
+    app: orders-service
+    example: orders-service
+---
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: TokenRequest
+metadata:
+  name: commerce-mock
+---
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: ApplicationMapping
+metadata:
+  name: commerce-mock
+  namespace: orders-service
+
+---
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: orders-function
+  namespace: orders-service
+  labels:
+    app: orders-function
+    example: orders-function
+spec:
+  deps: |-
+    { 
+      "name": "orders-function",
+      "version": "1.0.0",
+      "dependencies": {
+        "redis": "3.0.2"
+      }
+    }
+  maxReplicas: 1
+  minReplicas: 1
+  resources:
+    limits:
+      cpu: 20m
+      memory: 32Mi
+    requests:
+      cpu: 10m
+      memory: 16Mi
+  env:
+    - name: APP_REDIS_PREFIX
+      value: "REDIS_"
+  source: |-
+    const redis = require("redis");
+    const { promisify } = require("util");
+
+    let storage = undefined;
+    const errors = {
+      codeRequired: new Error("orderCode is required"),
+      alreadyExists: new Error("object already exists"),
+    }
+
+    module.exports = { 
+      main: async function (event, _) {
+        const storage = getStorage();
+
+        if (!event.data || !Object.keys(event.data).length) {
+          return await onList(storage, event);
+        }
+
+        const { orderCode, consignmentCode, consignmentStatus } = event.data;
+        if (orderCode && consignmentCode && consignmentStatus) {
+          return await onCreate(storage, event);
+        }
+
+        event.extensions.response.status(500);
+      }
+    }
+
+    async function onList(storage, event) {
+      try {
+        return await storage.getAll();
+      } catch(err) {
+        event.extensions.response.status(500);
+        return;
+      }
+    }
+
+    async function onCreate(storage, event) {
+      try {
+        await storage.set(event.data);
+      } catch(err) {
+        let status = 500;
+        switch (err) {
+          case errors.codeRequired: {
+            status = 400;
+            break;
+          };
+          case errors.alreadyExists: {
+            status = 409;
+            break;
+          };
+        }
+        event.extensions.response.status(status);
+      }
+    }
+
+    class RedisStorage {
+      storage = undefined;
+      asyncGet = void 0;
+      asyncKeys = void 0;
+      asyncSet = void 0;
+
+      constructor(options) {
+        this.storage = redis.createClient(options);
+        this.asyncGet = promisify(this.storage.get).bind(this.storage);
+        this.asyncKeys = promisify(this.storage.keys).bind(this.storage);
+        this.asyncSet = promisify(this.storage.set).bind(this.storage);
+      }
+
+      async getAll() {
+        let values = [];
+
+        const keys = await this.asyncKeys("*");
+        for (const key of keys) {
+          const value = await this.asyncGet(key);
+          values.push(JSON.parse(value));
+        }
+
+        return values;
+      }
+
+      async set(order = {}) {
+        if (!order.orderCode) {
+          throw errors.codeRequired;
+        }
+        const value = await this.asyncGet(order.orderCode);
+        if (value) {
+          throw errors.alreadyExists;
+        }
+        await this.asyncSet(order.orderCode, JSON.stringify(order));
+      }
+    }
+
+    class InMemoryStorage {
+      storage = new Map();
+
+      getAll() {
+        return Array.from(this.storage)
+          .map(([_, order]) => order)
+      }
+
+      set(order = {}) {
+        if (!order.orderCode) {
+          throw errors.codeRequired;
+        }
+        if (this.storage.get(order.orderCode)) {
+          throw errors.alreadyExists;
+        }
+        return this.storage.set(order.orderCode, order);
+      }
+    }
+
+    function readEnv(env = "") {
+      return process.env[env] || undefined;
+    }
+
+    function createStorage() {
+      let redisPrefix = readEnv("APP_REDIS_PREFIX");
+      if (!redisPrefix) {
+        redisPrefix = "REDIS_";
+      }
+      const port = readEnv(redisPrefix + "PORT");
+      const host = readEnv(redisPrefix + "HOST");
+      const password = readEnv(redisPrefix + "REDIS_PASSWORD");
+
+      if (host && port && password) {
+        return new RedisStorage({ host, port, password });
+      }
+      return new InMemoryStorage();
+    }
+
+    function getStorage() {
+      if (!storage) {
+        storage = createStorage();
+      }
+      return storage;
+    }
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      accessStrategies:
+        - config: {}
+          handler: noop
+      methods: ["GET", "POST"]
+  service:
+    host: orders-function
+    name: orders-function
+    port: 80
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  instanceRef:
+    name: redis-service
+---
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  serviceBindingRef:
+    name: orders-function
+  usedBy:
+    kind: serverless-function
+    name: orders-function
+  parameters:
+    envPrefix:
+      name: "REDIS_"
+---
+apiVersion: eventing.knative.dev/v1alpha1
+kind: Trigger
+metadata:
+  name: orders-function
+  namespace: orders-service
+spec:
+  broker: default
+  filter:
+    attributes:
+      eventtypeversion: v1
+      source: commerce-mock
+      type: order.deliverysent
+  subscriber:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: orders-function
+      namespace: orders-service
