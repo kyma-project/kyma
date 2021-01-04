@@ -13,6 +13,11 @@ const {
   expectNoK8sErr,
   expectNoAxiosErr,
   sleep,
+  k8sApply,
+  waitForK8sObject,
+  waitForServiceClass,
+  waitForServiceInstance,
+  waitForServiceBinding
 } = require("../utils");
 
 const https = require("https");
@@ -48,7 +53,6 @@ const sbu = {
     usedBy: { kind: 'serverless-function', name: 'lastorder' }
   }
 }
-
 
 describe("Commerce Mock tests", function () {
   this.timeout(10 * 60 * 1000);
@@ -165,20 +169,20 @@ describe("Commerce Mock tests", function () {
   })
 
   it("Commerce Webservices API and Events service instances should be ready", async function () {
-    const webServicesSC = await waitForServiceClass("webservices");
-    const eventsSC = await waitForServiceClass("events");
+    const webServicesSC = await waitForServiceClass(watch, "webservices");
+    const eventsSC = await waitForServiceClass(watch, "events");
 
     const webServicesSCExternalName = webServicesSC.spec.externalName;
     const eventsSCExternalName = eventsSC.spec.externalName;
-    await sleep(5000);
+    await sleep(5000); // Some issue with creating service instances when service class doesn't have service plans yet
     const serviceCatalogObjs = k8s.loadAllYaml(
       serviceCatalogResources(webServicesSCExternalName, eventsSCExternalName)
     );
     await retryPromise(() => k8sApply(k8sDynamicApi, serviceCatalogObjs, false), 5, 2000);
 
-    await waitForServiceInstance('commerce-webservices');
-    await waitForServiceInstance('commerce-events');
-    await waitForServiceBinding('commerce-binding');
+    await waitForServiceInstance(watch, 'commerce-webservices');
+    await waitForServiceInstance(watch, 'commerce-events');
+    await waitForServiceBinding(watch, 'commerce-binding');
 
   });
 
@@ -204,51 +208,6 @@ describe("Commerce Mock tests", function () {
   });
 });
 
-
-async function k8sApply(k8sDynamicApi, listOfSpecs, patch=true) {
-  const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
-  return Promise.all(
-    listOfSpecs.map(async (obj) => {
-      try {
-        const existing = await k8sDynamicApi.read(obj)
-        if (patch) {
-          obj.metadata.resourceVersion = existing.body.metadata.resourceVersion;
-          return await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options);
-        } 
-        return existing;
-      }
-      catch (e) {
-        if (e.body && e.body.reason == 'NotFound') {
-          return await k8sDynamicApi.create(obj)
-        }
-        else {
-          console.log(e.body)
-          throw e
-        }
-      }
-    })
-  );
-}
-
-function waitForServiceClass(name, namespace = "default") {
-  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
-    return watchObj.object.spec.externalName.includes(name)
-  }, 60 * 1000, `Waiting for ${name} service class timeout`);
-}
-
-function waitForServiceInstance(name, namespace = "default") {
-  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
-    return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
-      && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, 60 * 1000, `Waiting for ${name} service instance timeout`);
-}
-
-function waitForServiceBinding(name, namespace = "default") {
-  return waitForK8sObject(watch, `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`, {}, (_type, _apiObj, watchObj) => {
-    return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
-      && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, 60 * 1000, `Waiting for ${name} service binding timeout`);
-}
 
 async function sendEventAndCheckResponse(mockHost, host) {
   await retryPromise(
@@ -287,23 +246,6 @@ async function sendEventAndCheckResponse(mockHost, host) {
     30,
     2 * 1000
   ).catch(expectNoAxiosErr);
-}
-
-function waitForK8sObject(watch, path, query, checkFn, timeout, timeoutMsg) {
-  let res
-  let timer
-  const result = new Promise((resolve, reject) => {
-    watch.watch(path, query, (type, apiObj, watchObj) => {
-      if (checkFn(type, apiObj, watchObj)) {
-        if (res) {
-          res.abort();
-        }
-        clearTimeout(timer)
-        resolve(watchObj.object)
-      }
-    }, () => { }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
-  });
-  return result;
 }
 
 async function registerAllApis(mockHost, namespace, watch, timeout = 60 * 1000) {
