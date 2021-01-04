@@ -19,12 +19,6 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
 )
 
-const (
-	SuccessSynced = "Synced"
-	ErrResourceExists = "ErrResourceExists"
-	MessageResourceExists = "Resource %q already exists and is not managed by Application"
-	MessageResourceSynced = "Application resource synced successfully"
-)
 
 type Controller struct {
 	clientset         clientset.Interface
@@ -56,7 +50,6 @@ func NewController(
 			UpdateFunc: func(old, new interface{}) {
 				controller.enqueueApplication((new))
 			},
-			DeleteFunc: controller.enqueueApplication,
 		})
 
 	return controller
