@@ -129,6 +129,27 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	When("Creating a Subscription with empty event type", func() {
+		It("Should mark the subscription as not ready", func() {
+			ctx := context.Background()
+			subscriptionName := "invalid-sub-event-type"
+
+			// Create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyEventTypeFilterForNats, reconcilertesting.WithWebhookForNats)
+			reconcilertesting.WithValidSink("foo", "bar", givenSubscription)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionFalse, "nats: invalid subject")),
+			))
+		})
+	})
+
 	PWhen("Creating a Subscription and NATS is unavailable", func() {
 		It("Should mark the subscription as not ready", func() {
 
