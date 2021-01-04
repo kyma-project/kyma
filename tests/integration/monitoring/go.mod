@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/tests/integration/monitoring
 
-go 1.15
+go 1.14
 
 require (
 	github.com/coreos/prometheus-operator v0.38.3
