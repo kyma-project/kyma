@@ -26,7 +26,7 @@ backend:
 pamela:
   resources:
     requests:
-      cpu: 15m
+      cpu: 8m
       memory: 55Mi
     limits:
       cpu: 40m
