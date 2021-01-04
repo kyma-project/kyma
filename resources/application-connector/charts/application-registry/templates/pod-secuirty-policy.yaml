@@ -1,0 +1,36 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  allowPrivilegeEscalation: false
+  allowedCapabilities:
+  - NET_ADMIN
+  - NET_RAW
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535  
+  privileged: false
+  seLinux:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535  
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret 

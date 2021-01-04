@@ -64,6 +64,8 @@ spec:
             name: http-api-port
           - containerPort: 9090
             name: http-metrics
+        securityContext:
+          runAsUser: 1000
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
