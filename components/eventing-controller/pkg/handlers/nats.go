@@ -10,7 +10,7 @@ import (
 var _ NatsInterface = &Nats{}
 
 type NatsInterface interface {
-	Initialize(cfg env.NatsConfig)
+	Initialize(cfg env.NatsConfig) error
 }
 
 type Nats struct {
@@ -23,13 +23,15 @@ type NatsResponse struct {
 	Error      error
 }
 
-func (n *Nats) Initialize(cfg env.NatsConfig) {
+func (n *Nats) Initialize(cfg env.NatsConfig) error {
 	n.Log.Info("Initialize NATS connection")
-	if n.Connection == nil {
+	if n.Connection == nil || n.Connection.Status() != nats.CONNECTED {
 		var err error
 		n.Connection, err = nats.Connect(cfg.Url)
 		if err != nil {
 			n.Log.Error(err, "Can't connect to NATS Server")
+			return err
 		}
 	}
+	return nil
 }

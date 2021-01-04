@@ -53,7 +53,11 @@ func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, rec
 	natsClient := &handlers.Nats{
 		Log: log,
 	}
-	natsClient.Initialize(cfg)
+	err := natsClient.Initialize(cfg)
+	if err != nil {
+		log.Error(err, "reconciler can't start")
+		panic(err)
+	}
 	return &Reconciler{
 		Client:        client,
 		Cache:         cache,
@@ -186,15 +190,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				log.Error(err, "failed to send event")
 			}
 		}
-		sub, err := r.natsClient.Connection.Subscribe(eventType, callback)
-		if err != nil {
-			log.Error(err, "failed to create a Nats subscription")
-			// TODO retry once to create a new connection
-			err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
-			if err != nil {
-				log.Error(err, "failed to update subscription status")
+		sub, subscribeErr := r.natsClient.Connection.Subscribe(eventType, callback)
+		if subscribeErr != nil {
+			log.Error(subscribeErr, "failed to create a Nats subscription")
+			initializeErr := r.natsClient.Initialize(r.config)
+			if initializeErr != nil {
+				log.Error(initializeErr, "failed to reset NATS connection")
+				return result, initializeErr
 			}
-			return result, err
+			syncErr := r.syncSubscriptionStatus(ctx, actualSubscription, false, subscribeErr.Error())
+			if syncErr != nil {
+				log.Error(syncErr, "failed to update subscription status")
+				return result, syncErr
+			}
+			return result, subscribeErr
 		}
 		r.subscriptions[fmt.Sprintf("%s.%s", req.NamespacedName.String(), filter.EventType.Value)] = sub
 	}
@@ -252,6 +261,10 @@ func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
 			err := v.Unsubscribe()
 			if err != nil {
 				r.Log.Error(err, "failed to unsubscribe from NATS", "Subscription name: ", k)
+				initializeErr := r.natsClient.Initialize(r.config)
+				if initializeErr != nil {
+					return initializeErr
+				}
 				return err
 			}
 			delete(r.subscriptions, k)
