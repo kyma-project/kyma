@@ -7,7 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-// Config represents the environment config for the Eventing Controller with Nats.
+// NatsConfig represents the environment config for the Eventing Controller with Nats.
 type NatsConfig struct {
 	// Following details are for eventing-controller to communicate to Nats
 	Url           string `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`

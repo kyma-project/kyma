@@ -47,7 +47,7 @@ var (
 )
 
 const (
-	NATSPROTOCOL = "NATS"
+	NATSProtocol = "NATS"
 )
 
 func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder,
@@ -101,15 +101,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		"version", desiredSubscription.GetGeneration(),
 	)
 
-	// examine DeletionTimestamp to determine if object is under deletion
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-			r.Log.Info("map", "sub", fmt.Sprintf("%+v", r.subscriptions))
-			// our finalizer is present, so lets handle any external dependency
 			if err := r.deleteSubscriptions(req); err != nil {
 				r.Log.Error(err, "failed to delete subscription")
-				// if fail to delete the external dependency here, return with error
+				// if failed to delete the external dependency here, return with error
 				// so that it can be retried
 				return ctrl.Result{}, err
 			}
@@ -184,15 +181,24 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	for _, filter := range filters {
 		eventType := filter.EventType.Value
 		callback := func(msg *nats.Msg) {
-			log.Info(string(msg.Data), "payload", "value")
-			ce, _ := r.convertMsgToCE(msg)
-			ctx := cloudevents.ContextWithTarget(context.Background(), desiredSubscription.Spec.Sink)
-			cev2Client, _ := ceclient.NewDefault()
-			err := cev2Client.Send(ctx, *ce)
+			ce, err := convertMsgToCE(msg)
 			if err != nil {
-				log.Error(err, "failed to send event")
+				r.Log.Error(err, "failed to convert Nats message to CE")
+				return
+			}
+			ctx := cloudevents.ContextWithTarget(context.Background(), desiredSubscription.Spec.Sink)
+			cev2Client, err := ceclient.NewDefault()
+			if err != nil {
+				r.Log.Error(err, "failed to create CE client")
+				return
+			}
+			err = cev2Client.Send(ctx, *ce)
+			if err != nil {
+				log.Error(err, "failed to dispatch event")
+				return
 			}
 		}
+
 		if r.natsClient.Connection.Status() != nats.CONNECTED {
 			r.Log.Info("connection to Nats", "status", fmt.Sprintf("%v", r.natsClient.Connection.Status()))
 			initializeErr := r.natsClient.Initialize(r.config)
@@ -214,16 +220,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		r.subscriptions[fmt.Sprintf("%s.%s", req.NamespacedName.String(), filter.EventType.Value)] = sub
 	}
+	log.Info("successfully created Nats subscriptions")
 
 	// Update status
 	err = r.syncSubscriptionStatus(ctx, actualSubscription, true, "")
 	if err != nil {
 		log.Error(err, "failed to update subscription status")
 	}
+	log.Info("successfully updated subscription status")
 
 	return result, nil
 }
 
+// syncSubscriptionStatus syncs Subscription status
 func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
 	isNatsSubReady bool, message string) error {
 	desiredSubscription := sub.DeepCopy()
@@ -255,9 +264,9 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "failed to update Subscription status")
 		}
-		r.Log.Info("successfully updated subscription", "namespace/name", fmt.Sprintf("%s/%s", sub.Namespace, sub.Name))
+		r.Log.Info("successfully updated subscription")
 	}
 	return nil
 }
@@ -284,14 +293,12 @@ func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
 	return nil
 }
 
-func (r Reconciler) convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
+func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	event := cev2event.New(cev2event.CloudEventsVersionV1)
 	err := json.Unmarshal(msg.Data, &event)
 	if err != nil {
 		return nil, err
 	}
-	r.Log.Info("cloud event received", "type", event.Type(), "id", event.ID(), "time", event.Time(),
-		"data", string(event.Data()))
 	return &event, nil
 }
 
@@ -301,7 +308,7 @@ func (r Reconciler) assertSinkValidity(sink string) error {
 }
 
 func (r Reconciler) assertProtocolValidity(protocol string) error {
-	if protocol != NATSPROTOCOL {
+	if protocol != NATSProtocol {
 		return fmt.Errorf("invalid protocol: %s", protocol)
 	}
 	return nil
