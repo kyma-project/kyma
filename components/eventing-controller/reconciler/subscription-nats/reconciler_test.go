@@ -331,25 +331,6 @@ func printSubscriptions(namespace string) error {
 	return nil
 }
 
-// NATS tests helpers
-func NewDefaultConnection() *nats.Conn {
-	return NewConnection(nats.DefaultPort)
-}
-
-// NewConnection forms connection on a given port.
-func NewConnection(port int) *nats.Conn {
-	url := fmt.Sprintf("nats://127.0.0.1:%d", port)
-	nc, err := nats.Connect(url)
-	if err != nil {
-		log.Fatal("Failed to create default connection")
-	}
-	if nc.Status() != nats.CONNECTED {
-		log.Fatal("Failed to create default connection")
-	}
-	log.Printf("Connection to Nats status: %v", nc.Status())
-	return nc
-}
-
 // RunDefaultServer will run a server on the default port.
 func RunDefaultServer() *server.Server {
 	return RunServerOnPort(nats.DefaultPort)
