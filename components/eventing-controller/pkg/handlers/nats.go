@@ -3,11 +3,10 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
 )
 
 // compile time check
@@ -27,6 +26,7 @@ type NatsResponse struct {
 	Error      error
 }
 
+// Initialize creates a connection to Nats
 func (n *Nats) Initialize(cfg env.NatsConfig) error {
 	n.Log.Info("Initialize NATS connection")
 	var err error

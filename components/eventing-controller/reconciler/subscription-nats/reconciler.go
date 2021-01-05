@@ -116,7 +116,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers,
 				Finalizer)
 			if err := r.Client.Update(context.Background(), desiredSubscription); err != nil {
-				log.Info("failed to remove finalizer from subscription object")
+				log.Error(err, "failed to remove finalizer from subscription object")
 				return ctrl.Result{}, err
 			}
 			return ctrl.Result{}, nil

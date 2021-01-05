@@ -149,13 +149,6 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			))
 		})
 	})
-
-	PWhen("Creating a Subscription and NATS is unavailable", func() {
-		It("Should mark the subscription as not ready", func() {
-
-		})
-	})
-
 })
 
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
