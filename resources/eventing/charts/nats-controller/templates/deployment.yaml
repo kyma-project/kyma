@@ -24,7 +24,7 @@ spec:
           name: nats-controller
           env:
           - name: NATS_URL
-            value: {{ .Values.global.domainName }}
+            value: {{ .Values.NATS_URL }}
           resources:
             limits:
               cpu: 100m
