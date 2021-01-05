@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/url"
 
+	"github.com/pkg/errors"
+
 	"fmt"
 
 	"reflect"
@@ -92,7 +94,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// Handle only the new subscription
 	desiredSubscription := actualSubscription.DeepCopy()
-
 	//Bind fields to logger
 	log := r.Log.WithValues("kind", desiredSubscription.GetObjectKind().GroupVersionKind().Kind,
 		"name", desiredSubscription.GetName(),
@@ -104,9 +105,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
+			r.Log.Info("map", "sub", fmt.Sprintf("%+v", r.subscriptions))
 			// our finalizer is present, so lets handle any external dependency
 			if err := r.deleteSubscriptions(req); err != nil {
-				log.Info("failed to delete the external dependency of the subscription object")
+				r.Log.Error(err, "failed to delete subscription")
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return ctrl.Result{}, err
@@ -120,6 +122,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				log.Info("failed to remove finalizer from subscription object")
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{}, nil
 		}
 	}
 
@@ -190,14 +193,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				log.Error(err, "failed to send event")
 			}
 		}
-		sub, subscribeErr := r.natsClient.Connection.Subscribe(eventType, callback)
-		if subscribeErr != nil {
-			log.Error(subscribeErr, "failed to create a Nats subscription")
+		if r.natsClient.Connection.Status() != nats.CONNECTED {
+			r.Log.Info("connection to Nats", "status", fmt.Sprintf("%v", r.natsClient.Connection.Status()))
 			initializeErr := r.natsClient.Initialize(r.config)
 			if initializeErr != nil {
 				log.Error(initializeErr, "failed to reset NATS connection")
 				return result, initializeErr
 			}
+		}
+
+		sub, subscribeErr := r.natsClient.Connection.Subscribe(eventType, callback)
+		if subscribeErr != nil {
+			log.Error(subscribeErr, "failed to create a Nats subscription")
 			syncErr := r.syncSubscriptionStatus(ctx, actualSubscription, false, subscribeErr.Error())
 			if syncErr != nil {
 				log.Error(syncErr, "failed to update subscription status")
@@ -258,18 +265,20 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
 	for k, v := range r.subscriptions {
 		if strings.HasPrefix(k, req.NamespacedName.String()) {
-			err := v.Unsubscribe()
-			if err != nil {
-				r.Log.Error(err, "failed to unsubscribe from NATS", "Subscription name: ", k)
+			r.Log.Info("connection status", "status", r.natsClient.Connection.Status())
+			// Unsubscribe call to Nats is async hence checking the status of the connection is important
+			if r.natsClient.Connection.Status() != nats.CONNECTED {
 				initializeErr := r.natsClient.Initialize(r.config)
 				if initializeErr != nil {
-					return initializeErr
+					return errors.Wrapf(initializeErr, "can't connect to Nats server")
 				}
-				return err
+			}
+			err := v.Unsubscribe()
+			if err != nil {
+				return errors.Wrapf(err, "failed to unsubscribe")
 			}
 			delete(r.subscriptions, k)
-			r.Log.Info("successfully deleted subscription", "namespace/name",
-				req.NamespacedName.String())
+			r.Log.Info("successfully unsubscribed/deleted subscription")
 		}
 	}
 	return nil

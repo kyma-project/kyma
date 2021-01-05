@@ -258,9 +258,7 @@ var _ = BeforeSuite(func(done Done) {
 	useExistingCluster := useExistingCluster
 
 	s := RunDefaultServer()
-	defer s.Shutdown()
-	nc := NewDefaultConnection()
-	defer nc.Close()
+	log.Printf("started test Nats server: %v", s.ClientURL())
 
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -284,8 +282,6 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	//client, err := client.New()
-	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
@@ -294,7 +290,9 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{
-		Url: nats.DefaultURL,
+		Url:           nats.DefaultURL,
+		MaxReconnects: 10,
+		ReconnectWait: time.Second,
 	}
 	err = NewReconciler(
 		k8sManager.GetClient(),
@@ -340,16 +338,9 @@ func printSubscriptions(namespace string) error {
 	return nil
 }
 
-// NATS tests helper
-
+// NATS tests helpers
 func NewDefaultConnection() *nats.Conn {
 	return NewConnection(nats.DefaultPort)
-}
-
-// So that we can pass tests and benchmarks...
-type tLogger interface {
-	Fatalf(format string, args ...interface{})
-	Errorf(format string, args ...interface{})
 }
 
 // NewConnection forms connection on a given port.
@@ -357,10 +348,12 @@ func NewConnection(port int) *nats.Conn {
 	url := fmt.Sprintf("nats://127.0.0.1:%d", port)
 	nc, err := nats.Connect(url)
 	if err != nil {
-		//t.Fatalf("Failed to create default connection: %v\n", err)
-		panic("Failed to create default connection")
-		//return nil
+		log.Fatal("Failed to create default connection")
 	}
+	if nc.Status() != nats.CONNECTED {
+		log.Fatal("Failed to create default connection")
+	}
+	log.Printf("Connection to Nats status: %v", nc.Status())
 	return nc
 }
 

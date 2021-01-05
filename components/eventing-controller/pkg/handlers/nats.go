@@ -1,6 +1,10 @@
 package handlers
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
@@ -25,13 +29,20 @@ type NatsResponse struct {
 
 func (n *Nats) Initialize(cfg env.NatsConfig) error {
 	n.Log.Info("Initialize NATS connection")
+	var err error
 	if n.Connection == nil || n.Connection.Status() != nats.CONNECTED {
-		var err error
-		n.Connection, err = nats.Connect(cfg.Url)
+		n.Connection, err = nats.Connect(cfg.Url,
+			nats.RetryOnFailedConnect(true),
+			nats.MaxReconnects(cfg.MaxReconnects),
+			nats.ReconnectWait(cfg.ReconnectWait))
 		if err != nil {
-			n.Log.Error(err, "Can't connect to NATS Server")
-			return err
+			return errors.Wrapf(err, "failed to connect to Nats")
+		}
+		if n.Connection.Status() != nats.CONNECTED {
+			notConnectedErr := fmt.Errorf("not connected: status: %v", n.Connection.Status())
+			return notConnectedErr
 		}
 	}
+	n.Log.Info(fmt.Sprintf("Successfully connected to Nats: %v", n.Connection.Status()))
 	return nil
 }
