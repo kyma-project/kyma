@@ -3,28 +3,24 @@ package subscription_nats
 import (
 	"context"
 	"encoding/json"
-	"net/url"
-
-	"github.com/pkg/errors"
-
 	"fmt"
-
+	"net/url"
 	"reflect"
 	"strings"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	corev1 "k8s.io/api/core/v1"
-
 	ceclient "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/go-logr/logr"
 	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
