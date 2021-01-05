@@ -5,6 +5,8 @@ This Helm chart contains all components required for eventing in Kyma:
 Components:
 - event-publisher-proxy
 - controller
+- nats-controller
+- nats-server
 
 ## Event Publisher Proxy
 
@@ -12,7 +14,11 @@ This component receives legacy and Cloud Event publishing requests from the clus
 
 ## Controller
 
-This component manages the internal infrastructure in order to receive an event for all subscriptions.
+This component manages the internal infrastructure in order to receive an event for all subscriptions handled by SAP BEB.
+
+## NATS Controller
+
+This component manages the internal infrastructure in order to receive an event for all subscriptions handled by NATS.
 
 ## Installation
 
