@@ -36,8 +36,6 @@ import (
 )
 
 const (
-	bigTimeOut           = 40 * time.Second
-	bigPollingInterval   = 3 * time.Second
 	smallTimeOut         = 5 * time.Second
 	smallPollingInterval = 1 * time.Second
 )
@@ -48,12 +46,6 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
 	// SetDefaultEventuallyPollingInterval(time.Second)
-
-	BeforeEach(func() {
-		//namespaceName = "test"
-		// we need to reset the http requests which the mock captured
-		//beb.Reset()
-	})
 
 	AfterEach(func() {
 		// print all subscriptions in the namespace for debugging purposes
@@ -236,8 +228,6 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 
-//var beb *reconcilertesting.BebMock
-
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
@@ -340,7 +330,6 @@ func RunDefaultServer() *server.Server {
 func RunServerOnPort(port int) *server.Server {
 	opts := natstestserver.DefaultTestOptions
 	opts.Port = port
-	//opts.Cluster.Name = "testing"
 	return RunServerWithOptions(opts)
 }
 

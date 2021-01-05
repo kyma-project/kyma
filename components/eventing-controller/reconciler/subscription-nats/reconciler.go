@@ -195,11 +195,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					return
 				}
 			}
-			r.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), desiredSubscription.Spec.Sink))
+			r.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(),
+				desiredSubscription.Spec.Sink))
 		}
 
 		if r.natsClient.Connection.Status() != nats.CONNECTED {
-			r.Log.Info("connection to Nats", "status", fmt.Sprintf("%v", r.natsClient.Connection.Status()))
+			r.Log.Info("connection to Nats", "status",
+				fmt.Sprintf("%v", r.natsClient.Connection.Status()))
 			initializeErr := r.natsClient.Initialize(r.config)
 			if initializeErr != nil {
 				log.Error(initializeErr, "failed to reset NATS connection")
@@ -237,7 +239,8 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, "")
