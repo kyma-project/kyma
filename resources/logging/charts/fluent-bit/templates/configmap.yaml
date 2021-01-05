@@ -11,7 +11,7 @@ data:
   {{- if .Values.config.customParsers }}
     {{ .Values.config.customParsers | nindent 4 }}
   {{- end }}
-  
+
   fluent-bit.conf: |
     [SERVICE]
         Flush         {{ .Values.config.service.flush }}
@@ -116,84 +116,84 @@ data:
         Time_Key        {{ .Values.config.outputs.es.timeKey }}
         {{- end }}
         {{- if .Values.config.outputs.es.httpUser }}
-        HTTP_User {{ .Values.config.outputs.es.httpUser }}
-        HTTP_Passwd {{ .Values.config.outputs.es.httpPasswd }}
+        HTTP_User       {{ .Values.config.outputs.es.httpUser }}
+        HTTP_Passwd     {{ .Values.config.outputs.es.httpPasswd }}
         {{- end }}
         {{- if .Values.config.outputs.es.tls.enabled }}
-        tls On
-        tls.verify {{ .Values.config.outputs.es.tls.verify }}
-        tls.debug {{ .Values.config.outputs.es.tls.debug }}
+        tls             On
+        tls.verify      {{ .Values.config.outputs.es.tls.verify }}
+        tls.debug       {{ .Values.config.outputs.es.tls.debug }}
         {{- if and (.Values.config.outputs.es.tls.cert) (.Values.config.outputs.es.tls.key) }}
-        tls.crt_file /secure/es-tls.crt
-        tls.key_file /secure/es-tls.key
+        tls.crt_file    /secure/es-tls.crt
+        tls.key_file    /secure/es-tls.key
         {{- end }}
         {{- if .Values.config.outputs.es.tls.ca }}
-        tls.ca_file /secure/es-tls-ca.crt
+        tls.ca_file     /secure/es-tls-ca.crt
         {{- end }}
         {{- if .Values.config.outputs.es.tls.keyPasswd }}
-        tls.key_passwd {{ .Values.config.outputs.es.tls.keyPasswd }}
+        tls.key_passwd  {{ .Values.config.outputs.es.tls.keyPasswd }}
         {{- end }}
         {{- end }}
 {{- end }}
 
 {{- if .Values.config.outputs.forward.enabled }}
     [OUTPUT]
-        Name  forward
-        Match {{ .Values.config.outputs.forward.match }}
-        Host  {{ .Values.config.outputs.forward.host }}
-        Port  {{ .Values.config.outputs.forward.port }}
+        Name            forward
+        Match           {{ .Values.config.outputs.forward.match }}
+        Host            {{ .Values.config.outputs.forward.host }}
+        Port            {{ .Values.config.outputs.forward.port }}
         Retry_Limit     False
         {{- if (.Values.config.outputs.forward.tls.enabled)  }}
-        tls   On
-        tls.verify {{ .Values.config.outputs.forward.tls.verify }}
+        tls             On
+        tls.verify      {{ .Values.config.outputs.forward.tls.verify }}
         {{- if (.Values.config.outputs.forward.tls.ca)  }}
-        tls.ca_file /secure/forward-tls-ca.crt
+        tls.ca_file     /secure/forward-tls-ca.crt
         {{- end }}
         {{- if (.Values.config.outputs.forward.tls.debug)  }}
-        tls.debug {{ .Values.config.outputs.forward.tls.debug }}
+        tls.debug       {{ .Values.config.outputs.forward.tls.debug }}
         {{- end }}
         {{- if and (.Values.config.outputs.forward.tls.cert) (.Values.config.outputs.forward.tls.key) }}
-        tls.crt_file /secure/forward-tls.crt
-        tls.key_file /secure/forward-tls.key
+        tls.crt_file    /secure/forward-tls.crt
+        tls.key_file    /secure/forward-tls.key
         {{- end }}
         {{- end }}
 {{- end }}
 
 {{- if .Values.config.outputs.http.enabled }}
     [OUTPUT]
-        Name  http
-        Match {{ .Values.config.outputs.http.match }}
-        Host  {{ .Values.config.outputs.http.host }}
-        Port  {{ .Values.config.outputs.http.port }}
-        URI  {{ .Values.config.outputs.http.uri }}
+        Name             http
+        Match            {{ .Values.config.outputs.http.match }}
+        Host             {{ .Values.config.outputs.http.host }}
+        Port             {{ .Values.config.outputs.http.port }}
+        URI              {{ .Values.config.outputs.http.uri }}
         {{- if .Values.config.outputs.http.compress }}
-        compress {{ .Values.config.outputs.http.compress }}
+        compress         {{ .Values.config.outputs.http.compress }}
         {{- end }}
         {{- if .Values.config.outputs.http.jsonDateKey }}
-        json_date_key {{ .Values.config.outputs.http.jsonDateKey }}
+        json_date_key    {{ .Values.config.outputs.http.jsonDateKey }}
         {{- end }}
         {{- if .Values.config.outputs.http.jsonDateFormat }}
         json_date_format {{ .Values.config.outputs.http.jsonDateFormat }}
         {{- end }}
         {{- if .Values.config.outputs.http.format }}
-        Format {{ .Values.config.outputs.http.format }}
+        Format           {{ .Values.config.outputs.http.format }}
         {{- end }}
         {{- if .Values.config.outputs.http.httpUser }}
-        HTTP_User {{ .Values.config.outputs.http.httpUser }}
-        HTTP_Passwd {{ .Values.config.outputs.http.httpPasswd }}
+        HTTP_User        {{ .Values.config.outputs.http.httpUser }}
+        HTTP_Passwd      {{ .Values.config.outputs.http.httpPasswd }}
         {{- end }}
         {{- if .Values.config.outputs.http.tls.enabled  }}
-        tls   On
-        tls.verify {{ .Values.config.outputs.http.tls.verify }}
+        tls              On
+        tls.verify       {{ .Values.config.outputs.http.tls.verify }}
         {{- if (.Values.config.outputs.http.tls.ca)  }}
-        tls.ca_file /secure/http-tls-ca.crt
+        tls.ca_file      /secure/http-tls-ca.crt
         {{- end }}
         {{- if (.Values.config.outputs.http.tls.debug)  }}
-        tls.debug {{ .Values.config.outputs.http.tls.debug }}
+        tls.debug        {{ .Values.config.outputs.http.tls.debug }}
         {{- end }}
         {{- if and (.Values.config.outputs.http.tls.cert) (.Values.config.outputs.http.tls.key) }}
-        tls.crt_file /secure/http-tls.crt
-        tls.key_file /secure/http-tls.key
+        tls.crt_file     /secure/http-tls.crt
+        tls.key_file     /secure/http-tls.key
         {{- end }}
         {{- end }}
 {{- end }}
