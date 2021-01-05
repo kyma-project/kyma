@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -81,8 +82,19 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	activeJobs, err := r.getActiveJobs(ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if activeJobs >= r.config.Build.MaxActiveJobs {
+		return ctrl.Result{
+			RequeueAfter: time.Second * 5,
+		}, nil
+	}
+
 	instance := &serverlessv1alpha1.Function{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
+	err = r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -136,7 +148,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		log.Error(err, "Cannot list HorizontalPodAutoscalers")
 		return ctrl.Result{}, err
 	}
 
@@ -188,6 +200,23 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
+}
+
+func (r *FunctionReconciler) getActiveJobs(ctx context.Context) (int, error) {
+	var allJobs batchv1.JobList
+	if err := r.client.ListByLabel(ctx, "", map[string]string{serverlessv1alpha1.FunctionManagedByLabel: "function-controller"}, &allJobs); err != nil {
+		r.Log.Error(err, "Cannot list Jobs")
+		return 0, err
+	}
+
+	activeJobs := 0
+	for _, j := range allJobs.Items {
+		if j.Status.Active > 0 {
+			activeJobs++
+		}
+		r.Log.WithValues("name:", j.Name, "active", j.Status.Active)
+	}
+	return activeJobs, nil
 }
 
 func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {

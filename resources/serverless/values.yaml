@@ -144,6 +144,8 @@ containers:
         value: eu.gcr.io/kyma-project/function-build-init:c44616f0
       funtionMaxConcurrentReconciles:
         value: "10"
+      functionBuildMaxActiveJobs:
+        value: "5"
 
 services:
   manager:
