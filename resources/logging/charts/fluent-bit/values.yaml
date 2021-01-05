@@ -142,15 +142,15 @@ config:
       dockerModeFlush: 4
       # Specify the database file to keep track of monitored files and offsets.
       db: /var/log/flb_kube.db
-      # Mem_Buf_Limit: Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
+      # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
       memBufLimit: 5MB
-      # Skip_Long_Lines: When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
+      # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
       skipLongLines: On
-      # Refresh_Interval: The interval of refreshing the list of watched files. Default is 60 seconds.
+      # The interval of refreshing the list of watched files. Default is 60 seconds.
       refreshInterval: 10
-      #	buffer_Chunk_Size: Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
+      #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
       bufferChunkSize:
-      # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
+      # Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
       bufferMaxSize:
     tailLoki:
       path: /var/log/containers/*.log
@@ -162,18 +162,19 @@ config:
       dockerModeFlush: 4
       # Specify the database file to keep track of monitored files and offsets.
       db: /var/log/flb_kube_loki.db
-      # Mem_Buf_Limit: Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
+      # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
       memBufLimit: 5MB
-      # Skip_Long_Lines: When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
+      # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
       skipLongLines: On
-      # Refresh_Interval: The interval of refreshing the list of watched files. Default is 60 seconds.
+      # The interval of refreshing the list of watched files. Default is 60 seconds.
       refreshInterval: 10
-      #	Buffer_Chunk_Size: Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
+      #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
       bufferChunkSize:
-      # Buffer_Max_Size: Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
+      # Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
       bufferMaxSize:
       exclude:
         namespaces:
+    additional: ""
   filters:
     kubernetes:
       # When enabled, it checks if the log field content is a JSON string map, if so, it append the map fields as part of the log structure.
@@ -184,6 +185,7 @@ config:
       mergeLogKey: ""
       parser: On
       exclude: On
+    additional: ""
   outputs:
     loki:
       enabled: true
@@ -223,7 +225,7 @@ config:
       generateID: On
       replaceDots: On
       bufferSize: False
-      # default Time_Key: @timestamp
+      # default timeKey: @timestamp
       timeKey:
       # Optional credentials for Elastic X-Pack access
       httpUser:
@@ -277,6 +279,7 @@ config:
       jsonDateKey: ""
       jsonDateFormat: ""
       headers: []
+    additional: ""
   
   # extra can be used to pass extra configuration to Fluent Bit. Find below a sample configuration.
   extra: #|
@@ -287,16 +290,10 @@ config:
   #      Name              test
   #      Match             *
   ## https://docs.fluentbit.io/manual/pipeline/parsers
-  customParsers: #|
-  #  [PARSER]
-  #      Name docker_no_time
-  #      Format json
-  #      Time_Keep Off
-  #      Time_Key time
-  #      Time_Format %Y-%m-%dT%H:%M:%S.%L
+  parsers:
+    additional: ""
   script: #|
   # myScript() {}
-
 
 # Defines an entry to add an external service to the service mesh
 # By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)

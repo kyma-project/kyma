@@ -8,8 +8,8 @@ metadata:
 data:
   parsers.conf: |
   {{- include "fluent-bit.parsers" . | nindent 4 }}
-  {{- if .Values.config.customParsers }}
-    {{ .Values.config.customParsers | nindent 4 }}
+  {{- if .Values.config.parsers.additional }}
+    {{ .Values.config.parsers.additional | nindent 4 }}
   {{- end }}
 
   fluent-bit.conf: |
@@ -66,6 +66,10 @@ data:
         {{- end }}
 {{- end }}
 
+{{ if .Values.config.inputs.additional }}
+{{- toString .Values.config.inputs.additional | indent 4 }}
+{{- end }}
+
     [FILTER]
         Name                kubernetes
         Match               {{ .Values.config.filters.kubernetes.match }}
@@ -77,6 +81,10 @@ data:
         {{- end }}
         K8S-Logging.Parser  {{ .Values.config.filters.kubernetes.parser }}
         K8S-Logging.Exclude {{ .Values.config.filters.kubernetes.exclude }}
+
+{{ if .Values.config.filters.additional }}
+{{- toString .Values.config.filters.additional | indent 4 }}
+{{- end }}
 
 {{- if .Values.config.outputs.loki.enabled }}
     [OUTPUT]
@@ -198,8 +206,12 @@ data:
         {{- end }}
 {{- end }}
 
+{{ if .Values.config.outputs.additional }}
+{{- toString .Values.config.outputs.additional | indent 4 }}
+{{- end }}
+
 {{- if .Values.config.extra }}
-{{- toYaml .Values.config.extra | indent 2 }}
+{{- toString .Values.config.extra | indent 4 }}
 {{- end }}
 
 {{- if .Values.config.outputs.loki.enabled }}
