@@ -190,9 +190,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 			err = cev2Client.Send(ctx, *ce)
 			if err != nil {
-				log.Error(err, "failed to dispatch event")
-				return
+				if !strings.Contains(err.Error(), "200") {
+					log.Error(err, "failed to dispatch event")
+					return
+				}
 			}
+			r.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), desiredSubscription.Spec.Sink))
 		}
 
 		if r.natsClient.Connection.Status() != nats.CONNECTED {
