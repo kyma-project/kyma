@@ -21,11 +21,6 @@ type Nats struct {
 	Log        logr.Logger
 }
 
-type NatsResponse struct {
-	StatusCode int
-	Error      error
-}
-
 // Initialize creates a connection to Nats
 func (n *Nats) Initialize(cfg env.NatsConfig) error {
 	n.Log.Info("Initialize NATS connection")

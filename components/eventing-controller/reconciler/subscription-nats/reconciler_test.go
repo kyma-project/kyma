@@ -26,7 +26,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -259,9 +258,6 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(cfg).ToNot(BeNil())
 
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = apigatewayv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
