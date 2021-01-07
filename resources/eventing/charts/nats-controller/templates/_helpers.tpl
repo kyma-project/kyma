@@ -49,3 +49,10 @@ Selector labels
 app.kubernetes.io/name: {{ include "nats-controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Nats server service Name
+*/}}
+{{- define "nats-controller.natsServer.url" -}}
+{{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
+{{- end }}

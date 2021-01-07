@@ -1,3 +1,4 @@
+{{- if .Values.global.isNatsEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,8 +13,6 @@ spec:
   template:
     metadata:
       labels: {{- include "nats-controller.selectorLabels" . | nindent 8 }}
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ include "nats-controller.fullname" . }}
       terminationGracePeriodSeconds: 10
@@ -24,7 +23,7 @@ spec:
           name: nats-controller
           env:
           - name: NATS_URL
-            value: {{ .Values.NATS_URL }}
+            value: {{ include "nats-controller.natsServer.url" . }}
           resources:
             limits:
               cpu: 100m
@@ -32,4 +31,4 @@ spec:
             requests:
               cpu: 100m
               memory: 20Mi
-
+{{- end }}

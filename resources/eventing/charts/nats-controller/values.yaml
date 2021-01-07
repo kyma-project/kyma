@@ -6,7 +6,7 @@ serviceAccount:
   name: ""
   annotations: ""
 
-NATS_URL: "nats.nats.svc.cluster.local"
+NATS_URL: "nats.kyma-system.svc.cluster.local"
 
 image:
   # name is the name of the container image for the nats-eventing-controller

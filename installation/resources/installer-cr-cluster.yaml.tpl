@@ -37,10 +37,8 @@ spec:
       namespace: "kyma-system"
     - name: "helm-broker"
       namespace: "kyma-system"
-    # - name: "eventing"
-    #   namespace: kyma-system
-    # - name: nats-controller
-    #   namespace: kyma-system
+    - name: "eventing"
+      namespace: kyma-system
     - name: "nats-streaming"
       namespace: "natss"
     - name: "core"
