@@ -9,7 +9,7 @@ data:
   parsers.conf: |
   {{- include "fluent-bit.parsers" . | nindent 4 }}
   {{- if .Values.config.parsers.additional }}
-    {{ .Values.config.parsers.additional | nindent 4 }}
+  {{ toString .Values.config.parsers.additional | nindent 4 }}
   {{- end }}
 
   fluent-bit.conf: |
