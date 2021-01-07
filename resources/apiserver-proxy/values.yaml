@@ -36,7 +36,7 @@ tests:
 global:
   apiserver_proxy:
     dir:
-    version: 264d8882
+    version: PR-10296
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
