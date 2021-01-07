@@ -24,12 +24,10 @@ func main() {
 	setupLog := ctrl.Log.WithName("setup")
 
 	var metricsAddr string
-	var reSyncPeriod time.Duration
 	var enableDebugLogs bool
 	var maxReconnects int
 	var reconnectWait time.Duration
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.DurationVar(&reSyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls.")
 	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
 	flag.IntVar(&maxReconnects, "max-reconnects", 10, "Maximum number of reconnect attempts.")
 	flag.DurationVar(&reconnectWait, "reconnect-wait", time.Second, "Wait time between reconnect attempts.")
@@ -53,7 +51,6 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
-		SyncPeriod:         &reSyncPeriod,
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
