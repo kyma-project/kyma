@@ -84,12 +84,12 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: d022112f
+    version: 6fd499b9
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: 47b606f6
+    version: PR-10278
 
 nodeSelector: {}
 
@@ -97,6 +97,7 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
 
 livenessProbe:
   enabled: false

@@ -31,10 +31,16 @@ spec:
             - name: CLUSTER_DOMAIN_NAME
               value: {{ .Values.global.ingress.domainName }}
 
-            - name: UAA_SERVICE_INSTANCE_PARAMS_SECRET_NAME
-              value: {{ include "uaa-activator.fullname" . }}
-            - name: UAA_SERVICE_INSTANCE_PARAMS_SECRET_KEY
-              value: "security.json"
+            - name: UAA_IS_UPGRADE
+              value: "{{ .Release.IsUpgrade }}"
+            - name: UAA_DEVELOPER_GROUP
+              value: {{ .Values.global.kymaRuntime.developerGroup }}
+            - name: UAA_DEVELOPER_ROLE
+              value: {{ .Values.global.role.developer }}
+            - name: UAA_NAMESPACE_ADMIN_GROUP
+              value: {{ .Values.global.kymaRuntime.namespaceAdminGroup }}
+            - name: UAA_NAMESPACE_ADMIN_ROLE
+              value: {{ .Values.global.role.namespaceAdmin }}
             - name: UAA_SERVICE_INSTANCE_NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: UAA_SERVICE_INSTANCE_NAME
@@ -54,7 +60,7 @@ spec:
               value: "dex"
 
             - name: GLOBAL_REPEAT_INTERVAL
-              value: "1s"
+              value: "5s"
             - name: GLOBAL_REPEAT_TIMEOUT
               value: "5m"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

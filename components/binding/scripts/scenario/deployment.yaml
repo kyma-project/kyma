@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sandbox
+spec:
+  selector:
+    matchLabels:
+      app: sandbox
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sandbox
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: sandbox
+          image: yauritux/busybox-curl
+          command: ['sh', '-c', 'sleep 10000']

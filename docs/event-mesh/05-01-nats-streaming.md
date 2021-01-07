@@ -8,6 +8,9 @@ To configure NATS Streaming chart, override the default values of its `values.ya
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 >* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
+>
+> To learn how to configure a Kafka channel instead of the default NATS one, see this tutorial:
+>* [Configure the Kafka Channel](#tutorials-configure-the-kafka-channel).
 
 ## Configurable parameters
 

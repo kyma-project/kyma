@@ -15,13 +15,6 @@ This list shows the available Istio components and the components enabled in Kym
 | Component | Enabled |
 | :--- | :---: |
 | Istiod | ✅ |
-| Pilot | ⛔ |
-| Policy | ⛔ |
-| Telemetry | ⛔ |	
-| Citadel | ⛔ |	
-| Node Agent | ⛔ |	
-| Galley | ⛔ |	
-| Sidecar Injector | ⛔️ |	
 | Ingress Gateway | ✅️ |
 | Egress Gateway | ⛔️ |
 | CNI | ⛔️ |
@@ -29,8 +22,6 @@ This list shows the available Istio components and the components enabled in Kym
 | Prometheus | ⛔️ |
 | Tracing | ⛔️ |
 | Kiali | ⛔️ |
-
->**NOTE:** In Istio 1.5, separate components like Pilot or Sidecar Injector are replaced by Istiod, a single binary. You can find the details [in the upgrade notes](https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/#control-plane-restructuring).
 
 ## Kyma-specific configuration
 

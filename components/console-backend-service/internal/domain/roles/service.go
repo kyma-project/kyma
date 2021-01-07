@@ -36,6 +36,7 @@ type Service struct {
 }
 
 func NewRoleService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
+
 	return serviceFactory.ForResource(roleGroupVersionResource), nil
 }
 

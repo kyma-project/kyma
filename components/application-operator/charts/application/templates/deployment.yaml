@@ -57,6 +57,13 @@ spec:
             port: {{ .Values.deployment.args.externalAPIPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port
@@ -64,6 +71,7 @@ spec:
             name: http-api-port
 {{- end }}
 ---
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -118,6 +126,18 @@ spec:
             port: {{ .Values.eventService.deployment.args.externalAPIPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.eventService.deployment.resources.limits.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.eventService.deployment.resources.requests.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.requests.memory }}
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
+        {{- if .Values.eventService.deployment.resources }}
+        resources:
+        {{- toYaml .Values.eventService.deployment.resources | nindent 10 }}
+        {{- end }}
+{{- end }}

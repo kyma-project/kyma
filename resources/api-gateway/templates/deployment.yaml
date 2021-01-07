@@ -40,9 +40,7 @@ spec:
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
             - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
-            {{- with .Values.config.cors.allowOrigin }}
-            - --cors-allow-origin={{ . | join ", " }}
-            {{- end }}
+            - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}
             - --cors-allow-methods={{ . | join ", " }}
             {{- end }}

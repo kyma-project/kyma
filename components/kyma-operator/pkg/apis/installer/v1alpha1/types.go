@@ -66,10 +66,18 @@ func (i *Installation) IsBeingDeleted() bool {
 	return deletionTimestamp != nil
 }
 
+type KymaProfile string
+
+const (
+	EvaluationProfile KymaProfile = "evaluation"
+	ProductionProfile KymaProfile = "production"
+)
+
 // InstallationSpec .
 type InstallationSpec struct {
 	KymaVersion string          `json:"version"`
 	URL         string          `json:"url"`
+	Profile     KymaProfile     `json:"profile,omitempty"`
 	Components  []KymaComponent `json:"components"`
 }
 

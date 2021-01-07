@@ -3,7 +3,11 @@ title: Create an inline Function
 type: Tutorials
 ---
 
-This tutorial shows how you can create a simple "Hello World!" Function in Node.js 12.
+This tutorial shows how you can create a simple "Hello World!" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
+
+> **TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Function from Git repository sources](#tutorials-create-a-function-from-git-repository-sources).
+
+> **TIP:** As of 1.17, you can use Kyma CLI to create Functions, apply them on a cluster, and locally fetch the current state of your Function's cluster configuration after it was modified. To learn more, read how to [Use Kyma CLI to manage Functions](https://kyma-project.io/docs/cli/#tutorials-use-kyma-cli-to-manage-functions).
 
 ## Steps
 
@@ -63,7 +67,7 @@ Follows these steps:
 
 1. From the drop-down list in the top navigation panel, create a Namespace or select one.
 
-2.  Go to the **Functions** view in the left navigation panel and select **Create Function**.
+2.  In the left navigation panel, go to **Workloads** > **Functions** and select **Create Function**.
 
 3.  In the pop-up box, provide the Function's name, leave the default runtime `Node.js 12`, and select **Create** to confirm changes.
 

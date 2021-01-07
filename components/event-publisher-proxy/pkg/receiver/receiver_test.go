@@ -6,6 +6,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 // a mocked http.Handler
@@ -16,7 +18,10 @@ func (h *testHandler) ServeHTTP(http.ResponseWriter, *http.Request) {}
 var _ http.Handler = (*testHandler)(nil)
 
 func TestNewHttpMessageReceiver(t *testing.T) {
-	port := 9091
+	port, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
 	r := NewHttpMessageReceiver(port)
 	if r == nil {
 		t.Fatalf("Could not create HttpMessageReceiver")
@@ -29,7 +34,7 @@ func TestNewHttpMessageReceiver(t *testing.T) {
 // Test that tht receiver shuts down properly then receiving stop signal
 func TestStartListener(t *testing.T) {
 	timeout := time.Second * 10
-	r := fixtureReceiver()
+	r := fixtureReceiver(t)
 
 	ctx := context.Background()
 	// used to simulate sending a stop signal
@@ -68,6 +73,10 @@ func TestStartListener(t *testing.T) {
 	}
 }
 
-func fixtureReceiver() *HttpMessageReceiver {
-	return NewHttpMessageReceiver(9091)
+func fixtureReceiver(t *testing.T) *HttpMessageReceiver {
+	port, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
+	return NewHttpMessageReceiver(port)
 }

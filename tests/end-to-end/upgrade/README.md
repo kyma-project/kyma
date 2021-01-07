@@ -46,6 +46,7 @@ Use the following flags to configure the application:
 |-----|:---------:|------------|
 | **action** | YES | Defines what kind of action to execute. The possible values are `prepareData` and `executeTests`. |
 | **verbose** | NO | Prints logs for all tests. |
+| **testName** | NO | Limit test execution to the given test. If not specified, all tests will be executed. |
 
 See the example:
 

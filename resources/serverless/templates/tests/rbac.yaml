@@ -21,7 +21,7 @@ metadata:
     helm.sh/chart: {{ include "chart" . }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces", "services"]
+    resources: ["namespaces", "services", "configmaps"]
     verbs: ["create", "get", "delete", "list", "watch"]
   - apiGroups: ["apps"]
     resources: ["deployments"]

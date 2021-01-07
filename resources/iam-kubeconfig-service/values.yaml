@@ -7,7 +7,7 @@ resources:
     cpu: 100m
     memory: 128Mi
   requests:
-    cpu: 50m
+    cpu: 5m
     memory: 32Mi
 global:
   isLocalEnv: false
@@ -18,4 +18,4 @@ global:
     path: eu.gcr.io/kyma-project
   iam_kubeconfig_service:
     dir:
-    version: "1c48e0a0"
+    version: "405eed8d"

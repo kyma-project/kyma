@@ -9,7 +9,6 @@ var (
 type EnvConfig struct {
 	InstNamespace      string `envconfig:"default=default"`
 	InstResource       string `envconfig:"default=kyma-installation"`
-	InstFinalizer      string `envconfig:"default=finalizer.installer.kyma-project.io"`
 	OverridesNamespace string `envconfig:"default=kyma-installer"`
 }
 

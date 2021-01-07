@@ -1,0 +1,13 @@
+pod-preset:
+  webhook:
+    replicaCount: 2
+    timeout: "15"
+    pdb:
+      enabled: "true"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 30Mi
+      limits:
+        cpu: 100m
+        memory: 48Mi

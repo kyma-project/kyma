@@ -33,12 +33,7 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.service_binding_usage_controller.dir }}service-binding-usage-controller:{{ .Values.global.service_binding_usage_controller.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
-            limits:
-              memory: 76Mi
-              cpu: 50m
-            requests:
-              memory: 24Mi
-              cpu: 30m
+{{ toYaml .Values.resources | indent 12 }}
           env:
             - name: APP_LOGGER_LEVEL
               value: "debug"

@@ -4,12 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -68,7 +70,7 @@ func (sb *ServiceBinding) Create(serviceInstanceName string) error {
 }
 
 func (sb *ServiceBinding) Delete() error {
-	err := sb.resCli.Delete(sb.name, sb.waitTimeout)
+	err := sb.resCli.Delete(sb.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ServiceBinding %s in namespace %s", sb.name, sb.namespace)
 	}
@@ -90,6 +92,20 @@ func (sb *ServiceBinding) Get() (*v1beta1.ServiceBinding, error) {
 	return &servicebinding, nil
 }
 
+func (sb *ServiceBinding) LogResource() error {
+	serviceBinding, err := sb.Get()
+	if err != nil {
+		return err
+	}
+	out, err := helpers.PrettyMarshall(serviceBinding)
+	if err != nil {
+		return err
+	}
+
+	sb.log.Infof("Service Binding resource: %s", out)
+	return nil
+}
+
 func (sb *ServiceBinding) WaitForStatusRunning() error {
 	servicebinding, err := sb.Get()
 	if err != nil {
@@ -104,11 +120,7 @@ func (sb *ServiceBinding) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), sb.waitTimeout)
 	defer cancel()
 	condition := sb.isServiceBindingReady()
-	_, err = watchtools.Until(ctx, servicebinding.GetResourceVersion(), sb.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, sb.resCli.ResCli, condition)
 }
 
 func (sb *ServiceBinding) isServiceBindingReady() func(event watch.Event) (bool, error) {

@@ -6,6 +6,8 @@ global:
     zipkinAddress: zipkin.kyma-system:9411
     # Sample rate is configured in istio-pilot which drives the overall sampling decision hence setting it to zero.
     sampleRate: 0
+  hibernation:
+    enabled: false
 
 knative-eventing:
   channel:
@@ -14,6 +16,7 @@ knative-eventing:
       apiVersion: messaging.knative.dev/v1alpha1
       kind: NatssChannel
   webhook:
+    failurePolicy: Fail
     # default timeout for Mutating and Validating Webhooks
     timeout: 10
     # Additional matchExpressions for Webhook Configuration
@@ -25,7 +28,30 @@ knative-eventing:
           - kyma-system
           - kyma-installer
           - istio-system
-
+  sourcesController:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  eventingWebhook:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 20m
+        memory: 20Mi
+  eventingController:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
 
 # PodMonitorSelector is configured here: resources/monitoring/templates/prometheus/prometheus.yaml
 event-mesh-dashboard:

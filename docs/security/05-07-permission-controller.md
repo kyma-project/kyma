@@ -16,7 +16,7 @@ The following table lists the configurable parameters of the permission-controll
 | Parameter | Description | Default value |
 | --------- | ----------- | ------------- |
 | `global.kymaRuntime.namespaceAdminGroup` | Determines the user group for which a RoleBinding to the **kyma-namespace-admin** role is created in all Namespaces except those specified in the `config.namespaceBlacklist` parameter. | `runtimeNamespaceAdmin` |
-| `config.namespaceBlacklist` | Comma-separated list of Namespaces in which a RoleBinding to the **kyma-namespace-admin** role is not created for the members of the group specified in the `global.kymaRuntime.namespaceAdminGroup` parameter.|`kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system` |
+| `config.namespaceBlacklist` | Comma-separated list of Namespaces in which a RoleBinding to the **kyma-namespace-admin** role is not created for the members of the group specified in the `global.kymaRuntime.namespaceAdminGroup` parameter.|`kyma-system, istio-system, default, knative-eventing, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system` |
 | `config.enableStaticUser`| Determines if a RoleBinding to the **kyma-namespace-admin** role for the static `namespace.admin@kyma.cx` user is created for every Namespace that is not blacklisted. | `true` |
 
 ## Customization examples
@@ -53,7 +53,7 @@ metadata:
     installer: overrides
     kyma-project.io/installation: ""
 data:
-  config.namespaceBlacklist: "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
+  config.namespaceBlacklist: "kyma-system, istio-system, default, knative-eventing,  kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
   config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER}"
 EOF
 ```

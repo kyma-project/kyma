@@ -115,6 +115,9 @@ rules:
 - apiGroups: [""]
   resources: ["nodes"]
   verbs: ["list"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "podmonitors"]
+  verbs: ["list"]
 
 # Serverless
 - apiGroups: ["serverless.kyma-project.io"]

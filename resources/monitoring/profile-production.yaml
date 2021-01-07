@@ -1,0 +1,27 @@
+prometheus:
+  prometheusSpec:
+    resources:
+      limits:
+        cpu: 1
+        memory: 4Gi
+      requests:
+        cpu: 300m
+        memory: 1Gi
+    retention: 30d
+    retentionSize: 15GB
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          resources:
+            requests:
+              storage: 20Gi
+
+prometheus-istio:
+  server:
+    resources:
+      limits:
+        memory: 4Gi
+
+alertmanager:
+  alertmanagerSpec:
+    retention: 240h

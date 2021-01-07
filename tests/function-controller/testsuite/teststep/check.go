@@ -3,9 +3,12 @@ package teststep
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
@@ -26,7 +29,7 @@ var _ step.Step = HTTPCheck{}
 func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller, expectedMsg string) *HTTPCheck {
 	return &HTTPCheck{
 		name:        name,
-		log:         log,
+		log:         log.WithField(step.LogStepKey, name),
 		endpoint:    url.String(),
 		expectedMsg: expectedMsg,
 		poll:        poller,
@@ -39,10 +42,31 @@ func (h HTTPCheck) Name() string {
 }
 
 func (h HTTPCheck) Run() error {
-	return errors.Wrap(h.poll.PollForAnswer(h.endpoint, "", h.expectedMsg), "while checking function through the gateway")
+	// backoff is needed because even tough the deployment may be ready
+	// the language specific server may not start yet
+	// there may also be some problems with istio sidecars etc
+	backoff := wait.Backoff{
+		Steps:    6,
+		Duration: 250 * time.Millisecond,
+		Factor:   2.0,
+		Jitter:   0.1,
+	}
+	return retry.OnError(backoff, func(err error) bool {
+		return true
+	}, func() error {
+		err := errors.Wrap(h.poll.PollForAnswer(h.endpoint, "", h.expectedMsg), "while checking connection to function")
+		if err != nil {
+			h.log.Warn(err)
+		}
+		return err
+	})
 }
 
 func (h HTTPCheck) Cleanup() error {
+	return nil
+}
+
+func (h HTTPCheck) OnError() error {
 	return nil
 }
 
@@ -60,12 +84,12 @@ func NewDefaultedFunctionCheck(name string, fn *function.Function) step.Step {
 	}
 }
 
-func (e DefaultedFunctionCheck) Name() string {
-	return e.name
+func (d DefaultedFunctionCheck) Name() string {
+	return d.name
 }
 
-func (e DefaultedFunctionCheck) Run() error {
-	fn, err := e.fn.Get()
+func (d DefaultedFunctionCheck) Run() error {
+	fn, err := d.fn.Get()
 	if err != nil {
 		return err
 	}
@@ -87,7 +111,11 @@ func (e DefaultedFunctionCheck) Run() error {
 	return nil
 }
 
-func (e DefaultedFunctionCheck) Cleanup() error {
+func (d DefaultedFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (d DefaultedFunctionCheck) OnError() error {
 	return nil
 }
 
@@ -102,7 +130,7 @@ type E2EFunctionCheck struct {
 
 func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL, brokerURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
-		log:          log,
+		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),
@@ -157,5 +185,9 @@ func (c E2EFunctionCheck) Run() error {
 }
 
 func (c E2EFunctionCheck) Cleanup() error {
+	return nil
+}
+
+func (e E2EFunctionCheck) OnError() error {
 	return nil
 }

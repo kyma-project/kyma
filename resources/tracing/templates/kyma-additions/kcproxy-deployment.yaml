@@ -91,9 +91,5 @@ spec:
           httpGet:
             path: /oauth/health
             port: http
-        readinessProbe:
-          httpGet:
-            path: /oauth/health
-            port: http
         resources:
 {{ toYaml .Values.kcproxy.resources | indent 10 }}

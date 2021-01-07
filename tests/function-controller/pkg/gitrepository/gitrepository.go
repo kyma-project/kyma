@@ -3,13 +3,18 @@ package gitrepository
 import (
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/sirupsen/logrus"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 )
 
 type GitRepository struct {
@@ -54,7 +59,36 @@ func (r *GitRepository) Create(spec serverlessv1alpha1.GitRepositorySpec) error 
 }
 
 func (r *GitRepository) Delete() error {
-	err := r.resCli.Delete(r.name, r.waitTimeout)
+	err := r.resCli.Delete(r.name)
 
 	return errors.Wrapf(err, "while deleting GitRepository %s in namespace %s", r.name, r.namespace)
+}
+
+func (r *GitRepository) LogResource() error {
+	gitRepo, err := r.Get()
+	if err != nil {
+		return errors.Wrapf(err, "while getting git repository")
+	}
+
+	out, err := helpers.PrettyMarshall(gitRepo)
+	if err != nil {
+		return errors.Wrap(err, "while marshalling git repository")
+	}
+
+	r.log.Infof("GitRepository: %s", out)
+	return nil
+}
+
+func (r *GitRepository) Get() (serverlessv1alpha1.GitRepository, error) {
+	out, err := r.resCli.Get(r.name)
+	if err != nil {
+		return serverlessv1alpha1.GitRepository{}, errors.Wrap(err, "while getting git repository from cluster")
+	}
+	repo := serverlessv1alpha1.GitRepository{}
+
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(out.Object, &repo)
+	if err != nil {
+		return serverlessv1alpha1.GitRepository{}, errors.Wrapf(err, "while creating object from unstructured object")
+	}
+	return repo, err
 }

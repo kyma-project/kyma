@@ -60,7 +60,7 @@ Follows these steps:
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
-2. Go to **Development** > **Functions** in the left navigation panel and navigate to `orders-function`.
+2. Go to **Workloads** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
 3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
 
@@ -75,7 +75,7 @@ A message confirming that the event trigger was created will appear in the **Eve
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Discovery and Network** > **API Rules** view in the `order-service` Namespace.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 

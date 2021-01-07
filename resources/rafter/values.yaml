@@ -9,10 +9,11 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: e9138b36
+    tag: "PR-10244"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -55,7 +56,13 @@ controller-manager:
       - mountPath: /tmp
         name: tmp-empty-dir
     extraProperties:
-      terminationGracePeriodSeconds: 10
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+    extraContainerProperties:
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
 
   webhooksConfigMap:
     create: true
@@ -195,16 +202,28 @@ controller-manager:
     enabled: true
 
     # Values for patches old credentials in minio release. More info: https://github.com/minio/minio/tree/master/docs/config#rotating-encryption-with-new-credentials
-    patchCredentials:
+    ensureSecret:
       secretName: "rafter-minio-old-credentials"
       image:
-        repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-        tag: "v20200617-32c1f3ff"
+        repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
+        tag: "20201023-5de446cf"
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-1d81f948
+      tag: RELEASE.2020-09-21T22-31-59Z-db711226
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
+
+    pod:
+      extraProperties:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 1000
+          runAsGroup: 1000
+      extraContainerProperties:
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
 
     persistence:
       enabled: true
@@ -218,8 +237,7 @@ controller-manager:
       persistence: "on"
 
     service:
-      annotations:
-        auth.istio.io/9000: NONE
+      annotations: {}
 
     environment:
       MINIO_BROWSER: "off"
@@ -276,8 +294,7 @@ upload-service:
       recreate: "{{ now }}"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -346,8 +363,8 @@ upload-service:
   migrator:
     images:
       alpineKubectl:
-        repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-        tag: 'v20200617-32c1f3ff'
+        repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+        tag: "20201023-5de446cf"
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
@@ -382,8 +399,7 @@ front-matter-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -419,8 +435,7 @@ asyncapi-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true

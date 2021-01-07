@@ -32,12 +32,20 @@ image:
   pullPolicy: IfNotPresent
   pullsecret: null
   repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
-  tag: v0.8.8
+  tag: v0.8.10
 replicaCount: 1
-securityContext: {}
+securityContext: { }
 service:
   port: 80
   type: ClusterIP
 sm:
   password: admin
   user: admin
+
+resources:
+  limits:
+    memory: 96Mi
+    cpu: 100m
+  requests:
+    memory: 32Mi
+    cpu: 30m

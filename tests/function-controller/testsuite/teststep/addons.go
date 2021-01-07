@@ -23,7 +23,7 @@ func NewAddonConfiguration(name string, addonConfig *addons.AddonConfiguration, 
 		name:        name,
 		addonConfig: addonConfig,
 		url:         url,
-		log:         container.Log,
+		log:         container.Log.WithField(step.LogStepKey, name),
 	}
 }
 
@@ -41,11 +41,11 @@ func (a Addons) Run() error {
 }
 
 func (a Addons) Cleanup() error {
-	if err := a.addonConfig.LogResource(); err != nil {
-		a.log.Warn(errors.Wrapf(err, "while logging resource"))
-	}
-
 	return errors.Wrap(a.addonConfig.Delete(), "while deleting addon configuration")
+}
+
+func (a Addons) OnError() error {
+	return a.addonConfig.LogResource()
 }
 
 var _ step.Step = Addons{}

@@ -10,6 +10,13 @@ webhook:
   pdb:
     enabled: false
   timeout: 10
+  resources:
+    requests:
+      cpu: 20m
+      memory: 24Mi
+    limits:
+      cpu: 100m
+      memory: 36Mi
 
 controller:
   enabled: false

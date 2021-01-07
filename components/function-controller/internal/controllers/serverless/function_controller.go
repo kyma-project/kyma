@@ -48,7 +48,7 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 	for key, value := range existing {
 		expectedValue := expected[key]
 
-		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom != value.ValueFrom { // valueFrom check is by reference
+		if expectedValue.Name != value.Name || expectedValue.Value != value.Value || expectedValue.ValueFrom.String() != value.ValueFrom.String() { // valueFrom check is by string representation
 			return false
 		}
 	}

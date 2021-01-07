@@ -3,60 +3,10 @@ kind: PrometheusRule
 metadata:
   name: kyma.rules
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
-  - name: kyma-pod-not-running-rule
-    rules:
-    - alert: KymaSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace=~"kyma-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: kube-pod-not-running-rule
-    rules:
-    - alert: KubeSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="kube-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: istio-pod-not-running-rule
-    rules:
-    - alert: IstioSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="istio-system", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: natss-pod-not-running-rule
-    rules:
-    - alert: NatssSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
-  - name: kn-eventing-pod-not-running-rule
-    rules:
-    - alert: KnEventingSystemPodNotRunning
-      expr: sum(kube_pod_container_status_running { namespace="knative-eventing", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|((oct-tp-testsuite-all)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
-      for: 60s
-      #labels:
-      #  severity: critical
-      annotations:
-        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
-        summary: "{{`{{ $labels.pod }}`}} is not running"
   - name: pvc-90-percent-full-rule
     rules:
     - alert: PVC90PercentFull
@@ -65,7 +15,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        message:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
   - name: kube-pod-oomkilled
     rules:
     - alert: KubePodOOMKilled
@@ -74,4 +24,14 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
+        description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
+  - name: prometheus-rules
+    rules:
+    - alert: ScrapeLimitForTargetExceeded
+      annotations:
+        description: One or more targets in the job monitoring-prometheus-istio-server have scrape limit exceeded
+        summary: Scrape limit for one or more targets is exceeded.
+      expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total{job="monitoring-prometheus-istio-server"}[1m]) > 0
+      for: 1m
+      labels:
+        severity: critical

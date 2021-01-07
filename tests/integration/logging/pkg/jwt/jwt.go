@@ -17,11 +17,11 @@ type config struct {
 }
 
 // GetToken retrieves jwt token from authentication package
-func GetToken() (string, error) {
+func GetToken() (string, string, error) {
 	var cfg config
 	err := envconfig.Init(&cfg)
 	if err != nil {
-		return "", errors.Wrap(err, "cannot read configurations from environment variables")
+		return "", "", errors.Wrap(err, "cannot read configurations from environment variables")
 	}
 
 	idProviderConfig := authentication.BuildIdProviderConfig(authentication.EnvConfig{
@@ -33,9 +33,9 @@ func GetToken() (string, error) {
 
 	token, err := authentication.GetToken(idProviderConfig)
 	if err != nil {
-		return "", errors.Wrap(err, "cannot get JWT token")
+		return "", "", errors.Wrap(err, "cannot get JWT token")
 	}
-	return token, nil
+	return token, cfg.Domain, nil
 }
 
 // SetAuthHeader sets authorization header with JWT

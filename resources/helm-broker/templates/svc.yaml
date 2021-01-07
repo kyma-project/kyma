@@ -2,8 +2,6 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ template "fullname" . }}
-  annotations:
-    "auth.istio.io/{{.Values.service.externalPort}}": NONE
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

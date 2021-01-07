@@ -10,14 +10,6 @@
   version = "v0.57.0"
 
 [[projects]]
-  digest = "1:15c12ef481d2688a480dc12e3b55c104fac7fc42529d225f2d03f4a8a51eb3df"
-  name = "github.com/avast/retry-go"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "f9a5f3752008752cd4f31f9c0c4dc60dec4583e5"
-  version = "v2.4.3"
-
-[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -601,7 +593,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/avast/retry-go",
     "github.com/gorilla/websocket",
     "github.com/hashicorp/go-multierror",
     "github.com/kisielk/errcheck",
@@ -621,7 +612,6 @@
     "github.com/vrischmann/envconfig",
     "golang.org/x/net/html",
     "golang.org/x/tools/cmd/goimports",
-    "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/resource",

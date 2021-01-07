@@ -10,21 +10,17 @@ metadata:
 {{- fail "One of `allowAll` or `customSelectors` must be specified." }}
 {{- end }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
-    {{- if .Values.serviceAccountLabels -}}
-    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
-    {{- end -}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" dict) .}}
 spec:
   podSelector:
     matchLabels:
       app: {{ template "prometheus-pushgateway.name" .}}
+      release: {{ .Release.Name }}
   ingress:
     - ports:
       - port: {{ .Values.service.targetPort }}
 {{- if .Values.networkPolicy.customSelectors }}
-    - from:
+      from:
 {{ toYaml .Values.networkPolicy.customSelectors | indent 8 }}
-{{- else if .Values.networkPolicy.allowAll }}
-    - {}
 {{- end -}}
 {{- end -}}

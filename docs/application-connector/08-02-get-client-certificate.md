@@ -41,12 +41,15 @@ To get the configuration URL which allows you to fetch the required configuratio
 
    ```yaml
    apiVersion: applicationconnector.kyma-project.io/v1alpha1
+   context: {}
    kind: TokenRequest
    metadata:
+     ...
      name: {APP_NAME}
+     ...
    status:
-     expireAfter: 2018-11-22T18:38:44Z
      application: {APP_NAME}
+     expireAfter: 2018-11-22T18:38:44Z
      state: OK
      token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
      url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
@@ -67,13 +70,14 @@ A successful call returns the following response:
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
-        "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
+        "eventsInfoUrl":    "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events/subscribed",
         "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
+        "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
         "infoUrl":          "https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info",
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
-        "subject": "OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
+        "subject": "O=Organization,OU=OrgUnit,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
@@ -116,13 +120,13 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 
 - the Application Registry API
 - the Event Service API
-- the `certificate renewal` endpoint
-- the `certificate revocation` endpoint
+- the certificate renewal endpoint
+- the certificate revocation endpoint
 
 The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
 
 ```bash
-curl https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 A successful call returns the following response:
@@ -133,13 +137,14 @@ A successful call returns the following response:
     "application": "{APP_NAME}"
   },
   "urls": {
-    "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
+    "eventsInfoUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events/subscribed",
     "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
+    "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
     "renewCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
     "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
   },
   "certificate": {
-    "subject": "OU=OrgUnit,O=Organization,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
+    "subject": "O=Organization,OU=OrgUnit,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
     "extensions": "string",
     "key-algorithm": "rsa2048"
   }
@@ -155,11 +160,11 @@ Since Kyma installation on Minikube uses the self-signed certificate by default,
 Call the Application Registry with this command:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 Use this command to call the Event Service:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -H "Content-Type: application/json" https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
 ```

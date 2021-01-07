@@ -9,3 +9,4 @@ spec:
   - "client_credentials"
   scope: "read write"
   secretName: "{{.OauthSecretName}}"
+status: {}

@@ -14,7 +14,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/client"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resource"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
@@ -172,6 +171,16 @@ func TestApiGatewayIntegration(t *testing.T) {
 	batch.CreateResources(k8sClient, hydraClientResource...)
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+	// Get HydraClient Status
+	hydraClientResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(hydraClientResource[0])
+	clientStatus, err := resourceManager.GetStatus(k8sClient, hydraClientResourceSchema, ns, name)
+	errorStatus, ok := clientStatus["reconciliationError"].(map[string]interface{})
+	if err != nil || !ok {
+		t.Fatalf("Error retrieving Oauth2Client status: %+v | %+v", err, ok)
+	}
+	if len(errorStatus) != 0 {
+		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
+	}
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)

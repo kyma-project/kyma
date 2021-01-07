@@ -285,32 +285,27 @@ type EventActivationEvent struct {
 	Schema      JSON   `json:"schema"`
 }
 
-type ExceededQuota struct {
-	QuotaName         string   `json:"quotaName"`
-	ResourceName      string   `json:"resourceName"`
-	AffectedResources []string `json:"affectedResources"`
-}
-
 type File struct {
 	URL      string `json:"url"`
 	Metadata JSON   `json:"metadata"`
 }
 
 type Function struct {
-	Name         string             `json:"name"`
-	Namespace    string             `json:"namespace"`
-	UID          string             `json:"UID"`
-	Labels       Labels             `json:"labels"`
-	Source       string             `json:"source"`
-	Dependencies string             `json:"dependencies"`
-	Env          []*FunctionEnv     `json:"env"`
-	Replicas     *FunctionReplicas  `json:"replicas"`
-	Resources    *FunctionResources `json:"resources"`
-	Runtime      *string            `json:"runtime"`
-	SourceType   *string            `json:"sourceType"`
-	BaseDir      *string            `json:"baseDir"`
-	Reference    *string            `json:"reference"`
-	Status       *FunctionStatus    `json:"status"`
+	Name           string             `json:"name"`
+	Namespace      string             `json:"namespace"`
+	UID            string             `json:"UID"`
+	Labels         Labels             `json:"labels"`
+	Source         string             `json:"source"`
+	Dependencies   string             `json:"dependencies"`
+	Env            []*FunctionEnv     `json:"env"`
+	Replicas       *FunctionReplicas  `json:"replicas"`
+	Resources      *FunctionResources `json:"resources"`
+	BuildResources *FunctionResources `json:"buildResources"`
+	Runtime        *string            `json:"runtime"`
+	SourceType     *string            `json:"sourceType"`
+	BaseDir        *string            `json:"baseDir"`
+	Reference      *string            `json:"reference"`
+	Status         *FunctionStatus    `json:"status"`
 }
 
 type FunctionEnv struct {
@@ -355,16 +350,17 @@ type FunctionMetadataInput struct {
 }
 
 type FunctionMutationInput struct {
-	Labels       Labels                  `json:"labels"`
-	Source       string                  `json:"source"`
-	Dependencies string                  `json:"dependencies"`
-	Env          []*FunctionEnvInput     `json:"env"`
-	Replicas     *FunctionReplicasInput  `json:"replicas"`
-	Resources    *FunctionResourcesInput `json:"resources"`
-	Runtime      *string                 `json:"runtime"`
-	SourceType   *string                 `json:"sourceType"`
-	BaseDir      *string                 `json:"baseDir"`
-	Reference    *string                 `json:"reference"`
+	Labels         Labels                  `json:"labels"`
+	Source         string                  `json:"source"`
+	Dependencies   string                  `json:"dependencies"`
+	Env            []*FunctionEnvInput     `json:"env"`
+	Replicas       *FunctionReplicasInput  `json:"replicas"`
+	Resources      *FunctionResourcesInput `json:"resources"`
+	BuildResources *FunctionResourcesInput `json:"buildResources"`
+	Runtime        *string                 `json:"runtime"`
+	SourceType     *string                 `json:"sourceType"`
+	BaseDir        *string                 `json:"baseDir"`
+	Reference      *string                 `json:"reference"`
 }
 
 type FunctionReplicas struct {
@@ -393,23 +389,11 @@ type FunctionStatus struct {
 	Message *string             `json:"message"`
 }
 
-type LimitRange struct {
-	Name   string            `json:"name"`
-	Limits []*LimitRangeItem `json:"limits"`
-}
-
 type LimitRangeInput struct {
 	Default        *ResourceValuesInput `json:"default"`
 	DefaultRequest *ResourceValuesInput `json:"defaultRequest"`
 	Max            *ResourceValuesInput `json:"max"`
-	Type           string               `json:"type"`
-}
-
-type LimitRangeItem struct {
-	LimitType      LimitType     `json:"limitType"`
-	Max            *ResourceType `json:"max"`
-	Default        *ResourceType `json:"default"`
-	DefaultRequest *ResourceType `json:"defaultRequest"`
+	Type           LimitRangeType       `json:"type"`
 }
 
 type LoadBalancerIngress struct {
@@ -510,21 +494,20 @@ type ResourceAttributes struct {
 	IsChildResolver bool    `json:"isChildResolver"`
 }
 
-type ResourceQuota struct {
-	Name     string          `json:"name"`
-	Pods     *string         `json:"pods"`
-	Limits   *ResourceValues `json:"limits"`
-	Requests *ResourceValues `json:"requests"`
+type ResourceLimits struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
+type ResourceQuotaHard struct {
+	Limits   *ResourceLimits `json:"limits"`
+	Requests *ResourceLimits `json:"requests"`
+	Pods     string          `json:"pods"`
 }
 
 type ResourceQuotaInput struct {
 	Limits   *ResourceValuesInput `json:"limits"`
 	Requests *ResourceValuesInput `json:"requests"`
-}
-
-type ResourceQuotasStatus struct {
-	Exceeded       bool             `json:"exceeded"`
-	ExceededQuotas []*ExceededQuota `json:"exceededQuotas"`
 }
 
 type ResourceRef struct {
@@ -1116,44 +1099,44 @@ func (e InstanceStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type LimitType string
+type LimitRangeType string
 
 const (
-	LimitTypeContainer LimitType = "Container"
-	LimitTypePod       LimitType = "Pod"
+	LimitRangeTypeContainer LimitRangeType = "Container"
+	LimitRangeTypePod       LimitRangeType = "Pod"
 )
 
-var AllLimitType = []LimitType{
-	LimitTypeContainer,
-	LimitTypePod,
+var AllLimitRangeType = []LimitRangeType{
+	LimitRangeTypeContainer,
+	LimitRangeTypePod,
 }
 
-func (e LimitType) IsValid() bool {
+func (e LimitRangeType) IsValid() bool {
 	switch e {
-	case LimitTypeContainer, LimitTypePod:
+	case LimitRangeTypeContainer, LimitRangeTypePod:
 		return true
 	}
 	return false
 }
 
-func (e LimitType) String() string {
+func (e LimitRangeType) String() string {
 	return string(e)
 }
 
-func (e *LimitType) UnmarshalGQL(v interface{}) error {
+func (e *LimitRangeType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = LimitType(str)
+	*e = LimitRangeType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid LimitType", str)
+		return fmt.Errorf("%s is not a valid LimitRangeType", str)
 	}
 	return nil
 }
 
-func (e LimitType) MarshalGQL(w io.Writer) {
+func (e LimitRangeType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

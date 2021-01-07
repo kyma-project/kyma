@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
@@ -31,6 +32,7 @@ import (
 	apigateway "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-gateway"
 	applicationoperator "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/application-operator"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/rafter"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/serverless"
@@ -118,6 +120,9 @@ func main() {
 	eventingCli, err := eventingclientv1alpha1.NewForConfig(k8sConfig)
 	fatalOnError(err, "while generating knative eventing client")
 
+	monitoringCli, err := monitoringv1.NewForConfig(k8sConfig)
+	fatalOnError(err, "while generating monitoring client")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -136,7 +141,7 @@ func main() {
 		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
 		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli),
+		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli, monitoringCli),
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
@@ -145,7 +150,7 @@ func main() {
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
-		// "LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
+		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	if testToRun, found := tests[testName]; found {

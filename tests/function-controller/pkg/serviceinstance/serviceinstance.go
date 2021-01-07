@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
@@ -71,7 +71,7 @@ func (si *ServiceInstance) Create(serviceClassExternalName, servicePlanExternalN
 }
 
 func (si *ServiceInstance) Delete() error {
-	err := si.resCli.Delete(si.name, si.waitTimeout)
+	err := si.resCli.Delete(si.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ServiceInstance %s in namespace %s", si.name, si.namespace)
 	}
@@ -93,6 +93,21 @@ func (si *ServiceInstance) Get() (*v1beta1.ServiceInstance, error) {
 	return &serviceinstance, nil
 }
 
+func (si *ServiceInstance) LogResource() error {
+	serviceInstance, err := si.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(serviceInstance)
+	if err != nil {
+		return err
+	}
+
+	si.log.Infof("%s", out)
+	return nil
+}
+
 func (si *ServiceInstance) WaitForStatusRunning() error {
 	serviceinstance, err := si.Get()
 	if err != nil {
@@ -107,11 +122,7 @@ func (si *ServiceInstance) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), si.waitTimeout)
 	defer cancel()
 	condition := si.isServiceInstanceReady()
-	_, err = watchtools.Until(ctx, serviceinstance.GetResourceVersion(), si.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, si.resCli.ResCli, condition)
 }
 
 func (si *ServiceInstance) isServiceInstanceReady() func(event watch.Event) (bool, error) {

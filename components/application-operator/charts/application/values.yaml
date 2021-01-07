@@ -9,10 +9,23 @@ deployment:
     proxyTimeout: 10
     proxyCacheTTL: 120
     requestLogging: false
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 service:
   externalapi:
     port: *externalAPIPort
+
+autoscaling:
+  enable: true
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40
 
 applicationConnectivityValidator:
   image:
@@ -23,6 +36,13 @@ applicationConnectivityValidator:
     externalAPIPort: 8080
     cacheExpirationMinutes: 1
     cacheCleanupMinutes: 2
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 istio:
   gateway:
@@ -34,10 +54,18 @@ acceptanceTest:
   image:
     pullPolicy: IfNotPresent
 
+eventPublisherProxy:
+  publishCEEndpoint: publish
+  service:
+    ## The name refers to the svc of event-publisher-proxy(https://github.com/kyma-project/kyma/blob/master/resources/eventing/charts/event-publisher-proxy/templates/service.yaml)
+    name: eventing-event-publisher-proxy
+    namespace: kyma-system
+
 # console-backend is a ServiceAccount which is installed as a part of *core* chart
 authorizationPolicy:
   serviceAccount:
     consoleBackendService: console-backend
+
 eventService:
   deployment:
     labels:
@@ -50,6 +78,13 @@ eventService:
       maxRequestSize: 65536
       requestTimeout: 10
       requestLogging: false
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
   service:
     externalapi:
       port: *eventServiceExternalAPIPort

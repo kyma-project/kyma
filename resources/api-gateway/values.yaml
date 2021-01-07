@@ -2,12 +2,12 @@ replicaCount: 1
 
 rbacJob:
   image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "d419f5a4"
+  tag: "8af556cd"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -42,8 +42,9 @@ config:
   domainWhiteList:
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
-    allowOrigin:
-      - "*"
+    allowOrigins:
+      regex:
+        - ".*"
     allowMethods: # no possibility to use "*"
       - "GET"
       - "POST"
@@ -82,7 +83,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: d022112f
+    version: 2546ae71
   env:
     testUser: "admin-user"
     timeout: 120

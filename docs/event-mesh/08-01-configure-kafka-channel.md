@@ -3,7 +3,7 @@ title: Configure the Kafka Channel
 type: Tutorials
 ---
 
-Instead of the default Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
+Instead of the default NATS Channel implementation, you can use the Knative-compatible [Kafka Channel](https://github.com/kyma-incubator/knative-kafka). To ensure Kafka works properly, you must:
 
 * Set up a Kafka cluster using Azure Event Hubs.
 * Create a Secret which the controller uses to communicate with the cluster.
@@ -31,7 +31,7 @@ Follow these steps:
   $ export kafkaUsername=$ConnectionString
   $ export kafkaProvider=azure
   ```
-4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.  
+4. Prepare the override which creates the Azure Secret for Kafka and save it to a file called `azure-secret.yaml`.
 
   ```yaml
   apiVersion: v1
@@ -43,7 +43,7 @@ Follow these steps:
       installer: overrides
       component: knative-eventing-kafka
       kyma-project.io/installation: ""
-  type: Opaque    
+  type: Opaque
   stringData:
     kafka.brokers.hostname: $kafkaBrokersHost
     kafka.brokers.port : $kafkaBrokersPort

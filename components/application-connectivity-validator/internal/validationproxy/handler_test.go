@@ -30,10 +30,12 @@ const (
 	group  = "group"
 	tenant = "tenant"
 
-	eventServicePathPrefixV1 = "/test-application/v1/events"
-	eventServicePathPrefixV2 = "/test-application/v2/events"
-	eventMeshPathPrefix      = "/test-application/events"
-	appRegistryPathPrefix    = "/test-application/v1/metadata"
+	eventServicePathPrefixV1               = "/test-application/v1/events"
+	eventServicePathPrefixV2               = "/test-application/v2/events"
+	eventMeshPathPrefix                    = "/test-application/events"
+	appRegistryPathPrefix                  = "/test-application/v1/metadata"
+	eventMeshDestinationPath               = "/"
+	eventMeshDestinationPathWhenBEBEnabled = "/publish"
 )
 
 type event struct {
@@ -241,6 +243,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServiceHost,
 				eventMeshPathPrefix,
 				eventMeshHost,
+				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -390,6 +393,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServiceHost,
 				eventMeshPathPrefix,
 				eventMeshHost,
+				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -433,6 +437,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServiceHost,
 				eventMeshPathPrefix,
 				eventMeshHost,
+				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
@@ -470,6 +475,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServiceHost,
 			eventMeshPathPrefix,
 			eventMeshHost,
+			eventMeshDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
@@ -508,6 +514,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServiceHost,
 			eventMeshPathPrefix,
 			eventMeshHost,
+			eventMeshDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
@@ -524,6 +531,168 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusNotFound, recorder.Code)
+	})
+
+	t.Run("should proxy requests to Event Publisher Proxy(EPP) when BEB is enabled", func(t *testing.T) {
+		for _, testCase := range testCases {
+			// given
+			applicationGetter := &mocks.ApplicationGetter{}
+			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
+
+			idCache := cache.New(time.Minute, time.Minute)
+
+			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
+				eventPublisherV1ProxyHandler := mux.NewRouter()
+				eventPublisherV1ProxyServer := httptest.NewServer(eventPublisherV1ProxyHandler)
+				eventPublisherV1ProxyHost := strings.TrimPrefix(eventPublisherV1ProxyServer.URL, "http://")
+
+				proxyHandlerBEB := NewProxyHandler(
+					testCase.group,
+					testCase.tenant,
+					eventServicePathPrefixV1,
+					eventServicePathPrefixV2,
+					eventPublisherV1ProxyHost, // For a BEB enabled cluster requests should be forwarded to Event Publisher Proxy
+					eventMeshPathPrefix,
+					"randomMesh",
+					eventMeshDestinationPathWhenBEBEnabled,
+					appRegistryPathPrefix,
+					appRegistryHost,
+					applicationGetter,
+					idCache)
+				eventTitle := "my-event-1"
+
+				eventPublisherV1ProxyHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					appName := mux.Vars(r)["application"]
+					assert.Equal(t, applicationName, appName, `Error reading "application" route variable from request context`)
+
+					var receivedEvent event
+
+					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+					require.NoError(t, err)
+					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					w.WriteHeader(http.StatusOK)
+				})
+
+				body, err := json.Marshal(event{Title: eventTitle})
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", applicationName), bytes.NewReader(body))
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandlerBEB.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+
+			t.Run("should proxy requests in V2 to /publish endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
+				eventTitle := "my-event-2"
+
+				eventPublisherProxyHandler := mux.NewRouter()
+				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
+
+				proxyHandlerBEB := NewProxyHandler(
+					testCase.group,
+					testCase.tenant,
+					eventServicePathPrefixV1,
+					eventServicePathPrefixV2,
+					"randomV1Proxy",
+					eventMeshPathPrefix,
+					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
+					eventMeshDestinationPathWhenBEBEnabled,
+					appRegistryPathPrefix,
+					appRegistryHost,
+					applicationGetter,
+					idCache)
+
+				eventPublisherProxyHandler.PathPrefix("/publish").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var receivedEvent event
+
+					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+					require.NoError(t, err)
+					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					w.WriteHeader(http.StatusOK)
+				})
+
+				body, err := json.Marshal(event{Title: eventTitle})
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", applicationName), bytes.NewReader(body))
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandlerBEB.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+
+			t.Run("should proxy requests in /events to /publish endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
+				const eventTitle = "my-event"
+				const mockIncomingRequestHost = "fake.istio.gateway"
+
+				eventPublisherProxyHandler := mux.NewRouter()
+				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
+
+				proxyHandlerBEB := NewProxyHandler(
+					testCase.group,
+					testCase.tenant,
+					eventServicePathPrefixV1,
+					eventServicePathPrefixV2,
+					"randomV1Proxy",
+					eventMeshPathPrefix,
+					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
+					eventMeshDestinationPathWhenBEBEnabled,
+					appRegistryPathPrefix,
+					appRegistryHost,
+					applicationGetter,
+					idCache)
+
+				eventPublisherProxyHandler.Path("/publish").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var receivedEvent event
+
+					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+					require.NoError(t, err)
+					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					assert.NotEqual(t, mockIncomingRequestHost, r.Host, "proxy should rewrite Host field")
+
+					w.WriteHeader(http.StatusOK)
+				})
+
+				body, err := json.Marshal(event{Title: eventTitle})
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/events", applicationName), bytes.NewReader(body))
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+
+				// mock request Host to assert it gets rewritten by the proxy
+				req.Host = mockIncomingRequestHost
+
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandlerBEB.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+		}
 	})
 
 }

@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "prometheus-operator.fullname" . }}-grafana-datasource
-  namespace: {{ $.Release.Namespace }}
+  name: {{ template "kube-prometheus-stack.fullname" . }}-grafana-datasource
+  namespace: {{ template "kube-prometheus-stack.namespace" . }}
 {{- if .Values.grafana.sidecar.datasources.annotations }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.datasources.annotations | indent 4 }}
 {{- end }}
   labels:
     {{ $.Values.grafana.sidecar.datasources.label }}: "1"
-    app: {{ template "prometheus-operator.name" $ }}-grafana
-{{ include "prometheus-operator.labels" $ | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
 data:
   datasource.yaml: |-
     apiVersion: 1
@@ -19,14 +19,14 @@ data:
 {{- if .Values.grafana.sidecar.datasources.defaultDatasourceEnabled }}
     - name: Prometheus
       type: prometheus
-      url: http://{{ template "prometheus-operator.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}/{{ trimPrefix "/" .Values.prometheus.prometheusSpec.routePrefix }}
+      url: http://{{ template "kube-prometheus-stack.fullname" . }}-prometheus:{{ .Values.prometheus.service.port }}/{{ trimPrefix "/" .Values.prometheus.prometheusSpec.routePrefix }}
       access: proxy
       isDefault: true
 {{- if .Values.grafana.sidecar.datasources.createPrometheusReplicasDatasources }}
 {{- range until (int .Values.prometheus.prometheusSpec.replicas) }}
     - name: Prometheus-{{ . }}
       type: prometheus
-      url: http://prometheus-{{ template "prometheus-operator.fullname" $ }}-prometheus-{{ . }}.prometheus-operated:9090/{{ trimPrefix "/" $.Values.prometheus.prometheusSpec.routePrefix }}
+      url: http://prometheus-{{ template "kube-prometheus-stack.fullname" $ }}-prometheus-{{ . }}.prometheus-operated:9090/{{ trimPrefix "/" $.Values.prometheus.prometheusSpec.routePrefix }}
       access: proxy
       isDefault: false
 {{- end }}
@@ -38,7 +38,10 @@ data:
 {{- if .Values.grafana.dataSources.jaeger.enabled }}
 {{ toYaml .Values.grafana.dataSources.jaeger.config | indent 4}}
 {{- end }}
+{{- if (and .Values.grafana.dataSources.prometheusIstio.enabled (index .Values "prometheus-istio").enabled )}}
+{{ toYaml .Values.grafana.dataSources.prometheusIstio.config | indent 4}}
+{{- end }}
 {{- if .Values.grafana.additionalDataSources }}
-{{ toYaml .Values.grafana.additionalDataSources | indent 4}}
+{{ tpl (toYaml .Values.grafana.additionalDataSources | indent 4) . }}
 {{- end }}
 {{- end }}

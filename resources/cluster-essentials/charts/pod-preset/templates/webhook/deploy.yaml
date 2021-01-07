@@ -28,6 +28,8 @@ spec:
       - name: {{ .Chart.Name }}-webhook
         image: "{{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}"
         imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.webhook.resources | indent 10 }}
         args:
         - -tls-cert-file=/keys/webhook.crt
         - -tls-private-key-file=/keys/webhook.key

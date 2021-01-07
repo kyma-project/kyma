@@ -3,14 +3,15 @@ title: Jaeger shows only a few traces
 type: Troubleshooting
 ---
 
-By default, the **PILOT_TRACE_SAMPLING** value in the [IstioControlPlane](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) is set to `1`, where `100` is the maximum value. This means that only 1 out of 100 requests is sent to Jaeger for trace recording.
-To change this system behavior, you can override the existing settings or change the value in the Runtime.
+By default, only 1% of the requests are sent to Jaeger for trace recording. To change this system behavior, you can override the existing settings or change the value in the Runtime.
+
+> **NOTE:** You can also manually set the `x-b3-sampled: 1` header to force sampling for a particular request.
 
 ## Create an override
 
-Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration with a customized control plane definition.
+Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **PILOT_TRACE_SAMPLING** attribute to `60`.
+1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **trace sampling** attribute to `60`.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -30,16 +31,14 @@ data:
     metadata:
       namespace: istio-system
     spec:
-      components:
-        pilot:
-          k8s:
-            env:
-            - name: PILOT_TRACE_SAMPLING
-              value: "60"
+      meshConfig:
+        defaultConfig:
+          tracing:
+            sampling: 60
 EOF
 ```
 
-2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of **PILOT_TRACE_SAMPLING** to `60`.
+2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of trace sampling to `60`.
 
     >**NOTE:** If you add the override in the Runtime, run the following command to trigger the update:
     > ```bash
@@ -48,4 +47,6 @@ EOF
 
 ## Define the value in the Runtime
 
-If you have already installed Kyma and do not want to trigger any updates, edit the `istio-pilot` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/v1.5/docs/tasks/observability/distributed-tracing/overview/#trace-sampling).
+If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
+
+> Note: the change to PILOT_TRACE_SAMPLING would only take effect if the meshConfig override is not defined.

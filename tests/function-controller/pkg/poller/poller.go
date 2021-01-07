@@ -20,9 +20,9 @@ type Poller struct {
 	DataKey            string
 }
 
-func (p *Poller) WithLogger(l *logrus.Entry) Poller {
+func (p Poller) WithLogger(l *logrus.Entry) Poller {
 	p.Log = l
-	return *p
+	return p
 }
 
 func (p Poller) PollForAnswer(url, payloadStr, expected string) error {

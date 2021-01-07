@@ -9,6 +9,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
+  isBEBEnabled: false
   ingress:
     domainName: "TBD"
   helm:
@@ -23,39 +24,39 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9593"
+    version: "PR-10042"
   application_operator_tests:
-    version: "PR-9593"
+    version: "470796a1"
   connector_service:
-    version: "b9871385"
+    version: "PR-10285"
   connector_service_tests:
-    version: "b9871385"
+    version: "470796a1"
   connection_token_handler:
-    version: "b9871385"
+    version: "3083c3d4"
   connection_token_handler_tests:
-    version: "b9871385"
+    version: "470796a1"
   event_service:
-    version: "760fe348"
+    version: "f98272bd"
   event_service_integration_tests:
     version: "2c51c024"
   application_gateway:
-    version: "PR-9593"
+    version: "4feb544b"
   application_gateway_tests:
-    version: "PR-9593"
+    version: "470796a1"
   application_gateway_legacy_tests:
-    version: "PR-9569"
+    version: "d0f17bff"
   application_registry:
-    version: "PR-9593"
+    version: "4feb544b"
   application_registry_tests:
-    version: "PR-9569"
+    version: "d556963d"
   application_broker:
-    version: "1c48e0a0"
+    version: "6242216c"
   application_connectivity_certs_setup_job:
-    version: "b9871385"
+    version: "4feb544b"
   application_connectivity_validator:
-    version: "PR-9593"
+    version: "60463b1d"
   application_broker_eventing_migration:
-    version: "d4be1327"
+    version: "a8a6bca9"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -63,10 +64,22 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: kyma-gateway-certs-cacert
+      name: app-connector-certs
       namespace: istio-system
   certificate:
     validityTime: 92d
+
+application_connectivity_certs_sync:
+  secrets:
+    caCertificateSecret:
+      name: app-connector-certs
+      namespace: istio-system
+    tlsCertificateSecret:
+      name: kyma-gateway-certs
+      namespace: istio-system
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 tests:
   application_connector_tests:
@@ -78,5 +91,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-9569"
+      version: "470796a1"
       pullPolicy: IfNotPresent

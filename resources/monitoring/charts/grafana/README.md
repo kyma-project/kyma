@@ -9,10 +9,9 @@ In Kyma, you can find these dashboards under [grafana](../../templates/grafana/)
 Some of the available dashboards:
 
 * **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](../../../../resources/istio/templates/monitoring/grafana/dashboards/istio-mesh.yaml) file.
-* **Pilot** - Displays metrics on request latency, discovery calls and various cache types. Find the configuration of this dashboard in [this](../../../../resources/istio/templates/monitoring/grafana/dashboards/istio-pilot.yaml) file.
-* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](../../templates/grafana/dashboards/nodes.yaml) file.
-* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](../../templates/grafana/dashboards/pods.yaml) file.
-* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](../../templates/grafana/dashboards/statefulset.yaml) file.
+* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](../../templates/grafana/dashboards-1.14/nodes.yaml) file.
+* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](../../templates/grafana/kyma-dashboards/pods.yaml) file.
+* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](../../templates/grafana/dashboards-1.14/statefulset.yaml) file.
 
 ## Add a dashboard to Kyma
 

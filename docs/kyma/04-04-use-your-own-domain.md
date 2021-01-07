@@ -360,13 +360,15 @@ Get the TLS certificate:
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a TOML file with the Azure Client ID, Client Secret, Subscription ID and Tenant ID:
+3. Create a [service principal](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a JSON file with the Azure Client ID, Client Secret, Subscription ID, and Tenant ID:
 
-    ```toml
-    CLIENT_ID = {YOUR_CLIENT_ID}
-    CLIENT_SECRET = {YOUR_CLIENT_SECRET}
-    SUBSCRIPTION_ID = {YOUR_SUBSCRIPTION_ID}
-    TENANT_ID = {YOUR_TENANT_ID}
+    ```json
+    {
+      "subscription_id": "{YOUR_SUBSCRIPTION_ID}",
+      "tenant_id": "{YOUR_TENANT_ID}",
+      "client_id": "{YOUR_APP_ID}",
+      "client_secret": "{YOUR_APP_PASSWORD}"
+    }
     ```
 
 4. Create an AKS cluster:
@@ -379,7 +381,7 @@ Get the TLS certificate:
 5. Add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
 
     ```bash
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
     >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow the [troubleshooting guide](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) to avoid jobs running endlessly on AKS deployments of Kyma.
 
@@ -396,7 +398,7 @@ Get the TLS certificate:
 1. Install Kyma using Kyma CLI:
 
     ```bash
-    kyma install -s $KYMA_VERSION --domain $DOMAIN --tlsCert $TLS_CERT --tlsKey $TLS_KEY
+    kyma install -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
     ```
 
 ## Configure DNS for the cluster load balancer

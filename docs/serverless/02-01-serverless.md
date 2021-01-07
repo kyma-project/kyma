@@ -20,8 +20,6 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 
 6. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
 
-    > **NOTE:** Serverless offers a built-in internal Docker registry that is suitable for local development. For production purposes, switch to an [external Docker registry](#tutorials-set-an-external-docker-registry).
-
 7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Deployment that uses the newly built image.
 
 8. FC creates a Service that points to the Deployment.

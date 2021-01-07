@@ -5,11 +5,6 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -19,6 +14,13 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
@@ -55,6 +57,9 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: r.config.MaxConcurrentReconciles,
+		}).
 		Complete(r)
 }
 
@@ -105,7 +110,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var runtimeConfigMap corev1.ConfigMapList
 	labels := map[string]string{
-		kubernetes.ConfigLabel:  "runtime",
+		kubernetes.ConfigLabel:  kubernetes.RuntimeLabelValue,
 		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
 	}
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
@@ -142,7 +147,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Sources update failed: %v", err),
+			Message:            fmt.Sprintf("Reading git options failed: %v", err),
 		})
 	}
 

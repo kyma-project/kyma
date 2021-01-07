@@ -38,6 +38,13 @@ deployment:
     lookupConfigMapName: "lookup-config"
     lookupConfig: |
       { "url": "http://example.com/graphql", "headers": { } }
+  resources:
+    limits:
+      cpu: 100m
+      memory: 96Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
 
 service:
   externalapi:

@@ -1,0 +1,13 @@
+{{- if .Values.install.enabled }}
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "nats.fullname" . }}
+spec:
+  host: {{ include "nats.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+
+ {{- end }}

@@ -43,6 +43,12 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - "*"
+- apiGroups:
   - extensions
   resources:
   - replicasets

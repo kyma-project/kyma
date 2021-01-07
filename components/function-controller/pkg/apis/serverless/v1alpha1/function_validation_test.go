@@ -21,7 +21,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 	g := gomega.NewWithT(t)
 	err := os.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
-	err = os.Setenv("MIN_REPLICAS_VALUE", "1")
+	err = os.Setenv("FUNCTION_REPLICAS_MIN_VALUE", "1")
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 	for testName, testData := range map[string]struct {
@@ -45,6 +45,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("50m"),
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
 						},
 					},
 				},
@@ -82,6 +92,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("50m"),
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("200m"),
+							corev1.ResourceMemory: resource.MustParse("200Mi"),
 						},
 					},
 				},
@@ -197,7 +217,7 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
-		"Should return error on resources validation": {
+		"Should return error on function resources validation": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
@@ -225,6 +245,42 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				),
 			),
 		},
+		"Should return error on function build resources validation": {
+			givenFunc: Function{
+				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
+				Spec: FunctionSpec{
+					Source:  "test-source",
+					Runtime: Nodejs12,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("100m"),
+							corev1.ResourceMemory: resource.MustParse("128Mi"),
+						},
+					},
+				},
+			},
+			expectedError: gomega.HaveOccurred(),
+			specifiedExpectedError: gomega.And(
+				gomega.ContainSubstring("spec.buildResources.limits.cpu"),
+				gomega.ContainSubstring("spec.buildResources.limits.memory"),
+				gomega.ContainSubstring("spec.buildResources.requests.memory"),
+				gomega.ContainSubstring("spec.buildResources.requests.cpu"),
+			),
+		},
 		"should return errors because of minimal config values": {
 			givenFunc: Function{
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
@@ -234,6 +290,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 					MaxReplicas: &zero,
 					Runtime:     Nodejs12,
 					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("9m"),
+							corev1.ResourceMemory: resource.MustParse("10Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("5m"),
+							corev1.ResourceMemory: resource.MustParse("6Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("9m"),
 							corev1.ResourceMemory: resource.MustParse("10Mi"),
@@ -253,6 +319,10 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				gomega.ContainSubstring("spec.resources.requests.memory"),
 				gomega.ContainSubstring("spec.resources.limits.cpu"),
 				gomega.ContainSubstring("spec.resources.limits.memory"),
+				gomega.ContainSubstring("spec.buildResources.requests.cpu"),
+				gomega.ContainSubstring("spec.buildResources.requests.memory"),
+				gomega.ContainSubstring("spec.buildResources.limits.cpu"),
+				gomega.ContainSubstring("spec.buildResources.limits.memory"),
 			),
 		},
 		"should be OK for git sourceType": {
@@ -268,6 +338,16 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("50m"),
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("400m"),
+							corev1.ResourceMemory: resource.MustParse("400Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("300m"),
+							corev1.ResourceMemory: resource.MustParse("300Mi"),
 						},
 					},
 					MinReplicas: &one,

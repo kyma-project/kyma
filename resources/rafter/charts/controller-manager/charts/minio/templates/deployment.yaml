@@ -48,7 +48,6 @@ spec:
 {{ toYaml .Values.podLabels | indent 8 }}
 {{- end }}
       annotations:
-        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | trimSuffix "\n" | indent 8 }}
@@ -57,11 +56,17 @@ spec:
   {{- if .Values.priorityClassName }}
       priorityClassName: "{{ .Values.priorityClassName }}"
   {{- end }}
+      {{- if .Values.pod.extraProperties }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{- end }}
       serviceAccountName: {{ include "minio.serviceAccountName" . | quote }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.pod.extraContainerProperties }}
+          {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
+          {{- end }}
           {{- if .Values.s3gateway.enabled }}
           command: [ "/bin/sh",
           "-ce",
@@ -146,13 +151,6 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end}}
-          # CHANGES
-          {{- if .Release.IsUpgrade }}
-          envFrom:
-            - secretRef:
-                name: {{ .Values.patchCredentials.secretName }}
-          {{- end }}
-          # --CHANGES
           livenessProbe:
             httpGet:
               path: /minio/health/live

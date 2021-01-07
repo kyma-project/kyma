@@ -37,7 +37,7 @@ func WithResponseTime(responseTime time.Duration) MockServerOption {
 	}
 }
 
-func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string) {
+func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint, eventsWithHTTP400 string) {
 	m.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(m.responseTime)
 
@@ -47,16 +47,24 @@ func (m *MockServer) Start(t *testing.T, tokenEndpoint, eventsEndpoint string) {
 				m.generatedTokensCount++
 				token := fmt.Sprintf("access_token=token-%d&token_type=bearer&expires_in=%d", time.Now().UnixNano(), m.expiresInSec)
 				if _, err := w.Write([]byte(token)); err != nil {
-					t.Errorf("Failed to write HTTP response")
+					t.Errorf("failed to write HTTP response")
 				}
 			}
 		case eventsEndpoint:
 			{
 				w.WriteHeader(http.StatusNoContent)
 			}
+		case eventsWithHTTP400:
+			{
+				w.WriteHeader(http.StatusBadRequest)
+				_, err := w.Write([]byte("invalid request"))
+				if err != nil {
+					t.Errorf("failed to write message: %v", err)
+				}
+			}
 		default:
 			{
-				t.Errorf("Mock server supports the following endpoints only: [%s]", tokenEndpoint)
+				t.Errorf("mock server supports the following endpoints only: [%s]", tokenEndpoint)
 			}
 		}
 	}))

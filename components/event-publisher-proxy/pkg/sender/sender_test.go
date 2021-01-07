@@ -13,8 +13,9 @@ import (
 
 const (
 	// mock server endpoints
-	tokenEndpoint  = "/token"
-	eventsEndpoint = "/events"
+	tokenEndpoint         = "/token"
+	eventsEndpoint        = "/events"
+	eventsHTTP400Endpoint = "/events400"
 
 	// connection settings
 	maxIdleConns        = 100
@@ -78,7 +79,7 @@ func TestNewRequestWithTarget(t *testing.T) {
 
 func TestSend(t *testing.T) {
 	mockServer := testingutils.NewMockServer()
-	mockServer.Start(t, tokenEndpoint, eventsEndpoint)
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
 	defer mockServer.Close()
 
 	ctx := context.Background()

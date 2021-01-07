@@ -48,6 +48,13 @@ spec:
         - name: {{ include "rafterUploadService.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            requests:
+              memory: "{{ .Values.pod.resources.requests.memory }}"
+              cpu: "{{ .Values.pod.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.pod.resources.limits.memory }}"
+              cpu: "{{ .Values.pod.resources.limits.cpu }}"
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterUploadService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
           {{- end }}

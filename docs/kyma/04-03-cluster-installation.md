@@ -117,13 +117,15 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
     az group create --name $RS_GROUP --location $REGION
     ```
 
-3. Create a [service principle](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a TOML file with the Azure Client ID, Client Secret, Subscription ID, and Tenant ID:
+3. Create a [service principal](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal#manually-create-a-service-principal) on Azure. Create a JSON file with the Azure Client ID, Client Secret, Subscription ID, and Tenant ID:
 
-    ```toml
-    CLIENT_ID = {YOUR_APP_ID}
-    CLIENT_SECRET = {YOUR_APP_PASSWORD}
-    SUBSCRIPTION_ID = {YOUR_SUBSCRIPTION_ID}
-    TENANT_ID = {YOUR_TENANT_ID}
+    ```json
+    {
+      "subscription_id": "{YOUR_SUBSCRIPTION_ID}",
+      "tenant_id": "{YOUR_TENANT_ID}",
+      "client_id": "{YOUR_APP_ID}",
+      "client_secret": "{YOUR_APP_PASSWORD}"
+    }
     ```
 
 4. Create an AKS cluster:

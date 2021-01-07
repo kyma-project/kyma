@@ -42,9 +42,15 @@ spec:
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefixV1=/{{ .Release.Name }}/v1/events"
             - "--eventServicePathPrefixV2=/{{ .Release.Name }}/v2/events"
+            {{- if .Values.global.isBEBEnabled }}
+            - "--eventServiceHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"
+            - "--eventMeshHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"
+            - "--eventMeshDestinationPath=/{{ .Values.eventPublisherProxy.publishCEEndpoint }}"
+            {{- else }}
             - "--eventServiceHost={{ .Release.Name }}-event-service:{{ .Values.eventService.service.externalapi.port }}"
-            - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
             - "--eventMeshHost={{ .Release.Name }}.{{ .Release.Namespace }}"
+            {{- end }}
+            - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
@@ -61,11 +67,21 @@ spec:
               port: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
+          resources:
+            limits:
+              cpu: {{ .Values.applicationConnectivityValidator.resources.limits.cpu }}
+              memory: {{ .Values.applicationConnectivityValidator.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.applicationConnectivityValidator.resources.requests.cpu }}
+              memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
           ports:
             - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
               name: http-proxy
             - containerPort: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
               name: http-api-port
+          resources:
+            requests:
+              memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
 ---
 apiVersion: v1
 kind: Service

@@ -176,7 +176,7 @@ This is an example of the `api` section of the request body for an API with a sp
             "basic": {
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
-            },
+            }
         }  
     }
 ```
@@ -241,7 +241,7 @@ To register an API with a specification URL that requires specific custom header
             "basic": {
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
-            },
+            }
         }
     }
 ```
@@ -255,7 +255,7 @@ For example, for the service with the following API, the Application Registry wi
 ```json
 "api": {
   "targetUrl": "https://services.odata.org/OData/OData.svc",
-  "apiType": "OData"
+  "apiType": "OData",
   "credentials": {
     "basic": {
       "username": "{USERNAME}",

@@ -1,6 +1,6 @@
 ---
 # Destination rule to disable (m)TLS when talking to apiserver, as it doesn't have a sidecar.
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: api-server

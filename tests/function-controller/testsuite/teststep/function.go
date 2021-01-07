@@ -15,12 +15,12 @@ type newFunction struct {
 	log      *logrus.Entry
 }
 
-func CreateFunction(log *logrus.Entry, fn *function.Function, stepName string, data *function.FunctionData) step.Step {
+func CreateFunction(log *logrus.Entry, fn *function.Function, name string, data *function.FunctionData) step.Step {
 	return newFunction{
 		fn:       fn,
-		name:     stepName,
+		name:     name,
 		funcData: data,
-		log:      log,
+		log:      log.WithField(step.LogStepKey, name),
 	}
 }
 
@@ -38,44 +38,48 @@ func (f newFunction) Run() error {
 }
 
 func (f newFunction) Cleanup() error {
-	if err := f.fn.LogResource(); err != nil {
-		f.log.Warn(errors.Wrapf(err, "while logging function"))
-	}
-
 	return errors.Wrapf(f.fn.Delete(), "while deleting function: %s", f.name)
 }
 
-var _ step.Step = newFunction{}
-var _ step.Step = updateFunc{}
-var _ step.Step = EmptyFunction{}
+func (f newFunction) OnError() error {
+	return f.fn.LogResource()
+}
 
-type EmptyFunction struct {
+var _ step.Step = newFunction{}
+
+type emptyFunction struct {
 	name string
 	fn   *function.Function
 }
 
 func CreateEmptyFunction(fn *function.Function) step.Step {
-	return &EmptyFunction{
+	return &emptyFunction{
 		name: "Creating function without body should be rejected by the webhook",
 		fn:   fn,
 	}
 }
 
-func (e EmptyFunction) Name() string {
+func (e emptyFunction) Name() string {
 	return e.name
 }
 
-func (e EmptyFunction) Run() error {
+func (e emptyFunction) Run() error {
 	err := e.fn.Create(&function.FunctionData{})
 	if err == nil {
-		return errors.New("Creating empty funciton should return error, but got nil")
+		return errors.New("Creating empty function should return error, but got nil")
 	}
 	return nil
 }
 
-func (e EmptyFunction) Cleanup() error {
+func (e emptyFunction) Cleanup() error {
 	return nil
 }
+
+func (e emptyFunction) OnError() error {
+	return nil
+}
+
+var _ step.Step = emptyFunction{}
 
 type updateFunc struct {
 	name     string
@@ -89,7 +93,7 @@ func UpdateFunction(log *logrus.Entry, fn *function.Function, name string, data 
 		fn:       fn,
 		name:     name,
 		funcData: data,
-		log:      log,
+		log:      log.WithField(step.LogStepKey, name),
 	}
 }
 
@@ -108,3 +112,9 @@ func (u updateFunc) Run() error {
 func (u updateFunc) Cleanup() error {
 	return nil
 }
+
+func (u updateFunc) OnError() error {
+	return nil
+}
+
+var _ step.Step = updateFunc{}

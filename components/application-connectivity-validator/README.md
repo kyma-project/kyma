@@ -13,6 +13,7 @@ A single instance of the component is deployed for an Application and uses these
 - **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/v1/events`.
 - **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/v2/events`.
 - **eventServiceHost** is the host and the port of the Event Service. The default value is `events-api:8080`.
+- **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/`.
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
 

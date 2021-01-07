@@ -6,11 +6,10 @@ metadata:
   labels:
     action: install
     kyma-project.io/installation: ""
-  finalizers:
-    - finalizer.installer.kyma-project.io
 spec:
   version: "__VERSION__"
   url: "__URL__"
+  profile: ""
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
@@ -20,8 +19,6 @@ spec:
       namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
-    - name: "istio-kyma-patch"
-      namespace: "istio-system"
     - name: "knative-eventing"
       namespace: "knative-eventing"
     - name: "dex"
@@ -38,6 +35,8 @@ spec:
       namespace: "kyma-system"
     - name: "helm-broker"
       namespace: "kyma-system"
+    # - name: "eventing"
+    #   namespace: kyma-system
     - name: "nats-streaming"
       namespace: "natss"
     - name: "core"

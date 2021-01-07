@@ -39,6 +39,13 @@ spec:
       - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/application-registry:{{ .Values.global.application_registry.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         args:
           - "/applicationregistry"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"

@@ -6,12 +6,12 @@ import (
 
 // Default constraints
 type Config struct {
-	Interval time.Duration `envconfig:"default=1s"`
+	Interval time.Duration `envconfig:"default=5s"`
 	Timeout  time.Duration `envconfig:"default=5m"`
 }
 
 var config = Config{
-	Interval: time.Second,
+	Interval: 5 * time.Second,
 	Timeout:  5 * time.Minute,
 }
 

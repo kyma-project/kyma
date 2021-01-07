@@ -24,11 +24,11 @@ func (n NamespaceStep) Run() error {
 }
 
 func (n NamespaceStep) Cleanup() error {
-	if err := n.ns.LogResource(); err != nil {
-		return errors.Wrapf(err, "while logging namespace to stdout")
-	}
-
 	return errors.Wrap(n.ns.Delete(), "while deleting namespace")
+}
+
+func (n NamespaceStep) OnError() error {
+	return n.ns.LogResource()
 }
 
 func NewNamespaceStep(stepName string, coreCli typedcorev1.CoreV1Interface, container shared.Container) NamespaceStep {

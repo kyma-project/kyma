@@ -153,6 +153,7 @@ data:
   prometheus.prometheusSpec.retentionSize: "256MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
+  prometheus-istio.server.resources.limits.memory: "400Mi"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -164,10 +165,7 @@ metadata:
     component: serverless
     kyma-project.io/installation: ""
 data:
-  containers.manager.envs.buildRequestsCPU.value: "100m"
-  containers.manager.envs.buildRequestsMemory.value: "200Mi"
-  containers.manager.envs.buildLimitsCPU.value: "200m"
-  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  webhook.values.buildJob.resources.defaultPreset: "local-dev"
   # TODO: Solve a problem with DNS
   tests.enabled: "false"
 

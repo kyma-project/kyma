@@ -1,0 +1,26 @@
+{{- /*
+  Taken from https://github.com/kiali/helm-charts/tree/master/kiali-server
+  */ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kiali-server.fullname" . }}-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- /* Most of .Values is simply the ConfigMap - strip out the keys that are not part of the ConfigMap */}}
+    {{- $cm := omit .Values.kiali.spec "nameOverride" "fullnameOverride" "kiali_route_url" }}
+    {{- /* The helm chart defines namespace for us, but pass it to the ConfigMap in case the server needs it */}}
+    {{- $_ := set $cm.deployment "namespace" .Release.Namespace }}
+    {{- /* Some values of the ConfigMap are generated, but might not be identical, from .Values */}}
+    {{- $_ := set $cm "istio_namespace" (include "kiali-server.istio_namespace" .) }}
+    {{- $_ := set $cm.auth "strategy" (include "kiali-server.auth.strategy" .) }}
+    {{- $_ := set $cm.auth.openshift "client_id_prefix" (include "kiali-server.fullname" .) }}
+    {{- $_ := set $cm.identity "cert_file" (include "kiali-server.identity.cert_file" .) }}
+    {{- $_ := set $cm.identity "private_key_file" (include "kiali-server.identity.private_key_file" .) }}
+    {{- $_ := set $cm.login_token "signing_key" (include "kiali-server.login_token.signing_key" .) }}
+    {{- $_ := set $cm.server "web_root" (include "kiali-server.server.web_root" .) }}
+    {{- $_ := set $cm.external_services.tracing "enabled" .Values.global.tracing.enabled }}
+    {{- tpl (toYaml $cm | nindent 4) . }}

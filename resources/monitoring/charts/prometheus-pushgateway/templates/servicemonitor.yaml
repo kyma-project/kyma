@@ -7,11 +7,7 @@ metadata:
   namespace: {{ .Values.serviceMonitor.namespace }}
   {{- end }}
   labels:
-    {{- include "prometheus-pushgateway.labels" . | nindent 4 }}
-    app: {{ template "prometheus-pushgateway.name" . }}
-    {{- if .Values.serviceMonitor.additionalLabels }}
-{{ toYaml .Values.serviceMonitor.additionalLabels | indent 4 }}
-    {{- end }}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.serviceMonitor.additionalLabels) .  }}
 spec:
   endpoints:
   - port: http
@@ -28,6 +24,5 @@ spec:
       - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      app: {{ template "prometheus-pushgateway.name" . }}
-      release: {{ .Release.Name }}
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
 {{- end -}}

@@ -7,6 +7,9 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 ENTRYPOINT := ./cmd/generator/main.go
 
+release:
+	$(MAKE) gomod-release
+
 verify:: vet
 
 .PHONY: clean

@@ -67,6 +67,9 @@ rules:
   - apiGroups: ["*"]
     resources: ["pods/portforward"]
     verbs: ["create", "delete"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "create", "update", "delete", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

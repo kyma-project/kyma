@@ -29,12 +29,12 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter | Required | Description |
-|-----------|-------------|---------------|
-| **spec.url** | Yes | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix.  |
-| **spec.auth** | No | Specifies that you must authenticate to the Git repository. |
-| **spec.auth.type** | No | Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). This parameter is required if you provide **spec.auth**. |
-| **spec.auth.secretName** | No | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the GitRepository CR. The **spec.auth.secretName** parameter is required if you provide **spec.auth**. |
+| Parameter | Required for HTTP(S) | Required for SSH | Description |
+|-----------|-------------|-------------|---------------|
+| **spec.url** | Yes | Yes | Provides the address to the Git repository with the Function's code and dependencies. Depending on whether the repository is public or private and what authentication method is used to access it, the URL must start with the `http(s)`, `git`, or `ssh` prefix, and end with the `.git` suffix. |
+| **spec.auth** | No | Yes | Specifies that you must authenticate to the Git repository. |
+| **spec.auth.type** | No | Yes  | Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). For SSH, this parameter must be set to `key`. |
+| **spec.auth.secretName** | No | Yes | Specifies the name of the Secret with credentials used by the Function Controller to authenticate to the Git repository in order to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the GitRepository CR. The **spec.auth.secretName** parameter is required if you provide **spec.auth**. |
 
 ## Related resources and components
 

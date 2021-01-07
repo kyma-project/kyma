@@ -11,7 +11,7 @@ echo "---> Install requirements"
 apk add git jq
 
 echo "---> Get HELM_2 certs"
-${HELM_2_BINARY} init -c
+${HELM_2_BINARY} init -c --skip-refresh
 
 if [[ $(kubectl get -n kube-system deploy tiller-deploy -o name) ]]; then
     if [[ $(kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" -o name) ]]; then

@@ -35,7 +35,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       initContainers:
         - name: helm-release-migrator
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
             - /bin/bash
             - -c
@@ -62,13 +62,15 @@ spec:
         - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
         - "--strictMode={{ .Values.global.strictMode }}"
         - "--healthPort={{ .Values.controller.args.healthPort }}"
+        - "--profile={{ .Values.controller.resources.profile }}"
+        - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
         image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
           limits:
-            cpu: 100m
-            memory: 256Mi
+            cpu: {{ .Values.controller.resources.limits.cpu }}
+            memory: {{ .Values.controller.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.controller.resources.requests.cpu }}
+            memory: {{ .Values.controller.resources.requests.memory }}
       terminationGracePeriodSeconds: 10

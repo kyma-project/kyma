@@ -23,11 +23,13 @@ To install the chart with the release name `kiali` in the `kyma-system` Namespac
 ### Unistallation
 
 To uninstall/delete the `kiali` release but continue tracking the release, run:
-    ```
+
+    ```bash
     $ helm delete kiali
     ```
 
 To uninstall/delete the `kiali` release completely and make its name free for further use, run:
-    ```
+
+    ```bash
     $ helm delete kiali --purge
     ```

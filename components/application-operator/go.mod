@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go v0.65.0 // indirect
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0

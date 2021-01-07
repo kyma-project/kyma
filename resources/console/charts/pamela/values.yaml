@@ -1,0 +1,25 @@
+replicaCount: 1
+image:
+  name: eu.gcr.io/kyma-project/pamela
+  tag: ff2715e2
+  pullPolicy: IfNotPresent
+service:
+  internalPort: 3001
+  internalPortName: http-pamela
+  externalPort: 3001
+  protocol: TCP
+virtualservice:
+  enabled: true
+  host: pamela
+  annotations: {}
+serviceAccountName: console-backend
+istio:
+  namespace: istio-system
+verifySSL: false
+tracing:
+  debug: false
+  serviceSpanName: console-pamela
+
+global:
+  tracing:
+    zipkinAddress: zipkin.kyma-system:9411

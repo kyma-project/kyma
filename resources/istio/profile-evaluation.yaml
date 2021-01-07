@@ -1,0 +1,12 @@
+---
+
+monitoring:
+  enabled: false
+  dashboards:
+    enabled: false
+  istioServiceMonitor:
+    enabled: false
+    scrapeInterval: ""
+
+istio_operator_cluster_file: istio-operator-cluster-evaluation.yaml
+istio_operator_minikube_file: istio-operator-minikube-evaluation.yaml

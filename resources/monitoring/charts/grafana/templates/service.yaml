@@ -1,3 +1,9 @@
+{{- /*
+  Customization: due to kyma-installer limitations, extraExposePorts has to be a multi-line string and not a list
+  Extra label to be included by the service monitor:
+    app.kubernetes.io/component: grafana
+*/ -}}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,6 +11,7 @@ metadata:
   namespace: {{ template "grafana.namespace" . }}
   labels:
     {{- include "grafana.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
 {{- if .Values.service.labels }}
 {{ toYaml .Values.service.labels | indent 4 }}
 {{- end }}
@@ -47,3 +54,4 @@ spec:
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}
+

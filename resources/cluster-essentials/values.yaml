@@ -1,8 +1,8 @@
 jobs:
   crdsInConfigMap: 20
   image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201125-caa631b9"
   installer:
     namespace: kyma-installer
 
@@ -18,3 +18,11 @@ image:
   tag: "978664da"
   # Image pull policy
   pullPolicy: IfNotPresent
+
+limitRange:
+  max:
+    memory: 4Gi
+  default:
+    memory: 96Mi
+  defaultRequest:
+    memory: 32Mi

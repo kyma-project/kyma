@@ -6,7 +6,7 @@ metadata:
 {{ include "nats-streaming.labels.standard" . | indent 4 }}
 spec:
   ports:
-  - name: client
+  - name: tcp-client
     port: {{ .Values.global.natsStreaming.ports.client }}
     targetPort: client
   selector:

@@ -4,13 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage/types/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -73,7 +72,7 @@ func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix
 }
 
 func (sbu *ServiceBindingUsage) Delete() error {
-	err := sbu.resCli.Delete(sbu.name, sbu.waitTimeout)
+	err := sbu.resCli.Delete(sbu.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
@@ -87,12 +86,27 @@ func (sbu *ServiceBindingUsage) Get() (*v1alpha1.ServiceBindingUsage, error) {
 		return &v1alpha1.ServiceBindingUsage{}, errors.Wrapf(err, "while getting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
 
-	servicebindingusage, err := convertFromUnstructuredToServiceBindingUsage(u)
+	serviceBindingUsage, err := convertFromUnstructuredToServiceBindingUsage(u)
 	if err != nil {
 		return &v1alpha1.ServiceBindingUsage{}, err
 	}
 
-	return &servicebindingusage, nil
+	return &serviceBindingUsage, nil
+}
+
+func (sbu *ServiceBindingUsage) LogResource() error {
+	serviceBindingUsage, err := sbu.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(serviceBindingUsage)
+	if err != nil {
+		return err
+	}
+
+	sbu.log.Infof("Service Binding Usage resource: %s", out)
+	return nil
 }
 
 func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {
@@ -109,11 +123,7 @@ func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), sbu.waitTimeout)
 	defer cancel()
 	condition := sbu.isServiceBindingUsageReady()
-	_, err = watchtools.Until(ctx, servicebinding.GetResourceVersion(), sbu.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, sbu.resCli.ResCli, condition)
 }
 
 func (sbu *ServiceBindingUsage) isServiceBindingUsageReady() func(event watch.Event) (bool, error) {

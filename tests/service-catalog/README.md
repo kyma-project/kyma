@@ -24,7 +24,6 @@ Follow these steps to run a Service Catalog test on a local machine:
 1. Run Kyma.
 2. Modify the broker service, using the `kubectl edit` command:
  - add `name: http` to the **port** section
- - add the `auth.istio.io/80: NONE` annotation
 
 3. Create an Ingress to expose the service broker. For example:
 

@@ -1,7 +1,0 @@
-global:
-  isLocalEnv: false
-
-istio_kyma_patch:
-  image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-  tag: "v20200617-32c1f3ff"
-required_istio_version: 1.5.10-distroless

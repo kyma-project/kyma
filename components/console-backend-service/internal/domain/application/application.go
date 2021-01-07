@@ -45,7 +45,7 @@ type Config struct {
 }
 
 type ConnectorSvcCfg struct {
-	URL             string
+	URL             string        `envconfig:"optional"`
 	HTTPCallTimeout time.Duration `envconfig:"default=500ms"`
 }
 

@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  tag: b4ae0097
+  tag: "37b09dbb"
   pullPolicy: IfNotPresent
 service:
   internalPort: 80
@@ -10,3 +10,4 @@ virtualservice:
   enabled: true
   annotations: {}
   hostname: catalog
+resources: {}

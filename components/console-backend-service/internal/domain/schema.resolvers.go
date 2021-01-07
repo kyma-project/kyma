@@ -209,10 +209,6 @@ func (r *mutationResolver) DeleteReplicaSet(ctx context.Context, name string, na
 	return r.k8s.DeleteReplicaSetMutation(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
-	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuota)
-}
-
 func (r *mutationResolver) UpdateConfigMap(ctx context.Context, name string, namespace string, configMap gqlschema.JSON) (*gqlschema.ConfigMap, error) {
 	return r.k8s.UpdateConfigMapMutation(ctx, name, namespace, configMap)
 }
@@ -239,10 +235,6 @@ func (r *mutationResolver) UpdateNamespace(ctx context.Context, name string, lab
 
 func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
 	return r.k8s.DeleteNamespace(ctx, name)
-}
-
-func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
-	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
 func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionMutationInput) (*gqlschema.Function, error) {
@@ -283,10 +275,6 @@ func (r *namespaceListItemResolver) HealthyPodsCount(ctx context.Context, obj *g
 
 func (r *namespaceListItemResolver) ApplicationsCount(ctx context.Context, obj *gqlschema.NamespaceListItem) (*int, error) {
 	return r.k8s.ApplicationsCountField(ctx, obj)
-}
-
-func (r *queryResolver) ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*gqlschema.ClusterAssetGroup, error) {
-	return r.rafter.Resolver.ClusterAssetGroupsQuery(ctx, viewContext, groupName)
 }
 
 func (r *queryResolver) ServiceInstance(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {
@@ -417,20 +405,8 @@ func (r *queryResolver) ReplicaSets(ctx context.Context, namespace string, first
 	return r.k8s.ReplicaSetsQuery(ctx, namespace, first, offset)
 }
 
-func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]*gqlschema.ResourceQuota, error) {
-	return r.k8s.ResourceQuotasQuery(ctx, namespace)
-}
-
-func (r *queryResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (*gqlschema.ResourceQuotasStatus, error) {
-	return r.k8s.ResourceQuotasStatus(ctx, namespace)
-}
-
 func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]*gqlschema.EventActivation, error) {
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
-}
-
-func (r *queryResolver) LimitRanges(ctx context.Context, namespace string) ([]*gqlschema.LimitRange, error) {
-	return r.k8s.LimitRangesQuery(ctx, namespace)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]*gqlschema.BackendModule, error) {

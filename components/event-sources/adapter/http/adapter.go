@@ -27,7 +27,7 @@ type envConfig struct {
 	adapter.EnvConfig
 	EventSource string `envconfig:"EVENT_SOURCE" required:"true"`
 
-	// PORT as required by knative serving runtime contract
+	// PORT to access the event-source
 	Port int `envconfig:"PORT" required:"true" default:"8080"`
 }
 

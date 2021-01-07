@@ -22,3 +22,8 @@ bin
 *.swp
 *.swo
 *~
+
+/eventing-controller
+/eventing-controller-nats
+vendor
+licenses

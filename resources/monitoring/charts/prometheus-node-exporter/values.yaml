@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/node-exporter
-  tag: 0.18.1-6f374cc6
+  tag: 1.0.1-3ee7f789
   pullPolicy: IfNotPresent
 
 service:
@@ -15,19 +15,13 @@ service:
   annotations:
     prometheus.io/scrape: "true"
 
-podLabels:
-  jobLabel: node-exporter
-
-extraArgs:
-    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
-    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
-
 prometheus:
   monitor:
     enabled: false
     additionalLabels: {}
     namespace: ""
 
+    relabelings: []
     scrapeTimeout: 10s
 
 ## Customize the updateStrategy if set
@@ -57,6 +51,8 @@ serviceAccount:
   imagePullSecrets: []
 
 securityContext:
+  fsGroup: 65534
+  runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
 
@@ -91,7 +87,8 @@ affinity: {}
 podAnnotations: {}
 
 # Extra labels to be added to node exporter pods
-podLabels: {}
+podLabels:
+  jobLabel: node-exporter
 
 ## Assign a nodeSelector if operating a hybrid cluster
 ##
@@ -108,9 +105,11 @@ tolerations:
 
 ## Additional container arguments
 ##
-extraArgs: []
+extraArgs:
 #   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
 #   - --collector.textfile.directory=/run/prometheus
+    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
 
 ## Additional mounts from the host
 ##

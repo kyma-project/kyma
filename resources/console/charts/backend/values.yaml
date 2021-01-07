@@ -17,7 +17,7 @@ verifySSL: false
 tracing:
   debug: false
   serviceSpanName: console-backend-service
-
+resources: {}
 tests:
   enabled: true
   labels:
@@ -25,7 +25,7 @@ tests:
     after-upgrade: true
 
 
-systemNamespaces: "istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
+systemNamespaces: "istio-system,knative-eventing,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
 
 global:
   tracing:

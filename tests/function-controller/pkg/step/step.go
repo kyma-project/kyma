@@ -9,15 +9,17 @@ import (
 
 // Step represents a single action in test scenario
 type Step interface {
-	// Name returns name name of the step
+	// Name returns Name Name of the step
 	Name() string
 	// Run executes the step
 	Run() error
 	// Cleanup removes all resources that may possibly created by the step
 	Cleanup() error
+	// OnError is callback in case of error
+	OnError() error
 }
 
-// Runner executes steps in safe manner
+// Runner executes Steps in safe manner
 type Runner struct {
 	log     *logrus.Logger
 	cleanup CleanupMode
@@ -53,27 +55,26 @@ func NewRunner(opts ...RunnerOption) *Runner {
 	return runner
 }
 
-// Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
+// Run executes Steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
 // starting from last executed step
-func (r *Runner) Run(steps []Step, skipCleanup bool) error {
-	var startedStep int
-	var step Step
+func (r *Runner) Run(step Step, skipCleanup bool) error {
 	var err error
 
 	defer func() {
 		if !skipCleanup {
-			r.Cleanup(steps[0:(startedStep + 1)])
+			if err = step.Cleanup(); err != nil {
+				r.log.Error("while executing clean up", err)
+			}
 		}
 	}()
-
-	for startedStep, step = range steps {
-		r.log.Infof("Step: '%s'", step.Name())
-		if err = r.runStep(step); err != nil {
-			r.log.Errorf("Error in '%s': %s", step.Name(), err)
-			break
-		}
+	err = step.Run()
+	if err == nil {
+		return nil
 	}
-
+	callbackErr := step.OnError()
+	if callbackErr != nil {
+		r.log.Errorf("while executing on Error for step: %s, error: %s", step.Name(), err.Error())
+	}
 	return err
 }
 

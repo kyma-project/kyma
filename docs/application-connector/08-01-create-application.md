@@ -52,6 +52,6 @@ spec:
   services: []
 status:
   installationStatus:
-    description: Installation complete
-    status: DEPLOYED
+    description: Install complete
+    status: deployed
 ```

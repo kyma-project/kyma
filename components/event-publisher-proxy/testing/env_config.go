@@ -39,3 +39,15 @@ func WithRequestTimeout(requestTimeout time.Duration) EnvConfigOption {
 		e.RequestTimeout = requestTimeout
 	}
 }
+
+func WithBEBNamespace(bebNs string) EnvConfigOption {
+	return func(e *env.Config) {
+		e.BEBNamespace = bebNs
+	}
+}
+
+func WithEventTypePrefix(eventTypePrefix string) EnvConfigOption {
+	return func(e *env.Config) {
+		e.EventTypePrefix = eventTypePrefix
+	}
+}

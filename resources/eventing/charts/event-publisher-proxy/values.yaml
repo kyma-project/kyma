@@ -9,21 +9,9 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "87c46ffe"
+  tag: "cacbe4f2"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
-
-upstreamAuthentication:
-  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
-  oauthClientId: ""
-  # oauthClientSecret is the Oauth2 secret used in order to get an Oauth2 token from BEB
-  oauthClientSecret: ""
-  # oauthTokenEndpoint is the Oauth2 endpoint from BEB from where Oauth2 tokens can be retrieved
-  oauthTokenEndpoint: ""
-  # publishUrl is the URL for publishing events to BEB
-  publishUrl: ""
-  # secretName defines optionally another name than the default secret name
-  secretName: ""
 
 serviceAccount:
   # name defines optionally another name than the default name for the service account
@@ -36,3 +24,9 @@ resources:
   requests:
     cpu: 32m
     memory: 64Mi
+
+beb:
+  config:
+   # eventTypePrefix is the prefix of the eventType as per BEB specification
+   eventTypePrefix: sap.kyma.custom
+

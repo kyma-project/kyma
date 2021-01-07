@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/uaa-activator/internal/kubernetess/util"
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
-
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
-	"k8s.io/kubernetes/pkg/controller/deployment/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
