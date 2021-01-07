@@ -124,7 +124,7 @@ existingConfigMap: ""
 config:
   service:
     flush: 1
-    logLevel: error
+    logLevel: "warn"
     daemon: "off"
     http:
       server: "On"
@@ -137,7 +137,7 @@ config:
       excludePath:
       parser: docker
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
-      dockerMode: On
+      dockerMode: "On"
       # Wait period time in seconds to flush queued unfinished split lines.
       dockerModeFlush: 4
       # Specify the database file to keep track of monitored files and offsets.
@@ -145,7 +145,7 @@ config:
       # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
       memBufLimit: 5MB
       # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
-      skipLongLines: On
+      skipLongLines: "On"
       # The interval of refreshing the list of watched files. Default is 60 seconds.
       refreshInterval: 10
       #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
@@ -157,7 +157,7 @@ config:
       excludePath: 
       parser: docker
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
-      dockerMode: On
+      dockerMode: "On"
       # Wait period time in seconds to flush queued unfinished split lines.
       dockerModeFlush: 4
       # Specify the database file to keep track of monitored files and offsets.
@@ -165,7 +165,7 @@ config:
       # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
       memBufLimit: 5MB
       # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
-      skipLongLines: On
+      skipLongLines: "On"
       # The interval of refreshing the list of watched files. Default is 60 seconds.
       refreshInterval: 10
       #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
@@ -183,8 +183,8 @@ config:
       match: "*"
       # When Merge_Log is enabled, the filter tries to assume the log field from the incoming message is a JSON string message and make a structured representation of it at the same level of the log field in the map. Now if Merge_Log_Key is set (a string name), all the new structured fields taken from the original log content are inserted under the new key.
       mergeLogKey: ""
-      parser: On
-      exclude: On
+      parser: "On"
+      exclude: "On"
     additional: ""
   outputs:
     loki:
@@ -218,12 +218,12 @@ config:
       match: "*"
       host: elasticsearch
       port: 443
-      logstashFormat: On
+      logstashFormat: "On"
       logstashPrefix: flb
       index: flb_logs_write
       retryLimit: False
-      generateID: On
-      replaceDots: On
+      generateID: "On"
+      replaceDots: "On"
       bufferSize: False
       # default timeKey: @timestamp
       timeKey:
@@ -234,7 +234,7 @@ config:
       # Optional TLS encryption to ElasticSeaarch instance
       tls:
         enabled: true
-        verify: On
+        verify: "On"
         # TLS certificate for the Elastic (in base64 PEM format). Use if tls=on and tls_verify=on.
         ca: ""
         cert: ""
@@ -267,7 +267,7 @@ config:
       httpPasswd: ""
       tls:
         enabled: false
-        verify: on
+        verify: "On"
         ca: ""
         cert: ""
         key: ""
