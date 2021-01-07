@@ -16,9 +16,9 @@ A single instance of the component is deployed for an Application and uses these
 - **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/`.
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
-- **kubeConfig** is the path to a cluster kubeconfig. Used for running the service out-of-cluster.
-- **masterURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service out-of-cluster.
-- **syncPeriod** is the period in seconds how often controller should periodically reconcile Application resource. The default value is `120 seconds`.
+- **kubeConfig** is the path to a cluster kubeconfig. Used for running the service outside of the cluster.
+- **masterURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
+- **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `120 seconds`.
 
 ## Details
 
