@@ -23,6 +23,7 @@ type Config struct {
 	BaseNamespace                 string        `envconfig:"default=kyma-system"`
 	ExcludedNamespaces            []string      `envconfig:"default=istio-system;knative-eventing;kube-node-lease;kube-public;kube-system;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	RoleRequeueDuration           time.Duration `envconfig:"default=1m"`
+	RoleBindingRequeueDuration    time.Duration `envconfig:"default=1m"`
 	ConfigMapRequeueDuration      time.Duration `envconfig:"default=1m"`
 	SecretRequeueDuration         time.Duration `envconfig:"default=1m"`
 	ServiceAccountRequeueDuration time.Duration `envconfig:"default=1m"`

@@ -89,5 +89,5 @@ func (r *RoleBindingReconciler) Reconcile(request ctrl.Request) (ctrl.Result, er
 		}
 	}
 
-	return ctrl.Result{RequeueAfter: r.config.RoleRequeueDuration}, nil
+	return ctrl.Result{RequeueAfter: r.config.RoleBindingRequeueDuration}, nil
 }

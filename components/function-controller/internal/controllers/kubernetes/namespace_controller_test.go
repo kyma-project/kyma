@@ -81,7 +81,7 @@ var _ = ginkgo.Describe("Namespace", func() {
 		compareRole(role, baseRole)
 
 		roleBinding := &rbacv1.RoleBinding{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, role)).To(gomega.Succeed())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
 		compareRoleBinding(roleBinding, baseRoleBinding)
 
 		ginkgo.By("one more time reconciling the Namespace")
@@ -107,7 +107,7 @@ var _ = ginkgo.Describe("Namespace", func() {
 		compareRole(role, baseRole)
 
 		roleBinding = &rbacv1.RoleBinding{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, role)).To(gomega.Succeed())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
 		compareRoleBinding(roleBinding, baseRoleBinding)
 	})
 })
