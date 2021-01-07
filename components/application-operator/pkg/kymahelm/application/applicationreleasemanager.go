@@ -133,9 +133,13 @@ func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (ma
 		return nil, err
 	}
 
-	return map[string]interface{}{
+	overrides := map[string]interface{}{
 		"global": overridesMap,
-	}, nil
+	}
+
+	MergeLabelOverrides(application.Spec.Labels, overrides)
+
+	return overrides, nil
 }
 
 func (r *releaseManager) DeleteReleaseIfExists(name string) error {
