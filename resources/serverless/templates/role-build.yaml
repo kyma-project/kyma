@@ -4,7 +4,7 @@ metadata:
   name: {{ template "fullname" . }}-build
   namespace: {{ .Release.Namespace }}
   labels:
-    serverless.kyma-project.io/config: role
+    serverless.kyma-project.io/rbac: role
   {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 rules:
   - apiGroups:
