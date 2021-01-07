@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1 as builder
+FROM golang:1.14-alpine3.12 as builder
 
 ENV BASE_APP_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/dex
 WORKDIR ${BASE_APP_DIR}
@@ -7,10 +7,7 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
-COPY ./dex/ ${BASE_APP_DIR}/dex/
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
-COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
+COPY . ${BASE_APP_DIR}
 
 #
 # Build tests
