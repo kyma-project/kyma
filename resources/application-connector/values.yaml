@@ -28,7 +28,7 @@ global:
   application_operator_tests:
     version: "470796a1"
   connector_service:
-    version: "4feb544b"
+    version: "PR-10285"
   connector_service_tests:
     version: "470796a1"
   connection_token_handler:

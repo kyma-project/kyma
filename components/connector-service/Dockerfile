@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.15.6-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/connector-service
 WORKDIR $DOCK_PKG_DIR

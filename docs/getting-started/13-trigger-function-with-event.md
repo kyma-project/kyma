@@ -60,7 +60,7 @@ Follows these steps:
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
-2. Go to **Development** > **Functions** in the left navigation panel and navigate to `orders-function`.
+2. Go to **Workloads** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
 3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
 

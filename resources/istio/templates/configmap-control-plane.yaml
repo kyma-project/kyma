@@ -5,18 +5,14 @@ metadata:
   name: kyma-istio-operator-config
 data:
 {{- if hasKey .Values.global "minikubeIP" }}
-  config.yaml: |-
-{{ tpl (.Files.Get "files/kyma_minikube_istio_operator.yaml" | printf "%s" | indent 4) . }}
-  operator-1-7.yaml: |-
+  operator.yaml: |-
 {{ tpl (tpl ("files/{{ .Values.istio_operator_minikube_file }}") . | .Files.Get | printf "%s" | indent 4) . }}
 {{- else }}
-  config.yaml: |-
-{{ tpl (.Files.Get "files/kyma_cluster_istio_operator.yaml" | printf "%s" | indent 4) . }}
-  operator-1-7.yaml: |-
+  operator.yaml: |-
 {{ tpl (tpl ("files/{{ .Values.istio_operator_cluster_file }}") . | .Files.Get | printf "%s" | indent 4) . }}
 {{- end }}
 {{ if .Values.kyma_istio_operator }}
   #This additional user-provided definition is merged with the default one
   overrides.yaml: |-
 {{ .Values.kyma_istio_operator | printf "%s" | indent 4 }}
-{{ end }}
+{{- end }}
