@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 		userNamespace := newFixNamespace("tam")
 		gomega.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
-		baseRoleBinding = newFixBaseRoleBinding(config.BaseNamespace, "ah-tak-przeciez")
+		baseRoleBinding = newFixBaseRoleBinding(config.BaseNamespace, "ah-tak-przeciez", userNamespace.GetName())
 		gomega.Expect(resourceClient.Create(context.TODO(), baseRoleBinding)).To(gomega.Succeed())
 
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRoleBinding.GetNamespace(), Name: baseRoleBinding.GetName()}}
@@ -58,10 +58,12 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 		ginkgo.By("updating the base RoleBinding")
 		copy := baseRoleBinding.DeepCopy()
 		copy.Labels["test"] = "value"
-		copy.RoleRef = rbacv1.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
-			Name:     "test",
+		copy.Subjects = []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "testname",
+				Namespace: namespace,
+			},
 		}
 		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
 
@@ -76,10 +78,12 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 
 		ginkgo.By("updating the modified RoleBinding in user namespace")
 		userCopy := roleBinding.DeepCopy()
-		userCopy.RoleRef = rbacv1.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
-			Name:     "test2",
+		userCopy.Subjects = []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "testname2",
+				Namespace: namespace,
+			},
 		}
 		gomega.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 

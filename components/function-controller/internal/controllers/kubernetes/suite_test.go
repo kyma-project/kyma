@@ -142,7 +142,7 @@ func newFixBaseRole(namespace, name string) *rbacv1.Role {
 	}
 }
 
-func newFixBaseRoleBinding(namespace, name string) *rbacv1.RoleBinding {
+func newFixBaseRoleBinding(namespace, name, subjectNamespace string) *rbacv1.RoleBinding {
 	return &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", name),
@@ -153,7 +153,7 @@ func newFixBaseRoleBinding(namespace, name string) *rbacv1.RoleBinding {
 			{
 				Kind:      "ServiceAccount",
 				Name:      "serverless",
-				Namespace: namespace,
+				Namespace: subjectNamespace,
 			},
 		},
 		RoleRef: rbacv1.RoleRef{

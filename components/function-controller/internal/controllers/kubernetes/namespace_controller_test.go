@@ -45,7 +45,7 @@ var _ = ginkgo.Describe("Namespace", func() {
 		baseRole = newFixBaseRole(config.BaseNamespace, "ah-tak-przeciez")
 		gomega.Expect(resourceClient.Create(context.TODO(), baseRole)).To(gomega.Succeed())
 
-		baseRoleBinding = newFixBaseRoleBinding(config.BaseNamespace, "ah-tak-przeciez")
+		baseRoleBinding = newFixBaseRoleBinding(config.BaseNamespace, "ah-tak-przeciez", userNamespace.GetName())
 		gomega.Expect(resourceClient.Create(context.TODO(), baseRoleBinding)).To(gomega.Succeed())
 
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Name: userNamespace.GetName()}}

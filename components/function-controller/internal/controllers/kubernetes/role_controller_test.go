@@ -60,6 +60,7 @@ var _ = ginkgo.Describe("Role", func() {
 		copy.Labels["test"] = "value"
 		copy.Rules = []rbacv1.PolicyRule{
 			{
+				APIGroups:     []string{"v1"},
 				Verbs:         []string{"get"},
 				Resources:     []string{"configmaps"},
 				ResourceNames: []string{"test"},
@@ -80,6 +81,7 @@ var _ = ginkgo.Describe("Role", func() {
 		userCopy := role.DeepCopy()
 		userCopy.Rules = []rbacv1.PolicyRule{
 			{
+				APIGroups:     []string{"v1"},
 				Verbs:         []string{"create"},
 				Resources:     []string{"secrets"},
 				ResourceNames: []string{"test2"},
