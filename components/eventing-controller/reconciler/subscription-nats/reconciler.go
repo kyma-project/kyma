@@ -127,19 +127,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	// Check for valid protocol
-	actualProtocol := actualSubscription.Spec.Protocol
-	if err := r.assertProtocolValidity(actualProtocol); err != nil {
-		r.Log.Error(err, "invalid subscription protocol")
-		err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
-		if err != nil {
-			r.Log.Error(err, "failed to sync subscription status")
-			return ctrl.Result{}, err
-		}
-		// No point in reconciling as the sink is invalid
-		return ctrl.Result{}, nil
-	}
-
 	// Check for valid sink
 	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
