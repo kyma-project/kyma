@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: event-publisher-nats
+  name: event-publisher-nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-publisher-nats
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: event-publisher-nats
+    spec:
+      containers:
+        - image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-nats
+          imagePullPolicy: IfNotPresent
+          name: event-publisher-nats
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8080
+              scheme: HTTP

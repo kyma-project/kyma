@@ -46,8 +46,7 @@ loki:
     port: 3100
     type: ClusterIP
     nodePort:
-    annotations:
-      auth.istio.io/3100: NONE
+    annotations: {}
     labels: {}
 
   readinessProbe:
@@ -227,7 +226,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: 4544695c
+    version: PR-10242
     enabled: true
     env:
       testUser: "admin-user"

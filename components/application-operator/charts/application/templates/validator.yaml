@@ -53,6 +53,7 @@ spec:
             - "--eventMeshPathPrefix=/{{ .Release.Name }}/events"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
+            - "--appName={{ .Release.Name }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
             - "--cacheCleanupMinutes={{ .Values.applicationConnectivityValidator.args.cacheCleanupMinutes }}"
           readinessProbe:
@@ -79,6 +80,9 @@ spec:
               name: http-proxy
             - containerPort: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
               name: http-api-port
+          resources:
+            requests:
+              memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
 ---
 apiVersion: v1
 kind: Service

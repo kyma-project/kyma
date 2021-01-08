@@ -36,7 +36,6 @@ spec:
               - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
               - "console-backend.{{ .Values.global.ingress.domainName }}"
               - "storage.{{ .Values.global.ingress.domainName }}"
-              - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
               - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ template "fullname" . }}-tests

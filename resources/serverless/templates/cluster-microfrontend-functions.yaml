@@ -8,14 +8,14 @@ metadata:
 spec:
   displayName: Functions
   version: v1
-  category: Development
+  category: Workloads
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Functions
       navigationPath: functions
       viewUrl: '/lambdas'
-      order: 1
+      order: -1
       viewGroup: "_core_ui_"
       requiredBackendModules:
         - serverless

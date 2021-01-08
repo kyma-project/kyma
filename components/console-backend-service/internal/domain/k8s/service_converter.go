@@ -23,6 +23,10 @@ func (c *serviceConverter) ToGQL(in *v1.Service) (*gqlschema.Service, error) {
 		return nil, errors.Wrapf(err, "while converting %s `%s` to it's json representation", pretty.Service, in.Name)
 	}
 
+	if in.Labels == nil {
+		in.Labels = make(map[string]string)
+	}
+
 	return &gqlschema.Service{
 		Name:              in.Name,
 		ClusterIP:         in.Spec.ClusterIP,

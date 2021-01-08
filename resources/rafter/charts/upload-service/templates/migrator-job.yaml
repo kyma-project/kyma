@@ -18,6 +18,50 @@ data:
   initialize: |-
 {{ include (print $.Template.BasePath "/_helper_migrate_buckets.txt") . | indent 4 }}
 ---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ include "rafterUploadService.fullname" . }}-migrator
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
+  annotations:
+    helm.sh/hook: "pre-upgrade, post-upgrade"
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
+  readOnlyRootFilesystem: false # needed for migration job
+  volumes:
+    - "emptyDir"
+    - "secret"
+    - "downwardAPI"
+    - "configMap"
+    - "persistentVolumeClaim"
+    - "projected"
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -47,9 +91,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ include "rafterUploadService.fullname" . }}-migrator
@@ -69,13 +113,18 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get"]
+  - apiGroups: ['policy']
+    resources: ['podsecuritypolicies']
+    verbs:     ['use']
+    resourceNames:
+      - {{ include "rafterUploadService.fullname" . }}-migrator
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -88,9 +137,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "-2"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -120,7 +169,7 @@ spec:
       serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator
       restartPolicy: OnFailure
       {{- if .Values.pod.extraProperties }}
-      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraPropertiesWithFsGroup "context" . ) | nindent 6 }}
       {{- end }}
       volumes:
         - name: minio-configuration
@@ -206,8 +255,9 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator
       {{- if .Values.pod.extraProperties }}
-      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
+      {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraPropertiesWithFsGroup "context" . ) | nindent 6 }}
       {{- end }}
       volumes:
         - name: minio-configuration
@@ -261,7 +311,7 @@ metadata:
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
@@ -288,6 +338,7 @@ rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["delete"]
+
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -330,10 +381,10 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
       {{- if .Values.pod.extraProperties }}
       {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
       {{- end }}
+      serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
       containers:
         - name: pvc-remover
           image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"

@@ -31,6 +31,7 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 			Status: &gqlschema.ServiceStatus{
 				LoadBalancer: &gqlschema.LoadBalancerStatus{},
 			},
+			Labels: make(map[string]string),
 		}
 		result, err := converter.ToGQL(&v1.Service{})
 		require.NoError(t, err)

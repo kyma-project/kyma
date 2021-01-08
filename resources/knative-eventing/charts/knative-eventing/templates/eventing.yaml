@@ -955,11 +955,11 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.eventingController.resources.limits.cpu }}
+            memory: {{ .Values.eventingController.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ .Values.eventingController.resources.requests.cpu }}
+            memory: {{ .Values.eventingController.resources.requests.memory }}
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - mountPath: /etc/config-logging
@@ -1017,11 +1017,11 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.sourcesController.resources.limits.cpu }}
+            memory: {{ .Values.sourcesController.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ .Values.sourcesController.resources.requests.cpu }}
+            memory: {{ .Values.sourcesController.resources.requests.memory }}
         volumeMounts:
         - mountPath: /etc/config-logging
           name: config-logging
@@ -1188,11 +1188,11 @@ spec:
         name: eventing-webhook
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.eventingWebhook.resources.limits.cpu }}
+            memory: {{ .Values.eventingWebhook.resources.limits.memory }}
           requests:
-            cpu: 20m
-            memory: 20Mi
+            cpu: {{ .Values.eventingWebhook.resources.requests.cpu }}
+            memory: {{ .Values.eventingWebhook.resources.requests.memory }}
         terminationMessagePolicy: FallbackToLogsOnError
       serviceAccountName: eventing-webhook
       securityContext:
