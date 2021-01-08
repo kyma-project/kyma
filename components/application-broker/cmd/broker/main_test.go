@@ -182,7 +182,7 @@ func newTestSuite(t *testing.T) *testSuite {
 func newOSBClient(url string) (osb.Client, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
-	config.APIVersion = osb.Version2_13()
+	config.APIVersion = osb.Version2_14()
 
 	osbClient, err := osb.NewClient(config)
 	if err != nil {
