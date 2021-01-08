@@ -169,12 +169,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(minio_network_sent_bytes_total{service=\"$service\"}[1m])",
+              "expr": "rate(s3_tx_bytes_total{service=\"$service\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
               "legendFormat": "Transmited:",
-              "metric": "minio_network_sent_bytes_total",
+              "metric": "s3_tx_bytes_total",
               "refId": "A",
               "step": 10
             }
@@ -260,11 +260,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(minio_network_received_bytes_total{service=\"$service\"}[1m])",
+              "expr": "rate(s3_rx_bytes_total{service=\"$service\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Received:",
-              "metric": "minio_network_received_bytes_total",
+              "metric": "s3_rx_bytes_total",
               "refId": "A",
               "step": 10
             }
@@ -350,16 +350,16 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(minio_network_received_bytes_total{service=\"$service\"}[1m])",
+              "expr": "rate(s3_rx_bytes_total{service=\"$service\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Received: ",
-              "metric": "minio_network_received_bytes_total",
+              "metric": "s3_rx_bytes_total",
               "refId": "A",
               "step": 10
             },
             {
-              "expr": "rate(minio_network_sent_bytes_total{service=\"$service\"}[1m])",
+              "expr": "rate(s3_tx_bytes_total{service=\"$service\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Transmited:",
@@ -414,7 +414,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
-          "description": "The current aggregate time spent servicing all HTTP requests  in seconds",
+          "description": "The current aggregate time spent serving all HTTP requests in seconds",
           "fill": 1,
           "gridPos": {
             "h": 7,
@@ -447,48 +447,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(minio_http_requests_duration_seconds_sum{request_type=\"GET\",service=\"$service\"}[1m])",
+              "expr": "rate(s3_ttfb_seconds_sum{service="$service"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "GET",
-              "metric": "minio_http_requests_duration_seconds_count",
+              "legendFormat": "{{`{{ api }}`}}",
+              "metric": "s3_ttfb_seconds_sum",
               "refId": "A",
-              "step": 4
-            },
-            {
-              "expr": "rate(minio_http_requests_duration_seconds_sum{request_type=\"POST\",service=\"$service\"}[1m])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "POST",
-              "metric": "minio_http_requests_duration_seconds_count",
-              "refId": "B",
-              "step": 4
-            },
-            {
-              "expr": "rate(minio_http_requests_duration_seconds_sum{request_type=\"PUT\",service=\"$service\"}[1m])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "PUT",
-              "metric": "minio_http_requests_duration_seconds_count",
-              "refId": "C",
-              "step": 4
-            },
-            {
-              "expr": "rate(minio_http_requests_duration_seconds_sum{request_type=\"HEAD\",service=\"$service\"}[1m])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "HEAD",
-              "metric": "minio_http_requests_duration_seconds_count",
-              "refId": "D",
-              "step": 4
-            },
-            {
-              "expr": "rate(minio_http_requests_duration_seconds_sum{request_type=\"DELETE\",service=\"$service\"}[1m])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "DELETE",
-              "metric": "minio_http_requests_duration_seconds_count",
-              "refId": "E",
               "step": 4
             }
           ],
@@ -512,7 +476,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "s",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -520,7 +484,7 @@ data:
               "show": true
             },
             {
-              "format": "short",
+              "format": "s",
               "label": null,
               "logBase": 1,
               "max": null,
