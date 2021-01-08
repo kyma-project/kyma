@@ -320,7 +320,7 @@ async function deleteAllK8sResources( path, query = {}, retries = 2, interval = 
       if (body.items.length == 0) {
         break;
       }
-      for (o of body.items) {
+      for (let o of body.items) {
 
         if (o.metadata.finalizers && o.metadata.finalizers.length) {
           const obj = { kind: o.kind, apiVersion: o.apiVersion, metadata: { name: o.metadata.name,namespace:o.metadata.namespace,finalizers: [] } }
