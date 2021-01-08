@@ -54,10 +54,10 @@ global:
     pullPolicy: IfNotPresent
   # paths to docker images
   helm_broker:
-    dir: "develop/"
+    dir: "pr/"
     version: "PR-141"
   helm_controller:
-    dir: "develop/"
+    dir: "pr/"
     version: "PR-141"
   # etcd port uses by helm broker
   etcdClientPort: 2379
