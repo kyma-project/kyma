@@ -10,17 +10,17 @@ spec:
   - NET_ADMIN
   - NET_RAW
   fsGroup:
-    rule: 'MustRunAs'
+    rule: MustRunAs
     ranges:
       - min: 1
         max: 65535
   runAsUser:
-    rule: 'RunAsAny' #TODO after init-container removal set to 'MustRunAs'
+    rule: RunAsAny #TODO after init-container removal set to 'MustRunAs'
   privileged: false
   seLinux:
-    rule: 'RunAsAny'
+    rule: RunAsAny
   supplementalGroups:
-    rule: 'MustRunAs'
+    rule: MustRunAs
     ranges:
       - min: 1
         max: 65535
