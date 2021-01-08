@@ -41,18 +41,6 @@ rules:
   - patch
   - update
 - apiGroups:
-  - eventing.kyma-project.io
-  resources:
-  - subscriptions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - gateway.kyma-project.io
   resources:
   - apirules
