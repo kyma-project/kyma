@@ -20,7 +20,7 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
-  - {{ .Release.Name }}
+  - {{ .Chart.Name }}
 {{- end }}
 ---
 kind: RoleBinding
