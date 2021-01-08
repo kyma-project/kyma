@@ -92,7 +92,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 2
-        securitContext:
+        securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
       volumes:
       - name: config-volume
