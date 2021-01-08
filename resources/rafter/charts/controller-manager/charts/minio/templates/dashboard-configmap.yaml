@@ -30,8 +30,7 @@ data:
       "links": [],
       "panels": [
         {
-          "content": "<img src=\"https://www.dropbox.com/s/s5z6rn7offp7ov3/Minio_Logo_White.png?raw=1\" style=\"height: 55px;\"></img>\n<img src=\"https://www.dropbox.com/s/59wm2aemin3cvsc/Minio_wm_light_32px.png?raw=1\" style=\"height: 40px;\"></img>\n<p style=\"margin-top: 10px;\"><small>\nMinio is a high performance distributed object storage server. In Kyma it is used as a dependency for the Rafter component. For more information, check out the <a href=\"https://kyma-project.io/docs/components/rafter\">docs</a>.\n</small></p>",
-          "description": "Minio is a high performance distributed object storage server. In Kyma it is used as a dependency for the Rafter component. For more information, check out the docs.",
+          "content": "Minio is a high performance distributed object storage server. In Kyma it is used as a dependency for the Rafter component. For more information, check out the <a href=\"https://kyma-project.io/docs/components/rafter\">docs</a>.",
           "gridPos": {
             "h": 5,
             "w": 8,
