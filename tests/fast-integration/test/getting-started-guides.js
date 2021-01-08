@@ -20,7 +20,7 @@ describe("Getting Started Guide Tests", function () {
     await verifyOrderPersisted();
   })
 
-  it("Test namespaces should be deleted", async function () {
+  it("Namespace should be deleted", async function () {
     await cleanGettingStartedTestFixture();
   })
 });
