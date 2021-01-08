@@ -15,7 +15,7 @@ rules:
 - apiGroups: ["*"]
   resources: ["configmaps"]
   verbs: ["get", "update"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicy.enabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]

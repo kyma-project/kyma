@@ -66,6 +66,6 @@ spec:
             cpu: {{ .Values.controller.resources.requests.cpu }}
             memory: {{ .Values.controller.resources.requests.memory }}
         securityContext:
-          runAsUser: 1000
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
 
       terminationGracePeriodSeconds: 10
