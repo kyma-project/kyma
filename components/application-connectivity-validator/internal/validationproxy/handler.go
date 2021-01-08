@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,8 +56,7 @@ type proxyHandler struct {
 	eventMeshProxy   *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 
-	applicationGetter ApplicationGetter
-	cache             Cache
+	cache Cache
 }
 
 func NewProxyHandler(
@@ -72,7 +70,6 @@ func NewProxyHandler(
 	eventMeshDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
-	applicationGetter ApplicationGetter,
 	cache Cache) *proxyHandler {
 	isBEBEnabled := false
 	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
@@ -94,8 +91,7 @@ func NewProxyHandler(
 		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
-		applicationGetter: applicationGetter,
-		cache:             cache,
+		cache: cache,
 	}
 }
 
@@ -139,13 +135,9 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		var err apperrors.AppError
-		applicationClientIDs, err = ph.getClientIDsFromResource(applicationName)
-		if err != nil {
-			return []string{}, err
-		}
-
-		ph.cache.Set(applicationName, applicationClientIDs, cache.DefaultExpiration)
+		// TODO: retry logic should be implemented here
+		err := apperrors.Internal("Application with name %s is not found in the cache. Please retry.", applicationName)
+		return nil, err
 	}
 	return applicationClientIDs, nil
 }
@@ -156,18 +148,6 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 		return []string{}, found
 	}
 	return clientIDs.([]string), found
-}
-
-func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(context.Background(), applicationName, metav1.GetOptions{})
-	if err != nil {
-		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
-	}
-	if application.Spec.CompassMetadata == nil {
-		return []string{}, nil
-	}
-
-	return application.Spec.CompassMetadata.Authentication.ClientIds, nil
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
