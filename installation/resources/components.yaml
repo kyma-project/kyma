@@ -1,3 +1,4 @@
+---
 namespace: kyma-system
 prerequisites:
   - name: "cluster-essentials"
