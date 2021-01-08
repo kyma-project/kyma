@@ -12,7 +12,7 @@ import (
 type contextKey int
 
 const (
-	osbAPIVersion = "2.13"
+	osbAPIVersion = "2.14"
 
 	osbContextKey contextKey = 5001
 )
