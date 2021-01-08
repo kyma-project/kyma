@@ -2,17 +2,13 @@ package subscription_nats
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
-	"strings"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-	ceclient "github.com/cloudevents/sdk-go/v2/client"
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	"github.com/go-logr/logr"
 	"github.com/nats-io/nats.go"
+
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -31,11 +27,9 @@ import (
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	natsClient    *handlers.Nats
-	Log           logr.Logger
-	recorder      record.EventRecorder
-	config        env.NatsConfig
-	subscriptions map[string]*nats.Subscription
+	natsClient *handlers.Nats
+	Log        logr.Logger
+	recorder   record.EventRecorder
 }
 
 var (
@@ -49,21 +43,21 @@ const (
 func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder,
 	cfg env.NatsConfig) *Reconciler {
 	natsClient := &handlers.Nats{
-		Log: log,
+		Log:           log,
+		Config:        cfg,
+		Subscriptions: make(map[string]*nats.Subscription),
 	}
-	err := natsClient.Initialize(cfg)
+	err := natsClient.Initialize()
 	if err != nil {
 		log.Error(err, "reconciler can't start")
 		panic(err)
 	}
 	return &Reconciler{
-		Client:        client,
-		Cache:         cache,
-		natsClient:    natsClient,
-		Log:           log,
-		recorder:      recorder,
-		config:        cfg,
-		subscriptions: make(map[string]*nats.Subscription),
+		Client:     client,
+		Cache:      cache,
+		natsClient: natsClient,
+		Log:        log,
+		recorder:   recorder,
 	}
 }
 
@@ -100,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-			if err := r.deleteSubscriptions(req); err != nil {
+			if err := r.natsClient.DeleteSubscription(desiredSubscription); err != nil {
 				r.Log.Error(err, "failed to delete subscription")
 				// if failed to delete the external dependency here, return with error
 				// so that it can be retried
@@ -118,15 +112,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, nil
 		}
 	}
-
-	// Clean up the old subscriptions
-	err = r.deleteSubscriptions(req)
-	if err != nil {
-		log.Error(err, "failed to delete subscriptions")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
-		return ctrl.Result{}, err
-	}
-
 	// Check for valid sink
 	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
@@ -137,6 +122,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		// No point in reconciling as the sink is invalid
 		return ctrl.Result{}, nil
+	}
+
+	// Clean up the old subscriptions
+	err = r.natsClient.DeleteSubscription(desiredSubscription)
+	if err != nil {
+		log.Error(err, "failed to delete subscriptions")
+		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		return ctrl.Result{}, err
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
@@ -155,59 +148,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return result, nil
 	}
 
-	var filters []*eventingv1alpha1.BebFilter
-	if desiredSubscription.Spec.Filter != nil {
-		filters = desiredSubscription.Spec.Filter.Filters
+	err = r.natsClient.SyncSubscription(desiredSubscription)
+	if err != nil {
+		r.Log.Error(err, "failed to sync subscription")
+		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		return ctrl.Result{}, err
 	}
 
-	// Create subscriptions in Nats
-	for _, filter := range filters {
-		eventType := filter.EventType.Value
-		callback := func(msg *nats.Msg) {
-			ce, err := convertMsgToCE(msg)
-			if err != nil {
-				r.Log.Error(err, "failed to convert Nats message to CE")
-				return
-			}
-			ctx := cloudevents.ContextWithTarget(context.Background(), desiredSubscription.Spec.Sink)
-			cev2Client, err := ceclient.NewDefault()
-			if err != nil {
-				r.Log.Error(err, "failed to create CE client")
-				return
-			}
-			err = cev2Client.Send(ctx, *ce)
-			if err != nil {
-				if !strings.Contains(err.Error(), "200") {
-					log.Error(err, "failed to dispatch event")
-					return
-				}
-			}
-			r.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(),
-				desiredSubscription.Spec.Sink))
-		}
-
-		if r.natsClient.Connection.Status() != nats.CONNECTED {
-			r.Log.Info("connection to Nats", "status",
-				fmt.Sprintf("%v", r.natsClient.Connection.Status()))
-			initializeErr := r.natsClient.Initialize(r.config)
-			if initializeErr != nil {
-				log.Error(initializeErr, "failed to reset NATS connection")
-				return result, initializeErr
-			}
-		}
-
-		sub, subscribeErr := r.natsClient.Connection.Subscribe(eventType, callback)
-		if subscribeErr != nil {
-			log.Error(subscribeErr, "failed to create a Nats subscription")
-			syncErr := r.syncSubscriptionStatus(ctx, actualSubscription, false, subscribeErr.Error())
-			if syncErr != nil {
-				log.Error(syncErr, "failed to update subscription status")
-				return result, syncErr
-			}
-			return result, subscribeErr
-		}
-		r.subscriptions[fmt.Sprintf("%s.%s", req.NamespacedName.String(), filter.EventType.Value)] = sub
-	}
 	log.Info("successfully created Nats subscriptions")
 
 	// Update status
@@ -258,37 +205,6 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 		r.Log.Info("successfully updated subscription")
 	}
 	return nil
-}
-
-func (r Reconciler) deleteSubscriptions(req ctrl.Request) error {
-	for k, v := range r.subscriptions {
-		if strings.HasPrefix(k, req.NamespacedName.String()) {
-			r.Log.Info("connection status", "status", r.natsClient.Connection.Status())
-			// Unsubscribe call to Nats is async hence checking the status of the connection is important
-			if r.natsClient.Connection.Status() != nats.CONNECTED {
-				initializeErr := r.natsClient.Initialize(r.config)
-				if initializeErr != nil {
-					return errors.Wrapf(initializeErr, "can't connect to Nats server")
-				}
-			}
-			err := v.Unsubscribe()
-			if err != nil {
-				return errors.Wrapf(err, "failed to unsubscribe")
-			}
-			delete(r.subscriptions, k)
-			r.Log.Info("successfully unsubscribed/deleted subscription")
-		}
-	}
-	return nil
-}
-
-func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
-	event := cev2event.New(cev2event.CloudEventsVersionV1)
-	err := json.Unmarshal(msg.Data, &event)
-	if err != nil {
-		return nil, err
-	}
-	return &event, nil
 }
 
 func (r Reconciler) assertSinkValidity(sink string) error {
