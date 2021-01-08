@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -13,10 +14,7 @@ spec:
       - min: 1
         max: 65535
   runAsUser:
-    rule: 'MustRunAs'
-    ranges:
-      - min: 1
-        max: 65535  
+    rule: 'RunAsAny' #TODO after init-container removal set to 'MustRunAs'
   privileged: false
   seLinux:
     rule: 'RunAsAny'
@@ -30,4 +28,5 @@ spec:
   - downwardAPI
   - emptyDir
   - projected
-  - secret 
+  - secret
+{{- end }}
