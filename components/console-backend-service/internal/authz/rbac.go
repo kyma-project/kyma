@@ -2,7 +2,6 @@ package authz
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -19,8 +18,6 @@ type RBACDirective func(ctx context.Context, obj interface{}, next graphql.Resol
 func NewRBACDirective(a authorizer.Authorizer, client discovery.DiscoveryInterface) RBACDirective {
 	return func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.ResourceAttributes) (res interface{}, err error) {
 		u, err := authn.UserInfoForContext(ctx)
-		fmt.Println(u)
-		fmt.Printf("\n%v\n\n", u)
 		if err != nil {
 			glog.Errorf("Error while receiving user information: %v", err)
 			return nil, errors.New("access denied due to problems on the server side")
