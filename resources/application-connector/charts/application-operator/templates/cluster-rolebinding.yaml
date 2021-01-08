@@ -70,11 +70,13 @@ rules:
   - apiGroups: ["autoscaling"]
     resources: ["horizontalpodautoscalers"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
+{{- if .Values.global.podSecurityPolicy.enabled }}
   - apiGroups: ['policy']
     resources: ['podsecuritypolicies']
+    verbs: ['use']
     resourceNames:
     - {{ .Chart.Name }}
-    verbs: ['use']
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
