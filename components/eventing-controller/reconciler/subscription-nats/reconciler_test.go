@@ -10,9 +10,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 
-	"github.com/nats-io/nats-server/v2/server"
-	natsserver "github.com/nats-io/nats-server/v2/server"
-	natstestserver "github.com/nats-io/nats-server/v2/test"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -217,7 +214,8 @@ var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
 
-	s := RunDefaultServer()
+	natsPort := 4222
+	s := reconcilertesting.RunNatsServerOnPort(natsPort)
 	log.Printf("started test Nats server: %v", s.ClientURL())
 
 	testEnv = &envtest.Environment{
@@ -293,21 +291,4 @@ func printSubscriptions(namespace string) error {
 	}
 	log.Printf("subscriptions: %v", subscriptions)
 	return nil
-}
-
-// RunDefaultServer will run a server on the default port.
-func RunDefaultServer() *server.Server {
-	return RunServerOnPort(nats.DefaultPort)
-}
-
-// RunServerOnPort will run a server on the given port.
-func RunServerOnPort(port int) *server.Server {
-	opts := natstestserver.DefaultTestOptions
-	opts.Port = port
-	return RunServerWithOptions(opts)
-}
-
-// RunServerWithOptions will run a server with the given options.
-func RunServerWithOptions(opts natsserver.Options) *server.Server {
-	return natstestserver.RunServer(&opts)
 }
