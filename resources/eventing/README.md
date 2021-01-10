@@ -16,6 +16,10 @@ This component receives legacy and Cloud Event publishing requests from the clus
 
 This component manages the internal infrastructure in order to receive an event for all subscriptions handled by SAP BEB.
 
+## NATS Server
+
+This component manages NATS server which serves as an eventing platform for Kyma eventing.
+
 ## NATS Controller
 
 This component manages the internal infrastructure in order to receive an event for all subscriptions handled by NATS.
