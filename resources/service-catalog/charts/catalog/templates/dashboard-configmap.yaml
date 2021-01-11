@@ -426,14 +426,14 @@ data:
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-              "legendFormat": "classes from {{`{{broker}}`}}",
+              "legendFormat": "classes from {{`{{broker}}`}} in namespace {{`{{exported_namespace}}`}}",
           "refId": "A"
         },
         {
           "expr": "servicecatalog_broker_service_plan_count",
           "format": "time_series",
           "intervalFactor": 1,
-              "legendFormat": "plans from {{`{{broker}}`}} ",
+              "legendFormat": "plans from {{`{{broker}}`}} in namespace {{`{{exported_namespace}}`}}",
           "refId": "B"
         }
         ],
