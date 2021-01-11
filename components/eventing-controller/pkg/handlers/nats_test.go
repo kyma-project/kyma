@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -162,7 +163,12 @@ func TestSubscription(t *testing.T) {
 	}
 
 	// Check for the event that it did not reach subscriber
+	// Store should never return newdata hence CheckEvent should fail to match newdata
 	err = subscriber.CheckEvent(newData, subscriberCheckURL)
+	if err != nil && !strings.Contains(err.Error(), "failed to check the event after retries") {
+		t.Errorf("failed to CheckEvent: %v", err)
+	}
+	// newdata was received by the subscriber meaning the subscription was not deleted
 	if err == nil {
 		t.Error("subscription still exists in Nats")
 	}

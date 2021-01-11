@@ -82,16 +82,20 @@ func (s *Subscriber) Shutdown() {
 func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 	var body []byte
 	maxAttempts := uint(5)
+	delay := time.Second
 	err := retry.Do(
 		func() error {
 			resp, err := http.Get(subscriberCheckURL)
 			if err != nil {
-				return err
+				return pkgerrors.Wrapf(err, "failed to HTTP GET")
+			}
+			if !is2XXStatusCode(resp.StatusCode) {
+				return fmt.Errorf("response code is not 2xx, received response code is: %d", resp.StatusCode)
 			}
 			defer func() { _ = resp.Body.Close() }()
 			body, err = ioutil.ReadAll(resp.Body)
 			if err != nil {
-				return err
+				return pkgerrors.Wrapf(err, "failed to read data")
 			}
 
 			if string(body) != expectedData {
@@ -99,7 +103,7 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 			}
 			return nil
 		},
-		retry.Delay(2*time.Second),
+		retry.Delay(delay),
 		retry.DelayType(retry.FixedDelay),
 		retry.Attempts(maxAttempts),
 		retry.OnRetry(func(n uint, err error) { log.Printf("[%v] try failed: %s", n, err) }),
@@ -111,4 +115,8 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 	log.Printf("event :%s received successfully", expectedData)
 
 	return nil
+}
+
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
 }
