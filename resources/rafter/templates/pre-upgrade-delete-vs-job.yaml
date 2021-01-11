@@ -93,7 +93,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/delete-resources.sh"]
-        image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-PR-54
+        image: eu.gcr.io/kyma-project/incubator/pr/k8s-tools:20201125-PR-54
         imagePullPolicy: IfNotPresent
         name: pre-upgrade-delete-vs-rafter-minio
         securityContext:

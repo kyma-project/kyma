@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-PR-54
+FROM eu.gcr.io/kyma-project/incubator/pr/k8s-tools:20201125-PR-54
 
 LABEL source=git@github.com:kyma-project/kyma.git
 

@@ -4,7 +4,7 @@ fullnameOverride: "kiali"
 tests:
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    name: eu.gcr.io/kyma-project/incubator/pr/k8s-tools
     version: 20201125-PR-54
   labels:
     integration: true

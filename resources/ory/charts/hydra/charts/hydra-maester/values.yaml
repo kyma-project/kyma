@@ -2,7 +2,7 @@ replicaCount: 1
 
 jobs:
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    repository: eu.gcr.io/kyma-project/incubator/pr/k8s-tools
     tag: "20201125-PR-54"
 
 config:
