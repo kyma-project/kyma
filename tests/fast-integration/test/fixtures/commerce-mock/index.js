@@ -194,6 +194,7 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   expect(
     commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
   ).to.match(/^--skipVerify/);
+  delete commerceApplicationGatewayDeployment.body.metadata['generation']; 
   commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6] =
     "--skipVerify=true";
 
