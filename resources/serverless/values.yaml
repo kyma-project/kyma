@@ -142,9 +142,7 @@ containers:
         value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:PR-10283
-      funtionMaxConcurrentReconciles:
-        value: "10"
-      functionBuildMaxActiveJobs:
+      functionBuildMaxSimultaneousJobs:
         value: "5"
 
 services:

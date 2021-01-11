@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -53,6 +54,17 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 
 	switch {
 	case jobsLen == 0:
+		activeJobs, err := r.getActiveAndStatelessJobs(ctx)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if activeJobs >= r.config.Build.MaxSimultaneousJobs {
+			return ctrl.Result{
+				RequeueAfter: time.Second * 5,
+			}, nil
+		}
+
 		return r.createJob(ctx, log, instance, newJob)
 	case jobsLen > 1 || !r.equalJobs(jobs[0], newJob):
 		return r.deleteJobs(ctx, log, instance)
@@ -177,4 +189,20 @@ func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logge
 		Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
 		Message:            fmt.Sprintf("Job %s updated", newJob.GetName()),
 	})
+}
+
+func (r *FunctionReconciler) getActiveAndStatelessJobs(ctx context.Context) (int, error) {
+	var allJobs batchv1.JobList
+	if err := r.client.ListByLabel(ctx, "", map[string]string{serverlessv1alpha1.FunctionManagedByLabel: "function-controller"}, &allJobs); err != nil {
+		r.Log.Error(err, "Cannot list Jobs")
+		return 0, err
+	}
+
+	out := 0
+	for _, j := range allJobs.Items {
+		if j.Status.Active > 0 || (j.Status.Active == 0 && j.Status.Succeeded == 0 && j.Status.Failed == 0) {
+			out++
+		}
+	}
+	return out, nil
 }

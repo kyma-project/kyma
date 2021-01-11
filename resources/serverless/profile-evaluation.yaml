@@ -17,3 +17,8 @@ docker-registry:
   resources:
     requests:
       cpu: 10m
+
+containers:
+  manager:
+    envs:
+      functionBuildMaxSimultaneousJobs: "1"

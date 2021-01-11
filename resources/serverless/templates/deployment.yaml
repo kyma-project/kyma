@@ -92,8 +92,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPOFETCHER_IMAGE" "value" .Values.containers.manager.envs.functionBuildRepoFetcherImage "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_MAX_CONCURRENT_RECONCILES" "value" .Values.containers.manager.envs.funtionMaxConcurrentReconciles "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_ACTIVE_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxActiveJobs "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}
