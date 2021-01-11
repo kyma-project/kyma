@@ -3,11 +3,13 @@ module github.com/kyma-project/kyma/components/eventing-controller
 go 1.14
 
 require (
+	github.com/avast/retry-go v2.4.1+incompatible
 	github.com/cloudevents/sdk-go v1.2.0 // indirect
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1 // indirect
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.1.0
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/components/event-publisher-proxy v0.0.0-20201014135541-82b304ab245a
