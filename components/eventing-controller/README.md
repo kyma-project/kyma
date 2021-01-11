@@ -3,7 +3,7 @@
 ## Overview
 
 This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controllers come with this container:
-- [controller](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in BEB
+- [`controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
 - [`nats-controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
@@ -13,9 +13,9 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 ### Installation
 
-- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage)
+- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage).
  
-- For controller, run:
+- For `controller`, run:
 
     ```sh
     make deploy-local
@@ -24,12 +24,12 @@ This component contains controllers for various CustomResourceDefinitions relate
     make deploy-local-dry-run
     ```
 
-- For nats-controller, run:
+- For `nats-controller`, run:
 
     ```sh
     make deploy-eventing-controller-nats-local
 
-    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-eventing-controller-nats-local-dry-run    
+    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".    
     make deploy-eventing-controller-nats-local-dry-run
     ```
 
@@ -50,10 +50,10 @@ This section explains how to use the Eventing Controller.
     | Flag                    | Description                                         | Default Value |
     | ----------------------- | --------------------------------------------------- | ------------- |
     | metrics-addr            | The address the metric endpoint binds to.           | :8080         |
-    | reconcile-period        | The period between triggering of reconciling calls. | 10 minutes    |
+    | `reconcile-period`        | The period between triggering reconciling calls. | 10 minutes    |
     | enable-debug-logs       | The parameter that enables debug logs.                                  | `false`         |
-    | max-reconnects          | Maximum number of reconnect attempts.               | 10            |
-    | reconnect-wait          | Wait time between reconnect attempts.               | 1 second      |
+    | `max-reconnects`          | The maximum number of reconnection attempts.               | `10 `           |
+    | `reconnect-wait `         | Wait time between reconnection attempts.               | 1 second      |
 
 - The Eventing Controller expects the following environment variables:
 
@@ -67,11 +67,11 @@ This section explains how to use the Eventing Controller.
     | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              |
     | DOMAIN                 | The Kyma cluster public domain.                                                 |
 
-- The Nats Controller expects the following environment variables:
+- The NATS Controller expects the following environment variables:
 
     | Environment variable   | Description                                                                     |
     | ---------------------- | ------------------------------------------------------------------------------- |
-    | NATS_URL               | The URL for Nats server.     |
+    | **NATS_URL**               | The URL for the NATS server.     |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
