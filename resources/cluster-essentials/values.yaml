@@ -2,7 +2,7 @@ jobs:
   crdsInConfigMap: 20
   image:
     repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201125-caa631b9"
+    tag: "20201125-PR-54"
   installer:
     namespace: kyma-installer
 

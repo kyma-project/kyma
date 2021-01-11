@@ -55,7 +55,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: proxy-reset
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-PR-54
           env:
           - name: EXPECTED_ISTIO_PROXY_IMAGE
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}:{{ .Chart.Version }}

@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    version: 20201023-5de446cf
+    version: 20201125-PR-54
   labels:
     integration: true
     after-upgrade: true
