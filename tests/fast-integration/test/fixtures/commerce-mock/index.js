@@ -160,6 +160,27 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     spec: { serviceClassExternalName }
   }
 }
+async function patchAppGatewayDeployment() {
+  const commerceApplicationGatewayDeployment = await retryPromise(
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
+    },
+    3,
+    5000
+  ).catch(expectNoK8sErr);
+  expect(
+    commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
+  ).to.match(/^--skipVerify/);
+  const patch = [{"op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--skipVerify=true"}]
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
+  await k8sDynamicApi.requestPromise({ url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink, 
+    method: 'PATCH', body:patch, json:true, headers:options.headers }).catch(expectNoK8sErr);
+
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
+  expect(
+    patchedDeployment.body.spec.template.spec.containers[0].args[6]).to.equal("--skipVerify=true");
+  return patchedDeployment;
+}
 
 async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   const serviceBinding = {
@@ -184,27 +205,7 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await k8sApply(lastorderObjs, targetNamespace, true);
   const vs = await waitForVirtualService('mocks', 'commerce-mock')
   const mockHost = vs.spec.hosts[0]
-  const commerceApplicationGatewayDeployment = await retryPromise(
-    async () => {
-      return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
-    },
-    3,
-    5000
-  ).catch(expectNoK8sErr);
-  expect(
-    commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
-  ).to.match(/^--skipVerify/);
-  delete commerceApplicationGatewayDeployment.body.metadata['generation']; 
-  commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6] =
-    "--skipVerify=true";
-
-  await k8sDynamicApi
-    .patch(commerceApplicationGatewayDeployment.body)
-    .catch(expectNoK8sErr);
-
-  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
-  expect(
-    patchedDeployment.body.spec.template.spec.containers[0].args[6]).to.equal("--skipVerify=true");
+  await patchAppGatewayDeployment();
   await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr), 30, 3000);
 
