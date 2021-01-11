@@ -37,7 +37,7 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 This section explains how to use the Eventing Controller.
 
-- The Eventing Controller comes with the following command line argument flags:
+- `controller` comes with the following command line argument flags:
 
     | Flag                    | Description                                           | Default Value   |
     | ----------------------- | ----------------------------------------------------- | --------------- |
@@ -45,7 +45,7 @@ This section explains how to use the Eventing Controller.
     | `reconcile-period`        | The period between triggering of reconciling calls. | `10 minutes`    |
     | `enable-debug-logs`       | Enable debug logs.                                  | `false`         |
 
-- The Nats Controller comes with the following command line argument flags:
+- `nats-controller` comes with the following command line argument flags:
 
     | Flag                    | Description                                           | Default Value |
     | ----------------------- | ----------------------------------------------------- | ------------- |
@@ -53,9 +53,9 @@ This section explains how to use the Eventing Controller.
     | `reconcile-period`        | The period between triggering reconciling calls.    | `10 minutes`  |
     | `enable-debug-logs`       | The parameter that enables debug logs.              | `false`       |
     | `max-reconnects`          | The maximum number of reconnection attempts.        | `10 `         |
-    | `reconnect-wait `         | Wait time between reconnection attempts.            | `1 second`    |
+    | `reconnect-wait`         | Wait time between reconnection attempts.            | `1 second`    |
 
-- The Eventing Controller expects the following environment variables:
+- `controller` expects the following environment variables:
 
     | Environment variable       | Description                                                                     |
     | -------------------------- | ------------------------------------------------------------------------------- |
@@ -67,7 +67,7 @@ This section explains how to use the Eventing Controller.
     | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              |
     | **DOMAIN**                 | The Kyma cluster public domain.                                                 |
 
-- The NATS Controller expects the following environment variables:
+- `nats-controller` expects the following environment variables:
 
     | Environment variable   | Description                      |
     | ---------------------- | -------------------------------- |
