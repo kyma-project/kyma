@@ -51,7 +51,7 @@ This section explains how to use the Eventing Controller.
     | ----------------------- | --------------------------------------------------- | ------------- |
     | metrics-addr            | The address the metric endpoint binds to.           | :8080         |
     | reconcile-period        | The period between triggering of reconciling calls. | 10 minutes    |
-    | enable-debug-logs       | Enable debug logs.                                  | false         |
+    | enable-debug-logs       | The parameter that enables debug logs.                                  | `false`         |
     | max-reconnects          | Maximum number of reconnect attempts.               | 10            |
     | reconnect-wait          | Wait time between reconnect attempts.               | 1 second      |
 
