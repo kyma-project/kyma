@@ -27,14 +27,6 @@ const sbuYaml = fs.readFileSync(path.join(__dirname, "./redis-sbu.yaml"), {
   encoding: "utf8",
 });
 
-const serviceInstanceYaml = fs.readFileSync(
-  path.join(__dirname, "./serviceinstance.yaml"),
-  {
-    encoding: "utf8",
-  }
-);
-
-
 const { expect, config } = require("chai");
 config.truncateThreshold = 0; // more verbose errors
 

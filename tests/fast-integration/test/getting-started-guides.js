@@ -2,8 +2,6 @@ const { ensureGettingStartedTestFixture,
   verifyOrderPersisted,
   cleanGettingStartedTestFixture
 } = require('./fixtures/getting-started-guides')
-const { deleteNamespaces } = require("../utils");
-
 
 describe("Getting Started Guide Tests", function () {
 

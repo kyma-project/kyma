@@ -27,8 +27,6 @@ const {
   k8sDynamicApi,
   deleteNamespaces,
 } = require('../../../utils');
-const { debug } = require("util");
-
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
@@ -124,6 +122,7 @@ function namespaceObj(name) {
   }
 
 }
+
 async function connectMock(mockHost, targetNamespace) {
   const tokenRequest = {
     apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
