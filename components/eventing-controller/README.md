@@ -39,39 +39,39 @@ This section explains how to use the Eventing Controller.
 
 - The Eventing Controller comes with the following command line argument flags:
 
-    | Flag                    | Description                                         | Default Value |
-    | ----------------------- | --------------------------------------------------- | ------------- |
-    | metrics-addr            | The address the metric endpoint binds to.           | :8080         |
-    | reconcile-period        | The period between triggering of reconciling calls. | 10 minutes    |
-    | enable-debug-logs       | Enable debug logs.                                  | false         |
+    | Flag                    | Description                                           | Default Value   |
+    | ----------------------- | ----------------------------------------------------- | --------------- |
+    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`         |
+    | `reconcile-period`        | The period between triggering of reconciling calls. | `10 minutes`    |
+    | `enable-debug-logs`       | Enable debug logs.                                  | `false`         |
 
 - The Nats Controller comes with the following command line argument flags:
 
-    | Flag                    | Description                                         | Default Value |
-    | ----------------------- | --------------------------------------------------- | ------------- |
-    | metrics-addr            | The address the metric endpoint binds to.           | :8080         |
-    | `reconcile-period`        | The period between triggering reconciling calls. | 10 minutes    |
-    | enable-debug-logs       | The parameter that enables debug logs.                                  | `false`         |
-    | `max-reconnects`          | The maximum number of reconnection attempts.               | `10 `           |
-    | `reconnect-wait `         | Wait time between reconnection attempts.               | 1 second      |
+    | Flag                    | Description                                           | Default Value |
+    | ----------------------- | ----------------------------------------------------- | ------------- |
+    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`       |
+    | `reconcile-period`        | The period between triggering reconciling calls.    | `10 minutes`  |
+    | `enable-debug-logs`       | The parameter that enables debug logs.              | `false`       |
+    | `max-reconnects`          | The maximum number of reconnection attempts.        | `10 `         |
+    | `reconnect-wait `         | Wait time between reconnection attempts.            | `1 second`    |
 
 - The Eventing Controller expects the following environment variables:
 
-    | Environment variable   | Description                                                                     |
-    | ---------------------- | ------------------------------------------------------------------------------- |
-    | CLIENT_ID              | The Client ID used to acquire Access Tokens from the Authentication server.     |
-    | CLIENT_SECRET          | The Client Secret used to acquire Access Tokens from the Authentication server. |
-    | TOKEN_ENDPOINT         | The Authentication Server Endpoint to provide Access Tokens.                    |
-    | WEBHOOK_CLIENT_ID      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
-    | WEBHOOK_CLIENT_SECRET  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
-    | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              |
-    | DOMAIN                 | The Kyma cluster public domain.                                                 |
+    | Environment variable       | Description                                                                     |
+    | -------------------------- | ------------------------------------------------------------------------------- |
+    | **CLIENT_ID**              | The Client ID used to acquire Access Tokens from the Authentication server.     |
+    | **CLIENT_SECRET**          | The Client Secret used to acquire Access Tokens from the Authentication server. |
+    | **TOKEN_ENDPOINT**         | The Authentication Server Endpoint to provide Access Tokens.                    |
+    | **WEBHOOK_CLIENT_ID**      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
+    | **WEBHOOK_CLIENT_SECRET**  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
+    | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              |
+    | **DOMAIN**                 | The Kyma cluster public domain.                                                 |
 
 - The NATS Controller expects the following environment variables:
 
-    | Environment variable   | Description                                                                     |
-    | ---------------------- | ------------------------------------------------------------------------------- |
-    | **NATS_URL**               | The URL for the NATS server.     |
+    | Environment variable   | Description                      |
+    | ---------------------- | -------------------------------- |
+    | **NATS_URL**           | The URL for the NATS server.     |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
