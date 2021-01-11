@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -14,32 +13,44 @@ import (
 
 type Subscriber struct {
 	addr   string
-	t      *testing.T
 	server *http.Server
 }
 
-func NewSubscriber(addr string, t *testing.T) *Subscriber {
+func NewSubscriber(addr string) *Subscriber {
 	return &Subscriber{
 		addr: addr,
-		t:    t,
 	}
 }
 
 func (s *Subscriber) Start() {
 	store := ""
 	mux := http.NewServeMux()
-	mux.HandleFunc("/subscribe", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			s.t.Fatalf("failed to read data: %v", err)
+			msg := fmt.Sprintf("failed to read data: %v", err)
+			log.Printf(msg)
+			_, writeErr := w.Write([]byte(msg))
+			if writeErr != nil {
+				log.Printf("failed to write data for /store: %v", writeErr)
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 		store = string(data)
+		w.WriteHeader(http.StatusNoContent)
 	})
 	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(store))
 		if err != nil {
-			s.t.Fatalf("failed to write to the response: %v", err)
+			_, writeErr := w.Write([]byte("failed to write to the response"))
+			if writeErr != nil {
+				log.Printf("failed to write data for /check: %v", writeErr)
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
+		w.WriteHeader(http.StatusOK)
 	})
 
 	s.server = &http.Server{
@@ -52,7 +63,7 @@ func (s *Subscriber) Start() {
 		err := s.server.ListenAndServe()
 		if err != nil {
 			if err != http.ErrServerClosed {
-				s.t.Fatalf("failed to start server: %v", err)
+				log.Fatalf("failed to start server: %v", err)
 			}
 		}
 	}()
@@ -62,7 +73,7 @@ func (s *Subscriber) Shutdown() {
 	go func() {
 		err := s.server.Close()
 		if err != nil {
-			s.t.Errorf("failed to shutdown Subscriber: %v", err)
+			log.Printf("failed to shutdown Subscriber: %v", err)
 		}
 		log.Print("subscriber server shut down was successful")
 	}()

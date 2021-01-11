@@ -92,7 +92,7 @@ func TestConvertMsgToCE(t *testing.T) {
 func TestSubscription(t *testing.T) {
 	natsPort := 5222
 	subscriberPort := 8080
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/subscribe", subscriberPort)
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
 	// Start Nats server
@@ -115,7 +115,7 @@ func TestSubscription(t *testing.T) {
 	}
 
 	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort), t)
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
 	subscriber.Start()
 
 	// Shutting down subscriber
