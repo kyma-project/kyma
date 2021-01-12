@@ -10,6 +10,9 @@ global:
   namespace: kyma-integration
   strictMode: disabled
   isBEBEnabled: false
+  log:
+    format: "text"
+    level: "debug"
   ingress:
     domainName: "TBD"
   helm:

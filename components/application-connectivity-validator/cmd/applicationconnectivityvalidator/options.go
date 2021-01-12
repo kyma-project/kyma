@@ -25,6 +25,8 @@ type options struct {
 	kubeConfig               string
 	masterURL                string
 	syncPeriod               time.Duration
+	logFormat                string
+	logLevel                 string
 }
 
 func parseArgs() *options {
@@ -46,6 +48,8 @@ func parseArgs() *options {
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	syncPeriod := flag.Duration("syncPeriod", 120*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
+	logFormat := flag.String("logFormat", "text", "Logs format.")
+	logLevel := flag.String("logLevel", "debug", "Logs severity level.")
 
 	flag.Parse()
 
@@ -68,6 +72,8 @@ func parseArgs() *options {
 		kubeConfig:               *kubeConfig,
 		masterURL:                *masterURL,
 		syncPeriod:               *syncPeriod,
+		logFormat:                *logFormat,
+		logLevel:                 *logLevel,
 	}
 }
 
@@ -78,11 +84,13 @@ func (o *options) String() string {
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d"+
-		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d",
+		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d"+
+		"--logFormat=%s --logLevel=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
-		o.kubeConfig, o.masterURL, o.syncPeriod)
+		o.kubeConfig, o.masterURL, o.syncPeriod,
+		o.logFormat, o.logLevel)
 }

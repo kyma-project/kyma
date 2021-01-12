@@ -42,6 +42,8 @@ spec:
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefixV1=/{{ .Release.Name }}/v1/events"
             - "--eventServicePathPrefixV2=/{{ .Release.Name }}/v2/events"
+            - "--logFormat={{ .Values.global.log.format }}"
+            - "--logLevel={{ .Values.global.log.level }}"
             {{- if .Values.global.isBEBEnabled }}
             - "--eventServiceHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"
             - "--eventMeshHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"
