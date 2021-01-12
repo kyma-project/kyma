@@ -200,7 +200,7 @@ func (r *FunctionReconciler) getActiveAndStatelessJobs(ctx context.Context) (int
 
 	out := 0
 	for _, j := range allJobs.Items {
-		if j.Status.Active > 0 || (j.Status.Active == 0 && j.Status.Succeeded == 0 && j.Status.Failed == 0) {
+		if j.Status.Succeeded == 0 && j.Status.Failed == 0 {
 			out++
 		}
 	}
