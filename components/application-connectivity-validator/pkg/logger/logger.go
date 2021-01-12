@@ -7,20 +7,14 @@ import (
 )
 
 func New(format Format, level Level) *zap.SugaredLogger {
-	core := zapcore.NewTee(zapcore.NewCore(
+	core := zapcore.NewCore(
 		format.toZapEncoder(),
 		zapcore.Lock(os.Stderr),
 		level.toZapLevelEnabler(),
-	))
-
-	return zap.New(core).Sugar()
+	)
+	return newWithCustomCores(format, level, core)
 }
 
-type Tracing struct {
-	trace_id string
-	span_id  string
-}
-
-func AddTracing(logger *zap.SugaredLogger, tracing Tracing) *zap.SugaredLogger {
-	return logger.With(tracing)
+func newWithCustomCores(format Format, level Level, cores ...zapcore.Core) *zap.SugaredLogger {
+	return zap.New(zapcore.NewTee(cores...)).Sugar()
 }
