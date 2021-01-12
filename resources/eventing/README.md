@@ -14,7 +14,7 @@ This component receives legacy and Cloud Event publishing requests from the clus
 
 ## Controller
 
-This component manages the internal infrastructure in order to receive an event for all subscriptions handled by SAP BEB.
+This component manages the internal infrastructure in order to receive an event for all subscriptions handled by Business Event Bus (BEB).
 
 ## NATS Server
 
