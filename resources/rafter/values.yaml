@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "PR-10185"
+    tag: "PR-10244"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -210,7 +210,7 @@ controller-manager:
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-1d81f948
+      tag: RELEASE.2020-09-21T22-31-59Z-db711226
       repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
 
     pod:
@@ -364,7 +364,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-        tag: '20201023-5de446cf'
+        tag: "20201023-5de446cf"
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc

@@ -191,7 +191,7 @@ Follow these steps:
 
 ### Bind the Function to the ServiceInstance
 
-1. In the left navigation panel, go to **Development** > **Functions** and select the Function you want to bind to the ServiceInstance.
+1. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to bind to the ServiceInstance.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 
