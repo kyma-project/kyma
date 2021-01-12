@@ -130,7 +130,6 @@ func (n Nats) getCallback(sub *eventingv1alpha1.Subscription) func(msg *nats.Msg
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
 			n.Log.Error(err, "failed to convert Nats message to CE")
-			n.NAcknowledge(msg)
 			return
 		}
 		ctx := context.Background()
@@ -145,27 +144,17 @@ func (n Nats) getCallback(sub *eventingv1alpha1.Subscription) func(msg *nats.Msg
 		cev2Client, err := ceclient.NewDefault()
 		if err != nil {
 			n.Log.Error(err, "failed to create CE client")
-			n.NAcknowledge(msg)
 			return
 		}
 		err = cev2Client.Send(ctxWithCE, *ce)
 		if err != nil {
 			if !strings.Contains(err.Error(), "200") {
 				n.Log.Error(err, "failed to dispatch event")
-				n.NAcknowledge(msg)
 				return
 			}
 		}
-		// Msgs are Acked automatically on return from the callback. Ref: https://docs.nats.io/developing-with-nats-streaming/acks
 		n.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(),
 			sub.Spec.Sink))
-	}
-}
-
-func (n Nats) NAcknowledge(msg *nats.Msg) {
-	err := msg.Nak()
-	if err != nil {
-		n.Log.Error(err, "failed to NAK event to Nats")
 	}
 }
 
