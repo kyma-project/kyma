@@ -12,6 +12,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
+	github.com/vrischmann/envconfig v1.1.0
 	gotest.tools/v3 v3.0.2 // indirect
 	helm.sh/helm/v3 v3.3.1
 	k8s.io/apimachinery v0.18.8
