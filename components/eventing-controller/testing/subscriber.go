@@ -28,29 +28,19 @@ func (s *Subscriber) Start() {
 	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			msg := fmt.Sprintf("failed to read data: %v", err)
-			log.Printf(msg)
-			_, writeErr := w.Write([]byte(msg))
-			if writeErr != nil {
-				log.Printf("failed to write data for /store: %v", writeErr)
-			}
+			log.Printf("failed to read data: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		store = string(data)
-		w.WriteHeader(http.StatusNoContent)
 	})
 	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(store))
 		if err != nil {
-			_, writeErr := w.Write([]byte("failed to write to the response"))
-			if writeErr != nil {
-				log.Printf("failed to write data for /check: %v", writeErr)
-			}
+			log.Printf("failed to write data: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 	})
 
 	s.server = &http.Server{
@@ -97,7 +87,7 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 			if err != nil {
 				return pkgerrors.Wrapf(err, "failed to read data")
 			}
-
+			log.Printf("body in check: %v", string(body))
 			if string(body) != expectedData {
 				return fmt.Errorf("subscriber did not get the event with data: \"%s\" yet...waiting", expectedData)
 			}

@@ -175,8 +175,6 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	//Trimming leading and trailing quote from data added by json.Unmarshal
-	event.DataEncoded = event.Data()[1 : len(event.Data())-1]
 	if err := event.Validate(); err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ func TestConvertMsgToCE(t *testing.T) {
 		expectedErr        error
 	}{
 		{
-			name: "data without quotes",
+			name: "a valid Cloud Event NatsMessage",
 			natsMsg: nats.Msg{
 				Subject: "fooeventtype",
 				Reply:   "",
@@ -32,23 +32,10 @@ func TestConvertMsgToCE(t *testing.T) {
 				Data:    []byte(NewNatsMessagePayload("foo-data", "id", "foosource", eventTime, "fooeventtype")),
 				Sub:     nil,
 			},
-			expectedCloudEvent: eventingtesting.NewCloudEvent("foo-data", "id", "foosource", eventTime, "fooeventtype", t),
+			expectedCloudEvent: eventingtesting.NewCloudEvent("\"foo-data\"", "id", "foosource", eventTime, "fooeventtype", t),
 			expectedErr:        nil,
-		},
-		{
-			name: "data with quotes",
-			natsMsg: nats.Msg{
-				Subject: "fooeventtype",
-				Reply:   "",
-				Header:  nil,
-				Data:    []byte(NewNatsMessagePayload("\\\"foo-data\\\"", "id", "foosource", eventTime, "fooeventtype")),
-				Sub:     nil,
-			},
-			expectedCloudEvent: eventingtesting.NewCloudEvent("\\\"foo-data\\\"", "id", "foosource", eventTime, "fooeventtype", t),
-			expectedErr:        nil,
-		},
-		{
-			name: "natsMessage which is an invalid Cloud Event with empty id",
+		}, {
+			name: "an invalid Cloud Event NatsMessage with empty id",
 			natsMsg: nats.Msg{
 				Subject: "fooeventtype",
 				Reply:   "",
@@ -143,8 +130,9 @@ func TestSubscription(t *testing.T) {
 		t.Fatalf("failed to publish event: %v", err)
 	}
 
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
 	// Check for the event
-	err = subscriber.CheckEvent(data, subscriberCheckURL)
+	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
 	if err != nil {
 		t.Errorf("subscriber did not receive the event: %v", err)
 	}
@@ -155,7 +143,7 @@ func TestSubscription(t *testing.T) {
 		t.Errorf("failed to delete subscription: %v", err)
 	}
 
-	newData := "newdata"
+	newData := "datawhichdoesnotexist"
 	// Send an event
 	err = SendEvent(&natsClient, newData)
 	if err != nil {
@@ -164,7 +152,8 @@ func TestSubscription(t *testing.T) {
 
 	// Check for the event that it did not reach subscriber
 	// Store should never return newdata hence CheckEvent should fail to match newdata
-	err = subscriber.CheckEvent(newData, subscriberCheckURL)
+	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
+	err = subscriber.CheckEvent(notExpectedNewDataInStore, subscriberCheckURL)
 	if err != nil && !strings.Contains(err.Error(), "failed to check the event after retries") {
 		t.Errorf("failed to CheckEvent: %v", err)
 	}
