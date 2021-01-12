@@ -29,7 +29,7 @@ data:
       defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
       namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
       runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
-      bebEnabled: '{{ .Values.global.isBEBEnabled }}'
+      bebEnabled: '{{ .Values.global.isBEBEnabled }}',
       serverless: {
         functionUsageKind: "serverless-function",
         restrictedVariables: [

@@ -82,7 +82,7 @@ spec:
           - name: APP_SERVERLESS_USAGE_KIND
             value: serverless-function
           - name: APP_EVENT_SUBSCRIPTION
-            value: {{ .Values.global.isBEBEnabled }}
+            value: {{ .Values.global.isBEBEnabled | quote }}
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}
