@@ -57,7 +57,7 @@ func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 	}
 }
 
-// SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
+// SyncBebSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
 func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
