@@ -10,7 +10,7 @@ console:
 
 global:
   isLocalEnv: false
-  isBEBEnabled: true
+  isBEBEnabled: false
   knative:
     false
     # Change value below to your own GitHub user name if you want point to documentation sources from your fork
@@ -24,6 +24,6 @@ global:
   ui_acceptance_tests:
     version: "37b09dbb"
   console_backend_service:
-    version: PR-10186
+    version: "34552ff2"
   console_backend_service_test:
     version: "PR-10185"
