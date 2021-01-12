@@ -45,7 +45,6 @@ var _ = ginkgo.Describe("Function", func() {
 
 		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
 		fnLabels = reconciler.internalFunctionLabels(function)
-		reconciler.config.Build.MaxSimultaneousJobs = 1
 	})
 
 	ginkgo.It("should successfully create Function", func() {
@@ -556,6 +555,7 @@ var _ = ginkgo.Describe("Function", func() {
 	})
 
 	ginkgo.It("should requeue before creating a job", func() {
+		reconciler.config.Build.MaxSimultaneousJobs = 1
 		secondFunction := newFixFunction(testNamespace, "second-function", 1, 2)
 		secondRequest := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: secondFunction.GetNamespace(), Name: secondFunction.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), secondFunction)).To(gomega.Succeed())
@@ -567,7 +567,7 @@ var _ = ginkgo.Describe("Function", func() {
 		_, err = reconciler.Reconcile(secondRequest)
 		gomega.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("creating 2 jobs ")
+		ginkgo.By("creating 2 jobs")
 		_, err = reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 
@@ -575,6 +575,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(result.RequeueAfter).To(gomega.BeIdenticalTo(time.Second * 5))
 
+		ginkgo.By("handling first job")
 		function := &serverlessv1alpha1.Function{}
 		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 
@@ -591,8 +592,32 @@ var _ = ginkgo.Describe("Function", func() {
 		job.Status.CompletionTime = &now
 		gomega.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-		ginkgo.By("job finished")
+		ginkgo.By("first job finished")
 		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("handling second job")
+		secFunction := &serverlessv1alpha1.Function{}
+		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, secFunction)).To(gomega.Succeed())
+
+		_, err = reconciler.Reconcile(secondRequest)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		secJobList := &batchv1.JobList{}
+		err = reconciler.client.ListByLabel(context.TODO(), secFunction.GetNamespace(), reconciler.internalFunctionLabels(secondFunction), secJobList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(secJobList.Items).To(gomega.HaveLen(1))
+
+		secJob := &batchv1.Job{}
+		gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, secJob)).To(gomega.Succeed())
+		gomega.Expect(secJob).ToNot(gomega.BeNil())
+		secJob.Status.Succeeded = 1
+		now = metav1.Now()
+		secJob.Status.CompletionTime = &now
+		gomega.Expect(resourceClient.Status().Update(context.TODO(), secJob)).To(gomega.Succeed())
+
+		ginkgo.By("second job finished")
+		_, err = reconciler.Reconcile(secondRequest)
 		gomega.Expect(err).To(gomega.BeNil())
 	})
 

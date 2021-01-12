@@ -21,6 +21,8 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
+var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: "function-controller"}
+
 func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options) bool {
 	image := r.buildImageAddress(instance)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
@@ -193,7 +195,7 @@ func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logge
 
 func (r *FunctionReconciler) getActiveAndStatelessJobs(ctx context.Context) (int, error) {
 	var allJobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, "", map[string]string{serverlessv1alpha1.FunctionManagedByLabel: "function-controller"}, &allJobs); err != nil {
+	if err := r.client.ListByLabel(ctx, "", fcManagedByLabel, &allJobs); err != nil {
 		r.Log.Error(err, "Cannot list Jobs")
 		return 0, err
 	}
