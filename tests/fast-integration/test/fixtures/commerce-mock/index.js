@@ -173,8 +173,13 @@ async function patchAppGatewayDeployment() {
   ).to.match(/^--skipVerify/);
   const patch = [{"op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--skipVerify=true"}]
   const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
-  await k8sDynamicApi.requestPromise({ url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink, 
-    method: 'PATCH', body:patch, json:true, headers:options.headers }).catch(expectNoK8sErr);
+  await k8sDynamicApi.requestPromise({ 
+    url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink, 
+    method: 'PATCH', 
+    body: patch, 
+    json: true, 
+    headers: options.headers 
+  }).catch(expectNoK8sErr);
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
   expect(
