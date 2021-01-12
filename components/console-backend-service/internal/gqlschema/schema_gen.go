@@ -7276,28 +7276,28 @@ type RoleBindingEvent {
 }
 
 extend type Query {
-    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1", namespaceArg: "namespace"})
+    role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "", apiVersion: "v1"})
-    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "", apiVersion: "v1"})
+    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1"})
+    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1"})
 
-    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1", namespaceArg: "namespace"})
 
-    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1"})
 }
 
 extend type Mutation {
-    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1", namespaceArg: "namespace"})
 
-    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
-    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1"})
 }
 
 extend type Subscription {
-    roleBindingEvent(namespace: String!): RoleBindingEvent! @HasAccess(attributes: {resource: "roleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha", namespaceArg: "namespace"})
-    clusterRoleBindingEvent: ClusterRoleBindingEvent! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha"})
+    roleBindingEvent(namespace: String!): RoleBindingEvent! @HasAccess(attributes: {resource: "roleBindings", verb: "watch", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
+    clusterRoleBindingEvent: ClusterRoleBindingEvent! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "watch", apiGroup: "rbac.authorization.k8s.io", apiVersion: "v1alpha"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
@@ -24709,7 +24709,7 @@ func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, fie
 			return ec.resolvers.Mutation().CreateRoleBinding(rctx, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -24774,7 +24774,7 @@ func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, fie
 			return ec.resolvers.Mutation().DeleteRoleBinding(rctx, args["namespace"].(string), args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -24839,7 +24839,7 @@ func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Conte
 			return ec.resolvers.Mutation().CreateClusterRoleBinding(rctx, args["name"].(string), args["params"].(ClusterRoleBindingInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "create"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "create"})
 			if err != nil {
 				return nil, err
 			}
@@ -24904,7 +24904,7 @@ func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Conte
 			return ec.resolvers.Mutation().DeleteClusterRoleBinding(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "delete"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "delete"})
 			if err != nil {
 				return nil, err
 			}
@@ -29961,7 +29961,7 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 			return ec.resolvers.Query().Roles(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -30026,7 +30026,7 @@ func (ec *executionContext) _Query_role(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().Role(rctx, args["namespace"].(string), args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "get"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "get"})
 			if err != nil {
 				return nil, err
 			}
@@ -30084,7 +30084,7 @@ func (ec *executionContext) _Query_clusterRoles(ctx context.Context, field graph
 			return ec.resolvers.Query().ClusterRoles(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "resource": "clusterRoles", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -30149,7 +30149,7 @@ func (ec *executionContext) _Query_clusterRole(ctx context.Context, field graphq
 			return ec.resolvers.Query().ClusterRole(rctx, args["name"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "get"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "resource": "clusterRoles", "verb": "get"})
 			if err != nil {
 				return nil, err
 			}
@@ -30214,7 +30214,7 @@ func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graph
 			return ec.resolvers.Query().RoleBindings(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -30272,7 +30272,7 @@ func (ec *executionContext) _Query_clusterRoleBindings(ctx context.Context, fiel
 			return ec.resolvers.Query().ClusterRoleBindings(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "list"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "list"})
 			if err != nil {
 				return nil, err
 			}
@@ -37641,7 +37641,7 @@ func (ec *executionContext) _Subscription_roleBindingEvent(ctx context.Context, 
 			return ec.resolvers.Subscription().RoleBindingEvent(rctx, args["namespace"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "watch"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "watch"})
 			if err != nil {
 				return nil, err
 			}
@@ -37709,7 +37709,7 @@ func (ec *executionContext) _Subscription_clusterRoleBindingEvent(ctx context.Co
 			return ec.resolvers.Subscription().ClusterRoleBindingEvent(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "resource": "clusterRoleBindings", "verb": "watch"})
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "rbac.authorization.k8s.io", "apiVersion": "v1alpha", "resource": "clusterRoleBindings", "verb": "watch"})
 			if err != nil {
 				return nil, err
 			}
