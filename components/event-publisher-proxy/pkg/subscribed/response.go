@@ -28,7 +28,7 @@ func RespondWithErrorAndLog(e error, w http.ResponseWriter) {
 func respond(w http.ResponseWriter, httpCode int) {
 	w.Header().Set(legacy.HeaderContentType, legacy.ContentTypeApplicationJSON)
 	w.WriteHeader(httpCode)
-	logrus.Infof("Response code: HTTP %d", httpCode)
+	logrus.Infof("Response code from \"subscribed\" request: HTTP %d", httpCode)
 }
 
 //Events represents collection of all events with subscriptions
