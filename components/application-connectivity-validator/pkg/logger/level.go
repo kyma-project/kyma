@@ -8,11 +8,11 @@ import (
 type Level string
 
 const (
-	DEBUG = "debug"
-	INFO  = "info"
-	WARN  = "warn"
-	ERROR = "error"
-	FATAL = "fatal"
+	DEBUG Level = "debug"
+	INFO  Level = "info"
+	WARN  Level = "warn"
+	ERROR Level = "error"
+	FATAL Level = "fatal"
 )
 
 func (l Level) toZapLevel() zapcore.Level {

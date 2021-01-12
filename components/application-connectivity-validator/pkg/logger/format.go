@@ -8,8 +8,8 @@ import (
 type Format string
 
 const (
-	JSON = "json"
-	TEXT = "text"
+	JSON Format = "json"
+	TEXT Format = "text"
 )
 
 func (f Format) toZapEncoder() zapcore.Encoder {

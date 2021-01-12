@@ -11,7 +11,7 @@ import (
 func TestLogger(t *testing.T) {
 	t.Run("should log anything", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(Level(DEBUG).toZapLevel())
+		core, observedLogs := observer.New(DEBUG.toZapLevel())
 		logger := newWithCustomCores(JSON, DEBUG, core)
 
 		// when
@@ -24,7 +24,7 @@ func TestLogger(t *testing.T) {
 
 	t.Run("should log in the right format", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(Level(DEBUG).toZapLevel())
+		core, observedLogs := observer.New(DEBUG.toZapLevel())
 		logger := newWithCustomCores(JSON, DEBUG, core)
 
 		// when
@@ -37,7 +37,6 @@ func TestLogger(t *testing.T) {
 		for _, log := range observedLogs.All() {
 			//TODO: It does not want to work this way. Try something else
 			m := log.ContextMap()
-			t.Log(m)
 			require.Contains(t, m, "timestamp")
 			require.Contains(t, m, "level")
 			require.Contains(t, m, "message")
@@ -45,14 +44,14 @@ func TestLogger(t *testing.T) {
 			require.Contains(t, m, "traceid")
 			require.Contains(t, m, "spanid")
 
-			assert.Equal(t, Level(DEBUG).toZapLevel(), log.Level)
+			assert.Equal(t, DEBUG.toZapLevel(), log.Level)
 
 			if val, ok := m["timestamp"]; ok {
 				_, err := time.Parse(time.RFC3339, val.(string))
 				assert.Equal(t, nil, err)
 			}
 			if val, ok := m["level"]; ok {
-				assert.Equal(t, DEBUG, val.(string))
+				assert.Equal(t, string(DEBUG), val.(string))
 			}
 			if val, ok := m["message"]; ok {
 				assert.Equal(t, "something", val.(string))
