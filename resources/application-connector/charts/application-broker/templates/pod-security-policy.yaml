@@ -25,9 +25,8 @@ spec:
   privileged: false
   runAsUser:
     rule: MustRunAs
-    ranges:
-    - min: 1
-      max: 65535
+  runAsUser:
+    rule: RunAsAny #TODO after init-container removal set to 'MustRunAs'
   seLinux:
     rule: RunAsAny
   supplementalGroups:
