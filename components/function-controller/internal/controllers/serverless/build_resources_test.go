@@ -33,7 +33,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 					Namespace:    "fn-ns",
 					GenerateName: "function-name-",
 					Labels: map[string]string{
-						serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+						serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 						serverlessv1alpha1.FunctionNameLabel:      "function-name",
 						serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 					},
@@ -223,7 +223,7 @@ func TestFunctionReconciler_internalFunctionLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			}}},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},
@@ -257,7 +257,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 			}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 			},
@@ -275,7 +275,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 				"test-some":                               "test-label",
@@ -296,7 +296,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 				"test-some":                               "test-label",
@@ -335,7 +335,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				},
 			},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 				"some-key":                                "whatever-value",
@@ -350,7 +350,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 					},
 				}},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},
@@ -368,7 +368,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				},
 			},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},

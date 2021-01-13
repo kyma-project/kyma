@@ -58,7 +58,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1 https://github.com/kyma-project/kyma/issues/10037
+			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic. https://github.com/kyma-project/kyma/issues/10037
 		}).
 		Complete(r)
 }
