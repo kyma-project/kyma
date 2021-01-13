@@ -21,7 +21,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
-
 // Handler is responsible for receiving HTTP requests and dispatching them to the EMS gateway.
 // It also assures that the messages received are compliant with the Cloud Events spec.
 type NatsHandler struct {

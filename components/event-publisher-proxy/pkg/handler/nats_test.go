@@ -4,6 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"reflect"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
@@ -15,7 +21,6 @@ import (
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -23,10 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
-	"net/http"
-	"reflect"
-	"testing"
-	"time"
 )
 
 func TestNatsHandler(t *testing.T) {
@@ -120,12 +121,12 @@ func TestNatsHandler(t *testing.T) {
 	}()
 
 	// test environment
-	healthEndpoint  := fmt.Sprintf("http://localhost:%d/healthz", port)
+	healthEndpoint := fmt.Sprintf("http://localhost:%d/healthz", port)
 	publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", port)
 	publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 	subscribedEndpointFormat := "http://localhost:%d/%s/v1/events/subscribed"
- 	// wait that the embedded servers are started
-	testingutils.WaitForHandlerToStart(t,  healthEndpoint)
+	// wait that the embedded servers are started
+	testingutils.WaitForHandlerToStart(t, healthEndpoint)
 
 	// run the tests for publishing cloudevents
 	for _, testCase := range testCasesForCloudEvents {
@@ -193,12 +194,12 @@ func TestNatsHandler(t *testing.T) {
 
 func newEnvConfig(port int) *env.NatsConfig {
 	return &env.NatsConfig{
-		Port: port,
-		NatsPublishURL: fmt.Sprintf("http://localhost:%d", port + 1),
-		MaxIdleConns:         100,
-		MaxIdleConnsPerHost: 2,
-		RequestTimeout: 2 * time.Second,
-		LegacyNamespace: "beb.namespace", //"kyma",
+		Port:                  port,
+		NatsPublishURL:        fmt.Sprintf("http://localhost:%d", port+1),
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   2,
+		RequestTimeout:        2 * time.Second,
+		LegacyNamespace:       "beb.namespace", //"kyma",
 		LegacyEventTypePrefix: "event.type.prefix",
 	}
 }

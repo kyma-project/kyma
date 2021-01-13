@@ -2,11 +2,12 @@ package sender
 
 import (
 	"context"
+	"net/http"
+
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // compile time check
@@ -18,7 +19,7 @@ type GenericSender interface {
 
 // HttpMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
-	Ctx context.Context
+	Ctx    context.Context
 	Target string
 	Logger *logrus.Logger
 }
@@ -49,7 +50,7 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 		return http.StatusInternalServerError, err
 	}
 
-	err = c.Send(ctxWithCancel, *event);
+	err = c.Send(ctxWithCancel, *event)
 	if cev2.IsUndelivered(err) {
 		h.Logger.Printf("failed to send: %s", err.Error())
 		return http.StatusBadGateway, err

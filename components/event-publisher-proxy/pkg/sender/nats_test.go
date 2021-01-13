@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/go-logr/logr"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
@@ -13,7 +15,6 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"net/http"
 
 	//ctrl "sigs.k8s.io/controller-runtime"
 	//"github.com/go-logr/logr"
@@ -78,7 +79,7 @@ func TestNatsSender(t *testing.T) {
 
 	// create a CE event
 	ce := testingutils.StructuredCloudEventPayload
-	event :=  cloudevents.NewEvent()
+	event := cloudevents.NewEvent()
 	err = json.Unmarshal([]byte(ce), &event)
 	assert.Nil(t, err)
 	// set ce event type the same as the event type from subscription's filter. The Nats subject is defined by ce.Type
@@ -96,5 +97,3 @@ func TestNatsSender(t *testing.T) {
 		t.Errorf("subscriber did not receive the event: %v", err)
 	}
 }
-
-

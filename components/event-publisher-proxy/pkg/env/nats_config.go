@@ -6,7 +6,7 @@ import "time"
 type NatsConfig struct {
 	Port                int           `envconfig:"INGRESS_PORT" default:"8080"`
 	NatsPublishURL      string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
-	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"`  // ??
+	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"` // ??
 	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
 	// Legacy Namespace is used as the event source for legacy events
@@ -25,12 +25,12 @@ type NatsConfig struct {
 	MaxReconnects int
 	ReconnectWait time.Duration
 }
- */
+*/
 
 // Convert to a default BEB Config
-func (c *NatsConfig) ToConfig() *Config{
-	cfg := &Config {
-		BEBNamespace: c.LegacyNamespace,
+func (c *NatsConfig) ToConfig() *Config {
+	cfg := &Config{
+		BEBNamespace:    c.LegacyNamespace,
 		EventTypePrefix: c.LegacyEventTypePrefix,
 	}
 	return cfg

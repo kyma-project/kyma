@@ -246,7 +246,6 @@ var (
 			},
 		},
 	}
-
 )
 
 func TestHandler(t *testing.T) {
