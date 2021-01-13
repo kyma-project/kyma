@@ -12,6 +12,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /e2e /
 
+# temporarily install latest cURL to mitigate the security issues
 RUN apk update && apk add ca-certificates && apk add --no-cache --update-cache --repository http://nl.alpinelinux.org/alpine/edge/main/ curl && rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["/e2e"]
