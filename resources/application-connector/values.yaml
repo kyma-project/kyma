@@ -55,7 +55,7 @@ global:
   application_broker:
     version: "PR-10294"
   application_connectivity_certs_setup_job:
-    version: "4feb544b"
+    version: "PR-9921"
   application_connectivity_validator:
     version: "60463b1d"
   application_broker_eventing_migration:
