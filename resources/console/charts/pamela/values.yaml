@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: eu.gcr.io/kyma-project/pamela
-  tag: 3d08fc6f
+  tag: ff2715e2
   pullPolicy: IfNotPresent
 service:
   internalPort: 3001
@@ -19,6 +19,7 @@ verifySSL: false
 tracing:
   debug: false
   serviceSpanName: console-pamela
+resources: {}
 
 global:
   tracing:

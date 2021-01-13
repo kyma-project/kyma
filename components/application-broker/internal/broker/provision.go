@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 
 	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"

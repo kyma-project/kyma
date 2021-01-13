@@ -10,17 +10,19 @@ require (
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
+	github.com/gobuffalo/envy v1.6.15 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/googleapis/gnostic v0.4.0
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
-	github.com/kyma-incubator/api-gateway v0.0.0-20191125140217-295e8fcaa03f
+	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
 	github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20201127140131-ec965cad1047
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201012150043-858bc2c23ef5
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
@@ -29,7 +31,7 @@ require (
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.3.5 // indirect
 	github.com/openzipkin/zipkin-go-opentracing v0.3.5
 	github.com/ory/hydra-maester v0.0.19
-	github.com/ory/oathkeeper-maester v0.0.7
+	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
@@ -45,18 +47,22 @@ require (
 	golang.org/x/tools v0.0.0-20200921210052-fa0125251cc4 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.4.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
-	k8s.io/api v0.17.11
-	k8s.io/apimachinery v0.17.11
-	k8s.io/apiserver v0.17.9
+	k8s.io/api v0.18.2
+	k8s.io/apimachinery v0.18.2
+	k8s.io/apiserver v0.18.2
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
+	sigs.k8s.io/kustomize v2.0.3+incompatible // indirect
 )
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
+	k8s.io/api => k8s.io/api v0.17.11
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.11
+	k8s.io/apiserver => k8s.io/apiserver v0.17.9
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 )
