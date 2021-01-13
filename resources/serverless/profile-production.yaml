@@ -21,4 +21,5 @@ docker-registry:
 containers:
   manager:
     envs:
-      functionBuildMaxSimultaneousJobs: "5"
+      functionBuildMaxSimultaneousJobs:
+        value: "5"
