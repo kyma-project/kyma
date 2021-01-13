@@ -16,8 +16,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
-	//ctrl "sigs.k8s.io/controller-runtime"
-	//"github.com/go-logr/logr"
 	"testing"
 	"time"
 )

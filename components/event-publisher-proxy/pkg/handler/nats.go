@@ -21,7 +21,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 )
 
-// Handler is responsible for receiving HTTP requests and dispatching them to the EMS gateway.
+// Handler is responsible for receiving HTTP requests and dispatching them to NATS.
 // It also assures that the messages received are compliant with the Cloud Events spec.
 type NatsHandler struct {
 	// Receiver receives incoming HTTP requests
@@ -62,7 +62,7 @@ func (h *NatsHandler) Start(ctx context.Context) error {
 
 // ServeHTTP serves an HTTP request and returns back an HTTP response.
 // It ensures that the incoming request is a valid Cloud Event, then dispatches it
-// to the EMS gateway and writes back the HTTP response.
+// to NATS and writes back the HTTP response.
 func (h *NatsHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	// validate request method
 	if request.Method != http.MethodPost && request.Method != http.MethodGet {
