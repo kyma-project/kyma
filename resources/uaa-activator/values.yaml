@@ -19,7 +19,7 @@ initJobs:
   secret:
     image:
       registryPath: eu.gcr.io/kyma-project/incubator/develop
-      tag: "20201125-PR-54"
+      tag: "20201125-6e6f9030"
 
 nameOverride: ""
 fullnameOverride: ""

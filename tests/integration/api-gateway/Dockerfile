@@ -20,7 +20,7 @@ RUN mkdir /test &&\
 	mv ${BASE_DIR}/app.test /test/app.test  &&\
 	mv ${BASE_DIR}/licenses /test/licenses
 
-FROM eu.gcr.io/kyma-project/incubator/pr/k8s-tools:20201125-PR-54
+FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-6e6f9030
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 

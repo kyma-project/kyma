@@ -128,4 +128,4 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/incubator/pr/k8s-tools:20201125-PR-54
+  alpineKcImage: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-6e6f9030
