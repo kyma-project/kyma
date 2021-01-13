@@ -76,14 +76,14 @@ func (h *NatsHandler) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 	uri := request.RequestURI
 
 	// Process /publish endpoint
-	// Gets a CE and sends it to BEB
+	// Gets a CE and sends it to NATS
 	if isARequestWithCE(uri) {
 		h.publishCloudEvents(writer, request)
 		return
 	}
 
 	// Process /:application/v1/events
-	// Publishes a legacy event as CE v1.0 to BEB
+	// Publishes a legacy event as CE v1.0 to NATS
 	if isARequestWithLegacyEvent(uri) {
 		h.publishLegacyEventsAsCE(writer, request)
 		return

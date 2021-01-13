@@ -37,10 +37,8 @@ const (
 	eventsHTTP400Endpoint = "/events400"
 )
 
-func TestHandler(t *testing.T) {
-	t.Parallel()
-
-	testCases := []struct {
+var (
+	testCasesForCloudEvents = []struct {
 		name           string
 		provideMessage func() (string, http.Header)
 		wantStatusCode int
@@ -126,132 +124,7 @@ func TestHandler(t *testing.T) {
 			wantStatusCode: http.StatusNoContent,
 		},
 	}
-
-	port, err := testingutils.GeneratePort()
-	if err != nil {
-		t.Fatalf("failed to generate port: %v", err)
-	}
-
-	var (
-		healthEndpoint  = fmt.Sprintf("http://localhost:%d/healthz", port)
-		publishEndpoint = fmt.Sprintf("http://localhost:%d/publish", port)
-	)
-
-	mockServer := testingutils.NewMockServer()
-	mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
-	defer mockServer.Close()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
-	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
-	cfg := testingutils.NewEnvConfig(
-		emsCEURL,
-		authURL,
-		testingutils.WithPort(port),
-	)
-	client := oauth.NewClient(ctx, cfg)
-	defer client.CloseIdleConnections()
-
-	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
-
-	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
-	legacyTransformer := legacy.NewTransformer("beb.ns", "event.type.prefix")
-	opts := &options.Options{MaxRequestSize: 65536}
-	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, nil, logrus.New())
-	go func() {
-		if err := handler.Start(ctx); err != nil {
-			t.Errorf("failed to start handler with error: %v", err)
-		}
-	}()
-
-	testingutils.WaitForHandlerToStart(t, healthEndpoint)
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			body, headers := testCase.provideMessage()
-			resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
-			if err != nil {
-				t.Errorf("failed to send event with error: %v", err)
-			}
-			_ = resp.Body.Close()
-			if testCase.wantStatusCode != resp.StatusCode {
-				t.Errorf("Test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
-			}
-		})
-	}
-}
-
-func TestHandlerTimeout(t *testing.T) {
-	t.Parallel()
-
-	port, err := testingutils.GeneratePort()
-	if err != nil {
-		t.Fatalf("failed to generate port: %v", err)
-	}
-	var (
-		requestTimeout     = time.Nanosecond  // short request timeout
-		serverResponseTime = time.Millisecond // long server response time
-		healthEndpoint     = fmt.Sprintf("http://localhost:%d/healthz", port)
-		publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
-	)
-	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
-	mockServer.Start(t, tokenEndpoint, eventsEndpoint, "")
-	defer mockServer.Close()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
-	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
-	cfg := testingutils.NewEnvConfig(emsCEURL,
-		authURL,
-		testingutils.WithPort(port),
-		testingutils.WithRequestTimeout(requestTimeout),
-	)
-	client := oauth.NewClient(ctx, cfg)
-	defer client.CloseIdleConnections()
-
-	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
-
-	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
-
-	legacyTransformer := legacy.NewTransformer("beb.ns", "event.type.prefix")
-	opts := &options.Options{MaxRequestSize: 65536}
-	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, nil, logrus.New())
-	go func() {
-		if err := handler.Start(ctx); err != nil {
-			t.Errorf("failed to start handler with error: %v", err)
-		}
-	}()
-
-	testingutils.WaitForHandlerToStart(t, healthEndpoint)
-
-	body, headers := testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
-	resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
-	if err != nil {
-		t.Errorf("Failed to send event with error: %v", err)
-	}
-	_ = resp.Body.Close()
-	if http.StatusInternalServerError != resp.StatusCode {
-		t.Errorf("Test failed, want status code:%d but got:%d", http.StatusInternalServerError, resp.StatusCode)
-	}
-}
-
-func TestHandlerForLegacyEvents(t *testing.T) {
-	t.Parallel()
-	port, err := testingutils.GeneratePort()
-	if err != nil {
-		t.Fatalf("failed to generate port: %v", err)
-	}
-	var (
-		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
-		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
-		bebNs                 = "/beb.namespace"
-		eventTypePrefix       = "event.type.prefix"
-	)
-	testCases := []struct {
+	testCasesForLegacyEvents = []struct {
 		name           string
 		targetEndpoint string
 		provideMessage func() (string, http.Header)
@@ -347,6 +220,162 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			},
 		},
 	}
+	testCasesForSubscribedEndpoit = []struct {
+		name               string
+		appName            string
+		inputSubscriptions []eventingv1alpha1.Subscription
+		wantStatusCode     int
+		wantResponse       subscribed.Events
+	}{
+		{
+			name:           "Send a request with a valid application name",
+			appName:        "valid-app",
+			wantStatusCode: http.StatusOK,
+			wantResponse: subscribed.Events{
+				EventsInfo: []subscribed.Event{{
+					Name:    "order.created",
+					Version: "v1",
+				}},
+			},
+		}, {
+			name:           "Send a request with an invalid application name",
+			appName:        "invalid-app",
+			wantStatusCode: http.StatusOK,
+			wantResponse: subscribed.Events{
+				EventsInfo: []subscribed.Event{},
+			},
+		},
+	}
+
+)
+
+func TestHandler(t *testing.T) {
+	t.Parallel()
+
+	port, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
+
+	var (
+		healthEndpoint  = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishEndpoint = fmt.Sprintf("http://localhost:%d/publish", port)
+	)
+
+	mockServer := testingutils.NewMockServer()
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
+	defer mockServer.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
+	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
+	cfg := testingutils.NewEnvConfig(
+		emsCEURL,
+		authURL,
+		testingutils.WithPort(port),
+	)
+	client := oauth.NewClient(ctx, cfg)
+	defer client.CloseIdleConnections()
+
+	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
+
+	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+	legacyTransformer := legacy.NewTransformer("beb.ns", "event.type.prefix")
+	opts := &options.Options{MaxRequestSize: 65536}
+	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, nil, logrus.New())
+	go func() {
+		if err := handler.Start(ctx); err != nil {
+			t.Errorf("failed to start handler with error: %v", err)
+		}
+	}()
+
+	testingutils.WaitForHandlerToStart(t, healthEndpoint)
+
+	for _, testCase := range testCasesForCloudEvents {
+		t.Run(testCase.name, func(t *testing.T) {
+			body, headers := testCase.provideMessage()
+			resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
+			if err != nil {
+				t.Errorf("failed to send event with error: %v", err)
+			}
+			_ = resp.Body.Close()
+			if testCase.wantStatusCode != resp.StatusCode {
+				t.Errorf("Test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
+			}
+		})
+	}
+}
+
+func TestHandlerTimeout(t *testing.T) {
+	t.Parallel()
+
+	port, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
+	var (
+		requestTimeout     = time.Nanosecond  // short request timeout
+		serverResponseTime = time.Millisecond // long server response time
+		healthEndpoint     = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
+	)
+	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
+	mockServer.Start(t, tokenEndpoint, eventsEndpoint, "")
+	defer mockServer.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)
+	authURL := fmt.Sprintf("%s%s", mockServer.URL(), tokenEndpoint)
+	cfg := testingutils.NewEnvConfig(emsCEURL,
+		authURL,
+		testingutils.WithPort(port),
+		testingutils.WithRequestTimeout(requestTimeout),
+	)
+	client := oauth.NewClient(ctx, cfg)
+	defer client.CloseIdleConnections()
+
+	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
+
+	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+
+	legacyTransformer := legacy.NewTransformer("beb.ns", "event.type.prefix")
+	opts := &options.Options{MaxRequestSize: 65536}
+	handler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, nil, logrus.New())
+	go func() {
+		if err := handler.Start(ctx); err != nil {
+			t.Errorf("failed to start handler with error: %v", err)
+		}
+	}()
+
+	testingutils.WaitForHandlerToStart(t, healthEndpoint)
+
+	body, headers := testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
+	resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
+	if err != nil {
+		t.Errorf("Failed to send event with error: %v", err)
+	}
+	_ = resp.Body.Close()
+	if http.StatusInternalServerError != resp.StatusCode {
+		t.Errorf("Test failed, want status code:%d but got:%d", http.StatusInternalServerError, resp.StatusCode)
+	}
+}
+
+func TestHandlerForLegacyEvents(t *testing.T) {
+	t.Parallel()
+	port, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate port: %v", err)
+	}
+	var (
+		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
+		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
+		bebNs                 = "/beb.namespace"
+		eventTypePrefix       = "event.type.prefix"
+	)
 
 	mockServer := testingutils.NewMockServer()
 	mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
@@ -381,7 +410,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 
 	testingutils.WaitForHandlerToStart(t, healthEndpoint)
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCasesForLegacyEvents {
 		t.Run(testCase.name, func(t *testing.T) {
 			body, headers := testCase.provideMessage()
 
@@ -413,7 +442,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 		publishEndpoint       = fmt.Sprintf("http://localhost:%d/publish", port)
-		bebNs                 = "/beb.namespace"
+		bebNs                 = "beb.namespace"
 		eventTypePrefix       = "event.type.prefix"
 	)
 	mockServer := testingutils.NewMockServer()
@@ -509,7 +538,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 	var (
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
-		bebNs                 = "/beb.namespace"
+		bebNs                 = "beb.namespace"
 		eventTypePrefix       = "event.type.prefix"
 	)
 	mockServer := testingutils.NewMockServer()
@@ -597,7 +626,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 	var (
 		subscribedEndpointFormat = "http://localhost:%d/%s/v1/events/subscribed"
 		healthEndpoint           = fmt.Sprintf("http://localhost:%d/healthz", port)
-		bebNs                    = "/beb.namespace"
+		bebNs                    = "beb.namespace"
 		eventTypePrefix          = "event.type.prefix"
 	)
 
@@ -667,34 +696,8 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 		}
 	}()
 	testingutils.WaitForHandlerToStart(t, healthEndpoint)
-	testCases := []struct {
-		name               string
-		appName            string
-		inputSubscriptions []eventingv1alpha1.Subscription
-		wantStatusCode     int
-		wantResponse       subscribed.Events
-	}{
-		{
-			name:           "Send a request with a valid application name",
-			appName:        "valid-app",
-			wantStatusCode: http.StatusOK,
-			wantResponse: subscribed.Events{
-				EventsInfo: []subscribed.Event{{
-					Name:    "order.created",
-					Version: "v1",
-				}},
-			},
-		}, {
-			name:           "Send a request with an invalid application name",
-			appName:        "invalid-app",
-			wantStatusCode: http.StatusOK,
-			wantResponse: subscribed.Events{
-				EventsInfo: []subscribed.Event{},
-			},
-		},
-	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCasesForSubscribedEndpoit {
 		t.Run(testCase.name, func(t *testing.T) {
 			subscribedURL := fmt.Sprintf(subscribedEndpointFormat, port, testCase.appName)
 			resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)

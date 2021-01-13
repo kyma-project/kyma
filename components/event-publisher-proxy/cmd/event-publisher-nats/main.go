@@ -18,14 +18,8 @@ import (
 
 func main() {
 	logger := logrus.New()
-	logger.Info("Event Publisher NATS Started")
+	logger.Info("Event Publisher NATS started")
 	opts := options.ParseArgs()
-/*
-	cfg := new(env.Config)
-	if err := envconfig.Process("", cfg); err != nil {
-		logger.Fatalf("Read main configuration failed with error: %s", err)
-	}
- */
 	cfgNats := new(env.NatsConfig)
 	if err := envconfig.Process("", cfgNats); err != nil {
 		logger.Fatalf("Read NATS configuration failed with error: %s", err)
@@ -65,5 +59,5 @@ func main() {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 
-	logger.Info("Event Publisher NATS Shutdown")
+	logger.Info("Event Publisher NATS shutdown")
 }
