@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
+	logger "github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 )
 
 func main() {
@@ -24,6 +25,9 @@ func main() {
 
 	options := parseArgs()
 	log.Infof("Options: %s", options)
+
+	//TODO: Use it everywhere it's possible!
+	_ = logger.New(logger.Format(options.logFormat), logger.Level(options.logLevel))
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
