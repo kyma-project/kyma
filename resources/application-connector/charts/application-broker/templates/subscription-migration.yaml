@@ -87,7 +87,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: job
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201125-6e6f9030
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
           env:
             - name: API_PACKAGES_SUPPORT
               value: {{ .Values.global.disableLegacyConnectivity | quote }}
