@@ -231,7 +231,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	var err error
 	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription, apiRule); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -239,7 +239,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -255,13 +255,13 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 	if retry {
 		logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
 		result.RequeueAfter = time.Second * 1
 	} else if statusChanged {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -276,7 +276,7 @@ func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscr
 	if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
 		return err
 	}
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
 	return r.updateCondition(subscription, condition, ctx)
 }
 

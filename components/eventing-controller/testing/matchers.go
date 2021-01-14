@@ -36,6 +36,10 @@ func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
 
+func HaveNotFoundSubscription(isReallyDeleted bool) GomegaMatcher {
+	return WithTransform(func(isDeleted bool) bool { return isDeleted }, Equal(isReallyDeleted))
+}
+
 func IsAnEmptySubscription() GomegaMatcher {
 	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
 		emptySub := eventingv1alpha1.Subscription{}
@@ -145,6 +149,7 @@ func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
 		"Type":    Equal(condition.Type),
 		"Reason":  Equal(condition.Reason),
 		"Message": Equal(condition.Message),
+		"Status":  Equal(condition.Status),
 	})))
 }
 

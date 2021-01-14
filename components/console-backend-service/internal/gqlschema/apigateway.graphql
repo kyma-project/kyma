@@ -6,6 +6,7 @@ type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1
     status: APIRuleStatuses!
     generation: Int!
     json: JSON!
+    ownerSubscription: OwnerReference
 }
 
 type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {

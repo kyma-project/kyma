@@ -28,7 +28,7 @@ require (
 	github.com/oklog/ulid v1.3.1
 	github.com/openzipkin/zipkin-go v0.2.5 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/pmorie/go-open-service-broker-client v0.0.0-20180928143052-79b374a2302f
+	github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20200527163240-4406bd2cb6b8
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1

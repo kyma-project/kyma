@@ -55,15 +55,6 @@ input TriggerCreateInput {
     subscriber: SubscriberInput!
 }
 
-input OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
-    apiVersion: String!
-    blockOwnerDeletion: Boolean
-    controller: Boolean
-    kind: String!
-    name: String!
-    UID: UID!
-}
-
 type TriggerEvent {
     type: SubscriptionEventType!
     trigger: Trigger!
@@ -74,8 +65,8 @@ extend type Query {
 }
 
 extend type Mutation {
-    createTrigger(namespace: String!, trigger: TriggerCreateInput!, ownerRef: [OwnerReference!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    createManyTriggers(namespace: String!, triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReference!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    createTrigger(namespace: String!, trigger: TriggerCreateInput!, ownerRef: [OwnerReferenceInput!]): Trigger @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    createManyTriggers(namespace: String!, triggers: [TriggerCreateInput!]!, ownerRef: [OwnerReferenceInput!]): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "create", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteTrigger(namespace: String!, triggerName: String!): Trigger @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteManyTriggers(namespace: String!, triggerNames: [String!]!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "delete", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }

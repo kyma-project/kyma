@@ -13,8 +13,8 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
 
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 	"k8s.io/client-go/tools/cache"
