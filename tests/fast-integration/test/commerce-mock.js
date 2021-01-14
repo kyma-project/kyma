@@ -25,7 +25,7 @@ describe("CommerceMock tests", function () {
   });
 
   it("Test namespaces should be deleted", async function () {
-    await cleanMockTestFixture("mocks", testNamespace);
+    await cleanMockTestFixture("mocks", testNamespace, false);
   });
 
 })

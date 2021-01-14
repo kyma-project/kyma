@@ -16,7 +16,7 @@ describe("Getting Started Guide Tests", function () {
   })
 
   it("Namespace should be deleted", async function () {
-    await cleanGettingStartedTestFixture();
+    await cleanGettingStartedTestFixture(false);
   })
 });
 
