@@ -1,8 +1,8 @@
 package broker
 
 import (
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 type IDSelector struct {

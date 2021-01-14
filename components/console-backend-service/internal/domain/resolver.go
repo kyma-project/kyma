@@ -5,13 +5,19 @@ package domain
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
+
+	"k8s.io/client-go/kubernetes"
+
+	// "fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/roles"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/oauth"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/bebEventing"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
@@ -50,6 +56,7 @@ type Resolver struct {
 	serverless    *serverless.PluggableContainer
 	newServerless *serverless.NewResolver
 	eventing      *eventing.Resolver
+	bebEventing   *bebEventing.Resolver
 	oauth         *oauth.Resolver
 	roles         *roles.Resolver
 }
@@ -59,7 +66,7 @@ func GetRandomNumber() time.Duration {
 	return time.Duration(rand.Intn(120)-60) * time.Second
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string) (*Resolver, error) {
+func New(kubeClient kubernetes.Interface, restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Config, serverlessCfg serverless.Config, informerResyncPeriod time.Duration, _ experimental.FeatureToggles, systemNamespaces []string, useEventSubscription bool) (*Resolver, error) {
 	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod+GetRandomNumber())
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing service factory")
@@ -125,7 +132,17 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	makePluggable(newServerlessResolver)
 
 	eventingResolver := eventing.New(genericServiceFactory)
-	makePluggable(eventingResolver)
+	bebEventingResolver := bebEventing.New(genericServiceFactory, kubeClient)
+
+	if useEventSubscription {
+		fmt.Printf("Enabling module bebeventing...\n")
+		makePluggable(bebEventingResolver)
+		eventingResolver.Disable()
+	} else {
+		fmt.Printf("Enabling module eventing...\n")
+		makePluggable(eventingResolver)
+		bebEventingResolver.Disable()
+	}
 
 	oAuthResolver := oauth.New(genericServiceFactory)
 	makePluggable(oAuthResolver)
@@ -149,6 +166,7 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		serverless:    serverlessResolver,
 		newServerless: newServerlessResolver,
 		eventing:      eventingResolver,
+		bebEventing:   bebEventingResolver,
 		oauth:         oAuthResolver,
 		roles:         rolesResolver,
 	}, nil
@@ -167,6 +185,7 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.rafter.StopCacheSyncOnClose(stopCh)
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
+	r.bebEventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
 	r.newServerless.StopCacheSyncOnClose(stopCh)
 	r.oauth.StopCacheSyncOnClose(stopCh)
