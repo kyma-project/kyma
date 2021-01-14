@@ -160,14 +160,15 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     spec: { serviceClassExternalName }
   }
 }
+
 async function patchAppGatewayDeployment() {
   const commerceApplicationGatewayDeployment = await retryPromise(
     async () => {
       return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
     },
-    3,
+    12,
     5000
-  ).catch(expectNoK8sErr);
+  ).catch(err=>{ throw new Error("Timeout: commerce-application-gateway is not ready")});
   expect(
     commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
   ).to.match(/^--skipVerify/);
