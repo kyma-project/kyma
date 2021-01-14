@@ -15,6 +15,8 @@ const (
 func (f Format) toZapEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+	encoderConfig.TimeKey = "timestamp"
+	encoderConfig.MessageKey = "message"
 	switch f {
 	case JSON:
 		return zapcore.NewJSONEncoder(encoderConfig)
