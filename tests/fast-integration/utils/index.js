@@ -137,27 +137,27 @@ async function promiseAllSettled(promises) {
   );
 }
 
-async function k8sApply( listOfSpecs, namespace, patch=true) {
+async function k8sApply(listOfSpecs, namespace, patch = true) {
   const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
-  
+
   return Promise.all(
     listOfSpecs.map(async (obj) => {
       try {
         if (namespace) {
-          obj.metadata.namespace=namespace;
+          obj.metadata.namespace = namespace;
         }
-        debug("k8sApply:",obj.metadata.name, ", kind:", obj.kind, ", apiVersion:",obj.apiVersion, ", namespace:", obj.metadata.namespace)
+        debug("k8sApply:", obj.metadata.name, ", kind:", obj.kind, ", apiVersion:", obj.apiVersion, ", namespace:", obj.metadata.namespace)
         const existing = await k8sDynamicApi.read(obj)
-        
+
         if (patch) {
           obj.metadata.resourceVersion = existing.body.metadata.resourceVersion;
           return await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options);
-        } 
+        }
         return existing;
       }
       catch (e) {
         if (e.body && e.body.reason == 'NotFound') {
-          return await k8sDynamicApi.create(obj).catch(e=>{throw new Error("k8sApply error, cannot create: "+JSON.stringify(obj))})
+          return await k8sDynamicApi.create(obj).catch(e => { throw new Error("k8sApply error, cannot create: " + JSON.stringify(obj)) })
         }
         else {
           //console.log(e.body)
@@ -168,7 +168,7 @@ async function k8sApply( listOfSpecs, namespace, patch=true) {
   );
 }
 
-function waitForK8sObject( path, query, checkFn, timeout, timeoutMsg) {
+function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   debug("waiting for", path)
   let res
   let timer
@@ -179,7 +179,7 @@ function waitForK8sObject( path, query, checkFn, timeout, timeoutMsg) {
           res.abort();
         }
         clearTimeout(timer)
-        debug("finished waiting for ",path)
+        debug("finished waiting for ", path)
         resolve(watchObj.object)
       }
     }, () => { }).then((r) => { res = r; timer = setTimeout(() => { res.abort(); reject(new Error(timeoutMsg)) }, timeout); })
@@ -187,27 +187,27 @@ function waitForK8sObject( path, query, checkFn, timeout, timeoutMsg) {
   return result;
 }
 
-function waitForServiceClass( name, namespace = "default") {
-  return waitForK8sObject( `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
+function waitForServiceClass(name, namespace = "default") {
+  return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
     return watchObj.object.spec.externalName.includes(name)
   }, 90 * 1000, `Waiting for ${name} service class timeout`);
 }
 
-function waitForServiceInstance( name, namespace = "default") {
-  return waitForK8sObject( `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
+function waitForServiceInstance(name, namespace = "default") {
+  return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
   }, 90 * 1000, `Waiting for service instance ${name} timeout`);
 }
 
-function waitForServiceBinding( name, namespace = "default") {
+function waitForServiceBinding(name, namespace = "default") {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
   }, 90 * 1000, `Waiting for service binding ${name} timeout`);
 }
 
-function waitForServiceBindingUsage( name, namespace = "default") {
+function waitForServiceBindingUsage(name, namespace = "default") {
   return waitForK8sObject(`/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
@@ -217,23 +217,23 @@ function waitForServiceBindingUsage( name, namespace = "default") {
 function waitForVirtualService(namespace, apiRuleName) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = { labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}` }
-  return waitForK8sObject( path, query, (_type, _apiObj, watchObj) => {
+  return waitForK8sObject(path, query, (_type, _apiObj, watchObj) => {
     return watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
   }, 20 * 1000, `Wait for VirtualService ${apiRuleName} timeout`);
 }
 
-async function deleteNamespaces(namespaces) {
+async function deleteNamespaces(namespaces, wait = true) {
   let result = await k8sCoreV1Api.listNamespace()
   let allNamespaces = result.body.items.map(i => i.metadata.name);
   namespaces = namespaces.filter(n => allNamespaces.includes(n));
-  if (namespaces.length==0) {
+  if (namespaces.length == 0) {
     return;
   }
-  const waitForNamespacesResult = waitForK8sObject( '/api/v1/namespaces', {}, (type, apiObj, watchObj) => {
+  const waitForNamespacesResult = waitForK8sObject('/api/v1/namespaces', {}, (type, apiObj, watchObj) => {
     if (type == 'DELETED') {
       namespaces = namespaces.filter(n => n != watchObj.object.metadata.name)
     }
-    return namespaces.length == 0;
+    return namespaces.length == 0 || !wait;
   }, 120 * 1000, "Timeout for deleting namespaces: " + namespaces);
 
   for (let name of namespaces) {
@@ -307,7 +307,7 @@ function ignore404(e) {
   }
 }
 
-async function deleteAllK8sResources( path, query = {}, retries = 2, interval = 1000) {
+async function deleteAllK8sResources(path, query = {}, retries = 2, interval = 1000) {
   const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
   try {
     let i = 0
@@ -323,16 +323,16 @@ async function deleteAllK8sResources( path, query = {}, retries = 2, interval = 
       for (let o of body.items) {
 
         if (o.metadata.finalizers && o.metadata.finalizers.length) {
-          const obj = { kind: o.kind, apiVersion: o.apiVersion, metadata: { name: o.metadata.name,namespace:o.metadata.namespace,finalizers: [] } }
-          debug("Removing finalizers from",obj)
+          const obj = { kind: o.kind, apiVersion: o.apiVersion, metadata: { name: o.metadata.name, namespace: o.metadata.namespace, finalizers: [] } }
+          debug("Removing finalizers from", obj)
           await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options).catch(ignore404);
         }
         await k8sDynamicApi.requestPromise({ url: k8sDynamicApi.basePath + o.metadata.selfLink, method: 'DELETE' }).catch(ignore404);
-        debug("Deleted resource:", o.metadata.name, 'namespace:',o.metadata.namespace);
+        debug("Deleted resource:", o.metadata.name, 'namespace:', o.metadata.namespace);
       }
     }
   } catch (e) {
-    debug("Error during delete ",path, String(e).substring(0,1000))
+    debug("Error during delete ", path, String(e).substring(0, 1000))
   }
 }
 function ignoreNotFound(e) {
