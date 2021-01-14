@@ -7,7 +7,7 @@ COPY . $SRC_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /e2e ./cmd/runner
 
-FROM alpine:3.10
+FROM alpine:3.12.3
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /e2e /
