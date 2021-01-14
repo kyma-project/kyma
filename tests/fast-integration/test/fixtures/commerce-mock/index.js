@@ -168,18 +168,18 @@ async function patchAppGatewayDeployment() {
     },
     12,
     5000
-  ).catch(err=>{ throw new Error("Timeout: commerce-application-gateway is not ready")});
+  ).catch(err => { throw new Error("Timeout: commerce-application-gateway is not ready") });
   expect(
     commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
   ).to.match(/^--skipVerify/);
-  const patch = [{"op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--skipVerify=true"}]
-  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
-  await k8sDynamicApi.requestPromise({ 
-    url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink, 
-    method: 'PATCH', 
-    body: patch, 
-    json: true, 
-    headers: options.headers 
+  const patch = [{ "op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--skipVerify=true" }]
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH } };
+  await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink,
+    method: 'PATCH',
+    body: patch,
+    json: true,
+    headers: options.headers
   }).catch(expectNoK8sErr);
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
@@ -254,7 +254,7 @@ function getResourcePaths(namespace) {
 
 }
 
-function cleanMockTestFixture(mockNamespace, targetNamespace) {
+function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   for (let path of getResourcePaths(mockNamespace).concat(getResourcePaths(targetNamespace))) {
     deleteAllK8sResources(path)
   }
@@ -265,7 +265,7 @@ function cleanMockTestFixture(mockNamespace, targetNamespace) {
       name: 'commerce'
     }
   })
-  return deleteNamespaces([mockNamespace, targetNamespace]);
+  return deleteNamespaces([mockNamespace, targetNamespace], wait);
 
 }
 module.exports = {
