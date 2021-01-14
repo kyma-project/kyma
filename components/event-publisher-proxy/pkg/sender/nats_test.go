@@ -64,7 +64,7 @@ func TestNatsSender(t *testing.T) {
 	// Check subscriber is running or not by checking the store
 	err = subscriber.CheckEvent("", subscriberCheckURL)
 	if err != nil {
-		t.Errorf("subscriber did not receive the event: %v", err)
+		t.Errorf("failed to check subscriber's store: %v", err)
 	}
 
 	// Create a subscription
