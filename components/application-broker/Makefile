@@ -12,6 +12,7 @@ release:
 	$(MAKE) gomod-release
 
 build-image: pull-licenses
+	# dummy
 	docker build -t $(IMG_NAME) -f cmd/broker/Dockerfile .
 
 push-image:
