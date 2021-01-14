@@ -49,7 +49,7 @@ image:
     # Path to the Docker image on a specific Docker registry.
     repository: eu.gcr.io/kyma-project/incubator/develop/fluent-bit
     # Version of the Docker image.
-    tag: 1.5.7-0d213d59
+    tag: 1.5.7-d7de6040
     # imagePullPolicy for the container: 'IfNotPresent' or 'Always'.
     pullPolicy: IfNotPresent
 
