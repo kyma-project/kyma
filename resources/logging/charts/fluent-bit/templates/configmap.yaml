@@ -49,7 +49,6 @@ data:
         {{- if .Values.config.inputs.tail.bufferMaxSize }}
         Buffer_Max_Size   {{ .Values.config.inputs.tail.bufferMaxSize }}
         {{- end }}
-        Read_from_Head    {{ .Values.config.inputs.tail.readFromHead }}
         Refresh_Interval  {{ .Values.config.inputs.tail.refreshInterval }}
         Rotate_Wait       {{ .Values.config.inputs.tail.rotateWait }}
         {{- if .Values.config.inputs.tail.ignoreOlder }}
@@ -58,7 +57,6 @@ data:
         Skip_Long_Lines   {{ .Values.config.inputs.tail.skipLongLines }}
         DB                {{ .Values.config.inputs.tail.db }}
         DB.sync           {{ .Values.config.inputs.tail.dbSync }}
-        DB.locking        {{ .Values.config.inputs.tail.dbLocking }}
         Mem_Buf_Limit     {{ .Values.config.inputs.tail.memBufLimit }}
         exit_on_eof       {{ .Values.config.inputs.tail.exitOnEof }}
         Parser            {{ .Values.config.inputs.tail.parser }}

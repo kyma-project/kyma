@@ -146,8 +146,6 @@ config:
       bufferChunkSize:
       # Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
       bufferMaxSize:
-      # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
-      readFromHead: "Off"
       # The interval of refreshing the list of watched files. Default is 60 seconds.
       refreshInterval: 10
       # Specify the number of extra time in seconds to monitor a file once is rotated in case some pending data is flushed.
@@ -160,8 +158,6 @@ config:
       db: /var/log/flb_kube_loki.db
       # Set a default synchronization (I/O) method. Values: Extra, Full, Normal, Off. This flag affects how the internal SQLite engine do synchronization to disk, for more details about each option please refer to this section.  Most of workload scenarios will be fine with normal mode, but if you really need full synchronization after every write operation you should set full mode. Note that full has a high I/O performance cost.
       dbSync: normal
-      # Specify that the database will be accessed only by Fluent Bit. Enabling this feature helps to increase performance when accessing the database but it restrict any external tool to query the content.
-      dbLocking: "false"
       # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
       memBufLimit: 5MB
       # Exit Fluent Bit when reaching EOF of the monitored files.
