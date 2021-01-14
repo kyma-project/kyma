@@ -27,6 +27,7 @@ const {
   k8sDynamicApi,
   deleteNamespaces,
 } = require('../../../utils');
+const { exception } = require("console");
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
@@ -213,10 +214,11 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   const mockHost = vs.spec.hosts[0]
   await patchAppGatewayDeployment();
   await retryPromise(
-    () => axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr), 30, 3000);
+    () => axios.get(`https://${mockHost}/local/apis`)
+      .catch(() => { throw new Exception("Commerce mock local API not available - timeout") }), 40, 3000);
 
-  await retryPromise(() => connectMock(mockHost, targetNamespace), 3, 1000);
-  await retryPromise(() => registerAllApis(mockHost), 3, 1000);
+  await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
+  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
   const webServicesSC = await waitForServiceClass("webservices", targetNamespace);
   const eventsSC = await waitForServiceClass("events", targetNamespace);
