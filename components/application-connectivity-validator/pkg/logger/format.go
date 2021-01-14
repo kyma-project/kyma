@@ -15,6 +15,7 @@ const (
 func (f Format) toZapEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	encoderConfig.TimeKey = "timestamp"
 	encoderConfig.MessageKey = "message"
 	switch f {

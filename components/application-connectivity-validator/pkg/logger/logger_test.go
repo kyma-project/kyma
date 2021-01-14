@@ -24,12 +24,12 @@ func TestLogger(t *testing.T) {
 	t.Run("should log in the right format", func(t *testing.T) {
 		// given
 		core, observedLogs := observer.New(DEBUG.toZapLevel())
-		logger := New(JSON, DEBUG, core)
+		logger := New(TEXT, DEBUG, core)
 
 		// when
 		logger.WithTracing(map[string]string{"traceid": "traceid123", "spanid": "spanid123"}).
-			WithContext(map[string]string{"key": "val"}).
-			Debug("something")
+			WithContext(map[string]string{"key": "val", "key2": "val2"}).
+			Debugf("Some message: %v", "error")
 
 		// then
 		require.NotEqual(t, 0, observedLogs.Len())
