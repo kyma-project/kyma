@@ -77,7 +77,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10283"
+    tag: "9e5c2a22"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -141,7 +141,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:PR-10283
+        value: eu.gcr.io/kyma-project/function-build-init:9e5c2a22
       functionBuildMaxSimultaneousJobs:
         value: "5"
 
