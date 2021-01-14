@@ -441,7 +441,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
 		publishEndpoint       = fmt.Sprintf("http://localhost:%d/publish", port)
-		bebNs                 = "beb.namespace"
+		bebNs                 = "/beb.namespace"
 		eventTypePrefix       = "event.type.prefix"
 	)
 	mockServer := testingutils.NewMockServer()
@@ -537,7 +537,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 	var (
 		healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", port)
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/app/v1/events", port)
-		bebNs                 = "beb.namespace"
+		bebNs                 = "/beb.namespace"
 		eventTypePrefix       = "event.type.prefix"
 	)
 	mockServer := testingutils.NewMockServer()
@@ -625,7 +625,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 	var (
 		subscribedEndpointFormat = "http://localhost:%d/%s/v1/events/subscribed"
 		healthEndpoint           = fmt.Sprintf("http://localhost:%d/healthz", port)
-		bebNs                    = "beb.namespace"
+		bebNs                    = "/beb.namespace"
 		eventTypePrefix          = "event.type.prefix"
 	)
 

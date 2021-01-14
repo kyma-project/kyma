@@ -90,7 +90,7 @@ func NewSubscription() *eventingv1alpha1.Subscription {
 		EventSource: &eventingv1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
-			Value:    "beb.namespace",
+			Value:    "/beb.namespace",
 		},
 		EventType: &eventingv1alpha1.Filter{
 			Type:     "exact",

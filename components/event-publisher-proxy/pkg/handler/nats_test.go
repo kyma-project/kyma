@@ -199,7 +199,7 @@ func newEnvConfig(port int) *env.NatsConfig {
 		MaxIdleConns:          100,
 		MaxIdleConnsPerHost:   2,
 		RequestTimeout:        2 * time.Second,
-		LegacyNamespace:       "beb.namespace", //"kyma",
+		LegacyNamespace:       "/beb.namespace",
 		LegacyEventTypePrefix: "event.type.prefix",
 	}
 }
