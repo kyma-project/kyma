@@ -52,10 +52,10 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 
 	err = c.Send(ctxWithCancel, *event)
 	if cev2.IsUndelivered(err) {
-		h.Logger.Printf("failed to send: %s", err.Error())
+		h.Logger.Errorf("Failed to send: %s", err.Error())
 		return http.StatusBadGateway, err
 	}
 
-	h.Logger.Printf("sent id:[%s], accepted: %t", event.ID(), cev2.IsACK(err))
+	h.Logger.Infof("sent id:[%s], accepted: %t", event.ID(), cev2.IsACK(err))
 	return http.StatusNoContent, nil
 }

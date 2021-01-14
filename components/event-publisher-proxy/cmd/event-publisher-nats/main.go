@@ -32,7 +32,7 @@ func main() {
 	ctx := signals.NewContext()
 
 	// configure message sender
-	messageSenderToNats := sender.NewNatsMessageSender(ctx, "http://localhost:4222", logger)
+	messageSenderToNats := sender.NewNatsMessageSender(ctx, cfgNats.NatsPublishURL, logger)
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(

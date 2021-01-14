@@ -10,7 +10,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/console-backend-service v0.0.0-20201116133707-dd0a4cf8e9d8 // indirect
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210112215829-419ae45b5316
-	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20201204000952-090c71e95cd0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
