@@ -8,6 +8,7 @@ describe("Getting Started Guide Tests", function () {
   this.slow(5000);
 
   it("Getting started guide fixture should be ready", async function () {
+    this.timeout(4 * 60 * 1000);
     await ensureGettingStartedTestFixture()
   });
 
@@ -16,6 +17,7 @@ describe("Getting Started Guide Tests", function () {
   })
 
   it("Namespace should be deleted", async function () {
+    this.timeout(60 * 1000);
     await cleanGettingStartedTestFixture(false);
   })
 });
