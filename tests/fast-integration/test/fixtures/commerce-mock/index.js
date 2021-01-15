@@ -27,7 +27,6 @@ const {
   k8sDynamicApi,
   deleteNamespaces,
 } = require('../../../utils');
-const { exception } = require("console");
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
