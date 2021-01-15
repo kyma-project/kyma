@@ -368,7 +368,7 @@ var _ = ginkgo.Describe("Function", func() {
 				gomega.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 				gomega.Expect(deployment).To(haveLabelLen(7))
 				gomega.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionNameLabel, function.Name))
-				gomega.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionManagedByLabel, "function-controller"))
+				gomega.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionManagedByLabel, serverlessv1alpha1.FunctionControllerValue))
 				gomega.Expect(deployment).To(haveLabelWithValue(serverlessv1alpha1.FunctionUUIDLabel, string(function.UID)))
 				gomega.Expect(deployment).To(haveLabelWithValue(
 					serverlessv1alpha1.FunctionResourceLabel, serverlessv1alpha1.FunctionResourceLabelDeploymentValue))
