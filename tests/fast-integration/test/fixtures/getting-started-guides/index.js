@@ -161,11 +161,11 @@ function getResourcePaths(namespace) {
   ]
 }
 
-function cleanGettingStartedTestFixture() {
+function cleanGettingStartedTestFixture(wait = true) {
   for (let path of getResourcePaths(orderService)) {
     deleteAllK8sResources(path)
   }
-  return deleteNamespaces([orderService]);
+  return deleteNamespaces([orderService], wait);
 }
 
 module.exports = {

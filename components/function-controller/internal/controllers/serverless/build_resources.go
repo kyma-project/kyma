@@ -444,7 +444,7 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	labels := make(map[string]string, 3)
 
 	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = serverlessv1alpha1.FunctionControllerValue
 	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
