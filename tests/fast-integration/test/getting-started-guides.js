@@ -4,11 +4,10 @@ const { ensureGettingStartedTestFixture,
 } = require('./fixtures/getting-started-guides')
 
 describe("Getting Started Guide Tests", function () {
-  this.timeout(3 * 60 * 1000);
+  this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
   it("Getting started guide fixture should be ready", async function () {
-    this.timeout(4 * 60 * 1000);
     await ensureGettingStartedTestFixture()
   });
 
@@ -17,7 +16,6 @@ describe("Getting Started Guide Tests", function () {
   })
 
   it("Namespace should be deleted", async function () {
-    this.timeout(60 * 1000);
     await cleanGettingStartedTestFixture(false);
   })
 });

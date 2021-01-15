@@ -1,4 +1,4 @@
-{{- if .Values.global.isNatsEnabled }}
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
