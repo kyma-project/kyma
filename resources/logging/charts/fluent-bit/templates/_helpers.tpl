@@ -68,13 +68,13 @@ Create the name of the service account to use
 {{- end -}}
 
 {{- define "loki.namespace.filter" -}}
-{{- if .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
-{{- $namespaces := splitList "," .Values.conf.Input.Kubernetes_loki.exclude.namespaces -}}
+{{- if .Values.config.inputs.tail.exclude.namespaces -}}
+{{- $namespaces := splitList "," .Values.config.inputs.tail.exclude.namespaces -}}
 {{- range $namespaces -}}
 {{- printf "/var/log/containers/*_%s_*.log," . -}}
 {{- end -}}
 {{- end -}}
-{{- if .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
-{{- printf "%s" .Values.conf.Input.Kubernetes_loki.Exclude_Path -}}
+{{- if .Values.config.inputs.tail.excludePath -}}
+{{- printf "%s" .Values.config.inputs.tail.excludePath -}}
 {{- end -}}
 {{- end -}}
