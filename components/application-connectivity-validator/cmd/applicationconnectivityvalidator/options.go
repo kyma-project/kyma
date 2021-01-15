@@ -83,8 +83,8 @@ func (o *options) String() string {
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
-		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d"+
-		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d"+
+		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
+		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d "+
 		"--logFormat=%s --logLevel=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,

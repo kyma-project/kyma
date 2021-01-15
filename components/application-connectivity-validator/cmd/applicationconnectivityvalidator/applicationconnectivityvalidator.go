@@ -3,31 +3,37 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
-	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
+
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	logger "github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+	"github.com/patrickmn/go-cache"
 )
 
 func main() {
-	formatter := &log.TextFormatter{
-		FullTimestamp: true,
-	}
-	log.SetFormatter(formatter)
-
-	log.Info("Starting Validation Proxy.")
-
 	options := parseArgs()
-	log.Infof("Options: %s", options)
+	//TODO: what to do with this
+	fmt.Printf("Options: %+v:\n", options)
+	level, err := logger.MapLevel(options.logLevel)
+	if err != nil {
+		logger.LogFatalError("Fatal Error: %s", err.Error())
+		os.Exit(1)
+	}
+	format, err := logger.MapFormat(options.logFormat)
+	if err != nil {
+		logger.LogFatalError("Fatal Error: %s", err.Error())
+		os.Exit(1)
+	}
 
-	//TODO: Use it everywhere it's possible!
-	_ = logger.New(logger.Format(options.logFormat), logger.Level(options.logLevel))
+	level = logger.INFO
+	log := logger.New(format, level)
+	log.Info("Starting Validation Proxy.")
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
@@ -45,10 +51,13 @@ func main() {
 		options.eventMeshDestinationPath,
 		options.appRegistryPathPrefix,
 		options.appRegistryHost,
-		idCache)
+		idCache,
+		log)
+
+	tracingMiddleware := tracing.NewTracingMiddleware(log, proxyHandler.ProxyAppConnectorRequests)
 
 	proxyServer := http.Server{
-		Handler: validationproxy.NewHandler(proxyHandler),
+		Handler: validationproxy.NewHandler(tracingMiddleware),
 		Addr:    fmt.Sprintf(":%d", options.proxyPort),
 	}
 
@@ -62,7 +71,7 @@ func main() {
 
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
+		controller.Start(log, options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
 	}()
 
 	go func() {

@@ -15,7 +15,6 @@ require (
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.13.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
@@ -28,7 +27,6 @@ require (
 	k8s.io/api v0.18.8 // indirect
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.18.8
-	k8s.io/klog/v2 v2.2.0
 )
 
 replace (

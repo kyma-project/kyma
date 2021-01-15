@@ -1,6 +1,9 @@
 package logger
 
 import (
+	"errors"
+	"fmt"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -14,6 +17,19 @@ const (
 	ERROR Level = "error"
 	FATAL Level = "fatal"
 )
+
+var all_levels = []Level{DEBUG, INFO, WARN, ERROR, FATAL}
+
+func MapLevel(level string) (Level, error) {
+	var lvl = Level(level)
+
+	switch lvl {
+	case DEBUG, INFO, WARN, ERROR, FATAL:
+		return lvl, nil
+	default:
+		return lvl, errors.New(fmt.Sprintf("Given lgo level: %s, doesn't match with any of %v", level, all_levels))
+	}
+}
 
 func (l Level) toZapLevel() zapcore.Level {
 	switch l {

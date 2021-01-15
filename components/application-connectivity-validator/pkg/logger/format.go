@@ -1,6 +1,9 @@
 package logger
 
 import (
+	"errors"
+	"fmt"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -11,6 +14,18 @@ const (
 	JSON Format = "json"
 	TEXT Format = "text"
 )
+
+var all_formats = []Format{JSON, TEXT}
+
+func MapFormat(input string) (Format, error) {
+	var format = Format(input)
+	switch format {
+	case JSON, TEXT:
+		return format, nil
+	default:
+		return format, errors.New(fmt.Sprintf("Given log format: %s, doesn't match with any of %v", format, all_formats))
+	}
+}
 
 func (f Format) toZapEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()

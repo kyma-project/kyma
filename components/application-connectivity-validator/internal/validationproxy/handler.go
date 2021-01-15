@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -56,6 +57,8 @@ type proxyHandler struct {
 	eventMeshProxy   *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 
+	log *logger.Logger
+
 	cache Cache
 }
 
@@ -70,7 +73,8 @@ func NewProxyHandler(
 	eventMeshDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
-	cache Cache) *proxyHandler {
+	cache Cache,
+	log *logger.Logger) *proxyHandler {
 	isBEBEnabled := false
 	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
 		isBEBEnabled = true
@@ -87,45 +91,46 @@ func NewProxyHandler(
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		eventMeshProxy:   createReverseProxy(eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		appRegistryProxy: createReverseProxy(appRegistryHost, withEmptyRequestHost, withHTTPScheme),
+		eventsProxy:      createReverseProxy(log, eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		eventMeshProxy:   createReverseProxy(log, eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		appRegistryProxy: createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		cache: cache,
+		log:   log,
 	}
 }
 
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
 	certInfoData := r.Header.Get(CertificateInfoHeader)
 	if certInfoData == "" {
-		httptools.RespondWithError(w, apperrors.Internal("%s header not found", CertificateInfoHeader))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
 		return
 	}
 
 	applicationName := mux.Vars(r)["application"]
 	if applicationName == "" {
-		httptools.RespondWithError(w, apperrors.BadRequest("Application name not specified"))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.BadRequest("Application name not specified"))
 		return
 	}
 
-	log.Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
+	ph.log.WithTracing(r.Context()).Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
 
 	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
 	if err != nil {
-		httptools.RespondWithError(w, apperrors.Internal("Failed to get Application ClientIds: %s", err))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("Failed to get Application ClientIds: %s", err))
 		return
 	}
 
 	subjects := extractSubjects(certInfoData)
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName, ph.group, ph.tenant) {
-		httptools.RespondWithError(w, apperrors.Forbidden("No valid subject found"))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Forbidden("No valid subject found"))
 		return
 	}
 
 	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path)
 	if err != nil {
-		httptools.RespondWithError(w, err)
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, err)
 		return
 	}
 
@@ -291,7 +296,7 @@ func extractSubject(subject string) map[string]string {
 	return result
 }
 
-func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
+func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...requestOption) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
 			request.URL.Host = destinationHost
@@ -299,7 +304,7 @@ func createReverseProxy(destinationHost string, reqOpts ...requestOption) *httpu
 				opt(request)
 			}
 
-			log.Infof("Proxying request to target URL: %s", request.URL)
+			log.WithTracing(request.Context()).Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
 			log.Infof("Host responded with status: %s", response.Status)
