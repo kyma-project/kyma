@@ -28,7 +28,7 @@ spec:
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
-      - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
+      - image: eu.gcr.io/kyma-project/incubator/pr/dex:{{ .Chart.AppVersion }}
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
         resources:
