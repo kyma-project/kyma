@@ -39,6 +39,6 @@ spec:
           - "--caCertificate={{ .Values.global.applicationConnectorCa }}"
           - "--caKey={{ .Values.global.applicationConnectorCaKey }}"
           - "--generatedValidityTime={{ .Values.application_connectivity_certs_setup_job.certificate.validityTime }}"
-        securitContext:
+        securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
 {{- end }}
