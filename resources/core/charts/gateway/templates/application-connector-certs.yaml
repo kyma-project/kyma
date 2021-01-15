@@ -9,6 +9,6 @@ kind: Secret
 metadata:
   name: app-connector-certs
   namespace: istio-system
-  labels:
+  annotations:
     helm.sh/resource-policy: keep
 type: Opaque
