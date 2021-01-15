@@ -131,6 +131,16 @@ async function createOrder(serviceDomain, order) {
   ).catch(expectNoAxiosErr);
 }
 
+function waitForPodWithSbuToBeReady(sbu) {
+  return waitForK8sObject('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` }
+    , (_type, _apiObj, watchObj) => {
+      return Object.keys(watchObj.object.metadata.labels).includes('use-' + sbu.metadata.uid) &&
+        watchObj.object.metadata.name.startsWith(orderService) && watchObj.object.status.conditions
+        && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
+    }
+    , 60 * 1000, "Waiting for pods with injected redis service timeout");
+}
+
 async function ensureGettingStartedTestFixture() {
   await k8sApply([ordersServiceNamespaceObj]);
   await k8sApply(ordersServiceMicroserviceObj, orderService);
@@ -143,9 +153,8 @@ async function ensureGettingStartedTestFixture() {
   await waitForServiceInstance('redis-service', orderService);
   await waitForServiceBinding(orderService, orderService);
   await k8sApply([sbuObj], orderService);
-  await waitForServiceBindingUsage(orderService, orderService);
-  await deleteAllK8sResources('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` });
-
+  const sbu = await waitForServiceBindingUsage(orderService, orderService);
+  await waitForPodWithSbuToBeReady(sbu);
 }
 
 function getResourcePaths(namespace) {
