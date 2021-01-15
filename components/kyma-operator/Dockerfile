@@ -27,7 +27,7 @@ WORKDIR /app
 # Install certificates
 #
 
-RUN apk update && apk add ca-certificates git jq && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates git jq libcurl && rm -rf /var/cache/apk/*
 
 #
 # Copy binary
