@@ -220,7 +220,7 @@ var (
 			},
 		},
 	}
-	testCasesForSubscribedEndpoit = []struct {
+	testCasesForSubscribedEndpoint = []struct {
 		name               string
 		appName            string
 		inputSubscriptions []eventingv1alpha1.Subscription
@@ -696,7 +696,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 	}()
 	testingutils.WaitForHandlerToStart(t, healthEndpoint)
 
-	for _, testCase := range testCasesForSubscribedEndpoit {
+	for _, testCase := range testCasesForSubscribedEndpoint {
 		t.Run(testCase.name, func(t *testing.T) {
 			subscribedURL := fmt.Sprintf(subscribedEndpointFormat, port, testCase.appName)
 			resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)

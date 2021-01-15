@@ -6,8 +6,6 @@ import "time"
 type NatsConfig struct {
 	Port                int           `envconfig:"INGRESS_PORT" default:"8080"`
 	NatsPublishURL      string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
-	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"100"` // ??
-	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"2"`
 	RequestTimeout      time.Duration `envconfig:"REQUEST_TIMEOUT" default:"5s"`
 	// Legacy Namespace is used as the event source for legacy events
 	LegacyNamespace string `envconfig:"LEGACY_NAMESPACE" default:"kyma"`

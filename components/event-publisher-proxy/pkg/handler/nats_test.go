@@ -58,7 +58,7 @@ func TestNatsHandler(t *testing.T) {
 	// create a Nats sender
 	natsUrl := natsServer.ClientURL()
 	assert.NotEmpty(t, natsUrl)
-	sender := sender.NewNatsMessageSender(ctx, natsUrl, logger)
+	msgSender := sender.NewNatsMessageSender(ctx, natsUrl, logger)
 
 	// configure legacyTransformer
 	legacyTransformer := legacy.NewTransformer(
@@ -112,7 +112,7 @@ func TestNatsHandler(t *testing.T) {
 
 	// start handler which blocks until it receives a shutdown signal
 	opts := &options.Options{MaxRequestSize: 65536}
-	natsHandler := NewNatsHandler(messageReceiver, sender, cfgNats.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logger)
+	natsHandler := NewNatsHandler(messageReceiver, msgSender, cfgNats.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logger)
 	assert.NotNil(t, natsHandler)
 	go func() {
 		if err := natsHandler.Start(ctx); err != nil {
@@ -164,7 +164,7 @@ func TestNatsHandler(t *testing.T) {
 		})
 	}
 	// run the tests for subscribed endpoint
-	for _, testCase := range testCasesForSubscribedEndpoit {
+	for _, testCase := range testCasesForSubscribedEndpoint {
 		t.Run(testCase.name, func(t *testing.T) {
 			subscribedURL := fmt.Sprintf(subscribedEndpointFormat, port, testCase.appName)
 			resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
@@ -196,8 +196,6 @@ func newEnvConfig(port int) *env.NatsConfig {
 	return &env.NatsConfig{
 		Port:                  port,
 		NatsPublishURL:        fmt.Sprintf("http://localhost:%d", port+1),
-		MaxIdleConns:          100,
-		MaxIdleConnsPerHost:   2,
 		RequestTimeout:        2 * time.Second,
 		LegacyNamespace:       "/beb.namespace",
 		LegacyEventTypePrefix: "event.type.prefix",
