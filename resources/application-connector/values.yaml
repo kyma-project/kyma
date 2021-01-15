@@ -54,7 +54,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "4feb544b"
   application_connectivity_validator:
-    version: "60463b1d"
+    version: "7fb79933"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
