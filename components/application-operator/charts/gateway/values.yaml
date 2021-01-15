@@ -35,5 +35,4 @@ acceptanceTest:
     pullPolicy: IfNotPresent
 
 podSecurityPolicy:
-  enabled: true
   runAsUser: 1000

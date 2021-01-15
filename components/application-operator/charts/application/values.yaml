@@ -90,5 +90,4 @@ eventService:
       port: *eventServiceExternalAPIPort
 
 podSecurityPolicy:
-  enabled: true
   runAsUser: 1000

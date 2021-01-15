@@ -33,7 +33,7 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
-  - {{ .Release.Name }}
+  - application-gateway
 {{- end }}
 ---
 kind: RoleBinding
