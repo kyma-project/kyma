@@ -38,7 +38,7 @@ global:
   event_service:
     version: "f98272bd"
   event_service_integration_tests:
-    version: "PR-10277"
+    version: "d6bbc47a"
   application_gateway:
     version: "4feb544b"
   application_gateway_tests:
