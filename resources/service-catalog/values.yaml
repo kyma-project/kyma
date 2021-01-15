@@ -7,7 +7,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: "PR-10185"
+    version: "bc522023"
   disableLegacyConnectivity: "false"
 test:
   acceptance:
