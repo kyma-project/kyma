@@ -124,11 +124,11 @@ async function createOrder(serviceDomain, order) {
         headers: {
           "Cache-Control": "no-cache",
         },
-      });
+      }).catch(err => {if (err.response.status != 409) throw err});
     },
     10,
     3000
-  ).catch(expectNoAxiosErr);
+  ).catch(expectNoAxiosErr)
 }
 
 function waitForPodWithSbuToBeReady(sbu) {
