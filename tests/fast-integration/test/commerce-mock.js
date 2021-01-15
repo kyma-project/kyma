@@ -6,12 +6,11 @@ const { ensureCommerceMockTestFixture,
 
 describe("CommerceMock tests", function () {
 
-  this.timeout(2 * 60 * 1000);
+  this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test"
 
   it("CommerceMock test fixture should be ready", async function () {
-    this.timeout(4 * 60 * 1000);
     await ensureCommerceMockTestFixture("mocks", testNamespace);
   });
 
