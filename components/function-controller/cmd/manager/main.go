@@ -69,7 +69,7 @@ func main() {
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
-	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor("function-controller")).
+	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
