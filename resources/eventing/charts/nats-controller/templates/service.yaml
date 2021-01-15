@@ -1,4 +1,4 @@
-{{- if .Values.global.isNatsEnabled }}
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: v1
 kind: Service
 metadata:
