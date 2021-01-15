@@ -48,6 +48,7 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
+	rootUser := int64(0)
 
 	imageName := r.buildImageAddressForPush(instance)
 	args := r.config.Build.ExecutorArgs
@@ -124,6 +125,9 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
 					ServiceAccountName: r.config.ImagePullAccountName,
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser: &rootUser,
+					},
 				},
 			},
 		},
@@ -218,6 +222,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 
 	one := int32(1)
 	zero := int32(0)
+	rootUser := int64(0)
 
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -299,6 +304,9 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
 					ServiceAccountName: r.config.ImagePullAccountName,
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser: &rootUser,
+					},
 				},
 			},
 		},
@@ -436,7 +444,7 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	labels := make(map[string]string, 3)
 
 	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = "function-controller"
+	labels[serverlessv1alpha1.FunctionManagedByLabel] = serverlessv1alpha1.FunctionControllerValue
 	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
