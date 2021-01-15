@@ -42,9 +42,13 @@ func TestNatsHandler(t *testing.T) {
 
 	port, err := testingutils.GeneratePort()
 	if err != nil {
-		t.Fatalf("failed to generate port: %v", err)
+		t.Fatalf("failed to generate ingress port: %v", err)
 	}
-	cfgNats := newEnvConfig(port)
+	natsPort, err := testingutils.GeneratePort()
+	if err != nil {
+		t.Fatalf("failed to generate Nats port: %v", err)
+	}
+	cfgNats := newEnvConfig(port, natsPort)
 
 	// configure message receiver
 	messageReceiver := receiver.NewHttpMessageReceiver(cfgNats.Port)
@@ -192,10 +196,10 @@ func TestNatsHandler(t *testing.T) {
 	}
 }
 
-func newEnvConfig(port int) *env.NatsConfig {
+func newEnvConfig(port, natsPort int) *env.NatsConfig {
 	return &env.NatsConfig{
 		Port:                  port,
-		NatsPublishURL:        fmt.Sprintf("http://localhost:%d", port+1),
+		NatsPublishURL:        fmt.Sprintf("http://localhost:%d", natsPort),
 		RequestTimeout:        2 * time.Second,
 		LegacyNamespace:       "/beb.namespace",
 		LegacyEventTypePrefix: "event.type.prefix",
