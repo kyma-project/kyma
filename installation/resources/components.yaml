@@ -1,5 +1,5 @@
 ---
-namespace: kyma-system
+defaultNamespace: kyma-system
 prerequisites:
   - name: "cluster-essentials"
   - name: "istio"
@@ -20,10 +20,8 @@ components:
   - name: "nats-streaming"
     namespace: "natss"
   - name: "core"
+  - name: "permission-controller" 
   - name: "cluster-users"
-  - name: "permission-controller"
-  - name: "apiserver-proxy"
-  - name: "iam-kubeconfig-service"
   - name: "serverless"
   - name: "knative-provisioner-natss"
     namespace: "knative-eventing"
@@ -31,3 +29,7 @@ components:
   - name: "application-connector"
     namespace: "kyma-integration"
   - name: "console"
+  - name: "logging"
+  - name: "tracing"
+  - name: "kiali"
+  - name: "monitoring"
