@@ -3,7 +3,7 @@ containerRegistry:
 
 image:
   dir: ""
-  version: PR-10327
+  version: 6e630efb
   pullPolicy: "Always"
 
 testServiceImage:
