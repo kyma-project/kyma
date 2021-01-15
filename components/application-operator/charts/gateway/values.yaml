@@ -33,3 +33,7 @@ autoscaling:
 acceptanceTest:
   image:
     pullPolicy: IfNotPresent
+
+podSecurityPolicy:
+  enabled: true
+  runAsUser: 1000

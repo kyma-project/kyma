@@ -88,3 +88,7 @@ eventService:
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
+
+podSecurityPolicy:
+  enabled: true
+  runAsUser: 1000
