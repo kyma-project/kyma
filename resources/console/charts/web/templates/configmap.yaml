@@ -11,6 +11,7 @@ data:
   config.js: |
     window.clusterConfig = {
       authRedirectUri: 'https://console.{{ js .Values.global.ingress.domainName }}',
+      apiServerUrl: 'https://apiserver.{{ js .Values.global.ingress.domainName }}',
       domain: '{{ js .Values.global.ingress.domainName }}',
       consoleClientId: '{{ js .Values.cluster.consoleClientId }}',
       scope: '{{ js .Values.cluster.scope }}',
