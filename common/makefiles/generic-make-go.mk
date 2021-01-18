@@ -92,6 +92,9 @@ build-image: pull-licenses
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
+
+	docker tag $(DEBUG_IMG_NAME) $(DEBUG_IMG_NAME):$(TAG)
+	docker push $(DEBUG_IMG_NAME):$(TAG)
 docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 .PHONY: post-pr-tag-image
