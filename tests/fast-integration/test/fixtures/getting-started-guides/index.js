@@ -74,61 +74,37 @@ async function verifyOrderPersisted() {
   const virtualService = await waitForVirtualService(orderService, orderService);
   const serviceDomain = await virtualService.spec.hosts[0];
 
-  await createOrder(serviceDomain, order);
-
-  await getOrders(serviceDomain, (resp) => {
-    expect(resp).to.be.an("Array").of.length(1);
-    expect(resp[0]).to.deep.eq(order);
-  });
+  await retryPromise(async () => {
+    await createOrder(serviceDomain, order);
+    return findOrder(serviceDomain, order);
+  }, 30, 2000).catch(e => {throw new Error("Error during creating order: "+e)});
 
   await deleteAllK8sResources('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` });
 
-  await getOrders(
-    serviceDomain,
-    (resp) => {
-      expect(resp).to.be.an("Array").of.length(1);
-      expect(resp[0]).to.deep.eq(order);
-    },
-    30, // longer, because the pod has just been killed and it needs to start again
-    2000
-  );
+  await retryPromise(() => findOrder(serviceDomain, order), 30, 2000);
 
   // https://kyma-project.io/docs/root/getting-started/#getting-started-connect-an-external-application
   // This is covered by commerce-mock.js test
-
 }
 
 
-async function getOrders(
-  serviceDomain,
-  expectFn,
-  retriesLeft = 20,
-  interval = 2000
-) {
-  return await retryPromise(
-    async () => {
-      return axios.get(`https://${serviceDomain}/orders`).then((res) => {
-        expectFn(res.data);
-        return res;
-      });
-    },
-    retriesLeft,
-    interval
-  ).catch(expectNoAxiosErr);
+async function findOrder(serviceDomain, order) {
+  const result = await axios.get(`https://${serviceDomain}/orders`)
+  if (result.data && result.data.length) {
+    const createdOrder = result.data.find((o) => o.orderCode == order.orderCode);
+    if (createdOrder) {
+      return createdOrder;
+    }
+  }
+  throw new Error("Order not found: "+order.orderCode)
 }
 
 async function createOrder(serviceDomain, order) {
-  return await retryPromise(
-    async () => {
-      return axios.post(`https://${serviceDomain}/orders`, order, {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
-      }).catch(err => {if (err.response.status != 409) throw err});
+  return  axios.post(`https://${serviceDomain}/orders`, order, {
+    headers: {
+      "Cache-Control": "no-cache",
     },
-    10,
-    3000
-  ).catch(expectNoAxiosErr)
+  }).catch(err => { if (err.response.status != 409) throw new Error("Cannot create the order. Error: " + err) });
 }
 
 function waitForPodWithSbuToBeReady(sbu) {

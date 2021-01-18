@@ -48,7 +48,7 @@ async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService('mocks', 'commerce-mock')
   const mockHost = vs.spec.hosts[0]
   const host = mockHost.split(".").slice(1).join(".");
-  let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "789" }), 10, 2000);
+  let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "789" }), 30, 2000);
   expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
 }
 
