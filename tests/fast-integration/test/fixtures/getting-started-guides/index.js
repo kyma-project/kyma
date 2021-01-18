@@ -104,7 +104,7 @@ async function createOrder(serviceDomain, order) {
     headers: {
       "Cache-Control": "no-cache",
     },
-  }).catch(err => { if (err.response.status != 409) throw new Error("Cannot create the order. Error: " + err) });
+  }).catch(err => { if (err.response.status != 409) throw new Error(`Cannot create the order. Error: ${err}`) });
 }
 
 function waitForPodWithSbuToBeReady(sbu) {
