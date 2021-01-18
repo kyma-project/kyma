@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
+
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 
 	"github.com/gorilla/mux"
@@ -103,34 +105,34 @@ func NewProxyHandler(
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
 	certInfoData := r.Header.Get(CertificateInfoHeader)
 	if certInfoData == "" {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
+		httptools.RespondWithError(ph.log.WithFields(tracing.GetMetadata(r.Context())), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
 		return
 	}
 
 	applicationName := mux.Vars(r)["application"]
 	if applicationName == "" {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.BadRequest("Application name not specified"))
+		httptools.RespondWithError(ph.log.WithFields(tracing.GetMetadata(r.Context())), w, apperrors.BadRequest("Application name not specified"))
 		return
 	}
 
-	ph.log.WithTracing(r.Context()).Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
+	ph.log.WithFields(tracing.GetMetadata(r.Context())).Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
 
 	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
 	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("Failed to get Application ClientIds: %s", err))
+		httptools.RespondWithError(ph.log.WithFields(tracing.GetMetadata(r.Context())), w, apperrors.Internal("Failed to get Application ClientIds: %s", err))
 		return
 	}
 
 	subjects := extractSubjects(certInfoData)
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName, ph.group, ph.tenant) {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Forbidden("No valid subject found"))
+		httptools.RespondWithError(ph.log.WithFields(tracing.GetMetadata(r.Context())), w, apperrors.Forbidden("No valid subject found"))
 		return
 	}
 
 	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path)
 	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, err)
+		httptools.RespondWithError(ph.log.WithFields(tracing.GetMetadata(r.Context())), w, err)
 		return
 	}
 
@@ -304,7 +306,7 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 				opt(request)
 			}
 
-			log.WithTracing(request.Context()).Infof("Proxying request to target URL: %s", request.URL)
+			log.WithFields(tracing.GetMetadata(request.Context())).Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
 			log.Infof("Host responded with status: %s", response.Status)

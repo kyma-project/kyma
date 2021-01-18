@@ -11,6 +11,9 @@ import (
 const (
 	SPAN_HEADER_KEY  = "Spanid"
 	TRACE_HEADER_KEY = "Traceid"
+	TRACE_KEY        = "traceid"
+	SPAN_KEY         = "spanid"
+	UNKNOWN_VALUE    = "unknown"
 )
 
 type tracingMiddleware struct {
@@ -35,16 +38,6 @@ func (m *tracingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	m.handler(w, r.WithContext(newCtx))
 	return
-}
-
-//TODO: think where to enhance logger in tracing or in logger, maybe pass function
-// log.Enhance(func()).Info()
-// log.Enhance(tracing.AddMetadata(r.ctx)).Info()
-// I think that such API looks not so bad
-func AddTracingInfo(log *logger.Logger, ctx context.Context) *logger.Logger {
-	enhancedLogger := log.With("abc", "123")
-
-	return &logger.Logger{enhancedLogger}
 }
 
 func addHeaderToCtx(ctx context.Context, headers http.Header, key string) context.Context {
