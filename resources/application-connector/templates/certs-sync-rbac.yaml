@@ -13,10 +13,13 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "list", "patch", "create"]
+    verbs: ["get", "list", "patch"]
     resourceNames: 
       - {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
       - {{ .Values.application_connectivity_certs_sync.secrets.caCertificateSecret.name }}
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
