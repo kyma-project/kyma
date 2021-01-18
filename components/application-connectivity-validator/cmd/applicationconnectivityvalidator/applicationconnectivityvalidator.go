@@ -18,8 +18,8 @@ import (
 
 func main() {
 	options := parseArgs()
-	//TODO: what to do with this
-	fmt.Printf("Options: %+v:\n", options)
+	logger.LogOptions("Parsed options: %+v", options)
+
 	level, err := logger.MapLevel(options.logLevel)
 	if err != nil {
 		logger.LogFatalError("Fatal Error: %s", err.Error())
@@ -30,9 +30,8 @@ func main() {
 		logger.LogFatalError("Fatal Error: %s", err.Error())
 		os.Exit(1)
 	}
-
-	level = logger.INFO
 	log := logger.New(format, level)
+
 	log.Info("Starting Validation Proxy.")
 
 	idCache := cache.New(

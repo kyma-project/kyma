@@ -60,3 +60,8 @@ func LogFatalError(format string, args ...interface{}) {
 	logger := New(JSON, ERROR)
 	logger.Fatalf(format, args...)
 }
+
+func LogOptions(format string, args ...interface{}) {
+	logger := New(JSON, INFO)
+	logger.Infof(format, args...)
+}
