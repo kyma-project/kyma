@@ -274,6 +274,8 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ofType := mock.AnythingOfType("*v1alpha1.Application")
+		ApplicationReleaseManager.On("UpgradeApplicationRelease", ofType)
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 
@@ -289,6 +291,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
 		ApplicationReleaseManager.AssertExpectations(t)
+		ApplicationReleaseManager.AssertCalled(t, "UpgradeApplicationRelease", ofType)
 	})
 
 	t.Run("should correct access-label if updated with wrong value", func(t *testing.T) {
@@ -307,6 +310,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("UpgradeApplicationRelease", mock.AnythingOfType("*v1alpha1.Application"))
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 
@@ -428,6 +432,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("UpgradeApplicationRelease", mock.AnythingOfType("*v1alpha1.Application"))
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 
@@ -443,6 +448,43 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
 		ApplicationReleaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should invoke release manager upgrade if application override labels has changed", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
+			Run(statusChecker.checkStatus).Return(nil)
+
+		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
+		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
+		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+
+		ofType := mock.AnythingOfType("*v1alpha1.Application")
+		ApplicationReleaseManager.On("UpgradeApplicationRelease", ofType)
+
+		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		ApplicationReleaseManager.AssertExpectations(t)
+		ApplicationReleaseManager.AssertCalled(t, "UpgradeApplicationRelease", ofType)
 	})
 }
 

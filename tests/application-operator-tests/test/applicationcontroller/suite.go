@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"helm.sh/helm/v3/pkg/release"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
@@ -17,13 +19,17 @@ import (
 
 const (
 	testAppName              = "operator-test-%s"
+	testGatewayName          = "%s-application-gateway"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
 	assessLabelWaitTime      = 15 * time.Second
 )
 
+type StateAssertion func(*v1alpha1.Application) bool
+
 type TestSuite struct {
 	application string
+	gateway     string
 
 	config     testkit.TestConfig
 	helmClient testkit.HelmClient
@@ -38,6 +44,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	require.NoError(t, err)
 
 	app := fmt.Sprintf(testAppName, rand.String(4))
+	gateway := fmt.Sprintf(testGatewayName, app)
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
@@ -49,6 +56,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	return &TestSuite{
 		application: app,
+		gateway:     gateway,
 
 		config:              config,
 		helmClient:          helmClient,
@@ -62,6 +70,59 @@ func (ts *TestSuite) CreateApplication(t *testing.T, accessLabel string, skipIns
 	application, err := ts.k8sClient.CreateDummyApplication(context.Background(), ts.application, accessLabel, skipInstallation)
 	require.NoError(t, err)
 	require.NotNil(t, application)
+}
+
+func (ts *TestSuite) CreateLabeledApplication(t *testing.T, labels map[string]string) {
+	application, err := ts.k8sClient.CreateLabeledApplication(context.Background(), ts.application, labels)
+	require.NoError(t, err)
+	require.NotNil(t, application)
+}
+
+func (ts *TestSuite) UpdateLabeledApplication(t *testing.T, labels map[string]string) {
+	application, err := ts.k8sClient.GetApplication(context.Background(), ts.application, metav1.GetOptions{})
+	require.NoError(t, err)
+	require.NotNil(t, application)
+
+	application.Spec.Labels = labels
+
+	updated, err := ts.k8sClient.UpdateApplication(context.Background(), application)
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+}
+
+func (ts *TestSuite) AssertRunArgGateway(t *testing.T, expectedArg string) {
+	ts.AssertRunArg(t, ts.gateway, expectedArg)
+}
+
+func (ts *TestSuite) WaitForRunArgGateway(t *testing.T, expectedArg string) {
+	ts.WaitForRunArg(t, ts.gateway, expectedArg)
+}
+
+func (ts *TestSuite) AssertRunArg(t *testing.T, name string, expectedArg string) {
+	require.True(t, ts.containsArg(t, name, expectedArg), expectedArg)
+}
+
+func (ts *TestSuite) WaitForRunArg(t *testing.T, name string, expectedArg string) {
+	err := testkit.WaitForFunction(defaultCheckInterval, assessLabelWaitTime, func() bool {
+		return ts.containsArg(t, name, expectedArg)
+	})
+
+	require.NoError(t, err)
+}
+
+func (ts *TestSuite) containsArg(t *testing.T, name string, expectedArg string) bool {
+	deployment, err := ts.k8sClient.GetDeployment(context.Background(), name, metav1.GetOptions{})
+	require.NoError(t, err)
+
+	for _, container := range deployment.Spec.Template.Spec.Containers {
+		for _, arg := range container.Args {
+			if arg == expectedArg {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (ts *TestSuite) DeleteApplication(t *testing.T) {
@@ -102,6 +163,24 @@ func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {
 		return ts.helmClient.IsInstalled(ts.application, ts.config.Namespace)
 	})
 	require.NoError(t, err, "Received timeout while waiting for release to install")
+}
+
+func (ts *TestSuite) AssertApplicationState(t *testing.T, assertion StateAssertion) {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
+		application, err := ts.k8sClient.GetApplication(context.Background(), ts.application, metav1.GetOptions{})
+		require.NoError(t, err, "Received error while asserting application state")
+		return assertion(application)
+	})
+	require.NoError(t, err, "Received timeout while asserting application state")
+}
+
+func (ts *TestSuite) WaitForReleaseToUpgrade(t *testing.T) {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
+		status, err := ts.helmClient.CheckReleaseStatus(ts.application, ts.config.Namespace)
+		require.NoError(t, err, "Received error while waiting for release to upgrade")
+		return status != release.StatusDeployed
+	})
+	require.NoError(t, err, "Received timeout while waiting for release to upgrade")
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall(t *testing.T) {

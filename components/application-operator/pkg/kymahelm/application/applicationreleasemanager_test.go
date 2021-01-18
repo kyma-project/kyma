@@ -282,6 +282,39 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		helmClient.AssertExpectations(t)
 	})
 
+	t.Run("should upgrade existing release", func(t *testing.T) {
+		// given
+		application := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{Name: "app-1"},
+		}
+
+		updateResponse := &hapi_release5.Release{
+			Info: &hapi_release5.Info{
+				Status:      hapi_release5.StatusDeployed,
+				Description: "Installed",
+			},
+		}
+
+		helmListReleaseResponse := []*hapi_release5.Release{
+			{Name: "app-1"},
+		}
+
+		appClient := &mocks.ApplicationClient{}
+
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides, emptyProfile).Return(updateResponse, nil)
+		helmClient.On("ListReleases", namespace).Return(helmListReleaseResponse, nil)
+
+		releaseManager := NewApplicationReleaseManager(helmClient, appClient, OverridesData{}, namespace, emptyProfile)
+
+		// when
+		releaseManager.UpgradeApplicationRelease(&application)
+
+		// then
+		appClient.AssertExpectations(t)
+		helmClient.AssertExpectations(t)
+	})
+
 	t.Run("should set a proper status if upgrade failed", func(t *testing.T) {
 		// given
 

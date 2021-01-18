@@ -129,6 +129,8 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
+	} else if !application.ShouldSkipInstallation() {
+		r.releaseManager.UpgradeApplicationRelease(application)
 	}
 
 	return r.checkApplicationStatus(application)

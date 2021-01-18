@@ -30,6 +30,7 @@ type ApplicationReleaseManager interface {
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status, string, error)
 	UpgradeApplicationReleases() error
+	UpgradeApplicationRelease(application *v1alpha1.Application)
 }
 
 type releaseManager struct {
@@ -74,20 +75,24 @@ func (r *releaseManager) UpgradeApplicationReleases() error {
 			continue
 		}
 
-		status, description, err := r.upgradeChart(&app)
-		if err != nil {
-			log.Errorf("Failed to upgrade release %s: %s", app.Name, err.Error())
-
-			setCurrentStatus(&app, status.String(), description)
-
-			err = r.updateApplication(&app)
-			if err != nil {
-				log.Errorf("Failed to upgrade %s CR: %s", app.Name, err.Error())
-			}
-		}
+		r.UpgradeApplicationRelease(&app)
 	}
 
 	return nil
+}
+
+func (r *releaseManager) UpgradeApplicationRelease(app *v1alpha1.Application) {
+	status, description, err := r.upgradeChart(app)
+	if err != nil {
+		log.Errorf("Failed to upgrade release %s: %s", app.Name, err.Error())
+
+		setCurrentStatus(app, status.String(), description)
+
+		err = r.updateApplication(app)
+		if err != nil {
+			log.Errorf("Failed to upgrade %s CR: %s", app.Name, err.Error())
+		}
+	}
 }
 
 func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4.Status, string, error) {
