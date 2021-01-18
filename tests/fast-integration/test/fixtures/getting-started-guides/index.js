@@ -77,7 +77,7 @@ async function verifyOrderPersisted() {
   await retryPromise(async () => {
     await createOrder(serviceDomain, order);
     return findOrder(serviceDomain, order);
-  }, 30, 2000).catch(e => {throw new Error("Error during creating order: "+e)});
+  }, 30, 2000).catch(e => {throw new Error(`Error during creating order: ${e}`)});
 
   await deleteAllK8sResources('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` });
 
@@ -96,7 +96,7 @@ async function findOrder(serviceDomain, order) {
       return createdOrder;
     }
   }
-  throw new Error("Order not found: "+order.orderCode)
+  throw new Error(`Order not found: ${order.orderCode}`)
 }
 
 async function createOrder(serviceDomain, order) {
@@ -104,13 +104,13 @@ async function createOrder(serviceDomain, order) {
     headers: {
       "Cache-Control": "no-cache",
     },
-  }).catch(err => { if (err.response.status != 409) throw new Error("Cannot create the order. Error: " + err) });
+  }).catch(err => { if (err.response.status != 409) throw new Error(`Cannot create the order. Error: ${err}`) });
 }
 
 function waitForPodWithSbuToBeReady(sbu) {
   return waitForK8sObject('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` }
     , (_type, _apiObj, watchObj) => {
-      return Object.keys(watchObj.object.metadata.labels).includes('use-' + sbu.metadata.uid) &&
+      return Object.keys(watchObj.object.metadata.labels).includes(`use-${sbu.metadata.uid}`) &&
         watchObj.object.metadata.name.startsWith(orderService) && watchObj.object.status.conditions
         && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
     }
