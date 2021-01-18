@@ -77,7 +77,7 @@ async function verifyOrderPersisted() {
   await retryPromise(async () => {
     await createOrder(serviceDomain, order);
     return findOrder(serviceDomain, order);
-  }, 30, 2000).catch(e => {throw new Error("Error during creating order: "+e)});
+  }, 30, 2000).catch(e => {throw new Error(`Error during creating order: ${e}`)});
 
   await deleteAllK8sResources('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` });
 
