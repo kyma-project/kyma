@@ -5,14 +5,20 @@ metadata:
 spec:
   limits:
   - max:
-      memory: 4Gi # Maximum memory that a container can request
+    {{- if .Values.limitRange.max.memory }}
+      memory: {{ .Values.limitRange.max.memory }} # Maximum memory that a container can request
+    {{- end }}
     default:
       # If a container does not specify memory limit, this default value will be applied.
       # If a container tries to allocate more memory, container will be OOM killed.
-      memory: 96Mi
+    {{- if .Values.limitRange.default.memory }}
+      memory: {{ .Values.limitRange.default.memory }}
+    {{- end }}
     defaultRequest:
       # If a container does not specify memory request, this default value will be applied.
       # The scheduler considers this value when scheduling a container to a node.
       # If a node has not enough memory, such pod will not be created.
-      memory: 32Mi
+    {{- if .Values.limitRange.defaultRequest.memory }}
+      memory: {{ .Values.limitRange.defaultRequest.memory }}
+    {{- end }}
     type: Container
