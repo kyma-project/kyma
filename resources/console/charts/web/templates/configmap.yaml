@@ -10,7 +10,6 @@ metadata:
 data:
   config.js: |
     window.clusterConfig = {
-      pamelaApiUrl: 'https://pamela.{{ js .Values.global.ingress.domainName }}',
       apiServerUrl: 'https://apiserver.{{ js .Values.global.ingress.domainName }}',
       authRedirectUri: 'https://console.{{ js .Values.global.ingress.domainName }}',
       domain: '{{ js .Values.global.ingress.domainName }}',
