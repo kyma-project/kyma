@@ -1,6 +1,7 @@
 # Default configuration
 ENTRYPOINT := ./main.go
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+DEBUG_IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME).debug
 TAG := $(DOCKER_TAG)
 # BASE_PKG is a root packge of the component
 BASE_PKG := github.com/kyma-project/kyma
@@ -14,7 +15,7 @@ VERIFY_IGNORE := /vendor\|/automock
 # Other variables
 # LOCAL_DIR in a local path to scripts folder
 LOCAL_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-# COMPONENT_DIR is a local path to commponent
+# COMPONENT_DIR is a local path to component
 COMPONENT_DIR = $(shell pwd)
 # WORKSPACE_LOCAL_DIR is a path to the scripts folder in the container
 WORKSPACE_LOCAL_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/common/makefiles
@@ -87,6 +88,7 @@ release-dep: resolve dep-status verify build-image push-image
 .PHONY: build-image push-image
 build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
+	docker build --build-arg BASE_IMAGE_NAME=$(DEBUG_IMG_NAME) -t $(DEBUG_IMG_NAME).debug - < $(SCRIPTS_DIR)/debug/debug.Dockerfile
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
