@@ -31,7 +31,7 @@ global:
   application_operator_tests:
     version: "470796a1"
   connector_service:
-    version: "PR-10285"
+    version: "548ea6b4"
   connector_service_tests:
     version: "470796a1"
   connection_token_handler:
@@ -57,7 +57,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9921"
   application_connectivity_validator:
-    version: "60463b1d"
+    version: "7fb79933"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
