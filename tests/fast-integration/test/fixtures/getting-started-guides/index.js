@@ -96,7 +96,7 @@ async function findOrder(serviceDomain, order) {
       return createdOrder;
     }
   }
-  throw new Error("Order not found: "+order.orderCode)
+  throw new Error(`Order not found: ${order.orderCode}`)
 }
 
 async function createOrder(serviceDomain, order) {
