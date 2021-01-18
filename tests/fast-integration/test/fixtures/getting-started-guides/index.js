@@ -110,7 +110,7 @@ async function createOrder(serviceDomain, order) {
 function waitForPodWithSbuToBeReady(sbu) {
   return waitForK8sObject('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` }
     , (_type, _apiObj, watchObj) => {
-      return Object.keys(watchObj.object.metadata.labels).includes('use-' + sbu.metadata.uid) &&
+      return Object.keys(watchObj.object.metadata.labels).includes(`use-${sbu.metadata.uid}`) &&
         watchObj.object.metadata.name.startsWith(orderService) && watchObj.object.status.conditions
         && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
     }
