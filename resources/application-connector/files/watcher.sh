@@ -12,7 +12,7 @@ else
 fi
 
 function createSecret() {
-  cat <<EOF | kubectl -n kyma-integration apply -f -
+  cat <<EOF | kubectl -n "$2" apply -f -
 apiVersion: v1
 kind: Secret
 data:
