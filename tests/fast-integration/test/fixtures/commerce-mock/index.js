@@ -73,7 +73,11 @@ async function sendEventAndCheckResponse() {
             "content-type": "application/json",
           },
         }
-      );
+      ).catch(e => {
+        console.log('Cannot send event, the response from event gateway:');
+        console.dir(e.response.data);
+        throw e
+      });
 
       await sleep(500);
 
@@ -89,7 +93,7 @@ async function sendEventAndCheckResponse() {
     },
     45,
     2 * 1000
-  ).catch(expectNoAxiosErr);
+  );
 }
 
 async function registerAllApis(mockHost) {
