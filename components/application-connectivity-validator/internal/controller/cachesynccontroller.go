@@ -38,7 +38,7 @@ func NewController(
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
-		log:               log,
+		log:               log.WithContext(map[string]string{"controller": "Application Cache"}),
 		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
@@ -74,7 +74,6 @@ func (c *Controller) enqueueApplication(obj interface{}) {
 func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
-
 	c.log.Info("Starting Application Cache controller")
 
 	c.log.Info("Waiting for informer caches to sync")

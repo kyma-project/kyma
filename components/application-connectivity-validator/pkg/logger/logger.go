@@ -35,7 +35,15 @@ func (l *Logger) WithFields(m map[string]string) *Logger {
 
 func (l *Logger) WithContext(context map[string]string) *Logger {
 	newLogger := *l
-	newLogger.SugaredLogger = l.With("context", context)
+	newLogger.SugaredLogger = newLogger.With(zap.Namespace("context"))
+	return newLogger.EnhanceContext(context)
+}
+
+func (l *Logger) EnhanceContext(context map[string]string) *Logger {
+	newLogger := *l
+	for key, val := range context {
+		newLogger.SugaredLogger = l.With(key, val)
+	}
 	return &newLogger
 }
 
