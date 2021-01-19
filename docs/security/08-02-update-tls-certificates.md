@@ -22,16 +22,10 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 
   >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
 
-  1. Edit the `owndomain-overrides` ConfigMap and replace the existing certificate and key found in the **global.tlsCrt** and **global.tlsKey** with a new, base64-encoded pair.
+  1. Delete the `net-global-overrides` ConfigMap and replace the existing certificate and key found in the **global.tlsCrt** and **global.tlsKey** with a new, base64-encoded pair.
 
-    ```
-    kubectl edit cm -n kyma-installer owndomain-overrides
-    ```
-
-    Delete the Secret that stores the expired certificate:
-
-    ```
-    kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
+    ```bash
+    kubectl delete cm -n kyma-installer net-global-overrides
     ```
 
   </details>
@@ -57,8 +51,8 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 
 2. Trigger the update process. Run:
 
-  ```
-  kubectl -n default label installation/kyma-installation action=install
+  ```bash
+  kyma upgrade -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
   ```
 
   To watch the progress of the update, run:
@@ -74,8 +68,8 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 
 3. Restart the Console Backend Service to propagate the new certificate. Run:
 
-  ```
-  kubectl delete pod -n kyma-system -l app=console-backend
+  ```bash
+  kubectl delete pod -n kyma-system -l app=backend
   ```
 
 4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
