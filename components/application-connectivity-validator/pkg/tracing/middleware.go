@@ -22,18 +22,17 @@ func NewTracingMiddleware(handler func(w http.ResponseWriter, r *http.Request)) 
 	return &tracingMiddleware{
 		handler: handler,
 	}
-
 }
 
 func (m *tracingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	newCtx := addHeaderToCtx(r.Context(), r.Header, TRACE_HEADER_KEY)
-	newCtx = addHeaderToCtx(newCtx, r.Header, SPAN_HEADER_KEY)
+	newCtx := addHeaderToCtx(r.Context(), r.Header, TRACE_HEADER_KEY, TRACE_KEY)
+	newCtx = addHeaderToCtx(newCtx, r.Header, SPAN_HEADER_KEY, SPAN_KEY)
 
 	m.handler(w, r.WithContext(newCtx))
 	return
 }
 
-func addHeaderToCtx(ctx context.Context, headers http.Header, key string) context.Context {
+func addHeaderToCtx(ctx context.Context, headers http.Header, key string, desiredKey string) context.Context {
 	header, ok := headers[key]
 	if !ok {
 		return ctx

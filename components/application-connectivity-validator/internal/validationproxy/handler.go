@@ -307,7 +307,7 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 			log.WithTracing(request.Context()).Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
-			log.Infof("Host responded with status: %s", response.Status)
+			log.WithContext().Infof("Host responded with status: %s", response.Status)
 			return nil
 		},
 	}

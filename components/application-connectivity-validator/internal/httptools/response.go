@@ -2,9 +2,8 @@ package httptools
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 	"net/http"
-
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httperrors"
@@ -12,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 )
 
-func RespondWithError(log *logger.Logger, w http.ResponseWriter, apperr apperrors.AppError) {
+func RespondWithError(log *zap.SugaredLogger, w http.ResponseWriter, apperr apperrors.AppError) {
 	log.Error(apperr.Error())
 
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)

@@ -27,7 +27,7 @@ func MapFormat(input string) (Format, error) {
 	}
 }
 
-func (f Format) toZapEncoder() zapcore.Encoder {
+func (f Format) ToZapEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder

@@ -2,22 +2,24 @@ package logger
 
 import (
 	"context"
+	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
-	"os"
+	"k8s.io/klog/v2"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 )
 
 type Logger struct {
-	*zap.SugaredLogger
+	zapLogger *zap.SugaredLogger
 }
 
 func New(format Format, level Level, additionalCores ...zapcore.Core) *Logger {
-	filterLevel := level.ToZapLevel()
+	filterLevel := level.toZapLevel()
 
 	defaultCore := zapcore.NewCore(
-		format.toZapEncoder(),
+		format.ToZapEncoder(),
 		zapcore.Lock(os.Stderr),
 		zap.LevelEnablerFunc(func(incomingLevel zapcore.Level) bool {
 			return incomingLevel >= filterLevel
@@ -27,40 +29,38 @@ func New(format Format, level Level, additionalCores ...zapcore.Core) *Logger {
 	return &Logger{zap.New(zapcore.NewTee(cores...)).Sugar()}
 }
 
-func (l *Logger) WithTracing(ctx context.Context) *Logger {
+func (l *Logger) WithTracing(ctx context.Context) *zap.SugaredLogger {
 	newLogger := *l
-	newLogger = *newLogger.withFields(tracing.GetMetadata(ctx))
-	newLogger = *newLogger.WithContext()
-	return &newLogger
-}
-
-func (l *Logger) withFields(m map[string]string) *Logger {
-	newLogger := *l
-	for key, val := range m {
-		newLogger.SugaredLogger = newLogger.With(key, val)
+	for key, val := range tracing.GetMetadata(ctx) {
+		newLogger.zapLogger = newLogger.zapLogger.With(key, val)
 	}
-	return &newLogger
+
+	return newLogger.WithContext()
 }
 
-func (l *Logger) WithContext() *Logger {
+func (l *Logger) WithContext() *zap.SugaredLogger {
 	newLogger := *l
-	newLogger.SugaredLogger = newLogger.With(zap.Namespace("context"))
-	return &newLogger
+	return newLogger.zapLogger.With(zap.Namespace("context"))
 }
-//
-//func (l *Logger) EnhanceContext(context map[string]string) *Logger {
-//	newLogger := *l
-//	return newLogger.withFields(context)
-//}
 
 // By default the Fatal Error log will be in json format, because it's production default.
 func LogFatalError(format string, args ...interface{}) {
 	logger := New(JSON, ERROR)
-	logger.Fatalf(format, args...)
+	logger.zapLogger.Fatalf(format, args...)
 }
 
 // By default the Options log will be in json format, because it's production default.
 func LogOptions(format string, args ...interface{}) {
 	logger := New(JSON, INFO)
-	logger.Debugf(format, args...)
+	logger.zapLogger.Debugf(format, args...)
+}
+
+/**
+This function initialize klog which is used in k8s/go-client
+*/
+func InitKlog(log *Logger, level Level) {
+	zaprLogger := zapr.NewLogger(log.WithContext().Desugar())
+	zaprLogger.V((int)(level.toZapLevel()))
+	klog.SetLogger(zaprLogger)
+
 }

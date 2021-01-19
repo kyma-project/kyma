@@ -2,9 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"time"
-
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/cache"
@@ -27,11 +26,11 @@ type Controller struct {
 	workqueue         workqueue.RateLimitingInterface
 	appName           string
 	appCache          *gocache.Cache
-	log               *logger.Logger
+	log               *zap.SugaredLogger
 }
 
 func NewController(
-	log *logger.Logger,
+	log *zap.SugaredLogger,
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
 	appName string,

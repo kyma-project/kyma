@@ -27,11 +27,11 @@ func MapLevel(level string) (Level, error) {
 	case DEBUG, INFO, WARN, ERROR, FATAL:
 		return lvl, nil
 	default:
-		return lvl, errors.New(fmt.Sprintf("Given lgo level: %s, doesn't match with any of %v", level, all_levels))
+		return lvl, errors.New(fmt.Sprintf("Given log level: %s, doesn't match with any of %v", level, all_levels))
 	}
 }
 
-func (l Level) ToZapLevel() zapcore.Level {
+func (l Level) toZapLevel() zapcore.Level {
 	switch l {
 	case DEBUG:
 		return zap.DebugLevel
@@ -50,6 +50,6 @@ func (l Level) ToZapLevel() zapcore.Level {
 
 func (l Level) toZapLevelEnabler() zap.LevelEnablerFunc {
 	return func(zl zapcore.Level) bool {
-		return zl <= l.ToZapLevel()
+		return zl <= l.toZapLevel()
 	}
 }

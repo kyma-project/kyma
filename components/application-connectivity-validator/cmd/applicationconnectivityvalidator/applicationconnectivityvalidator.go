@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"k8s.io/klog/v2"
 	"net/http"
 	"os"
 	"sync"
@@ -16,9 +15,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	logger "github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 	"github.com/patrickmn/go-cache"
-
-	//"github.com/go-logr/logr"
-	"github.com/go-logr/zapr"
 )
 
 func main() {
@@ -38,23 +34,22 @@ func main() {
 	}
 	log := logger.New(format, level)
 
-	zaprLogger := zapr.NewLogger(log.SugaredLogger.Desugar())
-	zaprLogger.V((int)(level.ToZapLevel()))
-	klog.SetLogger(zaprLogger)
-
-	log.Info("Starting Validation Proxy.")
-	log.Error("this is sample error log")
+	logger.InitKlog(log, level)
+	log.WithContext().Info("Starting Validation Proxy.")
+	log.WithContext().Error("this is sample error log")
 
 	ctx := context.TODO()
 	ctx = context.WithValue(ctx, "traceid", "abc")
 	ctx = context.WithValue(ctx, "spanid", "def")
 
 	// Body handlera, gdzie przekazujemy log
+
 	log.WithTracing(ctx).With("key", "val").With("key2", "val2").Errorf("some error1")
 
 	// Body controllera, przekazujemy log.WithContext()
 	log.WithContext().With("key1", "val2").Errorf("some error2")
-	//
+	log.WithContext().Errorf("some error2")
+
 	//log.WithFields(tracing.GetMetadata(ctx)).Error("sample log")
 	//log.WithFields(tracing.GetMetadata(ctx)).Error("sample second log")
 	//log.WithFields(tracing.GetMetadata(ctx)).
@@ -113,15 +108,15 @@ func main() {
 
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(log, options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
+		controller.Start(log.WithContext(), options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
 	}()
 
 	go func() {
-		log.Error(proxyServer.ListenAndServe())
+		log.WithContext().Error(proxyServer.ListenAndServe())
 	}()
 
 	go func() {
-		log.Error(externalServer.ListenAndServe())
+		log.WithContext().Error(externalServer.ListenAndServe())
 	}()
 
 	wg.Wait()

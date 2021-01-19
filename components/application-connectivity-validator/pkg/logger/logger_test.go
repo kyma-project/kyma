@@ -1,18 +1,33 @@
 package logger
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"testing"
+	"time"
 
-	"github.com/bmizerany/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest/observer"
 )
 
+type logEntry struct {
+	Context   map[string]string `json:"context"`
+	Msg       string            `json:"message"`
+	TraceID   string            `json:"traceid"`
+	SpanID    string            `json:"spanid"`
+	Timestamp string            `json:"timestamp"`
+	Level     string            `json:"level"`
+}
+
 func TestLogger(t *testing.T) {
 	t.Run("should log anything", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(DEBUG.ToZapLevel())
-		logger := New(JSON, DEBUG, core)
+		core, observedLogs := observer.New(DEBUG.toZapLevel())
+		logger := New(JSON, DEBUG, core).WithContext()
 
 		// when
 		logger.Debug("something")
@@ -24,45 +39,48 @@ func TestLogger(t *testing.T) {
 
 	t.Run("should log in the right format", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(DEBUG.ToZapLevel())
+
+		array := make([]byte, 0)
+		buffer := bytes.NewBuffer(array)
+
+		syncBuffer := zapcore.AddSync(buffer)
+		ws := zapcore.Lock(syncBuffer)
+		logFilter := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
+			return true
+		})
+
+		core := zapcore.NewCore(JSON.ToZapEncoder(), ws, logFilter)
 		logger := New(JSON, DEBUG, core)
+
+		ctx := fixContext(map[string]string{"traceid": "trace", "spanid": "span"})
 		// when
-		//TODO: use Context
-		logger = logger
-		//logger.WithTracing(map[string]string{"traceid": "traceid123", "spanid": "spanid123"}).
-		//	WithContext(map[string]string{"key": "val", "key2": "val2"}).
-		//	Debugf("Some message: %v", "error")
+		logger.WithTracing(ctx).With("key", "value").Info("example message")
 
 		// then
-		//require.NotEqual(t, 0, observedLogs.Len())
-		for _, log := range observedLogs.All() {
-			//TODO: Consider some better approach
-			assert.Equal(t, DEBUG.ToZapLevel(), log.Level)
-			assert.Equal(t, "something", log.Message)
-			//fields := []zapcore.Field{{
-			//	"traceid",
-			//	0,
-			//	0,
-			//	"traceid123",
-			//	nil,
-			//},{
-			//	"spanid",
-			//	0,
-			//	0,
-			//	"spanid123",
-			//	nil,
-			//},{
-			//	"traceid",
-			//	0,
-			//	0,
-			//	"traceid123",
-			//	nil,
-			//},}
-			//for _, val := range fields {
-			//	assert.Equal(t, true, containsZapField(val, log.Context))
-			//}
-		}
+		var entry = logEntry{}
+		require.NotEqual(t, 0, buffer.Len())
+		err := json.Unmarshal(buffer.Bytes(), &entry)
+		require.NoError(t, err)
+		//MySuper
+		assert.Equal(t, "INFO", entry.Level)
+		assert.Equal(t, "example message", entry.Msg)
+		assert.Equal(t, "trace", entry.TraceID)
+		assert.Equal(t, "span", entry.SpanID)
+
+		assert.NotEmpty(t, entry.Timestamp)
+		_, err = time.Parse(time.RFC3339, entry.Timestamp)
+		assert.NoError(t, err)
+
 	})
+}
+
+func fixContext(values map[string]string) context.Context {
+	ctx := context.TODO()
+	for k, v := range values {
+		ctx = context.WithValue(ctx, k, v)
+	}
+
+	return ctx
 }
 
 //func containsZapField(field zapcore.Field, fields []zapcore.Field) bool {
@@ -72,4 +90,27 @@ func TestLogger(t *testing.T) {
 //		}
 //	}
 //	return false
+//}
+
+//func TestParallelRun(t *testing.T) {
+//	goRuntimesNumber := 15
+//	logger := New(TEXT, INFO)
+//
+//	wg := sync.WaitGroup{}
+//
+//	for i := 0; i < goRuntimesNumber; i++ {
+//
+//		wg.Add(1)
+//		i := i
+//		go func() {
+//			defer wg.Done()
+//			fmt.Println("aaaa")
+//			logger.WithContext(map[string]string{
+//				"id": strconv.Itoa(i),
+//			}).Infof("Hello From: %d", i)
+//		}()
+//	}
+//
+//	wg.Wait()
+//
 //}
