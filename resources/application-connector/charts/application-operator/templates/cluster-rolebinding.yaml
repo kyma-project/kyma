@@ -71,9 +71,9 @@ rules:
     resources: ["horizontalpodautoscalers"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
 {{- if .Values.global.podSecurityPolicy.enabled }}
-  - apiGroups: ['policy']
-    resources: ['podsecuritypolicies']
-    verbs: ['use']
+  - apiGroups: ["extensions", "policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
     resourceNames:
     - {{ .Chart.Name }}
     - application-gateway
