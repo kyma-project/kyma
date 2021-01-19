@@ -218,7 +218,18 @@ config:
           - kubernetes
           - stream
         labels: '{job="fluent-bit"}'
-        labelMapPath: labelmap.json
+        labelMap:
+          kubernetes:
+            namespace_name: namespace
+            labels:
+              app: app
+              release: release
+              "serverless.kyma-project.io/function-name": function
+              "serverless.kyma-project.io/uuid": functionUID
+            host: node
+            container_name: container
+            pod_name: pod
+          stream: stream
     es:
       enabled: false
       alias:
@@ -317,25 +328,8 @@ config:
   #      Name              test
   #      Match             *
   
-  extraFiles: 
-    ## Required for Loki
-    labelmap.json: |-
-      {
-        "kubernetes": {
-          "container_name": "container",
-          "host": "node",
-          "labels": {
-            "app": "app",
-            "release": "release",
-            "serverless.kyma-project.io/function-name": "function",
-            "serverless.kyma-project.io/uuid": "functionUID"
-          },
-          "namespace_name": "namespace",
-          "pod_name": "pod"
-        },
-        "stream": "stream"
-      }
-
+  script: #|
+  # myScript() {}
 
 # Defines an entry to add an external service to the service mesh
 # By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)

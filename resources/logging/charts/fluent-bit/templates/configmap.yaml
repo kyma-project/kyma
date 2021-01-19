@@ -115,7 +115,7 @@ data:
         {{- end }}
         Labels             {{ .Values.config.outputs.loki.config.labels }}
         RemoveKeys         {{ include "helm-toolkit.utils.joinListWithComma" .Values.config.outputs.loki.config.removeKeys }}
-        LabelMapPath       /fluent-bit/etc/{{ .Values.config.outputs.loki.config.labelMapPath }}
+        LabelMapPath       /fluent-bit/etc/labelmap.json
         LineFormat         {{ .Values.config.outputs.loki.config.lineFormat }}
         LogLevel           {{ .Values.config.outputs.loki.config.loglevel }}
 {{- end }}
@@ -253,9 +253,14 @@ data:
 {{- toString .Values.config.extra | indent 4 }}
 {{- end }}
 
-{{- range $key, $val := .Values.config.extraFiles }}
-{{ toYaml $key | indent 2 }}:
-{{- toYaml $val | indent 2 }}
+{{- if .Values.config.outputs.loki.enabled }}
+  labelmap.json: |-
+    {{- .Values.config.outputs.loki.config.labelMap | toPrettyJson | nindent 4}}
+{{- end }}
+
+{{- if .Values.config.script }}
+  script.lua:
+{{- toYaml .Values.config.script | indent 2 }}
 {{- end }}
 
 {{- end -}}
