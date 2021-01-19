@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"context"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
 	"os"
 
 	"go.uber.org/zap"
@@ -25,7 +27,14 @@ func New(format Format, level Level, additionalCores ...zapcore.Core) *Logger {
 	return &Logger{zap.New(zapcore.NewTee(cores...)).Sugar()}
 }
 
-func (l *Logger) WithFields(m map[string]string) *Logger {
+func (l *Logger) WithTracing(ctx context.Context) *Logger {
+	newLogger := *l
+	newLogger = *newLogger.withFields(tracing.GetMetadata(ctx))
+	newLogger = *newLogger.WithContext()
+	return &newLogger
+}
+
+func (l *Logger) withFields(m map[string]string) *Logger {
 	newLogger := *l
 	for key, val := range m {
 		newLogger.SugaredLogger = newLogger.With(key, val)
@@ -33,19 +42,16 @@ func (l *Logger) WithFields(m map[string]string) *Logger {
 	return &newLogger
 }
 
-func (l *Logger) WithContext(context map[string]string) *Logger {
+func (l *Logger) WithContext() *Logger {
 	newLogger := *l
 	newLogger.SugaredLogger = newLogger.With(zap.Namespace("context"))
-	return newLogger.EnhanceContext(context)
-}
-
-func (l *Logger) EnhanceContext(context map[string]string) *Logger {
-	newLogger := *l
-	for key, val := range context {
-		newLogger.SugaredLogger = l.With(key, val)
-	}
 	return &newLogger
 }
+//
+//func (l *Logger) EnhanceContext(context map[string]string) *Logger {
+//	newLogger := *l
+//	return newLogger.withFields(context)
+//}
 
 // By default the Fatal Error log will be in json format, because it's production default.
 func LogFatalError(format string, args ...interface{}) {

@@ -38,7 +38,7 @@ func NewController(
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
-		log:               log.WithContext(map[string]string{"controller": "Application Cache"}),
+		log:               log,
 		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
