@@ -1,9 +1,10 @@
 package logger_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 )

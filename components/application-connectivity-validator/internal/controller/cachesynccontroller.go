@@ -2,8 +2,9 @@ package controller
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/cache"

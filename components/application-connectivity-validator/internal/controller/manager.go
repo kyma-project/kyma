@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller/signals"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"

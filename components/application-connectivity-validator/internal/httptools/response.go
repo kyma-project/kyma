@@ -2,8 +2,9 @@ package httptools
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httperrors"
