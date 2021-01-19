@@ -76,6 +76,10 @@ config:
 # Configure node affinity
 affinity: {}
 
+# Configure PodSecurityPolicy
+podSecurityPolicy:
+  enabled: true
+
 tests:
   enabled: true
   labels:
