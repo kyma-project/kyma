@@ -126,7 +126,7 @@ async function ensureGettingStartedTestFixture() {
     return (watchObj.object.metadata.name == orderService && watchObj.object.status.APIRuleStatus.code == "OK")
   }, 10 * 1000, "Waiting for APIRule to be ready timeout")
   await waitForVirtualService(orderService, orderService);
-  await waitForServiceInstance('redis-service', orderService);
+  await waitForServiceInstance('redis-service', orderService, 180 * 1000);
   await waitForServiceBinding(orderService, orderService);
   await k8sApply([sbuObj], orderService);
   const sbu = await waitForServiceBindingUsage(orderService, orderService);
