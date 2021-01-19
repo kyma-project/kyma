@@ -76,6 +76,9 @@ rules:
     verbs: ['use']
     resourceNames:
     - {{ .Chart.Name }}
+    - application-gateway
+    - connectivity-validator
+    - event-service
 {{- end }}
 ---
 kind: ClusterRoleBinding
