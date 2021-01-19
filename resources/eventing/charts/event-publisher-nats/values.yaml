@@ -1,0 +1,35 @@
+# Default values for event-publisher-proxy.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# replicaCount configures the number of replicas for the event-publisher-proxy deployment
+replicaCount: 1
+
+image:
+  # name is the name of the container image for the event-publisher-proxy
+  name: "event-publisher-nats"
+  # tag is the container tag of the event-publisher-proxy image
+  tag: "PR-10331"
+  # pullPolicy is the pullPolicy for the event-publisher-proxy image
+  pullPolicy: "IfNotPresent"
+
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 32m
+    memory: 64Mi
+
+nats:
+  config:
+   port: "8080"
+   natsPublishURL: nats.nats.svc.cluster.local
+   requestTimeout: "5s"
+   legacyNamespace: kyma
+   legacyEventTypePrefix: kyma
+
