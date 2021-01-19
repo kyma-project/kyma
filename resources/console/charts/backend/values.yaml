@@ -23,7 +23,7 @@ resources:
     memory: 40Mi
   limits:
     cpu: 50m
-    memory: 150Mi
+    memory: 170Mi
 tests:
   enabled: true
   labels:
