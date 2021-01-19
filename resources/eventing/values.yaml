@@ -10,9 +10,8 @@ global:
   # domainName is the global domain used in Kyma
   domainName: ""
 
-  # isNatsEnabled determines whether Nats is enabled
-  isNatsEnabled: true
   # isBEBEnabled determines whether BEB is enabled
+  # if true BEB is enabled else NATS is enabled
   isBEBEnabled: false
 
 authentication:
