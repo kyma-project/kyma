@@ -305,7 +305,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_name: "eu.gcr.io/kyma-project/incubator/develop/kiali"
+      image_name: "eu.gcr.io/kyma-project/incubator/pr/kiali"
     #
     # The Kubernetes pull policy for the Kiali deployment.
     # This is overridden to be "Always" if image_version is set to "latest".
@@ -329,7 +329,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.27.0-85eb5cc7"
+      image_version: "1.28.1-PR-59"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
