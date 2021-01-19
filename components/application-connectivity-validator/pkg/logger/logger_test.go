@@ -11,7 +11,7 @@ import (
 func TestLogger(t *testing.T) {
 	t.Run("should log anything", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(DEBUG.toZapLevel())
+		core, observedLogs := observer.New(DEBUG.ToZapLevel())
 		logger := New(JSON, DEBUG, core)
 
 		// when
@@ -24,7 +24,7 @@ func TestLogger(t *testing.T) {
 
 	t.Run("should log in the right format", func(t *testing.T) {
 		// given
-		core, observedLogs := observer.New(DEBUG.toZapLevel())
+		core, observedLogs := observer.New(DEBUG.ToZapLevel())
 		logger := New(JSON, DEBUG, core)
 		// when
 		//TODO: use Context
@@ -37,7 +37,7 @@ func TestLogger(t *testing.T) {
 		//require.NotEqual(t, 0, observedLogs.Len())
 		for _, log := range observedLogs.All() {
 			//TODO: Consider some better approach
-			assert.Equal(t, DEBUG.toZapLevel(), log.Level)
+			assert.Equal(t, DEBUG.ToZapLevel(), log.Level)
 			assert.Equal(t, "something", log.Message)
 			//fields := []zapcore.Field{{
 			//	"traceid",

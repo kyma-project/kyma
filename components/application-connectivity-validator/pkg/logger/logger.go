@@ -12,11 +12,13 @@ type Logger struct {
 }
 
 func New(format Format, level Level, additionalCores ...zapcore.Core) *Logger {
+	filterLevel := level.ToZapLevel()
+
 	defaultCore := zapcore.NewCore(
 		format.toZapEncoder(),
 		zapcore.Lock(os.Stderr),
-		zap.LevelEnablerFunc(func(level zapcore.Level) bool {
-			return level <= level
+		zap.LevelEnablerFunc(func(incomingLevel zapcore.Level) bool {
+			return incomingLevel >= filterLevel
 		}),
 	)
 	cores := append(additionalCores, defaultCore)
@@ -24,15 +26,17 @@ func New(format Format, level Level, additionalCores ...zapcore.Core) *Logger {
 }
 
 func (l *Logger) WithFields(m map[string]string) *Logger {
+	newLogger := *l
 	for key, val := range m {
-		l.SugaredLogger = l.With(key, val)
+		newLogger.SugaredLogger = newLogger.With(key, val)
 	}
-	return l
+	return &newLogger
 }
 
 func (l *Logger) WithContext(context map[string]string) *Logger {
-	l.SugaredLogger = l.With("context", context)
-	return l
+	newLogger := *l
+	newLogger.SugaredLogger = l.With("context", context)
+	return &newLogger
 }
 
 // By default the Fatal Error log will be in json format, because it's production default.
@@ -44,5 +48,5 @@ func LogFatalError(format string, args ...interface{}) {
 // By default the Options log will be in json format, because it's production default.
 func LogOptions(format string, args ...interface{}) {
 	logger := New(JSON, INFO)
-	logger.Infof(format, args...)
+	logger.Debugf(format, args...)
 }

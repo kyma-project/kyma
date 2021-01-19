@@ -31,7 +31,7 @@ func MapLevel(level string) (Level, error) {
 	}
 }
 
-func (l Level) toZapLevel() zapcore.Level {
+func (l Level) ToZapLevel() zapcore.Level {
 	switch l {
 	case DEBUG:
 		return zap.DebugLevel
@@ -50,6 +50,6 @@ func (l Level) toZapLevel() zapcore.Level {
 
 func (l Level) toZapLevelEnabler() zap.LevelEnablerFunc {
 	return func(zl zapcore.Level) bool {
-		return zl <= l.toZapLevel()
+		return zl <= l.ToZapLevel()
 	}
 }

@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/go-logr/logr v0.3.0 // indirect
+	github.com/go-logr/zapr v0.3.0
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect; indirect	github.com/gorilla/mux v1.7.4
@@ -27,6 +28,7 @@ require (
 	k8s.io/api v0.18.8 // indirect
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.18.8
+	k8s.io/klog/v2 v2.2.0
 )
 
 replace (
