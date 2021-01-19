@@ -20,7 +20,7 @@ spec:
             - name: PORT
               value: {{ .Values.nats.config.port | quote }}
             - name: NATS_URL
-              value: {{ .Values.nats.config.natsPublishURL }}
+              value: {{ include "nats-controller.natsServer.url" . }}
             - name: REQUEST_TIMEOUT
               value: {{ .Values.nats.config.requestTimeout }}
             - name: LEGACY_NAMESPACE

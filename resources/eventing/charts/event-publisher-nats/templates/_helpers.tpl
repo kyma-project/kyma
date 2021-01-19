@@ -58,3 +58,10 @@ Create the name of the service account to use
 {{- define "event-publisher-nats.serviceAccountName" -}}
 {{- default (include "event-publisher-nats.fullname" .) .Values.serviceAccount.name }}
 {{- end }}
+
+{{/*
+Nats server service Name
+*/}}
+{{- define "nats-controller.natsServer.url" -}}
+{{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
+{{- end }}

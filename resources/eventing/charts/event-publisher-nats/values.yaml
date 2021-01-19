@@ -27,8 +27,7 @@ resources:
 
 nats:
   config:
-   port: "8080"
-   natsPublishURL: nats.nats.svc.cluster.local
+   port: 8080
    requestTimeout: "5s"
    legacyNamespace: kyma
    legacyEventTypePrefix: kyma
