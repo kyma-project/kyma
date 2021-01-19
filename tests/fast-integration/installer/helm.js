@@ -350,14 +350,6 @@ async function installKyma(
   );
 }
 
-(async () => {
-  const localKymaResourcesDir = join(__dirname, "..", "..", "..", "resources");
-  const installationLocation =
-    process.env["INSTALL_DIR"] || localKymaResourcesDir;
-
-  await installKyma(installationLocation, "1.7.6");
-})();
-
 module.exports = {
   installKyma,
 };
