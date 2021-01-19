@@ -193,11 +193,11 @@ function waitForServiceClass(name, namespace = "default") {
   }, 90 * 1000, `Waiting for ${name} service class timeout`);
 }
 
-function waitForServiceInstance(name, namespace = "default") {
+function waitForServiceInstance(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, 90 * 1000, `Waiting for service instance ${name} timeout`);
+  }, timeout, `Waiting for service instance ${name} timeout`);
 }
 
 function waitForServiceBinding(name, namespace = "default") {
