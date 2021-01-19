@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	SPAN_HEADER_KEY  = "Spanid"
-	TRACE_HEADER_KEY = "Traceid"
+	SPAN_HEADER_KEY  = "X-B3-Spanid"
+	TRACE_HEADER_KEY = "X-B3-Traceid"
 	TRACE_KEY        = "traceid"
 	SPAN_KEY         = "spanid"
 	UNKNOWN_VALUE    = "unknown"
@@ -46,5 +46,5 @@ func addHeaderToCtx(ctx context.Context, headers http.Header, key string) contex
 		return ctx
 	}
 	value := strings.Join(header, "")
-	return context.WithValue(ctx, strings.ToLower(key), value)
+	return context.WithValue(ctx, key, value)
 }
