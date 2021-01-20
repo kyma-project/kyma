@@ -13,9 +13,9 @@ import (
 func TestMiddleware(t *testing.T) {
 	t.Run("with trace and span in header, should put traceid and spanid to context", func(t *testing.T) {
 		//GIVEN
-		var enhancedRequest *http.Request
+		var outRequest *http.Request
 		middleware := tracing.NewTracingMiddleware(func(w http.ResponseWriter, r *http.Request) {
-			enhancedRequest = r
+			outRequest = r
 		})
 		resp := httptest.NewRecorder()
 
@@ -28,7 +28,7 @@ func TestMiddleware(t *testing.T) {
 		middleware.ServeHTTP(resp, r)
 
 		//THEN
-		ctx := enhancedRequest.Context()
+		ctx := outRequest.Context()
 		assert.Equal(t, "myspan", ctx.Value(tracing.SPAN_KEY))
 		assert.Equal(t, "mytrace", ctx.Value(tracing.TRACE_KEY))
 	})
