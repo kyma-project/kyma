@@ -2,15 +2,13 @@ package logger
 
 import (
 	"context"
+	"os"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
-	"k8s.io/klog/v2"
-
-	"os"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"k8s.io/klog/v2"
 )
 
 type Logger struct {
@@ -46,16 +44,12 @@ func (l *Logger) WithContext() *zap.SugaredLogger {
 	return l.zapLogger.With(zap.Namespace("context"))
 }
 
-// By default the Fatal Error log will be in json format, because it's production default.
+/**
+By default the Fatal Error log will be in json format, because it's production default.
+*/
 func LogFatalError(format string, args ...interface{}) {
 	logger := New(JSON, ERROR)
 	logger.zapLogger.Fatalf(format, args...)
-}
-
-// By default the Options log will be in json format, because it's production default.
-func LogOptions(format string, args ...interface{}) {
-	logger := New(JSON, INFO)
-	logger.zapLogger.Debugf(format, args...)
 }
 
 /**

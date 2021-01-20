@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,27 +18,21 @@ import (
 
 func main() {
 	options := parseArgs()
-	logger.LogOptions("Parsed options: %+v", options)
 
 	level, err := logger.MapLevel(options.logLevel)
 	if err != nil {
-		logger.LogFatalError("Fatal Error: %s", err.Error())
+		logger.LogFatalError("Failed to map log level from options: %s", err.Error())
 		os.Exit(1)
 	}
 	format, err := logger.MapFormat(options.logFormat)
 	if err != nil {
-		logger.LogFatalError("Fatal Error: %s", err.Error())
+		logger.LogFatalError("Failed to map log format from options: %s", err.Error())
 		os.Exit(1)
 	}
 	log := logger.New(format, level)
-
 	logger.InitKlog(log, level)
-	log.WithContext().Info("Starting Validation Proxy.")
-	log.WithContext().Error("this is sample error log")
 
-	ctx := context.TODO()
-	ctx = context.WithValue(ctx, "traceid", "abc")
-	ctx = context.WithValue(ctx, "spanid", "def")
+	log.WithContext().With("options", options).Info("Starting Validation Proxy.")
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
@@ -81,11 +74,11 @@ func main() {
 	}()
 
 	go func() {
-		log.WithContext().Error(proxyServer.ListenAndServe())
+		log.WithContext().With("server", "proxy").With("port", options.proxyPort).Error(proxyServer.ListenAndServe())
 	}()
 
 	go func() {
-		log.WithContext().Error(externalServer.ListenAndServe())
+		log.WithContext().With("server", "external").With("port", options.externalAPIPort).Error(externalServer.ListenAndServe())
 	}()
 
 	wg.Wait()

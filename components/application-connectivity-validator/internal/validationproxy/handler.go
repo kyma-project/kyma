@@ -24,6 +24,8 @@ const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
 	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy(https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy#send-events)
 	BEBEnabledPublishEndpoint = "/publish"
+
+	handlerName = "validation_proxy_handler"
 )
 
 type ProxyHandler interface {
@@ -103,34 +105,34 @@ func NewProxyHandler(
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
 	certInfoData := r.Header.Get(CertificateInfoHeader)
 	if certInfoData == "" {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.Internal("%s header not found", CertificateInfoHeader))
 		return
 	}
 
 	applicationName := mux.Vars(r)["application"]
 	if applicationName == "" {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.BadRequest("Application name not specified"))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName), w, apperrors.BadRequest("application name not specified"))
 		return
 	}
 
-	ph.log.WithTracing(r.Context()).Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
+	ph.log.WithTracing(r.Context()).With("handler", handlerName).With("application", applicationName).With("proxyPath", r.URL.Path).Infof("Proxying request for application...")
 
 	applicationClientIDs, err := ph.getCompassMetadataClientIDs(applicationName)
 	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Internal("Failed to get Application ClientIds: %s", err))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Internal("while getting application ClientIds: %s", err))
 		return
 	}
 
 	subjects := extractSubjects(certInfoData)
 
 	if !hasValidSubject(subjects, applicationClientIDs, applicationName, ph.group, ph.tenant) {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, apperrors.Forbidden("No valid subject found"))
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
 		return
 	}
 
 	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path)
 	if err != nil {
-		httptools.RespondWithError(ph.log.WithTracing(r.Context()), w, err)
+		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, err)
 		return
 	}
 
@@ -141,7 +143,7 @@ func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]s
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
 		// TODO: retry logic should be implemented here
-		err := apperrors.Internal("Application with name %s is not found in the cache. Please retry.", applicationName)
+		err := apperrors.Internal("application with name %s is not found in the cache. Please retry", applicationName)
 		return nil, err
 	}
 	return applicationClientIDs, nil
@@ -179,7 +181,7 @@ func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, 
 		return ph.appRegistryProxy, nil
 	}
 
-	return nil, apperrors.NotFound("Could not determine destination host. Requested resource not found")
+	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")
 }
 
 func hasValidSubject(subjects, applicationClientIDs []string, appName, group, tenant string) bool {
@@ -304,10 +306,10 @@ func createReverseProxy(log *logger.Logger, destinationHost string, reqOpts ...r
 				opt(request)
 			}
 
-			log.WithTracing(request.Context()).Infof("Proxying request to target URL: %s", request.URL)
+			log.WithTracing(request.Context()).With("handler", handlerName).With("targetURL", request.URL).Infof("Proxying request to target URL...")
 		},
 		ModifyResponse: func(response *http.Response) error {
-			log.WithContext().Infof("Host responded with status: %s", response.Status)
+			log.WithContext().With("handler", handlerName).Infof("Host responded with status %s", response.Status)
 			return nil
 		},
 	}

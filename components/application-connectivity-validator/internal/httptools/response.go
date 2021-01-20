@@ -13,7 +13,7 @@ import (
 )
 
 func RespondWithError(log *zap.SugaredLogger, w http.ResponseWriter, apperr apperrors.AppError) {
-	log.Error(apperr.Error())
+	log.Errorf("Error: %s", apperr.Error())
 
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
 
