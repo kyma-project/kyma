@@ -250,7 +250,7 @@ data:
 {{- end }}
 
 {{- if .Values.config.extra }}
-{{- toYaml .Values.config.extra }}
+{{- toString .Values.config.extra | indent 4 }}
 {{- end }}
 
 {{- if .Values.config.outputs.loki.enabled }}
