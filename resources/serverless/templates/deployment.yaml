@@ -81,6 +81,8 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleRequeueDuration "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLEBINDING_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleBindingRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KSERVICE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.kserviceRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDockerConfigSecretName "context" . ) | nindent 12 }}
@@ -90,7 +92,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPOFETCHER_IMAGE" "value" .Values.containers.manager.envs.functionBuildRepoFetcherImage "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_MAX_CONCURRENT_RECONCILES" "value" .Values.containers.manager.envs.funtionMaxConcurrentReconciles "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}

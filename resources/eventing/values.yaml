@@ -10,6 +10,10 @@ global:
   # domainName is the global domain used in Kyma
   domainName: ""
 
+  # isBEBEnabled determines whether BEB is enabled
+  # if true BEB is enabled else NATS is enabled
+  isBEBEnabled: false
+
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
   oauthClientId: ""
@@ -21,4 +25,3 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
-

@@ -6,4 +6,3 @@ The Console is a web-based administrative UI for Kyma. It allows administering t
 
 - `web`
 - `backend`
-- `pamela`
