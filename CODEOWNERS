@@ -187,7 +187,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Istioctl Installer Component
-/components/istio-installer/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/istio-installer/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira
 
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @crabtree @kjaksik
