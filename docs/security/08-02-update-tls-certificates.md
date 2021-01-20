@@ -42,16 +42,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
     ```bash
     kyma upgrade -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
     ```
-
-    To watch the progress of the update, run:
-
-    ```
-    while true; do \
-    kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
-    sleep 5; \
-    done
-    ```
-
+    
     The process is complete when you see the `Kyma installed` message.
 
   4. Restart the Console Backend Service to propagate the new certificate. Run:
