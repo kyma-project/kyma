@@ -187,39 +187,39 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   return result;
 }
 
-function waitForServiceClass(name, namespace = "default") {
+function waitForServiceClass(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
     return watchObj.object.spec.externalName.includes(name)
-  }, 90 * 1000, `Waiting for ${name} service class timeout`);
+  }, timeout, `Waiting for ${name} service class timeout (${timeout} ms)`);
 }
 
 function waitForServiceInstance(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, timeout, `Waiting for service instance ${name} timeout`);
+  }, timeout, `Waiting for service instance ${name} timeout (${timeout} ms)`);
 }
 
-function waitForServiceBinding(name, namespace = "default") {
+function waitForServiceBinding(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, 90 * 1000, `Waiting for service binding ${name} timeout`);
+  }, timeout, `Waiting for service binding ${name} timeout (${timeout} ms)`);
 }
 
-function waitForServiceBindingUsage(name, namespace = "default") {
+function waitForServiceBindingUsage(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
       && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True')))
-  }, 90 * 1000, `Waiting for service binding usage ${name} timeout`);
+  }, timeout, `Waiting for service binding usage ${name} timeout (${timeout} ms)`);
 }
 
-function waitForVirtualService(namespace, apiRuleName) {
+function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = { labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}` }
   return waitForK8sObject(path, query, (_type, _apiObj, watchObj) => {
     return watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
-  }, 20 * 1000, `Wait for VirtualService ${apiRuleName} timeout`);
+  }, timeout, `Wait for VirtualService ${apiRuleName} timeout (${timeout} ms)`);
 }
 
 async function deleteNamespaces(namespaces, wait = true) {
