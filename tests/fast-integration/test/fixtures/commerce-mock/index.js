@@ -108,10 +108,11 @@ async function registerAllApis(mockHost) {
             origin: `https://${mockHost}`,
           },
         }
-      ).catch(err => { throw new Error(`Error during Commerce Mock ai registration: ${err.response}`)})
+      ).catch(err => { throw new Error(`Error during Commerce Mock ai registration: ${err.response}`) })
     }, 3, 5000)
   }
-  const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(err => { throw new Error(`Commerce Mock registered apis not available: ${err.response}`)});
+  const remoteApis = await axios.get(`https://${mockHost}/remote/apis`)
+    .catch(err => { throw new Error(`Commerce Mock registered apis not available: ${err.response}`) });
   expect(remoteApis.data).to.have.lengthOf.at.least(2)
   return remoteApis;
 }
