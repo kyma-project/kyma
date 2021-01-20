@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +18,7 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 	sut := &OSBContextMiddleware{}
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	req = mux.SetURLVars(req, map[string]string{"namespace": "stage"})
-	req.Header.Set(osb.APIVersionHeader, "2.13")
+	req.Header.Set(osb.APIVersionHeader, osbAPIVersion)
 	req.Header.Set(osb.OriginatingIdentityHeader, osb.PlatformKubernetes)
 	rw := httptest.NewRecorder()
 	nextCalled := false

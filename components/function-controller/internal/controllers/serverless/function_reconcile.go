@@ -58,7 +58,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
-			MaxConcurrentReconciles: r.config.MaxConcurrentReconciles,
+			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
 		Complete(r)
 }
@@ -136,7 +136,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		log.Error(err, "Cannot list HorizontalPodAutoscalers")
 		return ctrl.Result{}, err
 	}
 

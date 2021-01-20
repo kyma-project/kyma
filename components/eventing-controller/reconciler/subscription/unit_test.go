@@ -76,7 +76,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 				return subscription
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
-				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
+				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 			}(),
 			wantStatusChanged: true,
 			wantError:         false,
@@ -105,7 +105,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 				return subscription
 			}(),
 			giveCondition: func() eventingv1alpha1.Condition {
-				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
+				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 			}(),
 			wantStatusChanged: true, // readiness changed
 			wantError:         false,

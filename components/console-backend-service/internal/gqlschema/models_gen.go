@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	v1alpha12 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
 	v1 "k8s.io/api/rbac/v1"
-	v1alpha12 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-	v11 "knative.dev/pkg/apis/duck/v1"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	v12 "knative.dev/pkg/apis/duck/v1"
 )
 
 type AddonsConfiguration struct {
@@ -285,9 +287,20 @@ type EventActivationEvent struct {
 	Schema      JSON   `json:"schema"`
 }
 
+type EventSubscriptionSpecInput struct {
+	Filters  []*FiltersInput     `json:"filters"`
+	OwnerRef *v11.OwnerReference `json:"ownerRef"`
+}
+
 type File struct {
 	URL      string `json:"url"`
 	Metadata JSON   `json:"metadata"`
+}
+
+type FiltersInput struct {
+	ApplicationName string `json:"applicationName"`
+	Version         string `json:"version"`
+	EventName       string `json:"eventName"`
 }
 
 type Function struct {
@@ -698,9 +711,14 @@ type ServiceStatus struct {
 }
 
 type SubscriberInput struct {
-	Ref  *v11.KReference `json:"ref"`
+	Ref  *v12.KReference `json:"ref"`
 	Port *uint32         `json:"port"`
 	Path *string         `json:"path"`
+}
+
+type SubscriptionEvent struct {
+	Type         SubscriptionEventType   `json:"type"`
+	Subscription *v1alpha12.Subscription `json:"subscription"`
 }
 
 type TriggerCreateInput struct {
@@ -712,7 +730,7 @@ type TriggerCreateInput struct {
 
 type TriggerEvent struct {
 	Type    SubscriptionEventType `json:"type"`
-	Trigger *v1alpha12.Trigger    `json:"trigger"`
+	Trigger *v1alpha13.Trigger    `json:"trigger"`
 }
 
 type TriggerStatus struct {

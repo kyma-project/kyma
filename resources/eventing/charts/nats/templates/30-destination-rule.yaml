@@ -1,5 +1,4 @@
-{{- if .Values.install.enabled }}
-
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -9,5 +8,4 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE
-
- {{- end }}
+{{- end }}

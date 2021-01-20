@@ -19,7 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator ${BASE_APP_DIR}/cmd/operator/main.go
 RUN mkdir /app && mv ./kyma-operator /app/kyma-operator && mv ${BASE_APP_DIR}/licenses /app/licenses
 
-FROM alpine:3.12.0
+FROM alpine:20201218
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
