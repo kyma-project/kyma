@@ -14,10 +14,6 @@ import (
 
 func Start(log *logger.Logger, kubeConfig string, masterURL string, syncPeriod time.Duration, appName string, cache *gocache.Cache) {
 	stopCh := signals.SetupSignalHandler()
-	//TODO: setup the logger for k8s controllers
-	// https://www.bookstack.cn/read/Operator-SDK-1.0-en/f8568aba96fc669e.md
-	// https://github.com/kubernetes-sigs/controller-runtime/blob/master/pkg/log/zap/zap.go
-	// client-go logs with hardcoded klog - https://github.com/kubernetes/kubernetes/issues/94428
 
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeConfig)
 	if err != nil {

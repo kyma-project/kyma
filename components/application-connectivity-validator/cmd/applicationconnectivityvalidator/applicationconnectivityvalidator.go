@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-
 	options := parseArgs()
 	logger.LogOptions("Parsed options: %+v", options)
 
@@ -41,36 +40,6 @@ func main() {
 	ctx := context.TODO()
 	ctx = context.WithValue(ctx, "traceid", "abc")
 	ctx = context.WithValue(ctx, "spanid", "def")
-
-	// Body handlera, gdzie przekazujemy log
-
-	log.WithTracing(ctx).With("key", "val").With("key2", "val2").Errorf("some error1")
-
-	// Body controllera, przekazujemy log.WithContext()
-	log.WithContext().With("key1", "val2").Errorf("some error2")
-	log.WithContext().Errorf("some error2")
-
-	//log.WithFields(tracing.GetMetadata(ctx)).Error("sample log")
-	//log.WithFields(tracing.GetMetadata(ctx)).Error("sample second log")
-	//log.WithFields(tracing.GetMetadata(ctx)).
-	//	WithFields(tracing.GetMetadata(ctx)).
-	//	WithContext(map[string]string{"key": "val"}).
-	//	EnhanceContext(map[string]string{"key2": "val2"}).
-	//	EnhanceContext(map[string]string{"key3": "val3"}). //można dodawać kilka razy
-	//	EnhanceContext(map[string]string{"key2": "val8"}). //nie podmienia, tylko dodaje
-	//	Error("Two Tracings and Two Contexts")
-	//log.EnhanceContext(map[string]string{"key": "val"})
-	//log.EnhanceContext(map[string]string{"key2": "val2"}).Infof("Only EnhanceContext")
-	//
-	//log.WithContext(map[string]string{"key3": "val3"})
-	//log.EnhanceContext(map[string]string{"key4": "val4"}).Infof("Second chance")
-	//
-	//log.WithContext(map[string]string{"key3": "val3"}).
-	//	EnhanceContext(map[string]string{"key4": "val4"}).
-	//	With("dupa1", "dupa2").
-	//	Infof("Third chance")
-
-	//log.WithFields(tracing.GetMetadata(ctx)).WithFields(tracing.GetMetadata(ctx)).Error("overwrite context")
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
