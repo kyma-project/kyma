@@ -17,7 +17,13 @@ verifySSL: false
 tracing:
   debug: false
   serviceSpanName: console-backend-service
-resources: {}
+resources:
+  requests:
+    cpu: 5m
+    memory: 40Mi
+  limits:
+    cpu: 50m
+    memory: 170Mi
 tests:
   enabled: true
   labels:
