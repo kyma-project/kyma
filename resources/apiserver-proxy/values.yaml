@@ -5,6 +5,8 @@ port:
   insecure: 8444
   metrics: 2112
 
+podSecurityPolicy:
+  enabled: true
 
 corsPolicy:
   allowOrigin:
