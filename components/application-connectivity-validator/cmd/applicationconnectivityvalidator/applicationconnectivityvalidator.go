@@ -108,7 +108,7 @@ func main() {
 
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(log.WithContext(), options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
+		controller.Start(log, options.kubeConfig, options.masterURL, options.syncPeriod, options.appName, idCache)
 	}()
 
 	go func() {

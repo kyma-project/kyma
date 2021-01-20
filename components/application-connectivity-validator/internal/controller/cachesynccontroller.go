@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"go.uber.org/zap"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
 
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/cache"
@@ -27,11 +27,11 @@ type Controller struct {
 	workqueue         workqueue.RateLimitingInterface
 	appName           string
 	appCache          *gocache.Cache
-	log               *zap.SugaredLogger
+	log               *logger.Logger
 }
 
 func NewController(
-	log *zap.SugaredLogger,
+	log *logger.Logger,
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
 	appName string,
@@ -74,21 +74,21 @@ func (c *Controller) enqueueApplication(obj interface{}) {
 func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
-	c.log.Info("Starting Application Cache controller")
+	c.log.WithContext().Info("Starting Application Cache controller")
 
-	c.log.Info("Waiting for informer caches to sync")
+	c.log.WithContext().Info("Waiting for informer caches to sync")
 	if ok := cache.WaitForCacheSync(stopCh, c.applicationSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
-	c.log.Info("Starting workers")
+	c.log.WithContext().Info("Starting workers")
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}
 
-	c.log.Info("Started workers")
+	c.log.WithContext().Info("Started workers")
 	<-stopCh
-	c.log.Info("Shutting down workers")
+	c.log.WithContext().Info("Shutting down workers")
 
 	return nil
 }
@@ -141,7 +141,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		if errors.IsNotFound(err) {
 			c.appCache.Delete(key)
-			c.log.Infof("Deleted the application '%s' from the cache", key)
+			c.log.WithContext().Infof("Deleted the application '%s' from the cache", key)
 			return nil
 		}
 
@@ -150,7 +150,7 @@ func (c *Controller) syncHandler(key string) error {
 
 	applicationClientIDs := c.getClientIDsFromResource(application)
 	c.appCache.Set(key, applicationClientIDs, gocache.NoExpiration)
-	c.log.Infof("Added/Updated the application '%s' in the cache", key)
+	c.log.WithContext().Infof("Added/Updated the application '%s' in the cache", key)
 	return nil
 }
 
