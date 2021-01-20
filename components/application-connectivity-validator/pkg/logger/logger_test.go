@@ -33,6 +33,7 @@ func TestLogger(t *testing.T) {
 		log := logger.New(logger.JSON, logger.DEBUG, core).WithContext()
 
 		// when
+		log.Desugar().WithOptions(zap.AddCaller())
 		log.Debug("something")
 
 		// then

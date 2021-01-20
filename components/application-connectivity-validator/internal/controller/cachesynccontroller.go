@@ -20,6 +20,8 @@ import (
 	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
 )
 
+const controllerName = "cache_synch_controller"
+
 type Controller struct {
 	clientset         clientset.Interface
 	applicationLister listers.ApplicationLister
@@ -76,19 +78,19 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer c.workqueue.ShutDown()
 	c.log.WithContext().Info("Starting Application Cache controller")
 
-	c.log.WithContext().Info("Waiting for informer caches to sync")
+	c.log.WithContext().With("controller", controllerName).Info("Waiting for informer caches to sync")
 	if ok := cache.WaitForCacheSync(stopCh, c.applicationSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
-	c.log.WithContext().Info("Starting workers")
+	c.log.WithContext().With("controller", controllerName).Info("Starting workers")
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}
 
-	c.log.WithContext().Info("Started workers")
+	c.log.WithContext().With("controller", controllerName).Info("Started workers")
 	<-stopCh
-	c.log.WithContext().Info("Shutting down workers")
+	c.log.WithContext().With("controller", controllerName).Info("Shutting down workers")
 
 	return nil
 }
@@ -141,7 +143,8 @@ func (c *Controller) syncHandler(key string) error {
 
 		if errors.IsNotFound(err) {
 			c.appCache.Delete(key)
-			c.log.WithContext().Infof("Deleted the application '%s' from the cache", key)
+			c.log.WithContext().With("controller", controllerName).With("name", application.Name).With("namespace", application.Namespace).
+				Infof("Deleted the application '%s' from the cache", key)
 			return nil
 		}
 
@@ -150,7 +153,8 @@ func (c *Controller) syncHandler(key string) error {
 
 	applicationClientIDs := c.getClientIDsFromResource(application)
 	c.appCache.Set(key, applicationClientIDs, gocache.NoExpiration)
-	c.log.WithContext().Infof("Added/Updated the application '%s' in the cache", key)
+	c.log.WithContext().With("controller", controllerName).With("name", application.Name).With("namespace", application.Namespace).
+		Infof("Added/Updated the application '%s' in the cache", key)
 	return nil
 }
 
