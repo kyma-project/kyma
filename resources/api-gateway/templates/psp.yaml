@@ -15,13 +15,8 @@ spec:
   hostNetwork: false
   hostIPC: false
   hostPID: false
-  fsGroup:
-    rule: 'MustRunAs'
-    ranges:
-      - min: 1
-        max: 65535
   seLinux:
-    rule: RunAsAny
+    rule: 'RunAsAny'
   fsGroup:
     rule: 'MustRunAs'
     ranges:
