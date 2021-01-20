@@ -187,10 +187,10 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   return result;
 }
 
-function waitForServiceClass(name, namespace = "default") {
+function waitForServiceClass(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(`/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`, {}, (_type, _apiObj, watchObj) => {
     return watchObj.object.spec.externalName.includes(name)
-  }, 90 * 1000, `Waiting for ${name} service class timeout`);
+  }, timeout, `Waiting for ${name} service class timeout (${timeout} ms)`);
 }
 
 function waitForServiceInstance(name, namespace = "default", timeout = 90000) {
