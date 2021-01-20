@@ -39,8 +39,6 @@ func (l *Logger) WithTracing(ctx context.Context) *zap.SugaredLogger {
 }
 
 func (l *Logger) WithContext() *zap.SugaredLogger {
-	//TODO: add the information who called it
-	//runtime.Caller(0)
 	return l.zapLogger.With(zap.Namespace("context"))
 }
 
