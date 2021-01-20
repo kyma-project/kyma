@@ -148,7 +148,7 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(reconciler.buildImageAddress(function)))
 		gomega.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
-		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal("function-controller"))
+		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal(serverlessv1alpha1.FunctionControllerValue))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionUUIDLabel]).To(gomega.Equal(string(function.UID)))
 		gomega.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionResourceLabel]).To(gomega.Equal(serverlessv1alpha1.FunctionResourceLabelDeploymentValue))
 		gomega.Expect(deployment.Spec.Template.Labels[testBindingLabel1]).To(gomega.Equal("foobar"))
@@ -552,6 +552,73 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(deployList.Items).To(gomega.HaveLen(1))
 
 		gomega.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
+	})
+
+	ginkgo.It("should requeue before creating a job", func() {
+		reconciler.config.Build.MaxSimultaneousJobs = 1
+		secondFunction := newFixFunction(testNamespace, "second-function", 1, 2)
+		secondRequest := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: secondFunction.GetNamespace(), Name: secondFunction.GetName()}}
+		gomega.Expect(resourceClient.Create(context.TODO(), secondFunction)).To(gomega.Succeed())
+
+		ginkgo.By("creating 2 cms")
+		_, err := reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		_, err = reconciler.Reconcile(secondRequest)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("creating 2 jobs")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		result, err := reconciler.Reconcile(secondRequest)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.RequeueAfter).To(gomega.BeIdenticalTo(time.Second * 5))
+
+		ginkgo.By("handling first job")
+		function := &serverlessv1alpha1.Function{}
+		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+
+		jobList := &batchv1.JobList{}
+		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(jobList.Items).To(gomega.HaveLen(1))
+
+		job := &batchv1.Job{}
+		gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, job)).To(gomega.Succeed())
+		gomega.Expect(job).ToNot(gomega.BeNil())
+		job.Status.Succeeded = 1
+		now := metav1.Now()
+		job.Status.CompletionTime = &now
+		gomega.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
+
+		ginkgo.By("first job finished")
+		_, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("handling second job")
+		secFunction := &serverlessv1alpha1.Function{}
+		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, secFunction)).To(gomega.Succeed())
+
+		_, err = reconciler.Reconcile(secondRequest)
+		gomega.Expect(err).To(gomega.BeNil())
+
+		secJobList := &batchv1.JobList{}
+		err = reconciler.client.ListByLabel(context.TODO(), secFunction.GetNamespace(), reconciler.internalFunctionLabels(secondFunction), secJobList)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(secJobList.Items).To(gomega.HaveLen(1))
+
+		secJob := &batchv1.Job{}
+		gomega.Expect(resourceClient.Get(context.TODO(), types.NamespacedName{Namespace: jobList.Items[0].GetNamespace(), Name: jobList.Items[0].GetName()}, secJob)).To(gomega.Succeed())
+		gomega.Expect(secJob).ToNot(gomega.BeNil())
+		secJob.Status.Succeeded = 1
+		now = metav1.Now()
+		secJob.Status.CompletionTime = &now
+		gomega.Expect(resourceClient.Status().Update(context.TODO(), secJob)).To(gomega.Succeed())
+
+		ginkgo.By("second job finished")
+		_, err = reconciler.Reconcile(secondRequest)
+		gomega.Expect(err).To(gomega.BeNil())
 	})
 
 	ginkgo.Context("label operations", func() {

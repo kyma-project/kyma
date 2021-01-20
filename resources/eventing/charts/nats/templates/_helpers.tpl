@@ -46,8 +46,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */ -}}
 {{- define "nats.labels.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "nats.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ .Chart.Name }}
 {{- end }}
 
 {{/* vim: set filetype=mustache: */}}

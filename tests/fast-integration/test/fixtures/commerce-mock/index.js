@@ -48,7 +48,7 @@ async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService('mocks', 'commerce-mock')
   const mockHost = vs.spec.hosts[0]
   const host = mockHost.split(".").slice(1).join(".");
-  let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "789" }), 10, 2000);
+  let res = await retryPromise(() => axios.post(`https://lastorder.${host}`, { orderCode: "789" }), 45, 2000);
   expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
 }
 
@@ -74,7 +74,8 @@ async function sendEventAndCheckResponse() {
           },
         }
       ).catch(e => {
-        console.dir({ status: e.response.status, data: e.response.data });
+        console.log('Cannot send event, the response from event gateway:');
+        console.dir(e.response.data);
         throw e
       });
 
@@ -90,9 +91,9 @@ async function sendEventAndCheckResponse() {
         return res;
       });
     },
-    30,
+    45,
     2 * 1000
-  ).catch(expectNoAxiosErr);
+  );
 }
 
 async function registerAllApis(mockHost) {
@@ -161,6 +162,33 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   }
 }
 
+async function patchAppGatewayDeployment() {
+  const commerceApplicationGatewayDeployment = await retryPromise(
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
+    },
+    12,
+    5000
+  ).catch(err => { throw new Error("Timeout: commerce-application-gateway is not ready") });
+  expect(
+    commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
+  ).to.match(/^--skipVerify/);
+  const patch = [{ "op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--skipVerify=true" }]
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH } };
+  await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + commerceApplicationGatewayDeployment.body.metadata.selfLink,
+    method: 'PATCH',
+    body: patch,
+    json: true,
+    headers: options.headers
+  }).catch(expectNoK8sErr);
+
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
+  expect(
+    patchedDeployment.body.spec.template.spec.containers[0].args[6]).to.equal("--skipVerify=true");
+  return patchedDeployment;
+}
+
 async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   const serviceBinding = {
     apiVersion: 'servicecatalog.k8s.io/v1beta1',
@@ -184,31 +212,13 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await k8sApply(lastorderObjs, targetNamespace, true);
   const vs = await waitForVirtualService('mocks', 'commerce-mock')
   const mockHost = vs.spec.hosts[0]
-  const commerceApplicationGatewayDeployment = await retryPromise(
-    async () => {
-      return k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
-    },
-    3,
-    5000
-  ).catch(expectNoK8sErr);
-  expect(
-    commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6]
-  ).to.match(/^--skipVerify/);
-  commerceApplicationGatewayDeployment.body.spec.template.spec.containers[0].args[6] =
-    "--skipVerify=true";
-
-  await k8sDynamicApi
-    .patch(commerceApplicationGatewayDeployment.body)
-    .catch(expectNoK8sErr);
-
-  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment("commerce-application-gateway", "kyma-integration");
-  expect(
-    patchedDeployment.body.spec.template.spec.containers[0].args[6]).to.equal("--skipVerify=true");
+  await patchAppGatewayDeployment();
   await retryPromise(
-    () => axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr), 30, 3000);
+    () => axios.get(`https://${mockHost}/local/apis`)
+      .catch(() => { throw new Exception("Commerce mock local API not available - timeout") }), 40, 3000);
 
-  await retryPromise(() => connectMock(mockHost, targetNamespace), 3, 1000);
-  await retryPromise(() => registerAllApis(mockHost), 3, 1000);
+  await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
+  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
   const webServicesSC = await waitForServiceClass("webservices", targetNamespace);
   const eventsSC = await waitForServiceClass("events", targetNamespace);
@@ -246,7 +256,7 @@ function getResourcePaths(namespace) {
 
 }
 
-function cleanMockTestFixture(mockNamespace, targetNamespace) {
+function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   for (let path of getResourcePaths(mockNamespace).concat(getResourcePaths(targetNamespace))) {
     deleteAllK8sResources(path)
   }
@@ -257,7 +267,7 @@ function cleanMockTestFixture(mockNamespace, targetNamespace) {
       name: 'commerce'
     }
   })
-  return deleteNamespaces([mockNamespace, targetNamespace]);
+  return deleteNamespaces([mockNamespace, targetNamespace], wait);
 
 }
 module.exports = {

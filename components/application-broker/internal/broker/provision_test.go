@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	k8sfake "k8s.io/client-go/kubernetes/fake"

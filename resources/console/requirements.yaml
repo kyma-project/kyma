@@ -3,5 +3,3 @@ dependencies:
     condition: web.enabled
   - name: backend
     condition: backend.enabled
-  - name: pamela
-    condition: pamela.enabled

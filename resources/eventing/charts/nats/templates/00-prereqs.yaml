@@ -1,6 +1,4 @@
-{{- if .Values.install.enabled }}
-
----
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -126,5 +124,4 @@ subjects:
 - kind: ServiceAccount
   name: nats-server
   namespace: {{ .Release.Namespace}}
-
-  {{- end }}
+{{- end }}

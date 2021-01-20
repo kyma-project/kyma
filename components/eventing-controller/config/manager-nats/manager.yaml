@@ -18,6 +18,9 @@ spec:
       serviceAccountName: default
       containers:
       - image: controller
+        env:
+        - name: NATS_URL
+          value: nats://nats.nats.svc.cluster.local
         name: controller
         resources:
           limits:

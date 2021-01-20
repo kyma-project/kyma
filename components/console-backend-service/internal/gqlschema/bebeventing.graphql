@@ -1,0 +1,106 @@
+scalar ConditionReason @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ConditionReason")
+scalar ConditionType @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ConditionType")
+scalar CoreStatus @goModel(model: "k8s.io/api/core/v1.ConditionStatus")
+
+type EventSubscription @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Subscription") {
+    name: String!
+    namespace: String!
+    spec: EventSubscriptionSpec!
+    status: EventSubscriptionStatus!
+}
+
+type EventSubscriptionSpec @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionSpec") {
+    filter: BebFilters!
+    id: String
+    protocol: String
+    protocolSettings: ProtocolSettings
+    sink: String
+}
+
+type ProtocolSettings @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.ProtocolSettings") {
+    contentMode: String
+    exemptHandshake: Boolean
+    qos: String
+    webhookAuth: WebhookAuth
+}
+
+type WebhookAuth @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.WebhookAuth") {
+    clientId: String
+    clientSecret: String
+    grantType: String
+    scope: [String!]
+    tokenUrl: String
+    type: String!
+}
+
+type BebFilters @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
+    dialect: String!
+    filters: [BebFilter!]!
+}
+
+type BebFilter @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
+    eventSource: Filter
+    eventType: Filter
+}
+
+type Filter @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Filter") {
+    property: String
+    type: String!
+    value: String
+}
+
+input EventSubscriptionSpecInput {
+    filters: [FiltersInput!]!
+    ownerRef: OwnerReferenceInput!
+}
+
+input FiltersInput {
+    applicationName: String!
+    version: String!
+    eventName: String!
+}
+
+type EventSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionStatus") {
+    apiRuleName: String
+    conditions: [Condition]
+    emsSubscriptionStatus: EmsSubscriptionStatus
+    emshash: Int
+    ev2hash: Int
+    externalSink: String
+    failedActivation: String
+    ready: Boolean
+}
+
+type Condition @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.Condition") {
+    message: String
+    reason: ConditionReason
+    status: CoreStatus!
+    type: ConditionType
+}
+
+type EmsSubscriptionStatus @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.EmsSubscriptionStatus") {
+    lastFailedDelivery: String
+    lastFailedDeliveryReason: String
+    lastSuccessfulDelivery: String
+    subscriptionStatus: String
+    subscriptionStatusReason: String
+}
+
+type SubscriptionEvent {
+    type: SubscriptionEventType!
+    subscription: EventSubscription!
+}
+
+extend type Query {
+    eventSubscriptions(ownerName: String!, namespace: String!): [EventSubscription!]! @HasAccess(attributes: {resource: "subscriptions", verb: "list", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}
+
+extend type Mutation {
+    createSubscription(name: String!, namespace: String!, params: EventSubscriptionSpecInput!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "create", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateSubscription(name: String!, namespace: String!, params: EventSubscriptionSpecInput!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "update", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    deleteSubscription(name: String!, namespace: String!): EventSubscription @HasAccess(attributes: {resource: "subscriptions", verb: "delete", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Subscription {
+    subscriptionSubscription(ownerName: String!, namespace: String!): SubscriptionEvent! @HasAccess(attributes: {resource: "subscriptions", verb: "watch", apiGroup: "eventing.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}
