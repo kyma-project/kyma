@@ -57,3 +57,15 @@ Tests are written in node.js for several reasons:
 - Concise syntax (handling JSON responses from api-server or our test fixtures)
 - Lighter dependencies (@kubernetes/client-node)
 - Educational value for our customers who can read tests to learn how to use Kyma features (none of our customers write code in Go, they use JavaScript, Java, or Python)
+
+### Which pipelines use fast-integration tests?
+
+We have several pipelines that use fast-integration tests. See the list of pipelines with links to the Prow status page:
+
+Pipeline | Description | Infrastructure
+--|--|--|
+[pre-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=pre-master-kyma-integration-k3s) | Job that runs on every PR before the merge to the `master` branch. | k3s
+[post-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=post-master-kyma-integration-k3s) | Job that runs on every PR after it is merged to the `master` branch. | k3s
+[kyma-integration-k3s](https://status.build.kyma-project.io/?job=kyma-integration-k3s) | Job that periodicially runs the fast-integration tests. | k3s
+[kyma-integration-production-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-production-gardener-azure) | Periodic job that tests the production profile in Kyma. | Gardener, Azure
+[kyma-integration-evaluation-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-evaluation-gardener-azure) | Periodic job that tests the evaluation profile in Kyma. | Gardener, Azure
