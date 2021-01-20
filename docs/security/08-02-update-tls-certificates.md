@@ -28,8 +28,15 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
     kubectl delete cm -n kyma-installer net-global-overrides
     ```
 
-  2. Export the new certificate and key as environment variables.
-   
+  2. Export the Kyma version, your domain, new certificate and key as the environment variables.
+
+    ```bash
+    export KYMA_VERSION={KYMA_RELEASE_VERSION}
+    export DOMAIN={YOUR_DOMAIN}
+    export TLS_CERT={YOUR_NEW_CERTIFICATE}
+    export TLS_KEY={YOUR_NEW_KEY}
+    ```
+
   3. Trigger the update process. Run:
 
     ```bash
@@ -54,6 +61,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
     ```
 
   </details>
+
   <details>
   <summary>
   Self-signed certificate
