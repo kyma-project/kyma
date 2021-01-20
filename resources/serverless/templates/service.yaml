@@ -19,6 +19,10 @@ spec:
       port: {{ .Values.metrics.manager.port.port }}
       protocol: {{ .Values.metrics.manager.port.protocol }}
       targetPort: {{ .Values.metrics.manager.port.targerPort }}
+    - name: "https"
+      port: {{ .Values.services.manager.https.port }}
+      protocol: TCP
+      targetPort: 8443
   selector:
     app: {{ template "name" . }}
     app.kubernetes.io/name: {{ template "name" . }}

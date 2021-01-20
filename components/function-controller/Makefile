@@ -10,7 +10,6 @@ override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_g
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-
 # Image URL to use all building/pushing image targets
 IMG ?= $(APP_NAME):latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -24,12 +23,6 @@ GOBIN=$(shell go env GOBIN)
 endif
 
 verify:: mod-verify
-release: build-function-webhook \
-	push-function-webhook \
-	build-function-build-init \
-	push-function-build-init \
-	build-image push-image
-
 
 resolve-local:
 	GO111MODULE=on go mod download
@@ -95,16 +88,28 @@ endif
 path-to-referenced-charts:
 	@echo "resources/serverless"
 
+.PHONY: build-image push-image
+build-image: build-function-webhook \
+	build-function-build-init \
+	build-image-function-controller
+	@echo "Override generic makefile build-image target to not execute"
+
+
+push-image: push-function-webhook \
+	push-function-build-init \
+	push-image-function-controller
+	@echo "Override generic makefile push-image target to not execute"
+
 ######## function manager
 
 MANAGER_NAME = function-controller
 MANAGER_IMG_TAG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(MANAGER_NAME)
 
-.PHONY: build-image push-image
-build-image:
+.PHONY: build-image-function-controller push-image-function-controller
+build-image-function-controller:
 	docker build -t $(MANAGER_NAME) -f $(ROOT)/deploy/manager/Dockerfile .
 
-push-image:
+push-image-function-controller:
 	docker tag $(MANAGER_NAME) $(MANAGER_IMG_TAG):$(DOCKER_TAG)
 	docker push $(MANAGER_IMG_TAG):$(DOCKER_TAG)
 
