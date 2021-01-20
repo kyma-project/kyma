@@ -38,5 +38,5 @@ func addHeaderToCtx(ctx context.Context, headers http.Header, key string, desire
 		return ctx
 	}
 	value := strings.Join(header, "")
-	return context.WithValue(ctx, key, value)
+	return context.WithValue(ctx, desiredKey, value)
 }
