@@ -59,6 +59,17 @@ telemetry:
 podSecurityPolicy:
   enabled: true
 
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 2000
+
 dex:
   expiry:
     signingKeys: "720h"
