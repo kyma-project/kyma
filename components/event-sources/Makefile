@@ -71,7 +71,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 .PHONY: $(cmds_images) $(cmds_images_push)
 
 # override image goals from common Makefile because we need to build several images
-build-image: gomod-deps-local  $(patched_trace) $(cmds_images) ;
+build-image: gomod-deps $(patched_trace) $(cmds_images) ;
 push-image: $(cmds_images_push) ;
 
 # Example:
