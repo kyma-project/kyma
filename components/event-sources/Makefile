@@ -49,10 +49,12 @@ resolve_clean:
 licenses_clean:
 	rm -rf licenses
 
+build-local: $(cmds) test-local ;
+
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: gomod-deps-local $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -69,12 +71,12 @@ $(patched_trace): hack/set-span-id.patch vendor
 .PHONY: $(cmds_images) $(cmds_images_push)
 
 # override image goals from common Makefile because we need to build several images
-build-image: $(patched_trace) $(cmds_images) ;
+build-image: gomod-deps-local  $(patched_trace) $(cmds_images) ;
 push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: build pull-licenses 
+$(cmds_images): %.image: pull-licenses
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
