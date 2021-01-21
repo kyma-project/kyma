@@ -30,6 +30,7 @@ spec:
         - -c
         args:
         - |
+            set -e
             {{ range $idx, $_ := until $configMapLen }}
             kubectl apply -f /etc/crd-{{ $idx }}
             {{ end }}
