@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/common/logger/tracing"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 
+	logger "github.com/kyma-project/kyma/common/logger/logger"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
-	logger "github.com/kyma-project/kyma/common/logger/logger"
 	"github.com/patrickmn/go-cache"
 )
 
