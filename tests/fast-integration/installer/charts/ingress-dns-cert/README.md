@@ -18,7 +18,7 @@ spec:s
     namespace: istio-system
 ```
 
-and annotates istio-ingressgateway with:
+It also annotates `istio-ingressgateway` with:
 ```
 dns.gardener.cloud/class='garden' 
 dns.gardener.cloud/dnsnames='*.$DOMAIN'
