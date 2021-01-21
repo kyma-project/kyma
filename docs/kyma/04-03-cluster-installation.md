@@ -200,7 +200,7 @@ To install Kyma with one of the predefined [profiles](#installation-overview-pro
 kyma install -s $KYMA_VERSION --profile {evaluation|production}
 ```
 
->**NOTE:** If you don't specify $KYMA_VERSION, the version from the latest commit on the `master` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
+>**NOTE:** If you don't specify ``$KYMA_VERSION`, the version from the latest commit on the `master` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
 
 ## Post-installation steps
 
