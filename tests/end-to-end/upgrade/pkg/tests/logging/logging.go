@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging/pkg/jwt"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging/pkg/logstream"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging/pkg/request"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -26,7 +27,7 @@ func NewLoggingTest(coreInterface kubernetes.Interface, domainName string, dexCo
 		coreInterface: coreInterface,
 		domainName:    domainName,
 		idpConfig:     dexConfig,
-		httpClient:    getHttpClient(),
+		httpClient:    request.GetHttpClient(),
 	}
 }
 
@@ -48,6 +49,14 @@ func (t LoggingTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	if err := t.testLogStream(namespace); err != nil {
 		return err
 	}
+	log.Println("Checking that a JWT token is required for accessing Loki before upgrade")
+	if err := t.checkTokenIsRequired(); err != nil {
+		return err
+	}
+	log.Println("Checking that sending a request to Loki with a wrong path is forbidden before upgrade")
+	if err := t.checkWrongPathIsForbidden(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -59,6 +68,14 @@ func (t LoggingTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger,
 	}
 	log.Println("Deleting test-counter-pod")
 	if err := logstream.Cleanup(namespace, t.coreInterface); err != nil {
+		return err
+	}
+	log.Println("Checking that a JWT token is required for accessing Loki after upgrade")
+	if err := t.checkTokenIsRequired(); err != nil {
+		return err
+	}
+	log.Println("Checking that sending a request to Loki with a wrong path is forbidden after upgrade")
+	if err := t.checkWrongPathIsForbidden(); err != nil {
 		return err
 	}
 	return nil
@@ -82,10 +99,33 @@ func (t LoggingTest) testLogStream(namespace string) error {
 	return nil
 }
 
-func getHttpClient() *http.Client {
-	client := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		}}
-	return client
+func (t LoggingTest) checkTokenIsRequired() error {
+	lokiURL := "http://logging-loki.kyma-system:3100/api/prom"
+	// sending a request to Loki wihtout a JWT token in the header
+	respStatus, _, err := request.DoGet(t.httpClient, lokiURL, "")
+	if err != nil {
+		return errors.Wrap(err, "cannot send request to Loki")
+	}
+	if respStatus != http.StatusUnauthorized {
+		return errors.Errorf("received status code %d instead of %d when accessing Loki wihout a JWT token", respStatus, http.StatusUnauthorized)
+	}
+	return nil
+}
+
+func (t LoggingTest) checkWrongPathIsForbidden() error {
+	token, err := jwt.GetToken(t.idpConfig)
+	if err != nil {
+		return errors.Wrap(err, "cannot fetch dex token")
+	}
+	authHeader := jwt.SetAuthHeader(token)
+	lokiURL := "http://logging-loki.kyma-system:3100/api/wrongPath"
+	// sending a request with a wrong path
+	respStatus, _, err := request.DoGet(t.httpClient, lokiURL, authHeader)
+	if err != nil {
+		return errors.Wrap(err, "cannot send request to Loki")
+	}
+	if respStatus != http.StatusForbidden {
+		return errors.Errorf("received status code %d instead of %d when sending a request to Loki with a wrong path", respStatus, http.StatusForbidden)
+	}
+	return nil
 }
