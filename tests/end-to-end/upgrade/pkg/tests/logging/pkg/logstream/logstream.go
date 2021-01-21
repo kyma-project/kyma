@@ -66,12 +66,12 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
+func Test(domain string, labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	currentTimeUnixNano := time.Now().UnixNano()
 	startTimeParam := strconv.FormatInt(currentTimeUnixNano, 10)
-	lokiURL := fmt.Sprintf(`http://logging-loki.kyma-system:3100/api/prom/query?query={%s="%s"}&start=%s`, labelKey, labelValue, startTimeParam)
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query={%s="%s"}&start=%s`, domain, labelKey, labelValue, startTimeParam)
 	for {
 		select {
 		case <-timeout:

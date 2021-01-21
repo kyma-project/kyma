@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"fmt"
 	"net/http"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/fetch-dex-token"
@@ -87,20 +88,20 @@ func (t LoggingTest) testLogStream(namespace string) error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	if err := logstream.Test("container", "count", authHeader, t.httpClient); err != nil {
+	if err := logstream.Test(t.domainName, "container", "count", authHeader, t.httpClient); err != nil {
 		return err
 	}
-	if err := logstream.Test("app", "test-counter-pod", authHeader, t.httpClient); err != nil {
+	if err := logstream.Test(t.domainName, "app", "test-counter-pod", authHeader, t.httpClient); err != nil {
 		return err
 	}
-	if err := logstream.Test("namespace", namespace, authHeader, t.httpClient); err != nil {
+	if err := logstream.Test(t.domainName, "namespace", namespace, authHeader, t.httpClient); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (t LoggingTest) checkTokenIsRequired() error {
-	lokiURL := "http://logging-loki.kyma-system:3100/api/prom"
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom`, t.domainName)
 	// sending a request to Loki wihtout a JWT token in the header
 	respStatus, _, err := request.DoGet(t.httpClient, lokiURL, "")
 	if err != nil {
@@ -118,7 +119,7 @@ func (t LoggingTest) checkWrongPathIsForbidden() error {
 		return errors.Wrap(err, "cannot fetch dex token")
 	}
 	authHeader := jwt.SetAuthHeader(token)
-	lokiURL := "http://logging-loki.kyma-system:3100/api/wrongPath"
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/wrongPath`, t.domainName)
 	// sending a request with a wrong path
 	respStatus, _, err := request.DoGet(t.httpClient, lokiURL, authHeader)
 	if err != nil {
