@@ -217,7 +217,7 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await patchAppGatewayDeployment();
   await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`)
-      .catch(() => { throw new Exception("Commerce mock local API not available - timeout") }), 40, 3000);
+      .catch(() => { throw new Error("Commerce mock local API not available - timeout") }), 40, 3000);
 
   await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
