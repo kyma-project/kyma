@@ -153,7 +153,7 @@ async function connectMock(mockHost, targetNamespace) {
         "content-type": "application/json",
       },
     }
-  ).catch(err => { throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response}`) });
+  ).catch(err => { throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`) });
 }
 function serviceInstanceObj(name, serviceClassExternalName) {
   return {
