@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+	"github.com/kyma-project/kyma/common/logger/logger"
 
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/cache"

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
+	"github.com/kyma-project/kyma/common/logger/tracing"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/klog/v2"

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/bmizerany/assert"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
+	"github.com/kyma-project/kyma/common/logger/tracing"
 )
 
 func TestGetMetadata(t *testing.T) {

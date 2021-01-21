@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/tracing"
+	"github.com/kyma-project/kyma/common/logger/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

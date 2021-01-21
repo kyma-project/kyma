@@ -3,7 +3,7 @@ package controller
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+	"github.com/kyma-project/kyma/common/logger/logger"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller/signals"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"

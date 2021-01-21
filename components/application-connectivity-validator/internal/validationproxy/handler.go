@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+	"github.com/kyma-project/kyma/common/logger/logger"
 
 	"github.com/gorilla/mux"
 

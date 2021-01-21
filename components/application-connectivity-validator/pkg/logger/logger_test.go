@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/pkg/logger"
+	"github.com/kyma-project/kyma/common/logger/logger"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
