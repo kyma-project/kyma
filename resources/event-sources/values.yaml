@@ -5,11 +5,11 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: ''
-    version: "e6a594cf"
+    version: "PR-9956"
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: "e6a594cf" 
+    version: "PR-9956"
     tracingEnabled: "true"
 
 deployment:
