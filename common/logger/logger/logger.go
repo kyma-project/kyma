@@ -2,8 +2,9 @@ package logger
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/common/logger/tracing"
 	"os"
+
+	"github.com/kyma-project/kyma/common/logger/tracing"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"

@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/common/logger/logger"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/common/logger/logger"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"

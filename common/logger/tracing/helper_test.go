@@ -2,8 +2,9 @@ package tracing_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/common/logger/tracing"
 	"testing"
+
+	"github.com/kyma-project/kyma/common/logger/tracing"
 
 	"github.com/bmizerany/assert"
 )
