@@ -19,6 +19,15 @@ deployment:
     requests:
       cpu: 50m
       memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 2000
 
 config:
   oathkeeper:
