@@ -1,9 +1,6 @@
 approvers:
-  - Tomasz-Smelcerz-SAP
-  - strekm
+  - pbochynski
   - piotrmsc
-  - kubadz
-  - Demonsthere
 
 labels:
 - area/service-mesh
