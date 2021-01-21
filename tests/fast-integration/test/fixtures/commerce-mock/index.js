@@ -153,7 +153,7 @@ async function connectMock(mockHost, targetNamespace) {
         "content-type": "application/json",
       },
     }
-  ).catch(err => { throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response}`) });
+  ).catch(err => { throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`) });
 }
 function serviceInstanceObj(name, serviceClassExternalName) {
   return {
@@ -217,7 +217,7 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await patchAppGatewayDeployment();
   await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`)
-      .catch(() => { throw new Exception("Commerce mock local API not available - timeout") }), 40, 3000);
+      .catch(() => { throw new Error("Commerce mock local API not available - timeout") }), 40, 3000);
 
   await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
