@@ -27,11 +27,11 @@ var (
 
 func main() {
 	httpClient = request.GetHttpClient()
-	kubeConfig, err := loadKubeConfigOrDie()
+	token, domain, err := jwt.GetToken()
 	if err != nil {
 		log.Fatal(err)
 	}
-	token, domain, err := jwt.GetToken()
+	kubeConfig, err := loadKubeConfigOrDie()
 	if err != nil {
 		log.Fatal(err)
 	}
