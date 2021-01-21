@@ -42,17 +42,17 @@ require (
 	k8s.io/api v0.18.1
 	k8s.io/apiextensions-apiserver v0.16.16-rc.0 // indirect
 	k8s.io/apimachinery v0.18.1
-	k8s.io/client-go v0.17.0
+	k8s.io/client-go v0.17.15
 	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6 // indirect
 	knative.dev/eventing v0.12.0
 	knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
 )
 
 replace (
-	k8s.io/api => k8s.io/api v0.16.15
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.16.15
-	k8s.io/apimachinery => k8s.io/apimachinery v0.16.16-rc.0
-	k8s.io/client-go => k8s.io/client-go v0.16.15
+	k8s.io/api => k8s.io/api v0.17.15
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.15
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.15
+	k8s.io/client-go => k8s.io/client-go v0.17.15
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
 )
 
