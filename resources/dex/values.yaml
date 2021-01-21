@@ -56,6 +56,9 @@ telemetry:
   enabled: true
   port: 5558
 
+podSecurityPolicy:
+  enabled: true
+
 dex:
   expiry:
     signingKeys: "720h"
