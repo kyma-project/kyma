@@ -29,6 +29,8 @@ spec:
             memory: 128Mi
           requests:
             memory: 32Mi
+        securityContext:
+{{- toYaml .Values.securityContext | nindent 10 }}
         envFrom:
         - configMapRef:
             name: {{ template "name" . }}
