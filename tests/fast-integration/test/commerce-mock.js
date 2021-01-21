@@ -11,7 +11,10 @@ describe("CommerceMock tests", function () {
   const testNamespace = "test"
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockTestFixture("mocks", testNamespace);
+    await ensureCommerceMockTestFixture("mocks", testNamespace).catch((err) => {
+      console.dir(err); // first error is logged
+      return ensureCommerceMockTestFixture("mocks", testNamespace)
+    });
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
