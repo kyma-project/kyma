@@ -65,7 +65,6 @@ securityContext:
     drop:
     - ALL
   privileged: false
-  readOnlyRootFilesystem: true
   runAsGroup: 2000
   runAsNonRoot: true
   runAsUser: 2000
