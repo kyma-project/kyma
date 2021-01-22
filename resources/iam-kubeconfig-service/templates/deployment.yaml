@@ -35,14 +35,14 @@ spec:
         command:
           - sh
           - -c
-        {{- if .Values.global.environment.gardener }}
-          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
-        {{- else }}
+        {{ if .Values.global.certificates.selfSigned }}
           - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
-        {{- end  }}
-        envFrom:
-        - configMapRef:
-            name: apiserver-proxy
+        {{ else }}
+          - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
+        {{ end  }}
+        env:
+          - name: DOMAIN
+            value: {{ .Values.global.domainName }}
         ports:
           - name: http
             containerPort: 8000
@@ -61,12 +61,12 @@ spec:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{- if not .Values.global.environment.gardener }}
+      {{ if .Values.global.certificates.selfSigned }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{- end }}
       volumes:
-      {{- if not .Values.global.environment.gardener }}
+      {{ if .Values.global.certificates.selfSigned }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert

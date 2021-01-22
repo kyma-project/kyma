@@ -1,0 +1,37 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-weight: "30"
+  name: {{ template "certificates.name" . }}-user-provided
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - command:
+            - bash
+            - "-c"
+            - |
+{{ .Files.Get "files/user-provided.sh" | printf "%s" | indent 16 }}
+          image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
+          name: installer
+          env:
+            - name: ISSUER_CM_NAME
+              value: "{{ .Values.userProvided.issuer.configMap.name }}"
+            - name: ISSUER_CM_NAMESPACE
+              value: "{{ .Values.userProvided.issuer.configMap.namespace }}"
+            - name: DOMAIN
+              value: {{ .Values.global.domainName }}
+            - name: ISSUER_NAME
+              value: {{ .Values.userProvided.issuer.name}}
+            - name: KYMA_SECRET_NAME
+              value: {{ .Values.certificate.name.kyma }}
+            - name: APISERVER_PROXY_SECRET_NAME
+              value: {{ .Values.certificate.name.apiserverProxy }}
+      restartPolicy: Never
+      serviceAccountName: {{ template "certificates.name" . }}-user-provided

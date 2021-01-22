@@ -93,8 +93,8 @@ spec:
       serviceAccountName: kyma-installer      
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        imagePullPolicy: IfNotPresent
+        image: colunira/kyma-installer:certs
+        imagePullPolicy: Always
         args:
           - -overrideLogFile=/app/overrides.txt
           - -helmDebugMode=true

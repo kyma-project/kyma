@@ -1,0 +1,19 @@
+job:
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20210113-12c4e3b5"
+
+certificate:
+  name:
+    kyma: kyma-gateway-certs
+    apiserverProxy: apiserver-proxy-tls-cert
+
+userProvided:
+  issuer:
+    name: kyma-ca-issuer
+    configMap:
+      name: kyma-ca-issuer
+      namespace: kyma-installer
+
+#global:
+#  domainName: ji-crt.kyma-goat.ga

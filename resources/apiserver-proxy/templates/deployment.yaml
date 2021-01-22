@@ -58,7 +58,7 @@ spec:
         - --v=9
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
-        {{- if not .Values.global.environment.gardener }}
+        {{ if .Values.global.certificates.selfSigned }}
         - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
         {{- end }}
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
@@ -78,12 +78,12 @@ spec:
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{- if not .Values.global.environment.gardener }}
+      {{ if .Values.global.certificates.selfSigned }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
       {{- end }}
       volumes:
-      {{- if not .Values.global.environment.gardener }}
+      {{ if .Values.global.certificates.selfSigned }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert

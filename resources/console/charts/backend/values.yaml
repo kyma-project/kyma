@@ -33,6 +33,8 @@ tests:
 systemNamespaces: "istio-system,knative-eventing,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
 
 global:
+  certificates:
+    selfSigned: false
   tracing:
     zipkinAddress: zipkin.kyma-system:9411
 

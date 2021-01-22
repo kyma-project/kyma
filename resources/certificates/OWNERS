@@ -1,0 +1,10 @@
+approvers:
+  - Tomasz-Smelcerz-SAP
+  - strekm
+  - piotrmsc
+  - kubadz
+  - Demonsthere
+  - colunira
+
+labels:
+- area/security
