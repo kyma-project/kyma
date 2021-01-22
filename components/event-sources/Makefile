@@ -164,6 +164,7 @@ injection: bin/injection-gen
 		--versioned-clientset-package $(PKG)/client/generated/clientset/internalclientset \
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
+istio-injection: bin/injection-gen
 
 $(generators_bin): gomod-vendor-local
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
