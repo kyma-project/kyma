@@ -170,5 +170,5 @@ func randomString(n int) string {
 // according to SM the name may only include characters 'a'-'z', 'A'-'Z', '0'-'9', and '_'
 func roleName(name, domain string) string {
 	r := strings.NewReplacer(".", "_", ",", "_", ":", "", ";", "", "-", "_", "/", "", "\\", "")
-	return fmt.Sprintf("%s_%s", r.Replace(name), r.Replace(domain))
+	return fmt.Sprintf("%s__%s", r.Replace(name), r.Replace(domain))
 }
