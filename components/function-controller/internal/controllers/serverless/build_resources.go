@@ -54,6 +54,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
+	r.Log.Info(r.config.BuildServiceAccountName)
+
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
