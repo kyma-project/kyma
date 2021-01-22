@@ -165,6 +165,14 @@ injection: bin/injection-gen
 		--external-versions-informers-package $(PKG)/client/generated/informer/externalversions
 
 istio-injection: bin/injection-gen
+	@echo "+ Generating injection for $(ISTIO_API_GROUPS)"
+	@rm -rf client/generated/injection/istio
+	@bin/injection-gen \
+        --go-header-file hack/boilerplate.go.txt \
+        --input-dirs $(subst $(space),$(comma),$(istio-api-import-paths)) \
+        --output-package $(PKG)/client/generated/injection/istio \
+        --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
+        --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
 $(generators_bin): gomod-vendor-local
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
