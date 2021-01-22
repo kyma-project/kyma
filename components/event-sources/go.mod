@@ -36,7 +36,7 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect
 	google.golang.org/genproto v0.0.0-20191203145615-049a07e0debe // indirect
-	istio.io/api v0.0.0-20200724154434-34e474846e0d
+	istio.io/api v0.0.0-20200513175333-ae3da0d240e3
 	istio.io/client-go v0.0.0-20200513180646-f8d9d8ff84e6
 	istio.io/gogo-genproto v0.0.0-20191029161641-f7d19ec0141d // indirect
 	k8s.io/api v0.18.1
@@ -55,5 +55,3 @@ replace (
 	k8s.io/client-go => k8s.io/client-go v0.17.15
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
 )
-
-// vendor/knative.dev/eventing/pkg/tracing/traceparent.go:83:6: span.SetSpanID undefined (type *trace.Span has no field or method SetSpanID
