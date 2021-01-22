@@ -87,7 +87,7 @@ func TestParametersBuilder_Generate(t *testing.T) {
 
 func parametersAreEqual(t *testing.T, schema Schema) {
 	roles := []string{"KymaRuntimeDeveloper", "KymaRuntimeNamespaceAdmin"}
-	rolesWithSuffix := []string{"KymaRuntimeDeveloper_uaa_test", "KymaRuntimeNamespaceAdmin_uaa_test"}
+	rolesWithSuffix := []string{"KymaRuntimeDeveloper__uaa_test", "KymaRuntimeNamespaceAdmin__uaa_test"}
 	rolesWithName := []string{"$XSAPPNAME.KymaRuntimeDeveloper", "$XSAPPNAME.KymaRuntimeNamespaceAdmin"}
 	groups := []string{"$XSAPPNAME.runtimeDeveloper", "$XSAPPNAME.runtimeNamespaceAdmin"}
 	scopesGroup := []string{"$XSAPPNAME.email", "$XSAPPNAME.runtimeDeveloper", "$XSAPPNAME.runtimeNamespaceAdmin"}
