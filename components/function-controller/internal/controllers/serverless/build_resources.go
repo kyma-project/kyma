@@ -124,7 +124,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -303,7 +303,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
