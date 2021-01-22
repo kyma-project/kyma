@@ -35,6 +35,9 @@ spec:
         - name: console
           image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
           resources: 
             {{- toYaml .Values.console.resources | nindent 12 }}
           livenessProbe:
@@ -53,6 +56,9 @@ spec:
         - name: core-ui
           image: "{{ .Values.global.containerRegistry.path }}/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
           resources: 
             {{- toYaml .Values.core_ui.resources | nindent 12 }}
           livenessProbe:
