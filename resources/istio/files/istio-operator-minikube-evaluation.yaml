@@ -116,6 +116,8 @@ spec:
             rollingUpdate:
               maxSurge: 100%
               maxUnavailable: 0
+          securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
           overlays:
             - kind: Deployment
               name: istio-ingressgateway
@@ -175,6 +177,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local

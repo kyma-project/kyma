@@ -30,6 +30,8 @@ spec:
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
             value: kyma-istio-operator-config
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}
       volumes:
       - name: config
         configMap:

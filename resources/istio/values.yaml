@@ -14,11 +14,26 @@ kyma:
     tag: "20210113-12c4e3b5"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 1337
+    runAsNonRoot: true
+    runAsUser: 1337
+  podSecurityPolicy:
+    enabled: true
 
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
     tag: "4493e340"
+  securityContext:
+    runAsUser: 1337
+    runAsNonRoot: true
+    runAsGroup: 1337
 
 monitoring:
   enabled: true

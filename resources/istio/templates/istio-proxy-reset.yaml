@@ -21,6 +21,13 @@ rules:
   - apiGroups: ["apps", "extensions"]
     resources: ["replicasets"]
     verbs: ["get", "patch", "delete"]
+{{- if .Values.kyma.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: 
+      - {{ template "istio.fullname" . }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -66,3 +73,5 @@ spec:
             - -c
             - |
 {{.Files.Get "files/istio-proxy-reset.sh" | printf "%s" | indent 16}}
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}
