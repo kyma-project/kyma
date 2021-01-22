@@ -1,16 +1,16 @@
-# Default values for event-publisher-proxy.
+# Default values for event-publisher-nats.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# replicaCount configures the number of replicas for the event-publisher-proxy deployment
+# replicaCount configures the number of replicas for the event-publisher-nats deployment
 replicaCount: 1
 
 image:
-  # name is the name of the container image for the event-publisher-proxy
+  # name is the name of the container image for the event-publisher-nats
   name: "event-publisher-nats"
-  # tag is the container tag of the event-publisher-proxy image
-  tag: "PR-10331"
-  # pullPolicy is the pullPolicy for the event-publisher-proxy image
+  # tag is the container tag of the event-publisher-nats image
+  tag: "381ac902"
+  # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 
 serviceAccount:
