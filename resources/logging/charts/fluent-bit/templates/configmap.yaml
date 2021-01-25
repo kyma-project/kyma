@@ -177,6 +177,7 @@ data:
         Match           {{ .Values.config.outputs.forward.match }}
         Host            {{ .Values.config.outputs.forward.host }}
         Port            {{ .Values.config.outputs.forward.port }}
+        Retry_Limit     {{ .Values.config.outputs.forward.retryLimit }}
         {{- if .Values.config.outputs.forward.tls.enabled  }}
         tls             On
         tls.verify      {{ .Values.config.outputs.forward.tls.verify }}

@@ -248,7 +248,7 @@ config:
       logstashPrefix: flb
       # default timeKey: @timestamp
       timeKey:
-      retryLimit: False
+      retryLimit: "False"
       # When enabled, generate _id for outgoing records. This prevents duplicate records when retrying ES.
       generateID: "On"
       # When enabled, replace field name dots with underscore, required by Elasticsearch 2.0-2.3.
@@ -271,6 +271,7 @@ config:
       match: "*"
       host: log-forwarder
       port: 24224
+      retryLimit: "False"
       tls:
         enabled: false
         verify: Off
