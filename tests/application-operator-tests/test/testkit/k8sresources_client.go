@@ -3,8 +3,6 @@ package testkit
 import (
 	"context"
 
-	v1 "k8s.io/api/apps/v1"
-
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -18,7 +16,7 @@ import (
 )
 
 type K8sResourcesClient interface {
-	GetDeployment(ctx context.Context, name string, options metav1.GetOptions) (*v1.Deployment, error)
+	GetDeployment(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
 	GetService(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
 	GetVirtualService(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
 	GetRole(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
@@ -87,7 +85,7 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 	}, nil
 }
 
-func (c *k8sResourcesClient) GetDeployment(ctx context.Context, name string, options metav1.GetOptions) (*v1.Deployment, error) {
+func (c *k8sResourcesClient) GetDeployment(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error) {
 	return c.coreClient.AppsV1().Deployments(c.namespace).Get(ctx, name, options)
 }
 

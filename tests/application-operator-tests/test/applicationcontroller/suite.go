@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	v1 "k8s.io/api/apps/v1"
+
 	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -25,7 +27,8 @@ const (
 	assessLabelWaitTime      = 15 * time.Second
 )
 
-type StateAssertion func(*v1alpha1.Application) bool
+type ApplicationStateAssertion func(*v1alpha1.Application) bool
+type ReleaseStateAssertion func(*release.Release) bool
 
 type TestSuite struct {
 	application string
@@ -114,7 +117,7 @@ func (ts *TestSuite) containsArg(t *testing.T, name string, expectedArg string) 
 	deployment, err := ts.k8sClient.GetDeployment(context.Background(), name, metav1.GetOptions{})
 	require.NoError(t, err)
 
-	for _, container := range deployment.Spec.Template.Spec.Containers {
+	for _, container := range deployment.(*v1.Deployment).Spec.Template.Spec.Containers {
 		for _, arg := range container.Args {
 			if arg == expectedArg {
 				return true
@@ -165,7 +168,7 @@ func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {
 	require.NoError(t, err, "Received timeout while waiting for release to install")
 }
 
-func (ts *TestSuite) AssertApplicationState(t *testing.T, assertion StateAssertion) {
+func (ts *TestSuite) AssertApplicationState(t *testing.T, assertion ApplicationStateAssertion) {
 	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
 		application, err := ts.k8sClient.GetApplication(context.Background(), ts.application, metav1.GetOptions{})
 		require.NoError(t, err, "Received error while asserting application state")
@@ -181,6 +184,21 @@ func (ts *TestSuite) WaitForReleaseToUpgrade(t *testing.T) {
 		return status != release.StatusDeployed
 	})
 	require.NoError(t, err, "Received timeout while waiting for release to upgrade")
+}
+
+func (ts *TestSuite) AssertReleaseState(t *testing.T, assertion ReleaseStateAssertion) {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
+		release, err := ts.helmClient.GetRelease(ts.application, ts.config.Namespace)
+		require.NoError(t, err, "Received error while asserting release state")
+		return assertion(release)
+	})
+	require.NoError(t, err, "Received timeout while asserting release state")
+}
+
+func (ts *TestSuite) GetReleaseVersion(t *testing.T) int {
+	releaseState, err := ts.helmClient.GetRelease(ts.application, ts.config.Namespace)
+	require.NoError(t, err, "Received timeout while reading release version")
+	return releaseState.Version
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall(t *testing.T) {

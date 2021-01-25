@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
@@ -30,7 +32,8 @@ type ApplicationReleaseManager interface {
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status, string, error)
 	UpgradeApplicationReleases() error
-	UpgradeApplicationRelease(application *v1alpha1.Application)
+	UpgradeApplicationRelease(application *v1alpha1.Application) error
+	ConfigsChanged(application *v1alpha1.Application) (bool, error)
 }
 
 type releaseManager struct {
@@ -81,18 +84,20 @@ func (r *releaseManager) UpgradeApplicationReleases() error {
 	return nil
 }
 
-func (r *releaseManager) UpgradeApplicationRelease(app *v1alpha1.Application) {
-	status, description, err := r.upgradeChart(app)
+func (r *releaseManager) UpgradeApplicationRelease(application *v1alpha1.Application) error {
+	status, description, err := r.upgradeChart(application)
 	if err != nil {
-		log.Errorf("Failed to upgrade release %s: %s", app.Name, err.Error())
+		log.Errorf("Failed to upgrade release %s: %s", application.Name, err.Error())
 
-		setCurrentStatus(app, status.String(), description)
+		setCurrentStatus(application, status.String(), description)
 
-		err = r.updateApplication(app)
+		err = r.updateApplication(application)
 		if err != nil {
-			log.Errorf("Failed to upgrade %s CR: %s", app.Name, err.Error())
+			log.Errorf("Failed to upgrade %s CR: %s", application.Name, err.Error())
 		}
 	}
+
+	return err
 }
 
 func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4.Status, string, error) {
@@ -180,6 +185,21 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (r *releaseManager) ConfigsChanged(application *v1alpha1.Application) (bool, error) {
+	status, err := r.releaseStatus(application)
+	if err != nil {
+		return false, err
+	}
+
+	releaseMap := utils.NewStringMap(status.Config)
+
+	return !releaseMap.ContainsAll(application.Spec.Labels), nil
+}
+
+func (r *releaseManager) releaseStatus(application *v1alpha1.Application) (*hapi_4.Release, error) {
+	return r.helmClient.ReleaseStatus(application.Name, application.Namespace)
 }
 
 func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status, string, error) {

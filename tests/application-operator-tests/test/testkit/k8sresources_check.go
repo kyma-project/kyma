@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	api "k8s.io/api/apps/v1"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/stretchr/testify/require"
@@ -57,7 +55,7 @@ type K8sResourceChecker struct {
 
 func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(context.Background(), releaseName, "deployment", cast(client.GetDeployment)),
+		newResource(context.Background(), releaseName, "deployment", client.GetDeployment),
 		newResource(context.Background(), releaseName, "role", client.GetRole),
 		newResource(context.Background(), releaseName, "rolebinding", client.GetRoleBinding),
 		newResource(context.Background(), releaseName, "serviceaccount", client.GetServiceAccount),
@@ -76,15 +74,15 @@ func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bo
 
 	resources := []k8sResource{
 		newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(ctxBackground, fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", cast(client.GetDeployment)),
+		newResource(ctxBackground, fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(ctxBackground, fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
-		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", cast(client.GetDeployment)),
+		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
 	}
 
 	if checkGateway {
 		resources = append(resources,
-			newResource(ctxBackground, fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", cast(client.GetDeployment)),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
 			newResource(ctxBackground, fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
 			newResource(ctxBackground, fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
 			newResource(ctxBackground, fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
@@ -139,10 +137,4 @@ func (c *K8sResourceChecker) checkResourceRemoved(_ interface{}, err error) bool
 	}
 
 	return false
-}
-
-func cast(deployment func(ctx context.Context, name string, options v1.GetOptions) (*api.Deployment, error)) func(context.Context, string, v1.GetOptions) (interface{}, error) {
-	return func(ctx context.Context, name string, options v1.GetOptions) (interface{}, error) {
-		return deployment(ctx, name, options)
-	}
 }

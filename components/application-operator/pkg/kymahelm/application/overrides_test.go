@@ -3,6 +3,8 @@ package application
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+
 	"github.com/bmizerany/assert"
 )
 
@@ -10,13 +12,24 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 	tests := []struct {
 		name           string
 		mergeTarget    map[string]interface{}
-		mergeSource    StringMap
+		mergeSource    utils.StringMap
 		expectedResult map[string]interface{}
 	}{
 		// Add test cases.
 		{"should merge simple properties to target map",
 			map[string]interface{}{"simple": "simpleValue"},
-			StringMap{"override.another": "anotherValue"},
+			utils.StringMap{overridePrefix + ".another": "anotherValue"},
+			map[string]interface{}{
+				"simple":  "simpleValue",
+				"another": "anotherValue",
+			},
+		},
+		{"should ignore properties without override prefix",
+			map[string]interface{}{"simple": "simpleValue"},
+			utils.StringMap{
+				overridePrefix + ".another": "anotherValue",
+				"no.override.prop":          "anotherValue",
+			},
 			map[string]interface{}{
 				"simple":  "simpleValue",
 				"another": "anotherValue",
@@ -24,7 +37,7 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 		},
 		{"should unwind and merge properties to target map",
 			map[string]interface{}{"simple": "simpleValue"},
-			StringMap{"override.flatten.another": "anotherValue"},
+			utils.StringMap{overridePrefix + ".flatten.another": "anotherValue"},
 			map[string]interface{}{
 				"simple": "simpleValue",
 				"flatten": map[string]interface{}{
@@ -34,10 +47,10 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 		},
 		{"should ignore source maps with empty keys but merge empty values",
 			map[string]interface{}{"simple": "simpleValue"},
-			StringMap{
-				"override.emptyValue":         "",
-				"override.complex.emptyValue": "",
-				"":                            "anotherValue",
+			utils.StringMap{
+				overridePrefix + ".emptyValue":         "",
+				overridePrefix + ".complex.emptyValue": "",
+				"":                                     "anotherValue",
 			},
 			map[string]interface{}{
 				"simple":     "simpleValue",
@@ -49,9 +62,9 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 		},
 		{"should merge properties with the same keys",
 			map[string]interface{}{},
-			StringMap{
-				"override.key.complex": "",
-				"override.key.friend":  "",
+			utils.StringMap{
+				overridePrefix + ".key.complex": "",
+				overridePrefix + ".key.friend":  "",
 			},
 			map[string]interface{}{
 				"key": map[string]interface{}{
@@ -62,11 +75,11 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 		},
 		{"should ignore invalid dot properties",
 			map[string]interface{}{},
-			StringMap{
-				"override.key.complex...":    "",
-				"override........key.friend": "",
-				"override........":           "",
-				"........":                   "",
+			utils.StringMap{
+				overridePrefix + ".key.complex...":    "",
+				overridePrefix + "........key.friend": "",
+				overridePrefix + "........":           "",
+				"........":                            "",
 			},
 			map[string]interface{}{
 				"key": map[string]interface{}{

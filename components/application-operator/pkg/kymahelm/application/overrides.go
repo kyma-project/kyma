@@ -8,7 +8,6 @@ import (
 
 const (
 	overridePrefix = "override."
-	separator      = '.'
 )
 
 type OverridesData struct {
@@ -25,15 +24,11 @@ type OverridesData struct {
 	IsBEBEnabled                          bool   `json:"isBEBEnabled,omitempty"`
 }
 
-type OverridesMap map[string]interface{}
-
-type StringMap map[string]string
-
-func MergeLabelOverrides(labels StringMap, target map[string]interface{}) {
+func MergeLabelOverrides(labels utils.StringMap, target map[string]interface{}) {
 	for key, value := range labels {
 		if HasPrefix(key, overridePrefix) {
 			preKey := TrimPrefix(key, overridePrefix)
-			preKey = Trim(preKey, string(separator))
+			preKey = Trim(preKey, utils.Separator)
 
 			if preKey != "" {
 				subMap := unwind(preKey, value)
@@ -44,7 +39,7 @@ func MergeLabelOverrides(labels StringMap, target map[string]interface{}) {
 }
 
 func unwind(key string, value string) map[string]interface{} {
-	index := IndexRune(key, separator)
+	index := IndexRune(key, utils.RuneSeparator)
 
 	if index == -1 {
 		return map[string]interface{}{key: value}

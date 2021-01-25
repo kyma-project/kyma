@@ -130,10 +130,26 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 
 		return r.installApplication(application)
 	} else if !application.ShouldSkipInstallation() {
-		r.releaseManager.UpgradeApplicationRelease(application)
+		err = r.conditionalUpgrade(application)
+		if err != nil {
+			return "", "", err
+		}
 	}
 
 	return r.checkApplicationStatus(application)
+}
+
+func (r *applicationReconciler) conditionalUpgrade(application *v1alpha1.Application) error {
+
+	configsChanged, err := r.releaseManager.ConfigsChanged(application)
+	if err != nil {
+		return err
+	}
+
+	if configsChanged {
+		err = r.releaseManager.UpgradeApplicationRelease(application)
+	}
+	return err
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {

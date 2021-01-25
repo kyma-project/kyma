@@ -369,7 +369,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		helmClient.AssertExpectations(t)
 	})
 
-	t.Run("should return error when failed to fetch application list ", func(t *testing.T) {
+	t.Run("should return error when failed to fetch application list", func(t *testing.T) {
 		// given
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", context.Background(), mock.AnythingOfType("ListOptions")).Return(nil, errors.New("Error"))

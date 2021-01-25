@@ -63,6 +63,27 @@ func (_m *ApplicationReleaseManager) CheckReleaseStatus(name string) (release.St
 	return r0, r1, r2
 }
 
+// ConfigsChanged provides a mock function with given fields: _a0
+func (_m *ApplicationReleaseManager) ConfigsChanged(_a0 *v1alpha1.Application) (bool, error) {
+	ret := _m.Called(_a0)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*v1alpha1.Application) bool); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1alpha1.Application) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteReleaseIfExists provides a mock function with given fields: name
 func (_m *ApplicationReleaseManager) DeleteReleaseIfExists(name string) error {
 	ret := _m.Called(name)
@@ -106,8 +127,17 @@ func (_m *ApplicationReleaseManager) InstallChart(_a0 *v1alpha1.Application) (re
 }
 
 // UpgradeApplicationRelease provides a mock function with given fields: _a0
-func (_m *ApplicationReleaseManager) UpgradeApplicationRelease(_a0 *v1alpha1.Application) {
-	_m.Called(_a0)
+func (_m *ApplicationReleaseManager) UpgradeApplicationRelease(_a0 *v1alpha1.Application) error {
+	ret := _m.Called(_a0)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*v1alpha1.Application) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpgradeApplicationReleases provides a mock function with given fields:
