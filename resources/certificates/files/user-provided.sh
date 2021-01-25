@@ -1,6 +1,16 @@
 set -e
 set -o pipefail
 
+for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_PROXY_SECRET_NAME APISERVER_PROXY_SECRET_NAMESPACE IS_SELF_SIGNED; do
+    if [ -z "${!var}" ] ; then
+        echo "ERROR: $var is not set"
+        discoverUnsetVar=true
+    fi
+done
+if [ "${discoverUnsetVar}" = true ] ; then
+    exit 1
+fi
+
 echo "Checking if running in user-provided mode"
 
 ISSUER_CM="$(kubectl get configmap -n $ISSUER_CM_NAMESPACE $ISSUER_CM_NAME --ignore-not-found -o jsonpath='{.data.issuer}')"
@@ -11,6 +21,15 @@ fi
 
 echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE found."
 
+echo "Checking if Certificates are already present on the cluster"
+
+KYMA_CRT="$(kubectl get certificates.cert-manager.io -n $KYMA_SECRET_NAMESPACE $KYMA_SECRET_NAME --ignore-not-found -o yaml)"
+APISERVER_PROXY_CRT="$(kubectl get certificates.cert-manager.io -n $APISERVER_PROXY_SECRET_NAMESPACE $APISERVER_PROXY_SECRET_NAME --ignore-not-found -o yaml)"
+if [ -n "$KYMA_CRT" ] && [ -n "$APISERVER_PROXY_CRT" ]; then
+  echo "Certificates $KYMA_SECRET_NAME/$KYMA_SECRET_NAMESPACE and $APISERVER_PROXY_SECRET_NAME/$APISERVER_PROXY_SECRET_NAMESPACE are already present. Nothing to do here. Exiting..."
+  exit 0
+fi
+
 if [ -z "$DOMAIN" ]; then
   echo "User-provided mode requested, but domain not provided. Exiting..."
   exit 1
@@ -18,32 +37,20 @@ fi
 
 echo "Validating Issuer"
 
-IS_CLUSTER_ISSUER=$(echo $ISSUER_CM | grep "ClusterIssuer")
+IS_CLUSTER_ISSUER=$(echo "$ISSUER_CM" | grep "ClusterIssuer")
 if [ -z "$IS_CLUSTER_ISSUER" ]; then
   echo "Provided Issuer is not a ClusterIssuer. Exiting..."
   exit 1
 fi
 
-IS_NAME_PROPER=$(echo $ISSUER_CM | grep "name: $ISSUER_NAME")
+IS_NAME_PROPER=$(echo "$ISSUER_CM" | grep "name: $ISSUER_NAME")
 if [ -z "$IS_NAME_PROPER" ]; then
   echo "Issuer name should be $ISSUER_NAME. Exiting..."
   exit 1
 fi
 
-echo "Checking if Issuer type is self-signed"
-
-IS_SELF_SIGNED="" # $(echo $ISSUER_CM | grep "selfSigned: {}")
-
-if [ -n "$IS_SELF_SIGNED" ]; then
-  echo "Self-signed certificate requested. Generating required overrides"
-  kubectl create configmap net-global-overrides \
-        --from-literal global.certificates.selfSigned="true" \
-        -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-fi
-
 echo "Creating issuer"
 
-echo "$ISSUER_CM"
 echo "$ISSUER_CM" | kubectl apply -f -
 
 echo "Generating certificates"
@@ -53,7 +60,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: $KYMA_SECRET_NAME
-  namespace: istio-system
+  namespace: $KYMA_SECRET_NAMESPACE
 spec:
   duration: 720h
   renewBefore: 10m
@@ -71,7 +78,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: $APISERVER_PROXY_SECRET_NAME
-  namespace: kyma-system
+  namespace: $APISERVER_PROXY_SECRET_NAMESPACE
 spec:
   duration: 720h
   renewBefore: 10m
@@ -85,4 +92,35 @@ spec:
   commonName: "apiserver.$DOMAIN"
 EOF
 
-# TODO: if self signed wait for the certificate
+# Note: The following part can be removed when we get rid of the components that need
+# a mounted secret with a certificate to trust it.
+if [ "$IS_SELF_SIGNED" == "true" ]; then
+
+  SECONDS=0
+  END_TIME=$((SECONDS+180))
+
+  echo "Self-signed certificate requested. Waiting $END_TIME for kyma-gateway-certs secret..."
+
+  while [ ${SECONDS} -lt ${END_TIME} ]; do
+
+    KYMA_CA_CERT=$(kubectl get secret ${KYMA_SECRET_NAME} -n istio-system -o jsonpath="{.data['ca\.crt']}")
+
+    if [ -n "$KYMA_CA_CERT"  ]; then
+      echo "Secret is ready. Copying the CA certificate to Secret ingress-tls-cert/kyma-system"
+
+      kubectl create secret generic -n kyma-system ingress-tls-cert \
+                --from-literal tls.crt="$(echo "$KYMA_CA_CERT" | base64 -D)" --dry-run -o yaml \
+                | kubectl apply -f -
+      exit 0
+    fi
+
+    echo "Secret is not ready. Sleeping 10 seconds..."
+    sleep 10
+
+  done
+
+  echo "Secret not found! Exiting..."
+  exit 1
+
+fi
+

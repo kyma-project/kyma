@@ -26,12 +26,18 @@ spec:
             - name: ISSUER_CM_NAMESPACE
               value: "{{ .Values.userProvided.issuer.configMap.namespace }}"
             - name: DOMAIN
-              value: {{ .Values.global.domainName }}
+              value: "{{ .Values.global.domainName }}"
             - name: ISSUER_NAME
-              value: {{ .Values.userProvided.issuer.name}}
+              value: "{{ .Values.userProvided.issuer.name}}"
             - name: KYMA_SECRET_NAME
-              value: {{ .Values.certificate.name.kyma }}
+              value: "{{ .Values.certificate.kyma.name }}"
+            - name: KYMA_SECRET_NAMESPACE
+              value: "{{ .Values.certificate.kyma.namespace }}"
             - name: APISERVER_PROXY_SECRET_NAME
-              value: {{ .Values.certificate.name.apiserverProxy }}
+              value: "{{ .Values.certificate.apiserverProxy.name }}"
+            - name: APISERVER_PROXY_SECRET_NAMESPACE
+              value: "{{ .Values.certificate.apiserverProxy.namespace }}"
+            - name: IS_SELF_SIGNED
+              value: "{{ .Values.global.certificates.selfSigned }}"
       restartPolicy: Never
       serviceAccountName: {{ template "certificates.name" . }}-user-provided

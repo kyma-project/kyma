@@ -4,9 +4,12 @@ job:
     tag: "20210113-12c4e3b5"
 
 certificate:
-  name:
-    kyma: kyma-gateway-certs
-    apiserverProxy: apiserver-proxy-tls-cert
+  kyma:
+    name: kyma-gateway-certs
+    namespace: istio-system
+  apiserverProxy:
+    name: apiserver-proxy-tls-cert
+    namespace: kyma-system
 
 userProvided:
   issuer:
@@ -15,5 +18,6 @@ userProvided:
       name: kyma-ca-issuer
       namespace: kyma-installer
 
-#global:
-#  domainName: ji-crt.kyma-goat.ga
+global:
+  certificates:
+    selfSigned: false
