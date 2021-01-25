@@ -1,0 +1,34 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "name" . }}
+  namespace:  {{ .Release.Namespace }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "name" . }}
+  namespace:  {{ .Release.Namespace }}
+rules:
+{{- if .Values.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: 
+      - {{ template "fullname" . }}
+  {{- end }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "name" . }}
+  namespace:  {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "name" . }}
+    namespace:  {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "name" . }}
