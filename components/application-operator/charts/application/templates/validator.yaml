@@ -58,9 +58,9 @@ spec:
             - "--cacheCleanupMinutes={{ .Values.applicationConnectivityValidator.args.cacheCleanupMinutes }}"
           env:
             - name: APP_LOG_FORMAT
-              value: {{ .Values.global.log.format | quote }}
+              value: {{ .Values.global.logFormat | quote }}
             - name: APP_LOG_LEVEL
-              value: {{ .Values.global.log.level | quote }}
+              value: {{ .Values.global.logLevel | quote }}
           readinessProbe:
             httpGet:
               path: /v1/health
