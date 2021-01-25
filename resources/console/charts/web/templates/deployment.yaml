@@ -31,6 +31,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: console
           image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
