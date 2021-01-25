@@ -34,7 +34,7 @@ func TestNewHttpMessageReceiver(t *testing.T) {
 // Test that tht receiver shuts down properly then receiving stop signal
 func TestStartListener(t *testing.T) {
 	timeout := time.Second * 10
-	r := fixtureReceiver(t)
+	r := fixtureReceiver()
 
 	ctx := context.Background()
 	// used to simulate sending a stop signal
@@ -42,15 +42,21 @@ func TestStartListener(t *testing.T) {
 
 	// start receiver
 	wg := sync.WaitGroup{}
-	go func() {
+	started := make(chan bool, 1)
+	defer close(started)
+	go func(t *testing.T) {
 		wg.Add(1)
+		started <- true
 		t.Log("starting receiver in goroutine")
 		if err := r.StartListen(ctx, &testHandler{}); err != nil {
 			t.Fatalf("error while starting HTTPMessageReceiver: %v", err)
 		}
 		t.Log("receiver goroutine ends here")
 		wg.Done()
-	}()
+	}(t)
+
+	// wait for receiver to start
+	<-started
 
 	// stop it
 	cancelFunc()
@@ -73,10 +79,6 @@ func TestStartListener(t *testing.T) {
 	}
 }
 
-func fixtureReceiver(t *testing.T) *HttpMessageReceiver {
-	port, err := testingutils.GeneratePort()
-	if err != nil {
-		t.Fatalf("failed to generate port: %v", err)
-	}
-	return NewHttpMessageReceiver(port)
+func fixtureReceiver() *HttpMessageReceiver {
+	return NewHttpMessageReceiver(0)
 }
