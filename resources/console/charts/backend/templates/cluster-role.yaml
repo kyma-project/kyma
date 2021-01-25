@@ -74,3 +74,8 @@ rules:
   - apiGroups: ["eventing.kyma-project.io"]
     resources: ["subscriptions"]
     verbs: ["list", "create", "update", "delete", "watch"]
+  - apiGroups: ['policy']
+    resources: ['podsecuritypolicies']
+    verbs:     ['use']
+    resourceNames:
+      - {{ template "fullname" . }}
