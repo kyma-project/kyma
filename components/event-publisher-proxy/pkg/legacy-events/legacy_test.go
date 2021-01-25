@@ -8,7 +8,7 @@ import (
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	bebNs := "beb.namespace"
+	bebNs := "/beb.namespace"
 	eventTypePrefix := "event.type.prefix"
 	legacyTransformer := NewTransformer(bebNs, eventTypePrefix)
 	eventID := "id"

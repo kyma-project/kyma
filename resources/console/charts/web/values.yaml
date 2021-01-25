@@ -16,7 +16,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: 0fa81441
+    tag: 36f3be4c
   service:
     externalPort: 80
     internalPort: 8080
@@ -26,7 +26,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "491eab72"
+    tag: 65af63fb
   service:
     externalPort: 80
     internalPort: 80
