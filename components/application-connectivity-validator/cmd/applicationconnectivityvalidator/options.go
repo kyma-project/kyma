@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"time"
+
+	"github.com/vrischmann/envconfig"
 )
 
-type options struct {
+type args struct {
 	proxyPort                int
 	externalAPIPort          int
 	tenant                   string
@@ -25,11 +27,19 @@ type options struct {
 	kubeConfig               string
 	masterURL                string
 	syncPeriod               time.Duration
-	logFormat                string
-	logLevel                 string
 }
 
-func parseArgs() *options {
+type config struct {
+	logFormat string `default:"text"`
+	logLevel  string `default:"debug"`
+}
+
+type options struct {
+	args
+	config
+}
+
+func parseOptions() (*options, error) {
 	proxyPort := flag.Int("proxyPort", 8081, "Proxy port.")
 	externalAPIPort := flag.Int("externalAPIPort", 8080, "External API port.")
 	tenant := flag.String("tenant", "", "Name of the application tenant")
@@ -48,33 +58,37 @@ func parseArgs() *options {
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	syncPeriod := flag.Duration("syncPeriod", 120*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
-	logFormat := flag.String("logFormat", "text", "Logs format.")
-	logLevel := flag.String("logLevel", "debug", "Logs severity level.")
 
 	flag.Parse()
 
-	return &options{
-		proxyPort:                *proxyPort,
-		externalAPIPort:          *externalAPIPort,
-		tenant:                   *tenant,
-		group:                    *group,
-		eventServicePathPrefixV1: *eventServicePathPrefixV1,
-		eventServicePathPrefixV2: *eventServicePathPrefixV2,
-		eventServiceHost:         *eventServiceHost,
-		eventMeshPathPrefix:      *eventMeshPathPrefix,
-		eventMeshHost:            *eventMeshHost,
-		eventMeshDestinationPath: *eventMeshDestinationPath,
-		appRegistryPathPrefix:    *appRegistryPathPrefix,
-		appRegistryHost:          *appRegistryHost,
-		appName:                  *appName,
-		cacheExpirationMinutes:   *cacheExpirationMinutes,
-		cacheCleanupMinutes:      *cacheCleanupMinutes,
-		kubeConfig:               *kubeConfig,
-		masterURL:                *masterURL,
-		syncPeriod:               *syncPeriod,
-		logFormat:                *logFormat,
-		logLevel:                 *logLevel,
+	var c config
+	if err := envconfig.InitWithPrefix(&c, "APP"); err != nil {
+		return nil, err
 	}
+
+	return &options{
+		args: args{
+			proxyPort:                *proxyPort,
+			externalAPIPort:          *externalAPIPort,
+			tenant:                   *tenant,
+			group:                    *group,
+			eventServicePathPrefixV1: *eventServicePathPrefixV1,
+			eventServicePathPrefixV2: *eventServicePathPrefixV2,
+			eventServiceHost:         *eventServiceHost,
+			eventMeshPathPrefix:      *eventMeshPathPrefix,
+			eventMeshHost:            *eventMeshHost,
+			eventMeshDestinationPath: *eventMeshDestinationPath,
+			appRegistryPathPrefix:    *appRegistryPathPrefix,
+			appRegistryHost:          *appRegistryHost,
+			appName:                  *appName,
+			cacheExpirationMinutes:   *cacheExpirationMinutes,
+			cacheCleanupMinutes:      *cacheCleanupMinutes,
+			kubeConfig:               *kubeConfig,
+			masterURL:                *masterURL,
+			syncPeriod:               *syncPeriod,
+		},
+		config: c,
+	}, nil
 }
 
 func (o *options) String() string {

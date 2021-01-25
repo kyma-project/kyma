@@ -17,7 +17,11 @@ import (
 )
 
 func main() {
-	options := parseArgs()
+	options, err := parseOptions()
+	if err != nil {
+		logger.LogFatalError("Failed to parse options: %s", err.Error())
+		os.Exit(1)
+	}
 
 	level, err := logger.MapLevel(options.logLevel)
 	if err != nil {

@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+
+	"github.com/vrischmann/envconfig"
 )
 
-type options struct {
+type args struct {
 	appName                               string
 	appMapName                            string
 	domainName                            string
@@ -23,11 +25,19 @@ type options struct {
 	helmDriver                            string
 	profile                               string
 	isBEBEnabled                          bool
-	logFormat                             string
-	logLevel                              string
 }
 
-func parseArgs() *options {
+type config struct {
+	logFormat string `default:"text"`
+	logLevel  string `default:"debug"`
+}
+
+type options struct {
+	args
+	config
+}
+
+func parseOptions() (*options, error) {
 	appName := flag.String("appName", "application-operator", "Name used in application controller registration")
 	domainName := flag.String("domainName", "kyma.local", "Domain name of the cluster")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the Application chart will be installed")
@@ -45,31 +55,35 @@ func parseArgs() *options {
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
 	profile := flag.String("profile", "", "Profile name")
 	isBEBEnabled := flag.Bool("isBEBEnabled", false, "Toggles creation of eventing infrastructure based on BEB if BEB is enabled")
-	logFormat := flag.String("logFormat", "text", "Logs format")
-	logLevel := flag.String("logLevel", "debug", "Logs severity level")
 
 	flag.Parse()
 
-	return &options{
-		appName:                               *appName,
-		domainName:                            *domainName,
-		namespace:                             *namespace,
-		syncPeriod:                            *syncPeriod,
-		installationTimeout:                   *installationTimeout,
-		applicationGatewayImage:               *applicationGatewayImage,
-		applicationGatewayTestsImage:          *applicationGatewayTestsImage,
-		eventServiceImage:                     *eventServiceImage,
-		eventServiceTestsImage:                *eventServiceTestsImage,
-		applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
-		gatewayOncePerNamespace:               *gatewayOncePerNamespace,
-		strictMode:                            *strictMode,
-		healthPort:                            *healthPort,
-		helmDriver:                            *helmDriver,
-		profile:                               *profile,
-		isBEBEnabled:                          *isBEBEnabled,
-		logLevel:                              *logLevel,
-		logFormat:                             *logFormat,
+	var c config
+	if err := envconfig.InitWithPrefix(&c, "APP"); err != nil {
+		return nil, err
 	}
+
+	return &options{
+		args: args{
+			appName:                               *appName,
+			domainName:                            *domainName,
+			namespace:                             *namespace,
+			syncPeriod:                            *syncPeriod,
+			installationTimeout:                   *installationTimeout,
+			applicationGatewayImage:               *applicationGatewayImage,
+			applicationGatewayTestsImage:          *applicationGatewayTestsImage,
+			eventServiceImage:                     *eventServiceImage,
+			eventServiceTestsImage:                *eventServiceTestsImage,
+			applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
+			gatewayOncePerNamespace:               *gatewayOncePerNamespace,
+			strictMode:                            *strictMode,
+			healthPort:                            *healthPort,
+			helmDriver:                            *helmDriver,
+			profile:                               *profile,
+			isBEBEnabled:                          *isBEBEnabled,
+		},
+		config: c,
+	}, nil
 }
 
 func (o *options) String() string {
