@@ -30,8 +30,8 @@ type args struct {
 }
 
 type config struct {
-	logFormat string `default:"text"`
-	logLevel  string `default:"debug"`
+	LogFormat string `default:"text"`
+	LogLevel  string `default:"debug"`
 }
 
 type options struct {
@@ -99,12 +99,12 @@ func (o *options) String() string {
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
 		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d "+
-		"--logFormat=%s --logLevel=%s",
+		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
 		o.kubeConfig, o.masterURL, o.syncPeriod,
-		o.logFormat, o.logLevel)
+		o.LogFormat, o.LogLevel)
 }

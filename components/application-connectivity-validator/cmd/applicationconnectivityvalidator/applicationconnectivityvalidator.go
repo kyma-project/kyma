@@ -23,12 +23,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	level, err := logger.MapLevel(options.logLevel)
+	level, err := logger.MapLevel(options.LogLevel)
 	if err != nil {
 		logger.LogFatalError("Failed to map log level from options: %s", err.Error())
 		os.Exit(1)
 	}
-	format, err := logger.MapFormat(options.logFormat)
+	format, err := logger.MapFormat(options.LogFormat)
 	if err != nil {
 		logger.LogFatalError("Failed to map log format from options: %s", err.Error())
 		os.Exit(1)

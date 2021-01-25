@@ -28,8 +28,8 @@ type args struct {
 }
 
 type config struct {
-	logFormat string `default:"text"`
-	logLevel  string `default:"debug"`
+	LogFormat string `default:"text"`
+	LogLevel  string `default:"debug"`
 }
 
 type options struct {
@@ -91,10 +91,10 @@ func (o *options) String() string {
 		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
 		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
 		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s"+
-		"--isBEBEnabled=%v --logLevel=%s --logFormat=%s",
+		"--isBEBEnabled=%v APP_LOG_LEVEL=%s APP_LOG_FORMAT=%s",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
 		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile,
-		o.isBEBEnabled, o.logLevel, o.logFormat)
+		o.isBEBEnabled, o.LogLevel, o.LogFormat)
 }
