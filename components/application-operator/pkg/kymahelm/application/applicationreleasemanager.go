@@ -188,7 +188,7 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 }
 
 func (r *releaseManager) ConfigsChanged(application *v1alpha1.Application) (bool, error) {
-	status, err := r.releaseStatus(application)
+	status, err := r.helmClient.ReleaseStatus(application.Name, application.Namespace)
 	if err != nil {
 		return false, err
 	}
@@ -196,10 +196,6 @@ func (r *releaseManager) ConfigsChanged(application *v1alpha1.Application) (bool
 	releaseMap := utils.NewStringMap(status.Config)
 
 	return !releaseMap.ContainsAll(application.Spec.Labels), nil
-}
-
-func (r *releaseManager) releaseStatus(application *v1alpha1.Application) (*hapi_4.Release, error) {
-	return r.helmClient.ReleaseStatus(application.Name, application.Namespace)
 }
 
 func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status, string, error) {
