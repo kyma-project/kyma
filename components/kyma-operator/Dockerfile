@@ -39,7 +39,9 @@ COPY --from=builder --chown=nobody:nogroup /app /app
 # Set permissions
 # 
 
-RUN chown -R nobody:nogroup /app
+RUN mkdir /kyma &&\
+	chown -R nobody:nogroup /app &&\
+	chown -R nobody:nogroup /kyma
 USER nobody
 
 #
