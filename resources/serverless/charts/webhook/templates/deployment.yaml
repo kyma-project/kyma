@@ -33,10 +33,31 @@ spec:
         {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 8 }}
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
+      # Our webhook should gracefully terminate by lame ducking first, set this to a sufficiently
+      # high value that we respect whatever value it has configured for the lame duck grace period.
+      terminationGracePeriodSeconds: 300   
       containers:
         - name: webhook
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          readinessProbe: # https://github.com/knative/serving/releases/download/v0.18.3/serving-core.yaml, line 2557 and below 
+            periodSeconds: 5
+            httpGet:
+              scheme: HTTPS
+              port: 8443
+              httpHeaders:
+                - name: k-kubelet-probe
+                  value: "webhook"
+          livenessProbe:
+            periodSeconds: 5
+            httpGet:
+              scheme: HTTPS
+              port: 8443
+              httpHeaders:
+                - name: k-kubelet-probe
+                  value: "webhook"
+            failureThreshold: 6
+            initialDelaySeconds: 20
           resources:
             requests:
               cpu: {{ .Values.deployment.resources.requests.cpu }}

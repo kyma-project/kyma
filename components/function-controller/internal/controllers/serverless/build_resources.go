@@ -29,6 +29,8 @@ var istioSidecarInjectFalse = map[string]string{
 	"sidecar.istio.io/inject": "false",
 }
 
+const svcTargetPort = 8080
+
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
 		FunctionSourceKey: instance.Spec.Source,
@@ -321,6 +323,11 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
 
+	probeHandler := corev1.Handler{HTTPGet: &corev1.HTTPGetAction{
+		Path: "/healthz",
+		Port: intstr.FromInt(svcTargetPort),
+	}}
+
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
@@ -345,6 +352,16 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
+							ReadinessProbe: &corev1.Probe{
+								Handler:             probeHandler,
+								InitialDelaySeconds: 5,
+								PeriodSeconds:       5,
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler:             probeHandler,
+								InitialDelaySeconds: 5,
+								PeriodSeconds:       5,
+							},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
@@ -363,8 +380,8 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       "http",               // it has to be here for istio to work properly
-				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Name:       "http",                        // it has to be here for istio to work properly
+				TargetPort: intstr.FromInt(svcTargetPort), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
