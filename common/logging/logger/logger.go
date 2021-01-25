@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/kyma-project/kyma/common/logger/tracing"
+	"github.com/kyma-project/kyma/common/logging/tracing"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"

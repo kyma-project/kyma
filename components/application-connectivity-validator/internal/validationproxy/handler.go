@@ -9,15 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/common/logger/logger"
-
 	"github.com/gorilla/mux"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/common/logger/tracing"
+	"github.com/kyma-project/kyma/common/logging/tracing"
 
 	"github.com/bmizerany/assert"
 )

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/common/logger/logger"
+	"github.com/kyma-project/kyma/common/logging/logger"
 
 	"github.com/gorilla/mux"
 	"github.com/patrickmn/go-cache"

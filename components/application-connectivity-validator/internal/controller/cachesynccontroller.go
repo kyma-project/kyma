@@ -4,20 +4,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/common/logger/logger"
-
-	gocache "github.com/patrickmn/go-cache"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/workqueue"
-
+	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
+	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
-
-	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
-	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/workqueue"
 )
 
 const controllerName = "cache_sync_controller"
