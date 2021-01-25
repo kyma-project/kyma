@@ -64,6 +64,8 @@ spec:
         - "--healthPort={{ .Values.controller.args.healthPort }}"
         - "--profile={{ .Values.controller.resources.profile }}"
         - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
+        - "--logFormat={{ .Values.global.log.format }}"
+        - "--logLevel={{ .Values.global.log.level }}"
         image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:

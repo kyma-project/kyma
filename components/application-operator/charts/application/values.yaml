@@ -44,6 +44,10 @@ applicationConnectivityValidator:
       cpu: 50m
       memory: 64Mi
 
+log:
+  format: "text"
+  level: "debug"
+
 istio:
   gateway:
     name: kyma-gateway

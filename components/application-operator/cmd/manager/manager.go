@@ -150,6 +150,8 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		EventServiceImage:                     options.eventServiceImage,
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
+		LogFormat:                             options.logFormat,
+		LogLevel:                              options.logLevel,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
 		IsBEBEnabled:                          options.isBEBEnabled,
