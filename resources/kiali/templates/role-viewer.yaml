@@ -23,6 +23,12 @@ rules:
   - get
   - list
   - watch
+- apiGroups: [""]
+  resources:
+  - pods/portforward
+  verbs:
+  - create
+  - post
 - apiGroups: ["extensions", "apps"]
   resources:
   - deployments
