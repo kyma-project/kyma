@@ -1,3 +1,536 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" style="background-color: rgb(255, 255, 255);" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1013px" height="728px" viewBox="-0.5 -0.5 1013 728" content="&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2020-06-15T08:54:29.944Z&quot; agent=&quot;5.0 (Macintosh)&quot; version=&quot;13.2.4&quot; etag=&quot;Kw6pi_jeDtxmx_5W2tDL&quot; type=&quot;device&quot;&gt;&lt;diagram id=&quot;eA0SdyX45FkALqIGtzRj&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;"><defs/><g><rect x="4" y="4" width="1005" height="401" fill="none" stroke="#acd62f" stroke-width="2" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 1003px; height: 1px; padding-top: 11px; margin-left: 5px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; "><font size="1"><span style="white-space: nowrap ; font-size: 15px"><b>Kubernetes Cluster </b></span></font></div></div></div></foreignObject><text x="507" y="24" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Kubernetes Cluster </text></switch></g><rect x="4" y="464" width="177" height="120" fill="none" stroke="#24cacc" stroke-width="2" pointer-events="all"/><rect x="612" y="44" width="370" height="260" fill="none" stroke="#d2d5d9" stroke-width="2" pointer-events="all"/><rect x="852" y="74" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><path d="M 259.5 594 L 259.5 574 Q 259.5 564 259.75 564 L 259.88 564 Q 260 564 260 554 L 260 540.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 260 535.12 L 263.5 542.12 L 260 540.37 L 256.5 542.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 284.5 624 L 419.5 624 Q 429.5 624 429.5 614 L 429.5 540.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 429.5 535.12 L 433 542.12 L 429.5 540.37 L 426 542.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 234.5 624 L 102.5 624 Q 92.5 624 92.5 614 L 92.5 540.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 92.5 535.12 L 96 542.12 L 92.5 540.37 L 89 542.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 234.5 654 C 234.5 630 234.5 618 259.5 618 C 242.83 618 242.83 594 259.5 594 C 276.17 594 276.17 618 259.5 618 C 284.5 618 284.5 630 284.5 654 Z" fill="#0a6ed1" stroke="#ffffff" stroke-miterlimit="10" pointer-events="all"/><path d="M 92.5 474 L 92.5 390.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 92.5 385.12 L 96 392.12 L 92.5 390.37 L 89 392.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 152.5 504 L 162.25 504 Q 172 504 172 494 L 172 123 Q 172 113 182 113 L 330.63 113" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 335.88 113 L 328.88 116.5 L 330.63 113 L 328.88 109.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="32.5" y="474" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 504px; margin-left: 34px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Log UI</div></div></div></foreignObject><text x="93" y="508" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Log UI</text></switch></g><path d="M 260 474 L 260 439 Q 260 429 259.87 419 L 259.5 390.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 259.5 385.12 L 263 392.12 L 259.5 390.37 L 256 392.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="201" y="474" width="118" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 116px; height: 1px; padding-top: 504px; margin-left: 202px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Grafana UI</div></div></div></foreignObject><text x="260" y="508" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Grafana UI</text></switch></g><path d="M 528.37 113 L 672 113" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 523.12 113 L 530.12 109.5 L 528.37 113 L 530.12 116.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="337" y="83" width="185" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 183px; height: 1px; padding-top: 113px; margin-left: 338px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">&lt;&lt;StatefulSet&gt;&gt;<br style="font-size: 13px" />Loki</div></div></div></foreignObject><text x="430" y="117" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">&lt;&lt;StatefulSet&gt;&gt;...</text></switch></g><rect x="672" y="83" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 113px; margin-left: 673px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">&lt;&lt;DaemonSet&gt;&gt;<br style="font-size: 13px" />FluentBit</div></div></div></foreignObject><text x="732" y="117" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">&lt;&lt;DaemonSet&gt;&gt;...</text></switch></g><path d="M 429.5 474 L 429.5 384 Q 429.5 374 429.5 364 L 429.5 149.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 429.5 144.12 L 433 151.12 L 429.5 149.37 L 426 151.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="369.5" y="474" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 504px; margin-left: 371px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; "><font style="font-size: 13px">API Client</font></div></div></div></foreignObject><text x="430" y="508" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">API Client</text></switch></g><rect x="32.5" y="324" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 354px; margin-left: 34px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">&lt;&lt;Deployment&gt;&gt;<br style="font-size: 13px" />Log UI</div></div></div></foreignObject><text x="93" y="358" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">&lt;&lt;Deployment&gt;&gt;...</text></switch></g><rect x="552" y="98" width="110" height="30" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 113px; margin-left: 607px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">POST log chunks<br />+ labels </div></div></div></foreignObject><text x="607" y="117" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">POST log chunks...</text></switch></g><path d="M 892 143 L 892 216.63" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 892 221.88 L 888.5 214.88 L 892 216.63 L 895.5 214.88 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="832" y="83" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 113px; margin-left: 833px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Container</div></div></div></foreignObject><text x="892" y="117" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Container</text></switch></g><path d="M 837 254 L 742 254 Q 732 254 732 244 L 732 149.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 732 144.12 L 735.5 151.12 L 732 149.37 L 728.5 151.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="892" cy="254" rx="55" ry="30" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 108px; height: 1px; padding-top: 254px; margin-left: 838px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">var/logs</div></div></div></foreignObject><text x="892" y="258" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">var/logs</text></switch></g><rect x="857" y="173.5" width="30" height="20" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 184px; margin-left: 872px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">log</div></div></div></foreignObject><text x="872" y="187" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">log</text></switch></g><rect x="762" y="229" width="60" height="20" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 239px; margin-left: 792px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">tail logs</div></div></div></foreignObject><text x="792" y="243" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">tail logs</text></switch></g><path d="M 702 143 L 702 317.63" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 702 322.88 L 698.5 315.88 L 702 317.63 L 705.5 315.88 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 209px; margin-left: 673px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">discover<br />Pods</div></div></div></foreignObject><text x="673" y="212" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">discover...</text></switch></g><rect x="642" y="324" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 354px; margin-left: 643px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Kubernetes<br />APIServer</div></div></div></foreignObject><text x="702" y="358" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Kubernetes...</text></switch></g><ellipse cx="379.5" cy="208" rx="40" ry="25" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 78px; height: 1px; padding-top: 208px; margin-left: 341px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Label index store</div></div></div></foreignObject><text x="380" y="212" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Label index...</text></switch></g><ellipse cx="482" cy="208" rx="40" ry="25" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 78px; height: 1px; padding-top: 208px; margin-left: 443px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">Log store</div></div></div></foreignObject><text x="482" y="212" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">Log store</text></switch></g><path d="M 379.5 183 Q 362 174 362 164 Q 362 154 377.59 145.93" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 382.26 143.51 L 377.65 149.84 L 377.59 145.93 L 374.43 143.62 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 481 184 Q 462 174 462 164 Q 462 154 476.07 145.32" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 480.53 142.57 L 476.41 149.22 L 476.07 145.32 L 472.74 143.26 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><path d="M 488.64 181.03 Q 502 174 502 164 Q 502 154 482.55 143" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 483.99 183.48 L 488.55 177.12 L 488.64 181.03 L 491.81 183.32 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="732" y="54" width="140" height="20" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 64px; margin-left: 802px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; "><font style="font-size: 15px"><b>Kubernetes Node</b></font></div></div></div></foreignObject><text x="802" y="68" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">Kubernetes Node</text></switch></g><rect x="32.5" y="554" width="120" height="20" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 564px; margin-left: 93px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 15px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; "><font style="font-size: 15px"><b>Kyma Console</b></font></div></div></div></foreignObject><text x="93" y="569" fill="#000000" font-family="Helvetica" font-size="15px" text-anchor="middle">Kyma Console</text></switch></g><path d="M 388.51 179.81 Q 402 172 402 162 Q 402 152 383.25 143" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 383.97 182.44 L 388.27 175.9 L 388.51 179.81 L 391.78 181.96 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="927" cy="183.5" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 184px; margin-left: 913px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><font style="font-size: 16px">1</font></div></div></div></foreignObject><text x="927" y="187" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">1</text></switch></g><ellipse cx="677" cy="248" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 248px; margin-left: 663px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><font style="font-size: 16px">2</font></div></div></div></foreignObject><text x="677" y="252" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">2</text></switch></g><ellipse cx="792" cy="204.5" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 205px; margin-left: 778px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><font style="font-size: 16px">3</font></div></div></div></foreignObject><text x="792" y="208" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">3</text></switch></g><ellipse cx="612" cy="79" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 79px; margin-left: 598px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><font style="font-size: 16px">4</font></div></div></div></foreignObject><text x="612" y="83" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">4</text></switch></g><path d="M 259.5 324 L 259.5 138 Q 259.5 128 269.5 128 L 330.63 128" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 335.88 128 L 328.88 131.5 L 330.63 128 L 328.88 124.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/><rect x="199.5" y="324" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 354px; margin-left: 201px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">&lt;&lt;Deployment&gt;&gt;<br style="font-size: 13px" />Grafana</div></div></div></foreignObject><text x="260" y="358" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">&lt;&lt;Deployment&gt;&gt;...</text></switch></g><rect x="214.5" y="664" width="90" height="20" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 674px; margin-left: 260px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 15px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; "><font style="font-size: 15px"><b>Kyma User</b></font></div></div></div></foreignObject><text x="260" y="679" fill="#000000" font-family="Helvetica" font-size="15px" text-anchor="middle">Kyma User</text></switch></g><ellipse cx="259.5" cy="709" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 709px; margin-left: 246px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><font style="font-size: 16px">6</font></div></div></div></foreignObject><text x="260" y="713" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">6</text></switch></g><ellipse cx="429.5" cy="64" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 64px; margin-left: 416px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; "><span style="font-size: 16px">5</span></div></div></div></foreignObject><text x="430" y="68" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">5</text></switch></g></g><switch><g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/><a transform="translate(0,-5)" xlink:href="https://desk.draw.io/support/solutions/articles/16000042487" target="_blank"><text text-anchor="middle" font-size="10px" x="50%" y="100%">Viewer does not support full SVG 1.1</text></a></switch></svg>
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1007px" height="722px" viewBox="-0.5 -0.5 1007 722" content="&lt;mxfile host=&quot;b641002a-78b3-452f-8abc-81f9c3827296&quot; modified=&quot;2021-01-25T10:39:25.568Z&quot; agent=&quot;5.0 (Macintosh; Intel Mac OS X 11_0_0) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.52.1 Chrome/83.0.4103.122 Electron/9.3.5 Safari/537.36&quot; etag=&quot;8XY6Qgv01g7aGmym85l2&quot; version=&quot;13.10.0&quot; type=&quot;embed&quot;&gt;&lt;diagram id=&quot;eA0SdyX45FkALqIGtzRj&quot; name=&quot;Page-1&quot;&gt;7Vxbd6M2EP41fkwOiPujL8l2T9M256R7tvtIjGzTYOSCnNj76yuBxEWSbWyDSbzJS8wgCTTfzGhmNGJgjJebL4m/WvyBAhgNgBZsBsZkAIDu6Tr5RynbnGI7ICfMkzBgjUrCU/gTMqLGqOswgGmtIUYowuGqTpyiOIZTXKP5SYLe6s1mKKo/deXPoUR4mvqRTP0eBniRU13glPTfYDhf8CfrtpffWfq8MZtJuvAD9FYhGXcDY5wghPNfy80YRpR5nC95v/sdd4sXS2CMm3RgfH/1ozWb2wDYEek6miEyAnlBznz7vzV9qZFe/iS/5ux/1iVd+THtgrdRvc/bIsTwhtyeEvqQNInRG5EM8iPrrdFn3eRPond1a7XZ/ZRnTvh9/QyTGGIiCUAbR+sUw4Tc85crcjN+TleVToQDz+JAhJa/sUTO587JoDYnkKB1HEDKP41P7Smf2SSblDFa4GVErnTKEpygFzhGEUqy3sZwPLEpGqNZGEWcHqOYdB/NEz8ICXACmb4N0wHdINd+FM5jcjElTcmMyfNQEv4kjXz+1FeY4JCI65C1xGhVvAsXWFDMrSotTIDoAHBTITHp+QLREuJkS5qwuze65eZ9mC6bXLTfSs3QNc3KiYuKWpgaV0mmjvNi9FJiyQ8mtGoBNhQC3CpgwBwPx+N2AaMNKo/Qsr+LIeS6CoQcRwZI51CeA5DZNUATMLEm3lkAdcJ309LqimHLbDccTWY7sFtgu9UL2wl9lv3t5n0LnLU9gbOeQqCBgrNtMNaW+AgD4hywS5TgBZqj2I/uSuqo5DRlZdnmAVHDnBH/hRhvmUz6a4zq3Ce8Srb/UKRuLX75o3pvsmEw5ldbdiWh5lneeGjKJug++9sHT4rWyZTNmHkz2E/mkLdiek6ZsRfDBEY+Dl/rntQ5gDifgCgB8foCxO0DkAsyFvTFWO+wTSfxxCpj0BTTCR+y6rvWx7pJ14b2nZrJh5nZ3Ko74NaqmXVd02W7bnVk1vmjLmxGNiGuWBFy9YObDfK7tCH0gpuQd2Z6uDpUVYSvvZdXEZ5Z6AdGvQpiAekhGKsgVjDtH0bdbhvGrOswSfxtpcEKhTFOKyM/UkJpGPS6t+eJKY39zS1mNksByp9filMxkWYSJqdMHtCcEL59lUSv98CmBbN8owNPMMzuJf1t3fj07wrvuqqdZm8ety7H9F8Sf+bH/vWqgeEdVgHd7UgFGgTzx+iEdqqL7Sd4SNPnhDCN/DQNp5x8H0al6gS8EYODUNj9/SrSTBVsxULl9KYKtgIaloJm2eTq1RP2MZytoyeIixvzWrN6qjsZqNLpYrrcUKXLH9BLeJWaqDv11cj0PFkVXUW+uRVVdI7Ce+LDJYovgPY9eZ0Yj0J8lZBbupjwU0DemQPSSz7jvTkgqkTI+wgPgF3f3nC8/fHBgfbnBwiqNE19T/U0HR8+EtdKG0dU5y6zWXmC9reg7UBz+gw4+LhNTTxcRWi7zDHpeEV/L2GmuL+8DIMgulz86ZiXFAddEofHv57+JpQow2O6WMcvaRVfroq0siHyn2GUylUJAoKEF7gOk7RnvJPnCSSC4z9nQ1H8mb0k41qjgTWhjyPDkQWGlXLIQtCe6hrCzpzFQ8VamKRAymgDKTkzc9bK3UaYxFhbjZG0eoxUBlJlmLR/Q6PRgs0LI1penKXV1DHqiNs8UOZD5B4D6yWAedzCqqj1GNOqlzCmdT/d28QGm9sd2D/b6dH35dUbH8X3fReaZylc5d4SFIpCkFefqMs9Wb1SGdwoClcp/OgaU3cXbJW7oFqEWtEYOSGU+Qk9L/htsNWrs9VyC7+sWtGkKmhqg69y4oVY/ih3w2RB/oj81YSV1JS5a3fFXfeaXKdyVx1Ut9X5LfV+7Llp6dYt/A5/yxQ8bFvwt/KXkvwtaSBLGKgYuAPHTc6IBGE6Ra9ZvbYQNz2ioAd1zuK0kT99mWdCrFrADq9UhRaJOl+cRGCvMagW+yuDXiK6hmPXAGIaeab83BigNuqNWR8BzWYpPBdwQ06hVIv1RciHj1+fYPJ6zV686e7Qtkt48Yacwnig8k6bEPZuMp6jBMom/xrcQd0R04mWIoRyFby32uC9nJTI83hXzHEgCPtF+d3gQIjShajwdromxijYxejCL6iEqeCoOPWUqr9GTghX9JN2aQ4UWXLamesP0ITgTBNAb+q/iANZoqXc4b8cvb2kicJ8YHtJbO+0u71kNDhQc5SAV8TYcfWqHGu3nmsczLnsVY9HmIRkctRD2y/G71hkDb6jd67IGpopiCzoRGSNI0VWat+2yDapX5KqhnYb5KZlSOcVHb1nieRdzpZIYNw6oh1tlsA/WijFwPWQUIrt2xZKZeXWcdv0J5xT/hMF8MCh5L0b+h8wsWWJOxiOIvYxFdrSRmbLUBZsdQLzdknrX8coTlH0oTCuhgBWO5grdu09FeyqkLcV2JskNPtack4OHD7iWgWEtaoIBo92+EE9H2ZZTicLFRAXHtfd/15SRrbW/vyFqoV6MltlwfSm9qhxUsJPV/nnVmbhhirPnrRqcaZwV1liP2cQLRF7s+EeVxsFLFyQWkcafCItOSXSbpuco+oMZzkf2w7OxifO0q6qLuabrEtqNOgIafMTaWmLxRDOhSg+c9MZzj0fUqxn7ZxDZ4hPSUCfuT/OTyt2e4CgMV6qJGoPNd5ZJ0G1i6OUgkBdw0EeQ9yKu+g+qKnKQ3aZC/iWlhUOv2giwJK/6qGwy15HaQCzhSSfcv21P9dfEWlXQlpXfL+lsxV4d55v52cpGyFt7fxc5C+LtKzUpt2ZT00uy8+h5umT8qOyxt3/&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <rect x="1" y="1" width="1005" height="401" fill="none" stroke="#acd62f" stroke-width="2" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 1003px; height: 1px; padding-top: 8px; margin-left: 2px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <font size="1">
+                                    <span style="white-space: nowrap ; font-size: 15px">
+                                        <b>
+                                            Kubernetes Cluster
+                                        </b>
+                                    </span>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="504" y="21" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Kubernetes Cluster
+                </text>
+            </switch>
+        </g>
+        <rect x="1" y="461" width="177" height="120" fill="none" stroke="#24cacc" stroke-width="2" pointer-events="all"/>
+        <rect x="609" y="41" width="370" height="260" fill="none" stroke="#d2d5d9" stroke-width="2" pointer-events="all"/>
+        <rect x="849" y="71" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <path d="M 256.5 591 L 256.5 571 Q 256.5 561 256.75 561 L 256.88 561 Q 257 561 257 551 L 257 537.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 257 532.12 L 260.5 539.12 L 257 537.37 L 253.5 539.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 281.5 621 L 416.5 621 Q 426.5 621 426.5 611 L 426.5 537.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 426.5 532.12 L 430 539.12 L 426.5 537.37 L 423 539.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 231.5 621 L 99.5 621 Q 89.5 621 89.5 611 L 89.5 537.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 89.5 532.12 L 93 539.12 L 89.5 537.37 L 86 539.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 231.5 651 C 231.5 627 231.5 615 256.5 615 C 239.83 615 239.83 591 256.5 591 C 273.17 591 273.17 615 256.5 615 C 281.5 615 281.5 627 281.5 651 Z" fill="#0a6ed1" stroke="#ffffff" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 89.5 471 L 89.5 387.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 89.5 382.12 L 93 389.12 L 89.5 387.37 L 86 389.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 149.5 501 L 159.25 501 Q 169 501 169 491 L 169 120 Q 169 110 179 110 L 327.63 110" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 332.88 110 L 325.88 113.5 L 327.63 110 L 325.88 106.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="29.5" y="471" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 501px; margin-left: 31px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Log UI
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="90" y="505" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Log UI
+                </text>
+            </switch>
+        </g>
+        <path d="M 257 471 L 257 436 Q 257 426 256.87 416 L 256.5 387.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 256.5 382.12 L 260 389.12 L 256.5 387.37 L 253 389.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="198" y="471" width="118" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 116px; height: 1px; padding-top: 501px; margin-left: 199px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Grafana UI
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="257" y="505" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Grafana UI
+                </text>
+            </switch>
+        </g>
+        <path d="M 525.37 110 L 669 110" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 520.12 110 L 527.12 106.5 L 525.37 110 L 527.12 113.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="334" y="80" width="185" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 183px; height: 1px; padding-top: 110px; margin-left: 335px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                &lt;&lt;StatefulSet&gt;&gt;
+                                <br style="font-size: 13px"/>
+                                Loki
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="427" y="114" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    &lt;&lt;StatefulSet&gt;&gt;...
+                </text>
+            </switch>
+        </g>
+        <rect x="669" y="80" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 110px; margin-left: 670px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                &lt;&lt;DaemonSet&gt;&gt;
+                                <br style="font-size: 13px"/>
+                                FluentBit
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="729" y="114" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    &lt;&lt;DaemonSet&gt;&gt;...
+                </text>
+            </switch>
+        </g>
+        <path d="M 426.5 471 L 426.5 381 Q 426.5 371 426.5 361 L 426.5 146.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 426.5 141.12 L 430 148.12 L 426.5 146.37 L 423 148.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="366.5" y="471" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 501px; margin-left: 368px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 13px">
+                                    API Client
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="427" y="505" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    API Client
+                </text>
+            </switch>
+        </g>
+        <rect x="29.5" y="321" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 351px; margin-left: 31px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                &lt;&lt;Deployment&gt;&gt;
+                                <br style="font-size: 13px"/>
+                                Log UI
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="90" y="355" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    &lt;&lt;Deployment&gt;&gt;...
+                </text>
+            </switch>
+        </g>
+        <rect x="549" y="95" width="110" height="30" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 110px; margin-left: 604px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                POST log chunks
+                                <br/>
+                                + labels
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="604" y="114" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    POST log chunks...
+                </text>
+            </switch>
+        </g>
+        <path d="M 889 140 L 889 213.63" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 889 218.88 L 885.5 211.88 L 889 213.63 L 892.5 211.88 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="829" y="80" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 110px; margin-left: 830px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Container
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="889" y="114" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Container
+                </text>
+            </switch>
+        </g>
+        <path d="M 834 251 L 739 251 Q 729 251 729 241 L 729 146.37" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 729 141.12 L 732.5 148.12 L 729 146.37 L 725.5 148.12 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="889" cy="251" rx="55" ry="30" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 108px; height: 1px; padding-top: 251px; margin-left: 835px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                var/logs
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="889" y="255" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    var/logs
+                </text>
+            </switch>
+        </g>
+        <rect x="854" y="170.5" width="30" height="20" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 181px; margin-left: 869px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                log
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="869" y="184" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    log
+                </text>
+            </switch>
+        </g>
+        <rect x="759" y="226" width="60" height="20" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 236px; margin-left: 789px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                tail logs
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="789" y="240" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    tail logs
+                </text>
+            </switch>
+        </g>
+        <path d="M 699 140 L 699 314.63" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 699 319.88 L 695.5 312.88 L 699 314.63 L 702.5 312.88 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 206px; margin-left: 670px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; background-color: #ffffff; white-space: nowrap; ">
+                                discover
+                                <br/>
+                                Pods
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="670" y="209" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    discover...
+                </text>
+            </switch>
+        </g>
+        <rect x="639" y="321" width="120" height="60" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 351px; margin-left: 640px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Kubernetes
+                                <br/>
+                                APIServer
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="699" y="355" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Kubernetes...
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="376.5" cy="205" rx="40" ry="25" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 78px; height: 1px; padding-top: 205px; margin-left: 338px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Label index store
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="377" y="209" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Label index...
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="479" cy="205" rx="40" ry="25" fill="#ffffff" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 78px; height: 1px; padding-top: 205px; margin-left: 440px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                Log store
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="479" y="209" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    Log store
+                </text>
+            </switch>
+        </g>
+        <path d="M 376.5 180 Q 359 171 359 161 Q 359 151 374.59 142.93" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 379.26 140.51 L 374.65 146.84 L 374.59 142.93 L 371.43 140.62 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 478 181 Q 459 171 459 161 Q 459 151 473.07 142.32" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 477.53 139.57 L 473.41 146.22 L 473.07 142.32 L 469.74 140.26 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 485.64 178.03 Q 499 171 499 161 Q 499 151 479.55 140" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 480.99 180.48 L 485.55 174.12 L 485.64 178.03 L 488.81 180.32 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="729" y="51" width="140" height="20" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 61px; margin-left: 799px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                <font style="font-size: 15px">
+                                    <b>
+                                        Kubernetes Node
+                                    </b>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="799" y="65" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Kubernetes Node
+                </text>
+            </switch>
+        </g>
+        <rect x="29.5" y="551" width="120" height="20" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 561px; margin-left: 90px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 15px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                <font style="font-size: 15px">
+                                    <b>
+                                        Kyma Console
+                                    </b>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="90" y="566" fill="#000000" font-family="Helvetica" font-size="15px" text-anchor="middle">
+                    Kyma Console
+                </text>
+            </switch>
+        </g>
+        <path d="M 385.51 176.81 Q 399 169 399 159 Q 399 149 380.25 140" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 380.97 179.44 L 385.27 172.9 L 385.51 176.81 L 388.78 178.96 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="924" cy="180.5" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 181px; margin-left: 910px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 16px">
+                                    1
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="924" y="184" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    1
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="674" cy="245" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 245px; margin-left: 660px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 16px">
+                                    2
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="674" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    2
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="789" cy="201.5" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 202px; margin-left: 775px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 16px">
+                                    3
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="789" y="205" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    3
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="609" cy="76" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 76px; margin-left: 595px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 16px">
+                                    4
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="609" y="80" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    4
+                </text>
+            </switch>
+        </g>
+        <path d="M 256.5 321 L 256.5 135 Q 256.5 125 266.5 125 L 327.63 125" fill="none" stroke="#959ca4" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 332.88 125 L 325.88 128.5 L 327.63 125 L 325.88 121.5 Z" fill="#959ca4" stroke="#959ca4" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="196.5" y="321" width="120" height="60" fill="none" stroke="#d2d5d9" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 351px; margin-left: 198px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 13px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                &lt;&lt;Deployment&gt;&gt;
+                                <br style="font-size: 13px"/>
+                                Grafana
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="257" y="355" fill="#000000" font-family="Helvetica" font-size="13px" text-anchor="middle">
+                    &lt;&lt;Deployment&gt;&gt;...
+                </text>
+            </switch>
+        </g>
+        <rect x="211.5" y="661" width="90" height="20" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 671px; margin-left: 257px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 15px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: nowrap; ">
+                                <font style="font-size: 15px">
+                                    <b>
+                                        Kyma User
+                                    </b>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="257" y="676" fill="#000000" font-family="Helvetica" font-size="15px" text-anchor="middle">
+                    Kyma User
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="256.5" cy="706" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 706px; margin-left: 243px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <font style="font-size: 16px">
+                                    6
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="257" y="710" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    6
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="426.5" cy="61" rx="15" ry="15" fill="#0a6ed1" stroke="#ffffff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 28px; height: 1px; padding-top: 61px; margin-left: 413px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #FFFFFF; line-height: 1.2; pointer-events: all; background-color: #0A6ED1; white-space: normal; word-wrap: normal; ">
+                                <span style="font-size: 16px">
+                                    5
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="427" y="65" fill="#FFFFFF" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    5
+                </text>
+            </switch>
+        </g>
+    </g>
+    <switch>
+        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+        <a transform="translate(0,-5)" xlink:href="https://desk.draw.io/support/solutions/articles/16000042487" target="_blank">
+            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
+                Viewer does not support full SVG 1.1
+            </text>
+        </a>
+    </switch>
+</svg>
