@@ -53,7 +53,9 @@ spec:
           {{- with .Values.extraVolumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
-          command:
+          command: 
+          # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
+          # might want to investigate
             - sh
             - -c
             - |
