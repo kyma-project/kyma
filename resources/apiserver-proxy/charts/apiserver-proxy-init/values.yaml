@@ -5,3 +5,16 @@ port:
   secure: 9443
   insecure: 8444
   metrics: 2112
+
+podSecurityPolicy:
+  enabled: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 2000
