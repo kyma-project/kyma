@@ -85,8 +85,18 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 			Name: testNamespace,
 		},
 	}
+	dockerRegistryConfiguration := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "serverless-registry-config-default",
+			Namespace: testNamespace,
+		},
+		StringData: map[string]string{
+			"registryAddress": "registry.kyma.local",
+		},
+	}
 	gomega.Expect(resourceClient.Create(context.TODO(), &ns)).To(gomega.Succeed())
 	gomega.Expect(resourceClient.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
+	gomega.Expect(resourceClient.Create(context.TODO(), &dockerRegistryConfiguration)).To(gomega.Succeed())
 
 	close(done)
 }, 60)

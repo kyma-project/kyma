@@ -13,10 +13,13 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 )
 
+const cfgSecretFinalizerName = "serverless.kyma-project.io/finalizer-registry-config"
+
 type SecretService interface {
 	IsBase(secret *corev1.Secret) bool
 	ListBase(ctx context.Context) ([]corev1.Secret, error)
 	UpdateNamespace(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error
+	HandleFinalizer(ctx context.Context, logger logr.Logger, secret *corev1.Secret, namespaces []string) error
 }
 
 var _ SecretService = &secretService{}
@@ -60,6 +63,33 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger,
 	return r.updateSecret(ctx, logger, instance, baseInstance)
 }
 
+func (r *secretService) HandleFinalizer(ctx context.Context, logger logr.Logger, instance *corev1.Secret, namespaces []string) error {
+	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		if containsString(instance.ObjectMeta.Finalizers, cfgSecretFinalizerName) {
+			return nil
+		}
+		instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, cfgSecretFinalizerName)
+		if err := r.client.Update(context.Background(), instance); err != nil {
+			return err
+		}
+	} else {
+		if !containsString(instance.ObjectMeta.Finalizers, cfgSecretFinalizerName) {
+			return nil
+		}
+		for _, namespace := range namespaces {
+			logger.Info(fmt.Sprintf("Deleting Secret '%s/%s'", namespace, instance.Name))
+			if err := r.deleteSecret(ctx, logger, namespace, instance.Name); err != nil {
+				return err
+			}
+		}
+		instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, cfgSecretFinalizerName)
+		if err := r.client.Update(context.Background(), instance); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (r *secretService) createSecret(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error {
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -96,4 +126,38 @@ func (r *secretService) updateSecret(ctx context.Context, logger logr.Logger, in
 	}
 
 	return nil
+}
+
+func (r *secretService) deleteSecret(ctx context.Context, logger logr.Logger, namespace, baseInstanceName string) error {
+	instance := &corev1.Secret{}
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
+		return client.IgnoreNotFound(err)
+	}
+
+	if err := r.client.Delete(ctx, instance); err != nil {
+		logger.Error(err, fmt.Sprintf("Deleting Secret '%s/%s' failed", namespace, baseInstanceName))
+		return err
+	}
+
+	return nil
+}
+
+// Helper functions to check and remove string from a slice of strings.
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+func removeString(slice []string, s string) (result []string) {
+	for _, item := range slice {
+		if item == s {
+			continue
+		}
+		result = append(result, item)
+	}
+	return
 }

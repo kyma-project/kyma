@@ -5,14 +5,15 @@ import (
 )
 
 type FunctionConfig struct {
-	ImageRegistryDockerConfigSecretName string        `envconfig:"default=serverless-image-pull-secret"`
-	ImagePullAccountName                string        `envconfig:"default=serverless-function"`
-	BuildServiceAccountName             string        `envconfig:"default=serverless-build"`
-	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
-	RequeueDuration                     time.Duration `envconfig:"default=1m"`
-	GitFetchRequeueDuration             time.Duration `envconfig:"default=30s"`
-	Build                               BuildConfig
-	Docker                              DockerConfig
+	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
+	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
+	ImagePullAccountName                        string        `envconfig:"default=serverless-function"`
+	BuildServiceAccountName                     string        `envconfig:"default=serverless-build"`
+	TargetCPUUtilizationPercentage              int32         `envconfig:"default=50"`
+	RequeueDuration                             time.Duration `envconfig:"default=1m"`
+	FunctionReadyRequeueDuration                time.Duration `envconfig:"default=5m"`
+	GitFetchRequeueDuration                     time.Duration `envconfig:"default=30s"`
+	Build                                       BuildConfig
 }
 
 type BuildConfig struct {
@@ -23,7 +24,7 @@ type BuildConfig struct {
 }
 
 type DockerConfig struct {
-	InternalRegistryEnabled bool   `envconfig:"default=true"`
-	InternalServerAddress   string `envconfig:"default=serverless-docker-registry.kyma-system.svc.cluster.local:5000"`
-	RegistryAddress         string `envconfig:"default=registry.kyma.local"`
+	ActiveRegistryConfigSecretName string
+	PushAddress                    string
+	PullAddress                    string
 }

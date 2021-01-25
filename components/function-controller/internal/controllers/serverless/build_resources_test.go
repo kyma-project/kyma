@@ -76,7 +76,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg)
+			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
@@ -422,7 +422,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 
 	r := FunctionReconciler{}
 	// when
-	job := r.buildJob(&instance, rtmCfg, cmName)
+	job := r.buildJob(&instance, rtmCfg, cmName, DockerConfig{})
 
 	// then
 	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
