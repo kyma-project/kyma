@@ -8,8 +8,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig/provider"
 
-	"github.com/gorilla/mux"
-
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/client"
 	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/strategy"
@@ -53,7 +51,6 @@ func main() {
 		k8sConfig,
 		coreClientset,
 		options.namespace,
-		options.application,
 	)
 	if err != nil {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
@@ -106,17 +103,9 @@ func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionSer
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
 			ProxyTimeout:  options.proxyTimeout,
-			Application:   options.application,
 			ProxyCacheTTL: options.proxyCacheTTL,
 		}
 		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig, proxyConfigRepository)
-
-		if options.namespacedGateway {
-			r := mux.NewRouter()
-			r.PathPrefix("/secret/{secret}/api/{apiName}").HandlerFunc(proxyHandler.ServeHTTPNamespaced)
-
-			return r
-		}
 
 		return proxyHandler
 	}
@@ -129,20 +118,20 @@ func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.Stra
 	})
 }
 
-func newServiceDefinitionService(k8sConfig *restclient.Config, coreClientset kubernetes.Interface, namespace string, application string) (metadata.ServiceDefinitionService, error) {
-	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig, application)
+func newServiceDefinitionService(k8sConfig *restclient.Config, coreClientset kubernetes.Interface, namespace string) (metadata.ServiceDefinitionService, error) {
+	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
 
-	secretsRepository := newSecretsRepository(coreClientset, namespace, application)
+	secretsRepository := newSecretsRepository(coreClientset, namespace)
 
 	serviceAPIService := serviceapi.NewService(secretsRepository)
 
 	return metadata.NewServiceDefinitionService(serviceAPIService, applicationServiceRepository), nil
 }
 
-func newApplicationRepository(config *restclient.Config, name string) (applications.ServiceRepository, apperrors.AppError) {
+func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
 	applicationClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create k8s application client, %s", err)
@@ -150,13 +139,13 @@ func newApplicationRepository(config *restclient.Config, name string) (applicati
 
 	rei := applicationClientset.ApplicationconnectorV1alpha1().Applications()
 
-	return applications.NewServiceRepository(name, rei), nil
+	return applications.NewServiceRepository(rei), nil
 }
 
-func newSecretsRepository(coreClientset kubernetes.Interface, namespace, application string) secrets.Repository {
+func newSecretsRepository(coreClientset kubernetes.Interface, namespace string) secrets.Repository {
 	sei := coreClientset.CoreV1().Secrets(namespace)
 
-	return secrets.NewRepository(sei, application)
+	return secrets.NewRepository(sei)
 }
 
 func newCSRFClient(timeout int) csrf.Client {

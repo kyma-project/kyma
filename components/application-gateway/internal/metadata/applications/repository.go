@@ -1,4 +1,4 @@
-// Package application contains components for accessing/modifying Application CRD
+// Package applications contains components for accessing/modifying Application CRD
 package applications
 
 import (
@@ -24,14 +24,14 @@ type Manager interface {
 }
 
 type repository struct {
-	name       string
 	appManager Manager
 }
 
+// Credentials stores information about credentials needed to call an API
 type Credentials struct {
 	Type                 string
 	SecretName           string
-	Url                  string
+	URL                  string
 	CSRFTokenEndpointURL string
 }
 
@@ -39,7 +39,7 @@ type Credentials struct {
 type ServiceAPI struct {
 	GatewayURL                  string
 	AccessLabel                 string
-	TargetUrl                   string
+	TargetURL                   string
 	Credentials                 *Credentials
 	RequestParametersSecretName string
 }
@@ -64,17 +64,17 @@ type Service struct {
 
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
-	Get(id string) (Service, apperrors.AppError)
+	Get(appName, id string) (Service, apperrors.AppError)
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
-func NewServiceRepository(name string, appManager Manager) ServiceRepository {
-	return &repository{name: name, appManager: appManager}
+func NewServiceRepository(appManager Manager) ServiceRepository {
+	return &repository{appManager: appManager}
 }
 
 // Get reads Service from Application by service id
-func (r *repository) Get(id string) (Service, apperrors.AppError) {
-	app, err := r.getApplication()
+func (r *repository) Get(appName, id string) (Service, apperrors.AppError) {
+	app, err := r.getApplication(appName)
 	if err != nil {
 		return Service{}, err
 	}
@@ -91,16 +91,16 @@ func (r *repository) Get(id string) (Service, apperrors.AppError) {
 	return Service{}, apperrors.NotFound(message)
 }
 
-func (r *repository) getApplication() (*v1alpha1.Application, apperrors.AppError) {
-	app, err := r.appManager.Get(context.Background(), r.name, v1.GetOptions{})
+func (r *repository) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
+	app, err := r.appManager.Get(context.Background(), appName, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Application: %s not found.", r.name)
+			message := fmt.Sprintf("Application: %s not found.", appName)
 			log.Warn(message)
 			return nil, apperrors.Internal(message)
 		}
 
-		message := fmt.Sprintf("failed to get Application '%s' : %s", r.name, err.Error())
+		message := fmt.Sprintf("failed to get Application '%s' : %s", appName, err.Error())
 		log.Error(message)
 		return nil, apperrors.Internal(message)
 	}
@@ -117,7 +117,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 				api = &ServiceAPI{
 					GatewayURL:                  entry.GatewayUrl,
 					AccessLabel:                 entry.AccessLabel,
-					TargetUrl:                   entry.TargetUrl,
+					TargetURL:                   entry.TargetUrl,
 					Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
 					RequestParametersSecretName: entry.RequestParametersSecretName,
 				}
@@ -156,7 +156,7 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 	return &Credentials{
 		Type:                 credentials.Type,
 		SecretName:           credentials.SecretName,
-		Url:                  credentials.AuthenticationUrl,
+		URL:                  credentials.AuthenticationUrl,
 		CSRFTokenEndpointURL: csrfTokenEndpointURL,
 	}
 }

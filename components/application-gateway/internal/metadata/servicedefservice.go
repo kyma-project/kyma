@@ -12,7 +12,7 @@ import (
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
 	// GetAPI gets API of a service with given ID
-	GetAPI(serviceId string) (*model.API, apperrors.AppError)
+	GetAPI(appName, serviceID string) (*model.API, apperrors.AppError)
 }
 
 type serviceDefinitionService struct {
@@ -29,24 +29,24 @@ func NewServiceDefinitionService(serviceAPIService serviceapi.Service, applicati
 }
 
 // GetAPI gets API of a service with given ID
-func (sds *serviceDefinitionService) GetAPI(serviceId string) (*model.API, apperrors.AppError) {
-	service, err := sds.applicationRepository.Get(serviceId)
+func (sds *serviceDefinitionService) GetAPI(appName, serviceID string) (*model.API, apperrors.AppError) {
+	service, err := sds.applicationRepository.Get(appName, serviceID)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return nil, apperrors.NotFound("service with ID %s not found", serviceId)
+			return nil, apperrors.NotFound("service with ID %s not found", serviceID)
 		}
-		log.Errorf("failed to get service with id '%s': %s", serviceId, err.Error())
-		return nil, apperrors.Internal("failed to read %s service, %s", serviceId, err)
+		log.Errorf("failed to get service with id '%s': %s", serviceID, err.Error())
+		return nil, apperrors.Internal("failed to read %s service, %s", serviceID, err)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceId)
+		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceID)
 	}
 
 	api, err := sds.serviceAPIService.Read(service.API)
 	if err != nil {
-		log.Errorf("failed to read api for serviceId '%s': %s", serviceId, err.Error())
-		return nil, apperrors.Internal("failed to read API for %s service, %s", serviceId, err)
+		log.Errorf("failed to read api for serviceId '%s': %s", serviceID, err.Error())
+		return nil, apperrors.Internal("failed to read API for %s service, %s", serviceID, err)
 	}
 	return api, nil
 }

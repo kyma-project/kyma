@@ -19,7 +19,7 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should get given secret", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		repository := NewRepository(secretsManagerMock, "default-ec")
+		repository := NewRepository(secretsManagerMock)
 
 		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "default-ec")
 		secretsManagerMock.On("Get", context.Background(), "new-secret", metav1.GetOptions{}).Return(secret, nil)
@@ -38,7 +38,7 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should return an error in case fetching fails", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		repository := NewRepository(secretsManagerMock, "default-ec")
+		repository := NewRepository(secretsManagerMock)
 
 		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,
@@ -59,7 +59,7 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should return not found if secret does not exist", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		repository := NewRepository(secretsManagerMock, "default-ec")
+		repository := NewRepository(secretsManagerMock)
 
 		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,

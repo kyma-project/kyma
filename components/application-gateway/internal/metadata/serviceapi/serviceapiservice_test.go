@@ -42,11 +42,11 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with oauth credentials",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl: targetUrl,
+				TargetURL: targetUrl,
 				Credentials: &applications.Credentials{
 					Type:       TypeOAuth,
 					SecretName: secretName,
-					Url:        oauthUrl,
+					URL:        oauthUrl,
 				},
 			},
 			credentialsSecret: map[string][]byte{
@@ -67,11 +67,11 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with basic auth credentials",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl: targetUrl,
+				TargetURL: targetUrl,
 				Credentials: &applications.Credentials{
 					Type:       TypeBasic,
 					SecretName: secretName,
-					Url:        "",
+					URL:        "",
 				},
 			},
 			credentialsSecret: map[string][]byte{
@@ -91,11 +91,11 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with certificate gen credentials",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl: targetUrl,
+				TargetURL: targetUrl,
 				Credentials: &applications.Credentials{
 					Type:       TypeCertificateGen,
 					SecretName: secretName,
-					Url:        "",
+					URL:        "",
 				},
 			},
 			credentialsSecret: map[string][]byte{
@@ -117,7 +117,7 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api without credentials",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl: targetUrl,
+				TargetURL: targetUrl,
 			},
 			credentialsSecret: map[string][]byte{},
 			resultingAPI: &model.API{
@@ -127,7 +127,7 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with headers and query parameters",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl:                   targetUrl,
+				TargetURL:                   targetUrl,
 				RequestParametersSecretName: "params-secret",
 			},
 			credentialsSecret:       map[string][]byte{},
@@ -151,7 +151,7 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with query parameters only",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl:                   targetUrl,
+				TargetURL:                   targetUrl,
 				RequestParametersSecretName: "params-secret",
 			},
 			credentialsSecret:       map[string][]byte{},
@@ -171,7 +171,7 @@ func TestDefaultService_Read(t *testing.T) {
 		{
 			description: "api with headers only",
 			applicationAPI: &applications.ServiceAPI{
-				TargetUrl:                   targetUrl,
+				TargetURL:                   targetUrl,
 				RequestParametersSecretName: "params-secret",
 			},
 			credentialsSecret:       map[string][]byte{},
@@ -213,11 +213,11 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should return error when reading credentialsSecret fails", func(t *testing.T) {
 		// given
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl: "http://target.com",
+			TargetURL: "http://target.com",
 			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "credentialsSecret-name",
-				Url:        "http://oauth.com",
+				URL:        "http://oauth.com",
 			},
 		}
 
@@ -241,7 +241,7 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should return error when reading request parameters fails", func(t *testing.T) {
 		// given
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:                   "http://target.com",
+			TargetURL:                   "http://target.com",
 			RequestParametersSecretName: secretName,
 		}
 

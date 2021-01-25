@@ -13,6 +13,7 @@ import (
 
 const cleanupInterval = 60
 
+// CacheEntry stores information about proxy configuration in cache
 type CacheEntry struct {
 	Proxy                 *httputil.ReverseProxy
 	AuthorizationStrategy *authorizationStrategyWrapper
@@ -37,11 +38,12 @@ func (ce *authorizationStrategyWrapper) Invalidate() {
 	ce.actualStrategy.Invalidate()
 }
 
+// Cache is an interface for caching Proxies
 type Cache interface {
 	// Get returns entry from the cache
-	Get(id string) (*CacheEntry, bool)
+	Get(appName, id string) (*CacheEntry, bool)
 	// Put adds entry to the cache
-	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry
+	Put(appName, id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry
 }
 
 type cache struct {
@@ -55,8 +57,9 @@ func NewCache(proxyCacheTTL int) Cache {
 	}
 }
 
-func (p *cache) Get(id string) (*CacheEntry, bool) {
-	proxy, found := p.proxyCache.Get(id)
+func (p *cache) Get(appName, id string) (*CacheEntry, bool) {
+	key := appName + id
+	proxy, found := p.proxyCache.Get(key)
 	if !found {
 		return nil, false
 	}
@@ -64,10 +67,10 @@ func (p *cache) Get(id string) (*CacheEntry, bool) {
 	return proxy.(*CacheEntry), found
 }
 
-func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry {
-
+func (p *cache) Put(appName, id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry {
+	key := appName + id
 	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: &authorizationStrategyWrapper{authorizationStrategy, reverseProxy}, CSRFTokenStrategy: csrfTokenStrategy}
-	p.proxyCache.Set(id, proxy, gocache.DefaultExpiration)
+	p.proxyCache.Set(key, proxy, gocache.DefaultExpiration)
 
 	return proxy
 }
