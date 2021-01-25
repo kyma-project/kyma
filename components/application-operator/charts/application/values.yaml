@@ -44,10 +44,6 @@ applicationConnectivityValidator:
       cpu: 50m
       memory: 64Mi
 
-# Change this approach to multilevel values when this issue is resolved - https://github.com/helm/helm/issues/8026
-logFormat: "text"
-logLevel: "debug"
-
 istio:
   gateway:
     name: kyma-gateway
