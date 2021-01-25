@@ -19,7 +19,7 @@ func TestApplicationOperator(t *testing.T) {
 		t.Log("Checking if k8s resource deployed")
 		testSuite.CheckK8sResourcesDeployed(t)
 
-		t.Log("Checking access label")
+		t.Log("Checking access access label")
 		testSuite.CheckAccessLabel(t)
 
 		t.Log("Deleting Application")
