@@ -33,7 +33,7 @@ require (
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
-	github.com/kyma-project/kyma/common => github.com/franpog859/kyma/common v0.0.0-20210125130648-d84b0b196bf9
+	github.com/kyma-project/kyma/common => github.com/franpog859/kyma/common v0.0.0-20210125133709-3a082ca53519
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
 	golang.org/x/text => golang.org/x/text v0.3.3
