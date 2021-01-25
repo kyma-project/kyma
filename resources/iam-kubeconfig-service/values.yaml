@@ -2,6 +2,19 @@ service:
   port: 8000
   name: iam-kubeconfig-service
 
+podSecurityPolicy:
+  enabled: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 2000
+
 resources:
   limits:
     cpu: 100m
