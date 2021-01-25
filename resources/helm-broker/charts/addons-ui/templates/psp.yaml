@@ -2,7 +2,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "addons-ui-fullname" . }}
   labels:
     app: {{ template "addons-ui-name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
