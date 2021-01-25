@@ -9,7 +9,7 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
+**Kyma!** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
 
 To limit the time spent on coding, use the built-in cloud services from [Service Catalog](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-catalog), exposed by [Service Brokers](https://kyma-project.io/docs/master/components/service-catalog/#overview-service-brokers) from such cloud providers as GCP, Azure, and AWS.
 
@@ -90,3 +90,5 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
+
+
