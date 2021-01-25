@@ -323,10 +323,14 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
 
-	probeHandler := corev1.Handler{HTTPGet: &corev1.HTTPGetAction{
-		Path: "/healthz",
-		Port: intstr.FromInt(svcTargetPort),
-	}}
+	probe := &corev1.Probe{
+		Handler: corev1.Handler{HTTPGet: &corev1.HTTPGetAction{
+			Path: "/healthz",
+			Port: intstr.FromInt(svcTargetPort),
+		}},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       5,
+	}
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -352,16 +356,8 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
-							ReadinessProbe: &corev1.Probe{
-								Handler:             probeHandler,
-								InitialDelaySeconds: 5,
-								PeriodSeconds:       5,
-							},
-							LivenessProbe: &corev1.Probe{
-								Handler:             probeHandler,
-								InitialDelaySeconds: 5,
-								PeriodSeconds:       5,
-							},
+							ReadinessProbe:  probe,
+							LivenessProbe:   probe,
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
