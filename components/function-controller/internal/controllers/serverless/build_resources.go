@@ -29,6 +29,10 @@ var istioSidecarInjectFalse = map[string]string{
 	"sidecar.istio.io/inject": "false",
 }
 
+func boolPtr(b bool) *bool {
+	return &b
+}
+
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
 		FunctionSourceKey: instance.Spec.Source,
@@ -320,6 +324,8 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
 
+	functionUser := int64(1000)
+
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
 
@@ -347,6 +353,18 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add:  []corev1.Capability{},
+									Drop: []corev1.Capability{"ALL"},
+								},
+								Privileged:               boolPtr(false),
+								RunAsUser:                &functionUser,
+								RunAsGroup:               &functionUser,
+								RunAsNonRoot:             boolPtr(true),
+								ReadOnlyRootFilesystem:   boolPtr(true),
+								AllowPrivilegeEscalation: boolPtr(false),
+							},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,

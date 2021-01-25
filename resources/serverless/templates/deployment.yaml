@@ -83,7 +83,6 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLEBINDING_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleBindingRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KSERVICE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.kserviceRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDockerConfigSecretName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}

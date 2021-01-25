@@ -129,11 +129,9 @@ containers:
       imageRegistryDockerConfigSecretName:
         value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
-        value: '{{ template "fullname" . }}'
+        value: '{{ template "fullname" . }}-function'
       targetCPUUtilizationPercentage:
         value: "50"
-      kserviceRequeueDuration:
-        value: 5m
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
