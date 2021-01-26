@@ -8,7 +8,7 @@ metadata:
   {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   hostNetwork: false
   privileged: false
   hostIPC: false
@@ -27,10 +27,7 @@ spec:
       - max: 65535
         min: 1
   fsGroup:
-    rule: MustRunAs
-    ranges:
-      - max: 65535
-        min: 1
+    rule: RunAsAny
   volumes:
     - configMap
     - downwardAPI

@@ -317,6 +317,44 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	}
 }
 
+// addReadWriteTmpVolumeToDeployment purpose is to add volume + volumeMount in python functions
+// it's needed because for security reasons we disable containers to write to root filesystem
+// and python functions need writable temporary directory, as seen in this error:
+// FileNotFoundError: [Errno 2] No usable temporary directory found in ['/tmp', '/var/tmp', '/usr/tmp', '/']
+// This function needs to be only used for deployments that are based on python runtime
+func addReadWriteTmpVolumeToDeployment(deploy appsv1.Deployment) appsv1.Deployment {
+	copiedDeploy := deploy.DeepCopy()
+	const volumeName = "tmp-dir"
+
+	copiedDeploy.Spec.Template.Spec.Volumes = []corev1.Volume{{
+		Name: volumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{
+				Medium: corev1.StorageMediumDefault,
+			},
+		},
+	}}
+
+	functionContainerIndex := mustFindFunctionContainerIndex(copiedDeploy.Spec.Template.Spec.Containers)
+	copiedDeploy.Spec.Template.Spec.Containers[functionContainerIndex].VolumeMounts = []corev1.VolumeMount{{
+		Name:      volumeName,
+		MountPath: "/tmp",
+		ReadOnly:  false,
+	}}
+	return *copiedDeploy
+}
+
+// mustFindFunctionContainerIndex finds index of container by name. It should never panic, as we're operating on containers that we create ourselves
+func mustFindFunctionContainerIndex(containers []corev1.Container) int {
+	for index, container := range containers {
+		if container.Name == functionContainerName {
+			return index
+		}
+	}
+
+	panic(fmt.Errorf("couldn't find container with name %s in function's containers", functionContainerName))
+}
+
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
 	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
@@ -327,7 +365,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
 
-	return appsv1.Deployment{
+	deploy := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -344,14 +382,6 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{{
-						Name: "emptydir",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{
-								Medium: corev1.StorageMediumDefault,
-							},
-						},
-					}},
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
@@ -371,11 +401,6 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								ReadOnlyRootFilesystem:   boolPtr(true),
 								AllowPrivilegeEscalation: boolPtr(false),
 							},
-							VolumeMounts: []corev1.VolumeMount{{
-								Name:      "emptydir",
-								MountPath: "/tmp",
-								ReadOnly:  false,
-							}},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
@@ -383,6 +408,12 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 			},
 		},
 	}
+
+	if rtmConfig.Runtime == serverlessv1alpha1.Python38 {
+		deploy = addReadWriteTmpVolumeToDeployment(deploy)
+	}
+
+	return deploy
 }
 
 func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
