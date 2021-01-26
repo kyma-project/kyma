@@ -2,11 +2,17 @@ loki:
   resources:
     limits:
       memory: 512Mi
+  config:
+    server:
+      log_level: warn
 
 fluent-bit:
   resources:
     limits:
       memory: 256Mi
+  conf:
+    Service:
+      Log_Level: warning
 
 logui:
   resources: 
