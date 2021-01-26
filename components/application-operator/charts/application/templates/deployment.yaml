@@ -99,6 +99,7 @@ spec:
         app: {{ .Release.Name }}-event-service
         kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
         kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
+        kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{.Release.Name }}-event-service
