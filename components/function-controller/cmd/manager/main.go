@@ -8,6 +8,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -32,6 +33,7 @@ func init() {
 
 type config struct {
 	MetricsAddress        string `envconfig:"default=:8080"`
+	ProbeAddress          string `envconfig:"default=:9090"`
 	LeaderElectionEnabled bool   `envconfig:"default=false"`
 	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
 	Kubernetes            k8s.Config
@@ -52,13 +54,19 @@ func main() {
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: config.MetricsAddress,
-		LeaderElection:     config.LeaderElectionEnabled,
-		LeaderElectionID:   config.LeaderElectionID,
+		Scheme:                 scheme,
+		MetricsBindAddress:     config.MetricsAddress,
+		LeaderElection:         config.LeaderElectionEnabled,
+		LeaderElectionID:       config.LeaderElectionID,
+		HealthProbeBindAddress: config.ProbeAddress,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
+		os.Exit(1)
+	}
+
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		setupLog.Error(err, "Unable to add health check to controller manager")
 		os.Exit(1)
 	}
 
