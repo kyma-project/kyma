@@ -212,7 +212,7 @@ func TestKymaService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
-				ApplicationID:   "",
+				ApplicationID:   "id1",
 				Operation:       Delete,
 				Error:           nil,
 			},
@@ -256,7 +256,7 @@ func TestKymaService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
-				ApplicationID:   "",
+				ApplicationID:   "id1",
 				Operation:       Delete,
 				Error:           nil,
 			},
@@ -351,7 +351,7 @@ func TestKymaService(t *testing.T) {
 
 func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.Application {
 	testApplication := getTestApplicationNotManagedByCompass(name, services)
-	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}}
+	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}, ApplicationID: id}
 
 	return testApplication
 }

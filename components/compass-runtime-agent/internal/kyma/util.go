@@ -116,13 +116,13 @@ func newResult(application v1alpha1.Application, applicationID string, operation
 	}
 }
 
-func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {
+func ApplicationExists(applicationID string, applicationList []v1alpha1.Application) bool {
 	if applicationList == nil {
 		return false
 	}
 
 	for _, runtimeApplication := range applicationList {
-		if runtimeApplication.Name == applicationName {
+		if runtimeApplication.GetApplicationID() == applicationID {
 			return true
 		}
 	}
@@ -130,13 +130,13 @@ func ApplicationExists(applicationName string, applicationList []v1alpha1.Applic
 	return false
 }
 
-func GetApplication(applicationName string, applicationList []v1alpha1.Application) v1alpha1.Application {
+func GetApplication(applicationID string, applicationList []v1alpha1.Application) v1alpha1.Application {
 	if applicationList == nil {
 		return v1alpha1.Application{}
 	}
 
 	for _, runtimeApplication := range applicationList {
-		if runtimeApplication.Name == applicationName {
+		if runtimeApplication.GetApplicationID() == applicationID {
 			return runtimeApplication
 		}
 	}
