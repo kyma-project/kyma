@@ -14,11 +14,11 @@ spec:
   hostIPC: false
   hostPID: false
   defaultAddCapabilities: []
-  allowedCapabilities:
+  allowedCapabilities: # istioInit, we drop all capabilities in function container via securityContext
     - NET_ADMIN
     - NET_RAW
   runAsUser:
-    rule: 'RunAsAny'
+    rule: 'RunAsAny' # again, istioInit, we set user 1000 for function image manually
   seLinux:
     rule: RunAsAny
   supplementalGroups:
