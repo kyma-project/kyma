@@ -20,7 +20,7 @@ if [ -f "/opt/istio/config/overrides.yaml" ]; then
             --from-file /opt/istio/combo.yaml \
             -o yaml --dry-run | kubectl replace -f -
     fi
-    OPERATOR_FILE="/etc/combo.yaml"
+    OPERATOR_FILE="/opt/istio/combo.yaml"
 fi
 
 echo "--> Install Istio"
