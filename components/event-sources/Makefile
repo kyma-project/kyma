@@ -36,7 +36,6 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 MOUNT_TARGETS = $(cmds)
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
-
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
 
@@ -67,6 +66,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 	patch -p0 < $<
 	cp $< $@
 
+test-local: gomod-vendor-local $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
