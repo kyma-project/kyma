@@ -31,6 +31,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
         env:
           - name: jwksUri
             value: "https://dex.{{ .Values.global.ingress.domainName }}/keys"
