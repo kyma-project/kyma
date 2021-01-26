@@ -65,6 +65,17 @@ maintenance:
   image:
     name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
     tag: "20210113-12c4e3b5"
+  podSecurityPolicy:
+    enabled: true
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 2000
 
 # Overrides for the Hydra chart
 hydra:
