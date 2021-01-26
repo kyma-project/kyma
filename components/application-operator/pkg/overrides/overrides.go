@@ -29,7 +29,7 @@ func NewFlatOverridesMap(labels map[string]string) utils.StringMap {
 	overridesMap := make(utils.StringMap)
 	for key, value := range labels {
 		if HasPrefix(key, overridePrefix) {
-			overridesMap[key] = value
+			overridesMap[removePrefix(key)] = value
 		}
 	}
 	return overridesMap
@@ -47,18 +47,21 @@ func NewExtractedOverridesMap(config utils.InterfaceMap) utils.StringMap {
 
 func MergeLabelOverrides(labels utils.StringMap, target map[string]interface{}) {
 	for key, value := range labels {
-		if HasPrefix(key, overridePrefix) {
-			preKey := TrimPrefix(key, overridePrefix)
-			preKey = Trim(preKey, utils.Separator)
+		preKey := removePrefix(key)
 
-			if preKey != "" {
-				subMap := unwind(preKey, value)
-				utils.MergeMaps(target, subMap)
-				// add prop to override map for further reference
-				utils.MergeMaps(target, map[string]interface{}{overridesKey: subMap})
-			}
+		if preKey != "" {
+			subMap := unwind(preKey, value)
+			utils.MergeMaps(target, subMap)
+			// add prop to override map for further reference
+			utils.MergeMaps(target, map[string]interface{}{overridesKey: subMap})
 		}
 	}
+}
+
+func removePrefix(key string) string {
+	preKey := TrimPrefix(key, overridePrefix)
+	preKey = Trim(preKey, utils.Separator)
+	return preKey
 }
 
 func unwind(key string, value string) map[string]interface{} {
