@@ -12,6 +12,10 @@ RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}
 	rm istioctl.tar.gz &&\
 	curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -o yq &&\
 	chmod +x yq &&\
-	mv yq /usr/local/bin/yq
+	mv yq /usr/local/bin/yq &&\
+	mkdir /opt/istio &&\
+	chown -R nobody:nogroup /opt/istio
+
+USER nobody
 
 ENTRYPOINT ["/bin/bash"]
