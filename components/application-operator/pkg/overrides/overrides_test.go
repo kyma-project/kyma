@@ -1,4 +1,4 @@
-package application
+package overrides
 
 import (
 	"testing"
@@ -22,6 +22,9 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 			map[string]interface{}{
 				"simple":  "simpleValue",
 				"another": "anotherValue",
+				"overrides": map[string]interface{}{
+					"another": "anotherValue",
+				},
 			},
 		},
 		{"should ignore properties without override prefix",
@@ -33,6 +36,9 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 			map[string]interface{}{
 				"simple":  "simpleValue",
 				"another": "anotherValue",
+				"overrides": map[string]interface{}{
+					"another": "anotherValue",
+				},
 			},
 		},
 		{"should unwind and merge properties to target map",
@@ -42,6 +48,11 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 				"simple": "simpleValue",
 				"flatten": map[string]interface{}{
 					"another": "anotherValue",
+				},
+				"overrides": map[string]interface{}{
+					"flatten": map[string]interface{}{
+						"another": "anotherValue",
+					},
 				},
 			},
 		},
@@ -58,6 +69,12 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 				"complex": map[string]interface{}{
 					"emptyValue": "",
 				},
+				"overrides": map[string]interface{}{
+					"emptyValue": "",
+					"complex": map[string]interface{}{
+						"emptyValue": "",
+					},
+				},
 			},
 		},
 		{"should merge properties with the same keys",
@@ -70,6 +87,12 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 				"key": map[string]interface{}{
 					"complex": "",
 					"friend":  "",
+				},
+				"overrides": map[string]interface{}{
+					"key": map[string]interface{}{
+						"complex": "",
+						"friend":  "",
+					},
 				},
 			},
 		},
@@ -85,6 +108,12 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 				"key": map[string]interface{}{
 					"complex": "",
 					"friend":  "",
+				},
+				"overrides": map[string]interface{}{
+					"key": map[string]interface{}{
+						"complex": "",
+						"friend":  "",
+					},
 				},
 			},
 		},

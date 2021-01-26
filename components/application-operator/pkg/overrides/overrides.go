@@ -1,4 +1,4 @@
-package application
+package overrides
 
 import (
 	. "strings"
@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	overridesKey   = "overrides"
 	overridePrefix = "override."
 )
 
@@ -24,6 +25,26 @@ type OverridesData struct {
 	IsBEBEnabled                          bool   `json:"isBEBEnabled,omitempty"`
 }
 
+func NewFlatOverridesMap(labels map[string]string) utils.StringMap {
+	overridesMap := make(utils.StringMap)
+	for key, value := range labels {
+		if HasPrefix(key, overridePrefix) {
+			overridesMap[key] = value
+		}
+	}
+	return overridesMap
+}
+
+func NewExtractedOverridesMap(config utils.InterfaceMap) utils.StringMap {
+	previousOverrides := make(map[string]interface{})
+	if val, ok := config[overridesKey]; ok {
+		if casted, ok := val.(map[string]interface{}); ok {
+			previousOverrides = casted
+		}
+	}
+	return utils.NewStringMap(previousOverrides)
+}
+
 func MergeLabelOverrides(labels utils.StringMap, target map[string]interface{}) {
 	for key, value := range labels {
 		if HasPrefix(key, overridePrefix) {
@@ -33,6 +54,8 @@ func MergeLabelOverrides(labels utils.StringMap, target map[string]interface{}) 
 			if preKey != "" {
 				subMap := unwind(preKey, value)
 				utils.MergeMaps(target, subMap)
+				// add prop to override map for further reference
+				utils.MergeMaps(target, map[string]interface{}{overridesKey: subMap})
 			}
 		}
 	}
