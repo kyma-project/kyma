@@ -11,8 +11,8 @@ global:
   strictMode: disabled
   isBEBEnabled: false
   log:
-    format: "text"
-    level: "debug"
+    format: "json"
+    level: "warn"
   ingress:
     domainName: "TBD"
   helm:

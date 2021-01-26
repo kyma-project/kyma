@@ -30,8 +30,8 @@ type args struct {
 }
 
 type config struct {
-	LogFormat string `default:"text"`
-	LogLevel  string `default:"debug"`
+	LogFormat string `default:"json"`
+	LogLevel  string `default:"warn"`
 }
 
 type options struct {
