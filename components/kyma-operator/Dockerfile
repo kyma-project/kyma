@@ -33,11 +33,18 @@ RUN apk update && apk add ca-certificates git jq && rm -rf /var/cache/apk/*
 # Copy binary
 #
 
-COPY --from=builder /app /app
+COPY --from=builder --chown=nobody:nogroup /app /app
+
+#
+# Set permissions
+# 
+
+RUN mkdir /kyma &&\
+	chown -R nobody:nogroup /app &&\
+	chown -R nobody:nogroup /kyma
+USER nobody
 
 #
 # Run app
 #
-
 ENTRYPOINT ["/app/kyma-operator"]
-
