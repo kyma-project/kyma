@@ -26,10 +26,10 @@ spec:
           name: installer
           volumeMounts:
           - name: config
-            mountPath: /etc/istio/
+            mountPath: /opt/istio/config
             readOnly: true
           - name: manifests
-            mountPath: /etc/manifests
+            mountPath: /opt/istio/manifests
             readOnly: true
           env:
           - name: NAMESPACE

@@ -23,7 +23,7 @@ spec:
           name: uninstaller
           volumeMounts:
           - name: config
-            mountPath: /etc/istio/
+            mountPath: /opt/istio/config
             readOnly: true
           env:
           - name: NAMESPACE
