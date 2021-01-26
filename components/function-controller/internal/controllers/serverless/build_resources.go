@@ -344,6 +344,14 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: "emptydir",
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{
+								Medium: corev1.StorageMediumDefault,
+							},
+						},
+					}},
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
@@ -363,6 +371,11 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								ReadOnlyRootFilesystem:   boolPtr(true),
 								AllowPrivilegeEscalation: boolPtr(false),
 							},
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "emptydir",
+								MountPath: "/tmp",
+								ReadOnly:  false,
+							}},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
