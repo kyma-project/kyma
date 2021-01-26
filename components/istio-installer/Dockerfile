@@ -17,5 +17,6 @@ RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}
 	chown -R nobody:nogroup /opt/istio
 
 USER nobody
+WORKDIR /opt/istio
 
 ENTRYPOINT ["/bin/bash"]
