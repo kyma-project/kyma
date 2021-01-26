@@ -8,7 +8,7 @@ metadata:
   {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false # we do not set it to true, beacause istioInit crashes otherwise -> we set it in securityContext on a pod level for a function container
   hostNetwork: false
   privileged: false
   hostIPC: false
