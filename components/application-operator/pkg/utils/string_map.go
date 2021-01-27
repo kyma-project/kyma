@@ -28,16 +28,12 @@ func (m StringMap) ContainsAll(labels StringMap) bool {
 	return true
 }
 
-func (m StringMap) flatten(parentKey string, source map[string]interface{}) {
+func (m StringMap) flatten(prefix string, source map[string]interface{}) {
 	for key, value := range source {
-		newKey := parentKey
-		if newKey != "" {
-			newKey += Separator
-		}
-		newKey += key
+		newKey := prefix + key
 
 		if casted, ok := value.(map[string]interface{}); ok {
-			m.flatten(newKey, casted)
+			m.flatten(newKey+Separator, casted)
 		} else {
 			m[newKey] = value.(string)
 		}
