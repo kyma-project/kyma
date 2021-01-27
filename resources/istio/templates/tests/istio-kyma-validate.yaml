@@ -35,7 +35,7 @@ spec:
           - name: REQUIRED_ISTIO_VERSION
             value: {{ .Chart.Version }}
           securityContext:
-{{- toYaml .Values.tests.securityContext | nindent 12 }}
+{{- toYaml .Values.test.securityContext | nindent 12 }}
       restartPolicy: Never
   {{- end }}
   {{- end }}
