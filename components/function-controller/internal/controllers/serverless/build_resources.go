@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -324,6 +326,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 
 	functionUser := int64(1000)
 	const volumeName = "tmp-dir"
+	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
@@ -349,7 +352,8 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 						Name: volumeName,
 						VolumeSource: corev1.VolumeSource{
 							EmptyDir: &corev1.EmptyDirVolumeSource{
-								Medium: corev1.StorageMediumDefault,
+								Medium:    corev1.StorageMediumDefault,
+								SizeLimit: &emptyDirVolumeSize,
 							},
 						},
 					}},
@@ -361,7 +365,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							VolumeMounts: []corev1.VolumeMount{{
-								Name:      volumeName,
+								Name: volumeName,
 								/* needed in order to have python functions working:
 								python functions need writable /tmp dir, but we disable writing to root filesystem via
 								security context below. That's why we override this whole /tmp directory with emptyDir volume.
