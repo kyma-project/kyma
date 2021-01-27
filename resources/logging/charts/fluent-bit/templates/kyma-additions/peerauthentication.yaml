@@ -1,4 +1,4 @@
-{{- if and (.Values.enabled) (.Values.serviceMonitor.enabled) }}
+{{- if .Values.serviceMonitor.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
@@ -7,7 +7,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "fluent-bit.matchLabels" . | trim | nindent 6 }}
+      {{- include "fluent-bit.selectorLabels" . | nindent 6 }}
   mtls:
     mode: "PERMISSIVE"
 {{- end }}

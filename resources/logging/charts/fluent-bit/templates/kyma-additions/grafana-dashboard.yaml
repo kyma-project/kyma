@@ -4,7 +4,7 @@ metadata:
   name: fluent-bit-dashboard
   labels:
     grafana_dashboard: "1"
-    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
+    {{- include "fluent-bit.labels" . | nindent 4 }}
 data:
   fluent-bit-dashboard.json: |-
         {

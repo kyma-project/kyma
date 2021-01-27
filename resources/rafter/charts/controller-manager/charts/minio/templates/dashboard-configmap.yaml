@@ -446,7 +446,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(s3_ttfb_seconds_sum{service="$service"}[1m])",
+              "expr": "rate(s3_ttfb_seconds_sum{service=\"$service\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{`{{ api }}`}}",

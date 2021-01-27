@@ -20,10 +20,14 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ template "logui.fullname" . }}
       containers:
         - name: {{ template "logui.name" . }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
           resources: 
             {{- toYaml .Values.resources | nindent 12 }}
           ports:
