@@ -19,7 +19,12 @@ spec:s
 ```
 
 It also annotates `istio-ingressgateway` with:
+
 ```
-dns.gardener.cloud/class='garden' 
+dns.gardener.cloud/class='garden'
 dns.gardener.cloud/dnsnames='*.$DOMAIN'
 ```
+
+# <<<<<<< HEAD
+
+> > > > > > > 2fe4cbeb1... squash
