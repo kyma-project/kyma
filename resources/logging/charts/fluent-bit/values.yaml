@@ -124,7 +124,7 @@ existingConfigMap: ""
 config:
   # Secret values that will be included in a Secret mounted to the Fluent Bit Pods. 
   secrets:
-    #MY_ES_PASSWD: "MTIzNAo="
+    #MY_ES_PASSWD: "1234"
   service:
     flush: 1
     grace: 5
