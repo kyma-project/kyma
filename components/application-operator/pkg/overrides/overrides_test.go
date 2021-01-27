@@ -120,7 +120,8 @@ func TestOverridesMap_MergeLabelOverrides(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			MergeLabelOverrides(tt.mergeSource, tt.mergeTarget)
+			flatMap := NewFlatOverridesMap(tt.mergeSource)
+			MergeLabelOverrides(flatMap, tt.mergeTarget)
 			assert.Equal(t, tt.expectedResult, tt.mergeTarget)
 		})
 	}
