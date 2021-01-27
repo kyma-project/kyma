@@ -20,7 +20,7 @@ rules:
     verbs: ["get", "patch"]
   - apiGroups: ["apps", "extensions"]
     resources: ["replicasets"]
-    verbs: ["get", "patch", "delete"]
+    verbs: ["get", "list", "patch", "delete"]
 {{- if .Values.kyma.podSecurityPolicy.enabled }}
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
