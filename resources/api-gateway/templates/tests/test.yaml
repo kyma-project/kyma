@@ -72,7 +72,7 @@ spec:
             value: "true"
           {{- end }}
           securityContext:
-{{- toYaml .Values.kyma.securityContext | nindent 12 }}
+{{- toYaml .Values.tests.securityContext | nindent 12 }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

@@ -63,7 +63,7 @@ spec:
         - name: MAX_TEST_RETRIES
           value: "10"
         securityContext:
-{{- toYaml .Values.kyma.securityContext | nindent 10 }}
+{{- toYaml .Values.tests.securityContext | nindent 10 }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

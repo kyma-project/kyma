@@ -111,6 +111,10 @@ tests:
     integration: true
     after-upgrade: true
     e2e-skr: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 livenessProbe:
   enabled: false

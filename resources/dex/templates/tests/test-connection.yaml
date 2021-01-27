@@ -12,7 +12,6 @@ metadata:
     {{- range $key, $val := .Values.tests.labels }}
     kyma-project.io/test.{{ $key }}: {{ $val | quote }}
     {{- end }}
-
 spec:
   disableConcurrency: false
   template:
@@ -33,6 +32,8 @@ spec:
           "--retry-delay", "3",
           "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
         ]
+        securityContext:
+{{- toYaml .Values.tests.securityContext | nindent 10 }}
       restartPolicy: Never
 ---
 {{- end }}
