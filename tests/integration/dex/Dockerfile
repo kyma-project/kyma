@@ -20,6 +20,13 @@ FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
 LABEL source = git@github.com:kyma-project/kyma.git
 
 #
+# Copy binary
+#
+
+COPY --from=builder --chown=nobody:nogroup /tests /tests
+WORKDIR /tests
+
+#
 # Install certificates and curl
 #
 
@@ -28,12 +35,6 @@ RUN apk update &&\
 	rm -rf /var/cache/apk/* &&\
 	chown -R nobody:nogroup /test
 
-#
-# Copy binary
-#
-
-COPY --from=builder --chown=nobody:nogroup /tests /tests
-WORKDIR /tests
 #
 # Run tests
 #
