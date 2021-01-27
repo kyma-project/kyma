@@ -33,7 +33,7 @@ WORKDIR /tests
 RUN apk update &&\
 	apk add ca-certificates curl &&\
 	rm -rf /var/cache/apk/* &&\
-	chown -R nobody:nogroup /test
+	chown -R nobody:nogroup /tests
 
 #
 # Run tests
