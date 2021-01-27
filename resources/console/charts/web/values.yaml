@@ -55,3 +55,6 @@ test:
         enabled: true
       rafter:
         enabled: true
+
+podSecurityPolicy:
+    enabled: true
