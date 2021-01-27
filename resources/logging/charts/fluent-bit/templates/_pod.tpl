@@ -100,8 +100,8 @@ containers:
         mountPath: /secure/http-tls-ca.crt
         subPath: http-tls-ca.crt
     {{- end }}
-    {{- if .Values.extraVolumeMounts }}
-      {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
+    {{- with .Values.extraVolumeMounts }}
+      {{- tpl . $ | nindent 6}}
     {{- end }}
 volumes:
   - name: config
@@ -149,8 +149,8 @@ volumes:
     secret:
       secretName: "{{ template "fluent-bit.fullname" . }}-http-tls-secret"
 {{- end }}
-{{- if .Values.extraVolumes }}
-  {{- toYaml .Values.extraVolumes | nindent 2 }}
+{{- with .Values.extraVolumes }}
+  {{- tpl . $ | nindent 2}}
 {{- end }}
 {{- with .Values.nodeSelector }}
 nodeSelector:
