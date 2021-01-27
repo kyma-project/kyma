@@ -5,11 +5,7 @@ metadata:
   name: {{ template "fluent-bit.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "fluent-bit.metaLabels" . | trim | nindent 4 }}
-  annotations:
-    {{- if .Values.globalAnnotations }}
-      {{- toYaml .Values.globalAnnotations | trim | nindent 4 }}
-      {{- end }}
+    {{- include "fluent-bit.labels" . | nindent 4 }}
 spec:
   hosts:
   {{- tpl (.Values.externalServiceEntry.hosts | nindent 4) . }}
