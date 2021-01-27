@@ -63,28 +63,24 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	}
 
 	tests := []struct {
-		name                  string
-		args                  args
-		rtmCfg                runtime.Config
-		expectedVolumesLength int
+		name   string
+		args   args
+		rtmCfg runtime.Config
 	}{
 		{
-			name:                  "spec.template.labels should contain every element from spec.selector.MatchLabels, also python runtime should have volume+volumeMount with emptyDir",
-			args:                  args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg:                runtime.GetRuntimeConfig(serverlessv1alpha1.Python38),
-			expectedVolumesLength: 1,
+			name:   "spec.template.labels should contain every element from spec.selector.MatchLabels, also python runtime should have volume+volumeMount with emptyDir",
+			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
+			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Python38),
 		},
 		{
-			name:                  "node10 runtime does not have volume+volumeMount with emptyDir",
-			args:                  args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg:                runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs10),
-			expectedVolumesLength: 0,
+			name:   "node10 runtime does not have volume+volumeMount with emptyDir",
+			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
+			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs10),
 		},
 		{
-			name:                  "node12 runtime does not have volume+volumeMount with emptyDir",
-			args:                  args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg:                runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs12),
-			expectedVolumesLength: 0,
+			name:   "node12 runtime does not have volume+volumeMount with emptyDir",
+			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
+			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs12),
 		},
 	}
 	for _, tt := range tests {
@@ -98,13 +94,13 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(tt.rtmCfg.RuntimeEnvs))
 
-				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(tt.expectedVolumesLength))
-				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(tt.expectedVolumesLength))
-				if tt.expectedVolumesLength > 0 {
-					g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
-					errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
-					g.Expect(errs).To(gomega.HaveLen(0))
-				}
+				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
+				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
+
+				g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
+				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
+				g.Expect(errs).To(gomega.HaveLen(0))
+
 			}
 		})
 	}
