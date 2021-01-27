@@ -40,28 +40,30 @@ spec:
         command: ["/bin/bash"]
         args: ["-c", "sleep 10; ./test.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"]
         env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: DOMAIN
-              value: {{ .Values.global.ingress.domainName }}
-            - name: USER_EMAIL
-              valueFrom:
-                  secretKeyRef:
-                      name: admin-user
-                      key: email
-            - name: USER_PASSWORD
-              valueFrom:
-                  secretKeyRef:
-                      name: admin-user
-                      key: password
-            - name: IAM_KUBECONFIG_SVC_FQDN
-              value: "iam-kubeconfig-service.{{ .Release.Namespace }}.svc.cluster.local"
-            - name: IAM_KUBECONFIG_SVC_PORT
-              value: "8000"
-            - name: MAX_TEST_RETRIES
-              value: "10"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+        - name: USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
+        - name: USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
+        - name: IAM_KUBECONFIG_SVC_FQDN
+          value: "iam-kubeconfig-service.{{ .Release.Namespace }}.svc.cluster.local"
+        - name: IAM_KUBECONFIG_SVC_PORT
+          value: "8000"
+        - name: MAX_TEST_RETRIES
+          value: "10"
+        securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 10 }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

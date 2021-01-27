@@ -45,6 +45,10 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 global:
   apiserver_proxy:
     dir:
