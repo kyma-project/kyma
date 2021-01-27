@@ -27,7 +27,7 @@ WORKDIR /test
 RUN apk update &&\
 	apk add curl bash grep ca-certificates
 
-COPY --from=builder /test /test
+COPY --from=builder --chown=nobody:nogroup /test /test
 COPY gateway-tests/manifests /test/manifests
 
 USER nobody
