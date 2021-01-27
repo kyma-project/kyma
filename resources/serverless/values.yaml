@@ -130,6 +130,8 @@ containers:
         value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
+      buildServiceAccountName:
+        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
       functionRequeueDuration:
