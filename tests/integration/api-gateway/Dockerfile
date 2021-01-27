@@ -30,4 +30,5 @@ RUN apk update &&\
 COPY --from=builder /test /test
 COPY gateway-tests/manifests /test/manifests
 
+USER nobody
 ENTRYPOINT ["/test/app.test"]
