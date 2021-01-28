@@ -1,9 +1,8 @@
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
-  # in difference to https://github.com/kyma-incubator/local-kyma/blob/main/config-istio.yaml
-  # we're not setting image here, to allow us to also test istio upgrade
   # TODO: find some way to override that file with our specific images
+  tag: 1.8.2-distroless
   components:
     egressGateways:
       - enabled: false
