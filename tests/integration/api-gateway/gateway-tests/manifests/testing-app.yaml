@@ -9,7 +9,7 @@ spec:
   ports:
   - name: http
     port: 8000
-    targetPort: 80
+    targetPort: 8000
   selector:
     app: httpbin-{{.TestID}}
 ---
@@ -37,11 +37,11 @@ spec:
           - -c
           - |
             sleep 20
-            gunicorn -b 0.0.0.0:80 httpbin:app -k gevent
+            gunicorn -b 0.0.0.0:8000 httpbin:app -k gevent
         imagePullPolicy: IfNotPresent
         name: httpbin
         ports:
-        - containerPort: 80
+        - containerPort: 8000
         securityContext:
           runAsUser: 65534
           runAsNonRoot: true
