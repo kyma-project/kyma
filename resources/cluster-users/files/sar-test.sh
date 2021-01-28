@@ -254,8 +254,8 @@ function getConfigFile() {
 	registrationRequestRetry
 
 	local REQUEST_ID
-	REQUEST_ID=$(grep '/auth/local?req' < registration_request | cut -d '"' -f 2 | cut -d '?' -f 2)
-	rm -f registration_request
+	REQUEST_ID=$(grep '/auth/local?req' < /tmp/registration_request | cut -d '"' -f 2 | cut -d '?' -f 2)
+	rm -f /tmp/registration_request
 
 	loginRequestRetry "${REQUEST_ID}"
 
