@@ -107,9 +107,16 @@ extraPorts: []
 #     protocol: TCP
 #     name: tcp
 
-extraVolumes: []
+extraVolumes: ""
+# extraVolumes: |
+#   - name: volume
+#     configMap:
+#       name: config
 
-extraVolumeMounts: []
+extraVolumeMounts: ""
+# extraVolumeMounts: |
+#   - name: volume
+#     mountPath: /var/tmp
 
 updateStrategy: {}
   # type: RollingUpdate
