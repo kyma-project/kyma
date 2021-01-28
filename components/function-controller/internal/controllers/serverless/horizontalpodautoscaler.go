@@ -29,9 +29,9 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 	newHpa := r.buildHorizontalPodAutoscaler(instance, deploymentName)
 
 	switch {
-	case len(hpas) == 0:
+	case len(hpas) == 0 && instance.Spec.MinReplicas != instance.Spec.MaxReplicas:
 		return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
-	case len(hpas) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
+	case len(hpas) > 1 || instance.Spec.MinReplicas == instance.Spec.MaxReplicas: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
 		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
 	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
