@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
+
 	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
 
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -127,7 +129,7 @@ func main() {
 }
 
 func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (gateway.GatewayManager, error) {
-	overrides := gateway.OverridesData{
+	overridesMap := gateway.OverridesData{
 		ApplicationGatewayImage:      options.applicationGatewayImage,
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
 		GatewayOncePerNamespace:      options.gatewayOncePerNamespace,
@@ -139,11 +141,11 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		return nil, err
 	}
 
-	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances(""), options.profile), nil
+	return gateway.NewGatewayManager(helmClient, overridesMap, serviceCatalogueClient.ServiceInstances(""), options.profile), nil
 }
 
 func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
-	overridesDefaults := appRelease.OverridesData{
+	overridesDefaults := overrides.OverridesData{
 		DomainName:                            options.domainName,
 		ApplicationGatewayImage:               options.applicationGatewayImage,
 		ApplicationGatewayTestsImage:          options.applicationGatewayTestsImage,

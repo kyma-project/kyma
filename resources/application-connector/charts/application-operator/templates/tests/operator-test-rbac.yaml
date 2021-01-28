@@ -70,7 +70,7 @@ metadata:
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
-    verbs: ["get", "list", "create", "delete"]
+    verbs: ["get", "list", "create", "delete", "update"]
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources: ["clusterroles", "clusterrolebindings"]
     verbs: ["get", "list"]
