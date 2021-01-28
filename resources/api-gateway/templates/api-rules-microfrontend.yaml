@@ -13,7 +13,7 @@ spec:
   navigationNodes:
     - label: API Rules
       navigationPath: apirules
-      viewUrl: "/apirules"
+      viewUrl: "/home/namespaces/:namespaceId/apirules?hasDetailsView=false&resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
       order: 1
       viewGroup: "_core_ui_"
       keepSelectedForChildren: true
