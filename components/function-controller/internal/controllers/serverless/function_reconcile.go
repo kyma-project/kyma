@@ -145,9 +145,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	dockerConfig, err := r.readDockerConfig(ctx, instance)
 	if err != nil {
 		log.Error(err, "Cannot read Docker registry configuration")
-		return ctrl.Result{
-			RequeueAfter: r.config.RequeueDuration,
-		}, err
+		return ctrl.Result{}, err
 	}
 
 	gitOptions, err := r.readGITOptions(ctx, instance)
@@ -290,7 +288,7 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 		}
 	}
 
-	return DockerConfig{}, errors.New("Docker registry configuration not found")
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 }
 
 func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {
