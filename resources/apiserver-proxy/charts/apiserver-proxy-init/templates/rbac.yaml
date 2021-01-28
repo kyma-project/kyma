@@ -54,7 +54,7 @@ rules:
     - {{ template "name" . }}-certs-job
 {{- end }}
 ---
-{{ if .Values.global.environment.gardener }}
+{{ if .Values.global.certificates.gardener }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:

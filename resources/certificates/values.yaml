@@ -16,7 +16,7 @@ userProvided:
     name: kyma-ca-issuer
     configMap:
       name: kyma-ca-issuer
-      namespace: kyma-installer
+      namespace: default
 
 global:
   certificates:
