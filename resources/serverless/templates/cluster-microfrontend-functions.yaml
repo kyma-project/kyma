@@ -14,7 +14,8 @@ spec:
   navigationNodes:
     - label: Functions
       navigationPath: functions
-      viewUrl: '/lambdas'
+      viewUrl: "/home/namespaces/:namespaceId/functions?hasDetailsView=false&resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1"
+
       order: -1
       viewGroup: "_core_ui_"
       requiredBackendModules:
