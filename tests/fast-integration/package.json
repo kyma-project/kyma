@@ -4,8 +4,8 @@
   "scripts": {
     "test": "mocha --inline-diffs --check-leaks",
     "test-utils": "mocha --inline-diffs --check-leaks ./utils/**/*.test.js",
-    "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/commerce-mock.js",
-    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/getting-started-guides.js"
+    "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/2-commerce-mock.js",
+    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/3-getting-started-guides.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
