@@ -38,6 +38,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
         resources: 
           {{- toYaml .Values.resources | nindent 10 }}
         env:
