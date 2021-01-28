@@ -68,7 +68,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		args args
 	}{
 		{
-			name: "spec.template.labels should contain every element from spec.selector.MatchLabels, also python runtime should have volume+volumeMount with emptyDir",
+			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
 			args: args{instance: newFixFunction("ns", "name", 1, 2)},
 		},
 	}
