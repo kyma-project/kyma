@@ -61,38 +61,27 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python38)
 
 	tests := []struct {
-		name   string
-		args   args
-		rtmCfg runtime.Config
+		name string
+		args args
 	}{
 		{
-			name:   "spec.template.labels should contain every element from spec.selector.MatchLabels, also python runtime should have volume+volumeMount with emptyDir",
-			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Python38),
-		},
-		{
-			name:   "node10 runtime does not have volume+volumeMount with emptyDir",
-			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs10),
-		},
-		{
-			name:   "node12 runtime does not have volume+volumeMount with emptyDir",
-			args:   args{instance: newFixFunction("ns", "name", 1, 2)},
-			rtmCfg: runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs12),
+			name: "spec.template.labels should contain every element from spec.selector.MatchLabels, also python runtime should have volume+volumeMount with emptyDir",
+			args: args{instance: newFixFunction("ns", "name", 1, 2)},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, tt.rtmCfg)
+			got := r.buildDeployment(tt.args.instance, rtmCfg)
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(tt.rtmCfg.RuntimeEnvs))
+				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
 
 				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
 				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
