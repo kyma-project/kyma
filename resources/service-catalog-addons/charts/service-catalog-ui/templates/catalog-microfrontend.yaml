@@ -9,13 +9,12 @@ spec:
   version: v1
   category: Service Management
   placement: namespace
-  viewBaseUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}"
-  preloadUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}/preload"
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: Catalog
       navigationPath: service-catalog
       order: 1
-      viewUrl: /catalog
+      viewUrl: /home/namespaces/:namespaceId/serviceclasses?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
     - label: Service Details
       navigationPath: service-catalog/details
       showInNavigation: false
@@ -39,7 +38,7 @@ spec:
     - label: Instances
       navigationPath: instances
       order: 2
-      viewUrl: /instances
+      viewUrl: /home/namespaces/:namespaceId/serviceinstances?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
     - label: Instance Details
       navigationPath: instances/details
       showInNavigation: false
