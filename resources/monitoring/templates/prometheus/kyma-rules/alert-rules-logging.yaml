@@ -31,7 +31,7 @@ spec:
       annotations:
         description: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'
     - alert: NoOutputBytesProcessed
-      expr: rate(fluentbit_output_proc_bytes_total{name!~"audit"}[5m]) == 0
+      expr: rate(fluentbit_output_proc_bytes_total{{ .Values.kymaRules.fluentBitAlertFilter }}[5m]) == 0
       annotations:
         message: |
           Fluent Bit instance {{ `{{$labels.instance}}` }}'s output plugin {{ `{{$labels.name}}` }} has not processed any
