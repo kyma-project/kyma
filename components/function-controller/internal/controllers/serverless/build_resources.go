@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -27,6 +29,10 @@ const (
 
 var istioSidecarInjectFalse = map[string]string{
 	"sidecar.istio.io/inject": "false",
+}
+
+func boolPtr(b bool) *bool {
+	return &b
 }
 
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
@@ -124,7 +130,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -303,7 +309,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -317,6 +323,10 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	imageName := r.buildImageAddress(instance)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
+
+	functionUser := int64(1000)
+	const volumeName = "tmp-dir"
+	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
@@ -338,6 +348,15 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: volumeName,
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{
+								Medium:    corev1.StorageMediumDefault,
+								SizeLimit: &emptyDirVolumeSize,
+							},
+						},
+					}},
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
@@ -345,6 +364,28 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{{
+								Name: volumeName,
+								/* needed in order to have python functions working:
+								python functions need writable /tmp dir, but we disable writing to root filesystem via
+								security context below. That's why we override this whole /tmp directory with emptyDir volume.
+								We've decided to add this directory to be writable by all functions, as it may come in handy
+								*/
+								MountPath: "/tmp",
+								ReadOnly:  false,
+							}},
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add:  []corev1.Capability{},
+									Drop: []corev1.Capability{"ALL"},
+								},
+								Privileged:               boolPtr(false),
+								RunAsUser:                &functionUser,
+								RunAsGroup:               &functionUser,
+								RunAsNonRoot:             boolPtr(true),
+								ReadOnlyRootFilesystem:   boolPtr(true),
+								AllowPrivilegeEscalation: boolPtr(false),
+							},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
