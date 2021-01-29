@@ -17,8 +17,8 @@ To eliminate potential security risks when using Functions, bear in mind these f
     - Internal Docker registry that contains Function images
     - Secrets allowing the build Job to pull and push images from and to the Docker registry (in non-system Namespaces)
 
-If the Pod Security Policies are [enabled](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies), then Functions have following security measures set in place:
+Serverless Functions are adapted to run in a non-privileged mode. If you [enable Pod Security Policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies) in your cluster, Functions will have the following security measures set in place:
 
-- root filesystem is set to read only mode, apart from `/tmp` directory which is read-write
-- Function container is non-privileged and runs as non root user
-- All [Linux capabilities](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#capabilities) are dropped
+- The root filesystem set to read-only mode, apart from the `/tmp` directory which is read-write.
+- The Function's container is non-privileged and runs as a non-root user.
+- All [Linux capabilities](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#capabilities) are dropped.
