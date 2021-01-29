@@ -19,6 +19,6 @@ To eliminate potential security risks when using Functions, bear in mind these f
 
 Serverless Functions are adapted to run in a non-privileged mode. If you [enable Pod Security Policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies) in your cluster, Functions will have the following security measures set in place:
 
-- The root filesystem set to read-only mode, apart from the `/tmp` directory which is read-write.
+- The root filesystem is set to read-only mode, apart from the `/tmp` directory which is read-write.
 - The Function's container is non-privileged and runs as a non-root user.
 - All [Linux capabilities](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#capabilities) are dropped.
