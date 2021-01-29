@@ -229,7 +229,7 @@ spec:
       jwtPolicy: third-party-jwt
       logAsJson: false
       logging:
-        level: default:info
+        level: all:warn
       meshExpansion:
         enabled: false
         useILB: false
