@@ -35,7 +35,7 @@ require (
 	golang.org/x/tools v0.0.0-20200216192241-b320d3a0f5a2 // indirect
 	google.golang.org/api v0.17.1-0.20200218000811-727024a431b5 // indirect
 	k8s.io/api v0.16.15
-	k8s.io/apimachinery v0.16.16-rc.0
+	k8s.io/apimachinery v0.16.15
 	k8s.io/client-go v0.16.15
 	k8s.io/utils v0.0.0-20200124190032-861946025e34 // indirect
 	knative.dev/eventing v0.12.0

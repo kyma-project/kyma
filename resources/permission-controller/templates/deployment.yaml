@@ -36,6 +36,8 @@ spec:
             - --subject-groups={{ .Values.global.kymaRuntime.namespaceAdminGroup }}
           resources:
 {{ toYaml .Values.deployment.resources | indent 12 }}
+          securityContext:
+{{ toYaml .Values.deployment.securityContext | indent 12 }}            
       serviceAccountName: {{ include "namespace-permission-controller.name" . }}-account
       nodeSelector:
         {{- with .Values.deployment.nodeSelector }}

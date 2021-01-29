@@ -23,8 +23,6 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
     spec:
       serviceAccountName: dex-account
-      securityContext:
-        runAsUser: 2000
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
@@ -33,6 +31,8 @@ spec:
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}
@@ -61,7 +61,8 @@ spec:
           mountPath: /config/dst
         - name: config-tpl
           mountPath: /config/src
-
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
       volumes:
       - name: config-tpl
         configMap:

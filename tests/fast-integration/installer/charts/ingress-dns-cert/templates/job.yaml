@@ -1,0 +1,71 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  annotations: 
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ .Release.Name }}-service-account
+      restartPolicy: Never
+      containers:
+      - name: {{ .Release.Name }}
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class=garden dns.gardener.cloud/dnsnames=*.$(GLOBAL_DOMAIN) --overwrite" ]
+        env:
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.ingress.domainName }}
+  backoffLimit: 4
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-copy-cert
+  namespace: {{ .Release.Namespace }}
+  annotations: 
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccount: {{ .Release.Name }}-service-account
+      restartPolicy: Never
+      containers:
+      - name: {{ .Release.Name }}-job1
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl create secret tls kyma-gateway-certs -n kyma-system --cert=/etc/kyma-gateway-certs/tls.crt --key=/etc/kyma-gateway-certs/tls.key --dry-run -oyaml |
+  kubectl apply -f -"]
+        volumeMounts:
+        - name: cert
+          mountPath: /etc/kyma-gateway-certs/
+      - name: {{ .Release.Name }}-job2
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl create secret generic ingress-tls-cert -n kyma-system --from-file=tls.crt=/etc/kyma-gateway-certs/tls.crt --dry-run -oyaml |
+  kubectl apply -f -"]
+        volumeMounts:
+        - name: cert
+          mountPath: /etc/kyma-gateway-certs/
+      - name: {{ .Release.Name }}-job3
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+        command: ["/bin/sh", ]
+        args: ["-c","kubectl create secret tls apiserver-proxy-tls-cert -n kyma-system --cert=/etc/kyma-gateway-certs/tls.crt --key=/etc/kyma-gateway-certs/tls.key --dry-run -oyaml |
+  kubectl apply -f -"]
+        volumeMounts:
+        - name: cert
+          mountPath: /etc/kyma-gateway-certs/
+      volumes:
+        - name: cert
+          secret:
+            secretName: kyma-gateway-certs
+  backoffLimit: 4

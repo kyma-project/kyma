@@ -9,6 +9,19 @@ else
   export SECRET_FILE=${SECRETS_DIR}/tls.crt
 fi
 
+function createSecret() {
+  cat <<EOF | kubectl -n "$2" apply -f -
+apiVersion: v1
+kind: Secret
+data:
+  "cacert": ""
+metadata:
+  name: "$1"
+  namespace: "$2"
+type: Opaque
+EOF
+}
+
 function patchSecret() {
   TLS_CERT_YAML=$(cat << EOF
 ---
@@ -17,6 +30,20 @@ data:
   tls.key: "$2"
 EOF
 )
+  echo "---> Checking if secret ${MTLS_GATEWAY_NAMESPACE}/${MTLS_GATEWAY_NAME} exists"
+  set +e
+
+  msg=$(kubectl get secret "${MTLS_GATEWAY_NAME}" -n "${MTLS_GATEWAY_NAMESPACE}" 2>&1)
+  status=$?
+  set -e
+
+  if [[ $status -ne 0 ]] && [[ "$msg" == *"not found"* ]]; then
+    set +e
+    echo "---> Creating secret ${MTLS_GATEWAY_NAMESPACE}/${MTLS_GATEWAY_NAME}"
+    msg=$(createSecret "${MTLS_GATEWAY_NAME}" "${MTLS_GATEWAY_NAMESPACE}" 2>&1)
+    echo $msg
+    set -e
+  fi
 
   echo "---> Patching secret ${MTLS_GATEWAY_NAMESPACE}/${MTLS_GATEWAY_NAME}"
   set +e

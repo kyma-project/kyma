@@ -6,7 +6,8 @@ import (
 
 type FunctionConfig struct {
 	ImageRegistryDockerConfigSecretName string        `envconfig:"default=serverless-image-pull-secret"`
-	ImagePullAccountName                string        `envconfig:"default=serverless"`
+	ImagePullAccountName                string        `envconfig:"default=serverless-function"`
+	BuildServiceAccountName             string        `envconfig:"default=serverless-build"`
 	TargetCPUUtilizationPercentage      int32         `envconfig:"default=50"`
 	RequeueDuration                     time.Duration `envconfig:"default=1m"`
 	GitFetchRequeueDuration             time.Duration `envconfig:"default=30s"`

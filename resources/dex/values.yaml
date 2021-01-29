@@ -56,6 +56,19 @@ telemetry:
   enabled: true
   port: 5558
 
+podSecurityPolicy:
+  enabled: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 2000
+
 dex:
   expiry:
     signingKeys: "720h"

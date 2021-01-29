@@ -97,7 +97,8 @@ async function sendEventAndCheckResponse() {
 }
 
 async function registerAllApis(mockHost) {
-  const localApis = await axios.get(`https://${mockHost}/local/apis`).catch(expectNoAxiosErr);
+  const localApis = await axios.get(`https://${mockHost}/local/apis`)
+    .catch(err => { throw new Error(`Commerce Mock local apis not available: ${err.response}`) });
   for (let api of localApis.data) {
     await retryPromise(async () => {
       await axios.post(`https://${mockHost}/local/apis/${api.id}/register`, {},
@@ -107,10 +108,11 @@ async function registerAllApis(mockHost) {
             origin: `https://${mockHost}`,
           },
         }
-      ).catch(expectNoAxiosErr)
+      ).catch(err => { throw new Error(`Error during Commerce Mock ai registration: ${err.response}`) })
     }, 3, 5000)
   }
-  const remoteApis = await axios.get(`https://${mockHost}/remote/apis`).catch(expectNoAxiosErr);
+  const remoteApis = await axios.get(`https://${mockHost}/remote/apis`)
+    .catch(err => { throw new Error(`Commerce Mock registered apis not available: ${err.response}`) });
   expect(remoteApis.data).to.have.lengthOf.at.least(2)
   return remoteApis;
 }
@@ -151,7 +153,7 @@ async function connectMock(mockHost, targetNamespace) {
         "content-type": "application/json",
       },
     }
-  ).catch(expectNoAxiosErr);
+  ).catch(err => { throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`) });
 }
 function serviceInstanceObj(name, serviceClassExternalName) {
   return {
@@ -215,12 +217,12 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await patchAppGatewayDeployment();
   await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`)
-      .catch(() => { throw new Exception("Commerce mock local API not available - timeout") }), 40, 3000);
+      .catch(() => { throw new Error("Commerce mock local API not available - timeout") }), 40, 3000);
 
   await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
-  const webServicesSC = await waitForServiceClass("webservices", targetNamespace);
+  const webServicesSC = await waitForServiceClass("webservices", targetNamespace, 300 * 1000);
   const eventsSC = await waitForServiceClass("events", targetNamespace);
   const webServicesSCExternalName = webServicesSC.spec.externalName;
   const eventsSCExternalName = eventsSC.spec.externalName;

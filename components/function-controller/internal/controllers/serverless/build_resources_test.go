@@ -3,6 +3,8 @@ package serverless
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/util/validation"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 
 	"github.com/onsi/gomega"
@@ -80,6 +82,14 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
+
+				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
+				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
+
+				g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
+				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
+				g.Expect(errs).To(gomega.HaveLen(0))
+
 			}
 		})
 	}
@@ -411,10 +421,10 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	}
 
 	r := FunctionReconciler{}
-	//when
+	// when
 	job := r.buildJob(&instance, rtmCfg, cmName)
 
-	//then
+	// then
 	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
 	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
 
