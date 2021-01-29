@@ -291,7 +291,7 @@ spec:
                     type: array
                   path:
                     description: Path to be exposed
-                    pattern: ^/([0-9a-zA-Z./*]+)
+                    pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                     type: string
                 required:
                 - path
