@@ -9,12 +9,11 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: "https://addons.{{ js .Values.global.ingress.domainName }}"
-  preloadUrl: "https://addons.{{ js .Values.global.ingress.domainName }}/preload"
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: "Cluster Addons"
       navigationPath: addons-config
-      viewUrl: ""
+      viewUrl: "/home/clusteraddonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: 3
       requiredPermissions:
         - apiGroup: addons.kyma-project.io
