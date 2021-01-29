@@ -18,7 +18,7 @@ spec:
   navigationNodes:
     - label: Applications/Systems
       navigationPath: apps
-      viewUrl: '/home/settings/apps'
+      viewUrl: '/home/applications?resourceApiPath=/apis/applicationconnector.kyma-project.io/v1alpha1&hasDetailsView=false'
       order: 1
       settings:
         readOnly: {{ .Values.global.disableLegacyConnectivity }}
