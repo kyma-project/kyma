@@ -54,6 +54,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
       name: istio-egressgateway
     ingressGateways:
     - enabled: true
@@ -116,6 +118,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
       name: istio-ingressgateway
     istiodRemote:
       enabled: false

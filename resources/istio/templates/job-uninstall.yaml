@@ -23,13 +23,15 @@ spec:
           name: uninstaller
           volumeMounts:
           - name: config
-            mountPath: /etc/istio/
+            mountPath: /opt/istio/config
             readOnly: true
           env:
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
             value: kyma-istio-operator-config
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}
       volumes:
       - name: config
         configMap:
