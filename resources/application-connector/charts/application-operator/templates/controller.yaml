@@ -56,6 +56,7 @@ spec:
         - "--healthPort={{ .Values.controller.args.healthPort }}"
         - "--profile={{ .Values.controller.resources.profile }}"
         - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
+        - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
         image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
