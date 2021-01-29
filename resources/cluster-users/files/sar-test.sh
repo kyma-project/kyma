@@ -20,8 +20,6 @@ MAX_RETRIES=5
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-alias kubectl="kubectl --cache-dir=/tmp"
-
 # resources/cluster-users/values.yaml clusterRoles.verbs.view
 readonly VIEW_OPERATIONS=( "get" "list" )
 # resources/cluster-users/values.yaml clusterRoles.verbs.edit - clusterRoles.verbs.view
