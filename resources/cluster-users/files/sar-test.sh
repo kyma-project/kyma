@@ -41,7 +41,7 @@ function __failRetry() {
 
 function __createTestBindings() {
 	echo "---> $1"
-	kubectl create -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
+	kubectl apply -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
 }
 
 function __deleteTestBindings() {
