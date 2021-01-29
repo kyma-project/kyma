@@ -33,7 +33,7 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
-  - application-gateway
+  - {{ .Release.Name }}-application-gateway
 {{- end }}
 ---
 kind: RoleBinding
@@ -78,7 +78,7 @@ rules:
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
     resourceNames:
-    - application-gateway
+    - {{ .Release.Name }}-application-gateway
 {{- end }}
 ---
 kind: ClusterRoleBinding
@@ -140,7 +140,7 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
-  - event-service
+  - {{ .Release.Name }}event-service
 {{- end }}
 ---
 kind: ClusterRoleBinding
@@ -185,7 +185,7 @@ rules:
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
     resourceNames:  
-    - connectivity-validator
+    - {{ .Release.Name }}-connectivity-validator
 {{- end }}
 ---
 kind: ClusterRoleBinding
