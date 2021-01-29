@@ -23,6 +23,7 @@ type OverridesData struct {
 	GatewayOncePerNamespace               bool   `json:"deployGatewayOncePerNamespace,omitempty"`
 	StrictMode                            string `json:"strictMode,omitempty"`
 	IsBEBEnabled                          bool   `json:"isBEBEnabled,omitempty"`
+	PodSecurityPolicyEnabled              bool   `json:"podSecurityPolicyEnabled,omitempty"`
 }
 
 func NewFlatOverridesMap(labels map[string]string) utils.StringMap {
