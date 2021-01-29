@@ -78,6 +78,6 @@ func (o *options) String() string {
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
-		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile, 
+		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile,
 		o.isBEBEnabled, o.podSecurityPolicyEnabled)
 }
