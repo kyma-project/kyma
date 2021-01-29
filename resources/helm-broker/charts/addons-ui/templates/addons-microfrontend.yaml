@@ -9,12 +9,11 @@ spec:
   version: v1
   category: Configuration
   placement: namespace
-  viewBaseUrl: "https://addons.{{ js .Values.global.ingress.domainName }}"
-  preloadUrl: "https://addons.{{ js .Values.global.ingress.domainName }}/preload"
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: "Addons"
-      navigationPath: addons
-      viewUrl: ""
+      navigationPath: addonsconfigurations
+      viewUrl: "/home/namespaces/:namespaceId/addonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: -1
       requiredPermissions:
         - apiGroup: addons.kyma-project.io
