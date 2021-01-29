@@ -1,0 +1,29 @@
+{{- if .Values.global.podSecurityPolicy.enabled }}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: application-gateway
+spec:
+  allowPrivilegeEscalation: false
+  fsGroup:
+    rule: MustRunAs
+    ranges:
+    - min: 1
+      max: 65535
+  runAsUser:
+    rule: MustRunAs
+    ranges:
+    - min: 1
+      max: 65535
+  privileged: false
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: MustRunAs  
+    ranges:
+    - min: 1
+      max: 65535
+  volumes:
+  - configMap
+  - secret
+{{- end }}
