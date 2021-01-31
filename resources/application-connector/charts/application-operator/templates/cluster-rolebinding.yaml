@@ -80,9 +80,9 @@ rules:
     resources: ["podsecuritypolicies"]
     verbs: ["get", "list", "create", "update", "delete", "watch"]
     resourceNames:
-    - application-gateway
-    - connectivity-validator
-    - event-service
+    - "*-application-gateway"
+    - "*-connectivity-validator"
+    - "*-event-service"
 {{- end }}
 ---
 kind: ClusterRoleBinding
