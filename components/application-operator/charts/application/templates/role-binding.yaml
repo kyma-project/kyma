@@ -28,7 +28,7 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["get"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicyEnabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
@@ -73,7 +73,7 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicyEnabled }}
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
@@ -135,7 +135,7 @@ rules:
 - apiGroups: ["eventing.knative.dev"]
   resources: ["triggers"]
   verbs: ["get", "list", "watch"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicyEnabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
@@ -180,7 +180,7 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list", "watch"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicyEnabled }}
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]

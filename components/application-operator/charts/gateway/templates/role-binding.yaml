@@ -28,7 +28,7 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["get"]
-{{- if .Values.podSecurityPolicy.enabled }}
+{{- if .Values.global.podSecurityPolicyEnabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
