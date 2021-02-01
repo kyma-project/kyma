@@ -87,4 +87,3 @@ global:
 securityContext: {runAsUser: 1000}
 podSecurityPolicy:
   enabled: true
-  name: helmbroker.restricted

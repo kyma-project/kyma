@@ -17,7 +17,7 @@ subjects:
   namespace: {{.Release.Namespace}}
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "etcd-hb-fullname" . }}-etcd-certs
 rules:
@@ -26,7 +26,7 @@ rules:
     resources: ["podsecuritypolicies"]
     verbs:     ["use"]
     resourceNames:
-      - {{ .Values.podSecurityPolicy.name }}
+    - {{ template "fullname" . }}
 {{ end }}
   - apiGroups: [""]
     resources: ["secrets"]
@@ -37,4 +37,5 @@ rules:
   - apiGroups: ["policy"]
     resources: ["podsecuritypolicies"]
     verbs:     ["use"]
-    resourceNames: ["helm-broker.privileged"]
+    resourceNames:
+    - {{ template "fullname" . }}
