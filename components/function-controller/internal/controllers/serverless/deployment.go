@@ -30,15 +30,15 @@ const (
 	MinimumReplicasAvailable = "MinimumReplicasAvailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) bool {
-	expectedDeployment := r.buildDeployment(instance, rtmConfig)
+func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
+	expectedDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
 	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
 
 	return !resourceOk
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance, rtmConfig)
+func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
 
 	switch {
 	case len(deployments) == 0:
@@ -108,7 +108,9 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	// trigger next reconcile loop, in which we should create svc
 	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
+			RequeueAfter: r.config.FunctionReadyRequeueDuration,
+		}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             runningStatus,
 			LastTransitionTime: metav1.Now(),

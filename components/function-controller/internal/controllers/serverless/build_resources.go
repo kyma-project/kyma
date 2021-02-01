@@ -51,12 +51,12 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
+func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
 
-	imageName := r.buildImageAddressForPush(instance)
+	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -98,7 +98,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
 									Items: []corev1.KeyToPath{
 										{
 											Key:  ".dockerconfigjson",
@@ -221,8 +221,8 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config) batchv1.Job {
-	imageName := r.buildImageAddressForPush(instance)
+func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config, dockerConfig DockerConfig) batchv1.Job {
+	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -252,7 +252,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
 									Items: []corev1.KeyToPath{
 										{
 											Key:  ".dockerconfigjson",
@@ -319,8 +319,8 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
-	imageName := r.buildImageAddress(instance)
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
+	imageName := r.buildImageAddress(instance, dockerConfig.PullAddress)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
 
@@ -449,32 +449,14 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 	return min, max
 }
 
-func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alpha1.Function) string {
-	if r.config.Docker.InternalRegistryEnabled {
-		return r.buildInternalImageAddress(instance)
-	}
-	return r.buildImageAddress(instance)
-}
-
-func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
+func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
 	var imageTag string
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)
 	}
-
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalServerAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
-	var imageTag string
-	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		imageTag = r.calculateGitImageTag(instance)
-	} else {
-		imageTag = r.calculateImageTag(instance)
-	}
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
