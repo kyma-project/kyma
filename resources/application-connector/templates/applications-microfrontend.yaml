@@ -14,11 +14,11 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: Applications/Systems
       navigationPath: apps
-      viewUrl: '/home/settings/apps'
+      viewUrl: '/applications?resourceApiPath=/apis/applicationconnector.kyma-project.io/v1alpha1&hasDetailsView=false'
       order: 1
       settings:
         readOnly: {{ .Values.global.disableLegacyConnectivity }}
