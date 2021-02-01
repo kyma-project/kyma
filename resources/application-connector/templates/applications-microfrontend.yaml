@@ -14,7 +14,7 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
+  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
   navigationNodes:
     - label: Applications/Systems
       navigationPath: apps
