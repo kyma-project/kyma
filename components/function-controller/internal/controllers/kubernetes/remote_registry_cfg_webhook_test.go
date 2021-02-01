@@ -92,7 +92,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 								"apiVersion": "v1",
 								"data": {
 									"password": "dGVzdA==",
-									"registry": "dGVzdA==",
+									"registryAddress": "dGVzdA==",
 									"username": "dGVzdA=="
 								},
 								"kind": "Secret",
@@ -136,8 +136,14 @@ func Test_registryWatcher_Handle(t *testing.T) {
 				Decoder: tt.fields.Decoder,
 			}
 			got := r.Handle(tt.args.ctx, tt.args.req)
-			if (tt.wantCode != 0) && got.Result.Code != tt.wantCode {
-				t.Errorf("response result code = %v, want %v", got.Result.Code, tt.wantCode)
+
+			var gotCode int32
+			if got.AdmissionResponse.Result != nil {
+				gotCode = got.AdmissionResponse.Result.Code
+			}
+
+			if gotCode != tt.wantCode {
+				t.Errorf("response result code = %v, want %v", gotCode, tt.wantCode)
 			}
 		})
 	}

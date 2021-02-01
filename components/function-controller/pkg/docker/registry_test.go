@@ -103,7 +103,7 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			args: args{
 				data: map[string][]byte{
 					keyPassword: []byte("-"),
-					keyRegistry: []byte("-"),
+					keyRegistryAddress: []byte("-"),
 				},
 			},
 			wantErr: true,
@@ -113,7 +113,7 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			args: args{
 				data: map[string][]byte{
 					keyUsername: []byte("-"),
-					keyRegistry: []byte("-"),
+					keyRegistryAddress: []byte("-"),
 				},
 			},
 			wantErr: true,
@@ -134,7 +134,7 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 				data: map[string][]byte{
 					keyUsername: []byte("-"),
 					keyPassword: []byte("-"),
-					keyRegistry: []byte("-"),
+					keyRegistryAddress: []byte("-"),
 				},
 			},
 			wantErr: false,
