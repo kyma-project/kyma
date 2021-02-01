@@ -34,7 +34,7 @@ webhooks:
   name: mutating.secret.serverless.k8s.io
   objectSelector:
     matchLabels:
-      serverless.kyma-project.io/config: remote-registry-config
+      serverless.kyma-project.io/remote-registry: config
   rules:
   - apiGroups:
     - ""
