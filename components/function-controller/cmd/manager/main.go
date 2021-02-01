@@ -75,7 +75,7 @@ func main() {
 	mgr.GetWebhookServer().Register(
 		"/mutate-v1-secret",
 		&webhook.Admission{
-			Handler: serverless.NewRegistryWatcher(mgr.GetClient()),
+			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
 		},
 	)
 

@@ -1,4 +1,4 @@
-package serverless
+package kubernetes
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package serverless
+package kubernetes
 
 import (
 	"context"
@@ -17,12 +17,12 @@ const (
 	keyDockerConfigJSON = ".dockerconfigjson"
 )
 
-type RegistryWatcher interface {
+type RemoteRegistryCfgUpdater interface {
 	Handle(context.Context, admission.Request) admission.Response
 	InjectDecoder(*admission.Decoder) error
 }
 
-func NewRegistryWatcher(c client.Client) RegistryWatcher {
+func NewRegistryWatcher(c client.Client) RemoteRegistryCfgUpdater {
 	return &registryWatcher{}
 }
 
