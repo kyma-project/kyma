@@ -3,14 +3,12 @@ package serverless
 import (
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/validation"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
