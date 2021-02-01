@@ -8,33 +8,33 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 rules:
-    {{ if .Values.podSecurityPolicy.enabled }}
-    - apiGroups: ["policy"]
-      resources: ["podsecuritypolicies"]
-      verbs:     ["use"]
-      resourceNames:
-        - {{ .Values.podSecurityPolicy.name }}
-    {{ end }}
-    - apiGroups: ["settings.svcat.k8s.io"]
-      resources: ["podpresets"]
-      verbs: ["create", "delete"]
-    - apiGroups: ["apps"]
-      resources: ["deployments"]
-      verbs: ["get", "list", "watch", "patch", "update"]
-    - apiGroups: ["serverless.kyma-project.io"]
-      resources: ["functions"]
-      verbs: ["get", "list", "watch", "patch", "update"]
-    - apiGroups: ["servicecatalog.kyma-project.io"]
-      resources: ["servicebindingusages", "usagekinds"]
-      verbs: ["get", "list", "watch", "create", "update", "delete"]
-    - apiGroups: ["servicecatalog.k8s.io"]
-      resources: ["servicebindings","serviceinstances","clusterserviceclasses","serviceclasses"]
-      verbs:     ["get","list","watch"]
-    - apiGroups: [""]
-      resources: ["events"]
-      verbs: ["patch", "create"]
-    - apiGroups: [""]
-      resources: ["configmaps"]
-      verbs: ["get", "delete", "update"]
-      resourceNames:
-        - "{{ .Chart.Name }}-process-sbu-spec"
+{{ if .Values.podSecurityPolicy.enabled }}
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    verbs:     ["use"]
+    resourceNames:
+    - {{ template "fullname" . }}
+{{ end }}
+  - apiGroups: ["settings.svcat.k8s.io"]
+    resources: ["podpresets"]
+    verbs: ["create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: ["serverless.kyma-project.io"]
+    resources: ["functions"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
+    resources: ["servicebindingusages", "usagekinds"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["servicebindings","serviceinstances","clusterserviceclasses","serviceclasses"]
+    verbs:     ["get","list","watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["patch", "create"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "delete", "update"]
+    resourceNames:
+    - "{{ .Chart.Name }}-process-sbu-spec"
