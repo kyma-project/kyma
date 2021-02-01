@@ -102,7 +102,7 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "err missing username",
 			args: args{
 				data: map[string][]byte{
-					keyPassword: []byte("-"),
+					keyPassword:        []byte("-"),
 					keyRegistryAddress: []byte("-"),
 				},
 			},
@@ -112,7 +112,7 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "err missing password",
 			args: args{
 				data: map[string][]byte{
-					keyUsername: []byte("-"),
+					keyUsername:        []byte("-"),
 					keyRegistryAddress: []byte("-"),
 				},
 			},
@@ -132,8 +132,8 @@ func TestNewRegistryCfgMarshaller(t *testing.T) {
 			name: "OK",
 			args: args{
 				data: map[string][]byte{
-					keyUsername: []byte("-"),
-					keyPassword: []byte("-"),
+					keyUsername:        []byte("-"),
+					keyPassword:        []byte("-"),
 					keyRegistryAddress: []byte("-"),
 				},
 			},
