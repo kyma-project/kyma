@@ -78,7 +78,7 @@ rules:
     - {{ .Chart.Name }}
   - apiGroups: ["extensions", "policy"]
     resources: ["podsecuritypolicies"]
-    verbs: ["get", "list", "create", "update", "delete", "watch"]
+    verbs: ["use", "get", "list", "create", "update", "delete", "watch"]
     resourceNames:
     - application-gateway
     - connectivity-validator
