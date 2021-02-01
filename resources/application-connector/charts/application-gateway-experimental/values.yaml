@@ -1,7 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
-    path: TODO
+    path: jmedrek/gateway:0.0.1
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
