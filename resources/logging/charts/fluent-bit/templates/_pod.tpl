@@ -23,9 +23,15 @@ containers:
     env:
     {{- toYaml .Values.env | nindent 4 }}
   {{- end }}
-  {{- if .Values.envFrom }}
+  {{- if or .Values.envFrom .Values.config.secrets }}
     envFrom:
+    {{- if .Values.envFrom }}
     {{- toYaml .Values.envFrom | nindent 4 }}
+    {{- end }}
+    {{- if .Values.config.secrets }}
+    - secretRef:
+        name: "{{ template "fluent-bit.fullname" . }}-env-secret"
+    {{- end }}
   {{- end }}
     ports:
       - name: http
