@@ -7,7 +7,7 @@ global:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
   role:
-    developer: KymaRuntimeDeveloper
+    developer: KymaRuntimeNamespaceDeveloper
     namespaceAdmin: KymaRuntimeNamespaceAdmin
 
 image:
