@@ -102,7 +102,7 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: PR-10459
+    version: "277f4247"
 
 nodeSelector: {}
 

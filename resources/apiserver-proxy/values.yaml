@@ -55,7 +55,7 @@ global:
     version: 264d8882
   apiserver_proxy_integration_tests:
     dir:
-    version: PR-10459
+    version: "277f4247"
   istio:
     gateway:
       name: kyma-gateway
