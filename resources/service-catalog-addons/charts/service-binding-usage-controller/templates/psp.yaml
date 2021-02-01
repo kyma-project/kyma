@@ -28,7 +28,7 @@ spec:
     ranges:
       - min: 1
         max: 65535
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   volumes:
     - configMap
     - downwardAPI
