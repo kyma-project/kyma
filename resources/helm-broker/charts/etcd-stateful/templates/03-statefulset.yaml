@@ -24,18 +24,16 @@ spec:
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
-{{- with .Values.securityContext }}
+      {{- with .Values.securityContext }}
       securityContext:
-{{ toYaml . | indent 8 }}
+      {{ toYaml . | indent 8 }}
+      {{- end }}
       terminationGracePeriodSeconds: 60
       restartPolicy: Always
       serviceAccountName: {{ template "etcd-hb-fullname" . }}-etcd-certs
       containers:
       - name: "{{ template "etcd-hb-fullname" . }}"
         image: "{{.Values.etcd.image}}:{{.Values.etcd.imageTag}}"
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 1000
         ports:
         - containerPort: 2379
           name: client
