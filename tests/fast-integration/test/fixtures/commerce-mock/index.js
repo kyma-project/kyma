@@ -119,14 +119,12 @@ async function sendEventAndCheckResponse() {
   );
 }
 
+
 async function registerAllApis(mockHost) {
-  const localApis = await axios
-    .get(`https://${mockHost}/local/apis`)
-    .catch((err) => {
-      throw new Error(
-        `Commerce Mock local apis not available: ${err.response}`
-      );
-    });
+
+  const localApis = await retryPromise(() => axios.get(`https://${mockHost}/local/apis`), 10, 3000)
+    .catch((err) => { throw new Error(`API registration error - commerce mock local API not available: ${err.response.data}`); });
+
   for (let api of localApis.data) {
     await retryPromise(
       async () => {
@@ -143,7 +141,7 @@ async function registerAllApis(mockHost) {
           )
           .catch((err) => {
             throw new Error(
-              `Error during Commerce Mock ai registration: ${err.response}`
+              `Error during Commerce Mock ai registration: ${err.response.data}`
             );
           });
       },
@@ -179,7 +177,7 @@ async function connectMock(mockHost, targetNamespace) {
 
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${targetNamespace}/tokenrequests`;
 
-  await k8sDynamicApi.delete(tokenRequest).catch(() => {}); // Ignore delete error
+  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
   const tokenObj = await waitForK8sObject(
     path,
