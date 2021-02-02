@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	keyUsername        = "username"
-	keyPassword        = "password"
-	keyRegistryAddress = "registryAddress"
+	keyUsername      = "username"
+	keyPassword      = "password"
+	keyServerAddress = "serverAddress"
 )
 
 var (
@@ -84,7 +84,7 @@ func NewRegistryCfgMarshaler(data map[string][]byte) (json.Marshaler, error) {
 		return nil, errPasswordNotFound
 	}
 
-	result.serverAddress, found = data[keyRegistryAddress]
+	result.serverAddress, found = data[keyServerAddress]
 	if !found {
 		return nil, errRegistryNotFound
 	}

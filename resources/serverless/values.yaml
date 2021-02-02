@@ -154,6 +154,7 @@ services:
     annotations: {}
     https:
       port: 443
+      targetPort: 8443
 
 metrics:
   enabled: true

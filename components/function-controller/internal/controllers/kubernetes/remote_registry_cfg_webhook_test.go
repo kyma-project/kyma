@@ -92,7 +92,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 								"apiVersion": "v1",
 								"data": {
 									"password": "dGVzdA==",
-									"registryAddress": "dGVzdA==",
+									"serverAddress": "dGVzdA==",
 									"username": "dGVzdA=="
 								},
 								"kind": "Secret",
