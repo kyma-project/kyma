@@ -4,7 +4,7 @@ controller-manager:
       requests:
         cpu: 150m
         memory: 64Mi
-  env:
+  envs:
     loglevel: "error"
 
 

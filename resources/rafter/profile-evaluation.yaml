@@ -4,7 +4,7 @@ controller-manager:
       requests:
         cpu: 10m
         memory: 32Mi
-  env:
+  envs:
     loglevel: "error"
 
 upload-service:
