@@ -3,7 +3,7 @@ const k8s = require("@kubernetes/client-node");
 const { join } = require("path");
 const { installIstio, upgradeIstio } = require("./istioctl");
 const pRetry = require("p-retry");
-
+const { debug } = require("../utils");
 const notDeployed = "not-deployed";
 
 async function waitForNodesToBeReady(timeout = "180s") {
@@ -14,7 +14,7 @@ async function waitForNodesToBeReady(timeout = "180s") {
     "--all",
     `--timeout=${timeout}`,
   ]);
-  console.log("All nodes are ready!");
+  debug("All nodes are ready!");
 }
 
 // TODO: replace by kubectlApply from utils
@@ -144,23 +144,23 @@ async function installRelease(
   let status = await helmStatus(release, namespace);
   switch (status) {
     case "pending-install":
-      console.log(
+      debug(
         `Deleting ${release} from namespace ${namespace} because previous installation got stuck in pending-install`
       );
       await helmUninstall(release, namespace);
       break;
     case "failed":
-      console.log(
+      debug(
         `Deleting ${release} from namespace ${namespace} because previous installation failed`
       );
       await helmUninstall(release, namespace);
       break;
     case notDeployed:
-      console.log(`Installing release ${release}`);
+      debug(`Installing release ${release}`);
       await helmInstallUpgrade(release, chart, namespace, values, profile);
       break;
     case "deployed":
-      console.log(`Upgrading release ${release}`);
+      debug(`Upgrading release ${release}`);
       await helmInstallUpgrade(release, chart, namespace, values, profile);
     default:
       break;
@@ -172,7 +172,7 @@ async function installRelease(
       `Release ${release} is in status ${status}, which is not "deployed"`
     );
   }
-  console.log(`Release ${release} deployed`);
+  debug(`Release ${release} deployed`);
 }
 
 const isGardener = process.env["GARDENER"] || "false";
@@ -206,7 +206,8 @@ const kymaCharts = [
   {
     release: "serverless",
     namespace: "kyma-system",
-    values: `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain}`,
+    // https://github.com/kyma-project/test-infra/pull/2967
+    values: `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
     profile: "evaluation",
   },
   {
@@ -306,7 +307,7 @@ const kymaCharts = [
 ];
 
 async function installKyma(
-  installLocation,
+  installLocation = join(__dirname, "..", "..", "..", "resources"),
   istioVersion,
   ignoredComponents = "monitoring,tracing,kiali,logging,console,cluster-users,dex",
   isUpgrade = false
@@ -328,7 +329,7 @@ async function installKyma(
     "kyma-system"
   );
 
-  await Promise.all(
+  return await Promise.all(
     kymaCharts
       .filter((arg) => !ignoredComponents.includes(arg.release))
       .map(({ release, namespace, values, customPath, profile }) => {
