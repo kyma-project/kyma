@@ -80,3 +80,11 @@ storage_config:
 {{- end }}
 
 {{- end}}
+
+{{- define "kyma.auth.groups" -}}
+{{- if .Values.kyma.auth.useKymaGroups }}
+{{- printf "%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
+{{- else if .Values.kyma.auth.groups }}
+{{- printf "%s" .Values.kyma.auth.groups }}
+{{- end }}
+{{- end -}}

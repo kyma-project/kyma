@@ -1,0 +1,35 @@
+{{- if .Values.loki.enabled }}	
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "loki.fullname" . }}
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+spec:
+  hosts:
+  - loki.{{ .Values.global.ingress.domainName }}
+  http:
+  - match:
+    - uri:
+        prefix: /api/prom/label
+    - uri:
+        exact: /api/prom/query
+    route:
+    - destination:
+        host: {{ template "loki.fullname" . }}
+        port:
+          number: {{ .Values.loki.service.port  }}
+    corsPolicy:
+      allowMethods:
+      - GET
+      - OPTIONS
+      allowOrigins:
+      - regex: ".*"
+      allowHeaders:
+      - access-control-allow-origin
+      - authorization
+  gateways:
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
+{{- end }}

@@ -225,6 +225,11 @@ loki:
   # Extra env variables to pass to the loki container
   env: []
 
+kyma:
+  auth:
+    useKymaGroups: true
+    groups: ""
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -238,6 +243,11 @@ global:
     labels:
       integration: true
       after-upgrade: true
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin
   istio:
     gateway:
       name: kyma-gateway
