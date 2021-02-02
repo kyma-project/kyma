@@ -13,7 +13,7 @@ spec:
   navigationNodes:
     - label: "Cluster Addons"
       navigationPath: addons-config
-      viewUrl: "/home/clusteraddonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: "/clusteraddonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: 3
       requiredPermissions:
         - apiGroup: addons.kyma-project.io

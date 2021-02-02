@@ -13,7 +13,7 @@ spec:
   navigationNodes:
     - label: "Addons"
       navigationPath: addonsconfigurations
-      viewUrl: "/home/namespaces/:namespaceId/addonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: "/namespaces/:namespaceId/addonsconfigurations?hasDetailsView=false&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: -1
       requiredPermissions:
         - apiGroup: addons.kyma-project.io
