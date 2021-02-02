@@ -37,3 +37,8 @@ ctrl:
     requests:
       memory: 32Mi
       cpu: 60m
+
+securityContext: { runAsUser: 1001 }
+podSecurityPolicy:
+  enabled: true
+

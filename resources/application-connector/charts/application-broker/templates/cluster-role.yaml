@@ -1,5 +1,5 @@
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
   labels:
@@ -44,3 +44,10 @@ rules:
 - apiGroups: ["security.istio.io"]
   resources: ["peerauthentications"]
   verbs: ["create","update", "get"]
+{{ if .Values.podSecurityPolicy.enabled }}
+- apiGroups: ["policy"]
+  resources: ["podsecuritypolicies"]
+  verbs:     ["use"]
+  resourceNames:
+  - {{ template "fullname" . }}
+  {{ end }}
