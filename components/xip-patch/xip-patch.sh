@@ -140,6 +140,41 @@ EOF
     kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
 }
 
+echo "Checking if running on local.kyma.dev"
+
+if [ "${GLOBAL_DOMAIN}" == "local.kyma.dev" ]; then
+    echo "Configure Kubernetes DNS to support local.kyma.dev"
+
+    COREDNS_PATCH=$(cat << EOF
+---
+  data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        rewrite name regex (.*)\.local\.kyma\.dev istio-ingressgateway.istio-system.svc.cluster.local
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        hosts /etc/coredns/NodeHosts {
+          reload 1s
+          fallthrough
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+EOF
+    )
+
+    kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
+fi
+
 echo "Checking if running on Gardener"
 
 GARDENER_ENVIRONMENT=false
