@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
+
+exit 0
+
 HELM_2_BINARY=$(which helm)
 HELM_3_BINARY=$(which helm3)
 SECRET_NAME="helm-secret"

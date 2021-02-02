@@ -63,7 +63,7 @@ spec:
         runAsUser: 2000
       containers:
       - name: job
-        image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+        image: eu.gcr.io/kyma-project/incubator/pr/k8s-tools:20210203-PR-61
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
