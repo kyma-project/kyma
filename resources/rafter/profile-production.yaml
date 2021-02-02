@@ -7,7 +7,6 @@ controller-manager:
   envs:
     loglevel: "error"
 
-
 upload-service:
   pod:
     resources:
