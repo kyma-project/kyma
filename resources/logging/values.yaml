@@ -227,7 +227,7 @@ loki:
 
 kyma:
   auth:
-    useKymaGroups: true
+    useKymaGroups: false
     groups: ""
 
 global:
