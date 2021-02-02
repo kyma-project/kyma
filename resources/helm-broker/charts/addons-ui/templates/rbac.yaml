@@ -13,7 +13,7 @@ metadata:
   name: {{ template "addons-ui-fullname" . }}
   namespace:  {{ .Release.Namespace }}
 rules:
-{{- if .Values.podSecurityPolicy.enabled }}
+  {{- if .Values.podSecurityPolicy.enabled }}
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
