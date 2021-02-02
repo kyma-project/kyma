@@ -33,14 +33,6 @@ spec:
         kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ .Chart.Name }}
-      initContainers:
-        - name: helm-release-migrator
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
-          command:
-            - /bin/bash
-            - -c
-            - |
-{{ .Files.Get "files/helm-release-migration.sh" | indent 14 }}
       containers:
       - name: {{ .Chart.Name }}
         ports:
