@@ -2,7 +2,7 @@
 
 ## Overview
 
-This chart creates certificate request:
+This chart creates the following certificate request:
 
 ```
 apiVersion: cert.gardener.cloud/v1alpha1
@@ -18,9 +18,8 @@ spec:s
     namespace: istio-system
 ```
 
-and annotates istio-ingressgateway with:
-
+It also annotates `istio-ingressgateway` with:
 ```
-dns.gardener.cloud/class='garden'
+dns.gardener.cloud/class='garden' 
 dns.gardener.cloud/dnsnames='*.$DOMAIN'
 ```
