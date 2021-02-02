@@ -1,4 +1,4 @@
-{{- if not .Values.global.isBEBEnabled }}
+{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: v1
 kind: Service
 metadata:
