@@ -10,9 +10,7 @@ metadata:
 spec:
   allowPrivilegeEscalation: false
   allowedCapabilities:
-    # Istio-init required
-    - NET_ADMIN
-    - NET_RAW
+  - '*'
   privileged: false
   fsGroup:
     rule: RunAsAny
