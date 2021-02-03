@@ -34,10 +34,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         kyma-project.io/component: controller
     spec:
-      {{- with .Values.securityContext }}
-      securityContext:
-      {{ toYaml . | indent 8 }}
-      {{- end }}
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
