@@ -11,17 +11,18 @@ Serverless supports two ways of connecting to an external registry:
 
 - [You can set up an external registry before installation](#tutorials-set-an-external-docker-registry).
 
-In this scenario, you can use Kyma overrides to change the default values supplied by the installation mechanism.
+  In this scenario, you can use Kyma overrides to change the default values supplied by the installation mechanism.
 
 - [You can switch to an external registry in the runtime](#tutorials-switch-to-an-external-docker-registry).
 
-In this scenario, you can change the registry on the fly, with Kyma already installed on your cluster. This option gives you way more flexibility and control over the choice of an external registry for your Functions.
+  In this scenario, you can change the registry on the fly, with Kyma already installed on your cluster. This option gives you way more flexibility and control over the choice of an external registry for your Functions.
 
 ## Switching registries in the runtime
 
 When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used to pull and push your Functions' images to the internal registry.
 
 Once you have Serverless up and running, you can switch to an external registry:
+
 - Per Namespace, and have even multiple external registries in a cluster, but no more than one per Namespace.
 - Cluster-wide, with this configuration overwriting any Namespace-scoped.
 
