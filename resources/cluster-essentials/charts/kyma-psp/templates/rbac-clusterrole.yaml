@@ -1,0 +1,20 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp-kyma-privileged
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["podsecuritypolicy"]
+  verbs: ["use"]
+  resourceNames: ["kyma.privileged"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp-kyma-unprivileged
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["podsecuritypolicy"]
+  verbs: ["use"]
+  resourceNames: ["kyma.unprivileged"]

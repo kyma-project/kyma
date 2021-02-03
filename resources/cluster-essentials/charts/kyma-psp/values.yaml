@@ -1,0 +1,4 @@
+---
+global:
+  podSecurityPolicy:
+    privileged: false

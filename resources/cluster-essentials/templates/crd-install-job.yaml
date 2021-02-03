@@ -41,6 +41,8 @@ spec:
           limits:
             memory: 256Mi
             cpu: 200m
+        securityContext:
+{{- toYaml .Values.securityContext | nindent 10 }}
         volumeMounts:
         {{ range $idx, $_ := until $configMapLen }}
         - name: crd-{{ $idx }}
