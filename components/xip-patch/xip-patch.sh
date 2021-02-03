@@ -157,6 +157,15 @@ INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
 INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
 INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
 
+if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
+    echo "Certificate provided, but domain is missing!"
+    exit 1
+fi
+
+if [ -z "${INGRESS_DOMAIN}" ] ; then
+    INGRESS_DOMAIN=$(generateXipDomain)
+fi
+
 echo "Checking if running on local.kyma.dev"
 
 if [ "${INGRESS_DOMAIN}" == "local.kyma.dev" ]; then
@@ -190,15 +199,6 @@ EOF
     )
 
     kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
-fi
-
-if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
-    echo "Certificate provided, but domain is missing!"
-    exit 1
-fi
-
-if [ -z "${INGRESS_DOMAIN}" ] ; then
-    INGRESS_DOMAIN=$(generateXipDomain)
 fi
 
 if [ -z "${INGRESS_TLS_CERT}" ] ; then
