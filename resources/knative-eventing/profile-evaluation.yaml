@@ -28,3 +28,4 @@ knative-eventing:
       requests:
         cpu: 25m
         memory: 25Mi
+  loglevel: warn
