@@ -172,8 +172,7 @@ if [ "${INGRESS_DOMAIN}" == "local.kyma.dev" ]; then
     echo "Configure Kubernetes DNS to support local.kyma.dev"
 
     COREDNS_PATCH=$(cat << EOF
----
-  data:
+data:
   Corefile: |
     .:53 {
         errors
