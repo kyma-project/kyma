@@ -46,4 +46,4 @@ rules:
 - apiGroups: [""]
   resources: ["configmaps"]
   resourceNames: ["shoot-info", "coredns"]
-  verbs: ["get"]
+  verbs: ["get", "patch"]
