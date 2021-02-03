@@ -3,9 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Release.Name }}-crd-install
   annotations:
-    helm.sh/hook: "pre-upgrade, pre-install"
-    helm.sh/hook-weight: "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
   labels:
     job: {{ .Release.Name }}-crd-install
 roleRef:
