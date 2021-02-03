@@ -37,14 +37,16 @@ fi
 
 echo "Validating Issuer"
 
-IS_CLUSTER_ISSUER=$(echo "$ISSUER_CM" | grep "ClusterIssuer")
-if [ -z "$IS_CLUSTER_ISSUER" ]; then
+if echo "$ISSUER_CM" | grep "ClusterIssuer"; then
+  echo "Type is proper"
+else
   echo "Provided Issuer is not a ClusterIssuer. Exiting..."
   exit 1
 fi
 
-IS_NAME_PROPER=$(echo "$ISSUER_CM" | grep "name: $ISSUER_NAME")
-if [ -z "$IS_NAME_PROPER" ]; then
+if echo "$ISSUER_CM" | grep "name: $ISSUER_NAME"; then
+  echo "Name is proper"
+else
   echo "Issuer name should be $ISSUER_NAME. Exiting..."
   exit 1
 fi
@@ -103,13 +105,13 @@ if [ "$IS_SELF_SIGNED" == "true" ]; then
 
   while [ ${SECONDS} -lt ${END_TIME} ]; do
 
-    KYMA_CA_CERT=$(kubectl get secret ${KYMA_SECRET_NAME} -n istio-system -o jsonpath="{.data['ca\.crt']}")
+    KYMA_CA_CERT=$(kubectl get secret ${KYMA_SECRET_NAME} -n istio-system -o jsonpath="{.data['ca\.crt']}" --ignore-not-found)
 
     if [ -n "$KYMA_CA_CERT"  ]; then
       echo "Secret is ready. Copying the CA certificate to Secret ingress-tls-cert/kyma-system"
 
       kubectl create secret generic -n kyma-system ingress-tls-cert \
-                --from-literal tls.crt="$(echo "$KYMA_CA_CERT" | base64 -D)" --dry-run -o yaml \
+                --from-literal tls.crt="$(echo "$KYMA_CA_CERT" | base64 --decode)" --dry-run -o yaml \
                 | kubectl apply -f -
       exit 0
     fi

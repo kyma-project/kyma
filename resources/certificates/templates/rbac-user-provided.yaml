@@ -49,7 +49,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "patch", "update"]
+    verbs: ["get", "create", "patch", "update"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
