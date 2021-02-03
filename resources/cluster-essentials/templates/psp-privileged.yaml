@@ -9,6 +9,8 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation"
 spec:
   allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - '*'
   privileged: true
   fsGroup:
     rule: RunAsAny
