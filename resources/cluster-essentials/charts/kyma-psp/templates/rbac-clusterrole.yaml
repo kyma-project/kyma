@@ -4,8 +4,8 @@ kind: ClusterRole
 metadata:
   name: psp-kyma-privileged
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["podsecuritypolicy"]
+- apiGroups: ["policy"] # "" indicates the core API group
+  resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames: ["kyma.privileged"]
 ---
@@ -14,7 +14,7 @@ kind: ClusterRole
 metadata:
   name: psp-kyma-unprivileged
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["podsecuritypolicy"]
+- apiGroups: ["policy"] # "" indicates the core API group
+  resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames: ["kyma.unprivileged"]
