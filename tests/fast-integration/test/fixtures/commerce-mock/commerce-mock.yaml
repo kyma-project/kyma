@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
         #      - image: eu.gcr.io/kyma-project/xf-application-mocks/commerce-mock:latest
-        - image: ghcr.io/pbochynski/commerce-mock-lite:0.4 # TODO: change it to proper image
+        #- image: ghcr.io/pbochynski/commerce-mock-lite:0.4 # TODO: change it to proper image
+        - image: crabtree/commerce-mock-lite:0.4-fix3 # TODO: change it to proper image
           imagePullPolicy: Always
           name: commerce-mock
           ports:
@@ -77,10 +78,3 @@ spec:
     host: commerce
     name: commerce-mock
     port: 10000
----
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: Application
-metadata:
-  name: commerce
-spec:
-  description: Commerce mock

@@ -3,6 +3,7 @@ const {
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
+  connectMock,
 } = require("./fixtures/commerce-mock");
 const {
   printRestartReport,
@@ -20,9 +21,9 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockTestFixture("mocks", testNamespace).catch((err) => {
+    await ensureCommerceMockTestFixture("mocks", testNamespace, connectMock(testNamespace)).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockTestFixture("mocks", testNamespace);
+      return ensureCommerceMockTestFixture("mocks", testNamespace, connectMock(testNamespace))
     });
   });
 

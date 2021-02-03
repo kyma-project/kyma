@@ -22,14 +22,33 @@ const {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForTokenRequest,
+  waitForCompassConnection,
   deleteAllK8sResources,
   k8sAppsApi,
   k8sDynamicApi,
   deleteNamespaces,
+  debug,
+  toBase64,
 } = require("../../../utils");
+
+const {
+  removeScenarioFromCompass,
+  addScenarioInCompass,
+  queryRuntimesForScenario,
+  queryApplicationsForScenario,
+  registerOrReturnApplication
+} = require("../../../compass");
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
+  {
+    encoding: "utf8",
+  }
+);
+
+const applicationMockYaml = fs.readFileSync(
+  path.join(__dirname, "./application.yaml"),
   {
     encoding: "utf8",
   }
@@ -41,8 +60,27 @@ const lastorderFunctionYaml = fs.readFileSync(
     encoding: "utf8",
   }
 );
+
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
+const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
+
+function namespaceObj(name) {
+  return {
+    apiVersion: "v1",
+    kind: "Namespace",
+    metadata: { name },
+  };
+}
+
+function serviceInstanceObj(name, serviceClassExternalName) {
+  return {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceInstance",
+    metadata: { name },
+    spec: { serviceClassExternalName },
+  };
+}
 
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
@@ -162,64 +200,73 @@ async function registerAllApis(mockHost) {
   return remoteApis;
 }
 
-function namespaceObj(name) {
-  return {
-    apiVersion: "v1",
-    kind: "Namespace",
-    metadata: { name },
-  };
+function connectMock(targetNamespace) {
+  return async function(mockHost) {
+    await k8sApply(applicationObjs);
+
+    const tokenRequest = {
+      apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
+      kind: "TokenRequest",
+      metadata: { name: "commerce", namespace: targetNamespace },
+    };
+
+    await k8sDynamicApi.delete(tokenRequest).catch(() => {}); // Ignore delete error
+    await k8sDynamicApi.create(tokenRequest);
+    const tokenObj = await waitForTokenRequest("commerce", targetNamespace);
+    
+    const pairingBody = {
+      token: tokenObj.status.url,
+      baseUrl: `https://${mockHost}`,
+      insecure: true,
+    };
+    
+    await connectCommerceMock(mockHost, pairingBody);
+    await ensureApplicationMapping("commerce", targetNamespace);
+  }
 }
 
-async function connectMock(mockHost, targetNamespace) {
-  const tokenRequest = {
+function connectMockCompass(client, appName, scenarioName, targetNamespace) {
+  return async function (mockHost) {
+    const appID = await registerOrReturnApplication(client, appName, scenarioName);
+    debug(`Application ID in Compass ${appID}`);
+
+    const pairingData = await client.requestOneTimeTokenForApplication(appID);
+    const pairingToken = toBase64(JSON.stringify(pairingData));
+    const pairingBody = {
+      token: pairingToken,
+      baseUrl: mockHost,
+      insecure: false
+    };
+    
+    await connectCommerceMock(mockHost, pairingBody);
+    await ensureApplicationMapping(`mp-${appName}`, targetNamespace);
+  }
+}
+
+async function ensureApplicationMapping(name, ns) {
+  const applicationMapping = {
     apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
-    kind: "TokenRequest",
-    metadata: { name: "commerce", namespace: targetNamespace },
-  };
-
-  const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${targetNamespace}/tokenrequests`;
-
-  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForK8sObject(
-    path,
-    {},
-    (type, apiObj, watchObj) => {
-      return (
-        watchObj.object.status &&
-        watchObj.object.status.state == "OK" &&
-        watchObj.object.status.url
-      );
-    },
-    5 * 1000,
-    "Wait for TokenRequest timeout"
-  );
-  const res = await axios
-    .post(
-      `https://${mockHost}/connection`,
-      {
-        token: tokenObj.status.url,
-        baseUrl: `https://${mockHost}`,
-        insecure: true,
-      },
-      {
-        headers: {
-          "content-type": "application/json",
-        },
-        timeout: 5000,
-      }
-    )
-    .catch((err) => {
-      throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
-    });
+    kind: "ApplicationMapping",
+    metadata: { name: name, namespace: ns }
+  }
+  await k8sDynamicApi.delete(applicationMapping).catch(() => {}); // Ignore delete error
+  return await k8sDynamicApi.create(applicationMapping);
 }
-function serviceInstanceObj(name, serviceClassExternalName) {
-  return {
-    apiVersion: "servicecatalog.k8s.io/v1beta1",
-    kind: "ServiceInstance",
-    metadata: { name },
-    spec: { serviceClassExternalName },
+
+async function connectCommerceMock(mockHost, tokenData) {
+  const url = `https://${mockHost}/connection`;
+  const body = tokenData;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    }
   };
+
+  try {
+    await axios.post(url, body, params);
+  } catch(err) {
+    throw new Error(`Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`);
+  }
 }
 
 async function patchAppGatewayDeployment() {
@@ -271,31 +318,13 @@ async function patchAppGatewayDeployment() {
   return patchedDeployment;
 }
 
-async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
-  const serviceBinding = {
-    apiVersion: "servicecatalog.k8s.io/v1beta1",
-    kind: "ServiceBinding",
-    metadata: { name: "commerce-binding" },
-    spec: {
-      instanceRef: { name: "commerce-webservices" },
-    },
-  };
-  const sbu = {
-    apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
-    kind: "ServiceBindingUsage",
-    metadata: { name: "commerce-lastorder-sbu" },
-    spec: {
-      serviceBindingRef: { name: "commerce-binding" },
-      usedBy: { kind: "serverless-function", name: "lastorder" },
-    },
-  };
+async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace, connectFn) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
-  await patchAppGatewayDeployment();
   await retryPromise(
     () =>
       axios.get(`https://${mockHost}/local/apis`).catch((err) => {
@@ -305,20 +334,13 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
     3000
   );
 
-  await retryPromise(() => connectMock(mockHost, targetNamespace), 10, 3000);
+  await retryPromise(() => connectFn(mockHost), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
-  const webServicesSC = await waitForServiceClass(
-    "webservices",
-    targetNamespace,
-    300 * 1000
-  );
-  const eventsSC = await waitForServiceClass("events", targetNamespace);
-  const webServicesSCExternalName = webServicesSC.spec.externalName;
-  const eventsSCExternalName = eventsSC.spec.externalName;
+  const commerceSC = await waitForServiceClass("commerce", targetNamespace, 300 * 1000);
+  const commerceSCExternalName = commerceSC.spec.externalName;
   const serviceCatalogObjs = [
-    serviceInstanceObj("commerce-webservices", webServicesSCExternalName),
-    serviceInstanceObj("commerce-events", eventsSCExternalName),
+    serviceInstanceObj("commerce", commerceSCExternalName),
   ];
 
   await retryPromise(
@@ -326,13 +348,32 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
     5,
     2000
   );
-  await waitForServiceInstance("commerce-webservices", targetNamespace);
-  await waitForServiceInstance("commerce-events", targetNamespace);
+  await waitForServiceInstance("commerce", targetNamespace);
+  
+  const serviceBinding = {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceBinding",
+    metadata: { name: "commerce-binding" },
+    spec: {
+      instanceRef: { name: "commerce" },
+    },
+  };
   await k8sApply([serviceBinding], targetNamespace, false);
   await waitForServiceBinding("commerce-binding", targetNamespace);
 
-  await k8sApply([sbu], targetNamespace);
+  const serviceBindingUsage = {
+    apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
+    kind: "ServiceBindingUsage",
+    metadata: { name: "commerce-lastorder-sbu" },
+    spec: {
+      serviceBindingRef: { name: "commerce-binding" },
+      usedBy: { kind: "serverless-function", name: "lastorder" },
+    },
+  };
+  await k8sApply([serviceBindingUsage], targetNamespace);
   await waitForServiceBindingUsage("commerce-lastorder-sbu", targetNamespace);
+
+  await patchAppGatewayDeployment();
 
   return mockHost;
 }
@@ -366,9 +407,59 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   });
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
+
+async function registerKymaInCompass(client, runtimeName, scenarioName) {
+  await addScenarioInCompass(client, scenarioName);
+  const runtimeID = await client.registerRuntime(runtimeName, scenarioName);
+  debug(`Runtime ID in Compass ${runtimeID}`);
+  
+  const pairingData = await client.requestOneTimeTokenForRuntime(runtimeID);
+  const compassAgentCfg = {
+    apiVersion: "v1",
+    kind: "Secret",
+    metadata: {
+      name: "compass-agent-configuration",
+    },
+    data: {
+      CONNECTOR_URL: toBase64(pairingData.connectorURL),
+      RUNTIME_ID: toBase64(runtimeID),
+      TENANT: toBase64(client.tenantID),
+      TOKEN: toBase64(pairingData.token),
+    }
+  };
+  await k8sApply([compassAgentCfg], "compass-system");
+  await waitForCompassConnection("compass-connection");
+}
+
+async function unregisterKymaFromCompass(client, scenarioName) {
+  // Cleanup Compass
+  const applications = await queryApplicationsForScenario(client, scenarioName);
+  for(let application of applications) {
+    await client.unregisterApplication(application.id);
+  }
+
+  // TODO: refactor this step to cover runtime agent deleting the application from Kyma
+  // and then remove the runtime from compass
+
+  // Delete connection between Compass Agent and Compass
+  deleteAllK8sResources("/api/v1/namespaces/compass-system/secrets/compass-agent-configuration");
+  deleteAllK8sResources("/apis/compass.kyma-project.io/v1alpha1/compassconnections/compass-connection");
+
+  const runtimes = await queryRuntimesForScenario(client, scenarioName);
+  for(let runtime of runtimes) {
+    await client.unregisterRuntime(runtime.id);
+  }
+  
+  await removeScenarioFromCompass(client, scenarioName);
+}
+
 module.exports = {
   ensureCommerceMockTestFixture,
   sendEventAndCheckResponse,
   checkAppGatewayResponse,
   cleanMockTestFixture,
+  connectMock,
+  connectMockCompass,
+  registerKymaInCompass,
+  unregisterKymaFromCompass,
 };

@@ -58,11 +58,6 @@ spec:
     name: lastorder
     port: 80
 ---
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce
----
 apiVersion: eventing.knative.dev/v1alpha1
 kind: Trigger
 metadata:

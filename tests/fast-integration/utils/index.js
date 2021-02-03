@@ -336,6 +336,22 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   );
 }
 
+function waitForTokenRequest(name, namespace, timeout = 5000) {
+  const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
+  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name === name && watchObj.object.status && watchObj.object.status.state == "OK"
+        && watchObj.object.status.url;
+    }, timeout, "Wait for TokenRequest timeout");
+}
+
+function waitForCompassConnection(name, _namespace, timeout = 90000) {
+  const path = `/apis/compass.kyma-project.io/v1alpha1/compassconnections`;
+  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
+    return watchObj.object.metadata.name === name && watchObj.object.status.connectionState
+      && ["Connected", "Synchronized"].indexOf(watchObj.object.status.connectionState) !== -1
+  }, timeout, `Wait for Compass connection ${name} timeout (${timeout} ms)`);
+}
+
 async function deleteNamespaces(namespaces, wait = true) {
   let result = await k8sCoreV1Api.listNamespace();
   let allNamespaces = result.body.items.map((i) => i.metadata.name);
@@ -444,9 +460,6 @@ async function deleteAllK8sResources(
   retries = 2,
   interval = 1000
 ) {
-  const options = {
-    headers: { "Content-type": "application/merge-patch+json" },
-  };
   try {
     let i = 0;
     while (i < retries) {
@@ -458,42 +471,27 @@ async function deleteAllK8sResources(
         qs: query,
       });
       const body = JSON.parse(response.body);
-      if (body.items.length == 0) {
-        break;
-      }
-      for (let o of body.items) {
-        if (o.metadata.finalizers && o.metadata.finalizers.length) {
-          const obj = {
-            kind: o.kind,
-            apiVersion: o.apiVersion,
-            metadata: {
-              name: o.metadata.name,
-              namespace: o.metadata.namespace,
-              finalizers: [],
-            },
-          };
-          debug("Removing finalizers from", obj);
-          await k8sDynamicApi
-            .patch(obj, undefined, undefined, undefined, undefined, options)
-            .catch(ignore404);
+      if (body.items && body.items.length) {
+        for (let o of body.items) {
+          deleteK8sResource(o);
         }
-        await k8sDynamicApi
-          .requestPromise({
-            url: k8sDynamicApi.basePath + o.metadata.selfLink,
-            method: "DELETE",
-          })
-          .catch(ignore404);
-        debug(
-          "Deleted resource:",
-          o.metadata.name,
-          "namespace:",
-          o.metadata.namespace
-        );
+      } else if(!body.items) {
+        deleteK8sResource(body);
       }
     }
   } catch (e) {
     debug("Error during delete ", path, String(e).substring(0, 1000));
   }
+}
+
+async function deleteK8sResource(obj) {
+  if (obj.metadata.finalizers && o.metadata.finalizers.length) {
+      const obj = { kind: obj.kind, apiVersion: obj.apiVersion, metadata: { name: obj.metadata.name, namespace: obj.metadata.namespace, finalizers: [] } }
+      debug("Removing finalizers from", obj)
+      await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options).catch(ignore404);
+  }
+  await k8sDynamicApi.requestPromise({ url: k8sDynamicApi.basePath + obj.metadata.selfLink, method: 'DELETE' }).catch(ignore404);
+  debug("Deleted resource:", obj.metadata.name, 'namespace:', obj.metadata.namespace);
 }
 
 async function getContainerRestartsForAllNamespaces() {
@@ -569,18 +567,36 @@ ${k8s.dumpYaml(report)}
 };
 
 function ignoreNotFound(e) {
-  if (e.body && e.body.reason == "NotFound") {
+  if (e.body && e.body.reason == 'NotFound') {
+    return;
   } else {
     console.log(e.body);
     throw e;
   }
 }
+
 const DEBUG = process.env.DEBUG;
 
 function debug() {
   if (DEBUG) {
     console.log.apply(null, arguments);
   }
+}
+
+function toBase64(s) {
+  return Buffer
+    .from(s)
+    .toString("base64");
+}
+
+function genRandom(len) {
+  let res = "";
+  const chrs = "abcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < len; i++ ) {
+    res += chrs.charAt(Math.floor(Math.random() * chrs.length));
+  }
+
+  return res;
 }
 
 module.exports = {
@@ -600,6 +616,8 @@ module.exports = {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForTokenRequest,
+  waitForCompassConnection,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
@@ -607,6 +625,8 @@ module.exports = {
   k8sDynamicApi,
   k8sAppsApi,
   getContainerRestartsForAllNamespaces,
-  debug,
   printRestartReport,
+  debug,
+  toBase64,
+  genRandom
 };

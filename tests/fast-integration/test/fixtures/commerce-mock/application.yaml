@@ -1,0 +1,6 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: commerce
+spec:
+  description: Commerce mock
