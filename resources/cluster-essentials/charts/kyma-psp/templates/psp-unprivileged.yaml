@@ -6,3 +6,11 @@ metadata:
 spec:
   allowPrivilegeEscalation: false
   privileged: false
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
