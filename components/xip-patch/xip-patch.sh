@@ -140,9 +140,26 @@ EOF
     kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
 }
 
+echo "Checking if running on Gardener"
+
+GARDENER_ENVIRONMENT=false
+
+SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"
+if [ -n "$SHOOT_INFO" ]; then
+  requestGardenerCerts
+  INGRESS_DOMAIN=${DOMAIN}
+  INGRESS_TLS_CERT=${TLS_CERT}
+  INGRESS_TLS_KEY=${TLS_KEY}
+  GARDENER_ENVIRONMENT=true
+fi
+
+INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
+INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
+INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
+
 echo "Checking if running on local.kyma.dev"
 
-if [ "${GLOBAL_DOMAIN}" == "local.kyma.dev" ]; then
+if [ "${INGRESS_DOMAIN}" == "local.kyma.dev" ]; then
     echo "Configure Kubernetes DNS to support local.kyma.dev"
 
     COREDNS_PATCH=$(cat << EOF
@@ -174,23 +191,6 @@ EOF
 
     kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
 fi
-
-echo "Checking if running on Gardener"
-
-GARDENER_ENVIRONMENT=false
-
-SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"
-if [ -n "$SHOOT_INFO" ]; then
-  requestGardenerCerts
-  INGRESS_DOMAIN=${DOMAIN}
-  INGRESS_TLS_CERT=${TLS_CERT}
-  INGRESS_TLS_KEY=${TLS_KEY}
-  GARDENER_ENVIRONMENT=true
-fi
-
-INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
-INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
-INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
 
 if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
     echo "Certificate provided, but domain is missing!"
