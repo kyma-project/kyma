@@ -22,15 +22,12 @@ spec:
     - operation:
         paths: ["/api/prom/query","/api/prom/label/*","/api/prom/tail"]
         methods: ["GET", "OPTIONS"]
-  # Grafana having SA can query v1 API
-  {{- if or .Values.kyma.auth.useKymaGroups .Values.kyma.auth.groups }}
-  - from:
-    - source:
-        requestPrincipals: ["*"]
+    {{- if or .Values.kyma.auth.useKymaGroups .Values.kyma.auth.groups }}
     when:
     - key: request.auth.claims[groups]
       values: [{{ template "kyma.auth.groups" . }}]
-  {{- end }}
+    {{- end }}
+  # Grafana having SA can query v1 API
   - from:
     - source:
         principals:
