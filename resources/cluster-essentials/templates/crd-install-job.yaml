@@ -11,7 +11,7 @@ metadata:
   name: {{ .Release.Name }}-crd-install
   annotations:
     "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
-    "helm.sh/hook": "post-install, post-upgrade"
+    "helm.sh/hook": "pre-install, pre-upgrade"
     "helm.sh/hook-weight": "10"
 spec:
   activeDeadlineSeconds: 300
@@ -41,8 +41,6 @@ spec:
           limits:
             memory: 256Mi
             cpu: 200m
-        securityContext:
-{{- toYaml .Values.securityContext | nindent 10 }}
         volumeMounts:
         {{ range $idx, $_ := until $configMapLen }}
         - name: crd-{{ $idx }}
