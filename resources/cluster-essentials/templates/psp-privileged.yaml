@@ -11,6 +11,9 @@ spec:
   allowPrivilegeEscalation: true
   allowedCapabilities:
   - '*'
+  hostPorts:
+  - max: 65535
+    min: 0
   privileged: true
   fsGroup:
     rule: RunAsAny
