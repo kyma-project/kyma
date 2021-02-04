@@ -1,15 +1,5 @@
 set -e
-set -o pipefail
-
-for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_PROXY_SECRET_NAME APISERVER_PROXY_SECRET_NAMESPACE IS_SELF_SIGNED; do
-    if [ -z "${!var}" ] ; then
-        echo "ERROR: $var is not set"
-        discoverUnsetVar=true
-    fi
-done
-if [ "${discoverUnsetVar}" = true ] ; then
-    exit 1
-fi
+set -eo pipefail
 
 echo "Checking if running in user-provided mode"
 
@@ -20,6 +10,16 @@ if [ -z "$ISSUER_CM" ]; then
 fi
 
 echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE found."
+
+for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_PROXY_SECRET_NAME APISERVER_PROXY_SECRET_NAMESPACE IS_SELF_SIGNED; do
+  if [ -z "${!var}" ] ; then
+    echo "ERROR: $var is not set"
+    discoverUnsetVar=true
+  fi
+done
+if [ "${discoverUnsetVar}" = true ] ; then
+    exit 1
+fi
 
 echo "Checking if Certificates are already present on the cluster"
 

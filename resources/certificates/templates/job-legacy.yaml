@@ -17,18 +17,16 @@ spec:
             - bash
             - "-c"
             - |
-{{ .Files.Get "files/user-provided.sh" | printf "%s" | indent 16 }}
+          {{ .Files.Get "files/user-provided.sh" | printf "%s" | indent 16 }}
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           name: installer
           env:
-            - name: ISSUER_CM_NAME
-              value: "{{ .Values.userProvided.issuer.configMap.name }}"
-            - name: ISSUER_CM_NAMESPACE
-              value: "{{ .Values.userProvided.issuer.configMap.namespace }}"
             - name: DOMAIN
               value: "{{ .Values.global.domainName }}"
-            - name: ISSUER_NAME
-              value: "{{ .Values.userProvided.issuer.name}}"
+            - name: TLS_KEY
+              value: "{{ .Values.global.tlsKey }}"
+            - name: TLS_CRT
+              value: "{{ .Values.global.tlsCrt }}"
             - name: KYMA_SECRET_NAME
               value: "{{ .Values.certificates.kyma.name }}"
             - name: KYMA_SECRET_NAMESPACE
@@ -37,7 +35,5 @@ spec:
               value: "{{ .Values.certificates.apiserverProxy.name }}"
             - name: APISERVER_PROXY_SECRET_NAMESPACE
               value: "{{ .Values.certificates.apiserverProxy.namespace }}"
-            - name: IS_SELF_SIGNED
-              value: "{{ .Values.global.certificates.selfSigned }}"
       restartPolicy: Never
       serviceAccountName: {{ template "certificates.name" . }}-user-provided
