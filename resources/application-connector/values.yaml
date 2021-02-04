@@ -24,9 +24,6 @@ global:
       name: kyma-gateway
       nameMtls: kyma-gateway-application-connector
       namespace: kyma-system
-  podSecurityPolicy:
-    enabled: true
-    runAsUser: 1000
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
