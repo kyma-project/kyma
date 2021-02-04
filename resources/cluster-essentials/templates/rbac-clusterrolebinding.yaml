@@ -3,7 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: kyma:psp:privileged
+  name: kyma:all:psp:privileged
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
@@ -27,7 +27,7 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: kyma:psp:unprivileged
+  name: kyma:all:psp:unprivileged
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
@@ -47,3 +47,26 @@ subjects:
   name: system:serviceaccounts
   apiGroup: rbac.authorization.k8s.io
 {{- end -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma:kube-system:psp:privileged
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma:psp:privileged
+subjects:
+- kind: Group
+  name: system:authenticated:kube-system
+  apiGroup: rbac.authorization.k8s.io
+- kind: Group
+  name: system:unauthenticated:kube-system
+  apiGroup: rbac.authorization.k8s.io
+- kind: Group
+  name: system:serviceaccounts:kube-system
+  apiGroup: rbac.authorization.k8s.io
