@@ -10,6 +10,7 @@ global:
     enabled: false
 
 knative-eventing:
+  loglevel: info
   channel:
     default:
       # default channel to Natss
