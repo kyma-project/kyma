@@ -75,7 +75,8 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
 	istioClient securityclientv1beta1.SecurityV1beta1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector appSvcIDSelector,
-	apiPkgCredsCreator apiPackageCredentialsCreator, validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) *ProvisionService {
+	apiPkgCredsCreator apiPackageCredentialsCreator,
+	validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError, newEventingFlow bool) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:         instanceInserter,
 		instanceStateGetter:      instanceStateGetter,
@@ -93,6 +94,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 		apiPkgCredCreator:        apiPkgCredsCreator,
 		validateProvisionRequest: validateReq,
 		log:                      log.WithField("service", "provisioner"),
+		newEventingFlow:          newEventingFlow,
 	}
 }
 
@@ -118,6 +120,8 @@ type ProvisionService struct {
 	maxWaitTime time.Duration
 	log         logrus.FieldLogger
 	asyncHook   func()
+
+	newEventingFlow bool
 }
 
 // Provision action
@@ -260,27 +264,29 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 		return
 	}
 
-	// create Kyma EventActivation
-	if err := svc.createEaOnSuccessProvision(appName, appSvcID, ns, displayName); err != nil {
-		opDesc := fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
-		svc.updateStateFailed(iID, opID, opDesc)
-		return
-	}
+	if !svc.newEventingFlow {
+		// create Kyma EventActivation
+		if err := svc.createEaOnSuccessProvision(appName, appSvcID, ns, displayName); err != nil {
+			opDesc := fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
+			svc.updateStateFailed(iID, opID, opDesc)
+			return
+		}
 
-	// persist Knative Subscription
-	if err := svc.persistKnativeSubscription(appName, appSvcID, ns); err != nil {
-		svc.log.Printf("Error persisting Knative Subscription: %v", err)
-		opDesc := fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
-		svc.updateStateFailed(iID, opID, opDesc)
-		return
-	}
+		// persist Knative Subscription
+		if err := svc.persistKnativeSubscription(appName, appSvcID, ns); err != nil {
+			svc.log.Printf("Error persisting Knative Subscription: %v", err)
+			opDesc := fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
+			svc.updateStateFailed(iID, opID, opDesc)
+			return
+		}
 
-	// enable the namespace default Knative Broker
-	if err := svc.enableDefaultKnativeBroker(ns); err != nil {
-		opDesc := fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
-			" on error: %s", ns, err)
-		svc.updateStateFailed(iID, opID, opDesc)
-		return
+		// enable the namespace default Knative Broker
+		if err := svc.enableDefaultKnativeBroker(ns); err != nil {
+			opDesc := fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
+				" on error: %s", ns, err)
+			svc.updateStateFailed(iID, opID, opDesc)
+			return
+		}
 	}
 
 	// CreateOrUpdate Istio PeerAuthentication

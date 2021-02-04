@@ -40,10 +40,15 @@ import (
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
 // BEWARE: too short period time will increase the CPU load.
-const informerResyncPeriod = 30 * time.Minute
+const (
+	informerResyncPeriod = 30 * time.Minute
+	Verbose              = "verbose"
+	NewEventingFlowFlag  = "new-eventing-flow"
+)
 
 func main() {
-	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
+	verbose := flag.Bool(Verbose, false, "specify if log verbosely loading configuration")
+	newEventingFlow := flag.Bool(NewEventingFlowFlag, false, "specify if the new eventing flow should be used")
 	flag.Parse()
 	cfg, err := config.Load(*verbose)
 	fatalOnError(err)
@@ -76,7 +81,7 @@ func main() {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
-		istioClient, &livenessCheckStatus)
+		istioClient, &livenessCheckStatus, *newEventingFlow)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -90,6 +95,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	knClient knative.Client,
 	istioClient securityclientv1beta1.SecurityV1beta1Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
+	newEventingFlow bool,
 ) *broker.Server {
 
 	// create storage factory
@@ -140,7 +146,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
 		&mClient, knClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
-		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, newEventingFlow)
 
 	// wait for api server
 	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {
