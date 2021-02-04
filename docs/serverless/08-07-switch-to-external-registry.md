@@ -3,11 +3,13 @@ title: Switch to an external Docker registry in the runtime
 type: Tutorials
 ---
 
-This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) after you already installed Serverless. You must have at least one Function running in the `default` Namespace in which you will create a Secret custom resource (CR). The Secret will contain credentials allowing Kaniko - the job build tool - to rebuild the Function image and push it to one of these external registries:
+This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example shows the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one these registry:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
+
+These credentials will allow Kaniko - the job build tool - to push all images of Functions created in the `default` Namespace to the selected external registry.
 
 > **CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
 
@@ -76,8 +78,8 @@ EOF
 
 ### Test the registry switch
 
-To see if the Function's Deployment points to the external registry, run this command:
+[Create a Function](#tutorials-create-an-inline-function) in the `default` Namespace and check if the Function's Deployment points to the external registry using this command:
 
 ```bash
-kubectl get pods -n default serverless.kyma-project.io/resource=deployment -o jsonpath='{ ...image }'
+kubectl get pods -n default -l serverless.kyma-project.io/resource=deployment -o jsonpath='{ ...image }'
 ```

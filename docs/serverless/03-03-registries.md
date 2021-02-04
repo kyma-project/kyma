@@ -21,6 +21,8 @@ Serverless supports two ways of connecting to an external registry:
 
 When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used to pull and push your Functions' images to the internal registry.
 
+> **NOTE:** If you [install Serverless with overrides](#tutorials-set-an-external-docker-registry) disabling the internal registry and specifying some external one to use, the `serverless-registry-config-default` Secret will contain the credentials to access the specified external registry instead.
+
 Once you have Serverless up and running, you can switch to an external registry:
 
 - Per Namespace, and have even multiple external registries in a cluster, but no more than one per Namespace.
@@ -31,6 +33,7 @@ Once you have Serverless up and running, you can switch to an external registry:
 To switch to an external registry in a given Namespace, create a Secret CR that:
 
 - Is named `serverless-registry-config`.
+- Is of type `kubernetes.io/dockerconfigjson`.
 - Has the `serverless.kyma-project.io/remote-registry: config` label.
 - Contains these keys with valid values pointing to the external registry:
   - **username**
@@ -64,9 +67,9 @@ If you want to switch to one external registry in the whole cluster, you must cr
 
 ### How this works
 
-This implementation has a fallback mechanism that works as follows:
+ Provided that Serverless was installed with enabled internal registry, there is a fallback mechanism that works as follows:
 
 1. Every 5 minutes, Function Controller checks if there is the `serverless-registry-config` Secret CR in the Namespace with your Function specifying the external registry to push the Function's image to.
 2. If it doesn't find such a Secret CR, Function Controller uses the credentials to the internal registry specified in the default `serverless-registry-config-default` Secret CR.
 
-This mechanism also leaves room for a lot of flexibility as you can easily switch between external registries or move back to the internal one. If you remove the `serverless-registry-config` Secret CR or update it with credentials to a different external registry, you don't lose any images. Function Controller detects any changes in the Secret CR and the images are rebuilt automatically, using cache and delta updates. If you modify the username and password to the registry, the [admission webhook](#details-supported-webhooks-admission-webhook) automatically modifies the `.dockerconfigjson` entry in the Secret CR, allowing Kaniko to push images to the registry with correct credentials.
+This mechanism also leaves room for a lot of flexibility as you can easily switch between external registries or move back to the internal one. If you remove the `serverless-registry-config` Secret CR or update it with credentials to a different external registry, you don't lose any images. Function Controller detects any changes in the Secret CR and the images are rebuilt automatically, using cache and delta updates. If you modify the username and password to the registry, these credentials are used by deployed functions that need to pull the images from the registry. The [admission webhook](#details-supported-webhooks-admission-webhook), on the other hand, automatically modifies the `.dockerconfigjson` entry in the Secret CR, pointing Kaniko to correct credentials to use when pushing images to the registry.
