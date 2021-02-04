@@ -9,7 +9,7 @@ This tutorial shows how you can [switch to an external Docker registry](#details
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
-These credentials will allow Kaniko - the job build tool - to push all images of Functions created in the `default` Namespace to the selected external registry.
+Any Function deployed in the `default` Namespace will use these credentials to pull the images from the selected external registry. They will also allow Kaniko - the job build tool - to push any newly built or rebuilt images to this registry.
 
 > **CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
 
