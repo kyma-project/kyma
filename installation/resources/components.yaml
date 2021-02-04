@@ -8,6 +8,10 @@ prerequisites:
     namespace: "kyma-installer"
 components:
   - name: "testing"
+  - name: "logging"
+  - name: "tracing"
+  - name: "kiali"
+  - name: "monitoring"
   - name: "knative-eventing"
     namespace: "knative-eventing"
   - name: "dex"
@@ -31,7 +35,4 @@ components:
   - name: "application-connector"
     namespace: "kyma-integration"
   - name: "console"
-  - name: "logging"
-  - name: "tracing"
-  - name: "kiali"
-  - name: "monitoring"
+
