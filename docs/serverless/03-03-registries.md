@@ -19,9 +19,9 @@ Serverless supports two ways of connecting to an external registry:
 
 ## Switching registries in the runtime
 
-When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used by Kubernetes to pull deployed Functions' images from the internal registry. They also allow Kaniko to push any images to the registry each time a Function is created or updated.
+When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used by Kubernetes to pull deployed Functions' images from the internal registry. These credentials also allow Kaniko to push any images to the registry each time a Function is created or updated.
 
-> **NOTE:** If you [install Serverless with overrides](#tutorials-set-an-external-docker-registry), disabling the internal registry and specifying an external one to use, the `serverless-registry-config-default` Secret will contain credentials to access the specified external registry instead.
+> **NOTE:** If you [install Serverless with overrides](#tutorials-set-an-external-docker-registry), you disable the internal registry and specify an external one to use. The `serverless-registry-config-default` Secret will then contain credentials to the specified external registry instead of the internal one.
 
 Once you have Serverless up and running, you can switch to an external registry:
 
@@ -61,7 +61,7 @@ See this example:
 
 ### Cluster-wide external registry
 
-If you want to switch to one external registry in the whole cluster, you must create a Secret CR in the `kyma-system` Namespace. The Secret CR must meet the same [requirements](#namespace-scoped-external-registry) as in the case of the Namespace-scoped setup, but you must also add the `serverless.kyma-project.io/config: credentials` label. This label ensures the Secret CR gets propagated to all Namespaces.
+To switch to one external registry in the whole cluster, you must create a Secret CR in the `kyma-system` Namespace. The Secret CR must meet the same [requirements](#namespace-scoped-external-registry) as in the case of the Namespace-scoped setup, but you must also add the `serverless.kyma-project.io/config: credentials` label. This label ensures the Secret CR gets propagated to all Namespaces.
 
 > **NOTE:** The cluster-wide configuration takes precedence over any Namespace-scoped one.
 

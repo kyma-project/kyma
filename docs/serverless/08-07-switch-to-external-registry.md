@@ -3,7 +3,7 @@ title: Switch to an external Docker registry in the runtime
 type: Tutorials
 ---
 
-This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registry:
+This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
