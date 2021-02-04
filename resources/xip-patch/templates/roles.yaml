@@ -45,5 +45,9 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
-  resourceNames: ["shoot-info", "coredns"]
-  verbs: ["get", "patch"]
+  resourceNames: ["shoot-info"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["coredns"]
+  verbs: ["get","patch"]
