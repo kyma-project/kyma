@@ -76,8 +76,8 @@ It checks the following conditions for these CRs:
 
 There is also an additional, admission webhook that is only triggered in the scenario when you switch in the runtime from one registry to another.
 
-To switch registries in the runtime, you must create or update a Secret CR that complies with [specific requirements](#details-switching-registries-in-the-runtime). This Secret CR, among other details, contains a username and password to the registry. These credentials are used to authorize registry access for deployed Functions that need to pull images. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
+To switch registries in the runtime, you must create or update a Secret CR that complies with [specific requirements](#details-switching-registries-in-the-runtime). This Secret CR, among other details, contains a username and password to the registry. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. These encoded credentials also allow Kubernetes to pull images of deployed Functions from the registry. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
 
 ### Requirements
 
-This webhook is triggered every time you `CREATE` or `UPDATE` a Secret in any Namespace, provided the Secret contains the `serverless.kyma-project.io/remote-registry: config` label.
+This webhook is triggered every time you `CREATE` or `UPDATE` a Secret in any Namespace, as long as the Secret contains the `serverless.kyma-project.io/remote-registry: config` label.

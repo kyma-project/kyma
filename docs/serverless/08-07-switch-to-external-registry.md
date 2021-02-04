@@ -3,13 +3,13 @@ title: Switch to an external Docker registry in the runtime
 type: Tutorials
 ---
 
-This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example shows the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one these registry:
+This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-in-the-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registry:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
-Any Function deployed in the `default` Namespace will use these credentials to pull the images from the selected external registry. They will also allow Kaniko - the job build tool - to push any newly built or rebuilt images to this registry.
+After this change, any Function deployed in the `default` Namespace will store images in this registry.
 
 > **CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
 
