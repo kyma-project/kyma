@@ -22,7 +22,7 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     resourceNames: ['coredns']
-    verbs: ["patch"]
+    verbs: ["get", "patch"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -36,7 +36,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "update"]
+    verbs: ["get", "create", "update", "patch"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -50,7 +50,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["create", "update"]
+    verbs: ["get", "create", "update", "patch"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

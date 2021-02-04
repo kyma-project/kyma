@@ -1,16 +1,6 @@
 set -e
 set -eo pipefail
 
-echo "Checking if running in user-provided mode"
-
-ISSUER_CM="$(kubectl get configmap -n $ISSUER_CM_NAMESPACE $ISSUER_CM_NAME --ignore-not-found -o jsonpath='{.data.issuer}')"
-if [ -z "$ISSUER_CM" ]; then
-  echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE not present. Nothing to do here. Exiting..."
-  exit 0
-fi
-
-echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE found."
-
 for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_PROXY_SECRET_NAME APISERVER_PROXY_SECRET_NAMESPACE IS_SELF_SIGNED; do
   if [ -z "${!var}" ] ; then
     echo "ERROR: $var is not set"
@@ -20,6 +10,16 @@ done
 if [ "${discoverUnsetVar}" = true ] ; then
     exit 1
 fi
+
+echo "Checking if running in user-provided mode"
+
+ISSUER_CM="$(kubectl get configmap -n $ISSUER_CM_NAMESPACE $ISSUER_CM_NAME --ignore-not-found -o jsonpath='{.data.issuer}')"
+if [ -z "$ISSUER_CM" ]; then
+  echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE not present. Nothing to do here. Exiting..."
+  exit 0
+fi
+
+echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE found."
 
 echo "Checking if Certificates are already present on the cluster"
 

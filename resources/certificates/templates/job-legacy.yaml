@@ -6,7 +6,7 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-weight: "30"
-  name: {{ template "certificates.name" . }}-user-provided
+  name: {{ template "certificates.name" . }}-legacy
 spec:
   activeDeadlineSeconds: 1000
   backoffLimit: 1
@@ -17,7 +17,7 @@ spec:
             - bash
             - "-c"
             - |
-          {{ .Files.Get "files/user-provided.sh" | printf "%s" | indent 16 }}
+{{ .Files.Get "files/legacy.sh" | printf "%s" | indent 16 }}
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           name: installer
           env:
@@ -36,4 +36,4 @@ spec:
             - name: APISERVER_PROXY_SECRET_NAMESPACE
               value: "{{ .Values.certificates.apiserverProxy.namespace }}"
       restartPolicy: Never
-      serviceAccountName: {{ template "certificates.name" . }}-user-provided
+      serviceAccountName: {{ template "certificates.name" . }}-legacy
