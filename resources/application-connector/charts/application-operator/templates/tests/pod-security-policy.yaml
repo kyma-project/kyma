@@ -13,6 +13,9 @@ spec:
     ranges:
     - min: 1
       max: 65535
+  hostPorts:
+  - min: {{ .Values.tests.gateway.mockServicePort }}
+    max: {{ .Values.tests.gateway.mockServicePort }}
   runAsUser:
     rule: RunAsAny
   privileged: false

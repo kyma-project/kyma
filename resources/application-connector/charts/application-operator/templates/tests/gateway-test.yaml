@@ -48,7 +48,7 @@ spec:
             - containerPort: {{ .Values.tests.gateway.mockServicePort }}
               name: http-port
           securityContext:
-            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUer }}
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
       restartPolicy: Never
 ---
 apiVersion: v1
