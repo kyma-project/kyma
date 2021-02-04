@@ -21,8 +21,12 @@ func (r *FunctionReconciler) isOnHorizontalPodAutoscalerChange(instance *serverl
 	}
 
 	newHpa := r.buildHorizontalPodAutoscaler(instance, deployments[0].GetName())
-	return !(len(hpas) == 1 &&
-		r.equalHorizontalPodAutoscalers(hpas[0], newHpa))
+	scalingEnabled := isScalingEnabled(instance)
+	numHpa := len(hpas)
+
+	return (scalingEnabled && numHpa != 1) ||
+		(scalingEnabled && !r.equalHorizontalPodAutoscalers(hpas[0], newHpa)) ||
+		(!scalingEnabled && numHpa != 0)
 }
 
 func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string) (ctrl.Result, error) {
@@ -63,6 +67,10 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	}
 
 	return *first == *second
+}
+
+func isScalingEnabled(instance *serverlessv1alpha1.Function) bool {
+	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
 }
 
 func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPodAutoscaler) bool {

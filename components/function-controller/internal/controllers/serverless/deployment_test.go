@@ -323,7 +323,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.equalDeployments(tt.args.existing, tt.args.expected)
+			got := r.equalDeployments(tt.args.existing, tt.args.expected, true)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
