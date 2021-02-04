@@ -29,11 +29,11 @@ rules:
   resources: ["tokenrequests"]
   verbs: ["get", "create", "list", "update", "delete", "watch"]
 {{- if .Values.global.podSecurityPolicy.enabled }}
-  - apiGroups: ["extensions", "policy"]
-    resources: ["podsecuritypolicies"]
-    verbs: ["use"]
-    resourceNames:
-    - {{ .Chart.Name }}-tests
+- apiGroups: ["extensions", "policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:
+  - {{ .Chart.Name }}-tests
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
