@@ -8,6 +8,9 @@ loki:
       memory: 128Mi
   persistence:
     enabled: false
+  config:
+    server:
+      log_level: warn
 
 fluent-bit:
   resources:
@@ -17,6 +20,9 @@ fluent-bit:
     requests:
       cpu: 20m
       memory: 40Mi
+  conf:
+    Service:
+      Log_Level: warning
 
 logui:
   resources: 
