@@ -14,7 +14,7 @@ minio:
 
 image:
   repository: eu.gcr.io/kyma-project/rafter-controller-manager
-  tag: 3778b2ec
+  tag: 6d342230
   pullPolicy: IfNotPresent
 
 deployment:
@@ -199,3 +199,5 @@ envs:
     metadata:
       timeout:
         value: 1m
+  loglevel: "info"
+

@@ -1,0 +1,15 @@
+{{- if not .Values.global.isBEBEnabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "event-publisher-nats.fullname" . }}
+  labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "event-publisher-nats.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "event-publisher-nats.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

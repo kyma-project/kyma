@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "9e5c2a22"
+    tag: "PR-10434"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
 
 deployment:
   replicas: 1
@@ -126,14 +126,16 @@ containers:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imageRegistryDockerConfigSecretName:
-        value: '{{ template "fullname" . }}-image-pull-secret'
+      imageRegistryExternalDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config'
+      imageRegistryDefaultDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config-default'
       imagePullAccountName:
-        value: '{{ template "fullname" . }}'
+        value: '{{ template "fullname" . }}-function'
+      buildServiceAccountName:
+        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
-      kserviceRequeueDuration:
-        value: 5m
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
@@ -203,7 +205,7 @@ docker-registry:
   extraVolumes:
     - name: registry-credentials
       secret:
-        secretName: serverless-registry-credentials
+        secretName: serverless-registry-config-default
         items:
           - key: username
             path: username.txt

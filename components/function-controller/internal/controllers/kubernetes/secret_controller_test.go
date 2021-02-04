@@ -50,12 +50,15 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(result.Requeue).To(gomega.BeFalse())
 		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
 
+		updatedBase := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
+		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
 		secret := &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(secret, baseSecret)
 
 		ginkgo.By("updating the base Secret")
-		copy := baseSecret.DeepCopy()
+		copy := updatedBase.DeepCopy()
 		copy.Labels["test"] = "value"
 		copy.Data["test123"] = []byte("321tset")
 		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
@@ -83,6 +86,30 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(secret, copy)
 	})
+
+	ginkgo.It("should successfully delete propagated Secrets from user namespace when base Secret is deleted", func() {
+		ginkgo.By("reconciling the Secret")
+		result, err := reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+
+		updatedBase := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
+		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
+		secret := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(secret, baseSecret)
+
+		ginkgo.By("deleting base Secret")
+		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
+		result, err = reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.BeZero())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.HaveOccurred())
+	})
 })
 
 func TestSecretReconciler_predicate(t *testing.T) {
@@ -105,7 +132,7 @@ func TestSecretReconciler_predicate(t *testing.T) {
 		eventNonBaseSecret := event.DeleteEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
 
 		gm.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeFalse())
+		gm.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
 		gm.Expect(preds.Delete(eventNonBaseSecret)).To(gomega.BeFalse())
 		gm.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
 	})

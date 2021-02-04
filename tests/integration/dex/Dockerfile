@@ -16,24 +16,27 @@ COPY . ${BASE_APP_DIR}
 RUN CGO_ENABLED=0 go test -c ./dex -tags=integration
 RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses && mv ${BASE_APP_DIR}/entrypoint.sh /tests/entrypoint.sh
 
-FROM alpine:3.10
+FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
 LABEL source = git@github.com:kyma-project/kyma.git
+
+#
+# Copy binary
+#
+
+COPY --from=builder --chown=nobody:nogroup /tests /tests
 WORKDIR /tests
 
 #
 # Install certificates and curl
 #
 
-RUN apk update && apk add ca-certificates && apk add curl && rm -rf /var/cache/apk/*
-
-#
-# Copy binary
-#
-
-COPY --from=builder /tests /tests
+RUN apk update &&\
+	apk add ca-certificates curl &&\
+	rm -rf /var/cache/apk/* &&\
+	chown -R nobody:nogroup /tests
 
 #
 # Run tests
 #
-
+USER nobody
 ENTRYPOINT /tests/entrypoint.sh

@@ -1,0 +1,14 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ template "fluent-bit.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "fluent-bit.selectorLabels" . | nindent 6 }}
+  mtls:
+    mode: "PERMISSIVE"
+{{- end }}
+

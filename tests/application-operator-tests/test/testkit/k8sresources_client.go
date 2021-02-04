@@ -25,6 +25,7 @@ type K8sResourcesClient interface {
 	GetClusterRoleBinding(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
 	GetServiceAccount(ctx context.Context, name string, options metav1.GetOptions) (interface{}, error)
 	CreateDummyApplication(ctx context.Context, name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
+	CreateLabeledApplication(ctx context.Context, name string, labels map[string]string) (*v1alpha1.Application, error)
 	DeleteApplication(ctx context.Context, name string, options metav1.DeleteOptions) error
 	GetApplication(ctx context.Context, name string, options metav1.GetOptions) (*v1alpha1.Application, error)
 	ListPods(ctx context.Context, options metav1.ListOptions) (*corev1.PodList, error)
@@ -34,6 +35,7 @@ type K8sResourcesClient interface {
 	DeleteNamespace(ctx context.Context) error
 	CreateServiceInstance(ctx context.Context, serviceInstance *v1beta1.ServiceInstance) (*v1beta1.ServiceInstance, error)
 	DeleteServiceInstance(ctx context.Context, name string) error
+	UpdateApplication(ctx context.Context, application *v1alpha1.Application) (*v1alpha1.Application, error)
 }
 
 type k8sResourcesClient struct {
@@ -122,6 +124,24 @@ func (c *k8sResourcesClient) CreateDummyApplication(ctx context.Context, name st
 		SkipInstallation: skipInstallation,
 	}
 
+	return c.newApplicationForSpec(ctx, name, spec)
+}
+
+func (c *k8sResourcesClient) CreateLabeledApplication(ctx context.Context, name string, labels map[string]string) (*v1alpha1.Application, error) {
+	spec := v1alpha1.ApplicationSpec{
+		Services:         []v1alpha1.Service{},
+		SkipInstallation: false,
+		Labels:           labels,
+	}
+
+	return c.newApplicationForSpec(ctx, name, spec)
+}
+
+func (c *k8sResourcesClient) UpdateApplication(ctx context.Context, application *v1alpha1.Application) (*v1alpha1.Application, error) {
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Update(ctx, application, metav1.UpdateOptions{})
+}
+
+func (c *k8sResourcesClient) newApplicationForSpec(ctx context.Context, name string, spec v1alpha1.ApplicationSpec) (*v1alpha1.Application, error) {
 	dummyApp := &v1alpha1.Application{
 		TypeMeta:   metav1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: c.namespace},

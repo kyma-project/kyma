@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -29,6 +31,10 @@ var istioSidecarInjectFalse = map[string]string{
 	"sidecar.istio.io/inject": "false",
 }
 
+func boolPtr(b bool) *bool {
+	return &b
+}
+
 func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
 		FunctionSourceKey: instance.Spec.Source,
@@ -45,12 +51,12 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string) batchv1.Job {
+func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
 
-	imageName := r.buildImageAddressForPush(instance)
+	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -92,7 +98,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
 									Items: []corev1.KeyToPath{
 										{
 											Key:  ".dockerconfigjson",
@@ -124,7 +130,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -215,8 +221,8 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config) batchv1.Job {
-	imageName := r.buildImageAddressForPush(instance)
+func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config, dockerConfig DockerConfig) batchv1.Job {
+	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -246,7 +252,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Name: "credentials",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.ImageRegistryDockerConfigSecretName,
+									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
 									Items: []corev1.KeyToPath{
 										{
 											Key:  ".dockerconfigjson",
@@ -303,7 +309,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -313,10 +319,14 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) appsv1.Deployment {
-	imageName := r.buildImageAddress(instance)
+func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
+	imageName := r.buildImageAddress(instance, dockerConfig.PullAddress)
 	deploymentLabels := r.functionLabels(instance)
 	podLabels := r.podLabels(instance)
+
+	functionUser := int64(1000)
+	const volumeName = "tmp-dir"
+	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
@@ -338,6 +348,15 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
 				},
 				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: volumeName,
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{
+								Medium:    corev1.StorageMediumDefault,
+								SizeLimit: &emptyDirVolumeSize,
+							},
+						},
+					}},
 					Containers: []corev1.Container{
 						{
 							Name:            functionContainerName,
@@ -345,6 +364,28 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							Env:             envs,
 							Resources:       instance.Spec.Resources,
 							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{{
+								Name: volumeName,
+								/* needed in order to have python functions working:
+								python functions need writable /tmp dir, but we disable writing to root filesystem via
+								security context below. That's why we override this whole /tmp directory with emptyDir volume.
+								We've decided to add this directory to be writable by all functions, as it may come in handy
+								*/
+								MountPath: "/tmp",
+								ReadOnly:  false,
+							}},
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add:  []corev1.Capability{},
+									Drop: []corev1.Capability{"ALL"},
+								},
+								Privileged:               boolPtr(false),
+								RunAsUser:                &functionUser,
+								RunAsGroup:               &functionUser,
+								RunAsNonRoot:             boolPtr(true),
+								ReadOnlyRootFilesystem:   boolPtr(true),
+								AllowPrivilegeEscalation: boolPtr(false),
+							},
 						},
 					},
 					ServiceAccountName: r.config.ImagePullAccountName,
@@ -408,32 +449,14 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 	return min, max
 }
 
-func (r *FunctionReconciler) buildImageAddressForPush(instance *serverlessv1alpha1.Function) string {
-	if r.config.Docker.InternalRegistryEnabled {
-		return r.buildInternalImageAddress(instance)
-	}
-	return r.buildImageAddress(instance)
-}
-
-func (r *FunctionReconciler) buildInternalImageAddress(instance *serverlessv1alpha1.Function) string {
+func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
 	var imageTag string
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
 		imageTag = r.calculateGitImageTag(instance)
 	} else {
 		imageTag = r.calculateImageTag(instance)
 	}
-
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.InternalServerAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function) string {
-	var imageTag string
-	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		imageTag = r.calculateGitImageTag(instance)
-	} else {
-		imageTag = r.calculateImageTag(instance)
-	}
-	return fmt.Sprintf("%s/%s-%s:%s", r.config.Docker.RegistryAddress, instance.Namespace, instance.Name, imageTag)
+	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
 func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {

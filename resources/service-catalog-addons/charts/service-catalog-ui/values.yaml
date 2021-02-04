@@ -11,3 +11,6 @@ virtualservice:
   annotations: {}
   hostname: catalog
 resources: {}
+
+podSecurityPolicy:
+    enabled: true
