@@ -8,6 +8,10 @@ tests:
     version: 20210113-12c4e3b5
   env:
     namespace: default
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 bindings:
   kymaEssentials:

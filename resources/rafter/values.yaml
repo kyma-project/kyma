@@ -32,7 +32,7 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: d999a403
+    tag: 6d342230
     pullPolicy: IfNotPresent
 
   deployment:

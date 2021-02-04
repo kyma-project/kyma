@@ -71,6 +71,8 @@ spec:
           - name: TEST_MINIKUBE_ENV
             value: "true"
           {{- end }}
+          securityContext:
+{{- toYaml .Values.tests.securityContext | nindent 12 }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

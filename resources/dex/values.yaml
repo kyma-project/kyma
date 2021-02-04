@@ -102,7 +102,7 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: a01e37ee
+    version: "277f4247"
 
 nodeSelector: {}
 
@@ -111,6 +111,10 @@ tests:
     integration: true
     after-upgrade: true
     e2e-skr: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 livenessProbe:
   enabled: false

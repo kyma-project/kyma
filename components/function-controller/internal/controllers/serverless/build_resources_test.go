@@ -3,14 +3,12 @@ package serverless
 import (
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/validation"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -76,7 +74,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg)
+			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
@@ -422,7 +420,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 
 	r := FunctionReconciler{}
 	// when
-	job := r.buildJob(&instance, rtmCfg, cmName)
+	job := r.buildJob(&instance, rtmCfg, cmName, DockerConfig{})
 
 	// then
 	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))

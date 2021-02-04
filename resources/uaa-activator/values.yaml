@@ -7,13 +7,13 @@ global:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
   role:
-    developer: KymaRuntimeDeveloper
+    developer: KymaRuntimeNamespaceDeveloper
     namespaceAdmin: KymaRuntimeNamespaceAdmin
 
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "PR-10382"
+  version: "PR-10493"
 
 initJobs:
   secret:

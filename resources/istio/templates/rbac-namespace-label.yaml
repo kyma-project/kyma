@@ -22,6 +22,13 @@ rules:
   verbs: ["get", "list", "watch", "patch"]
   resourceNames:
 {{ .Values.kyma.namespaces2Label | toYaml | trim | indent 4 }}
+{{- if .Values.kyma.podSecurityPolicy.enabled }}
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames: 
+    - {{ template "istio.fullname" . }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

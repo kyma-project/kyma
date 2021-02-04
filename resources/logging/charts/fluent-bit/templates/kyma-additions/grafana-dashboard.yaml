@@ -21,13 +21,97 @@ data:
                 }
                 ]
             },
-            "description": "This is a simple dashboard for Fluent-bit",
+            "description": "Inspired by https://grafana.com/grafana/dashboards/7752",
             "editable": false,
-            "gnetId": 11620,
-            "graphTooltip": 0,
+            "gnetId": 7752,
+            "graphTooltip": 1,
             "id": null,
             "links": [],
             "panels": [
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorPrefix": false,
+                "colorValue": true,
+                "colors": [
+                    "#d44a3a",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#299c46"
+                ],
+                "datasource": "Prometheus",
+                "format": "none",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 2,
+                    "x": 0,
+                    "y": 0
+                },
+                "id": 6,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": false,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": false
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_pod_info{pod=~\".*fluent-bit.*\"})",
+                    "format": "time_series",
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "legendFormat": "Active Fluent-bit",
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "0,1",
+                "title": "Fluent Bits",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "80%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "avg"
+                },
                 {
                 "cacheTimeout": null,
                 "colorBackground": false,
@@ -47,9 +131,9 @@ data:
                     "thresholdMarkers": true
                 },
                 "gridPos": {
-                    "h": 5,
+                    "h": 2,
                     "w": 2,
-                    "x": 0,
+                    "x": 2,
                     "y": 0
                 },
                 "id": 4,
@@ -69,7 +153,6 @@ data:
                 "maxDataPoints": 100,
                 "nullPointMode": "connected",
                 "nullText": null,
-                "options": {},
                 "postfix": "",
                 "postfixFontSize": "50%",
                 "prefix": "",
@@ -85,22 +168,620 @@ data:
                     "fillColor": "rgba(31, 118, 189, 0.18)",
                     "full": false,
                     "lineColor": "rgb(31, 120, 193)",
-                    "show": true
+                    "show": false
                 },
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "sum(kube_node_status_condition{condition=\"Ready\"})",
+                    "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
                     "format": "time_series",
+                    "instant": true,
+                    "interval": "",
                     "intervalFactor": 1,
                     "legendFormat": "",
                     "refId": "A"
                     }
                 ],
                 "thresholds": "0,1",
-                "title": "Active Nodes",
+                "title": "Ready Nodes",
+                "transparent": true,
                 "type": "singlestat",
-                "valueFontSize": "100%",
+                "valueFontSize": "80%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorPrefix": false,
+                "colorValue": true,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "short",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 2,
+                    "x": 4,
+                    "y": 0
+                },
+                "id": 36,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": false,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": false
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_node_status_condition{condition!=\"Ready\",status=\"true\"})",
+                    "format": "time_series",
+                    "instant": true,
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "legendFormat": "",
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "1,2",
+                "title": "Non-Ready Nodes",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "80%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 6,
+                    "y": 0
+                },
+                "id": 33,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m]))",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "CPU Utilisation",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 9,
+                    "y": 0
+                },
+                "id": 37,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Memory Utilisation",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 12,
+                    "y": 0
+                },
+                "id": 34,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_pod_container_resource_requests_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores)",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "CPU Requests Commitment",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 15,
+                    "y": 0
+                },
+                "id": 38,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Memory Requests Commitment",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 18,
+                    "y": 0
+                },
+                "id": 35,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_pod_container_resource_limits_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores)",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "CPU Limits Commitment",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
+                "valueMaps": [
+                    {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                    }
+                ],
+                "valueName": "current"
+                },
+                {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource": "Prometheus",
+                "format": "percentunit",
+                "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                },
+                "gridPos": {
+                    "h": 2,
+                    "w": 3,
+                    "x": 21,
+                    "y": 0
+                },
+                "id": 39,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                    {
+                    "name": "value to text",
+                    "value": 1
+                    },
+                    {
+                    "name": "range to text",
+                    "value": 2
+                    }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "pluginVersion": "6.5.2",
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                    {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                    }
+                ],
+                "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": true,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": true,
+                    "ymax": null,
+                    "ymin": null
+                },
+                "tableColumn": "",
+                "targets": [
+                    {
+                    "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "instant": false,
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Memory Limits Commitment",
+                "transparent": true,
+                "type": "singlestat",
+                "valueFontSize": "70%",
                 "valueMaps": [
                     {
                     "op": "=",
@@ -116,23 +797,26 @@ data:
                 "dashLength": 10,
                 "dashes": false,
                 "datasource": "Prometheus",
-                "fill": 1,
+                "fill": 5,
                 "fillGradient": 0,
                 "gridPos": {
-                    "h": 5,
-                    "w": 9,
-                    "x": 2,
-                    "y": 0
+                    "h": 6,
+                    "w": 12,
+                    "x": 0,
+                    "y": 2
                 },
+                "hiddenSeries": false,
                 "id": 2,
                 "legend": {
-                    "alignAsTable": true,
+                    "alignAsTable": false,
                     "avg": false,
                     "current": true,
+                    "hideEmpty": false,
+                    "hideZero": false,
                     "max": false,
                     "min": false,
-                    "rightSide": true,
-                    "show": true,
+                    "rightSide": false,
+                    "show": false,
                     "sort": "current",
                     "sortDesc": true,
                     "total": false,
@@ -151,15 +835,16 @@ data:
                 "renderer": "flot",
                 "seriesOverrides": [],
                 "spaceLength": 10,
-                "stack": false,
+                "stack": true,
                 "steppedLine": false,
                 "targets": [
                     {
-                    "expr": "rate(fluentbit_input_bytes_total[1m])",
+                    "expr": "sum(rate(fluentbit_input_bytes_total[5m])) by (instance, name)",
                     "format": "time_series",
                     "hide": false,
+                    "interval": "",
                     "intervalFactor": 1,
-                    "legendFormat": "{{ `{{ pod }}` }}",
+                    "legendFormat": "{{ `{{ instance }}` }}/{{ `{{name}}` }}",
                     "refId": "A"
                     }
                 ],
@@ -167,10 +852,10 @@ data:
                 "timeFrom": null,
                 "timeRegions": [],
                 "timeShift": null,
-                "title": "Fluent-bit input bytes/s",
+                "title": "Input Bytes Processing Rate",
                 "tooltip": {
                     "shared": true,
-                    "sort": 0,
+                    "sort": 2,
                     "value_type": "individual"
                 },
                 "type": "graph",
@@ -183,7 +868,7 @@ data:
                 },
                 "yaxes": [
                     {
-                    "format": "bytes",
+                    "format": "Bps",
                     "label": null,
                     "logBase": 1,
                     "max": null,
@@ -210,23 +895,24 @@ data:
                 "dashLength": 10,
                 "dashes": false,
                 "datasource": "Prometheus",
-                "fill": 1,
+                "fill": 5,
                 "fillGradient": 0,
                 "gridPos": {
-                    "h": 5,
-                    "w": 9,
-                    "x": 11,
-                    "y": 0
+                    "h": 6,
+                    "w": 12,
+                    "x": 12,
+                    "y": 2
                 },
+                "hiddenSeries": false,
                 "id": 9,
                 "legend": {
-                    "alignAsTable": true,
+                    "alignAsTable": false,
                     "avg": false,
                     "current": true,
                     "max": false,
                     "min": false,
-                    "rightSide": true,
-                    "show": true,
+                    "rightSide": false,
+                    "show": false,
                     "sort": "current",
                     "sortDesc": true,
                     "total": false,
@@ -245,15 +931,16 @@ data:
                 "renderer": "flot",
                 "seriesOverrides": [],
                 "spaceLength": 10,
-                "stack": false,
+                "stack": true,
                 "steppedLine": false,
                 "targets": [
                     {
-                    "expr": "rate(fluentbit_output_proc_bytes_total[1m])",
+                    "expr": "sum(rate(fluentbit_output_proc_bytes_total[5m])) by (instance, name)",
                     "format": "time_series",
                     "hide": false,
+                    "interval": "",
                     "intervalFactor": 1,
-                    "legendFormat": "{{ `{{ pod }}` }}",
+                    "legendFormat": "{{ `{{ pod }}` }}/{{ `{{name}}` }}",
                     "refId": "A"
                     }
                 ],
@@ -261,10 +948,10 @@ data:
                 "timeFrom": null,
                 "timeRegions": [],
                 "timeShift": null,
-                "title": "Fluent-bit output bytes/s",
+                "title": "Output Bytes Processing Rate",
                 "tooltip": {
                     "shared": true,
-                    "sort": 0,
+                    "sort": 2,
                     "value_type": "individual"
                 },
                 "type": "graph",
@@ -277,7 +964,103 @@ data:
                 },
                 "yaxes": [
                     {
-                    "format": "bytes",
+                    "format": "Bps",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": "0",
+                    "show": true
+                    },
+                    {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                    }
+                ],
+                "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                }
+                },
+                {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Prometheus",
+                "fill": 5,
+                "fillGradient": 0,
+                "gridPos": {
+                    "h": 6,
+                    "w": 12,
+                    "x": 0,
+                    "y": 8
+                },
+                "hiddenSeries": false,
+                "id": 40,
+                "legend": {
+                    "alignAsTable": false,
+                    "avg": false,
+                    "current": true,
+                    "max": false,
+                    "min": false,
+                    "rightSide": false,
+                    "show": false,
+                    "sort": "current",
+                    "sortDesc": true,
+                    "total": false,
+                    "values": true
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "options": {
+                    "dataLinks": []
+                },
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": true,
+                "steppedLine": false,
+                "targets": [
+                    {
+                    "expr": "sum(rate(fluentbit_input_records_total[5m])) by (instance, name)",
+                    "format": "time_series",
+                    "hide": false,
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "legendFormat": "{{ `{{ instance }}` }}/{{ `{{name}}` }}",
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Input Records Processing Rate",
+                "tooltip": {
+                    "shared": true,
+                    "sort": 2,
+                    "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                },
+                "yaxes": [
+                    {
+                    "format": "rps",
                     "label": null,
                     "logBase": 1,
                     "max": null,
@@ -304,23 +1087,26 @@ data:
                 "dashLength": 10,
                 "dashes": false,
                 "datasource": "Prometheus",
-                "fill": 1,
+                "fill": 5,
                 "fillGradient": 0,
                 "gridPos": {
-                    "h": 7,
-                    "w": 9,
-                    "x": 2,
-                    "y": 5
+                    "h": 6,
+                    "w": 12,
+                    "x": 12,
+                    "y": 8
                 },
-                "id": 10,
+                "hiddenSeries": false,
+                "id": 41,
                 "legend": {
-                    "alignAsTable": true,
+                    "alignAsTable": false,
                     "avg": false,
                     "current": true,
+                    "hideEmpty": false,
+                    "hideZero": false,
                     "max": false,
                     "min": false,
-                    "rightSide": true,
-                    "show": true,
+                    "rightSide": false,
+                    "show": false,
                     "sort": "current",
                     "sortDesc": true,
                     "total": false,
@@ -339,15 +1125,16 @@ data:
                 "renderer": "flot",
                 "seriesOverrides": [],
                 "spaceLength": 10,
-                "stack": false,
+                "stack": true,
                 "steppedLine": false,
                 "targets": [
                     {
-                    "expr": "rate(fluentbit_output_errors_total[1m])",
+                    "expr": "sum(rate(fluentbit_output_proc_records_total[5m])) by (instance, name)",
                     "format": "time_series",
                     "hide": false,
+                    "interval": "",
                     "intervalFactor": 1,
-                    "legendFormat": "{{ `{{ pod }}` }}",
+                    "legendFormat": "{{ `{{ pod }}` }}/{{ `{{name}}` }}",
                     "refId": "A"
                     }
                 ],
@@ -355,10 +1142,10 @@ data:
                 "timeFrom": null,
                 "timeRegions": [],
                 "timeShift": null,
-                "title": "Fluent-bit error/s",
+                "title": "Output Record Processing Rate",
                 "tooltip": {
                     "shared": true,
-                    "sort": 0,
+                    "sort": 2,
                     "value_type": "individual"
                 },
                 "type": "graph",
@@ -371,7 +1158,7 @@ data:
                 },
                 "yaxes": [
                     {
-                    "format": "bytes",
+                    "format": "rps",
                     "label": null,
                     "logBase": 1,
                     "max": null,
@@ -401,20 +1188,23 @@ data:
                 "fill": 1,
                 "fillGradient": 0,
                 "gridPos": {
-                    "h": 7,
-                    "w": 9,
-                    "x": 11,
-                    "y": 5
+                    "h": 6,
+                    "w": 12,
+                    "x": 0,
+                    "y": 14
                 },
+                "hiddenSeries": false,
                 "id": 11,
                 "legend": {
-                    "alignAsTable": true,
-                    "avg": false,
+                    "alignAsTable": false,
+                    "avg": true,
                     "current": true,
-                    "max": false,
+                    "hideEmpty": true,
+                    "hideZero": true,
+                    "max": true,
                     "min": false,
-                    "rightSide": true,
-                    "show": true,
+                    "rightSide": false,
+                    "show": false,
                     "sort": "current",
                     "sortDesc": true,
                     "total": false,
@@ -433,22 +1223,24 @@ data:
                 "renderer": "flot",
                 "seriesOverrides": [],
                 "spaceLength": 10,
-                "stack": false,
+                "stack": true,
                 "steppedLine": false,
                 "targets": [
                     {
-                    "expr": "rate(fluentbit_output_retries_total[1m])",
+                    "expr": "sum(rate(fluentbit_output_retries_total[1m])) by (instance, name)",
                     "format": "time_series",
                     "hide": false,
+                    "interval": "",
                     "intervalFactor": 1,
-                    "legendFormat": "Retries {{ `{{ pod }}` }}",
+                    "legendFormat": "{{ `{{instance}}` }} Retries to {{ `{{name}}` }}",
                     "refId": "A"
                     },
                     {
-                    "expr": "rate(fluentbit_output_retries_failed_total[1m])",
+                    "expr": "sum(rate(fluentbit_output_retries_failed_total[1m])) by (instance, name)",
                     "format": "time_series",
+                    "interval": "",
                     "intervalFactor": 1,
-                    "legendFormat": "Failed {{ `{{ pod }}` }}",
+                    "legendFormat": "{{ `{{instance}}` }} Failed Retries to {{ `{{ name }}` }}",
                     "refId": "B"
                     }
                 ],
@@ -456,10 +1248,10 @@ data:
                 "timeFrom": null,
                 "timeRegions": [],
                 "timeShift": null,
-                "title": "Fluent-bit retries/fails",
+                "title": "Output Retry/Failed Rates",
                 "tooltip": {
                     "shared": true,
-                    "sort": 0,
+                    "sort": 2,
                     "value_type": "individual"
                 },
                 "type": "graph",
@@ -493,17 +1285,115 @@ data:
                     "align": false,
                     "alignLevel": null
                 }
+                },
+                {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Prometheus",
+                "fill": 1,
+                "fillGradient": 0,
+                "gridPos": {
+                    "h": 6,
+                    "w": 12,
+                    "x": 12,
+                    "y": 14
+                },
+                "hiddenSeries": false,
+                "id": 10,
+                "legend": {
+                    "alignAsTable": false,
+                    "avg": false,
+                    "current": true,
+                    "hideEmpty": true,
+                    "hideZero": true,
+                    "max": false,
+                    "min": false,
+                    "rightSide": false,
+                    "show": true,
+                    "sort": "current",
+                    "sortDesc": true,
+                    "total": false,
+                    "values": true
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "options": {
+                    "dataLinks": []
+                },
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [
+                    {
+                    "expr": "sum(rate(fluentbit_output_errors_total[1m])) by (instance, name)",
+                    "format": "time_series",
+                    "hide": false,
+                    "interval": "",
+                    "intervalFactor": 1,
+                    "legendFormat": "{{ `{{ instance }}` }}/{{ `{{ name }}` }}",
+                    "refId": "A"
+                    }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Output Error Rate",
+                "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                },
+                "yaxes": [
+                    {
+                    "format": "errors/sec",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": "0",
+                    "show": true
+                    },
+                    {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                    }
+                ],
+                "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                }
                 }
             ],
-            "refresh": "10s",
-            "schemaVersion": 20,
+            "refresh": "5s",
+            "schemaVersion": 22,
             "style": "dark",
             "tags": ["logging","kyma"],
             "templating": {
                 "list": []
             },
             "time": {
-                "from": "now-1h",
+                "from": "now-15m",
                 "to": "now"
             },
             "timepicker": {
@@ -532,7 +1422,10 @@ data:
                 ]
             },
             "timezone": "",
-            "title": "Kyma / Logging / Fluent-Bit",
-            "uid": "bNn5LUtiz",
+            "title": "Kyma / Logging / Fluent Bit",
+            "uid": "fluentbit",
+            "variables": {
+                "list": []
+            },
             "version": 1
-            }
+        }
