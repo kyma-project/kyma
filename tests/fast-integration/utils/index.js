@@ -214,6 +214,13 @@ function waitForServiceBindingUsage(name, namespace = "default", timeout = 90000
   }, timeout, `Waiting for service binding usage ${name} timeout (${timeout} ms)`);
 }
 
+function waitForDeployment(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(`/apis/apps/v1/namespaces/${namespace}/deployments`, {}, (_type, _apiObj, watchObj) => {
+    return (watchObj.object.metadata.name == name && watchObj.object.status.conditions
+      && watchObj.object.status.conditions.some((c) => (c.type == 'Available' && c.status == 'True')))
+  }, timeout, `Waiting for deployment ${name} timeout (${timeout} ms)`);
+}
+
 function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = { labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}` }
@@ -366,6 +373,7 @@ module.exports = {
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
+  waitForDeployment,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,

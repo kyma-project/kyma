@@ -21,6 +21,7 @@ const {
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
+  waitForDeployment,
   deleteAllK8sResources,
   k8sAppsApi,
   k8sDynamicApi,
@@ -292,6 +293,7 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
+  await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   await patchAppGatewayDeployment();
