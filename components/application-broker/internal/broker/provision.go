@@ -264,13 +264,14 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 		return
 	}
 
+	// create Kyma EventActivation
+	if err := svc.createEaOnSuccessProvision(appName, appSvcID, ns, displayName); err != nil {
+		opDesc := fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
+		svc.updateStateFailed(iID, opID, opDesc)
+		return
+	}
+
 	if !svc.newEventingFlow {
-		// create Kyma EventActivation
-		if err := svc.createEaOnSuccessProvision(appName, appSvcID, ns, displayName); err != nil {
-			opDesc := fmt.Sprintf("provisioning failed while creating EventActivation on error: %s", err)
-			svc.updateStateFailed(iID, opID, opDesc)
-			return
-		}
 
 		// persist Knative Subscription
 		if err := svc.persistKnativeSubscription(appName, appSvcID, ns); err != nil {

@@ -311,6 +311,9 @@ func TestProvisionProcessWithNewEventing(t *testing.T) {
 
 	select {
 	case <-asyncFinished:
+		eventActivation, err := provisioner.eaClient.EventActivations(string(fixNs())).Get(string(fixServiceID()), v1.GetOptions{})
+		assert.NoError(t, err)
+		assert.Equal(t, fixEventActivation(), eventActivation)
 	case <-time.After(time.Second):
 		assert.Fail(t, "Async processing not finished")
 	}
@@ -671,7 +674,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			newEventingFlow:                true,
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 "provisioning succeeded",
-			expectedEventActivationCreated: false,
+			expectedEventActivationCreated: true,
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs:                    []runtime.Object{},
 			expectCreates: []runtime.Object{
