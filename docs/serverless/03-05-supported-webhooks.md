@@ -80,4 +80,4 @@ To switch registries in the runtime, you must create or update a Secret CR that 
 
 ### Requirements
 
-This webhook is triggered every time you `CREATE` or `UPDATE` a Secret in any Namespace, as long as the Secret contains the `serverless.kyma-project.io/remote-registry: config` label.
+This admission webhook is triggered every time you `CREATE` or `UPDATE` a Secret in any Namespace, as long as the Secret contains the `serverless.kyma-project.io/remote-registry: config` label.

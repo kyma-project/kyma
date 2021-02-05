@@ -61,9 +61,9 @@ See this example:
 
 ### Cluster-wide external registry
 
-To switch to one external registry in the whole cluster, you must create a Secret CR in the `kyma-system` Namespace. The Secret CR must meet the same [requirements](#namespace-scoped-external-registry) as in the case of the Namespace-scoped setup, but you must also add the `serverless.kyma-project.io/config: credentials` label. This label ensures the Secret CR gets propagated to all Namespaces.
+To switch to one external registry in the whole cluster, you must create a Secret CR in the `kyma-system` Namespace. The Secret CR must meet the same [requirements](#namespace-scoped-external-registry) as in the case of the Namespace-scoped setup, but you must also add the `serverless.kyma-project.io/config: credentials` label. This label ensures the Secret CR gets propagated to all Namespaces. Such a cluster-wide configuration will always take precedence over any Namespace-scoped one.
 
-> **NOTE:** The cluster-wide configuration takes precedence over any Namespace-scoped one.
+> **CAUTION:** Do not remove the `serverless.kyma-project.io/config: credentials` label from the existing Secret CR in the `kyma-system` Namespace. If you do so, you will not be able to remove the Secret CR afterwards.
 
 ### How this works
 
