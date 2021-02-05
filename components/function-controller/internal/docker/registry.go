@@ -15,9 +15,9 @@ const (
 )
 
 var (
-	errUsernameNotFound = errors.New("username field not found")
-	errPasswordNotFound = errors.New("password field not found")
-	errRegistryNotFound = errors.New("registry field not found")
+	errUsernameNotFound      = errors.New("username field not found")
+	errPasswordNotFound      = errors.New("password field not found")
+	errServerAddressNotFound = errors.New("serverAddress field not found")
 )
 
 type registryCfgCredentials struct {
@@ -86,7 +86,7 @@ func NewRegistryCfgMarshaler(data map[string][]byte) (json.Marshaler, error) {
 
 	result.serverAddress, found = data[keyServerAddress]
 	if !found {
-		return nil, errRegistryNotFound
+		return nil, errServerAddressNotFound
 	}
 
 	return &result, nil
