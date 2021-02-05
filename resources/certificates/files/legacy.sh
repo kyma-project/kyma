@@ -42,10 +42,10 @@ kubectl create secret generic -n kyma-system ingress-tls-cert \
 
 echo "Checking if running on local.kyma.dev"
 
-if [ "${INGRESS_DOMAIN}" == "local.kyma.dev" ]; then
+if [ "${DOMAIN}" == "local.kyma.dev" ]; then
     echo "Configure Kubernetes DNS to support local.kyma.dev"
 
-COREDNS_PATCH=$(cat << EOF
+    COREDNS_PATCH=$(cat << EOF
 data:
   Corefile: |
     .:53 {
@@ -69,7 +69,7 @@ data:
         loadbalance
     }
 EOF
-)
+    )
 
     kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
 fi
