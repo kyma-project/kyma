@@ -18,27 +18,27 @@ spec:
       serviceAccountName: kyma-ns-label
       restartPolicy: Never
       containers:
-        - name: kyma-ns-label
-          image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
-          terminationMessagePolicy: "FallbackToLogsOnError"
-          command:
-            - /bin/bash
-            - -c
-            - |
-              set +e
-              {{- range .Values.kyma.namespaces2Label }}
-              if RESULT=$(kubectl get namespace {{ . }} 2>&1) ; then
-                echo "---> Setting label to {{ . }}"
-                kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
+      - name: kyma-ns-label
+        image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set +e
+            {{- range .Values.kyma.namespaces2Label }}
+            if RESULT=$(kubectl get namespace {{ . }} 2>&1) ; then
+              echo "---> Setting label to {{ . }}"
+              kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
+            else
+              NS_NOT_FOUND_ERROR="namespaces {{ . }} not found"
+              if [[ $RESULT =~ .*"$NS_NOT_FOUND_ERROR".* ]] ; then
+                echo "---> Namespace {{ . }} could not be labelled, as it was not found. Skipping."
               else
-                NS_NOT_FOUND_ERROR="namespaces {{ . }} not found"
-                if [[ $RESULT =~ .*"$NS_NOT_FOUND_ERROR".* ]] ; then
-                  echo "---> Namespace {{ . }} could not be labelled, as it was not found. Skipping."
-                else
-                  echo $RESULT
-                  exit 1
-                fi
+                echo $RESULT
+                exit 1
               fi
-              {{- end }}
-          securityContext:
-  {{- toYaml .Values.kyma.securityContext | nindent 10 }}
+            fi
+            {{- end }}
+        securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 10 }}
