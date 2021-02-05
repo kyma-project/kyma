@@ -59,7 +59,9 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger,
 		logger.Error(err, fmt.Sprintf("Gathering existing Secret '%s/%s' failed", namespace, baseInstance.GetName()))
 		return err
 	}
-
+	if instance.Labels[ManagedLabel] == ClientLabelValue {
+		return nil
+	}
 	return r.updateSecret(ctx, logger, instance, baseInstance)
 }
 
@@ -93,8 +95,7 @@ func (r *secretService) HandleFinalizer(ctx context.Context, logger logr.Logger,
 func (r *secretService) createSecret(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error {
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        baseInstance.GetName(),
-			Namespace:   namespace,
+			Name: baseInstance.GetName(), Namespace: namespace,
 			Labels:      baseInstance.Labels,
 			Annotations: baseInstance.Annotations,
 		},
@@ -133,7 +134,9 @@ func (r *secretService) deleteSecret(ctx context.Context, logger logr.Logger, na
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
 		return client.IgnoreNotFound(err)
 	}
-
+	if instance.Labels[ManagedLabel] == ClientLabelValue {
+		return nil
+	}
 	if err := r.client.Delete(ctx, instance); err != nil {
 		logger.Error(err, fmt.Sprintf("Deleting Secret '%s/%s' failed", namespace, baseInstanceName))
 		return err
