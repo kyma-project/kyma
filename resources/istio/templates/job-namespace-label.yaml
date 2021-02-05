@@ -39,6 +39,6 @@ spec:
                   exit 1
                 fi
               fi
-          {{- end }}
+              {{- end }}
           securityContext:
   {{- toYaml .Values.kyma.securityContext | nindent 10 }}
