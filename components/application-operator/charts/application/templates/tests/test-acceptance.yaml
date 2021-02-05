@@ -27,4 +27,6 @@ spec:
           value: {{ .Release.Namespace }}
         - name: APPLICATION
           value: {{ .Release.Name }}
+      securityContext:
+        runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
   restartPolicy: Never

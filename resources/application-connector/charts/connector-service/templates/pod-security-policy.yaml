@@ -1,9 +1,9 @@
 {{- if not .Values.global.disableLegacyConnectivity }}
-{{- if .Values.podSecurityPolicy.enabled}}
+{{- if .Values.global.podSecurityPolicy.enabled }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -11,21 +11,28 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  allowPrivilegeEscalation: true
-  privileged: false
+  allowPrivilegeEscalation: false
+  allowedCapabilities:
+  - NET_ADMIN
+  - NET_RAW
   hostNetwork: false
   hostIPC: false
   hostPID: false
-  allowedCapabilities:
-  - NET_ADMIN
   fsGroup:
-    rule: RunAsAny
+    rule: MustRunAs
+    ranges:
+    - min: 1
+      max: 65535
+  privileged: false
+  runAsUser:
+    rule: RunAsAny #TODO after init-container removal set to 'MustRunAs'
   seLinux:
     rule: RunAsAny
   supplementalGroups:
-    rule: RunAsAny
-  runAsUser:
-    rule: RunAsAny
+    rule: MustRunAs
+    ranges:
+      - min: 1
+        max: 65535
   volumes:
   - configMap
   - downwardAPI

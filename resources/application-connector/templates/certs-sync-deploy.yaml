@@ -48,6 +48,8 @@ spec:
             - -c
             - |-
 {{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
+          securityContext:
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
       serviceAccountName: {{ .Chart.Name }}-certs-sync
       volumes:
         - name: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
