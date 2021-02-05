@@ -88,8 +88,6 @@ spec:
       containers:
         - name: job
           image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
-          securityContext:
-            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
           env:
             - name: API_PACKAGES_SUPPORT
               value: {{ .Values.global.disableLegacyConnectivity | quote }}
