@@ -10,6 +10,9 @@ spec:
     ranges:
     - min: 1
       max: 65535
+  hostPorts:
+  - min: 8080
+    max: 8081
   runAsUser:
     rule: MustRunAs
     ranges:
@@ -41,6 +44,9 @@ spec:
     ranges:
     - min: 1
       max: 65535
+  hostPorts:
+  - min: 8080
+    max: 8081
   runAsUser:
     rule: RunAsAny
   privileged: false
@@ -103,6 +109,9 @@ spec:
     ranges:
     - min: 1
       max: 65535
+  hostPorts:
+  - min: 8081
+    max: 8081
   runAsUser:
     rule: RunAsAny
   privileged: false

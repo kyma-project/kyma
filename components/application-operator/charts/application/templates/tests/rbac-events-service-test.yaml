@@ -25,6 +25,13 @@ rules:
 - apiGroups: ["*"]
   resources: ["subscriptions", "triggers"]
   verbs: ["create", "delete"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:  
+  - application-gateway
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
