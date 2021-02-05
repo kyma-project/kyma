@@ -20,9 +20,6 @@ fluent-bit:
     requests:
       cpu: 20m
       memory: 40Mi
-  conf:
-    Service:
-      Log_Level: warning
 
 logui:
   resources: 
