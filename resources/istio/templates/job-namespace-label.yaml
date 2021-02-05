@@ -27,11 +27,11 @@ spec:
           - |
             set +e
             {{- range .Values.kyma.namespaces2Label }}
-            if RESULT=$(kubectl get namespace --ignore-not-found=true {{ . }} 2>&1) ; then
+            if RESULT=$(kubectl get namespace {{ . }} 2>&1) ; then
               echo "---> Setting label to {{ . }}"
               kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
             else
-              NS_NOT_FOUND_ERROR="namespaces {{ . }} not found"
+              NS_NOT_FOUND_ERROR="not found"
               if [[ $RESULT =~ .*"$NS_NOT_FOUND_ERROR".* ]] ; then
                 echo "---> Namespace {{ . }} could not be labelled, as it was not found. Skipping."
               else
