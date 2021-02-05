@@ -172,7 +172,7 @@ spec:
             maxSurge: 100%
             maxUnavailable: 25%
   meshConfig:
-    accessLogFile: /dev/stdout
+    accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}

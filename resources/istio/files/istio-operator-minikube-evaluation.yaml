@@ -180,7 +180,7 @@ spec:
         securityContext:
 {{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
-    accessLogFile: /dev/stdout
+    accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}
