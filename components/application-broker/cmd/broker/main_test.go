@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/apimachinery/pkg/util/wait"
+
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
@@ -327,11 +329,17 @@ func (ts *testSuite) ProvisionInstance(id string) {
 }
 
 func (ts *testSuite) DeprovisionInstance(id string) {
-	_, err := ts.osbClient.DeprovisionInstance(&osb.DeprovisionRequest{
-		AcceptsIncomplete: true,
-		InstanceID:        id,
-		ServiceID:         ts.serviceID,
-		PlanID:            ts.planID,
+	err := wait.PollImmediate(100*time.Millisecond, 3*time.Second, func() (bool, error) {
+		_, err := ts.osbClient.DeprovisionInstance(&osb.DeprovisionRequest{
+			AcceptsIncomplete: true,
+			InstanceID:        id,
+			ServiceID:         ts.serviceID,
+			PlanID:            ts.planID,
+		})
+		if err != nil {
+			return false, nil
+		}
+		return true, nil
 	})
 	require.NoError(ts.t, err)
 
