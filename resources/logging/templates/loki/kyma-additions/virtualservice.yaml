@@ -11,12 +11,7 @@ spec:
   hosts:
   - loki.{{ .Values.global.ingress.domainName }}
   http:
-  - match:
-    - uri:
-        prefix: /api/prom/label
-    - uri:
-        exact: /api/prom/query
-    route:
+  - route:
     - destination:
         host: {{ template "loki.fullname" . }}
         port:
