@@ -13,7 +13,7 @@ spec:
   - '*'
   hostPorts:
   - max: 65535
-    min: 0
+    min: 1024
   privileged: true
   fsGroup:
     rule: RunAsAny
