@@ -18,6 +18,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api v0.18.12
 	k8s.io/apimachinery v0.18.12

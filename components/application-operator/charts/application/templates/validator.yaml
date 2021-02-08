@@ -83,6 +83,8 @@ spec:
           resources:
             requests:
               memory: {{ .Values.applicationConnectivityValidator.resources.requests.memory }}
+          securityContext:
+            runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 ---
 apiVersion: v1
 kind: Service

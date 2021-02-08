@@ -45,4 +45,6 @@ spec:
           requests:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
+        securityContext:
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
 {{- end }}

@@ -77,8 +77,8 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10434"
-    pullPolicy: IfNotPresent
+    tag: "PR-10408"
+    pullPolicy: Always
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
@@ -152,6 +152,9 @@ services:
     type: ClusterIP
     labels: {}
     annotations: {}
+    https:
+      port: 443
+      targetPort: 8443
 
 metrics:
   enabled: true
