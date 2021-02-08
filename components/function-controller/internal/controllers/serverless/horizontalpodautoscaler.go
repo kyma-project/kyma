@@ -42,6 +42,7 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 }
 
 func equalInt32Pointer(first *int32, second *int32) bool {
+	// comment
 	if first == nil && second == nil {
 		return true
 	}
