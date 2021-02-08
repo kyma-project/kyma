@@ -39,13 +39,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: [services]
-  verbs: [create, list, get, watch]
-- apiGroups: [""]
-  resources: [secrets]
-  verbs: [create, list, get, update, patch]
-- apiGroups: [""]
-  resources: [configmaps]
-  verbs: [create, list, get, watch, update, patch]
+  verbs: [get, update, patch]
 {{- if .Values.podSecurityPolicy.enabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
@@ -54,7 +48,6 @@ rules:
     - {{ template "name" . }}-certs-job
 {{- end }}
 ---
-{{ if .Values.global.certificates.gardener }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -77,50 +70,11 @@ rules:
     - {{ template "name" . }}-certs-job
 {{- end }}
 ---
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: {{ .Release.Namespace }}
-  name: {{ template "name" . }}-certs-job-gardener-certs-role
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "post-install, post-upgrade"
-rules:
-- apiGroups: ["cert.gardener.cloud"]
-  resources: ["certificates"]
-  verbs: ["get", "create", "patch"]
-{{- if .Values.podSecurityPolicy.enabled }}
-- apiGroups: ["extensions","policy"]
-  resources: ["podsecuritypolicies"]
-  verbs: ["use"]
-  resourceNames: 
-    - {{ template "name" . }}-certs-job
-{{- end }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ template "name" . }}-certs-job-gardener-certs-role
-  namespace: {{ .Release.Namespace}}
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    helm.sh/hook: "post-install, post-upgrade"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ template "name" . }}-certs-job-gardener-certs-role
-subjects:
-- kind: ServiceAccount
-  name: {{ template "name" . }}-certs-job
-  namespace: {{ .Release.Namespace }}
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job-kube-system-role
-  namespace: {{ .Release.Namespace}}
+  namespace: kube-system
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
@@ -133,4 +87,3 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace }}
-{{ end }}

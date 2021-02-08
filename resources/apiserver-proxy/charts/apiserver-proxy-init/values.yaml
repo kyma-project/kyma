@@ -6,6 +6,11 @@ port:
   insecure: 8444
   metrics: 2112
 
+job:
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20210113-12c4e3b5"
+
 podSecurityPolicy:
   enabled: true
 
