@@ -120,7 +120,7 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 }
 
 func (r *FunctionReconciler) deleteAllHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-	log.Info("Deleting all HorizontalPodAutoscalers attatched to function")
+	log.Info("Deleting all HorizontalPodAutoscalers attached to function")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete underlying HorizontalPodAutoscalers")
