@@ -72,7 +72,7 @@ spec:
             value: "https://dex.{{ .Values.global.ingress.domainName }}"
           - name: APP_OIDC_CLIENT_ID
             value: "kyma-client"
-          {{ if not .Values.global.environment.gardener }}
+          {{ if .Values.global.certificates.selfSigned }}
           - name: APP_OIDC_CA_FILE
             value: "/etc/ingress-tls-cert/tls.crt"
           {{ end }}
@@ -89,7 +89,7 @@ spec:
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}
-      {{ if not .Values.global.environment.gardener }}
+      {{ if .Values.global.certificates.selfSigned }}
         volumeMounts:
           - name: ingress-tls-cert
             mountPath: /etc/ingress-tls-cert/

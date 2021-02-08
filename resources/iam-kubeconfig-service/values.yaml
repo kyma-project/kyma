@@ -23,6 +23,8 @@ resources:
     cpu: 5m
     memory: 32Mi
 global:
+  certificates:
+    selfSigned: false
   isLocalEnv: false
   istio:
     gateway:

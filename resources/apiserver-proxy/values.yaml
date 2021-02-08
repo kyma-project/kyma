@@ -50,6 +50,8 @@ tests:
     runAsNonRoot: true
     runAsGroup: 65534
 global:
+  certificates:
+    gardener: false
   apiserver_proxy:
     dir:
     version: 264d8882
