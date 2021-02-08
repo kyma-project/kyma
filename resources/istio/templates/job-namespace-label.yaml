@@ -25,23 +25,11 @@ spec:
           - /bin/bash
           - -c
           - |
-            set +e
-            {{- range .Values.kyma.namespaces2Label }}
-            if RESULT=$(kubectl get namespace {{ . }} 2>&1) ; then
-              echo "---> Setting label to {{ . }}"
-              kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
-            else
-              NS_NOT_FOUND_ERROR="not found"
-              if [[ $RESULT =~ .*"$NS_NOT_FOUND_ERROR".* ]] ; then
-                echo "---> Namespace {{ . }} could not be labelled, as it was not found. Skipping."
-              else
-                echo $RESULT
-                exit 1
-              fi
-            fi
-            {{- end }}
+{{ .Files.Get "files/istio-namespace-label.sh" | indent 14 }}
         env:
           - name: HOME
             value: /tmp
+          - name: NAMESPACES
+            value: {{ join " " .Values.kyma.namespaces2Label }}
         securityContext:
 {{- toYaml .Values.kyma.securityContext | nindent 10 }}
