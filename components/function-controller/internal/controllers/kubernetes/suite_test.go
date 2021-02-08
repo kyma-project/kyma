@@ -110,6 +110,19 @@ func newFixBaseSecret(namespace, name string) *corev1.Secret {
 	}
 }
 
+func newFixBaseSecretWithManagedLabel(namespace, name string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue, ManagedLabel: UserLabelValue},
+		},
+		Data:       map[string][]byte{"key_1_b": []byte("value_1_b"), "key_2_b": []byte("value_2_b")},
+		StringData: map[string]string{"key_1": "value_1", "key_2": "value_2"},
+		Type:       "test",
+	}
+}
+
 func newFixBaseServiceAccount(namespace, name string) *corev1.ServiceAccount {
 	falseValue := false
 	return &corev1.ServiceAccount{

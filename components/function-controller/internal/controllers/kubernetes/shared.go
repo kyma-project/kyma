@@ -18,7 +18,7 @@ const (
 	CredentialsLabelValue    = "credentials"
 	ServiceAccountLabelValue = "service-account"
 	RuntimeLabelValue        = "runtime"
-	ClientLabelValue         = "client"
+	UserLabelValue           = "user"
 )
 
 type Config struct {

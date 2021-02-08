@@ -59,7 +59,7 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger,
 		logger.Error(err, fmt.Sprintf("Gathering existing Secret '%s/%s' failed", namespace, baseInstance.GetName()))
 		return err
 	}
-	if instance.Labels[ManagedLabel] == ClientLabelValue {
+	if instance.Labels[ManagedLabel] == UserLabelValue {
 		return nil
 	}
 	return r.updateSecret(ctx, logger, instance, baseInstance)
@@ -134,7 +134,7 @@ func (r *secretService) deleteSecret(ctx context.Context, logger logr.Logger, na
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
 		return client.IgnoreNotFound(err)
 	}
-	if instance.Labels[ManagedLabel] == ClientLabelValue {
+	if instance.Labels[ManagedLabel] == UserLabelValue {
 		return nil
 	}
 	if err := r.client.Delete(ctx, instance); err != nil {
