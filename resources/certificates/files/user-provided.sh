@@ -136,3 +136,8 @@ if [ "$IS_SELF_SIGNED" == "true" ]; then
 
 fi
 
+# NOTE: This part can be removed once we get rid of Values.global.ingress.domainName
+kubectl create configmap net-global-overrides \
+  --from-literal global.domainName="$DOMAIN" \
+  --from-literal global.ingress.domainName="$DOMAIN" \
+  -n kyma-installer -o yaml --dry-run | kubectl apply -f -

@@ -60,7 +60,7 @@ echo "Annotating istio-ingressgateway/istio-system service"
 
 kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
 
-# NOTE: This part can be removed once we get rid of kyma-installer
+# NOTE: This part can be removed once we get rid of Values.global.ingress.domainName
 kubectl create configmap net-global-overrides \
   --from-literal global.domainName="$DOMAIN" \
   --from-literal global.ingress.domainName="$DOMAIN" \
