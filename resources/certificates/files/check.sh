@@ -1,5 +1,4 @@
-set -o
-set -eo pipefail
+set +e
 
 KYMA_SECRET="$(kubectl get secret -n $KYMA_SECRET_NAMESPACE $KYMA_SECRET_NAME --ignore-not-found)"
 APISERVER_PROXY_SECRET="$(kubectl get secret -n $APISERVER_PROXY_SECRET_NAMESPACE $APISERVER_PROXY_SECRET_NAME --ignore-not-found)"
@@ -33,4 +32,7 @@ echo $GARDENER
 
 if [ $LEGACY ] || [ $USER_PROVIDED ] || [ $GARDENER ]; then
   exit 0
+else
+  echo "None of the scenarios were launched"
+  exit 1
 fi
