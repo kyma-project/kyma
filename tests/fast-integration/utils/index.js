@@ -505,10 +505,6 @@ const getRestartRaport = (prevPodList, afterPodList) => {
   return prevPodList
     .map((elem) => {
       const afterPod = afterPodList.find((arg) => arg.name === elem.name);
-      if (!afterPod) {
-        console.log(elem);
-      }
-
       if (!afterPod || !afterPod.containerStatuses) {
         return {
           name: elem.name,
