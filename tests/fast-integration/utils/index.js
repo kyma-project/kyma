@@ -504,9 +504,12 @@ async function getContainerRestartsForAllNamespaces() {
 const getRestartRaport = (prevPodList, afterPodList) => {
   return prevPodList
     .map((elem) => {
-      let afterPod = afterPodList.find((arg) => arg.name === elem.name);
-      console.log(afterPod);
-      if (!afterPod.containerStatuses) {
+      const afterPod = afterPodList.find((arg) => arg.name === elem.name);
+      if (!afterPod) {
+        console.log(elem);
+      }
+
+      if (!afterPod || !afterPod.containerStatuses) {
         return {
           name: elem.name,
           containerRestarts: null,
