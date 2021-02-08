@@ -89,7 +89,7 @@ func (c *client) ListByLabel(ctx context.Context, namespace string, labels map[s
 }
 
 func (c *client) DeleteAllBySelector(ctx context.Context, resourceType Object, namespace string, selector apilabels.Selector) error {
-	propagationPolicy := metav1.DeletePropagationForeground
+	propagationPolicy := metav1.DeletePropagationBackground
 
 	return c.k8sClient.DeleteAllOf(ctx, resourceType, &ctrlclient.DeleteAllOfOptions{
 		ListOptions: ctrlclient.ListOptions{
