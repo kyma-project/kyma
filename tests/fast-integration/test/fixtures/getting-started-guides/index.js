@@ -51,7 +51,6 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 
-
 const ordersServiceNamespaceObj = k8s.loadYaml(ordersServiceNamespaceYaml);
 const ordersServiceMicroserviceObj = k8s.loadAllYaml(
   ordersServiceMicroserviceYaml
@@ -69,17 +68,27 @@ const order = {
   consignmentStatus: "PICKUP_COMPLETE",
 };
 
-
 async function verifyOrderPersisted() {
-  const virtualService = await waitForVirtualService(orderService, orderService);
+  const virtualService = await waitForVirtualService(
+    orderService,
+    orderService
+  );
   const serviceDomain = await virtualService.spec.hosts[0];
 
-  await retryPromise(async () => {
-    await createOrder(serviceDomain, order);
-    return findOrder(serviceDomain, order);
-  }, 30, 2000).catch(e => {throw new Error(`Error during creating order: ${e}`)});
+  await retryPromise(
+    async () => {
+      await createOrder(serviceDomain, order);
+      return findOrder(serviceDomain, order);
+    },
+    30,
+    2000
+  ).catch((e) => {
+    throw new Error(`Error during creating order: ${e}`);
+  });
 
-  await deleteAllK8sResources('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` });
+  await deleteAllK8sResources("/api/v1/namespaces/orders-service/pods", {
+    labelSelector: `app=${orderService}`,
+  });
 
   await retryPromise(() => findOrder(serviceDomain, order), 30, 2000);
 
@@ -87,46 +96,72 @@ async function verifyOrderPersisted() {
   // This is covered by commerce-mock.js test
 }
 
-
 async function findOrder(serviceDomain, order) {
-  const result = await axios.get(`https://${serviceDomain}/orders`)
+  const result = await axios.get(`https://${serviceDomain}/orders`);
   if (result.data && result.data.length) {
-    const createdOrder = result.data.find((o) => o.orderCode == order.orderCode);
+    const createdOrder = result.data.find(
+      (o) => o.orderCode == order.orderCode
+    );
     if (createdOrder) {
       return createdOrder;
     }
   }
-  throw new Error(`Order not found: ${order.orderCode}`)
+  throw new Error(`Order not found: ${order.orderCode}`);
 }
 
 async function createOrder(serviceDomain, order) {
-  return  axios.post(`https://${serviceDomain}/orders`, order, {
-    headers: {
-      "Cache-Control": "no-cache",
-    },
-  }).catch(err => { if (err.response.status != 409) throw new Error(`Cannot create the order. Error: ${err}`) });
+  return axios
+    .post(`https://${serviceDomain}/orders`, order, {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    })
+    .catch((err) => {
+      if (err.response.status != 409)
+        throw new Error(`Cannot create the order. Error: ${err}`);
+    });
 }
 
 function waitForPodWithSbuToBeReady(sbu) {
-  return waitForK8sObject('/api/v1/namespaces/orders-service/pods', { labelSelector: `app=${orderService}` }
-    , (_type, _apiObj, watchObj) => {
-      return Object.keys(watchObj.object.metadata.labels).includes(`use-${sbu.metadata.uid}`) &&
-        watchObj.object.metadata.name.startsWith(orderService) && watchObj.object.status.conditions
-        && watchObj.object.status.conditions.some((c) => (c.type == 'Ready' && c.status == 'True'))
-    }
-    , 60 * 1000, "Waiting for pods with injected redis service timeout");
+  return waitForK8sObject(
+    "/api/v1/namespaces/orders-service/pods",
+    { labelSelector: `app=${orderService}` },
+    (_type, _apiObj, watchObj) => {
+      return (
+        Object.keys(watchObj.object.metadata.labels).includes(
+          `use-${sbu.metadata.uid}`
+        ) &&
+        watchObj.object.metadata.name.startsWith(orderService) &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+          (c) => c.type == "Ready" && c.status == "True"
+        )
+      );
+    },
+    60 * 1000,
+    "Waiting for pods with injected redis service timeout"
+  );
 }
 
 async function ensureGettingStartedTestFixture() {
   await k8sApply([ordersServiceNamespaceObj]);
   await k8sApply(ordersServiceMicroserviceObj, orderService);
   await k8sApply(addonServiceBindingServiceInstanceObjs, orderService);
-  const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${orderService}/apirules`
-  await waitForK8sObject(apiRulePath, {}, (_type, _apiObj, watchObj) => {
-    return (watchObj.object.metadata.name == orderService && watchObj.object.status.APIRuleStatus.code == "OK")
-  }, 10 * 1000, "Waiting for APIRule to be ready timeout")
+  const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${orderService}/apirules`;
+  await waitForK8sObject(
+    apiRulePath,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == orderService &&
+        watchObj.object.status.APIRuleStatus.code == "OK"
+      );
+    },
+    10 * 1000,
+    "Waiting for APIRule to be ready timeout"
+  );
   await waitForVirtualService(orderService, orderService);
-  await waitForServiceInstance('redis-service', orderService, 300 * 1000);
+  await waitForServiceInstance("redis-service", orderService, 300 * 1000);
   await waitForServiceBinding(orderService, orderService);
   await k8sApply([sbuObj], orderService);
   const sbu = await waitForServiceBindingUsage(orderService, orderService);
@@ -143,12 +178,12 @@ function getResourcePaths(namespace) {
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
-  ]
+  ];
 }
 
 function cleanGettingStartedTestFixture(wait = true) {
   for (let path of getResourcePaths(orderService)) {
-    deleteAllK8sResources(path)
+    deleteAllK8sResources(path);
   }
   return deleteNamespaces([orderService], wait);
 }
@@ -156,5 +191,5 @@ function cleanGettingStartedTestFixture(wait = true) {
 module.exports = {
   ensureGettingStartedTestFixture,
   verifyOrderPersisted,
-  cleanGettingStartedTestFixture
-}
+  cleanGettingStartedTestFixture,
+};

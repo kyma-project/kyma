@@ -1,0 +1,4 @@
+installer/charts
+**/**/*.md
+**/**/*.yaml
+package-lock.json

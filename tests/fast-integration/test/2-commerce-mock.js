@@ -13,7 +13,7 @@ describe("CommerceMock tests", function () {
   it("CommerceMock test fixture should be ready", async function () {
     await ensureCommerceMockTestFixture("mocks", testNamespace).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockTestFixture("mocks", testNamespace)
+      return ensureCommerceMockTestFixture("mocks", testNamespace);
     });
   });
 

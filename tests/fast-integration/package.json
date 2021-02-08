@@ -6,13 +6,17 @@
     "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert",
     "test-utils": "mocha --inline-diffs --check-leaks './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/2-commerce-mock.js",
-    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/3-getting-started-guides.js"
+    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/3-getting-started-guides.js",
+    "lint": "prettier --write ."
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "@kubernetes/client-node": "0.13.0",
     "chai": "^4.2.0",
-    "mocha": "^8.2.1"
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.3",
+    "mocha": "^8.2.1",
+    "prettier": "2.2.1"
   },
   "dependencies": {
     "axios": "^0.21.0",
@@ -22,5 +26,13 @@
   },
   "engines": {
     "node": ">=12"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown '**/*.js'"
   }
 }
