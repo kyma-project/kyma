@@ -501,8 +501,8 @@ async function getContainerRestartsForAllNamespaces() {
     }));
 }
 
-const getRestartRaport = (prevPodList, afterPodList) => {
-  return prevPodList
+const printRestartReport = (prevPodList, afterPodList) => {
+  const report = prevPodList
     .map((elem) => {
       const afterPod = afterPodList.find((arg) => arg.name === elem.name);
       if (!afterPod || !afterPod.containerStatuses) {
@@ -535,6 +535,10 @@ const getRestartRaport = (prevPodList, afterPodList) => {
         (container) => container.restartsTillTestStart != 0
       )
     );
+
+  if (report.length > 0) {
+    console.log(k8s.dumpYaml(report));
+  }
 };
 
 function ignoreNotFound(e) {
@@ -576,5 +580,5 @@ module.exports = {
   k8sAppsApi,
   getContainerRestartsForAllNamespaces,
   debug,
-  getRestartRaport,
+  printRestartReport,
 };

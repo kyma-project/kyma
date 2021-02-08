@@ -4,7 +4,7 @@ const {
   cleanGettingStartedTestFixture,
 } = require("./fixtures/getting-started-guides");
 const {
-  getRestartRaport,
+  printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
@@ -28,11 +28,9 @@ describe("Getting Started Guide Tests", function () {
     await verifyOrderPersisted();
   });
 
-  it("Spit out raport", async function () {
+  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-    console.log(
-      JSON.stringify(getRestartRaport(initialRestarts, afterTestRestarts))
-    );
+    printRestartReport(initialRestarts, afterTestRestarts);
   });
 
   it("Namespace should be deleted", async function () {

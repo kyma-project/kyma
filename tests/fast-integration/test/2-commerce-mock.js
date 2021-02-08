@@ -1,4 +1,3 @@
-const k8s = require("@kubernetes/client-node");
 const {
   ensureCommerceMockTestFixture,
   checkAppGatewayResponse,
@@ -6,7 +5,7 @@ const {
   cleanMockTestFixture,
 } = require("./fixtures/commerce-mock");
 const {
-  getRestartRaport,
+  printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
@@ -35,12 +34,9 @@ describe("CommerceMock tests", function () {
     await sendEventAndCheckResponse();
   });
 
-  it("Spit out raport", async function () {
+  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-    // console.log(JSON.stringify(asd(initialRestarts, afterTestRestarts)));
-    console.log(
-      k8s.dumpYaml(getRestartRaport(initialRestarts, afterTestRestarts))
-    );
+    printRestartReport(initialRestarts, afterTestRestarts);
   });
 
   it("Test namespaces should be deleted", async function () {
