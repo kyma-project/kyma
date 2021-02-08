@@ -65,3 +65,10 @@ Nats server service Name
 {{- define "nats-controller.natsServer.url" -}}
 {{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Publisher service Name
+*/}}
+{{- define "event-publisher-nats.serviceName" -}}
+{{- printf "%s-event-publisher-proxy" .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
