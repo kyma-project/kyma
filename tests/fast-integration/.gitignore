@@ -116,4 +116,4 @@ dist
 .pnp.*
 
 istio-*
-fast-integration-junit.xml
+junit_kyma-fast-integration.xml
