@@ -1,6 +1,9 @@
 {
-  "reporterEnabled": "spec, mocha-junit-reporter",
+  "reporterEnabled": "spec, xunit",
   "mochaJunitReporterReporterOptions": {
     "mochaFile": "junit_kyma-fast-integration.xml"
+  },
+  "xunitReporterOptions": {
+    "output": "junit_kyma-fast-integration.xml"
   }
 }
