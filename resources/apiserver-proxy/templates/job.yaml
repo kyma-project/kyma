@@ -24,13 +24,6 @@ rules:
     resources: ["services"]
     resourceNames: ['{{ template "name" . }}-ssl']
     verbs: ["get", "patch"]
-{{- if .Values.podSecurityPolicy.enabled }}
-  - apiGroups: ["extensions","policy"]
-    resources: ["podsecuritypolicies"]
-    verbs: ["use"]
-    resourceNames: 
-      - {{ template "name" . }}
-{{- end }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -87,6 +80,11 @@ spec:
               exit 1
           image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
           name: gardener-annotate
+          env:
+            - name: HOME
+              value: /tmp
+          securityContext:
+{{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
       serviceAccountName: {{ template "name" . }}-ssl-helper-service-account
 {{ end }}
