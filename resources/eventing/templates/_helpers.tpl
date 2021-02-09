@@ -20,6 +20,7 @@ If release name contains chart name it will be used as a full name.
 Common labels
 */}}
 {{- define "eventing.labels" -}}
+component: {{ .Release.Name }}
 helm.sh/chart: {{ include "eventing.chart" . }}
 {{ include "eventing.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
