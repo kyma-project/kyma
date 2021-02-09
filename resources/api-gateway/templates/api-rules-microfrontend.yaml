@@ -19,6 +19,10 @@ spec:
       keepSelectedForChildren: true
       navigationContext: "apirules"
     - label: API Rule details
+      navigationPath: apirules/details
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+    - label: API Rule details
       navigationPath: apirules/details/:apiName
       viewUrl: "/namespaces/:namespaceId/apirules/:apiName?resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
       showInNavigation: false
