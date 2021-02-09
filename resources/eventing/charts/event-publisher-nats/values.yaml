@@ -30,5 +30,5 @@ nats:
    port: 8080
    requestTimeout: "5s"
    legacyNamespace: kyma
-   legacyEventTypePrefix: kyma
+   legacyEventTypePrefix: sap.kyma.custom
 
