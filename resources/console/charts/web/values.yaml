@@ -11,7 +11,7 @@ cluster:
   scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
   systemNamespaces: istio-system knative-eventing kube-public kube-system
-    kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
+    kyma-installer kyma-integration kyma-system natss kube-node-lease
     kubernetes-dashboard
 console:
   image:
