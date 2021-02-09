@@ -51,6 +51,7 @@ service:
 
 container:
   allowPrivilegeEscalation: false
+  privileged: false
   envs:
     metricsDomain:
       value: "kyma-project.io/serverless"

@@ -64,6 +64,10 @@ spec:
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
+          {{- if .Values.containers.manager.containerSecurityContext }}
+          securityContext:
+            {{- include "tplValue" ( dict "value" .Values.containers.manager.containerSecurityContext "context" . ) | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.services.manager.https.targetPort }}
               name: "webhook"
