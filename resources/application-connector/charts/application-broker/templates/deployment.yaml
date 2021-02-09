@@ -35,9 +35,6 @@ spec:
         kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ .Chart.Name }}
-      securityContext:
-        privileged: false
-        allowPrivilegeEscalation: false
       containers:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
@@ -73,6 +70,9 @@ spec:
           - name: APP_GATEWAY_BASE_URL_FORMAT
             value: {{ .Values.gatewayBaseURLFormat | quote }}
           {{ end }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
