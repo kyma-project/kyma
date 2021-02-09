@@ -69,47 +69,6 @@ metadata:
   labels:
     kyma-project.io/installation: ""
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kyma-installer
-  namespace: kyma-installer
-  labels:
-    kyma-project.io/installation: ""
-spec:
-  selector:
-    matchLabels:
-      name: kyma-installer
-  # Installer is designed to be run as a single instance only
-  # We enforce it by changing default rolling update to recreate startegy.
-  # With that k8s will first delete old pod and then provision new one during upgrade.
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        name: kyma-installer
-    spec:
-      serviceAccountName: kyma-installer      
-      containers:
-      - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
-        imagePullPolicy: IfNotPresent
-        args:
-          - -overrideLogFile=/app/overrides.txt
-          - -helmDebugMode=true
-        resources:
-          requests:
-            memory: 512Mi
-          limits:
-            memory: 2Gi
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          runAsGroup: 65534
-          runAsNonRoot: true
-          runAsUser: 65534
----
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -162,3 +121,44 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyma-installer
+  namespace: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  selector:
+    matchLabels:
+      name: kyma-installer
+  # Installer is designed to be run as a single instance only
+  # We enforce it by changing default rolling update to recreate startegy.
+  # With that k8s will first delete old pod and then provision new one during upgrade.
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: kyma-installer
+    spec:
+      serviceAccountName: kyma-installer      
+      containers:
+      - name: kyma-installer-container
+        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
+        imagePullPolicy: IfNotPresent
+        args:
+          - -overrideLogFile=/app/overrides.txt
+          - -helmDebugMode=true
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsGroup: 65534
+          runAsNonRoot: true
+          runAsUser: 65534
