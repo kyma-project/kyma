@@ -26,4 +26,4 @@ COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 USER 1000
 
-ENTRYPOINT ["/webhook-server"]
+ENTRYPOINT ["/app/webhook-server"]
