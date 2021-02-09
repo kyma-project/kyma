@@ -537,7 +537,9 @@ const printRestartReport = (prevPodList, afterPodList) => {
     );
 
   if (report.length > 0) {
-    console.log(k8s.dumpYaml(report));
+    console.log(`=========RESTART REPORT=========
+    ${k8s.dumpYaml(report)}
+    =========================`);
   }
 };
 
