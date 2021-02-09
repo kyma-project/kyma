@@ -63,9 +63,11 @@ containers:
       - name: varlibdockercontainers
         mountPath: /var/lib/docker/containers
         readOnly: true
+      {{- if .Values.volumes.mountMachineIdFile }}
       - name: etcmachineid
         mountPath: /etc/machine-id
         readOnly: true
+      {{- end }}
     {{- end }}
     {{- if and (.Values.config.outputs.es.tls.cert) (.Values.config.outputs.es.tls.key) }}
       - name: es-tls-secret
@@ -120,10 +122,12 @@ volumes:
   - name: varlibdockercontainers
     hostPath:
       path: /var/lib/docker/containers
+  {{- if .Values.volumes.mountMachineIdFile }}
   - name: etcmachineid
     hostPath:
       path: /etc/machine-id
       type: File
+  {{- end }}
 {{- end }}
 {{- if .Values.config.outputs.es.tls.ca }}
   - name: es-ca-secret

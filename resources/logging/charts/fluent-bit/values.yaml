@@ -107,6 +107,9 @@ extraPorts: []
 #     protocol: TCP
 #     name: tcp
 
+volumes:
+  mountMachineIdFile: false
+
 extraVolumes: ""
 # extraVolumes: |
 #   - name: volume
