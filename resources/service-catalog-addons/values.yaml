@@ -6,6 +6,6 @@ global:
       name: kyma-gateway
   service_binding_usage_controller:
     dir:
-    version: "4d45d900"
+    version: "PR-10532"
   ingress:
     domainName: "TBD"
