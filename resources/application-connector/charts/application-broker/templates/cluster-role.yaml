@@ -49,5 +49,5 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs:     ["use"]
   resourceNames:
-  - {{ template "fullname" . }}
+  - kyma.unprivileged
   {{ end }}
