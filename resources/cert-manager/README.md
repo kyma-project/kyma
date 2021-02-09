@@ -15,7 +15,7 @@ to renew certificates at an appropriate time before expiry.
 
 For more information check [links](#links) section.
 
-## Changes introduces
+## Changes introduced
 
 Overall `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with it's name indicating a resource type. They are available in `files/` directory.
 
@@ -41,7 +41,7 @@ $ kubectl apply -f ./files
 
 ## Usage
 
-[Isuees configuration](https://cert-manager.io/docs/configuration/).
+[Issues configuration](https://cert-manager.io/docs/configuration/).
 
 [Securing Ingresses documentation](https://cert-manager.io/docs/usage/ingress/).
 
@@ -51,4 +51,4 @@ For more information check [links](#links) section.
 
 - [official site](https://cert-manager.io)
 - [docs](https://cert-manager.io/docs/)
-- [GitHub](https://github.com/jetstack/cert-managers)
+- [GitHub](https://github.com/jetstack/cert-manager)
