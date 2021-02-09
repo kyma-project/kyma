@@ -24,6 +24,8 @@ spec:
           env:
           - name: NATS_URL
             value: {{ include "nats-controller.natsServer.url" . }}
+          - name: EVENT_TYPE_PREFIX
+            value: {{ .Values.global.eventTypePrefix }}
           resources:
             limits:
               cpu: 100m
