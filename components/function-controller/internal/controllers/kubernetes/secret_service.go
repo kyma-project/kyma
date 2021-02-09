@@ -95,7 +95,8 @@ func (r *secretService) HandleFinalizer(ctx context.Context, logger logr.Logger,
 func (r *secretService) createSecret(ctx context.Context, logger logr.Logger, namespace string, baseInstance *corev1.Secret) error {
 	secret := corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: baseInstance.GetName(), Namespace: namespace,
+			Name:        baseInstance.GetName(),
+			Namespace:   namespace,
 			Labels:      baseInstance.Labels,
 			Annotations: baseInstance.Annotations,
 		},
