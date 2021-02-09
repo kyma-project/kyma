@@ -164,3 +164,11 @@ func HaveEvent(event v1.Event) GomegaMatcher {
 func IsK8sUnprocessableEntity() GomegaMatcher {
 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
 }
+
+//
+// int matchers
+//
+
+func BeGreaterThanOrEqual(a int) GomegaMatcher {
+	return WithTransform(func(b int) bool { return b >= a }, BeTrue())
+}

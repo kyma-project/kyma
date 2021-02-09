@@ -124,8 +124,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests == 0).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(BeZero())
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -252,8 +252,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 1).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -300,8 +300,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 1).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -349,8 +349,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 2).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(2))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -406,8 +406,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 1).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -483,8 +483,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 1).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
@@ -572,8 +572,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Sending valid webhook requests only")
 			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests >= 1).Should(BeTrue())
-			Expect(invalidRequests == 0).Should(BeTrue())
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 

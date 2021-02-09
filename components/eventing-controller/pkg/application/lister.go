@@ -22,8 +22,9 @@ type Lister struct {
 }
 
 func NewLister(ctx context.Context, client dynamic.Interface) *Lister {
+	const defaultResync = 10 * time.Second
 	gvr := GroupVersionResource()
-	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 10*time.Second, v1.NamespaceAll, nil)
+	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, defaultResync, v1.NamespaceAll, nil)
 	factory.ForResource(gvr)
 	lister := factory.ForResource(gvr).Lister()
 	informers.WaitForCacheSyncOrDie(ctx, factory)
