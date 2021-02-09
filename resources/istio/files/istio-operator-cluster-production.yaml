@@ -84,12 +84,12 @@ spec:
             memory: 128Mi
         service:
           ports:
-          - port: 15012
-            targetPort: 15012
-            name: tcp-istiod
           - name: status-port
             port: 15021
             targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
           - name: http2
             port: 80
             targetPort: 8080
