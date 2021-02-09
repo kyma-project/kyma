@@ -13,31 +13,13 @@ spec:
   navigationNodes:
     - label: API Rules
       navigationPath: apirules
-      viewUrl: "/home/namespaces/:namespaceId/apirules?hasDetailsView=false&resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
+      viewUrl: "/namespaces/:namespaceId/apirules?hasDetailsView=true&resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
       order: 1
       viewGroup: "_core_ui_"
       keepSelectedForChildren: true
       navigationContext: "apirules"
-    - label: Create API rule
-      navigationPath: apirules/create
-      viewUrl: "/apirules/create"
-      showInNavigation: false
-      viewGroup: "_core_ui_"
-    - label: API Rule details
-      navigationPath: apirules/details
-      showInNavigation: false
-      viewGroup: "_core_ui_"
     - label: API Rule details
       navigationPath: apirules/details/:apiName
-      viewUrl: "/apirules/details/:apiName"
+      viewUrl: "/namespaces/:namespaceId/apirules/:apiName?resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
       showInNavigation: false
       viewGroup: "_core_ui_"
-    - label: API Rule edit
-      navigationPath: apirules/edit
-      showInNavigation: false
-      viewGroup: _core_ui_
-    - label: API Rule edit
-      navigationPath: apirules/edit/:apiName
-      showInNavigation: false
-      viewGroup: _core_ui_
-      viewUrl: /apirules/edit/:apiName
