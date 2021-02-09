@@ -44,10 +44,3 @@ rules:
 - apiGroups: ["security.istio.io"]
   resources: ["peerauthentications"]
   verbs: ["create","update", "get"]
-{{ if .Values.podSecurityPolicy.enabled }}
-- apiGroups: ["policy"]
-  resources: ["podsecuritypolicies"]
-  verbs:     ["use"]
-  resourceNames:
-  - kyma.unprivileged
-  {{ end }}

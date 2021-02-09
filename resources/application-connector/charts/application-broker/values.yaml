@@ -37,7 +37,3 @@ ctrl:
     requests:
       memory: 32Mi
       cpu: 60m
-
-podSecurityPolicy:
-  enabled: true
-

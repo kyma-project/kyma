@@ -35,6 +35,9 @@ spec:
         kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ .Chart.Name }}
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
       containers:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
