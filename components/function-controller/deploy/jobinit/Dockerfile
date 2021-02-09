@@ -26,7 +26,7 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 && if [ -f ${BASE_APP_DIR}/licenses ]; then mv ${BASE_APP_DIR}/licenses /app/licenses; fi
 
 # result container
-FROM alpine:3.12
+FROM alpine:3.13
 
 RUN apk add --no-cache \
   openssh-client \
