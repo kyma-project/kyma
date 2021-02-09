@@ -47,4 +47,6 @@ spec:
             memory: {{ .Values.deployment.resources.requests.memory }}
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
 {{- end }}
