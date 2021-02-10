@@ -10,6 +10,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
@@ -31,11 +32,12 @@ func init() {
 }
 
 type config struct {
-	MetricsAddress        string `envconfig:"default=:8080"`
-	LeaderElectionEnabled bool   `envconfig:"default=false"`
-	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
-	Kubernetes            k8s.Config
-	Function              serverless.FunctionConfig
+	MetricsAddress            string `envconfig:"default=:8080"`
+	LeaderElectionEnabled     bool   `envconfig:"default=false"`
+	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
+	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
+	Kubernetes                k8s.Config
+	Function                  serverless.FunctionConfig
 }
 
 func main() {
@@ -56,6 +58,7 @@ func main() {
 		MetricsBindAddress: config.MetricsAddress,
 		LeaderElection:     config.LeaderElectionEnabled,
 		LeaderElectionID:   config.LeaderElectionID,
+		Port:               config.SecretMutatingWebhookPort,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
@@ -68,6 +71,13 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
+
+	mgr.GetWebhookServer().Register(
+		"/mutate-v1-secret",
+		&webhook.Admission{
+			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
+		},
+	)
 
 	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
 		SetupWithManager(mgr); err != nil {
@@ -114,6 +124,7 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Running manager")
+
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
 		os.Exit(1)

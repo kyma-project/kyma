@@ -94,7 +94,7 @@ spec:
           - containerPort: 9090
             name: http-metrics
         securityContext:
-          runAsUser: {{ .Values.deployment.runAsUser }}
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
       {{- if .Values.deployment.externalClusterLookup.enabled }}
       volumes:
       - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}

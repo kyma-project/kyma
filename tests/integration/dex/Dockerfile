@@ -16,7 +16,7 @@ COPY . ${BASE_APP_DIR}
 RUN CGO_ENABLED=0 go test -c ./dex -tags=integration
 RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses && mv ${BASE_APP_DIR}/entrypoint.sh /tests/entrypoint.sh
 
-FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
+FROM eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
 LABEL source = git@github.com:kyma-project/kyma.git
 
 #

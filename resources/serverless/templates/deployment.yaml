@@ -43,12 +43,19 @@ spec:
       {{- end }}
       {{- end }}
     spec:
+      volumes:
+        - name: {{ template "fullname" . }}-k8s-webhook-cert
+          secret:
+            secretName: {{ template "fullname" . }}-k8s-webhook-cert
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
       {{- end }}
       containers:
         - name: manager
+          volumeMounts:
+            - name: {{ template "fullname" . }}-k8s-webhook-cert
+              mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
           imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
           command:
@@ -58,6 +65,9 @@ spec:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
           ports:
+            - containerPort: {{ .Values.services.manager.https.targetPort }}
+              name: "webhook"
+              protocol: TCP
             {{- if .Values.metrics.enabled }}
             - containerPort: {{ .Values.metrics.manager.port.port }}
               name: {{ .Values.metrics.manager.port.name }}

@@ -6,14 +6,14 @@ fullnameOverride: "serverless"
 
 injectCerts:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20210113-12c4e3b5"
+    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+    tag: "20210208-080d17ad"
     pullPolicy: IfNotPresent
 
 migration:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20210113-12c4e3b5"
+    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+    tag: "20210208-080d17ad"
     pullPolicy: IfNotPresent
 
 tests:
@@ -33,8 +33,8 @@ tests:
         memory: 256Mi
         cpu: 200m
     image:
-      repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-      tag: "20210113-12c4e3b5"
+      repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+      tag: "20210208-080d17ad"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
@@ -77,8 +77,8 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10434"
-    pullPolicy: IfNotPresent
+    tag: "ff5b21b7"
+    pullPolicy: Always
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
@@ -143,7 +143,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:9e5c2a22
+        value: eu.gcr.io/kyma-project/function-build-init:PR-10558
       functionBuildMaxSimultaneousJobs:
         value: "5"
 
@@ -152,6 +152,9 @@ services:
     type: ClusterIP
     labels: {}
     annotations: {}
+    https:
+      port: 443
+      targetPort: 8443
 
 metrics:
   enabled: true

@@ -159,6 +159,8 @@ loki:
           period: 24h
     server:
       http_listen_port: 3100
+      # Log only messages with the given severity or above. Supported values [debug, info, warn, error]
+      log_level: info
     storage_config:
       boltdb:
         directory: /data/loki/index
