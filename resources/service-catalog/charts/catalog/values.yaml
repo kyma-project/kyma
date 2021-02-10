@@ -37,7 +37,7 @@ webhook:
       # The TLS-enabled endpoint will be exposed here
       securePort: 31443
   # Log level; valid values are in the range 0 - 10 (do not set higher than 6, see CVE-2019-11250)
-  verbosity: "4"
+  verbosity: "6"
   serviceAccount: service-catalog-webhook
   # Webhook resource requests and limits
   # Ref: http://kubernetes.io/docs/user-guide/compute-resources/

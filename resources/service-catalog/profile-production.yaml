@@ -23,4 +23,3 @@ catalog:
         cpu: 100m
         memory: 128Mi
     verbosity: "4"
-gi
