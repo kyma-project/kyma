@@ -2,7 +2,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: 000.kyma.unprivileged
+  name: 001-kyma-unprivileged
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"
     helm.sh/hook-weight: "0"
