@@ -677,9 +677,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			expectedEventActivationCreated: true,
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs:                    []runtime.Object{},
-			expectCreates: []runtime.Object{
-				bt.NewIstioPeerAuthentication(string(appNs), fmt.Sprintf("%s%s", appNs, peerAuthNameSuffix)),
-			},
+			expectCreates: []runtime.Object{},
 		},
 		{
 			name:                           "provision fail namespace not found",

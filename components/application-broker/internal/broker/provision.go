@@ -288,15 +288,15 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 			svc.updateStateFailed(iID, opID, opDesc)
 			return
 		}
-	}
 
-	// CreateOrUpdate Istio PeerAuthentication
-	if err := svc.createOrUpdatePeerAuthentication(ns); err != nil {
-		svc.log.Errorf("Error creating istio PeerAuthentication: %v", err)
-		opDesc := fmt.Sprintf("provisioning failed while creating an istio PeerAuthentication for application: %s"+
-			" namespace: %s on error: %s", appName, ns, err)
-		svc.updateStateFailed(iID, opID, opDesc)
-		return
+		// CreateOrUpdate Istio PeerAuthentication
+		if err := svc.createOrUpdatePeerAuthentication(ns); err != nil {
+			svc.log.Errorf("Error creating istio PeerAuthentication: %v", err)
+			opDesc := fmt.Sprintf("provisioning failed while creating an istio PeerAuthentication for application: %s"+
+				" namespace: %s on error: %s", appName, ns, err)
+			svc.updateStateFailed(iID, opID, opDesc)
+			return
+		}
 	}
 
 	svc.updateStateSuccess(iID, opID)
