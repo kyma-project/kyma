@@ -107,8 +107,8 @@ func (t LoggingTest) checkTokenIsRequired() error {
 	if err != nil {
 		return errors.Wrap(err, "cannot send request to Loki")
 	}
-	if respStatus != http.StatusForbidden {
-		return errors.Errorf("received status code %d instead of %d when accessing Loki wihout a JWT token", respStatus, http.StatusForbidden)
+	if respStatus != http.StatusUnauthorized && respStatus != http.StatusForbidden {
+		return errors.Errorf("received status code %d instead of %d or %d when accessing Loki wihout a JWT token", respStatus, http.StatusUnauthorized, http.StatusForbidden)
 	}
 	return nil
 }
