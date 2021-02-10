@@ -67,7 +67,7 @@ func main() {
 	logger.Info("Informers are synced successfully")
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewNatsHandler(messageReceiver, messageSenderToNats, cfgNats.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logger).Start(ctx); err != nil {
+	if err := nats.NewHandler(messageReceiver, messageSenderToNats, cfgNats.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logger).Start(ctx); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 

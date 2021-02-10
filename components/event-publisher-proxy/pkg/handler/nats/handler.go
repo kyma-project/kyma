@@ -42,8 +42,8 @@ type Handler struct {
 	Options *options.Options
 }
 
-// NewHandler returns a new Handler instance for the Event Publisher Proxy.
-func NewNatsHandler(receiver *receiver.HttpMessageReceiver, sender *sender.NatsMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor, logger *logrus.Logger) *Handler {
+// NewHandler returns a new NATS Handler instance.
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.NatsMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor, logger *logrus.Logger) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,

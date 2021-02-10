@@ -114,7 +114,7 @@ func NewApplicationListerOrDie(ctx context.Context, appName string) *application
 	return appLister
 }
 
-// common test-cases for the proxy-handler and nats-handler
+// common test-cases for the HTTP handler and NATS handler
 var (
 	TestCasesForCloudEvents = []struct {
 		Name           string

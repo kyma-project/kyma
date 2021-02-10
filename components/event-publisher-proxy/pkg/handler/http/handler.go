@@ -59,7 +59,7 @@ type Handler struct {
 	Options *options.Options
 }
 
-// NewHandler returns a new Handler instance for the Event Publisher Proxy.
+// NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor, logger *logrus.Logger) *Handler {
 	return &Handler{
 		Receiver:            receiver,

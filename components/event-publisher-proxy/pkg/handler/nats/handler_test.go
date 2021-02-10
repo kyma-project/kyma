@@ -38,27 +38,107 @@ import (
 )
 
 type Test struct {
-	logger     *logrus.Logger
-	natsConfig *env.NatsConfig
-	natsServer *server.Server
+	logger         *logrus.Logger
+	natsConfig     *env.NatsConfig
+	natsServer     *server.Server
+	natsUrl        string
+	healthEndpoint string
 }
 
-func (t *Test) setup() {
+func (test *Test) init() {
 	port := testingutils.GeneratePortOrDie()
 	natsPort := testingutils.GeneratePortOrDie()
-	t.natsConfig = newEnvConfig(port, natsPort)
-	t.logger = logrus.New()
-	t.natsServer = eventingtesting.RunNatsServerOnPort(port + 1)
+
+	test.logger = logrus.New()
+	test.natsConfig = newEnvConfig(port, natsPort)
+	test.natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
+	test.natsUrl = test.natsServer.ClientURL()
+	test.healthEndpoint = fmt.Sprintf("http://localhost:%d/healthz", port)
 }
 
-func (t *Test) cleanup() {
-	t.natsServer.Shutdown()
+func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Subscription, applicationName string) context.CancelFunc {
+	// a cancelable context to be used
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// configure message receiver
+	messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
+	assert.NotNil(t, messageReceiver)
+
+	// create a Nats sender
+	msgSender := sender.NewNatsMessageSender(ctx, test.natsUrl, test.logger)
+	assert.NotNil(t, msgSender)
+
+	// configure legacyTransformer
+	appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)
+	legacyTransformer := legacy.NewTransformer(
+		test.natsConfig.ToConfig().BEBNamespace,
+		test.natsConfig.ToConfig().EventTypePrefix,
+		appLister,
+	)
+
+	// Setting up fake informers
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		t.Fatalf("failed to add corev1 to scheme: %v", err)
+	}
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		t.Fatalf("failed to add eventing v1alpha1 to scheme: %v", err)
+	}
+
+	subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
+	if err != nil {
+		t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
+	}
+	// Creating unstructured subscriptions
+	subUnstructured := &unstructured.Unstructured{
+		Object: subUnstructuredMap,
+	}
+	// Setting Kind information in unstructured subscription
+	subscriptionGVK := schema.GroupVersionKind{
+		Group:   subscribed.GVR.Group,
+		Version: subscribed.GVR.Version,
+		Kind:    "Subscription",
+	}
+	subUnstructured.SetGroupVersionKind(subscriptionGVK)
+	// Configuring fake dynamic client
+	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
+
+	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
+	genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
+	t.Logf("Waiting for cache to resync")
+	informers.WaitForCacheSyncOrDie(ctx, dFilteredSharedInfFactory)
+	t.Logf("Informers resynced successfully")
+	subLister := genericInf.Lister()
+	subscribedProcessor := &subscribed.Processor{
+		SubscriptionLister: &subLister,
+		Config:             test.natsConfig.ToConfig(),
+		Logger:             logrus.New(),
+	}
+
+	// start handler which blocks until it receives a shutdown signal
+	opts := &options.Options{MaxRequestSize: 65536}
+	natsHandler := NewHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger)
+	assert.NotNil(t, natsHandler)
+	go func() {
+		if err := natsHandler.Start(ctx); err != nil {
+			t.Errorf("Failed to start handler with error: %v", err)
+		}
+	}()
+
+	// wait that the embedded servers are started
+	testingutils.WaitForHandlerToStart(t, test.healthEndpoint)
+
+	return cancel
+}
+
+func (test *Test) cleanup() {
+	test.natsServer.Shutdown()
 }
 
 var test = Test{}
 
 func TestMain(m *testing.M) {
-	test.setup()
+	test.init()
 	code := m.Run()
 	test.cleanup()
 	os.Exit(code)
@@ -66,87 +146,13 @@ func TestMain(m *testing.M) {
 
 func TestNatsHandlerForCloudEvents(t *testing.T) {
 	exec := func(t *testing.T, applicationName, expectedNatsSubject string) {
-		// test environment
-		var (
-			healthEndpoint  = fmt.Sprintf("http://localhost:%d/healthz", test.natsConfig.Port)
-			publishEndpoint = fmt.Sprintf("http://localhost:%d/publish", test.natsConfig.Port)
-		)
+		test.logger.Info("TestNatsHandlerForCloudEvents started")
 
-		test.logger.Info("TestNatsHandler started")
-
-		// a cancelable context to be used
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		// configure message receiver
-		messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
-		assert.NotNil(t, messageReceiver)
-
-		// create a Nats sender
-		natsUrl := test.natsServer.ClientURL()
-		assert.NotEmpty(t, natsUrl)
-		msgSender := sender.NewNatsMessageSender(ctx, natsUrl, test.logger)
-
-		// configure legacyTransformer
-		appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)
-		legacyTransformer := legacy.NewTransformer(
-			test.natsConfig.ToConfig().BEBNamespace,
-			test.natsConfig.ToConfig().EventTypePrefix,
-			appLister,
-		)
-
-		// Setting up fake informers
-		scheme := runtime.NewScheme()
-		if err := corev1.AddToScheme(scheme); err != nil {
-			t.Fatalf("failed to add corev1 to scheme: %v", err)
-		}
-		if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
-			t.Fatalf("failed to add eventing v1alpha1 to scheme: %v", err)
-		}
+		// setup test environment
+		publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", test.natsConfig.Port)
 		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventTypeNotClean))
-
-		subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
-		if err != nil {
-			t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
-		}
-		// Creating unstructured subscriptions
-		subUnstructured := &unstructured.Unstructured{
-			Object: subUnstructuredMap,
-		}
-		// Setting Kind information in unstructured subscription
-		subscriptionGVK := schema.GroupVersionKind{
-			Group:   subscribed.GVR.Group,
-			Version: subscribed.GVR.Version,
-			Kind:    "Subscription",
-		}
-		subUnstructured.SetGroupVersionKind(subscriptionGVK)
-		// Configuring fake dynamic client
-		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
-
-		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
-		genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
-		t.Logf("Waiting for cache to resync")
-		informers.WaitForCacheSyncOrDie(ctx, dFilteredSharedInfFactory)
-		t.Logf("Informers resynced successfully")
-		subLister := genericInf.Lister()
-		subscribedProcessor := &subscribed.Processor{
-			SubscriptionLister: &subLister,
-			Config:             test.natsConfig.ToConfig(),
-			Logger:             logrus.New(),
-		}
-
-		// start handler which blocks until it receives a shutdown signal
-		opts := &options.Options{MaxRequestSize: 65536}
-		natsHandler := NewNatsHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger)
-		assert.NotNil(t, natsHandler)
-		go func() {
-			if err := natsHandler.Start(ctx); err != nil {
-				t.Errorf("Failed to start handler with error: %v", err)
-			}
-		}()
-
-		// wait that the embedded servers are started
-		testingutils.WaitForHandlerToStart(t, healthEndpoint)
+		cancel := test.setupResources(t, subscription, applicationName)
+		defer cancel()
 
 		// prepare event type from subscription
 		assert.NotNil(t, subscription.Spec.Filter)
@@ -154,7 +160,7 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// publish a message to NATS and validate it
-		connection := connectToNatsOrFail(t, natsUrl)
+		connection := connectToNatsOrFail(t, test.natsUrl)
 		validator := validateNatsSubject(t, expectedNatsSubject)
 		subscribeToEventOrFail(t, connection, eventType, validator)
 
@@ -181,87 +187,13 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 
 func TestNatsHandlerForLegacyEvents(t *testing.T) {
 	exec := func(t *testing.T, applicationName string, expectedNatsSubject string) {
-		// test environment
-		var (
-			healthEndpoint        = fmt.Sprintf("http://localhost:%d/healthz", test.natsConfig.Port)
-			publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/%s/v1/events", test.natsConfig.Port, applicationName)
-		)
+		test.logger.Info("TestNatsHandlerForLegacyEvents started")
 
-		test.logger.Info("TestNatsHandler started")
-
-		// a cancelable context to be used
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		// configure message receiver
-		messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
-		assert.NotNil(t, messageReceiver)
-
-		// create a Nats sender
-		natsUrl := test.natsServer.ClientURL()
-		assert.NotEmpty(t, natsUrl)
-		msgSender := sender.NewNatsMessageSender(ctx, natsUrl, test.logger)
-
-		// configure legacyTransformer
-		appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)
-		legacyTransformer := legacy.NewTransformer(
-			test.natsConfig.ToConfig().BEBNamespace,
-			test.natsConfig.ToConfig().EventTypePrefix,
-			appLister,
-		)
-
-		// Setting up fake informers
-		scheme := runtime.NewScheme()
-		if err := corev1.AddToScheme(scheme); err != nil {
-			t.Fatalf("failed to add corev1 to scheme: %v", err)
-		}
-		if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
-			t.Fatalf("failed to add eventing v1alpha1 to scheme: %v", err)
-		}
+		// setup test environment
+		publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", test.natsConfig.Port, applicationName)
 		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventTypeNotClean))
-
-		subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
-		if err != nil {
-			t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
-		}
-		// Creating unstructured subscriptions
-		subUnstructured := &unstructured.Unstructured{
-			Object: subUnstructuredMap,
-		}
-		// Setting Kind information in unstructured subscription
-		subscriptionGVK := schema.GroupVersionKind{
-			Group:   subscribed.GVR.Group,
-			Version: subscribed.GVR.Version,
-			Kind:    "Subscription",
-		}
-		subUnstructured.SetGroupVersionKind(subscriptionGVK)
-		// Configuring fake dynamic client
-		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
-
-		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
-		genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
-		t.Logf("Waiting for cache to resync")
-		informers.WaitForCacheSyncOrDie(ctx, dFilteredSharedInfFactory)
-		t.Logf("Informers resynced successfully")
-		subLister := genericInf.Lister()
-		subscribedProcessor := &subscribed.Processor{
-			SubscriptionLister: &subLister,
-			Config:             test.natsConfig.ToConfig(),
-			Logger:             logrus.New(),
-		}
-
-		// start handler which blocks until it receives a shutdown signal
-		opts := &options.Options{MaxRequestSize: 65536}
-		natsHandler := NewNatsHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger)
-		assert.NotNil(t, natsHandler)
-		go func() {
-			if err := natsHandler.Start(ctx); err != nil {
-				t.Errorf("Failed to start handler with error: %v", err)
-			}
-		}()
-
-		// wait that the embedded servers are started
-		testingutils.WaitForHandlerToStart(t, healthEndpoint)
+		cancel := test.setupResources(t, subscription, applicationName)
+		defer cancel()
 
 		// prepare event type from subscription
 		assert.NotNil(t, subscription.Spec.Filter)
@@ -269,7 +201,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// publish a message to NATS and validate it
-		connection := connectToNatsOrFail(t, natsUrl)
+		connection := connectToNatsOrFail(t, test.natsUrl)
 		validator := validateNatsSubject(t, expectedNatsSubject)
 		subscribeToEventOrFail(t, connection, eventType, validator)
 
@@ -301,92 +233,13 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 }
 
 func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
-	// test environment
-	var (
-		applicationName          = testingutils.ApplicationName
-		healthEndpoint           = fmt.Sprintf("http://localhost:%d/healthz", test.natsConfig.Port)
-		subscribedEndpointFormat = "http://localhost:%d/%s/v1/events/subscribed"
-	)
+	test.logger.Info("TestNatsHandlerForSubscribedEndpoint started")
 
-	test.logger.Info("TestNatsHandler started")
-
-	// a cancelable context to be used
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
-	assert.NotNil(t, messageReceiver)
-
-	// create a Nats sender
-	natsUrl := test.natsServer.ClientURL()
-	assert.NotEmpty(t, natsUrl)
-	msgSender := sender.NewNatsMessageSender(ctx, natsUrl, test.logger)
-
-	// configure legacyTransformer
-	appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)
-	legacyTransformer := legacy.NewTransformer(
-		test.natsConfig.ToConfig().BEBNamespace,
-		test.natsConfig.ToConfig().EventTypePrefix,
-		appLister,
-	)
-
-	// Setting up fake informers
-	scheme := runtime.NewScheme()
-	if err := corev1.AddToScheme(scheme); err != nil {
-		t.Fatalf("failed to add corev1 to scheme: %v", err)
-	}
-	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
-		t.Fatalf("failed to add eventing v1alpha1 to scheme: %v", err)
-	}
+	// setup test environment
+	subscribedEndpointFormat := "http://localhost:%d/%s/v1/events/subscribed"
 	subscription := testingutils.NewSubscription()
-
-	subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
-	if err != nil {
-		t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
-	}
-	// Creating unstructured subscriptions
-	subUnstructured := &unstructured.Unstructured{
-		Object: subUnstructuredMap,
-	}
-	// Setting Kind information in unstructured subscription
-	subscriptionGVK := schema.GroupVersionKind{
-		Group:   subscribed.GVR.Group,
-		Version: subscribed.GVR.Version,
-		Kind:    "Subscription",
-	}
-	subUnstructured.SetGroupVersionKind(subscriptionGVK)
-	// Configuring fake dynamic client
-	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
-
-	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient,
-		10*time.Second,
-		v1.NamespaceAll,
-		nil,
-	)
-	genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
-	t.Logf("Waiting for cache to resync")
-	informers.WaitForCacheSyncOrDie(ctx, dFilteredSharedInfFactory)
-	t.Logf("Informers resynced successfully")
-	subLister := genericInf.Lister()
-	subscribedProcessor := &subscribed.Processor{
-		SubscriptionLister: &subLister,
-		Config:             test.natsConfig.ToConfig(),
-		Logger:             logrus.New(),
-	}
-
-	// start handler which blocks until it receives a shutdown signal
-	opts := &options.Options{MaxRequestSize: 65536}
-	natsHandler := NewNatsHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger)
-	assert.NotNil(t, natsHandler)
-	go func() {
-		if err := natsHandler.Start(ctx); err != nil {
-			t.Errorf("Failed to start handler with error: %v", err)
-		}
-	}()
-
-	// wait that the embedded servers are started
-	testingutils.WaitForHandlerToStart(t, healthEndpoint)
+	cancel := test.setupResources(t, subscription, testingutils.ApplicationName)
+	defer cancel()
 
 	// run the tests for subscribed endpoint
 	for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
