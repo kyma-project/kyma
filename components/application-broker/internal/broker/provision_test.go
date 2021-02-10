@@ -72,7 +72,7 @@ func TestProvisionAsync(t *testing.T) {
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 "provisioning succeeded",
-			expectedEventActivationCreated: false,
+			expectedEventActivationCreated: true,
 			expectedAPIPackageCredsCreated: true,
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			newEventingFlow:                true,
@@ -699,6 +699,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 		{
 			name:                           "provision fail channel not found",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			newEventingFlow:                false,
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 `provisioning failed while persisting Knative Subscription for application: ec-prod namespace: example-namespace on error: getting the Knative channel for the application [ec-prod]: channels.messaging.knative.dev "" not found`,
 			expectedEventActivationCreated: true,
@@ -710,6 +711,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 		{
 			name:                           "provision success subscription created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			newEventingFlow:                false,
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
@@ -730,6 +732,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 		{
 			name:                           "provision success no subscription created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			newEventingFlow:                false,
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
@@ -749,6 +752,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 		{
 			name:                           "provision success no istio PeerAuthentication created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			newEventingFlow:                false,
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
@@ -768,6 +772,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 		{
 			name:                           "provision success an istio PeerAuthentication created before",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
+			newEventingFlow:                false,
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 internal.OperationDescriptionProvisioningSucceeded,
 			expectedEventActivationCreated: true,
