@@ -224,7 +224,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "55e5b31a"
+    tag: "da9a9809"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
