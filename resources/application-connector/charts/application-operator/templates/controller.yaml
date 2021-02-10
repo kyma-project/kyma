@@ -57,6 +57,11 @@ spec:
         - "--profile={{ .Values.controller.resources.profile }}"
         - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
         - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
+        env:
+          - name: APP_LOG_FORMAT
+            value: {{ .Values.global.log.format | quote }}
+          - name: APP_LOG_LEVEL
+            value: {{ .Values.global.log.level | quote }}
         image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
