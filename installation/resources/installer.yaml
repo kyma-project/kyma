@@ -73,7 +73,10 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: kyma.installer
-  namespace: kyma-installer
+  labels:
+    release: kyma-installer 
+    kyma-project.io/installation: "kyma-installer"  
+    kyma-project.io/installation: ""
 spec:
   allowPrivilegeEscalation: false
   allowedCapabilities:
