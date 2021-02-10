@@ -180,6 +180,7 @@ spec:
         securityContext:
 {{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
+    #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
     accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
