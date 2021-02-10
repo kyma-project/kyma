@@ -89,6 +89,8 @@ spec:
     metadata:
       labels:
         name: kyma-installer
+      annotations:
+        kubernetes.io/psp: 000-kyma-installer
     spec:
       serviceAccountName: kyma-installer      
       containers:
@@ -105,12 +107,8 @@ spec:
             memory: 2Gi
         securityContext:
           allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
           privileged: false
           runAsGroup: 65534
-          runAsNonRoot: true
           runAsUser: 65534
 ---
 apiVersion: policy/v1beta1
@@ -135,7 +133,7 @@ spec:
       - min: 1
         max: 65535
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
