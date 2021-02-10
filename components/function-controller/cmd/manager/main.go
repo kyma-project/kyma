@@ -48,7 +48,6 @@ type config struct {
 }
 
 func main() {
-	ctrl.SetLogger(zap.New())
 
 	config, err := loadConfig("APP")
 	if err != nil {
