@@ -140,15 +140,14 @@ async function registerAllApis(mockHost) {
               },
             }
           )
-          .catch((err) => {
-            throw new Error(
-              `Error during Commerce Mock ai registration: ${err.response.data}`
-            );
-          });
-      },
-      3,
-      5000
-    );
+          },
+      10,
+      3000
+    ).catch((err) => {
+      throw new Error(
+        `Error during Commerce Mock API registration: ${err.response.data}`
+      );
+    });
   }
   const remoteApis = await axios
     .get(`https://${mockHost}/remote/apis`)
