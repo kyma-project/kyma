@@ -116,7 +116,7 @@ spec:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: kyma.installer
+  name: kyma-installer
   labels:
     release: kyma-installer
     kyma-project.io/installation: "kyma-installer"
@@ -158,7 +158,7 @@ rules:
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
-  resourceNames: ["kyma.installer"]
+  resourceNames: ["kyma-installer"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
