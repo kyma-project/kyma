@@ -25,7 +25,7 @@ spec:
         - name: certificates
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
+{{- toYaml .Values.securityContext | nindent 12 }}
           command:
             - bash
             - -c

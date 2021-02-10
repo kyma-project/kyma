@@ -31,5 +31,7 @@ spec:
               value: "{{ .Values.certificates.apiserverProxy.name }}"
             - name: APISERVER_PROXY_SECRET_NAMESPACE
               value: "{{ .Values.certificates.apiserverProxy.namespace }}"
+          securityContext:
+{{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
       serviceAccountName: {{ template "certificates.name" . }}-gardener

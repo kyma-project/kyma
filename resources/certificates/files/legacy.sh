@@ -1,6 +1,8 @@
 set -e
 set -eo pipefail
 
+export HOME="/tmp"
+
 echo "Checking if running in legacy mode"
 
 if [ -z "$TLS_KEY" ] || [ -z "$TLS_CRT" ]; then

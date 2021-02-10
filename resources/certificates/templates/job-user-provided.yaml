@@ -39,5 +39,7 @@ spec:
               value: "{{ .Values.certificates.apiserverProxy.namespace }}"
             - name: IS_SELF_SIGNED
               value: "{{ .Values.global.certificates.selfSigned }}"
+          securityContext:
+{{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
       serviceAccountName: {{ template "certificates.name" . }}-user-provided

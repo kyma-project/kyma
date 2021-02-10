@@ -1,6 +1,8 @@
 set -e
 set -eo pipefail
 
+export HOME="/tmp"
+
 echo "Checking if running in Gardener mode"
 
 SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"

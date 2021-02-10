@@ -1,7 +1,7 @@
 set -e
 set -eo pipefail
 
-HOME=/tmp
+export HOME="/tmp"
 
 echo "Checking if running in Gardener mode"
 

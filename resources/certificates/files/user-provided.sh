@@ -1,6 +1,8 @@
 set -e
 set -eo pipefail
 
+export HOME="/tmp"
+
 for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE; do
   if [ -z "${!var}" ] ; then
     echo "ERROR: $var is not set"
@@ -29,20 +31,6 @@ for var in DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_P
 done
 if [ "${discoverUnsetVar}" = true ] ; then
     exit 1
-fi
-
-echo "Checking if Certificates are already present on the cluster"
-
-KYMA_CRT="$(kubectl get certificates.cert-manager.io -n $KYMA_SECRET_NAMESPACE $KYMA_SECRET_NAME --ignore-not-found -o yaml)"
-APISERVER_PROXY_CRT="$(kubectl get certificates.cert-manager.io -n $APISERVER_PROXY_SECRET_NAMESPACE $APISERVER_PROXY_SECRET_NAME --ignore-not-found -o yaml)"
-if [ -n "$KYMA_CRT" ] && [ -n "$APISERVER_PROXY_CRT" ]; then
-  echo "Certificates $KYMA_SECRET_NAME/$KYMA_SECRET_NAMESPACE and $APISERVER_PROXY_SECRET_NAME/$APISERVER_PROXY_SECRET_NAMESPACE are already present. Nothing to do here. Exiting..."
-  exit 0
-fi
-
-if [ -z "$DOMAIN" ]; then
-  echo "User-provided mode requested, but domain not provided. Exiting..."
-  exit 1
 fi
 
 echo "Validating Issuer"

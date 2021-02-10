@@ -51,7 +51,7 @@ tests:
     runAsGroup: 65534
 global:
   certificates:
-    gardener: false
+    selfSigned: false
   apiserver_proxy:
     dir:
     version: 264d8882

@@ -4,8 +4,8 @@ prerequisites:
   - name: "cluster-essentials"
   - name: "istio"
     namespace: "istio-system"
-  - name: "xip-patch"
-    namespace: "kyma-installer"
+  - name: "certificates"
+    namespace: "istio-system"
 components:
   - name: "testing"
   - name: "knative-eventing"

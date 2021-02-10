@@ -1,5 +1,7 @@
 set +e
 
+export HOME="/tmp"
+
 KYMA_SECRET="$(kubectl get secret -n $KYMA_SECRET_NAMESPACE $KYMA_SECRET_NAME --ignore-not-found)"
 APISERVER_PROXY_SECRET="$(kubectl get secret -n $APISERVER_PROXY_SECRET_NAMESPACE $APISERVER_PROXY_SECRET_NAME --ignore-not-found)"
 
