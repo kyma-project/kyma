@@ -144,6 +144,10 @@ spec:
   hostPorts:
   - max: 65535
     min: 1024
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+  - "*"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
