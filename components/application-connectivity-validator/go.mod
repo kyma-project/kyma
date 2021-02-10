@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kyma-project/kyma/common v0.0.0-00010101000000-000000000000
+	github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -33,7 +33,6 @@ require (
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
-	github.com/kyma-project/kyma/common => github.com/franpog859/kyma/common v0.0.0-20210205091019-2fec300e2a56
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
 	golang.org/x/text => golang.org/x/text v0.3.3
