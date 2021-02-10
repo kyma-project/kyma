@@ -16,6 +16,8 @@ global:
   podSecurityPolicy:
     enabled: true
     runAsUser: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
   ingress:
     domainName: "TBD"
   helm:
