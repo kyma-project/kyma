@@ -677,7 +677,7 @@ func TestDoKnativeResourceProvision(t *testing.T) {
 			expectedEventActivationCreated: true,
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 			initialObjs:                    []runtime.Object{},
-			expectCreates: []runtime.Object{},
+			expectCreates:                  []runtime.Object{},
 		},
 		{
 			name:                           "provision fail namespace not found",
