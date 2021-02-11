@@ -50,7 +50,7 @@ func TestFormatEventType4BEB(t *testing.T) {
 			app:             "app",
 			eventType:       "order-foo",
 			version:         "v1",
-			wantedEventType: "prefix.app.order.foo.v1",
+			wantedEventType: "prefix.app.order-foo.v1",
 		},
 	}
 

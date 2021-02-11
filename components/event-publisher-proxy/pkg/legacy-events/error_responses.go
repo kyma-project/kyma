@@ -61,6 +61,11 @@ func ErrorResponseMissingFieldData() (response *api.PublishEventResponses) {
 	return CreateMissingFieldError(FieldData)
 }
 
+// ErrorResponse returns an error of type PublishEventResponses with the given status and error
+func ErrorResponse(status int, err error) *api.PublishEventResponses {
+	return &api.PublishEventResponses{Error: &api.Error{Status: status, Message: err.Error()}}
+}
+
 //CreateMissingFieldError create an error for a missing field
 func CreateMissingFieldError(field interface{}) (response *api.PublishEventResponses) {
 	apiErrorDetail := api.ErrorDetail{Field: field.(string), Type: ErrorTypeMissingField, Message: ErrorMessageMissingField, MoreInfo: ""}

@@ -10,9 +10,14 @@ global:
   namespace: kyma-integration
   strictMode: disabled
   isBEBEnabled: false
+  log:
+    format: "json"
+    level: "warn"
   podSecurityPolicy:
     enabled: true
     runAsUser: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
   ingress:
     domainName: "TBD"
   helm:
@@ -27,7 +32,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-9921"
+    version: "763e0035"
   application_operator_tests:
     version: "PR-10289"
   connector_service:
@@ -57,7 +62,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-9921"
   application_connectivity_validator:
-    version: "7fb79933"
+    version: "PR-10568"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
@@ -81,8 +86,8 @@ application_connectivity_certs_sync:
       name: kyma-gateway-certs
       namespace: istio-system
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20210113-12c4e3b5"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210208-080d17ad"
 
 tests:
   application_connector_tests:

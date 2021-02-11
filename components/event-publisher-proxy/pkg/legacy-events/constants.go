@@ -21,7 +21,6 @@ const (
 	ErrorTypeMissingField        = "missing_field"
 	ErrorTypeValidationViolation = "validation_violation"
 	ErrorTypeInvalidField        = "invalid_field"
-	ErrorTypeInternalServer      = "internal_server"
 )
 
 // Field definition

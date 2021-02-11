@@ -1,13 +1,9 @@
 package subscribed
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"strings"
-	"time"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,10 +11,9 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
-)
 
-const (
-	DefaultResyncPeriod = 10 * time.Second
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 var (
@@ -29,7 +24,7 @@ var (
 	}
 )
 
-// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to Unstructed in between
+// ConvertRuntimeObjToSubscription converts a runtime.Object to a Subscription object by converting to unstructured in between
 func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha1.Subscription, error) {
 	sub := &eventingv1alpha1.Subscription{}
 	if subUnstructured, ok := sObj.(*unstructured.Unstructured); ok {
@@ -45,7 +40,7 @@ func ConvertRuntimeObjToSubscription(sObj runtime.Object) (*eventingv1alpha1.Sub
 func GenerateSubscriptionInfFactory(k8sConfig *rest.Config) dynamicinformer.DynamicSharedInformerFactory {
 	subDynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(subDynamicClient,
-		DefaultResyncPeriod,
+		informers.DefaultResyncPeriod,
 		v1.NamespaceAll,
 		nil,
 	)
@@ -53,56 +48,10 @@ func GenerateSubscriptionInfFactory(k8sConfig *rest.Config) dynamicinformer.Dyna
 	return dFilteredSharedInfFactory
 }
 
-type waitForCacheSyncFunc func(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
-
-// WaitForCacheSyncOrDie waits for the cache to sync. If sync fails everything stops
-func WaitForCacheSyncOrDie(ctx context.Context, dc dynamicinformer.DynamicSharedInformerFactory) {
-	dc.Start(ctx.Done())
-
-	ctx, cancel := context.WithTimeout(context.Background(), DefaultResyncPeriod)
-	defer cancel()
-
-	err := hasSynced(ctx, dc.WaitForCacheSync)
-	if err != nil {
-		log.Fatalf("Failed to sync informer caches: %v", err)
-	}
-}
-
-func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
-	// synced gets closed as soon as fn returns
-	synced := make(chan struct{})
-	// closing stopWait forces fn to return, which happens whenever ctx
-	// gets canceled
-	stopWait := make(chan struct{})
-	defer close(stopWait)
-
-	// close the synced channel if the `WaitForCacheSync()` finished the execution cleanly
-	go func() {
-		informersCacheSync := fn(stopWait)
-		res := true
-		for _, sync := range informersCacheSync {
-			if !sync {
-				res = false
-			}
-		}
-		if res {
-			close(synced)
-		}
-	}()
-
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-synced:
-	}
-
-	return nil
-}
-
 // ConvertEventsMapToSlice converts a map of Events to a slice of Events
 func ConvertEventsMapToSlice(eventsMap map[Event]bool) []Event {
 	result := make([]Event, 0)
-	for k, _ := range eventsMap {
+	for k := range eventsMap {
 		result = append(result, k)
 	}
 	return result

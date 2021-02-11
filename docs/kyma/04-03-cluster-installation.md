@@ -188,15 +188,19 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Install Kyma
 
-   >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
-   >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
-   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
+Install Kyma using Kyma CLI:
 
-1. Install Kyma using Kyma CLI:
+```bash
+kyma install -s $KYMA_VERSION
+```
 
-    ```bash
-    kyma install -s $KYMA_VERSION
-    ```
+To install Kyma with one of the predefined [profiles](#installation-overview-profiles), run:
+
+```bash
+kyma install -s $KYMA_VERSION --profile {evaluation|production}
+```
+
+>**NOTE:** If you don't specify `$KYMA_VERSION`, the version from the latest commit on the `master` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
 
 ## Post-installation steps
 

@@ -84,12 +84,12 @@ spec:
             memory: 32Mi
         service:
           ports:
-          - port: 15012
-            targetPort: 15012
-            name: tcp-istiod
           - name: status-port
             port: 15021
             targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
           - name: http2
             port: 80
             targetPort: 8080
@@ -172,7 +172,8 @@ spec:
             maxSurge: 100%
             maxUnavailable: 25%
   meshConfig:
-    accessLogFile: /dev/stdout
+    #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
+    accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}

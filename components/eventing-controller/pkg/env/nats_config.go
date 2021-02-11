@@ -13,6 +13,10 @@ type NatsConfig struct {
 	Url           string `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
 	MaxReconnects int
 	ReconnectWait time.Duration
+
+	// EventTypePrefix prefix for the EventType
+	// note: eventType format is <prefix>.<application>.<event>.<version>
+	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
 }
 
 func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {

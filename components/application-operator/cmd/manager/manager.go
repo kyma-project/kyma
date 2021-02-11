@@ -23,7 +23,7 @@ import (
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	runtimeConfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
@@ -36,10 +36,13 @@ func main() {
 
 	log.Info("Starting Application Operator.")
 
-	options := parseArgs()
+	options, err := parseOptions()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Infof("Options: %s", options)
 
-	cfg, err := config.GetConfig()
+	cfg, err := runtimeConfig.GetConfig()
 
 	if err != nil {
 		log.Fatal(err)
@@ -152,6 +155,8 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		EventServiceImage:                     options.eventServiceImage,
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
+		LogFormat:                             options.LogFormat,
+		LogLevel:                              options.LogLevel,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
 		IsBEBEnabled:                          options.isBEBEnabled,

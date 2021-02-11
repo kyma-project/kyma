@@ -56,6 +56,11 @@ spec:
             - "--appName={{ .Release.Name }}"
             - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
             - "--cacheCleanupMinutes={{ .Values.applicationConnectivityValidator.args.cacheCleanupMinutes }}"
+          env:
+            - name: APP_LOG_FORMAT
+              value: {{ .Values.global.logFormat | quote }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.global.logLevel | quote }}
           readinessProbe:
             httpGet:
               path: /v1/health
