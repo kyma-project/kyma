@@ -1,4 +1,4 @@
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validation.webhook.serverless.kyma-project.io
@@ -15,7 +15,7 @@ webhooks:
     sideEffects: None
     name: validation.webhook.serverless.kyma-project.io
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: defaulting.webhook.serverless.kyma-project.io
