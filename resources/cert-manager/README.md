@@ -2,53 +2,60 @@
 
 ## Overview
 
-`cert-manager` is a Kyma's version of Jetstack's cert-manager.
+`cert-manager` is a version of [Jetstack's cert-manager](https://cert-manager.io) customized to Kyma's needs.
 
-Quote from the official README:
-```
-cert-manager is a Kubernetes addon to automate the management and issuance of
-TLS certificates from various issuing sources.
+Quoting from the [official README](https://github.com/jetstack/cert-manager):
 
-It will ensure certificates are valid and up to date periodically, and attempt
-to renew certificates at an appropriate time before expiry.
-```
+>cert-manager is a Kubernetes addon to automate the management and issuance of
+>TLS certificates from various issuing sources.
+>
+>It will ensure certificates are valid and up to date periodically, and attempt
+>to renew certificates at an appropriate time before expiry.
+
 
 For more information check [links](#links) section.
-
-## Changes introduced
-
-Overall `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with it's name indicating a resource type. They are available in `files/` directory.
 
 ## Prerequisites
 
 - Kubernetes 1.11+
 
-## Installing the Chart
+## Details
 
-In order to install cert-manager component using:
+### Changes introduced
 
-### Kyma installer
-1. manually apply CRDs from `files/` directory
-```bash
-# Kubernetes 1.15+
-$ kubectl apply -f ./files
-```
-2. update appropriate installer from `installation/resources/` and add the following section to `spec.components`:
-```yaml
-- name: "cert-manager"
-  namespace: "cert-manager"
-```
+The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `files/` directory.
 
-## Usage
+### Installation
 
-[Issues configuration](https://cert-manager.io/docs/configuration/).
+To install `cert-manager`, use the Kyma Installer and follow these steps:
 
-[Securing Ingresses documentation](https://cert-manager.io/docs/usage/ingress/).
+1. Manually apply CRDs from the `files/` directory:
 
-For more information check [links](#links) section.
+   ```bash
+   # Kubernetes 1.15+
+   $ kubectl apply -f ./files
+   ```
 
-## Links
+2. Update the appropriate Installer CR template in `installation/resources/` by adding the following lines to the `spec.components` section:
 
-- [official site](https://cert-manager.io)
-- [docs](https://cert-manager.io/docs/)
-- [GitHub](https://github.com/jetstack/cert-manager)
+    ```yaml
+    - name: "cert-manager"
+      namespace: "cert-manager"
+    ```
+
+### Usage
+
+Before you configure `cert-manager` to issue certificates, you must first create Issuer resources. To learn more, read about [Issuers configuration](https://cert-manager.io/docs/configuration/).
+
+One of the common use cases for `cert-manager` is securing ingress resources. Read the [Securing Ingresses Resources documentation](https://cert-manager.io/docs/usage/ingress/) for more details.
+
+For more information, check the [official `cert-manager` documentation](https://cert-manager.io/docs/).
+
+## Troubleshooting
+
+One potential issue may occur while creating an Issuer or ClusterIssuer resources. It might result in failed calling webhook "webhook.cert-manager.io". A workaround that can be applied in this case is to delete both cert-manager's webhooks:
+
+   ```bash
+   $ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-manager-webhook
+   $ kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook
+   ```
