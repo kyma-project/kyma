@@ -89,8 +89,6 @@ spec:
     metadata:
       labels:
         name: kyma-installer
-      annotations:
-        kubernetes.io/psp: 000-kyma-installer
     spec:
       serviceAccountName: kyma-installer      
       containers:

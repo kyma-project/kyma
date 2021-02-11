@@ -24,6 +24,9 @@ spec:
               kubectl delete gateways.networking.istio.io -n istio-system ingressgateway --ignore-not-found
           image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
           name: cleanup
+          env:
+          - name: HOME
+            value: /tmp
           securityContext:
 {{- toYaml .Values.kyma.securityContext | nindent 12 }}
       restartPolicy: Never

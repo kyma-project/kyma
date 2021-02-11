@@ -32,6 +32,8 @@ spec:
             mountPath: /opt/istio/manifests
             readOnly: true
           env:
+          - name: HOME
+            value: /tmp
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
