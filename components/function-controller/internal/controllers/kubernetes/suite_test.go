@@ -3,8 +3,9 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
