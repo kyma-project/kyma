@@ -173,8 +173,6 @@ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5Kwzbycv
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
 github.com/franela/goblin v0.0.0-20200105215937-c9ffbefa60db/go.mod h1:7dvUGVsVBjqR7JHJk0brhHOZYGmfBYOrK0ZhYMEtBr4=
 github.com/franela/goreq v0.0.0-20171204163338-bcd34c9993f8/go.mod h1:ZhphrRTfi2rbfLwlschooIH4+wKKDR4Pdxhh+TRoA20=
-github.com/franpog859/kyma/common v0.0.0-20210205091019-2fec300e2a56 h1:NQ1N8L3TVaPy0LDlQNrAt3wvNVnB54LgmrWn2Dsqgbg=
-github.com/franpog859/kyma/common v0.0.0-20210205091019-2fec300e2a56/go.mod h1:HNlKHtEskjK2UddA6LbdevvGHKMwFp6d648Ndvb8k2g=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/garyburd/redigo v0.0.0-20150301180006-535138d7bcd7/go.mod h1:NR3MbYisc3/PwhQ00EMzDiPmrwpPxAn5GI05/YaO1SY=
@@ -402,6 +400,8 @@ github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20190909175253-906fa5f9c249/go.mod h1:s8wBC55/DEkNa3YMY1WLgpT33Ghpmw7v+waIxh15dYI=
 github.com/kubernetes-sigs/service-catalog v0.3.0/go.mod h1:zRfgMd1T9HuXR24Qj4GOu/TGWABVGw62MGlyHVcpWnU=
+github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35 h1:Tfau5LzmCtUPZhyHSWtss3o6GC8MMEFCOVv8IgYgLbE=
+github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35/go.mod h1:HNlKHtEskjK2UddA6LbdevvGHKMwFp6d648Ndvb8k2g=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30 h1:bqG/FehsUzEmeTOYZuzjVQQZCgWu545IHWRX9M5eq2I=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30/go.mod h1:caerCWyllbJsqBM4gtwWW3QsRFgRuRmqYXOqrpji/Ms=
 github.com/lann/builder v0.0.0-20180802200727-47ae307949d0/go.mod h1:dXGbAdH5GtBTC4WfIxhKZfyBF/HBFgRZSWwZ9g/He9o=
