@@ -5,8 +5,6 @@ webhook:
     tag: "59c50a2a"
     pullPolicy: IfNotPresent
   verbosity: 6
-  securityContext:
-    runAsUser: 2000
   pdb:
     enabled: false
   timeout: 10
@@ -24,3 +22,13 @@ controller:
     repository: "eu.gcr.io/kyma-project/incubator/develop/podpreset-controller"
     tag: "59c50a2a"
     pullPolicy: IfNotPresent
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534
