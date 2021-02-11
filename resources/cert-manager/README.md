@@ -12,27 +12,21 @@ Quoting from the [official README](https://github.com/jetstack/cert-manager):
 >It will ensure certificates are valid and up to date periodically, and attempt
 >to renew certificates at an appropriate time before expiry.
 
-
-For more information check [links](#links) section.
-
 ## Prerequisites
 
-- Kubernetes 1.11+
+- Kubernetes 1.15+
 
-## Details
-
-### Changes introduced
+## Changes introduced
 
 The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `files/` directory.
 
-### Installation
+## Installation
 
 To install `cert-manager`, use the Kyma Installer and follow these steps:
 
 1. Manually apply CRDs from the `files/` directory:
 
    ```bash
-   # Kubernetes 1.15+
    $ kubectl apply -f ./files
    ```
 
@@ -43,7 +37,7 @@ To install `cert-manager`, use the Kyma Installer and follow these steps:
       namespace: "cert-manager"
     ```
 
-### Usage
+## Usage
 
 Before you configure `cert-manager` to issue certificates, you must first create Issuer resources. To learn more, read about [Issuers configuration](https://cert-manager.io/docs/configuration/).
 
@@ -53,7 +47,7 @@ For more information, check the [official `cert-manager` documentation](https://
 
 ## Troubleshooting
 
-One potential issue may occur while creating an Issuer or ClusterIssuer resources. It might result in failed calling webhook "webhook.cert-manager.io". A workaround that can be applied in this case is to delete both cert-manager's webhooks:
+One potential issue may occur while creating Issuer or ClusterIssuer resources. It might result in a failed call to the `webhook.cert-manager.io` webhook. A workaround for this is to delete these two `cert-manager`'s webhooks:
 
    ```bash
    $ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-manager-webhook
