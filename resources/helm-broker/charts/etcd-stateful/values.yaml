@@ -11,4 +11,3 @@ etcd:
       memory: 64Mi
 
 replicaCount: 1
-securityContext: {runAsUser: 1000}
