@@ -81,11 +81,8 @@ config:
   server:
     http_listen_port: 3100
   storage_config:
-    boltdb_shipper:
-      active_index_directory: /data/loki/boltdb-shipper-active
-      cache_location: /data/loki/boltdb-shipper-cache
-      cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
-      shared_store: filesystem
+    boltdb:
+      directory: /data/loki/index
     filesystem:
       directory: /data/loki/chunks
   chunk_store_config:
