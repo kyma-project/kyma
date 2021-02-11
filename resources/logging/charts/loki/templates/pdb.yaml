@@ -1,5 +1,4 @@
-{{- if .Values.loki.enabled }}
-{{- if .Values.loki.podDisruptionBudget -}}
+{{- if .Values.podDisruptionBudget -}}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
@@ -13,6 +12,5 @@ spec:
   selector:
     matchLabels:
       app: {{ template "loki.name" . }}
-{{ toYaml .Values.loki.podDisruptionBudget | indent 2 }}
-{{- end }}
+{{ toYaml .Values.podDisruptionBudget | indent 2 }}
 {{- end }}
