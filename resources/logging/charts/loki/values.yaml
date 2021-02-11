@@ -71,10 +71,10 @@ config:
     reject_old_samples_max_age: 168h
   schema_config:
     configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
+    - from: 2018-04-15
+      store: boltdb
       object_store: filesystem
-      schema: v11
+      schema: v9
       index:
         prefix: index_
         period: 24h
