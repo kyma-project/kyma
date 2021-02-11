@@ -1,3 +1,4 @@
+// Package applicationtest provides utilities for Application testing.
 package applicationtest
 
 import (

@@ -1,3 +1,4 @@
+// Package handlertest provides utilities for Handler testing.
 package handlertest
 
 import (
