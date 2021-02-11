@@ -1,14 +1,20 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
+
+	"go.uber.org/zap/zapcore"
+
+	"go.uber.org/zap"
 
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -36,18 +42,29 @@ type config struct {
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
+	LogLevel                  string `envconfig:"default=info"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
 }
 
 func main() {
-	ctrl.SetLogger(zap.New())
 
 	config, err := loadConfig("APP")
 	if err != nil {
+		ctrl.SetLogger(ctrlzap.New())
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
+
+	logLevel, err := toZapLogLevel(config.LogLevel)
+	if err != nil {
+		ctrl.SetLogger(ctrlzap.New())
+		setupLog.Error(err, "unable to set logging level")
+		os.Exit(2)
+	}
+
+	atomicLevel := zap.NewAtomicLevelAt(logLevel)
+	ctrl.SetLogger(ctrlzap.New(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel)))
 
 	setupLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
@@ -139,4 +156,19 @@ func loadConfig(prefix string) (config, error) {
 	}
 
 	return cfg, nil
+}
+
+func toZapLogLevel(level string) (zapcore.Level, error) {
+	switch level {
+	case "debug":
+		return zapcore.DebugLevel, nil
+	case "info":
+		return zapcore.InfoLevel, nil
+	case "warn":
+		return zapcore.WarnLevel, nil
+	case "error":
+		return zapcore.ErrorLevel, nil
+	default:
+		return 0, errors.New(fmt.Sprintf("Desired log level: %s not exist", level))
+	}
 }

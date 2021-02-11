@@ -146,6 +146,8 @@ containers:
         value: eu.gcr.io/kyma-project/function-build-init:PR-10558
       functionBuildMaxSimultaneousJobs:
         value: "5"
+      logLevel:
+        value: "info"
 
 services:
   manager:
