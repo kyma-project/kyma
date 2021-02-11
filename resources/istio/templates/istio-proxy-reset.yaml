@@ -68,6 +68,8 @@ spec:
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}:{{ .Chart.Version }}
           - name: COMMON_ISTIO_PROXY_IMAGE_PREFIX
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}
+          - name: HOME
+            value: /tmp
           command:
             - /bin/bash
             - -c
