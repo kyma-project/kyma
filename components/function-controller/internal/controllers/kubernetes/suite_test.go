@@ -115,7 +115,7 @@ func newFixBaseSecretWithManagedLabel(namespace, name string) *corev1.Secret {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", name),
 			Namespace:    namespace,
-			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue, ManagedLabel: UserLabelValue},
+			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue, ManagedByLabel: UserLabelValue},
 		},
 		Data:       map[string][]byte{"key_1_b": []byte("value_1_b"), "key_2_b": []byte("value_2_b")},
 		StringData: map[string]string{"key_1": "value_1", "key_2": "value_2"},

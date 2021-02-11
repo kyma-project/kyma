@@ -36,7 +36,6 @@ var _ = ginkgo.Describe("Secret", func() {
 		baseSecretWithManagedLabel = newFixBaseSecretWithManagedLabel(config.BaseNamespace, "secret-with-managed-label")
 		gomega.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
 		requestForSecretWithManagedLabel = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
-		reconciler = NewSecret(k8sClient, log.Log, config, secretSvc)
 
 		namespace = userNamespace.GetName()
 	})
