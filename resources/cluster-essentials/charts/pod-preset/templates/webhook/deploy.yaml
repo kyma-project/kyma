@@ -43,9 +43,6 @@ spec:
         - name: webhook-cert
           mountPath: /keys
           readOnly: true
-        env:
-          - name: HOME
-            value: /tmp
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
       volumes:
