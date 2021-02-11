@@ -49,7 +49,7 @@ For more information, check the [official `cert-manager` documentation](https://
 
 One potential issue may occur while creating Issuer or ClusterIssuer resources. It might result in a failed call to the `webhook.cert-manager.io` webhook. A workaround for this is to delete these two `cert-manager`'s webhooks:
 
-   ```bash
-   $ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-manager-webhook
-   $ kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook
-   ```
+```bash
+$ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-manager-webhook
+$ kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook
+```
