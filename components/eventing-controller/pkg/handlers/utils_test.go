@@ -57,12 +57,12 @@ func Test_getInternalView4Ev2(t *testing.T) {
 						EventSource: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "source",
-							Value:    "/default/kyma/myinstance",
+							Value:    reconcilertesting.EventSource,
 						},
 						EventType: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "type",
-							Value:    "kyma.ev2.poc.event1.v1",
+							Value:    reconcilertesting.EventTypeNotClean,
 						},
 					},
 				},
@@ -83,8 +83,8 @@ func Test_getInternalView4Ev2(t *testing.T) {
 	g.Expect(bebSubscription.Name).To(BeEquivalentTo(subscription.Name))
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
-			Source: "/default/kyma/myinstance",
-			Type:   "kyma.ev2.poc.event1.v1",
+			Source: reconcilertesting.EventSource,
+			Type:   reconcilertesting.EventTypeNotClean,
 		},
 	}))
 	g.Expect(bebSubscription)
@@ -112,8 +112,8 @@ func Test_getInternalView4Ems(t *testing.T) {
 
 		Events: []types.Event{
 			{
-				Source: "/default/kyma/myinstance",
-				Type:   "kyma.ev2.poc.event1.v1",
+				Source: reconcilertesting.EventSource,
+				Type:   reconcilertesting.EventTypeNotClean,
 			},
 		},
 	}
@@ -131,8 +131,8 @@ func Test_getInternalView4Ems(t *testing.T) {
 
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
-			Source: "/default/kyma/myinstance",
-			Type:   "kyma.ev2.poc.event1.v1",
+			Source: reconcilertesting.EventSource,
+			Type:   reconcilertesting.EventTypeNotClean,
 		},
 	}))
 	g.Expect(bebSubscription)

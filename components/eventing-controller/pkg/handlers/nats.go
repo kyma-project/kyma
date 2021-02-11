@@ -7,20 +7,19 @@ import (
 	"strings"
 	"time"
 
-	ceclient "github.com/cloudevents/sdk-go/v2/client"
-
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
-
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-
-	"k8s.io/apimachinery/pkg/types"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
+
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	ceclient "github.com/cloudevents/sdk-go/v2/client"
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
+
+	"k8s.io/apimachinery/pkg/types"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
 // compile time check
@@ -28,7 +27,7 @@ var _ NatsInterface = &Nats{}
 
 type NatsInterface interface {
 	Initialize() error
-	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
@@ -65,7 +64,7 @@ func (n *Nats) Initialize() error {
 	return nil
 }
 
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {
 	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
@@ -76,7 +75,13 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
-		eventType := filter.EventType.Value
+		eventType := strings.TrimSpace(filter.EventType.Value)
+		if len(eventType) == 0 {
+			err := nats.ErrBadSubject
+			n.Log.Error(err, "failed to create a Nats subscription")
+			return err
+		}
+
 		callback := n.getCallback(sub)
 
 		if n.Connection.Status() != nats.CONNECTED {
@@ -87,6 +92,12 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 				n.Log.Error(initializeErr, "failed to reset NATS connection")
 				return initializeErr
 			}
+		}
+
+		// clean the application name segment in the event-type from none-alphanumeric characters
+		eventType, err := cleaner.Clean(eventType)
+		if err != nil {
+			return err
 		}
 
 		sub, subscribeErr := n.Connection.Subscribe(eventType, callback)

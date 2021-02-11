@@ -4,18 +4,30 @@ go 1.15
 
 require (
 	github.com/go-logr/logr v0.3.0 // indirect
-	github.com/google/ko v0.6.2 // indirect
-	github.com/googleapis/gnostic v0.5.1 // indirect	github.com/gorilla/mux v1.7.4
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/google/go-cmp v0.4.1 // indirect
+	github.com/googleapis/gnostic v0.5.1 // indirect; indirect	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/mux v1.7.4
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/imdario/mergo v0.3.9 // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sirupsen/logrus v1.6.0
-	github.com/stretchr/testify v1.6.1
-	k8s.io/api v0.18.8
+	github.com/stretchr/testify v1.7.0
+	github.com/vrischmann/envconfig v1.1.0
+	go.uber.org/zap v1.16.0
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
+	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
+	golang.org/x/tools v0.0.0-20200924205911-8a9a89368bd3 // indirect
+	google.golang.org/appengine v1.6.6 // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
+	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
+	k8s.io/api v0.18.8 // indirect
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.18.8
-	k8s.io/klog/v2 v2.2.0
-	sigs.k8s.io/controller-runtime v0.6.2
 )
 
 replace (
