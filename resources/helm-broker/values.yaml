@@ -83,5 +83,3 @@ global:
     tls:
       crt: "TBD"
       key: "TBD"
-
-securityContext: {runAsUser: 1000}
