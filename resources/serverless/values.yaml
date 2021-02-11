@@ -104,6 +104,15 @@ pod:
     terminationGracePeriodSeconds: 10
 
 containers:
+  daemonset:
+    initContainerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 0
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
   manager:
     resources:
       limits:
@@ -112,6 +121,10 @@ containers:
       requests:
         cpu: 10m
         memory: 32Mi
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
     extraProperties: {}
     envs:
       configMapRequeueDuration:
