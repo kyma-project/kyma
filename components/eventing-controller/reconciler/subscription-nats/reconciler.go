@@ -6,30 +6,32 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/nats-io/nats.go"
-
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/go-logr/logr"
+	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	natsClient *handlers.Nats
-	Log        logr.Logger
-	recorder   record.EventRecorder
+	natsClient       *handlers.Nats
+	Log              logr.Logger
+	recorder         record.EventRecorder
+	eventTypeCleaner eventtype.Cleaner
 }
 
 var (
@@ -40,8 +42,7 @@ const (
 	NATSProtocol = "NATS"
 )
 
-func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder,
-	cfg env.NatsConfig) *Reconciler {
+func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
 	natsClient := &handlers.Nats{
 		Log:           log,
 		Config:        cfg,
@@ -53,11 +54,12 @@ func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, rec
 		panic(err)
 	}
 	return &Reconciler{
-		Client:     client,
-		Cache:      cache,
-		natsClient: natsClient,
-		Log:        log,
-		recorder:   recorder,
+		Client:           client,
+		Cache:            cache,
+		natsClient:       natsClient,
+		Log:              log,
+		recorder:         recorder,
+		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister),
 	}
 }
 
@@ -148,7 +150,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return result, nil
 	}
 
-	err = r.natsClient.SyncSubscription(desiredSubscription)
+	err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
 		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
