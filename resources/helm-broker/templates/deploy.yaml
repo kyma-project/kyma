@@ -26,10 +26,6 @@ spec:
         heritage: "{{ .Release.Service }}"
         kyma-project.io/component: controller
     spec:
-{{- with .Values.securityContext }}
-      securityContext:
-      {{ toYaml . | indent 8 }}
-{{- end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: broker
