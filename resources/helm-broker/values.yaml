@@ -85,5 +85,3 @@ global:
       key: "TBD"
 
 securityContext: {runAsUser: 1000}
-podSecurityPolicy:
-  enabled: true

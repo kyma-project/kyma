@@ -11,11 +11,6 @@ rules:
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["*"]
-  - apiGroups: ["policy"]
-    resources: ["podsecuritypolicies"]
-    verbs:     ["use"]
-    resourceNames:
-    - {{ template "fullname" . }}
 
 ---
 

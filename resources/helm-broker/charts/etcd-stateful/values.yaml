@@ -12,5 +12,3 @@ etcd:
 
 replicaCount: 1
 securityContext: {runAsUser: 1000}
-podSecurityPolicy:
-  enabled: true
