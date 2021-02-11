@@ -29,3 +29,4 @@ beb:
   config:
     # emsPublisherUrlSuffix is the suffix added to EMS url obtained from service key
     emsPublisherUrlSuffix: sap/ems/v1/events
+
