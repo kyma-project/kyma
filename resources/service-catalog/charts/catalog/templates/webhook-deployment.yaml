@@ -59,6 +59,9 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8443
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - name: service-catalog-webhook-cert
           mountPath: /var/run/service-catalog-webhook

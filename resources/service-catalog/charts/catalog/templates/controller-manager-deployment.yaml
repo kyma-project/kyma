@@ -41,6 +41,9 @@ spec:
       containers:
       - name: healthcheck
         image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.2
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         env:
           - name: PROXY_TARGET_URL
             value: "https://localhost:8444/"
@@ -118,6 +121,9 @@ spec:
         - --feature-gates
         - CascadingDeletion=true
         {{- end }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
           - mountPath: /var/run
             name: run

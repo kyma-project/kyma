@@ -15,6 +15,3 @@ resources:
   requests:
     memory: 32Mi
     cpu: 30m
-
-podSecurityPolicy:
-  enabled: true
