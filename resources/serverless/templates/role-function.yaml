@@ -10,7 +10,7 @@ rules:
   - apiGroups:
       - policy
     resourceNames:
-      - {{ template "fullname" . }}-function
+      - {{ template "fn-psp.name" . }}
     resources:
       - podsecuritypolicies
     verbs:
