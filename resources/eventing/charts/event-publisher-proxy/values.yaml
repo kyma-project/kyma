@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "PR-10523" # TODO(marcobebway) change to the final image
+  tag: "657ff89e"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 
