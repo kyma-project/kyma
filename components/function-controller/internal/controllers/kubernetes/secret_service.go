@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -59,7 +60,7 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger logr.Logger,
 		logger.Error(err, fmt.Sprintf("Gathering existing Secret '%s/%s' failed", namespace, baseInstance.GetName()))
 		return err
 	}
-	if instance.Labels[ManagedByLabel] == UserLabelValue {
+	if instance.Labels[v1alpha1.FunctionManagedByLabel] == v1alpha1.FunctionResourceLabelUserValue {
 		return nil
 	}
 	return r.updateSecret(ctx, logger, instance, baseInstance)
@@ -135,7 +136,7 @@ func (r *secretService) deleteSecret(ctx context.Context, logger logr.Logger, na
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
 		return client.IgnoreNotFound(err)
 	}
-	if instance.Labels[ManagedByLabel] == UserLabelValue {
+	if instance.Labels[v1alpha1.FunctionManagedByLabel] == v1alpha1.FunctionResourceLabelUserValue {
 		return nil
 	}
 	if err := r.client.Delete(ctx, instance); err != nil {

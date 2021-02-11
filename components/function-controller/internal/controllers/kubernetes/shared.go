@@ -12,13 +12,11 @@ const (
 	ConfigLabel              = "serverless.kyma-project.io/config"
 	RuntimeLabel             = "serverless.kyma-project.io/runtime"
 	RbacLabel                = "serverless.kyma-project.io/rbac"
-	ManagedByLabel           = "serverless.kyma-project.io/managed-by"
 	RoleLabelValue           = "role"
 	RoleBindingLabelValue    = "rolebinding"
 	CredentialsLabelValue    = "credentials"
 	ServiceAccountLabelValue = "service-account"
 	RuntimeLabelValue        = "runtime"
-	UserLabelValue           = "user"
 )
 
 type Config struct {
