@@ -40,6 +40,9 @@
 # The `rafter` chart
 /resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
+# The `cert-manager` chart
+/resources/cert-manager/ @Tomasz-Smelcerz-SAP @strekm @Demonsthere @colunira @mjakobczyk
+
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
