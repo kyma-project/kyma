@@ -236,7 +236,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: 
-    version: PR-10500
+    version: 40007ec9
     enabled: true
     env:
       testUser: "admin-user"
