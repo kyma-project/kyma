@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
@@ -7,4 +6,3 @@ metadata:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
-{{- end }}

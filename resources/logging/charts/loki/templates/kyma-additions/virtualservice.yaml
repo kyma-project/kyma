@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}	
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -15,7 +14,7 @@ spec:
     - destination:
         host: {{ template "loki.fullname" . }}
         port:
-          number: {{ .Values.loki.service.port  }}
+          number: {{ .Values.service.port  }}
     corsPolicy:
       allowMethods:
       - GET
@@ -27,4 +26,3 @@ spec:
       - authorization
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
-{{- end }}

@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -53,4 +52,3 @@ spec:
     when:
     - key: "request.headers[User-Agent]"
       values: ["Prometheus/*"]
-{{- end }}
