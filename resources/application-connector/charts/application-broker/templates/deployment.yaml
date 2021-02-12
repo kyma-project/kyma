@@ -39,8 +39,6 @@ spec:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args:
-          - "--new-eventing-flow={{ .Values.global.isBEBEnabled }}"
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
@@ -62,6 +60,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: APP_API_PACKAGES_SUPPORT
             value: {{ .Values.global.disableLegacyConnectivity | quote }}
+          - name: APP_NEW_EVENTING_FLOW
+            value: {{ .Values.global.isBEBEnabled }}
           {{ if .Values.global.disableLegacyConnectivity }}
           - name: APP_DIRECTOR_PROXY_URL
             value: {{ .Values.director.proxyURL | quote }}

@@ -43,12 +43,10 @@ import (
 const (
 	informerResyncPeriod = 30 * time.Minute
 	Verbose              = "verbose"
-	NewEventingFlowFlag  = "new-eventing-flow"
 )
 
 func main() {
 	verbose := flag.Bool(Verbose, false, "specify if log verbosely loading configuration")
-	newEventingFlow := flag.Bool(NewEventingFlowFlag, false, "specify if the new eventing flow should be used")
 	flag.Parse()
 	cfg, err := config.Load(*verbose)
 	fatalOnError(err)
@@ -81,7 +79,7 @@ func main() {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
-		istioClient, &livenessCheckStatus, *newEventingFlow)
+		istioClient, &livenessCheckStatus, cfg.NewEventingFlow)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
