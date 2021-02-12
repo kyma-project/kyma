@@ -15,11 +15,11 @@ This is a sample resource that registers the `system-prod` Application which off
 
 >**NOTE:** The name of the Application must consist of lower case alphanumeric characters, `-` or `.`, and start and end with an alphanumeric character.
 
->**NOTE:** In case the Application name has `-` or `.`, the underlying Eventing services will use a clean name which only contains alphanumeric characters (For example `system-prod` becomes `systemprod`).
+>**NOTE:** In case the Application name contains `-` or `.`, the underlying Eventing services will use a clean name with alphanumeric characters only. (For example, `system-prod` will become `systemprod`).
 > 
-> This could lead to a naming collision. For example both Application names `system-prod` and `systemprod` becomes `systemprod`.
+> This could lead to a naming collision. For example, both `system-prod` and `systemprod` will become `systemprod`.
 > 
-> A solution for this is to provide an `application-type` label (with alphanumeric characters only) which will be used by the Eventing services instead of the application name. In case the `application-type` label also contains `-` or `.`, the underlying Eventing services will clean it and use the cleaned label.
+> A solution for this is to provide an `application-type` label (with alphanumeric characters only) which will be used by the Eventing services instead of the Application name. In case the `application-type` label also contains `-` or `.`, the underlying Eventing services will clean it and use the cleaned label.
 
 ```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
