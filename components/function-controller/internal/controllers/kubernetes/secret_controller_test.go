@@ -16,10 +16,12 @@ import (
 
 var _ = ginkgo.Describe("Secret", func() {
 	var (
-		reconciler *SecretReconciler
-		request    ctrl.Request
-		baseSecret *corev1.Secret
-		namespace  string
+		reconciler                       *SecretReconciler
+		request                          ctrl.Request
+		requestForSecretWithManagedLabel ctrl.Request
+		baseSecret                       *corev1.Secret
+		baseSecretWithManagedLabel       *corev1.Secret
+		namespace                        string
 	)
 
 	ginkgo.BeforeEach(func() {
@@ -28,9 +30,13 @@ var _ = ginkgo.Describe("Secret", func() {
 
 		baseSecret = newFixBaseSecret(config.BaseNamespace, "ah-tak-przeciez")
 		gomega.Expect(resourceClient.Create(context.TODO(), baseSecret)).To(gomega.Succeed())
-
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}}
 		reconciler = NewSecret(k8sClient, log.Log, config, secretSvc)
+
+		baseSecretWithManagedLabel = newFixBaseSecretWithManagedLabel(config.BaseNamespace, "secret-with-managed-label")
+		gomega.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
+		requestForSecretWithManagedLabel = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
+
 		namespace = userNamespace.GetName()
 	})
 
@@ -87,6 +93,43 @@ var _ = ginkgo.Describe("Secret", func() {
 		compareSecrets(secret, copy)
 	})
 
+	ginkgo.It("should not successfully propagate Secret managed by user to user namespace", func() {
+		ginkgo.By("reconciling non-existing secret")
+		_, err := reconciler.Reconcile(ctrl.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: baseSecretWithManagedLabel.GetNamespace(),
+				Name:      "not-existing-secret",
+			},
+		})
+		gomega.Expect(err).To(gomega.BeNil())
+
+		ginkgo.By("reconciling the Secret")
+		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+
+		updatedBase := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
+		secret := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(secret, updatedBase)
+
+		ginkgo.By("updating the base Secret")
+		copy := updatedBase.DeepCopy()
+		copy.Data["test123"] = []byte("321tset")
+		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+
+		secret = &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(secret, updatedBase)
+	})
+
 	ginkgo.It("should successfully delete propagated Secrets from user namespace when base Secret is deleted", func() {
 		ginkgo.By("reconciling the Secret")
 		result, err := reconciler.Reconcile(request)
@@ -109,6 +152,29 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(result.RequeueAfter).To(gomega.BeZero())
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.HaveOccurred())
+	})
+
+	ginkgo.It("should not successfully delete propagated Secrets from user namespace manged by user when base Secret is deleted", func() {
+		ginkgo.By("reconciling the Secret")
+		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+
+		updatedBase := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
+		secret := &corev1.Secret{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(secret, updatedBase)
+
+		ginkgo.By("deleting base Secret")
+		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
+		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		gomega.Expect(err).To(gomega.BeNil())
+		gomega.Expect(result.Requeue).To(gomega.BeFalse())
+		gomega.Expect(result.RequeueAfter).To(gomega.BeZero())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.Succeed())
 	})
 })
 
