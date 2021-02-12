@@ -1,0 +1,43 @@
+name: Release Kyma
+on: workflow_dispatch
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+    container:
+      image: eu.gcr.io/kyma-project/test-infra/kyma-integration:v20201208-8f23a167-k8s1.16
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Check if not in master
+        id: check_if_master
+        shell: bash
+        run: |
+          if ! [[ "${{ github.ref }}" =~ ^refs/heads/release-.*$ ]] ; then
+            echo "Job must run against a release branch. Stopping."
+            exit 1
+          fi
+      - name: Check if already released
+        id: check_release
+        shell: bash
+        run: |
+          NEXT_RELEASE=$(cat "VERSION")
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/${{ github.event.repository.owner.login }}/${{ github.event.repository.name }}/releases/tags/"${NEXT_RELEASE}")
+          if [[ $RESPONSE != 404* ]]; then
+              echo "The ${NEXT_RELEASE} is already published on github. Stopping."
+              exit 1
+          fi
+      - name: Make Kyma release
+        id: make_release
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          GOOGLE_APPLICATION_CREDENTIALS: 'creds.json'
+        run: |
+          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON | base64 --decode > creds.json
+          /prow-tools/githubrelease -targetCommit=${{ github.ref }} \
+                                    -githubRepoOwner=${{ github.event.repository.owner.login }} \
+                                    -githubRepoName=${{ github.event.repository.name }} \
+                                    -githubAccessToken=${{ secrets.GITHUB_TOKEN }} \
+                                    -releaseVersionFilePath=VERSION

@@ -377,3 +377,6 @@ milv.config.yaml @m00g3n @aerfio @pPrecel @magicmatatjahu @kazydek @klaudiagrz @
 
 # github actions
 /.github/workflows @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
+
+# VERSION file
+VERSION @kyma-project/prow
