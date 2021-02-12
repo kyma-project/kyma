@@ -43,10 +43,8 @@ spec:
         - name: webhook-cert
           mountPath: /keys
           readOnly: true
-      {{- with .Values.webhook.securityContext }}
-      securityContext:
-{{ toYaml . | indent 8 }}
-      {{- end }}
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
       volumes:
       - name: webhook-cert
         secret:

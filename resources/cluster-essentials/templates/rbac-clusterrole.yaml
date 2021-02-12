@@ -11,7 +11,7 @@ rules:
 - apiGroups: ["policy"] # "" indicates the core API group
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
-  resourceNames: ["kyma.privileged"]
+  resourceNames: ["002-kyma-privileged"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -25,4 +25,4 @@ rules:
 - apiGroups: ["policy"] # "" indicates the core API group
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
-  resourceNames: ["kyma.unprivileged"]
+  resourceNames: ["001-kyma-unprivileged"]
