@@ -7,6 +7,8 @@ global:
   # secretName defines optionally another name than the default secret name
   secretName: ""
 
+  secretNamespace: "kyma-installer"
+
   # domainName is the global domain used in Kyma
   domainName: ""
 
