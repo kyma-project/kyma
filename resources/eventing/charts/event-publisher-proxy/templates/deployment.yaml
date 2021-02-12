@@ -32,11 +32,13 @@ spec:
                 secretKeyRef:
                   name: {{ include "eventing.secretName" . }}
                   key: token-endpoint
-            - name: EMS_PUBLISH_URL
+            - name: EMS_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ include "eventing.secretName" . }}
                   key: ems-publish-url
+            - name: EMS_PUBLISH_URL
+              value: $(EMS_URL)/{{ .Values.beb.config.emsPublisherUrlSuffix }}
             - name: BEB_NAMESPACE
               valueFrom:
                 secretKeyRef:
