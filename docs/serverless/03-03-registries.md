@@ -26,7 +26,7 @@ When you install Kyma with the default internal registry, Helm creates the `serv
 Once you have Serverless up and running, you can switch to an external registry:
 
 - Per Namespace, and have even multiple external registries in a cluster, but no more than one per Namespace.
-- Cluster-wide, with this configuration overwriting by default the Namespace-scoped
+- Cluster-wide, with this configuration overwriting by default the Namespace-scoped one.
 
 ### Namespace-scoped external registry
 
