@@ -491,21 +491,26 @@ async function getContainerRestartsForAllNamespaces() {
     .filter((pd) => !!pd.status && !!pd.status.containerStatuses)
     .map((pod) => ({
       name: pod.metadata.name,
-      containerStatuses:
-        pod.status &&
-        (pod.status.containerStatuses || []).map((elem) => ({
-          name: elem.name,
-          image: elem.image,
-          restartCount: elem.restartCount,
-        })),
+      containerStatuses: pod.status.containerStatuses.map((elem) => ({
+        name: elem.name,
+        image: elem.image,
+        restartCount: elem.restartCount,
+      })),
     }));
 }
 
-const printRestartReport = (prevPodList, afterPodList) => {
+function getContainerStatusByImage(pod, image) {
+  return pod.containerStatuses.find((status) => status.image === image);
+}
+
+const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
   const report = prevPodList
     .map((elem) => {
-      const afterPod = afterPodList.find((arg) => arg.name === elem.name);
-      if (!afterPod || !afterPod.containerStatuses) {
+      // check if the pod that existed before the test started still exists after test
+      const afterTestPod = afterTestPodList.find(
+        (arg) => arg.name === elem.name
+      );
+      if (!afterTestPod || !afterPod.containerStatuses) {
         return {
           name: elem.name,
           containerRestarts: null,
@@ -516,30 +521,39 @@ const printRestartReport = (prevPodList, afterPodList) => {
         name: elem.name,
         containerRestarts: elem.containerStatuses
           .map((status) => {
-            let afterContainerStatus = afterPod.containerStatuses.find(
-              (pd) => status.image === pd.image
+            const afterTestContainerStatus = getContainerStatusByImage(
+              afterTestPod,
+              status.image
             );
             return {
               name: status.name,
               image: status.image,
               restartsTillTestStart:
-                afterContainerStatus.restartCount - status.restartCount,
+                afterTestContainerStatus.restartCount - status.restartCount,
             };
           })
-          .filter((status) => status.restartsTillTestStart > 0),
+          .filter((status) => {
+            // we're interested only in containers that crashed during test
+            return status.restartsTillTestStart > 0;
+          }),
       };
     })
-    .filter((arg) => !!arg.containerRestarts)
-    .filter((arg) =>
-      arg.containerRestarts.some(
-        (container) => container.restartsTillTestStart != 0
-      )
-    );
+    .filter((arg) => {
+      // filter out pods that do not have statuses after test or somehow cannot be mapped to pods before test start
+      return !!arg.containerRestarts;
+    });
+  // .filter((arg) =>
+  //   arg.containerRestarts.some(
+  //     (container) => container.restartsTillTestStart != 0
+  //   )
+  // );
 
   if (report.length > 0) {
-    console.log(`=========RESTART REPORT=========
-    ${k8s.dumpYaml(report)}
-    =========================`);
+    console.log(`
+=========RESTART REPORT========
+${k8s.dumpYaml(report)}
+===============================
+`);
   }
 };
 
