@@ -13,10 +13,10 @@
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @crabtree @piotrmsc @adamwalach @kubadz @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
+/installation/ @Tomasz-Smelcerz-SAP @strekm @crabtree @piotrmsc @adamwalach @colunira @mjakobczyk @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @piotrmsc @PK85 @janmedrek @a-thaler @suleymanakbas91
+/resources/cluster-essentials/ @piotrmsc @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
@@ -29,13 +29,13 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `apiserver-proxy` chart
-/resources/apiserver-proxy/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira
+/resources/apiserver-proxy/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `cluster-users` subchart
-/resources/cluster-users/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira
+/resources/cluster-users/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `iam-kubeconfig-service` chart
-/resources/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira
+/resources/iam-kubeconfig-service/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `rafter` chart
 /resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
@@ -59,7 +59,7 @@
 /resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector-helper/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # The `application-connector-ingress` chart
 /resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
@@ -68,13 +68,13 @@
 /resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `dex` subchart
-/resources/dex/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/dex/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `istio-rbac` subchart
-/resources/core/charts/istio-rbac/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/core/charts/istio-rbac/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The 'gateway' subchart
-/resources/core/charts/gateway/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/core/charts/gateway/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
@@ -128,7 +128,7 @@
 /resources/core/templates/tests/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @m00g3n @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @k15r @crabtree @kjaksik
 
 # The `istio` chart
-/resources/istio/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/istio/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `knative-eventing` chart
 /resources/knative-eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
@@ -140,13 +140,13 @@
 /resources/service-catalog/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
 
 # The `xip-patch` chart
-/resources/xip-patch/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/xip-patch/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `ory` chart
-/resources/ory/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/ory/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `api-gateway` chart
-/resources/api-gateway/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/api-gateway/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
@@ -161,7 +161,7 @@
 /resources/uaa-activator/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree @kjaksik
 
 # The `permission-controller` chart
-/resources/permission-controller/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/resources/permission-controller/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Kafka Channel for knative eventing
 /resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
@@ -172,7 +172,7 @@
 components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
 
 #API server proxy Component
-/components/apiserver-proxy/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/apiserver-proxy/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Binding Component
 /components/binding/ @PK85 @piotrmiskiewicz @polskikiel @jasiu001 @crabtree @kjaksik @ksputo
@@ -181,13 +181,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
 
 # Kyma Operator Component
-/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @piotrmsc @kubadz @Demonsthere
+/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @piotrmsc @Demonsthere @colunira @mjakobczyk
 
 # IAM Kubeconfig Service Component
-/components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/iam-kubeconfig-service/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Istioctl Installer Component
-/components/istio-installer/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira
+/components/istio-installer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @crabtree @kjaksik
@@ -233,13 +233,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/uaa-activator/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree @kjaksik
 
 # Xip Patch Component
-/components/xip-patch/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/xip-patch/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Permission Controller Component
-/components/permission-controller/  @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/permission-controller/  @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Dex Static User Configurer
-/components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/components/dex-static-user-configurer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Function Controller
 /components/function-controller/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
@@ -261,7 +261,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/service-catalog/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach @crabtree @kjaksik
 
 # Dex integration tests
-/tests/integration/dex/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/dex/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # monitoring tests
 /tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash
@@ -270,10 +270,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/integration/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash
 
 # api-gateway integration tests
-/tests/integration/api-gateway/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/api-gateway/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/apiserver-proxy/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Console Backend Service tests
 /tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -317,7 +317,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tools/failery/ @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/tools/kyma-installer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 #
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
@@ -338,7 +338,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r @crabtree @kjaksik @suleymanakbas91
 
 # E2E Api Gateway Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @piotrmsc @kubadz @strekm @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # E2E Rafter Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
