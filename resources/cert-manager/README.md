@@ -12,10 +12,6 @@ Quoting from the [official README](https://github.com/jetstack/cert-manager):
 >It will ensure certificates are valid and up to date periodically, and attempt
 >to renew certificates at an appropriate time before expiry.
 
-## Prerequisites
-
-- Kubernetes 1.15+
-
 ## Changes introduced
 
 The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `files/` directory.
