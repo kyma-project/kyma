@@ -10,7 +10,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
@@ -42,11 +42,11 @@ func Test_SyncBebSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
-	reconcilertesting.WithService("foo-host", "foo-svc", apiRule)
+	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
+	controllertesting.WithService("foo-host", "foo-svc", apiRule)
 
 	// then
-	changed, err := beb.SyncBebSubscription(subscription, apiRule)
+	changed, err := beb.SyncBebSubscription(subscription, apiRule, nil)
 	g.Expect(err).To(Not(BeNil()))
 	g.Expect(changed).To(BeFalse())
 }
@@ -86,12 +86,12 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 						EventSource: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "source",
-							Value:    "/default/kyma/myinstance",
+							Value:    controllertesting.EventSource,
 						},
 						EventType: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "type",
-							Value:    "kyma.ev2.poc.event1.v1",
+							Value:    controllertesting.EventTypeNotClean,
 						},
 					},
 				},

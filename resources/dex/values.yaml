@@ -56,6 +56,13 @@ telemetry:
   enabled: true
   port: 5558
 
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  runAsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 2000
+
 dex:
   expiry:
     signingKeys: "720h"
@@ -84,12 +91,12 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: 6fd499b9
+    version: 48611d45
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: 47b606f6
+    version: "277f4247"
 
 nodeSelector: {}
 
@@ -98,6 +105,10 @@ tests:
     integration: true
     after-upgrade: true
     e2e-skr: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 livenessProbe:
   enabled: false

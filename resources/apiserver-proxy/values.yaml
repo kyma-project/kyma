@@ -5,6 +5,12 @@ port:
   insecure: 8444
   metrics: 2112
 
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534
 
 corsPolicy:
   allowOrigin:
@@ -33,13 +39,17 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 global:
   apiserver_proxy:
     dir:
     version: 264d8882
   apiserver_proxy_integration_tests:
     dir:
-    version: bdfddb63
+    version: "277f4247"
   istio:
     gateway:
       name: kyma-gateway
@@ -47,4 +57,4 @@ global:
     path: eu.gcr.io/kyma-project
   xip_patch:
     dir:
-    version: 6fd499b9
+    version: 4c2061be

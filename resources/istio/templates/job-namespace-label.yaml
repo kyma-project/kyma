@@ -30,3 +30,8 @@ spec:
             echo "---> Setting label to {{ . }}"
             kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
             {{- end }}
+        env:
+          - name: HOME
+            value: /tmp
+        securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 10 }}

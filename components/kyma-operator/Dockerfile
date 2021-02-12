@@ -19,7 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator ${BASE_APP_DIR}/cmd/operator/main.go
 RUN mkdir /app && mv ./kyma-operator /app/kyma-operator && mv ${BASE_APP_DIR}/licenses /app/licenses
 
-FROM alpine:3.12.0
+FROM alpine:20201218
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
@@ -33,11 +33,18 @@ RUN apk update && apk add ca-certificates git jq && rm -rf /var/cache/apk/*
 # Copy binary
 #
 
-COPY --from=builder /app /app
+COPY --from=builder --chown=nobody:nogroup /app /app
+
+#
+# Set permissions
+# 
+
+RUN mkdir /kyma &&\
+	chown -R nobody:nogroup /app &&\
+	chown -R nobody:nogroup /kyma
+USER nobody
 
 #
 # Run app
 #
-
 ENTRYPOINT ["/app/kyma-operator"]
-

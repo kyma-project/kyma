@@ -1,14 +1,16 @@
 jobs:
   crdsInConfigMap: 20
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201125-caa631b9"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210208-080d17ad"
   installer:
     namespace: kyma-installer
 
 global:
   isLocalEnv: false
   disableLegacyConnectivity: false
+  podSecurityPolicy:
+    privileged: false
 
 containerRegistry:
   path: eu.gcr.io/kyma-project
@@ -26,3 +28,13 @@ limitRange:
     memory: 96Mi
   defaultRequest:
     memory: 32Mi
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534

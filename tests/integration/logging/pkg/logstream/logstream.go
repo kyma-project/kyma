@@ -1,14 +1,13 @@
 package logstream
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/integration/logging/pkg/request"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -91,9 +90,12 @@ func Test(domain, authHeader, logPrefix string, labelsToSelect map[string]string
 			tick.Stop()
 			return errors.Errorf(`the string "%s" is not present in logs when using the following query: %s`, logPrefix, query)
 		case <-tick.C:
-			respBody, err := doGet(httpClient, lokiURL, authHeader)
+			respStatus, respBody, err := request.DoGet(httpClient, lokiURL, authHeader)
 			if err != nil {
 				return errors.Wrap(err, "cannot query loki for logs")
+			}
+			if respStatus != http.StatusOK {
+				return errors.Errorf("error in HTTP GET to %s.\nStatus Code: %d\nResponse: %s", lokiURL, respStatus, respBody)
 			}
 			var testDataRegex = regexp.MustCompile(logPrefix)
 			submatches := testDataRegex.FindStringSubmatch(respBody)
@@ -131,26 +133,4 @@ func Cleanup(spec PodSpec, coreInterface kubernetes.Interface) error {
 		return errors.Wrapf(err, "cannot delete %s", spec.PodName)
 	}
 	return nil
-}
-
-func doGet(httpClient *http.Client, url string, authHeader string) (string, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot create a new HTTP request")
-	}
-	req.Header.Add("Authorization", authHeader)
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return "", errors.Wrapf(err, "cannot send HTTP request to %s", url)
-	}
-	defer resp.Body.Close()
-	var body bytes.Buffer
-	if _, err := io.Copy(&body, resp.Body); err != nil {
-		return "", errors.Wrap(err, "cannot read response body")
-	}
-	if resp.StatusCode != 200 {
-		return "", errors.Errorf("error in HTTP GET to %s.\nStatus Code: %d\nResponse: %s", url, resp.StatusCode, body.String())
-	}
-	return body.String(), nil
 }

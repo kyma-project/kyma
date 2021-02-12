@@ -11,7 +11,7 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: e7bd11dc
+    version: ed8521c6
     enabled: true
     labels:
       integration: true
@@ -146,7 +146,10 @@ additionalPrometheusRulesMap: {}
 #      - record: my_record
 #        expr: 100 * my_record
 
-##
+## Custom configuration for Kyma alerting rules
+kymaRules:
+  ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
+  fluentBitAlertFilter: ""
 
 ## Configuration for alertmanager
 ## ref: https://prometheus.io/docs/alerting/alertmanager/

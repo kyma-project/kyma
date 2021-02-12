@@ -1,3 +1,4 @@
+{{- if eq .Values.global.eventing.backend "beb" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,6 +58,8 @@ spec:
             value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
           - name: DOMAIN
             value: {{ .Values.global.domainName }}
+          - name: EVENT_TYPE_PREFIX
+            value: {{ .Values.global.eventTypePrefix }}
           resources:
             limits:
               cpu: 100m
@@ -64,4 +67,4 @@ spec:
             requests:
               cpu: 100m
               memory: 20Mi
-
+{{- end }}

@@ -34,6 +34,11 @@ pod:
     securityContext:
       runAsNonRoot: true
       runAsUser: 1000
+  extraPropertiesWithFsGroup:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
   extraContainerProperties:
     securityContext:
       privileged: false
@@ -127,12 +132,12 @@ envs:
 migrator:
   images:
     alpineKubectl:
-      repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-      tag: '20201023-5de446cf'
+      repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+      tag: "20210208-080d17ad"
       pullPolicy: IfNotPresent
     minioClient:
-      repository: 'minio/mc'
-      tag: 'RELEASE.2019-04-03T17-59-57Z'
+      repository: "minio/mc"
+      tag: "RELEASE.2019-04-03T17-59-57Z"
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:

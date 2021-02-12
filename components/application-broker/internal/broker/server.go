@@ -12,9 +12,9 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 
 	"github.com/gorilla/mux"
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
 )

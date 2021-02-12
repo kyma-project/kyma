@@ -8,10 +8,15 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *aPIRuleResolver) JSON(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {
 	return r.ag.JsonField(ctx, obj)
+}
+
+func (r *aPIRuleResolver) OwnerSubscription(ctx context.Context, rule *v1alpha1.APIRule) (*v1.OwnerReference, error) {
+	return r.ag.GetOwnerSubscription(ctx, rule), nil
 }
 
 func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {

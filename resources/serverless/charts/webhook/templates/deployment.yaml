@@ -45,7 +45,9 @@ spec:
               cpu: {{ .Values.deployment.resources.limits.cpu }}
               memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
+            privileged:  {{ .Values.container.privileged }}
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+            runAsUser: {{ .Values.container.runAsUser }}
           ports:
             - name: {{ .Values.service.ports.httpMetrics.name }}
               containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}

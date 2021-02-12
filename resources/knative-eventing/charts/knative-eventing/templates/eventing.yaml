@@ -245,6 +245,36 @@ kind: ClusterRole
 metadata:
   labels:
     eventing.knative.dev/release: "v0.12.0"
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: knative-eventing-flows-namespaced-admin
+rules:
+  - apiGroups:
+      - flows.knative.dev
+    resources:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    eventing.knative.dev/release: "v0.12.0"
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: knative-sources-namespaced-admin
+rules:
+  - apiGroups:
+      - sources.knative.dev
+    resources:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    eventing.knative.dev/release: "v0.12.0"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
   name: knative-eventing-namespaced-edit
 rules:
@@ -1201,11 +1231,9 @@ spec:
 ---
 apiVersion: v1
 data:
-  loglevel.controller: info
-  loglevel.webhook: info
   zap-logger-config: |
     {
-      "level": "info",
+      "level": "{{ .Values.loglevel }}",
       "development": false,
       "outputPaths": ["stdout"],
       "errorOutputPaths": ["stderr"],

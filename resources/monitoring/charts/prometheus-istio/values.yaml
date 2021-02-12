@@ -904,7 +904,7 @@ server:
   ##
   resources:
     limits:
-      cpu: 600m
+      cpu: 1000m
       memory: 2000Mi
     requests:
       cpu: 40m

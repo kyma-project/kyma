@@ -1,0 +1,37 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ template "fn-psp.name" . }}
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: runtime/default
+  labels:
+  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false # we do not set it to true, beacause istioInit crashes otherwise -> we set it in securityContext on a pod level for a function container
+  hostNetwork: false
+  privileged: false
+  hostIPC: false
+  hostPID: false
+  defaultAddCapabilities: []
+  allowedCapabilities: # istioInit, we drop all capabilities in function container via securityContext
+    - NET_ADMIN
+    - NET_RAW
+  runAsUser:
+    rule: 'RunAsAny' # again, istioInit, we set user 1000 for function image manually
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: MustRunAs
+    ranges:
+      - max: 65535
+        min: 1
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - persistentVolumeClaim
+    - secret
+    - projected

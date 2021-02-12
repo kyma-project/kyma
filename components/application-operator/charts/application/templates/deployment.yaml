@@ -69,6 +69,8 @@ spec:
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+        securityContext:
+          runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 {{- end }}
 ---
 {{- if not .Values.global.isBEBEnabled }}
@@ -99,6 +101,7 @@ spec:
         app: {{ .Release.Name }}-event-service
         kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
         kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
+        kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{.Release.Name }}-event-service
@@ -136,8 +139,6 @@ spec:
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
-        {{- if .Values.eventService.deployment.resources }}
-        resources:
-        {{- toYaml .Values.eventService.deployment.resources | nindent 10 }}
-        {{- end }}
+        securityContext:
+          runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 {{- end }}

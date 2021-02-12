@@ -3,9 +3,6 @@ package testing
 import (
 	"fmt"
 	"net/http"
-	"net/url"
-
-	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,8 +11,29 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+)
+
+const (
+	ApplicationName         = "testapp1023"
+	ApplicationNameNotClean = "test.app_1-0+2=3"
+
+	// event properties
+	EventSource       = "/default/kyma/id"
+	EventTypePrefix   = "sap.kyma"
+	EventType         = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
+	EventTypeNotClean = EventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
+	EventID           = "8945ec08-256b-11eb-9928-acde48001122"
+	EventSpecVersion  = "1.0"
+	EventData         = "test-data"
+
+	StructuredCloudEvent = `{
+           "id":"` + EventID + `",
+           "type":"` + EventType + `",
+           "specversion":"` + EventSpecVersion + `",
+           "source":"` + EventSource + `",
+           "data":"` + EventData + `"
+        }`
 )
 
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
@@ -53,11 +71,6 @@ func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
 	}
 }
 
-func WithGateway(apiRule *apigatewayv1alpha1.APIRule) {
-	gateway := "foo.gateway"
-	apiRule.Spec.Gateway = &gateway
-}
-
 func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 	handlerOAuth := object.OAuthHandlerName
 	handler := oryv1alpha1.Handler{
@@ -69,27 +82,6 @@ func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
 		{
 			Path: "/path",
-			Methods: []string{
-				http.MethodPost,
-				http.MethodOptions,
-			},
-			AccessStrategies: []*oryv1alpha1.Authenticator{
-				authenticator,
-			},
-		},
-	}
-}
-
-func WithoutPath(apiRule *apigatewayv1alpha1.APIRule) {
-	handler := oryv1alpha1.Handler{
-		Name: object.OAuthHandlerName,
-	}
-	authenticator := &oryv1alpha1.Authenticator{
-		Handler: &handler,
-	}
-	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
-		{
-			Path: "/",
 			Methods: []string{
 				http.MethodPost,
 				http.MethodOptions,
@@ -116,11 +108,11 @@ func WithStatusReady(apiRule *apigatewayv1alpha1.APIRule) {
 
 type subOpt func(subscription *eventingv1alpha1.Subscription)
 
-func NewSubscription(name, ns string, opts ...subOpt) *eventingv1alpha1.Subscription {
+func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.Subscription {
 	newSub := &eventingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: ns,
+			Namespace: namespace,
 		},
 		Spec: eventingv1alpha1.SubscriptionSpec{},
 	}
@@ -130,7 +122,7 @@ func NewSubscription(name, ns string, opts ...subOpt) *eventingv1alpha1.Subscrip
 	return newSub
 }
 
-func WithWebhook(s *eventingv1alpha1.Subscription) {
+func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "BEB"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
@@ -147,20 +139,45 @@ func WithWebhook(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithFilter(s *eventingv1alpha1.Subscription) {
+func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
+	s.Spec.Protocol = "NATS"
+	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
+}
+
+// WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
+// A not clean event-type means it contains none-alphanumeric characters
+func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Dialect: "beb",
 		Filters: []*eventingv1alpha1.BebFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "source",
-					Value:    "/default/kyma/myinstance",
+					Value:    EventSource,
 				},
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "type",
-					Value:    "kyma.ev2.poc.event1.v1",
+					Value:    EventTypeNotClean,
+				},
+			},
+		},
+	}
+}
+
+func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    EventSource,
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    "",
 				},
 			},
 		},
@@ -169,55 +186,6 @@ func WithFilter(s *eventingv1alpha1.Subscription) {
 
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
 	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
-}
-
-// fixtureValidSubscription returns a valid subscription
-func FixtureValidSubscription(name, namespace, id string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ID:       id,
-			Protocol: "BEB",
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-				ExemptHandshake: true,
-				Qos:             "AT-LEAST_ONCE",
-				WebhookAuth: &eventingv1alpha1.WebhookAuth{
-					Type:         "oauth2",
-					GrantType:    "client_credentials",
-					ClientId:     "xxx",
-					ClientSecret: "xxx",
-					TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
-					Scope:        []string{"guid-identifier"},
-				},
-			},
-			Sink: fmt.Sprintf("https://webhook.%s.svc.cluster.local", namespace),
-			Filter: &eventingv1alpha1.BebFilters{
-				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BebFilter{
-					{
-						EventSource: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "source",
-							Value:    "/default/kyma/myinstance",
-						},
-						EventType: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "type",
-							Value:    "kyma.ev2.poc.event1.v1",
-						},
-					},
-				},
-			},
-		},
-	}
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {
@@ -241,16 +209,4 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 			},
 		},
 	}
-}
-
-func SetSinkSvcPortInAPIRule(apiRule *apigatewayv1alpha1.APIRule, sink string) {
-	sinkURL, err := url.ParseRequestURI(sink)
-	if err != nil {
-		Expect(err).ShouldNot(HaveOccurred())
-	}
-	sinkPort, err := utils.GetPortNumberFromURL(*sinkURL)
-	if err != nil {
-		Expect(err).ShouldNot(HaveOccurred())
-	}
-	apiRule.Spec.Service.Port = &sinkPort
 }

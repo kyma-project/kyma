@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-6-g8e85904-dirty
+image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.1-6-ge839d22-dirty
 # imagePullSecrets pre-existing secrets to use to pull images from a private registry
 imagePullSecrets: []
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
@@ -123,9 +123,8 @@ servicePlanDefaultsEnabled: false
 cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
-## securityContext: { runAsUser: 1001 }
-securityContext: {}
+securityContext: { runAsUser: 1001 }
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+  alpineKcImage: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad

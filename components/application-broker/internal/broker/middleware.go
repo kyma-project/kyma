@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 )
 
 // OSBContextMiddleware implements Handler interface, creates an osbContext instance from HTTP data and stores in the request context.

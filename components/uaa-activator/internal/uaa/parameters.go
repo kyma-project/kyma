@@ -12,23 +12,21 @@ import (
 )
 
 type ParametersBuilder struct {
-	domain         string
-	redirectURL    string
-	developerGroup string
-	adminGroup     string
-	developerRole  string
-	adminRole      string
+	domain        string
+	redirectURL   string
+	developerRole string
+	adminRole     string
+	config        Config
 }
 
 func NewParametersBuilder(cfg Config, domain string) *ParametersBuilder {
 	shootName := strings.Split(domain, ".")[0]
 	return &ParametersBuilder{
-		domain:         domain,
-		redirectURL:    fmt.Sprintf("https://dex.%s/callback", strings.Trim(domain, "/")),
-		developerGroup: cfg.DeveloperGroup,
-		adminGroup:     cfg.NamespaceAdminGroup,
-		developerRole:  roleName(cfg.DeveloperRole, shootName),
-		adminRole:      roleName(cfg.NamespaceAdminRole, shootName),
+		domain:        domain,
+		redirectURL:   fmt.Sprintf("https://dex.%s/callback", strings.Trim(domain, "/")),
+		developerRole: roleName(cfg.DeveloperRole, shootName),
+		adminRole:     roleName(cfg.NamespaceAdminRole, shootName),
+		config:        cfg,
 	}
 }
 
@@ -78,11 +76,11 @@ func (pb *ParametersBuilder) Generate(instance *v1beta1.ServiceInstance) ([]byte
 				Description: "get user email",
 			},
 			{
-				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.developerGroup),
+				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.config.DeveloperGroup),
 				Description: "Runtime developer access to all managed resources",
 			},
 			{
-				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.adminGroup),
+				Name:        fmt.Sprintf("$XSAPPNAME.%s", pb.config.NamespaceAdminGroup),
 				Description: "Runtime admin access to all managed resources",
 			},
 		},
@@ -91,17 +89,17 @@ func (pb *ParametersBuilder) Generate(instance *v1beta1.ServiceInstance) ([]byte
 		},
 		RoleTemplates: []RoleTemplate{
 			{
-				Name:        pb.developerRole,
+				Name:        pb.config.DeveloperRole,
 				Description: "Runtime developer access to all managed resources",
 				ScopeReferences: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", pb.developerGroup),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.config.DeveloperGroup),
 				},
 			},
 			{
-				Name:        pb.adminRole,
+				Name:        pb.config.NamespaceAdminRole,
 				Description: "Runtime admin access to all managed resources",
 				ScopeReferences: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", pb.adminGroup),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.config.NamespaceAdminGroup),
 				},
 			},
 		},
@@ -110,14 +108,14 @@ func (pb *ParametersBuilder) Generate(instance *v1beta1.ServiceInstance) ([]byte
 				Name:        pb.developerRole,
 				Description: "Kyma Runtime Developer Role Collection for development tasks in given custom namespaces",
 				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", pb.developerRole),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.config.DeveloperRole),
 				},
 			},
 			{
 				Name:        pb.adminRole,
 				Description: "Kyma Runtime Namespace Admin Role Collection for administration tasks across all custom namespaces",
 				RoleTemplateReference: []string{
-					fmt.Sprintf("$XSAPPNAME.%s", pb.adminRole),
+					fmt.Sprintf("$XSAPPNAME.%s", pb.config.NamespaceAdminRole),
 				},
 			},
 		},
@@ -172,5 +170,5 @@ func randomString(n int) string {
 // according to SM the name may only include characters 'a'-'z', 'A'-'Z', '0'-'9', and '_'
 func roleName(name, domain string) string {
 	r := strings.NewReplacer(".", "_", ",", "_", ":", "", ";", "", "-", "_", "/", "", "\\", "")
-	return fmt.Sprintf("%s_%s", r.Replace(name), r.Replace(domain))
+	return fmt.Sprintf("%s___%s", r.Replace(name), r.Replace(domain))
 }

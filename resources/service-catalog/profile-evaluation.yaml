@@ -9,6 +9,7 @@ catalog:
       limits:
         cpu: 100m
         memory: 30Mi
+    verbosity: "4"
 
   controllerManager:
     replicas: 1
@@ -21,3 +22,4 @@ catalog:
       limits:
         cpu: 100m
         memory: 128Mi
+    verbosity: "4"

@@ -3,6 +3,7 @@ package apigateway
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
@@ -41,6 +42,20 @@ func (r *Resolver) APIRuleQuery(ctx context.Context, name string, namespace stri
 	err := r.Service().GetInNamespace(name, namespace, &result)
 
 	return result, err
+}
+
+func (r *Resolver) GetOwnerSubscription(ctx context.Context, rule *v1alpha1.APIRule) *metav1.OwnerReference {
+	if rule.OwnerReferences == nil {
+		return nil
+	}
+
+	for _, ownerRef := range rule.OwnerReferences {
+		if ownerRef.Kind == "Subscription" {
+			return &ownerRef
+		}
+	}
+
+	return nil
 }
 
 func (r *Resolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
@@ -89,6 +104,11 @@ func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace str
 			return errors.New("resource already modified")
 		}
 
+		subscription := r.GetOwnerSubscription(ctx, result)
+		if subscription != nil {
+			return errors.New(fmt.Sprintf("API Rule is owned by %s", subscription.Name))
+		}
+
 		result.Spec = newSpec
 		return nil
 	})
@@ -97,7 +117,16 @@ func (r *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace str
 
 func (r *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error) {
 	result := &v1alpha1.APIRule{}
-	err := r.Service().DeleteInNamespace(namespace, name, result)
+	err := r.Service().GetInNamespace(name, namespace, &result)
+	if err != nil {
+		return nil, err
+	}
+	subscription := r.GetOwnerSubscription(ctx, result)
+	if subscription != nil {
+		return nil, errors.New(fmt.Sprintf("API Rule is owned by %s", subscription.Name))
+	}
+
+	err = r.Service().DeleteInNamespace(namespace, name, result)
 	return result, err
 }
 

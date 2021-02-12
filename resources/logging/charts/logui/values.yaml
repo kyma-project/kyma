@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 8e17ac32
+  tag: 0fa81441
   pullPolicy: Always
 service:
   name: nginx
@@ -10,3 +10,6 @@ service:
   internalPort: 80
 resources: {}
 nameOverride: log-ui
+
+podSecurityPolicy:
+    enabled: true

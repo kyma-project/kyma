@@ -19,7 +19,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/excludeInboundPorts: "8443"
+        traffic.sidecar.istio.io/excludeInboundPorts: "{{ .Values.port.secure }}"
         prometheus.io/port: "{{ .Values.port.metrics }}"
         prometheus.io/path: "/"
         prometheus.io/scrape: "true"
@@ -29,22 +29,24 @@ spec:
         kyma-project.io/component: backend
     spec:
       serviceAccountName: {{ template "name" . }}
-      {{ if .Values.global.isLocalEnv }}
+      {{- if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+      {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
         name: auth-proxy
-        {{ if not .Values.global.isLocalEnv }}
+        {{- if not .Values.global.isLocalEnv }}
         resources:
           limits:
             memory: 256Mi
           requests:
             memory: 96Mi
-        {{ end }}
+        {{- end }}
+        securityContext:
+{{- toYaml .Values.securityContext | nindent 10 }}
         imagePullPolicy: IfNotPresent
         args:
         - --insecure-listen-address=0.0.0.0:{{ .Values.port.insecure }}
@@ -56,9 +58,9 @@ spec:
         - --v=9
         - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
-        {{ if not .Values.global.environment.gardener }}
+        {{- if not .Values.global.environment.gardener }}
         - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
-        {{ end }}
+        {{- end }}
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
         - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
         - --cors-allow-methods={{ .Values.corsPolicy.allowMethods | join "," }}
@@ -76,16 +78,16 @@ spec:
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
+      {{- end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
-      {{ end }}
+      {{- end }}
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert

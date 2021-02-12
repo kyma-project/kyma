@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+
+	rbacv1 "k8s.io/api/rbac/v1"
+
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
@@ -28,6 +32,8 @@ var (
 	configMapSvc      ConfigMapService
 	secretSvc         SecretService
 	serviceAccountSvc ServiceAccountService
+	roleSvc           RoleService
+	roleBindingSvc    RoleBindingService
 )
 
 func TestAPIs(t *testing.T) {
@@ -66,6 +72,8 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	configMapSvc = NewConfigMapService(resourceClient, config)
 	secretSvc = NewSecretService(resourceClient, config)
 	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
+	roleSvc = NewRoleService(resourceClient, config)
+	roleBindingSvc = NewRoleBindingService(resourceClient, config)
 
 	baseNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: config.BaseNamespace}}
 	gomega.Expect(resourceClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
@@ -104,6 +112,19 @@ func newFixBaseSecret(namespace, name string) *corev1.Secret {
 	}
 }
 
+func newFixBaseSecretWithManagedLabel(namespace, name string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue, v1alpha1.FunctionManagedByLabel: v1alpha1.FunctionResourceLabelUserValue},
+		},
+		Data:       map[string][]byte{"key_1_b": []byte("value_1_b"), "key_2_b": []byte("value_2_b")},
+		StringData: map[string]string{"key_1": "value_1", "key_2": "value_2"},
+		Type:       "test",
+	}
+}
+
 func newFixBaseServiceAccount(namespace, name string) *corev1.ServiceAccount {
 	falseValue := false
 	return &corev1.ServiceAccount{
@@ -115,6 +136,46 @@ func newFixBaseServiceAccount(namespace, name string) *corev1.ServiceAccount {
 		Secrets:                      []corev1.ObjectReference{{Name: "test1"}, {Name: "test2"}},
 		ImagePullSecrets:             []corev1.LocalObjectReference{{Name: "test-ips-1"}, {Name: "test-ips-2"}},
 		AutomountServiceAccountToken: &falseValue,
+	}
+}
+
+func newFixBaseRole(namespace, name string) *rbacv1.Role {
+	return &rbacv1.Role{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{RbacLabel: RoleLabelValue},
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				Verbs:         []string{"use"},
+				APIGroups:     []string{"policy"},
+				Resources:     []string{"podsecuritypolicies"},
+				ResourceNames: []string{"serverless-build"},
+			},
+		},
+	}
+}
+
+func newFixBaseRoleBinding(namespace, name, subjectNamespace string) *rbacv1.RoleBinding {
+	return &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", name),
+			Namespace:    namespace,
+			Labels:       map[string]string{RbacLabel: RoleBindingLabelValue},
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "serverless",
+				Namespace: subjectNamespace,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "Role",
+			Name:     "serverless-build",
+		},
 	}
 }
 
@@ -145,4 +206,17 @@ func compareServiceAccounts(actual, expected *corev1.ServiceAccount) {
 	gomega.Expect(actual.Secrets).To(gomega.Equal(expected.Secrets))
 	gomega.Expect(actual.ImagePullSecrets).To(gomega.Equal(expected.ImagePullSecrets))
 	gomega.Expect(actual.AutomountServiceAccountToken).To(gomega.Equal(expected.AutomountServiceAccountToken))
+}
+
+func compareRole(actual, expected *rbacv1.Role) {
+	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	gomega.Expect(actual.Rules).To(gomega.Equal(expected.Rules))
+}
+
+func compareRoleBinding(actual, expected *rbacv1.RoleBinding) {
+	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	gomega.Expect(actual.RoleRef).To(gomega.Equal(expected.RoleRef))
+	gomega.Expect(actual.Subjects).To(gomega.Equal(expected.Subjects))
 }

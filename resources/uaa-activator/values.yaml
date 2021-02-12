@@ -7,19 +7,19 @@ global:
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
   role:
-    developer: KymaRuntimeDeveloper
+    developer: KymaRuntimeNamespaceDeveloper
     namespaceAdmin: KymaRuntimeNamespaceAdmin
 
 image:
   registryPath: eu.gcr.io/kyma-project
   pullPolicy: IfNotPresent
-  version: "df0d6541"
+  version: "PR-10493"
 
 initJobs:
   secret:
     image:
       registryPath: eu.gcr.io/kyma-project/incubator/develop
-      tag: "20201023-5de446cf"
+      tag: "20210208-080d17ad"
 
 nameOverride: ""
 fullnameOverride: ""

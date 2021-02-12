@@ -16,7 +16,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "7245f350"
+    tag: 36f3be4c
   service:
     externalPort: 80
     internalPort: 8080
@@ -55,3 +55,6 @@ test:
         enabled: true
       rafter:
         enabled: true
+
+podSecurityPolicy:
+    enabled: true

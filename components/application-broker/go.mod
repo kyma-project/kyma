@@ -17,6 +17,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.13.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/imdario/mergo v0.3.9
+	github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20200527163240-4406bd2cb6b8
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-incubator/compass/components/director v0.0.0-20201110114731-9af1781d40a1
 	github.com/kyma-project/kyma/components/application-gateway v0.0.0-20201110134855-a03ec1689c4e
@@ -28,7 +29,6 @@ require (
 	github.com/oklog/ulid v1.3.1
 	github.com/openzipkin/zipkin-go v0.2.5 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/pmorie/go-open-service-broker-client v0.0.0-20180928143052-79b374a2302f
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1

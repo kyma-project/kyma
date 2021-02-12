@@ -12,3 +12,6 @@ virtualservice:
   enabled: true
   annotations: {}
 resources: {}
+
+podSecurityPolicy:
+    enabled: true

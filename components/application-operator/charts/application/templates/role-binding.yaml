@@ -28,6 +28,13 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["get"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:  
+  - application-gateway
+{{- end }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -66,6 +73,13 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:
+    - application-gateway
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -121,7 +135,13 @@ rules:
 - apiGroups: ["eventing.knative.dev"]
   resources: ["triggers"]
   verbs: ["get", "list", "watch"]
-
+{{- if .Values.global.podSecurityPolicyEnabled }}
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:  
+  - event-service
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -159,7 +179,14 @@ metadata:
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
-    verbs: ["get", "list"]
+    verbs: ["get", "list", "watch"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:  
+    - connectivity-validator
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

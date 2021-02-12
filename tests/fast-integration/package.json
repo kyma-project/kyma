@@ -3,19 +3,22 @@
   "version": "0.0.1",
   "scripts": {
     "test": "mocha --inline-diffs --check-leaks",
-    "test-utils": "mocha --inline-diffs --check-leaks ./utils/**/*.test.js",
-    "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/commerce-mock.js",
-    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/getting-started-guides.js"
+    "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert",
+    "test-utils": "mocha --inline-diffs --check-leaks './utils/**/*.test.js'",
+    "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/2-commerce-mock.js",
+    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/3-getting-started-guides.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@kubernetes/client-node": "0.13.0",
     "chai": "^4.2.0",
-    "mocha": "^8.2.1",
-    "@kubernetes/client-node": "0.13.0"
+    "mocha": "^8.2.1"
   },
   "dependencies": {
     "axios": "^0.21.0",
-    "lodash": "^4.17.20"
+    "execa": "^5.0.0",
+    "lodash": "^4.17.20",
+    "p-retry": "^4.2.0"
   },
   "engines": {
     "node": ">=12"

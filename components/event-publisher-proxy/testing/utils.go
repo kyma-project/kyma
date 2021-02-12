@@ -3,22 +3,19 @@ package testing
 import (
 	"bytes"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
-	"reflect"
-	"regexp"
 	"strconv"
 	"testing"
 	"time"
 
-	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
-	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 const (
@@ -27,12 +24,6 @@ const (
 	CeTypeHeader        = "CE-Type"
 	CeSourceHeader      = "CE-Source"
 	CeSpecVersionHeader = "CE-SpecVersion"
-
-	// cloudevent attributes
-	CeID          = "00000"
-	CeType        = "someType"
-	CeSource      = "someSource"
-	CeSpecVersion = "1.0"
 )
 
 func QuerySubscribedEndpoint(endpoint string) (*http.Response, error) {
@@ -72,10 +63,10 @@ func GetStructuredMessageHeaders() http.Header {
 
 func GetBinaryMessageHeaders() http.Header {
 	headers := make(http.Header)
-	headers.Add(CeIDHeader, CeID)
-	headers.Add(CeTypeHeader, CeType)
-	headers.Add(CeSourceHeader, CeSource)
-	headers.Add(CeSpecVersionHeader, CeSpecVersion)
+	headers.Add(CeIDHeader, EventID)
+	headers.Add(CeTypeHeader, CloudEventTypeNotClean)
+	headers.Add(CeSourceHeader, CloudEventSource)
+	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
 	return headers
 }
 
@@ -85,20 +76,10 @@ func GetApplicationJSONHeaders() http.Header {
 	return headers
 }
 
-func NewSubscription() *eventingv1alpha1.Subscription {
-	filter := &eventingv1alpha1.BebFilter{
-		EventSource: &eventingv1alpha1.Filter{
-			Type:     "exact",
-			Property: "source",
-			Value:    "/beb.namespace",
-		},
-		EventType: &eventingv1alpha1.Filter{
-			Type:     "exact",
-			Property: "type",
-			Value:    "event.type.prefix.valid-app.order.created.v1",
-		},
-	}
-	return &eventingv1alpha1.Subscription{
+type SubscriptionOpt func(*eventingv1alpha1.Subscription)
+
+func NewSubscription(opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
+	subscription := &eventingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
 			Labels: map[string]string{
@@ -112,97 +93,48 @@ func NewSubscription() *eventingv1alpha1.Subscription {
 			Sink:             "",
 			Filter: &eventingv1alpha1.BebFilters{
 				Filters: []*eventingv1alpha1.BebFilter{
-					filter,
+					{
+						EventSource: &eventingv1alpha1.Filter{
+							Type:     "exact",
+							Property: "source",
+							Value:    MessagingNamespace,
+						},
+						EventType: &eventingv1alpha1.Filter{
+							Type:     "exact",
+							Property: "type",
+							Value:    CloudEventType,
+						},
+					},
 				},
 			},
 		},
 	}
+
+	for _, opt := range opts {
+		opt(subscription)
+	}
+
+	return subscription
 }
 
-// GetMissingFieldValidationErrorFor generates an Error message for a missing field
-func GetMissingFieldValidationErrorFor(field string) *legacyapi.Error {
-	return &legacyapi.Error{
-		Status:  400,
-		Type:    "validation_violation",
-		Message: "Missing field",
-		Details: []legacyapi.ErrorDetail{
-			{
-				Field:    field,
-				Type:     "missing_field",
-				Message:  "Missing field",
-				MoreInfo: "",
+func SubscriptionWithFilter(eventSource, eventType string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Filter = &eventingv1alpha1.BebFilters{
+			Filters: []*eventingv1alpha1.BebFilter{
+				{
+					EventSource: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "source",
+						Value:    eventSource,
+					},
+					EventType: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "type",
+						Value:    eventType,
+					},
+				},
 			},
-		},
-	}
-}
-
-// IsValidEventID checks whether EventID is valid or not
-func IsValidEventID(id string) bool {
-	return regexp.MustCompile(legacy.AllowedEventIDChars).MatchString(id)
-}
-
-// GetInvalidValidationErrorFor generates an Error message for an invalid field
-func GetInvalidValidationErrorFor(field string) *legacyapi.Error {
-	return &legacyapi.Error{
-		Status:  400,
-		Type:    "validation_violation",
-		Message: "Invalid field",
-		Details: []legacyapi.ErrorDetail{
-			{
-				Field:    field,
-				Type:     "invalid_field",
-				Message:  "Invalid field",
-				MoreInfo: "",
-			},
-		},
-	}
-}
-
-// ValidateErrorResponse validates Error Response
-func ValidateErrorResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
-	legacyResponse := legacyapi.PublishEventResponses{}
-	legacyError := legacyapi.Error{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyError); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
-	legacyResponse.Error = &legacyError
-	if !reflect.DeepEqual(tcWantResponse.Error, legacyResponse.Error) {
-		t.Fatalf("Invalid error, want: %v, got: %v", tcWantResponse.Error, legacyResponse.Error)
-	}
-}
-
-// ValidateOkResponse validates Ok Response
-func ValidateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
-	legacyOkResponse := legacyapi.PublishResponse{}
-	legacyResponse := legacyapi.PublishEventResponses{}
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyOkResponse); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
-	legacyResponse.Ok = &legacyOkResponse
-	if err = resp.Body.Close(); err != nil {
-		t.Fatalf("failed to close body: %v", err)
-	}
-
-	if tcWantResponse.Ok.EventID != "" && tcWantResponse.Ok.EventID != legacyResponse.Ok.EventID {
-		t.Errorf("invalid event-id, want: %v, got: %v", tcWantResponse.Ok.EventID, legacyResponse.Ok.EventID)
-	}
-
-	if tcWantResponse.Ok.EventID == "" && !IsValidEventID(legacyResponse.Ok.EventID) {
-		t.Errorf("should match regex: [%s] Not a valid event-id: %v ", legacy.AllowedEventIDChars, legacyResponse.Ok.EventID)
-	}
-	if tcWantResponse.Ok.Reason != legacyResponse.Ok.Reason {
-		t.Errorf("invalid reason, want: %v, got: %v", tcWantResponse.Ok.Reason, legacyResponse.Ok.Reason)
-	}
-	if tcWantResponse.Ok.Status != legacyResponse.Ok.Status {
-		t.Errorf("invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
+		}
 	}
 }
 
@@ -229,8 +161,16 @@ func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 	}
 }
 
-// GeneratePort generates a random 5 digit port
-func GeneratePort() (int, error) {
+// GeneratePortOrDie generates a random 5 digit port or fail
+func GeneratePortOrDie() int {
+	port, err := generatePort()
+	if err != nil {
+		log.Fatalf("Failed to generate port with error: %v", err)
+	}
+	return port
+}
+
+func generatePort() (int, error) {
 	max := 4
 	// Add 4 as prefix to make it 5 digits but less than 65535
 	add4AsPrefix := "4"

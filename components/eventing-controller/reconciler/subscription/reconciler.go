@@ -30,10 +30,12 @@ import (
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	. "github.com/kyma-project/kyma/components/eventing-controller/reconciler/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -43,10 +45,11 @@ import (
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	Log       logr.Logger
-	recorder  record.EventRecorder
-	bebClient *handlers.Beb
-	Domain    string
+	Log              logr.Logger
+	recorder         record.EventRecorder
+	bebClient        *handlers.Beb
+	Domain           string
+	eventTypeCleaner eventtype.Cleaner
 }
 
 var (
@@ -61,16 +64,17 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
+func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
 	bebClient := &handlers.Beb{Log: log}
 	bebClient.Initialize(cfg)
 	return &Reconciler{
-		Client:    client,
-		Cache:     cache,
-		Log:       log,
-		recorder:  recorder,
-		bebClient: bebClient,
-		Domain:    cfg.Domain,
+		Client:           client,
+		Cache:            cache,
+		Log:              log,
+		recorder:         recorder,
+		bebClient:        bebClient,
+		Domain:           cfg.Domain,
+		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister),
 	}
 }
 
@@ -229,9 +233,9 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 
 	var statusChanged bool
 	var err error
-	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription, apiRule); err != nil {
+	if statusChanged, err = r.bebClient.SyncBebSubscription(subscription, apiRule, r.eventTypeCleaner); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -239,7 +243,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -255,13 +259,13 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 	if retry {
 		logger.Info("Wait for subscription to be active", "name:", subscription.Name, "status:", subscription.Status.EmsSubscriptionStatus.SubscriptionStatus)
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
 		result.RequeueAfter = time.Second * 1
 	} else if statusChanged {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue)
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, corev1.ConditionTrue, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}
@@ -276,7 +280,7 @@ func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscr
 	if err := r.bebClient.DeleteBebSubscription(subscription); err != nil {
 		return err
 	}
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse)
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
 	return r.updateCondition(subscription, condition, ctx)
 }
 

@@ -4,8 +4,8 @@ fullnameOverride: "kiali"
 tests:
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    version: 20201023-5de446cf
+    name: eu.gcr.io/kyma-project/incubator/k8s-tools
+    version: 20210208-080d17ad
   labels:
     integration: true
     after-upgrade: true
@@ -329,7 +329,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.27.0-85eb5cc7"
+      image_version: "1.28.1-aa625b61"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.

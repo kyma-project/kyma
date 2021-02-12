@@ -1,3 +1,4 @@
+{{- if eq .Values.global.eventing.backend "beb" }}
 apiVersion: hydra.ory.sh/v1alpha1
 kind: OAuth2Client
 metadata:
@@ -9,3 +10,4 @@ spec:
   hydraAdmin: {}
   scope: read write beb uaa.resource
   secretName: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
+{{- end }}

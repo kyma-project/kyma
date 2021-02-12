@@ -30,4 +30,10 @@ spec:
       - min: 1
         max: 65535
   readOnlyRootFilesystem: true
-  volumes: []
+  volumes:
+    - "emptyDir"
+    - "secret"
+    - "downwardAPI"
+    - "configMap"
+    - "persistentVolumeClaim"
+    - "projected"

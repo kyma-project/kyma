@@ -74,7 +74,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-migrate-ac-certs
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
           command:
             - /bin/sh
             - -c
@@ -83,13 +83,16 @@ spec:
               kubectl create secret generic -n {{ .Values.jobs.installer.namespace }} application-connector-overrides \
                   --from-literal global.applicationConnectorCa="$(cat /etc/application-connector-certs/ca.crt | base64 -w 0)" \
                   --from-literal global.applicationConnectorCaKey="$(cat /etc/application-connector-certs/ca.key | base64 -w 0)" --dry-run -oyaml | kubectl apply -f -
-
               kubectl label --overwrite secret -n {{ .Values.jobs.installer.namespace }} application-connector-overrides "kyma-project.io/installation=" "installer=overrides"
-
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
           volumeMounts:
             - name: cert
               readOnly: true
               mountPath: /etc/application-connector-certs/
+          env:
+            - name: HOME
+              value: /tmp
       volumes:
         - name: cert
           secret:

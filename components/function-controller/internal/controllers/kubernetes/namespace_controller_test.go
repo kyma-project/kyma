@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	rbacv1 "k8s.io/api/rbac/v1"
+
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -22,6 +24,8 @@ var _ = ginkgo.Describe("Namespace", func() {
 		baseSecret         *corev1.Secret
 		baseConfigMap      *corev1.ConfigMap
 		baseServiceAccount *corev1.ServiceAccount
+		baseRole           *rbacv1.Role
+		baseRoleBinding    *rbacv1.RoleBinding
 		namespace          string
 	)
 
@@ -38,8 +42,14 @@ var _ = ginkgo.Describe("Namespace", func() {
 		baseServiceAccount = newFixBaseServiceAccount(config.BaseNamespace, "ah-tak-przeciez")
 		gomega.Expect(resourceClient.Create(context.TODO(), baseServiceAccount)).To(gomega.Succeed())
 
+		baseRole = newFixBaseRole(config.BaseNamespace, "ah-tak-przeciez")
+		gomega.Expect(resourceClient.Create(context.TODO(), baseRole)).To(gomega.Succeed())
+
+		baseRoleBinding = newFixBaseRoleBinding(config.BaseNamespace, "ah-tak-przeciez", userNamespace.GetName())
+		gomega.Expect(resourceClient.Create(context.TODO(), baseRoleBinding)).To(gomega.Succeed())
+
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Name: userNamespace.GetName()}}
-		reconciler = NewNamespace(k8sClient, log.Log, config, configMapSvc, secretSvc, serviceAccountSvc)
+		reconciler = NewNamespace(k8sClient, log.Log, config, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
 		namespace = userNamespace.GetName()
 	})
 
@@ -66,6 +76,14 @@ var _ = ginkgo.Describe("Namespace", func() {
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
 		compareServiceAccounts(serviceAccount, baseServiceAccount)
 
+		role := &rbacv1.Role{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
+		compareRole(role, baseRole)
+
+		roleBinding := &rbacv1.RoleBinding{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
+		compareRoleBinding(roleBinding, baseRoleBinding)
+
 		ginkgo.By("one more time reconciling the Namespace")
 		result, err = reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
@@ -83,6 +101,14 @@ var _ = ginkgo.Describe("Namespace", func() {
 		serviceAccount = &corev1.ServiceAccount{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
 		compareServiceAccounts(serviceAccount, baseServiceAccount)
+
+		role = &rbacv1.Role{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
+		compareRole(role, baseRole)
+
+		roleBinding = &rbacv1.RoleBinding{}
+		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
+		compareRoleBinding(roleBinding, baseRoleBinding)
 	})
 })
 
