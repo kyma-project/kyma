@@ -5,7 +5,7 @@ type: Installation
 
 This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
 
-We recommend (and test) following Kubernetes cluster versions:
+These are the supported Kubernetes cluster versions:
 - Azure - AKS - 1.19
 - Google Cloud Platform - GKE - 1.18
 - GARDENER on AWS, Azure or GCP - 1.19
