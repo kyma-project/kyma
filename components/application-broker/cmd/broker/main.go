@@ -79,7 +79,7 @@ func main() {
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
-		istioClient, &livenessCheckStatus, cfg.NewEventingFlow)
+		istioClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -93,7 +93,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	knClient knative.Client,
 	istioClient securityclientv1beta1.SecurityV1beta1Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
-	newEventingFlow bool,
 ) *broker.Server {
 
 	// create storage factory
@@ -144,7 +143,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
 		&mClient, knClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
-		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, newEventingFlow)
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, cfg.NewEventingFlow)
 
 	// wait for api server
 	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {
