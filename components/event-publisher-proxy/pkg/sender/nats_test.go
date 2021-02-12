@@ -5,19 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"testing"
+	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/go-logr/logr"
-	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
-	"testing"
-	"time"
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestNatsSender(t *testing.T) {
@@ -68,7 +68,7 @@ func TestNatsSender(t *testing.T) {
 	}
 
 	// Create a subscription
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithFilterForNats)
+	sub := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventType))
 	sub.Spec.Sink = subscriberReceiveURL
 	err = natsClient.SyncSubscription(sub)
 	if err != nil {
@@ -81,7 +81,7 @@ func TestNatsSender(t *testing.T) {
 	err = json.Unmarshal([]byte(ce), &event)
 	assert.Nil(t, err)
 	// set ce event type the same as the event type from subscription's filter. The Nats subject is defined by ce.Type
-	event.SetType("kyma.ev2.poc.event1.v1")
+	event.SetType(testingutils.CloudEventType)
 
 	// send the event
 	c, err := sender.Send(ctx, &event)
@@ -89,7 +89,7 @@ func TestNatsSender(t *testing.T) {
 	assert.Equal(t, c, http.StatusNoContent)
 
 	// Check for the event
-	expectedDataInStore := fmt.Sprintf("\"%s\"", "{\\\"foo\\\":\\\"bar\\\"}")
+	expectedDataInStore := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
 	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
 	if err != nil {
 		t.Errorf("subscriber did not receive the event: %v", err)

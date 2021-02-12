@@ -8,6 +8,7 @@ The Function Controller requires the following components to be installed:
 
 - [Istio](https://github.com/istio/istio/releases) (v1.4.3)
 - [Docker registry](https://github.com/docker/distribution) (v2.7.1)
+- [controller-gen](https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen) (v0.2.4+)
 
 ## Development
 

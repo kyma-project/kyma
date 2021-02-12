@@ -23,3 +23,5 @@ containers:
     envs:
       functionBuildMaxSimultaneousJobs:
         value: "1"
+      logLevel:
+        value: "warn"

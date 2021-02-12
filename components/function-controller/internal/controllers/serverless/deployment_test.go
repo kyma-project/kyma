@@ -12,8 +12,9 @@ import (
 
 func TestFunctionReconciler_equalDeployments(t *testing.T) {
 	type args struct {
-		existing appsv1.Deployment
-		expected appsv1.Deployment
+		existing       appsv1.Deployment
+		expected       appsv1.Deployment
+		scalingEnabled bool
 	}
 	tests := []struct {
 		name string
@@ -23,8 +24,9 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 		{
 			name: "simple case - false on empty structs",
 			args: args{
-				existing: appsv1.Deployment{},
-				expected: appsv1.Deployment{},
+				existing:       appsv1.Deployment{},
+				expected:       appsv1.Deployment{},
+				scalingEnabled: true,
 			},
 			want: false, // yes, false, as we can't compare services without spec.template.containers, it makes no sense
 		},
@@ -107,6 +109,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						},
 					},
 				},
+				scalingEnabled: true,
 			},
 			want: true,
 		},
@@ -189,6 +192,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						},
 					},
 				},
+				scalingEnabled: true,
 			},
 			want: false,
 		},
@@ -228,6 +232,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						},
 					},
 				},
+				scalingEnabled: true,
 			},
 			want: false,
 		},
@@ -283,6 +288,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						},
 					},
 				},
+				scalingEnabled: true,
 			},
 			want: false,
 		},
@@ -315,15 +321,52 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 						},
 					},
 				},
+				scalingEnabled: true,
 			},
 			want: false,
+		},
+		{
+			name: "scaling enabled and replicas differ",
+			args: args{
+				existing:       fixDeploymentWithReplicas(1),
+				expected:       fixDeploymentWithReplicas(2),
+				scalingEnabled: true,
+			},
+			want: true,
+		},
+		{
+			name: "scaling enabled and replicas match",
+			args: args{
+				existing:       fixDeploymentWithReplicas(3),
+				expected:       fixDeploymentWithReplicas(3),
+				scalingEnabled: true,
+			},
+			want: true,
+		},
+		{
+			name: "scaling disabled and replicas differ",
+			args: args{
+				existing:       fixDeploymentWithReplicas(1),
+				expected:       fixDeploymentWithReplicas(2),
+				scalingEnabled: false,
+			},
+			want: false,
+		},
+		{
+			name: "scaling disabled and replicas match",
+			args: args{
+				existing:       fixDeploymentWithReplicas(3),
+				expected:       fixDeploymentWithReplicas(3),
+				scalingEnabled: false,
+			},
+			want: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.equalDeployments(tt.args.existing, tt.args.expected)
+			got := r.equalDeployments(tt.args.existing, tt.args.expected, tt.args.scalingEnabled)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -621,5 +664,18 @@ func TestFunctionReconciler_isDeploymentReady(t *testing.T) {
 			})
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
+	}
+}
+
+func fixDeploymentWithReplicas(replicas int32) appsv1.Deployment {
+	return appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{{}},
+				},
+			},
+		},
 	}
 }

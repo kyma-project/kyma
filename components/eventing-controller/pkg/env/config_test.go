@@ -19,6 +19,7 @@ func Test_GetConfig(t *testing.T) {
 		"WEBHOOK_CLIENT_SECRET":  "WEBHOOK_CLIENT_SECRET",
 		"WEBHOOK_TOKEN_ENDPOINT": "WEBHOOK_TOKEN_ENDPOINT",
 		"DOMAIN":                 "DOMAIN",
+		"EVENT_TYPE_PREFIX":      "EVENT_TYPE_PREFIX",
 		// optional
 		"BEB_API_URL":                "BEB_API_URL",
 		"WEBHOOK_ACTIVATION_TIMEOUT": "60s",
@@ -43,6 +44,7 @@ func Test_GetConfig(t *testing.T) {
 	g.Expect(config.WebhookClientSecret).To(Equal(envs["WEBHOOK_CLIENT_SECRET"]))
 	g.Expect(config.WebhookTokenEndpoint).To(Equal(envs["WEBHOOK_TOKEN_ENDPOINT"]))
 	g.Expect(config.Domain).To(Equal(envs["DOMAIN"]))
+	g.Expect(config.EventTypePrefix).To(Equal(envs["EVENT_TYPE_PREFIX"]))
 	// Ensure optional variables can be set
 	g.Expect(config.BebApiUrl).To(Equal(envs["BEB_API_URL"]))
 

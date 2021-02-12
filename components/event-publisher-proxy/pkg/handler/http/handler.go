@@ -1,37 +1,32 @@
-package handler
+package http
 
 import (
 	"context"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
-
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
 
+	"github.com/sirupsen/logrus"
+
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 )
 
 const (
 	// noDuration signals that the dispatch step has not started yet.
 	noDuration = -1
-
-	publishEndpoint          = "/publish"
-	legacyEndpointSuffix     = "/v1/events"
-	subscribedEndpointSuffix = "/v1/events/subscribed"
 )
 
 var (
@@ -64,7 +59,7 @@ type Handler struct {
 	Options *options.Options
 }
 
-// NewHandler returns a new Handler instance for the Event Publisher Proxy.
+// NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor, logger *logrus.Logger) *Handler {
 	return &Handler{
 		Receiver:            receiver,
@@ -98,21 +93,21 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	// Process /publish endpoint
 	// Gets a CE and sends it to BEB
-	if isARequestWithCE(uri) {
+	if handler.IsARequestWithCE(uri) {
 		h.publishCloudEvents(writer, request)
 		return
 	}
 
 	// Process /:application/v1/events
 	// Publishes a legacy event as CE v1.0 to BEB
-	if isARequestWithLegacyEvent(uri) {
+	if handler.IsARequestWithLegacyEvent(uri) {
 		h.publishLegacyEventsAsCE(writer, request)
 		return
 	}
 
 	// Process /:application/v1/events/subscribed
 	// Fetches the list of subscriptions available for the given application
-	if isARequestForSubscriptions(uri) {
+	if handler.IsARequestForSubscriptions(uri) {
 		h.SubscribedProcessor.ExtractEventsFromSubscriptions(writer, request)
 		return
 	}
@@ -121,41 +116,13 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	return
 }
 
-func isARequestWithCE(uri string) bool {
-	return uri == publishEndpoint
-}
-func isARequestWithLegacyEvent(uri string) bool {
-	// Assuming the path should be of the form /:application/v1/events
-	uriPathSegments := make([]string, 0)
-
-	for _, segment := range strings.Split(uri, "/") {
-		if strings.TrimSpace(segment) != "" {
-			uriPathSegments = append(uriPathSegments, segment)
-		}
-	}
-	if len(uriPathSegments) != 3 {
-		return false
-	}
-	if !strings.HasSuffix(uri, legacyEndpointSuffix) {
-		return false
-	}
-	return true
-}
-
-func isARequestForSubscriptions(uri string) bool {
-	// Assuming the path should be of the form /:application/v1/events/subscribed
-	if !strings.HasSuffix(uri, subscribedEndpointSuffix) {
-		return false
-	}
-	return true
-}
-
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event := h.LegacyTransformer.TransformsLegacyRequestsToCE(writer, request)
+	event := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
 	if event == nil {
 		h.Logger.Debug("failed to transform legacy event to CE, event is nil")
 		return
 	}
+
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 	h.receive(ctx, event)
