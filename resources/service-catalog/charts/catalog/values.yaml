@@ -124,7 +124,6 @@ cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
 securityContext: { runAsUser: 1001 }
-## securityContext: {}
 
 ## images for migration process
 migration:
