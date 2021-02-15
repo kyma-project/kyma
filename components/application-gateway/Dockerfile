@@ -31,5 +31,4 @@ COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
-RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] done" 
 CMD ["/applicationgateway"]

@@ -86,7 +86,7 @@ release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
 build-image: pull-licenses
-	docker build -t $(IMG_NAME) .
+	docker build -t $(IMG_NAME) . | while read line ; do echo "$$(date +"%Y/%m/%d %T %Z")| $$line"; done;
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
