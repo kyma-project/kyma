@@ -4,7 +4,7 @@ ROOT :=  $(shell pwd)
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201113-a3e68400
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+SCRIPTS_DIR = $(realpath $(shell pwd))
 
 override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
 
@@ -25,7 +25,9 @@ release:
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local:
+	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] test"
 	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
+	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] test done"
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
