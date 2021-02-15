@@ -1,4 +1,5 @@
 const execa = require("execa");
+const fs = require('fs');
 const k8s = require("@kubernetes/client-node");
 const { join } = require("path");
 const { installIstio, upgradeIstio } = require("./istioctl");
@@ -123,12 +124,19 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile) {
     chart,
   ];
 
-  if (!!values) {
-    args.push("--set", values);
+  if (!!profile) {
+    try {
+      const profilePath = join(chart, `profile-${profile}.yaml`);
+      if (fs.existsSync(profilePath)) {
+        args.push("-f", profilePath);
+      }
+    } catch(err) {
+      console.error(`profile-${profile}.yaml file not found in ${chart} - switching to default profile instead`)
+    }
   }
 
-  if (!!profile) {
-    args.push("-f", join(chart, `profile-${profile}.yaml`));
+  if (!!values) {
+    args.push("--set", values);
   }
 
   await execa("helm", args);
@@ -201,14 +209,12 @@ const kymaCharts = [
     release: "ory",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "serverless",
     namespace: "kyma-system",
     // https://github.com/kyma-project/test-infra/pull/2967
     values: `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
-    profile: "evaluation",
   },
   {
     release: "dex",
@@ -224,31 +230,26 @@ const kymaCharts = [
     release: "rafter",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "service-catalog",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "service-catalog-addons",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "helm-broker",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "console",
     namespace: "kyma-system",
     values: `${overrides},pamela.enabled=false`,
-    profile: "evaluation",
   },
   {
     release: "knative-eventing",
@@ -268,7 +269,6 @@ const kymaCharts = [
   {
     release: "nats-streaming",
     namespace: "natss",
-    values: `global.natsStreaming.resources.requests.memory=64M,global.natsStreaming.resources.requests.cpu=10m`,
   },
   {
     release: "event-sources",
@@ -278,25 +278,21 @@ const kymaCharts = [
     release: "monitoring",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "kiali",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "tracing",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "logging",
     namespace: "kyma-system",
     values: `${overrides}`,
-    profile: "evaluation",
   },
   {
     release: "ingress-dns-cert",
@@ -338,7 +334,7 @@ async function installKyma(
           : join(installLocation, release);
         return pRetry(
           async () =>
-            installRelease(release, namespace, chartLocation, values, profile),
+            installRelease(release, namespace, chartLocation, values, profile || "evaluation"),
           {
             retries: 10,
             onFailedAttempt: async (err) => {
