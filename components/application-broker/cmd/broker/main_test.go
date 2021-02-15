@@ -39,6 +39,8 @@ const (
 
 	serviceOneID = "001"
 	serviceTwoID = "002"
+
+	newEventingFlow = false
 )
 
 type testSuite struct {
