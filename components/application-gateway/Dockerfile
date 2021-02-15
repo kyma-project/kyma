@@ -2,6 +2,7 @@ FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-gateway
 WORKDIR $DOCK_PKG_DIR
+ENV GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80
 
 COPY go.mod .
 COPY go.sum .

@@ -13,7 +13,7 @@ verify:: mod-verify
 
 resolve-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") vendor"
-	GO111MODULE=on go mod vendor -v
+	GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80 GO111MODULE=on go mod vendor -v
 	echo "$$(date +"%Y/%m/%d %T %Z") vendor done"
 
 ensure-local:
@@ -27,12 +27,12 @@ dep-status-local:
 
 mod-verify-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") verify"
-	GO111MODULE=on go mod verify
+	GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80 GO111MODULE=on go mod verify
 	echo "$$(date +"%Y/%m/%d %T %Z") verify done"
 
 test-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") test"
-	GO111MODULE=on go test ./...
+	GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80 GO111MODULE=on go test ./...
 	echo "$$(date +"%Y/%m/%d %T %Z") test done"
 
 $(eval $(call buildpack-cp-ro,resolve))
