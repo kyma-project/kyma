@@ -61,7 +61,7 @@ spec:
           - name: APP_API_PACKAGES_SUPPORT
             value: {{ .Values.global.disableLegacyConnectivity | quote }}
           - name: APP_NEW_EVENTING_FLOW
-            value: {{ .Values.global.isBEBEnabled }}
+            value: {{ .Values.global.isBEBEnabled | quote  }}
           {{ if .Values.global.disableLegacyConnectivity }}
           - name: APP_DIRECTOR_PROXY_URL
             value: {{ .Values.director.proxyURL | quote }}
