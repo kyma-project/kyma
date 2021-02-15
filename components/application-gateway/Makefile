@@ -12,7 +12,9 @@ VERIFY_IGNORE := /vendor\|/mocks
 verify:: mod-verify
 
 resolve-local:
+	echo "$$(date +"%Y/%m/%d %T %Z") vendor"
 	GO111MODULE=on go mod vendor -v
+	echo "$$(date +"%Y/%m/%d %T %Z") vendor done"
 
 ensure-local:
 	@echo "Go modules present in component - omitting."
@@ -24,10 +26,14 @@ dep-status-local:
 	@echo "Go modules present in component - omitting."
 
 mod-verify-local:
+	echo "$$(date +"%Y/%m/%d %T %Z") verify"
 	GO111MODULE=on go mod verify
+	echo "$$(date +"%Y/%m/%d %T %Z") verify done"
 
 test-local:
+	echo "$$(date +"%Y/%m/%d %T %Z") test"
 	GO111MODULE=on go test ./...
+	echo "$$(date +"%Y/%m/%d %T %Z") test done"
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
