@@ -138,7 +138,9 @@ gomod-verify-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] verify done"
 
 gomod-status-local:
+	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] graph"
 	GO111MODULE=on go mod graph
+	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] graph done"
 
 gomod-tidy-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") [INFO] tidy"
