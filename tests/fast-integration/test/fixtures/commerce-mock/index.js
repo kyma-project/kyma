@@ -55,7 +55,7 @@ async function checkAppGatewayResponse() {
   ).catch(expectNoAxiosErr);
   expect(res.data).to.have.nested.property(
     "order.totalPriceWithTax.value",
-    101
+    100
   );
 }
 
