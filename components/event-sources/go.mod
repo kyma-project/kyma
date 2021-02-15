@@ -29,12 +29,8 @@ require (
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/zap v1.13.0
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933 // indirect
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
-	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect
 	google.golang.org/genproto v0.0.0-20191203145615-049a07e0debe // indirect
 
 	// istio version "1.5.8"
@@ -51,6 +47,7 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2 // fix CVE-2021-3121
 	k8s.io/api => k8s.io/api v0.17.15
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.15
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.15
