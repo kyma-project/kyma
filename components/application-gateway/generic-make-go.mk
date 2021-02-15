@@ -86,7 +86,7 @@ release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
 build-image: pull-licenses
-	docker build -t $(IMG_NAME) . | while read line ; do echo "$$(date +"%Y/%m/%d %T %Z")| $$line"; done;
+	docker build -t $(IMG_NAME) .
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
@@ -116,7 +116,7 @@ dep-status-local:
 	dep status -v
 
 #Go mod
-gomod-deps-local:: gomod-vendor-local gomod-verify-local
+gomod-deps-local:: gomod-vendor-local gomod-verify-local gomod-status-local
 $(eval $(call buildpack-mount,gomod-deps))
 
 gomod-check-local:: test-local check-imports-local check-fmt-local
@@ -127,13 +127,14 @@ $(eval $(call buildpack-mount,gomod-component-check))
 
 gomod-release:gomod-component-check build-image push-image
 
-gomod-release-local:gomod-component-check-local build-image push-image
-
 gomod-vendor-local:
-	GO111MODULE=on go mod vendor
+	GO111MODULE=on go mod vendor -v
 
 gomod-verify-local:
 	GO111MODULE=on go mod verify
+
+gomod-status-local:
+	GO111MODULE=on go mod graph
 
 gomod-tidy-local:
 	GO111MODULE=on go mod tidy
