@@ -5,14 +5,18 @@ WORKDIR $DOCK_PKG_DIR
 
 COPY go.mod .
 COPY go.sum .
-RUN go mod download
+RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] download" && \
+    go mod download && \ 
+    echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done"
 
 COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
 
 RUN echo "nobody:x:65534:5534:nobody:/:" > /etc_passwd
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway
+RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] build" &&\
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway &&\ 
+    echo "$(date +"%Y/%m/%d %T %Z")  [INFO] build done"
 
 
 FROM eu.gcr.io/kyma-project/external/alpine:3.12.0 as certs
@@ -27,5 +31,5 @@ COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
-
+RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] done" 
 CMD ["/applicationgateway"]
