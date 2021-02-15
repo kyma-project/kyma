@@ -510,7 +510,7 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
       const afterTestPod = afterTestPodList.find(
         (arg) => arg.name === elem.name
       );
-      if (!afterTestPod || !afterPod.containerStatuses) {
+      if (!afterTestPod || !afterTestPod.containerStatuses) {
         return {
           name: elem.name,
           containerRestarts: null,
