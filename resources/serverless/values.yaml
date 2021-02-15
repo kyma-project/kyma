@@ -78,7 +78,7 @@ images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
     tag: "PR-10574"
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
