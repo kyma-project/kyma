@@ -25,4 +25,4 @@ logui:
       memory: 3Mi
     limits:
       cpu: 30m
-      memory: 8Mi
+      memory: 16Mi
