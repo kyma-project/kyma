@@ -36,6 +36,8 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20191203134012-c197fd4bf371 // indirect
 	google.golang.org/genproto v0.0.0-20191203145615-049a07e0debe // indirect
+
+	// istio version "1.5.8"
 	istio.io/api v0.0.0-20200513175333-ae3da0d240e3
 	istio.io/client-go v0.0.0-20200513180646-f8d9d8ff84e6
 	istio.io/gogo-genproto v0.0.0-20191029161641-f7d19ec0141d // indirect
