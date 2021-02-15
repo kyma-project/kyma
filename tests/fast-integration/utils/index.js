@@ -540,14 +540,13 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
     })
     .filter((arg) => {
       // filter out pods that do not have statuses after test or somehow cannot be mapped to pods before test start
-      return !!arg.containerRestarts;
+      return (
+        Array.isArray(arg.containerRestarts) &&
+        arg.containerRestarts.some(
+          (container) => container.restartsTillTestStart != 0
+        )
+      );
     });
-  // .filter((arg) =>
-  //   arg.containerRestarts.some(
-  //     (container) => container.restartsTillTestStart != 0
-  //   )
-  // );
-
   if (report.length > 0) {
     console.log(`
 =========RESTART REPORT========
