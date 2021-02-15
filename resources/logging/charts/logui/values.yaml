@@ -12,10 +12,12 @@ nameOverride: log-ui
 
 podSecurityPolicy:
     enabled: true
-requests:
-  cpu: 1m
-  memory: 3Mi
-limits:
-  cpu: 30m
-  memory: 16Mi
+
+resources:
+  requests:
+    cpu: 1m
+    memory: 3Mi
+  limits:
+    cpu: 30m
+    memory: 16Mi
 
