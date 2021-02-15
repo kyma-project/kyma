@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  tag: 0fa81441
+  tag: PR-2128
   pullPolicy: IfNotPresent
 service:
   internalPort: 80
