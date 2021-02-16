@@ -9,15 +9,15 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200903161647-0fae3728c173
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
-	github.com/kyma-project/rafter v0.0.0-20191209072228-90c07ef7c8a3
-	github.com/prometheus/client_golang v1.3.0
+	github.com/kyma-project/rafter v0.0.0-20210202141112-0bd2218c9c12
+	github.com/prometheus/client_golang v1.7.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
-	k8s.io/code-generator v0.18.8
+	k8s.io/api v0.18.15
+	k8s.io/apimachinery v0.18.15
+	k8s.io/client-go v0.18.15
+	k8s.io/code-generator v0.18.15
 )
 
 replace (
