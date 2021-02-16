@@ -32,7 +32,13 @@ core_ui:
     internalPort: 80
     name: nginx
   statusPort: 6081
-  resources: {}
+  resources:
+    limits:
+      cpu: 3m
+      memory: 10Mi
+    requests:
+      cpu: 1m
+      memory: 4Mi
 managementPlane: {}
 replicaCount: 1
 test:
@@ -57,4 +63,4 @@ test:
         enabled: true
 
 podSecurityPolicy:
-    enabled: true
+  enabled: true

@@ -9,12 +9,12 @@ web:
         memory: 32Mi
   core-ui:
     resources:
-      requests:
-        cpu: 2m
-        memory: 16Mi
       limits:
-        cpu: 40m
-        memory: 64Mi
+        cpu: 4m
+        memory: 30Mi
+      requests:
+        cpu: 1m
+        memory: 4Mi
 backend:
   resources:
     requests:
