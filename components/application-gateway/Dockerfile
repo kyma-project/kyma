@@ -6,9 +6,9 @@ ENV GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80
 
 COPY go.mod .
 COPY go.sum .
-RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] download" && \
-    go mod download && \ 
-    echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done"
+# RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] download" && \
+#     go mod download && \ 
+#     echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done"
 
 COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
@@ -16,7 +16,9 @@ COPY . $DOCK_PKG_DIR
 RUN echo "nobody:x:65534:5534:nobody:/:" > /etc_passwd
 
 RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] build" &&\
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway &&\ 
+    go mod download && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway &&\
+    go clean --modcache && \
     echo "$(date +"%Y/%m/%d %T %Z")  [INFO] build done"
 
 
