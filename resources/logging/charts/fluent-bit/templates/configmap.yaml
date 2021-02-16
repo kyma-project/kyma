@@ -69,7 +69,7 @@ data:
         Multiline         {{ .Values.config.inputs.tail.multiline }}
         Multiline_Flush   {{ .Values.config.inputs.tail.multilineFlush }}
         Parser_Firstline  {{ .Values.config.inputs.tail.parserFirstline }}
-        {{- en -}}
+        {{- end -}}
         
 {{- end }}
 
