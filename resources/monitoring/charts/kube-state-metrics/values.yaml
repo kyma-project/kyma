@@ -71,11 +71,15 @@ podSecurityPolicy:
 
   additionalVolumes: []
 
-securityContext:
+podSecurityContext:
   enabled: true
   runAsGroup: 65534
   runAsUser: 65534
   fsGroup: 65534
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/

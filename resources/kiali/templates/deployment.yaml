@@ -64,6 +64,10 @@ spec:
         - name: http-metrics
           containerPort: {{ .Values.kiali.spec.server.metrics_port | default 9090 }}
         {{- end }}
+        {{- if .Values.kiali.spec.server.securityContext }}
+        securityContext:
+        {{- toYaml .Values.kiali.spec.server.securityContext | nindent 10 }}
+        {{- end }}
         readinessProbe:
           httpGet:
             path: {{ include "kiali-server.server.web_root" . | trimSuffix "/"  }}/healthz

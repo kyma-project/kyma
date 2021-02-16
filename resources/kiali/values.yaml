@@ -44,6 +44,10 @@ kcproxy:
     matchClaims: ""
     addClaims: ""
   nodeSelector: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
     tag: 10.0.0
@@ -872,3 +876,8 @@ kiali:
     #    ---
     #    web_schema: ""
     #
+
+    # Containers securityContext, not defined in upstream chart
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
