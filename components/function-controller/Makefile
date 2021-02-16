@@ -4,7 +4,7 @@ ROOT :=  $(shell pwd)
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201113-a3e68400
-SCRIPTS_DIR = $(realpath $(shell pwd))
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
 

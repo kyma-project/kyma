@@ -1,7 +1,7 @@
 APP_NAME = application-gateway
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
-SCRIPTS_DIR = $(realpath $(shell pwd))
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/applicationgateway/
 
