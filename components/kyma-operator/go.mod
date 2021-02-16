@@ -23,3 +23,5 @@ require (
 	k8s.io/client-go v0.19.7
 	rsc.io/letsencrypt v0.0.3 // indirect
 )
+
+replace k8s.io/client-go => k8s.io/client-go v0.19.7
