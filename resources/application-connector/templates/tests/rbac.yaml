@@ -30,6 +30,13 @@ rules:
   - apiGroups: ["sources.kyma-project.io"]
     resources: ["httpsources"]
     verbs: ["get", "list"]
+{{- if .Values.global.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions", "policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:
+    - {{ .Chart.Name }}-tests
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -67,6 +74,13 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["tokenrequests"]
     verbs: ["get", "create", "list", "delete"]
+{{- if .Values.global.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions", "policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:
+    - {{ .Chart.Name }}-tests
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

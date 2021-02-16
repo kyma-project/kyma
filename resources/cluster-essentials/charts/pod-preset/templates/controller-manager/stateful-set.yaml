@@ -33,4 +33,6 @@ spec:
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         command:
         - /root/manager
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
 {{- end -}}

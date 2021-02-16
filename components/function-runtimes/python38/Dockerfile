@@ -1,5 +1,5 @@
 # kubeless/python:3.7
-FROM python:3.8.6-alpine3.12
+FROM python:3.8.7-alpine3.12
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

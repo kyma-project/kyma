@@ -48,6 +48,9 @@ spec:
             value: "{{ .Values.broker.tillerTLSEnabled }}"
         resources:
 {{ toYaml .Values.broker.resources | indent 10 }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
@@ -99,6 +102,9 @@ spec:
             value: "{{ .Values.ctrl.documentationEnabled }}"
           - name: APP_UPLOAD_SERVICE_URL
             value: "{{ .Values.ctrl.uploadServiceURL }}"
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir

@@ -3,12 +3,12 @@ package serverless
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -74,12 +74,20 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg)
+			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
+
+				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
+				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
+
+				g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
+				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
+				g.Expect(errs).To(gomega.HaveLen(0))
+
 			}
 		})
 	}
@@ -411,10 +419,10 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	}
 
 	r := FunctionReconciler{}
-	//when
-	job := r.buildJob(&instance, rtmCfg, cmName)
+	// when
+	job := r.buildJob(&instance, rtmCfg, cmName, DockerConfig{})
 
-	//then
+	// then
 	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
 	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
 

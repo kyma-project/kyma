@@ -60,6 +60,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: APP_API_PACKAGES_SUPPORT
             value: {{ .Values.global.disableLegacyConnectivity | quote }}
+          - name: APP_NEW_EVENTING_FLOW
+            value: {{ .Values.global.isBEBEnabled | quote  }}
           {{ if .Values.global.disableLegacyConnectivity }}
           - name: APP_DIRECTOR_PROXY_URL
             value: {{ .Values.director.proxyURL | quote }}
@@ -70,6 +72,9 @@ spec:
           - name: APP_GATEWAY_BASE_URL_FORMAT
             value: {{ .Values.gatewayBaseURLFormat | quote }}
           {{ end }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume

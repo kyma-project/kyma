@@ -60,6 +60,7 @@ func (m *BebMock) Reset() {
 	m.AuthResponse = nil
 	m.GetResponse = nil
 	m.ListResponse = nil
+	m.CreateResponse = nil
 	m.DeleteResponse = nil
 }
 

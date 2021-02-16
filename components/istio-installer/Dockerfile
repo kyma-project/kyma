@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
+FROM eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
@@ -12,6 +12,11 @@ RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}
 	rm istioctl.tar.gz &&\
 	curl -L https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -o yq &&\
 	chmod +x yq &&\
-	mv yq /usr/local/bin/yq
+	mv yq /usr/local/bin/yq &&\
+	mkdir /opt/istio &&\
+	chown -R nobody:nogroup /opt/istio
+
+USER nobody
+WORKDIR /opt/istio
 
 ENTRYPOINT ["/bin/bash"]

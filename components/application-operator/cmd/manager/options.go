@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+
+	"github.com/vrischmann/envconfig"
 )
 
-type options struct {
+type args struct {
 	appName                               string
 	appMapName                            string
 	domainName                            string
@@ -23,9 +25,20 @@ type options struct {
 	helmDriver                            string
 	profile                               string
 	isBEBEnabled                          bool
+	podSecurityPolicyEnabled              bool
 }
 
-func parseArgs() *options {
+type config struct {
+	LogFormat string `default:"json"`
+	LogLevel  string `default:"warn"`
+}
+
+type options struct {
+	args
+	config
+}
+
+func parseOptions() (*options, error) {
 	appName := flag.String("appName", "application-operator", "Name used in application controller registration")
 	domainName := flag.String("domainName", "kyma.local", "Domain name of the cluster")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the Application chart will be installed")
@@ -43,36 +56,48 @@ func parseArgs() *options {
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
 	profile := flag.String("profile", "", "Profile name")
 	isBEBEnabled := flag.Bool("isBEBEnabled", false, "Toggles creation of eventing infrastructure based on BEB if BEB is enabled")
+	podSecurityPolicyEnabled := flag.Bool("podSecurityPolicyEnabled", false, "The information if applications should be created with PodSecurityPolicies")
 
 	flag.Parse()
 
-	return &options{
-		appName:                               *appName,
-		domainName:                            *domainName,
-		namespace:                             *namespace,
-		syncPeriod:                            *syncPeriod,
-		installationTimeout:                   *installationTimeout,
-		applicationGatewayImage:               *applicationGatewayImage,
-		applicationGatewayTestsImage:          *applicationGatewayTestsImage,
-		eventServiceImage:                     *eventServiceImage,
-		eventServiceTestsImage:                *eventServiceTestsImage,
-		applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
-		gatewayOncePerNamespace:               *gatewayOncePerNamespace,
-		strictMode:                            *strictMode,
-		healthPort:                            *healthPort,
-		helmDriver:                            *helmDriver,
-		profile:                               *profile,
-		isBEBEnabled:                          *isBEBEnabled,
+	var c config
+	if err := envconfig.InitWithPrefix(&c, "APP"); err != nil {
+		return nil, err
 	}
+
+	return &options{
+		args: args{
+			appName:                               *appName,
+			domainName:                            *domainName,
+			namespace:                             *namespace,
+			syncPeriod:                            *syncPeriod,
+			installationTimeout:                   *installationTimeout,
+			applicationGatewayImage:               *applicationGatewayImage,
+			applicationGatewayTestsImage:          *applicationGatewayTestsImage,
+			eventServiceImage:                     *eventServiceImage,
+			eventServiceTestsImage:                *eventServiceTestsImage,
+			applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
+			gatewayOncePerNamespace:               *gatewayOncePerNamespace,
+			strictMode:                            *strictMode,
+			healthPort:                            *healthPort,
+			helmDriver:                            *helmDriver,
+			profile:                               *profile,
+			isBEBEnabled:                          *isBEBEnabled,
+			podSecurityPolicyEnabled:              *podSecurityPolicyEnabled,
+		},
+		config: c,
+	}, nil
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s"+
 		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
 		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
-		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s --isBEBEnabled=%v",
+		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s"+
+		" APP_LOG_LEVEL=%s APP_LOG_FORMAT=%s --isBEBEnabled=%v --podSecurityPolicyEnabled=%v",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
-		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile, o.isBEBEnabled)
+		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile,
+		o.LogLevel, o.LogFormat, o.isBEBEnabled, o.podSecurityPolicyEnabled)
 }

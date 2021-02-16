@@ -363,7 +363,7 @@ var _ = ginkgo.Describe("Function", func() {
 				gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
 
 				deployment := &deployments.Items[0]
-				expectedImage := reconciler.buildImageAddress(function)
+				expectedImage := reconciler.buildImageAddress(function, "registry.kyma.local")
 				gomega.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 				gomega.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 				gomega.Expect(deployment).To(haveLabelLen(7))
@@ -430,7 +430,7 @@ var _ = ginkgo.Describe("Function", func() {
 				}
 				gomega.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-				gomega.Ω(reconciler.Reconcile(request)).To(beOKReconcileResult)
+				gomega.Ω(reconciler.Reconcile(request)).To(beFinishedReconcileResult)
 
 				function = &serverlessv1alpha1.Function{}
 				gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -441,7 +441,7 @@ var _ = ginkgo.Describe("Function", func() {
 				gomega.Expect(function).To(haveConditionReasonDeploymentReady)
 
 				ginkgo.By("should not change state on reconcile")
-				gomega.Ω(reconciler.Reconcile(request)).To(beOKReconcileResult)
+				gomega.Ω(reconciler.Reconcile(request)).To(beFinishedReconcileResult)
 
 				function = &serverlessv1alpha1.Function{}
 				gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())

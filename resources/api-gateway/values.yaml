@@ -2,8 +2,8 @@ replicaCount: 1
 
 rbacJob:
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20210113-12c4e3b5"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210208-080d17ad"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
@@ -25,9 +25,9 @@ deployment:
       drop:
       - ALL
     privileged: false
-    runAsGroup: 2000
+    runAsGroup: 65534
     runAsNonRoot: true
-    runAsUser: 2000
+    runAsUser: 65534
 
 config:
   oathkeeper:
@@ -96,7 +96,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: 48611d45
+    version: "a066c1a5"
   env:
     testUser: "admin-user"
     timeout: 120
@@ -106,3 +106,7 @@ tests:
     jwtDelay: 5
     gatewayName: "kyma-gateway"
     gatewayNamespace: "kyma-system"
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534

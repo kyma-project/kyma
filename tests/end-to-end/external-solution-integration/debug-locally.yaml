@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod 
+metadata:
+  namespace: kyma-system
+  annotations:
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "false"
+  labels:
+    app: core-test-external-solution
+    kyma-project.io/test-kind: e2e
+  name: core-test-external-solution
+spec:
+  containers:
+    - command:
+      - /bin/sh
+      - -c
+      - "dlv exec /ko-app/runner e2e-event-mesh --listen=:40000 --headless=true --api-version=2 --log --accept-multiclient -- /ko-app/runner e2e-event-mesh --domain $KYMADOMAIN --testID e2e-event-mesh --skipSSLVerify --testServiceImage eu.gcr.io/kyma-project/event-subscriber-tools:9913ea21"
+      securityContext:
+        capabilities:
+          add:
+          - SYS_PTRACE
+      env:
+      - name: INGRESSGATEWAY_ADDRESS
+        value: istio-ingressgateway.istio-system.svc.cluster.local
+      - name: KYMADOMAIN
+        value: carinacl.kymatunas.shoot.canary.k8s-hana.ondemand.com
+      image: ko://github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/cmd/runner
+      imagePullPolicy: Always
+      name: test
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 2048Mi
+        requests:
+          cpu: 800m
+          memory: 1024Mi
+  restartPolicy: Never
+  serviceAccountName: core-test-external-solution

@@ -105,18 +105,14 @@ spec:
             memory: 2Gi
         securityContext:
           allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
           privileged: false
           runAsGroup: 65534
-          runAsNonRoot: true
           runAsUser: 65534
 ---
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: kyma-installer
+  name: 000-kyma-installer
   labels:
     release: kyma-installer
     kyma-project.io/installation: "kyma-installer"
@@ -135,12 +131,19 @@ spec:
       - min: 1
         max: 65535
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
       - min: 1
         max: 65535
+  hostPorts:
+  - max: 65535
+    min: 1024
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+  - "*"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -155,7 +158,7 @@ rules:
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
-  resourceNames: ["kyma-installer"]
+  resourceNames: ["000-kyma-installer"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

@@ -13,6 +13,7 @@ import (
 )
 
 var beOKReconcileResult = recResultMatcher(false, 0)
+var beFinishedReconcileResult = recResultMatcher(false, time.Minute*5)
 
 func recResultMatcher(requeue bool, requeueAfter time.Duration) gtypes.GomegaMatcher {
 	return gstruct.MatchAllFields(gstruct.Fields{

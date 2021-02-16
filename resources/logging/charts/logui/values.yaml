@@ -10,3 +10,6 @@ service:
   internalPort: 80
 resources: {}
 nameOverride: log-ui
+
+podSecurityPolicy:
+    enabled: true

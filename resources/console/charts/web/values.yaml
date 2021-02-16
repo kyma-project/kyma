@@ -26,7 +26,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 65af63fb
+    tag: "4f6246be"
   service:
     externalPort: 80
     internalPort: 80
@@ -55,3 +55,6 @@ test:
         enabled: true
       rafter:
         enabled: true
+
+podSecurityPolicy:
+    enabled: true

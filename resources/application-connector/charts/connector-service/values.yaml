@@ -8,7 +8,6 @@ deployment:
   image:
     pullPolicy: IfNotPresent
     pullSecret: ""
-  runAsUser: 1000
   args:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
@@ -73,6 +72,3 @@ tests:
   central: *central
   image:
     pullPolicy: IfNotPresent
-
-podSecurityPolicy:
-  enabled: false

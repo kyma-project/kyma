@@ -5,7 +5,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "5"
     helm.sh/hook: "post-install,post-upgrade"
-    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 spec:
   backoffLimit: 1
   template:

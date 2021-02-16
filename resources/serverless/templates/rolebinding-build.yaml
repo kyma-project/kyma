@@ -12,5 +12,5 @@ roleRef:
   name: {{ template "fullname" . }}-build
 subjects:
   - kind: ServiceAccount
-    name: {{ template "fullname" . }}
+    name: {{ template "fullname" . }}-build
     namespace: {{ .Release.Namespace }}

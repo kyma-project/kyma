@@ -20,7 +20,14 @@ rules:
     verbs: ["get", "patch"]
   - apiGroups: ["apps", "extensions"]
     resources: ["replicasets"]
-    verbs: ["get", "patch", "delete"]
+    verbs: ["get", "list", "patch", "delete"]
+{{- if .Values.kyma.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames: 
+      - {{ template "istio.fullname" . }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -55,14 +62,18 @@ spec:
       restartPolicy: Never
       containers:
         - name: proxy-reset
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
+          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
           env:
           - name: EXPECTED_ISTIO_PROXY_IMAGE
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}:{{ .Chart.Version }}
           - name: COMMON_ISTIO_PROXY_IMAGE_PREFIX
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}
+          - name: HOME
+            value: /tmp
           command:
             - /bin/bash
             - -c
             - |
 {{.Files.Get "files/istio-proxy-reset.sh" | printf "%s" | indent 16}}
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}

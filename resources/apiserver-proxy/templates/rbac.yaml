@@ -29,10 +29,3 @@ rules:
     verbs: ['*']
   - nonResourceURLs: ["*"]
     verbs: ['*']
-{{- if .Values.podSecurityPolicy.enabled }}
-  - apiGroups: ["extensions","policy"]
-    resources: ["podsecuritypolicies"]
-    verbs: ["use"]
-    resourceNames: 
-      - {{ template "name" . }}
-{{- end }}

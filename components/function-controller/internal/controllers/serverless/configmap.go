@@ -57,8 +57,8 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	})
 }
 
-func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment) bool {
-	image := r.buildImageAddress(instance)
+func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
+	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
 	if len(deployments) == 1 &&

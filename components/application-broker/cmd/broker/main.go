@@ -40,10 +40,13 @@ import (
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
 // BEWARE: too short period time will increase the CPU load.
-const informerResyncPeriod = 30 * time.Minute
+const (
+	informerResyncPeriod = 30 * time.Minute
+	Verbose              = "verbose"
+)
 
 func main() {
-	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
+	verbose := flag.Bool(Verbose, false, "specify if log verbosely loading configuration")
 	flag.Parse()
 	cfg, err := config.Load(*verbose)
 	fatalOnError(err)
@@ -125,11 +128,11 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace,
+		cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(),
-		nsInformer, scInformersGroup.ServiceInstances().Informer(), k8sClient.CoreV1().Namespaces(), sFact.Application(),
-		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus, cfg.APIPackagesSupport)
+	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), scInformersGroup.ServiceInstances().Informer(),
+		nsBrokerFacade, nsBrokerSyncer, siFacade, log, livenessCheckStatus)
 
 	// create ApplicationServiceID selector
 	idSelector := broker.NewIDSelector(cfg.APIPackagesSupport)
@@ -140,7 +143,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
 		&mClient, knClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
-		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, cfg.NewEventingFlow)
 
 	// wait for api server
 	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {

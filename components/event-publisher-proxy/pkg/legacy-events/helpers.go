@@ -1,14 +1,14 @@
 package legacy
 
 import (
-	"fmt"
-
-	api "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
-	log "github.com/sirupsen/logrus"
-
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
 // ParseApplicationNameFromPath returns application name from the URL.
@@ -51,6 +51,5 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 
 // formatEventType4BEB format eventType as per BEB spec
 func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
-	eventType4BEB := fmt.Sprintf(eventTypePrefixFormat, eventTypePrefix, app, eventType, version)
-	return strings.ReplaceAll(eventType4BEB, "-", ".")
+	return fmt.Sprintf(eventTypePrefixFormat, eventTypePrefix, app, eventType, version)
 }

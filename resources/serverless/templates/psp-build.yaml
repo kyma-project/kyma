@@ -1,7 +1,7 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ template "fullname" . }}-build
+  name: {{ template "build-psp.name" . }}
   labels:
   {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
 spec:

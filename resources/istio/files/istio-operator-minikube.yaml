@@ -82,12 +82,12 @@ spec:
             memory: 96Mi
         service:
           ports:
-          - port: 15012
-            targetPort: 15012
-            name: tcp-istiod
           - name: status-port
             port: 15021
             targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
           - name: http2
             port: 80
             targetPort: 8080
@@ -116,6 +116,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
         overlays:
         - kind: Deployment
           name: istio-ingressgateway
@@ -175,6 +177,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local

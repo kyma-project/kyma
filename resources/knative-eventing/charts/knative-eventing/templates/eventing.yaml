@@ -1231,11 +1231,9 @@ spec:
 ---
 apiVersion: v1
 data:
-  loglevel.controller: info
-  loglevel.webhook: info
   zap-logger-config: |
     {
-      "level": "info",
+      "level": "{{ .Values.loglevel }}",
       "development": false,
       "outputPaths": ["stdout"],
       "errorOutputPaths": ["stderr"],

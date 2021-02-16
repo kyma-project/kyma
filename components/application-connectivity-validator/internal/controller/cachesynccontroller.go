@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"time"
 
-	gocache "github.com/patrickmn/go-cache"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/workqueue"
-
+	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	log "github.com/sirupsen/logrus"
+	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
+	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
-
-	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
-	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/workqueue"
 )
+
+const controllerName = "cache_sync_controller"
 
 type Controller struct {
 	clientset         clientset.Interface
@@ -26,15 +26,18 @@ type Controller struct {
 	workqueue         workqueue.RateLimitingInterface
 	appName           string
 	appCache          *gocache.Cache
+	log               *logger.Logger
 }
 
 func NewController(
+	log *logger.Logger,
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
 	appName string,
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
+		log:               log,
 		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
@@ -70,22 +73,21 @@ func (c *Controller) enqueueApplication(obj interface{}) {
 func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
+	c.log.WithContext().With("applicationName", c.appName).With("controller", controllerName).Info("Starting Application Cache controller...")
 
-	log.Info("Starting Application Cache controller")
-
-	log.Info("Waiting for informer caches to sync")
+	c.log.WithContext().With("controller", controllerName).Info("Waiting for informer caches to sync...")
 	if ok := cache.WaitForCacheSync(stopCh, c.applicationSynced); !ok {
-		return fmt.Errorf("failed to wait for caches to sync")
+		return fmt.Errorf("waiting for caches to sync")
 	}
 
-	log.Info("Starting workers")
+	c.log.WithContext().With("controller", controllerName).Info("Starting workers...")
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}
 
-	log.Info("Started workers")
+	c.log.WithContext().With("controller", controllerName).Info("Started workers!")
 	<-stopCh
-	log.Info("Shutting down workers")
+	c.log.WithContext().With("controller", controllerName).Info("Shutting down workers...")
 
 	return nil
 }
@@ -116,7 +118,7 @@ func (c *Controller) processNextWorkItem() bool {
 
 		if err := c.syncHandler(key); err != nil {
 			c.workqueue.AddRateLimited(key)
-			return fmt.Errorf("error syncing '%s': %s, requeuing", key, err.Error())
+			return fmt.Errorf("while syncing '%s': %s, requeuing", key, err.Error())
 		}
 
 		c.workqueue.Forget(obj)
@@ -138,7 +140,10 @@ func (c *Controller) syncHandler(key string) error {
 
 		if errors.IsNotFound(err) {
 			c.appCache.Delete(key)
-			log.Infof("Deleted the application '%s' from the cache", key)
+			c.log.WithContext().
+				With("controller", controllerName).
+				With("name", application.Name).
+				Infof("Deleted the application from the cache.")
 			return nil
 		}
 
@@ -147,7 +152,10 @@ func (c *Controller) syncHandler(key string) error {
 
 	applicationClientIDs := c.getClientIDsFromResource(application)
 	c.appCache.Set(key, applicationClientIDs, gocache.NoExpiration)
-	log.Infof("Added/Updated the application '%s' in the cache", key)
+	c.log.WithContext().
+		With("controller", controllerName).
+		With("name", application.Name).
+		Infof("Added/Updated the application in the cache.")
 	return nil
 }
 

@@ -122,6 +122,8 @@ securityContext:
   enabled: true
   runAsUser: 1000
   fsGroup: 1000
+  privileged: false
+  allowPrivilegeEscalation: false
 
 priorityClassName: ""
 
