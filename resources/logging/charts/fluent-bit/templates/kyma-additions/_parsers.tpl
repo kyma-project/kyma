@@ -119,7 +119,7 @@
 [PARSER]
     Name              java
     Format            regex
-    Regex             ^(?<time>\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2},\d{1,3}) (?<level>[^\s]+) \d{3,5} \[(?<thread>.*)\] (?<message>.*)
+    Regex             ^(?<time>\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2},\d{1,3}) (?<level>[^\s]+) \[(?<thread>.*)\] (?<message>.*)
     Time_Key          time
     Time_Format       %Y-%m-%d %H:%M:%S,%L
 {{- end -}}
