@@ -99,50 +99,159 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter, reconcilertesting.WithWebhook)
+			givenSubscription := reconcilertesting.NewSubscription(
+				subscriptionName,
+				namespaceName,
+				reconcilertesting.WithFilter,
+				reconcilertesting.WithWebhook)
 			givenSubscription.Spec.Sink = "invalid"
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
 			By("Setting APIRule status to False")
-			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady, v1.ConditionFalse, "")
+			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionAPIRuleStatus,
+				eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady,
+				v1.ConditionFalse,
+				"",
+			)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyFalseCondition),
 			))
 
-			By("Deleting the object to not provoke more reconciliation requests")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			Context("Fixing an invalid Subscirption should update the APIRule to ready", func() {
+				validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberSvc.Name, subscriberSvc.Namespace)
+				givenSubscription.Spec.Sink = validSink
+				updateSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionSink(validSink))
 
-			By("Emitting a Subscription deleted event")
+				By("Creating a valid APIRule")
+				getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+				apiRuleUpdated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+				getAPIRule(&apiRuleUpdated, ctx).Should(And(
+					reconcilertesting.HaveNotEmptyHost(),
+					reconcilertesting.HaveNotEmptyAPIRule(),
+					reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
+				))
+
+				By("Updating the APIRule status to be Ready")
+				ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleUpdated, ctx).Should(BeNil())
+
+				By("Setting a subscription active condition")
+				subscriptionActiveCondition := eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonSubscriptionActive,
+					v1.ConditionTrue,
+					"",
+				)
+				getSubscription(givenSubscription, ctx).Should(And(
+					reconcilertesting.HaveSubscriptionName(subscriptionName),
+					reconcilertesting.HaveCondition(subscriptionActiveCondition),
+				))
+
+				By("Setting APIRule status in Subscription to Ready")
+				subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionAPIRuleStatus,
+					eventingv1alpha1.ConditionReasonAPIRuleStatusReady,
+					v1.ConditionTrue,
+					"",
+				)
+				getSubscription(givenSubscription, ctx).Should(And(
+					reconcilertesting.HaveSubscriptionName(subscriptionName),
+					reconcilertesting.HaveAPIRuleName(apiRuleUpdated.Name),
+					reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
+					reconcilertesting.HaveSubscriptionReady(),
+				))
+			})
+		})
+	})
+
+	When("Two Subscriptions which are using the same sink but different paths are deleted", func() {
+		It("Should update the APIRule accordingly", func() {
+			// Context
+			ctx := context.Background()
+
+			// Service
+			service1 := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(service1, ctx)
+
+			// Subscriptions
+			subscription1Name := "test-delete-valid-subscription-1"
+			subscription1ID := "test-subs-1"
+			subscription1 := reconcilertesting.FixtureValidSubscription(subscription1Name, namespaceName, subscription1ID)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)
+			ensureSubscriptionCreated(subscription1, ctx)
+
+			subscription2Name := "test-delete-valid-subscription-2"
+			subscription2ID := "test-subs-2"
+			subscription2 := reconcilertesting.FixtureValidSubscription(subscription2Name, namespaceName, subscription2ID)
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service1.Name, service1.Namespace)
+			ensureSubscriptionCreated(subscription2, ctx)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(service1, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, service1), service1)
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx)
+
+			By("Using the same APIRule for both Subscriptions")
+			getSubscription(subscription1, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
+			getSubscription(subscription2, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
+
+			By("Ensuring the APIRule has 2 OwnerReferences and 2 paths")
+			getAPIRule(&apiRuleCreated, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID, subscription2.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+			))
+
+			By("Deleting the first Subscription")
+			Expect(k8sClient.Delete(ctx, subscription1)).Should(BeNil())
+
+			By("Removing the Subscription")
+			getSubscription(subscription1, ctx).Should(reconcilertesting.IsAnEmptySubscription())
+
+			By("Emitting a k8s Subscription deleted event")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionDeletedEvent := v1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
-		})
-	})
+			getK8sEvents(&subscriptionEvents, subscription1.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
-	// TODO: https://github.com/kyma-project/kyma/issues/9950
-	PWhen("Fixing an invalid Subscription (related to APIRule)", func() {
-		It("Should finally mark the subscription as ready", func() {})
-	})
+			By("Ensuring the APIRule has 1 OwnerReference and 1 path")
+			getAPIRule(&apiRuleCreated, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription2.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+			))
 
-	PWhen("Two Subscriptions using the same sink but different path", func() {
-		It("Should update the APIRule accordingly ", func() {})
-		// check APIRule has two owner refs and two paths
-		// delete one subscription
-		// check APIRule has one owner ref and one path
-		// delete last subscription
-		// check APIRule is gone
-	})
+			By("Ensuring the deleted Subscription is removed as Owner from the APIRule")
+			getAPIRule(&apiRuleCreated, ctx).ShouldNot(And(
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+			))
 
-	PWhen("Creating two Subscriptions using different sinks", func() {
-		It("Should mark both Subscriptions as ready and create two different APIRules", func() {})
-		When("Unifying both Subscription sinks", func() {
-			It("Should mark both Subscriptions as ready and end up with only one APIRule", func() {})
+			By("Deleting the second Subscription")
+			Expect(k8sClient.Delete(ctx, subscription2)).Should(BeNil())
+
+			By("Removing the Subscription")
+			getSubscription(subscription2, ctx).Should(reconcilertesting.IsAnEmptySubscription())
+
+			By("Emitting a k8s Subscription deleted event")
+			subscriptionDeletedEvent = v1.Event{
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
+				Message: "",
+				Type:    v1.EventTypeWarning,
+			}
+			getK8sEvents(&subscriptionEvents, subscription2.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
+
+			By("Removing the APIRule")
+			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 		})
 	})
 
@@ -534,8 +643,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Removing the APIRule")
-			// TODO: Check for disappearing of APIRule which does not work in kubebuilder suite
-			//getAPIRule(apiRule, ctx).Should(IsAnEmptyAPIRule())
+			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
