@@ -14,10 +14,8 @@ fi
 echo "Gardener mode detected"
 
 # TODO: remove this when Gardener detection is added to the CLI/installation library
-if [ -z "$DOMAIN" ]; then
-  echo "Getting shoot domain"
-  DOMAIN="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
-fi
+echo "Getting shoot domain"
+DOMAIN="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
 
 for var in DOMAIN KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE; do
   if [ -z "${!var}" ]; then
