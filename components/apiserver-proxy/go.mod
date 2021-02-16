@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/apiserver-proxy
 
-go 1.15
+go 1.14
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9
