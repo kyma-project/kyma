@@ -171,7 +171,7 @@ func main() {
 		}
 	} else {
 		//Use Delegating authenticator
-		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
+		tokenClient := kubeClient.AuthenticationV1().TokenReviews()
 		oidcAuthenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
