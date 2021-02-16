@@ -8,10 +8,8 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
-COPY ./cmd/ ${BASE_APP_DIR}/cmd/
-COPY ./internal/ ${BASE_APP_DIR}/internal/
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
+COPY . ${BASE_APP_DIR}
+RUN go mod download
 
 #
 # Build app
