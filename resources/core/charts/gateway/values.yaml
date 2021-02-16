@@ -1,4 +1,6 @@
 global:
+  environment:
+    gardener: false
   compass:
     mtls:
       secret:
