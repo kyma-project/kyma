@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/mattn/go-colorable v0.1.7 // indirect
+	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
@@ -25,7 +26,7 @@ require (
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.3
-	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20210128214336-420b1d36250f+incompatible
+	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
 
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
