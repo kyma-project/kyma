@@ -13,14 +13,13 @@ fi
 
 echo "Gardener mode detected"
 
-# NOTE: This part can be removed once we get rid of kyma-installer
+# TODO: remove this when Gardener detection is added to the CLI/installation library
 if [ -z "$DOMAIN" ]; then
   echo "Getting shoot domain"
   DOMAIN="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
 fi
-# END
 
-for var in DOMAIN KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE APISERVER_PROXY_SECRET_NAME APISERVER_PROXY_SECRET_NAMESPACE; do
+for var in DOMAIN KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE; do
   if [ -z "${!var}" ]; then
     echo "ERROR: $var is not set"
     discoverUnsetVar=true
@@ -44,25 +43,11 @@ spec:
   secretName: "$KYMA_SECRET_NAME"
 EOF
 
-echo "Creating Certificate $APISERVER_PROXY_SECRET_NAME/$APISERVER_PROXY_SECRET_NAMESPACE"
-
-cat <<EOF | kubectl apply -f -
----
-apiVersion: cert.gardener.cloud/v1alpha1
-kind: Certificate
-metadata:
-  name: apiserver-proxy-tls-cert
-  namespace: $APISERVER_PROXY_SECRET_NAMESPACE
-spec:
-  commonName: "apiserver.${DOMAIN}"
-  secretName: "$APISERVER_PROXY_SECRET_NAME"
-EOF
-
 echo "Annotating istio-ingressgateway/istio-system service"
 
 kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
 
-# NOTE: This part can be removed once we get rid of Values.global.ingress.domainName
+# TODO: remove this when global.ingress.domainName is removed
 kubectl create configmap net-global-overrides \
   --from-literal global.domainName="$DOMAIN" \
   --from-literal global.ingress.domainName="$DOMAIN" \

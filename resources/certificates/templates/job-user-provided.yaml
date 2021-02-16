@@ -33,12 +33,6 @@ spec:
               value: "{{ .Values.certificates.kyma.name }}"
             - name: KYMA_SECRET_NAMESPACE
               value: "{{ .Values.certificates.kyma.namespace }}"
-            - name: APISERVER_PROXY_SECRET_NAME
-              value: "{{ .Values.certificates.apiserverProxy.name }}"
-            - name: APISERVER_PROXY_SECRET_NAMESPACE
-              value: "{{ .Values.certificates.apiserverProxy.namespace }}"
-            - name: IS_SELF_SIGNED
-              value: "{{ .Values.global.certificates.selfSigned }}"
           securityContext:
 {{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never

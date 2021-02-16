@@ -25,10 +25,6 @@ spec:
               value: "{{ .Values.certificates.kyma.name }}"
             - name: KYMA_SECRET_NAMESPACE
               value: "{{ .Values.certificates.kyma.namespace }}"
-            - name: APISERVER_PROXY_SECRET_NAME
-              value: "{{ .Values.certificates.apiserverProxy.name }}"
-            - name: APISERVER_PROXY_SECRET_NAMESPACE
-              value: "{{ .Values.certificates.apiserverProxy.namespace }}"
           securityContext:
 {{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
