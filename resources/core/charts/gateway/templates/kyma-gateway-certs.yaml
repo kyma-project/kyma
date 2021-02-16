@@ -1,4 +1,4 @@
-{{ if not .Values.global.isNewInstallation }}
+{{ if not .Values.global.newInstallation }}
  {{ if not .Values.global.environment.gardener }}
 apiVersion: v1
 data:

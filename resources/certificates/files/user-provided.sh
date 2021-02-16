@@ -24,14 +24,14 @@ fi
 
 echo "Validating Issuer"
 
-if echo "$ISSUER_CM" | grep "ClusterIssuer"; then
+if echo "$ISSUER" | grep "ClusterIssuer"; then
   echo "Type is proper"
 else
   echo "Provided Issuer is not a ClusterIssuer. Exiting..."
   exit 1
 fi
 
-if echo "$ISSUER_CM" | grep "name: $ISSUER_NAME"; then
+if echo "$ISSUER" | grep "name: $ISSUER_NAME"; then
   echo "Name is proper"
 else
   echo "Issuer name should be $ISSUER_NAME. Exiting..."
@@ -40,7 +40,9 @@ fi
 
 echo "Creating issuer"
 
-echo "$ISSUER_CM" | kubectl apply -f -
+cat <<EOF | kubectl apply -f -
+{{ .Values.global.issuer | printf "%s" | nindent 16 }}
+EOF
 
 echo "Generating certificate"
 

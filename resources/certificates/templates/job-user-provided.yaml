@@ -17,12 +17,12 @@ spec:
             - bash
             - "-c"
             - |
-{{ .Files.Get "files/user-provided.sh" | printf "%s" | indent 16 }}
+{{ tpl (.Files.Get "files/user-provided.sh" | printf "%s" | indent 16) . }}
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           name: installer
           env:
             - name: ISSUER
-              value: {{ .Values.global.issuer }}
+              value: "{{ .Values.global.issuer }}"
             - name: DOMAIN
               value: "{{ .Values.global.domainName }}"
             - name: ISSUER_NAME
