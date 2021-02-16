@@ -12,3 +12,5 @@ The whole installation package provides the end-to-end Kubernetes cluster monito
 - Set up channels for notifications informing of any detected alerts.
 
 >**NOTE:** The monitoring component is available by default in the cluster installation, but disabled in the **Kyma Lite** local installation on Minikube. [Enable the component](/root/kyma/#configuration-custom-component-installation-add-a-component) to install it with the [local profile](/components/monitoring/#configuration-monitoring-profiles-local-profile).
+
+You can install Monitoring as part of Kyma predefined [profiles](/root/kyma/#installation-overview-profiles). For production purposes, use the **production profile** which ensures increased retention time to prevent data loss in case of prolonged troubleshooting, and increased memory and CPU values to ensure stable performance of the component.
