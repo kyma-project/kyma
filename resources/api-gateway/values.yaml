@@ -96,7 +96,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "277f4247"
+    version: "a066c1a5"
   env:
     testUser: "admin-user"
     timeout: 120
