@@ -12,26 +12,6 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: kyma-system
-  name: {{ template "certificates.name" . }}-kyma-system-check
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get"]
-  - apiGroups: ["cert.gardener.cloud"]
-    resources: ["certificates"]
-    verbs: ["get"]
-  - apiGroups: ["cert-manager.io"]
-    resources: ["certificates"]
-    verbs: ["get"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
   namespace: istio-system
   name: {{ template "certificates.name" . }}-istio-system-check
   annotations:
@@ -39,7 +19,6 @@ metadata:
     helm.sh/hook-delete-policy: "before-hook-creation"
     "helm.sh/hook": "post-install, post-upgrade"
 rules:
-rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get"]
@@ -49,24 +28,6 @@ rules:
   - apiGroups: ["cert-manager.io"]
     resources: ["certificates"]
     verbs: ["get"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ template "certificates.name" . }}-check
-  namespace: kyma-system
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-subjects:
-  - kind: ServiceAccount
-    name: {{ template "certificates.name" . }}-check
-    namespace: {{.Release.Namespace}}
-roleRef:
-  kind: Role
-  name: {{ template "certificates.name" . }}-kyma-system-check
-  apiGroup: rbac.authorization.k8s.io
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

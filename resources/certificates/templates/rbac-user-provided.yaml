@@ -25,21 +25,6 @@ rules:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: default
-  name: {{ template "certificates.name" . }}-default-user-provided
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    resourceNames: ['{{ .Values.userProvided.issuer.name }}']
-    verbs: ["get"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
   namespace: kyma-installer
   name: {{ template "certificates.name" . }}-kyma-installer-user-provided
   annotations:
@@ -50,20 +35,6 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "create", "update", "patch"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  namespace: kyma-system
-  name: {{ template "certificates.name" . }}-kyma-system-user-provided
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "create", "patch", "update"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -100,24 +71,6 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "certificates.name" . }}-user-provided
-  namespace: default
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-subjects:
-  - kind: ServiceAccount
-    name: {{ template "certificates.name" . }}-user-provided
-    namespace: {{.Release.Namespace}}
-roleRef:
-  kind: Role
-  name: {{ template "certificates.name" . }}-default-user-provided
-  apiGroup: rbac.authorization.k8s.io
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ template "certificates.name" . }}-user-provided
   namespace: kyma-installer
   annotations:
     helm.sh/hook-weight: "0"
@@ -130,24 +83,6 @@ subjects:
 roleRef:
   kind: Role
   name: {{ template "certificates.name" . }}-kyma-installer-user-provided
-  apiGroup: rbac.authorization.k8s.io
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ template "certificates.name" . }}-user-provided
-  namespace: kyma-system
-  annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-install, post-upgrade"
-subjects:
-  - kind: ServiceAccount
-    name: {{ template "certificates.name" . }}-user-provided
-    namespace: {{.Release.Namespace}}
-roleRef:
-  kind: Role
-  name: {{ template "certificates.name" . }}-kyma-system-user-provided
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: RoleBinding

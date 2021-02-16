@@ -3,25 +3,14 @@ set -eo pipefail
 
 export HOME="/tmp"
 
-for var in ISSUER_CM_NAME ISSUER_CM_NAMESPACE; do
-  if [ -z "${!var}" ] ; then
-    echo "ERROR: $var is not set"
-    discoverUnsetVar=true
-  fi
-done
-if [ "${discoverUnsetVar}" = true ] ; then
-    exit 1
-fi
-
 echo "Checking if running in user-provided mode"
 
-ISSUER_CM="$(kubectl get configmap -n $ISSUER_CM_NAMESPACE $ISSUER_CM_NAME --ignore-not-found -o jsonpath='{.data.issuer}')"
-if [ -z "$ISSUER_CM" ]; then
-  echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE not present. Nothing to do here. Exiting..."
+if [ -z "$ISSUER" ]; then
+  echo "Issuer not provided. Nothing to do here. Exiting..."
   exit 0
 fi
 
-echo "Issuer ConfigMap $ISSUER_CM_NAME/$ISSUER_CM_NAMESPACE found. User-provided mode detected"
+echo "Issuer provided. User-provided mode detected"
 
 for var in DOMAIN ISSUER_NAME KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE; do
   if [ -z "${!var}" ] ; then

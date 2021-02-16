@@ -21,10 +21,8 @@ spec:
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           name: installer
           env:
-            - name: ISSUER_CM_NAME
-              value: "{{ .Values.userProvided.issuer.configMap.name }}"
-            - name: ISSUER_CM_NAMESPACE
-              value: "{{ .Values.userProvided.issuer.configMap.namespace }}"
+            - name: ISSUER
+              value: {{ .Values.global.issuer }}
             - name: DOMAIN
               value: "{{ .Values.global.domainName }}"
             - name: ISSUER_NAME

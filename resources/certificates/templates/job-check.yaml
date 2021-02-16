@@ -28,4 +28,4 @@ spec:
           securityContext:
 {{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
-      serviceAccountName: {{ template "certificates.name" . }}-legacy
+      serviceAccountName: {{ template "certificates.name" . }}-check
