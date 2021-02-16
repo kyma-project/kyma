@@ -182,7 +182,9 @@ check-gqlgen:
 
 pull-licenses-local:
 ifdef LICENSE_PULLER_PATH
+	echo "$$(date +"%Y/%m/%d %T %Z") license"
 	bash $(LICENSE_PULLER_PATH)
+	echo "$$(date +"%Y/%m/%d %T %Z") license done"
 else
 	mkdir -p licenses
 endif
