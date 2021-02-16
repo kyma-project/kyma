@@ -1,4 +1,4 @@
-{{- if not .Values.global.isBEBEnabled }}
+{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

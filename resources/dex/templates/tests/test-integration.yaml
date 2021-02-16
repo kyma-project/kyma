@@ -56,5 +56,7 @@ spec:
             curl -XPOST http://127.0.0.1:15020/quitquitquit
             sleep 4
             exit $exit_code
+        securityContext:
+{{- toYaml .Values.tests.securityContext | nindent 10 }}
     restartPolicy: Never
 {{- end }}

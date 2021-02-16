@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -140,6 +141,12 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
+	dockerConfig, err := r.readDockerConfig(ctx, instance)
+	if err != nil {
+		log.Error(err, "Cannot read Docker registry configuration")
+		return ctrl.Result{}, err
+	}
+
 	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
@@ -173,14 +180,14 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
 		return r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}):
-		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items)
-	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items)
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
+		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
+		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
+	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
+		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
 	case r.isOnServiceChange(instance, services.Items):
 		return r.onServiceChange(ctx, log, instance, services.Items)
 	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
@@ -248,6 +255,39 @@ func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serve
 		Reference: instance.Spec.Reference,
 		Auth:      auth,
 	}, nil
+}
+
+func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
+	var secret corev1.Secret
+	// try reading user config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
+	}
+
+	// try reading default config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		if data["isInternal"] == "true" {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["serverAddress"],
+			}, nil
+		} else {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["registryAddress"],
+			}, nil
+		}
+	}
+
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 }
 
 func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {

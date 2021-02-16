@@ -5,17 +5,18 @@ import (
 	"time"
 
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	bebNs := "/beb.namespace"
-	eventTypePrefix := "event.type.prefix"
-	legacyTransformer := NewTransformer(bebNs, eventTypePrefix)
-	eventID := "id"
-	appName := "foo-app"
-	legacyEventType := "foo.bar"
-	legacyEventVersion := "v1"
-	data := "{\"foo\": \"bar\"}"
+	bebNs := MessagingNamespace
+	eventTypePrefix := MessagingEventTypePrefix
+	legacyTransformer := NewTransformer(bebNs, eventTypePrefix, nil)
+	eventID := EventID
+	appName := ApplicationName
+	legacyEventType := LegacyEventType
+	legacyEventVersion := LegacyEventTypeVersion
+	data := LegacyEventData
 	timeNow := time.Now()
 	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, legacyEventType, legacyEventVersion)
 	timeNowStr := timeNow.Format(time.RFC3339)

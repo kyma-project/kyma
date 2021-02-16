@@ -1,0 +1,33 @@
+# Default values for event-publisher-nats.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# replicaCount configures the number of replicas for the event-publisher-nats deployment
+replicaCount: 1
+
+image:
+  # name is the name of the container image for the event-publisher-nats
+  name: "event-publisher-nats"
+  # tag is the container tag of the event-publisher-nats image
+  tag: "657ff89e"
+  # pullPolicy is the pullPolicy for the event-publisher-nats image
+  pullPolicy: "IfNotPresent"
+
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 32m
+    memory: 64Mi
+
+nats:
+  config:
+   port: 8080
+   requestTimeout: "5s"
+   legacyNamespace: kyma
+   legacyEventTypePrefix: sap.kyma.custom

@@ -1,20 +1,14 @@
 package mapping
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -28,16 +22,6 @@ const (
 	// 5ms, 10ms, 20ms, 40ms, 80ms
 	maxApplicationMappingProcessRetries = 15
 )
-
-//go:generate mockery -name=appGetter -output=automock -outpkg=automock -case=underscore
-type appGetter interface {
-	Get(internal.ApplicationName) (*internal.Application, error)
-}
-
-//go:generate mockery -name=nsPatcher -output=automock -outpkg=automock -case=underscore
-type nsPatcher interface {
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *corev1.Namespace, err error)
-}
 
 // nsBrokerFacade is responsible for managing namespaced ServiceBrokers and creating proper k8s Services for them in the system namespace
 //go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
@@ -65,45 +49,33 @@ type instanceChecker interface {
 type Controller struct {
 	queue               workqueue.RateLimitingInterface
 	emInformer          cache.SharedIndexInformer
-	nsInformer          cache.SharedIndexInformer
-	nsPatcher           nsPatcher
-	appGetter           appGetter
 	nsBrokerFacade      nsBrokerFacade
 	nsBrokerSyncer      nsBrokerSyncer
 	mappingSvc          mappingLister
 	livenessCheckStatus *broker.LivenessCheckStatus
 	log                 logrus.FieldLogger
 
-	instanceChecker    instanceChecker
-	apiPackagesSupport bool
+	instanceChecker instanceChecker
 }
 
 // New creates new application mapping controller
 func New(emInformer cache.SharedIndexInformer,
-	nsInformer cache.SharedIndexInformer,
 	instInformer cache.SharedIndexInformer,
-	nsPatcher nsPatcher,
-	appGetter appGetter,
 	nsBrokerFacade nsBrokerFacade,
 	nsBrokerSyncer nsBrokerSyncer,
 	instanceChecker instanceChecker,
 	log logrus.FieldLogger,
-	livenessCheckStatus *broker.LivenessCheckStatus,
-	apiPackagesSupport bool) *Controller {
+	livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
 
 	c := &Controller{
 		log:                 log.WithField("service", "labeler:controller"),
 		emInformer:          emInformer,
-		nsInformer:          nsInformer,
 		queue:               workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:           nsPatcher,
-		appGetter:           appGetter,
 		nsBrokerFacade:      nsBrokerFacade,
 		nsBrokerSyncer:      nsBrokerSyncer,
 		mappingSvc:          newMappingService(emInformer),
 		livenessCheckStatus: livenessCheckStatus,
 		instanceChecker:     instanceChecker,
-		apiPackagesSupport:  apiPackagesSupport,
 	}
 
 	// EventHandler reacts every time when we add, update or delete ApplicationMapping
@@ -125,7 +97,10 @@ func New(emInformer cache.SharedIndexInformer,
 				c.log.Errorf("while handling deleting event: while deleting service instance resource to queue: couldn't split key: %v", err)
 				return
 			}
-			c.processRemovalInNamespace(ns)
+			err = c.processRemovalInNamespace(ns)
+			if err != nil {
+				c.log.Errorf("while handling deleting event: while processing removal in namespace")
+			}
 		},
 	})
 	return c
@@ -166,16 +141,9 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 	defer c.log.Infof("Shutting down Application Mappings controller")
 
 	if !cache.WaitForCacheSync(stopCh, c.emInformer.HasSynced) {
-		c.log.Error("Timeout occurred on waiting for EM informer caches to sync. Shutdown the controller.")
+		c.log.Error("Timeout occurred on waiting for informer caches to sync. Shutdown the controller.")
 		return
 	}
-	if !cache.WaitForCacheSync(stopCh, c.nsInformer.HasSynced) {
-		c.log.Error("Timeout occurred on waiting for NS informer caches to sync. Shutdown the controller.")
-		return
-	}
-
-	c.log.Info("EM controller synced and ready")
-
 	wait.Until(c.runWorker, time.Second, stopCh)
 }
 
@@ -250,26 +218,13 @@ func (c *Controller) processItem(key string) error {
 		return errors.Wrapf(err, "while getting name and namespace from key %q", key)
 	}
 
-	appNs, err := c.getNamespace(namespace)
-	if err != nil {
-		return err
-	}
-
 	if name == broker.LivenessApplicationSampleName {
 		c.livenessCheckStatus.Succeeded = true
 		c.log.Infof("livenessCheckStatus flag set to: %v", c.livenessCheckStatus.Succeeded)
 		return nil
 	}
-
 	if !emExist {
-		if err = c.ensureNsNotLabelled(appNs, name); err != nil {
-			return err
-		}
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
-	}
-
-	if err = c.ensureNsLabelled(name, appNs); err != nil {
-		return err
 	}
 
 	envMapping, ok := emObj.(*v1alpha1.ApplicationMapping)
@@ -277,23 +232,6 @@ func (c *Controller) processItem(key string) error {
 		return fmt.Errorf("cannot cast received object to v1alpha1.ApplicationMapping type, type was [%T]", emObj)
 	}
 	return c.ensureNsBrokerRegisteredAndSynced(envMapping)
-}
-
-func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
-	nsObj, nsExist, nsErr := c.nsInformer.GetIndexer().GetByKey(namespace)
-	if nsErr != nil {
-		return nil, errors.Wrapf(nsErr, "cannot get the namespace: %q", namespace)
-	}
-
-	if !nsExist {
-		return nil, fmt.Errorf("namespace [%s] not found", namespace)
-	}
-
-	reNs, ok := nsObj.(*corev1.Namespace)
-	if !ok {
-		return nil, fmt.Errorf("cannot cast received object to corev1.Namespace type, type was [%T]", nsObj)
-	}
-	return reNs, nil
 }
 
 func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.ApplicationMapping) error {
@@ -352,105 +290,4 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
 	}
 	return nil
-}
-
-func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace, mName string) error {
-	if c.apiPackagesSupport { // namespace labeling is removed when using V2 api (since api-packages)
-		c.log.Info("Skipping removing namespace label because of using V2 api version")
-		return nil
-	}
-
-	nsCopy := ns.DeepCopy()
-	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
-
-	delete(nsCopy.Labels, "accessLabel")
-
-	err := c.patchNs(ns, nsCopy)
-	if err != nil {
-		return fmt.Errorf("failed to delete AccessLabel from the namespace: %q, %v", nsCopy.Name, err)
-	}
-
-	return nil
-}
-
-func (c *Controller) ensureNsLabelled(appName string, appNs *corev1.Namespace) error {
-	if c.apiPackagesSupport { // namespace labeling is removed when using V2 api (since api-packages)
-		c.log.Info("Skipping adding namespace label because of using V2 api version")
-		return nil
-	}
-
-	var label string
-	label, err := c.getAppAccLabel(appName)
-	if err != nil {
-		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", appName)
-	}
-
-	err = c.applyNsAccLabel(appNs, label)
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", appNs.Name)
-	}
-	return nil
-}
-
-func (c *Controller) applyNsAccLabel(ns *corev1.Namespace, label string) error {
-	nsCopy := ns.DeepCopy()
-	if nsCopy.Labels == nil {
-		nsCopy.Labels = make(map[string]string)
-	}
-
-	nsCopy.Labels["accessLabel"] = label
-
-	c.log.Infof("Applying AccessLabel: %q to namespace - %q", label, nsCopy.Name)
-
-	err := c.patchNs(ns, nsCopy)
-	if err != nil {
-		return fmt.Errorf("failed to apply AccessLabel: %q to the namespace: %q, %v", label, nsCopy.Name, err)
-	}
-
-	return nil
-}
-
-func (c *Controller) patchNs(nsOrig, nsMod *corev1.Namespace) error {
-	oldData, err := json.Marshal(nsOrig)
-	if err != nil {
-		return errors.Wrapf(err, "while marshalling original namespace")
-	}
-	newData, err2 := json.Marshal(nsMod)
-	if err2 != nil {
-		return errors.Wrapf(err, "while marshalling modified namespace")
-	}
-
-	patch, err3 := strategicpatch.CreateTwoWayMergePatch(oldData, newData, corev1.Namespace{})
-	if err3 != nil {
-		return errors.Wrapf(err, "while creating patch")
-	}
-
-	if _, err := c.nsPatcher.Patch(nsMod.Name, types.StrategicMergePatchType, patch); err != nil {
-		return fmt.Errorf("failed to patch namespace: %q: %v", nsMod.Name, err)
-	}
-	return nil
-}
-
-func (c *Controller) getAppAccLabel(appName string) (string, error) {
-	// get Application from storage
-	app, err := c.appGetter.Get(internal.ApplicationName(appName))
-	if err != nil {
-		return "", errors.Wrapf(err, "while getting application with name: %q", appName)
-	}
-
-	if app.AccessLabel == "" {
-		return "", fmt.Errorf("Application %q access label is empty", appName)
-	}
-
-	return app.AccessLabel, nil
-}
-
-func (c *Controller) closeChanOnCtxCancellation(ctx context.Context, ch chan<- struct{}) {
-	for {
-		select {
-		case <-ctx.Done():
-			close(ch)
-			return
-		}
-	}
 }

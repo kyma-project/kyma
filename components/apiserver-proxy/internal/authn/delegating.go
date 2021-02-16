@@ -6,7 +6,7 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/authenticatorfactory"
-	authenticationclient "k8s.io/client-go/kubernetes/typed/authentication/v1beta1"
+	authenticationclient "k8s.io/client-go/kubernetes/typed/authentication/v1"
 )
 
 // NewDelegatingAuthenticator creates an authenticator compatible with the kubelet's needs
@@ -19,7 +19,6 @@ func NewDelegatingAuthenticator(client authenticationclient.TokenReviewInterface
 	authenticatorConfig := authenticatorfactory.DelegatingAuthenticatorConfig{
 		Anonymous:               false, // always require authentication
 		CacheTTL:                2 * time.Minute,
-		ClientCAFile:            authn.X509.ClientCAFile,
 		TokenAccessReviewClient: client,
 	}
 

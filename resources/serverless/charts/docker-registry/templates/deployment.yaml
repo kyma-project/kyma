@@ -46,6 +46,11 @@ spec:
       initContainers:
         - name: generate-htpasswd
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+{{- if .Values.securityContext.enabled }}
+          securityContext:
+            privileged: {{ .Values.securityContext.privileged }}
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+{{- end }}
           volumeMounts:
             - name: registry-credentials
               mountPath: /regcred
@@ -53,7 +58,9 @@ spec:
           {{- with .Values.extraVolumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
-          command:
+          command: 
+          # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
+          # might want to investigate
             - sh
             - -c
             - |
@@ -63,6 +70,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.securityContext.enabled }}
+          securityContext:
+            privileged: {{ .Values.securityContext.privileged }}
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+{{- end }}
           command:
           - /bin/registry
           - serve

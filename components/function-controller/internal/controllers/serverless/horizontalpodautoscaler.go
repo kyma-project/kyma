@@ -21,22 +21,39 @@ func (r *FunctionReconciler) isOnHorizontalPodAutoscalerChange(instance *serverl
 	}
 
 	newHpa := r.buildHorizontalPodAutoscaler(instance, deployments[0].GetName())
-	return !(len(hpas) == 1 &&
-		r.equalHorizontalPodAutoscalers(hpas[0], newHpa))
+	scalingEnabled := isScalingEnabled(instance)
+	numHpa := len(hpas)
+
+	return (scalingEnabled && numHpa != 1) ||
+		(scalingEnabled && !r.equalHorizontalPodAutoscalers(hpas[0], newHpa)) ||
+		(!scalingEnabled && numHpa != 0)
 }
 
 func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string) (ctrl.Result, error) {
 	newHpa := r.buildHorizontalPodAutoscaler(instance, deploymentName)
+	hpasNum := len(hpas)
 
 	switch {
-	case len(hpas) == 0:
-		return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
-	case len(hpas) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
+	case hpasNum == 0:
+		{
+			if !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas) {
+				return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
+			}
+			return ctrl.Result{}, nil
+		}
+	case hpasNum > 1: // case len(hpas)>1: this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
+		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
+	case hpasNum == 1 && equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas):
+		// this case is when we previously created HPA with maxReplicas > minReplicas, but now user changed
+		// function spec and NOW maxReplicas == minReplicas, so hpa is not needed anymore
 		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
 	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
 	default:
-		log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s is ready", hpas[0].GetName()))
+		if hpasNum == 1 {
+			log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s is ready", hpas[0].GetName()))
+		}
+
 		return ctrl.Result{}, nil
 	}
 }
@@ -50,6 +67,10 @@ func equalInt32Pointer(first *int32, second *int32) bool {
 	}
 
 	return *first == *second
+}
+
+func isScalingEnabled(instance *serverlessv1alpha1.Function) bool {
+	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
 }
 
 func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPodAutoscaler) bool {
@@ -99,7 +120,7 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 }
 
 func (r *FunctionReconciler) deleteAllHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-	log.Info("Deleting all HorizontalPodAutoscalers")
+	log.Info("Deleting all HorizontalPodAutoscalers attached to function")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete underlying HorizontalPodAutoscalers")

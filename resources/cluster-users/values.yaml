@@ -4,10 +4,19 @@ tests:
     after-upgrade: true
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    version: 20210113-12c4e3b5
+    name: eu.gcr.io/kyma-project/incubator/k8s-tools
+    version: 20210208-080d17ad
   env:
     namespace: default
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
 
 bindings:
   kymaEssentials:
