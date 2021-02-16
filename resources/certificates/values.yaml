@@ -1,0 +1,33 @@
+job:
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20210113-12c4e3b5"
+
+certificates:
+  kyma:
+    name: kyma-gateway-certs
+    namespace: istio-system
+  apiserverProxy:
+    name: apiserver-proxy-tls-cert
+    namespace: kyma-system
+
+userProvided:
+  issuer:
+    name: kyma-ca-issuer
+    configMap:
+      name: kyma-ca-issuer
+      namespace: default
+
+global:
+  certificates:
+    selfSigned: false
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534
