@@ -4,16 +4,25 @@ const {
   sendEventAndCheckResponse,
   cleanMockTestFixture,
 } = require("./fixtures/commerce-mock");
+const {
+  printRestartReport,
+  getContainerRestartsForAllNamespaces,
+} = require("../utils");
 
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";
+  let initialRestarts = null;
+
+  it("Listing all pods in cluster", async function () {
+    initialRestarts = await getContainerRestartsForAllNamespaces();
+  });
 
   it("CommerceMock test fixture should be ready", async function () {
     await ensureCommerceMockTestFixture("mocks", testNamespace).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockTestFixture("mocks", testNamespace)
+      return ensureCommerceMockTestFixture("mocks", testNamespace);
     });
   });
 
@@ -23,6 +32,11 @@ describe("CommerceMock tests", function () {
 
   it("order.created.v1 event should trigger the lastorder function", async function () {
     await sendEventAndCheckResponse();
+  });
+
+  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
+    const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+    printRestartReport(initialRestarts, afterTestRestarts);
   });
 
   it("Test namespaces should be deleted", async function () {
