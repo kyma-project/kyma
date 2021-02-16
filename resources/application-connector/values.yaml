@@ -34,11 +34,11 @@ global:
   application_operator:
     version: "763e0035"
   application_operator_tests:
-    version: "PR-10289"
+    version: "f4a3bda0"
   connector_service:
     version: "548ea6b4"
   connector_service_tests:
-    version: "470796a1"
+    version: "77ca2463"
   connection_token_handler:
     version: "3083c3d4"
   connection_token_handler_tests:
@@ -48,21 +48,21 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   application_gateway:
-    version: "4feb544b"
+    version: "77ca2463"
   application_gateway_tests:
-    version: "470796a1"
+    version: "77ca2463"
   application_gateway_legacy_tests:
-    version: "d0f17bff"
+    version: "fc11d39b"
   application_registry:
-    version: "4feb544b"
+    version: "77ca2463"
   application_registry_tests:
     version: "d556963d"
   application_broker:
     version: "52f52cc9"
   application_connectivity_certs_setup_job:
-    version: "PR-9921"
+    version: "960b1536"
   application_connectivity_validator:
-    version: "PR-10568"
+    version: "56b8cb60"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
@@ -99,5 +99,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-10608"
+      version: "58e57ea1"
       pullPolicy: IfNotPresent
