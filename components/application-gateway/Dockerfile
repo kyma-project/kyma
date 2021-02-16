@@ -8,9 +8,7 @@ COPY go.mod .
 COPY go.sum .
 RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] download" && \
     go mod download && \ 
-    echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done" &&\
-    sleep 45 && \
-    echo "$(date +"%Y/%m/%d %T %Z") [INFO] slept for 45 seconds, maybe this will givve system time to write down data" 
+    echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done"
 
 COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
