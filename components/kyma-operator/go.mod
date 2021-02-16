@@ -17,11 +17,9 @@ require (
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/vrischmann/envconfig v1.1.0
 	helm.sh/helm/v3 v3.2.1
-	k8s.io/api v0.19.7
-	k8s.io/apimachinery v0.19.7
-	k8s.io/cli-runtime v0.19.7
-	k8s.io/client-go v0.19.7
+	k8s.io/api v0.18.15
+	k8s.io/apimachinery v0.18.15
+	k8s.io/cli-runtime v0.18.15
+	k8s.io/client-go v0.18.15
 	rsc.io/letsencrypt v0.0.3 // indirect
 )
-
-replace k8s.io/client-go => k8s.io/client-go v0.19.7
