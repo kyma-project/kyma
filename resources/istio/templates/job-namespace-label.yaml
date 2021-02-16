@@ -25,11 +25,13 @@ spec:
           - /bin/bash
           - -c
           - |
-{{ .Files.Get "files/istio-namespace-label.sh" | indent 14 }}
+            set -e
+            {{- range .Values.kyma.namespaces2Label }}
+            echo "---> Setting label to {{ . }}"
+            kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
+            {{- end }}
         env:
           - name: HOME
             value: /tmp
-          - name: NAMESPACES
-            value: {{ join " " .Values.kyma.namespaces2Label }}
         securityContext:
 {{- toYaml .Values.kyma.securityContext | nindent 10 }}
