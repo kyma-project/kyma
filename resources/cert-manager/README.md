@@ -14,16 +14,16 @@ Quoting from the [official README](https://github.com/jetstack/cert-manager):
 
 ## Changes introduced
 
-The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `files/` directory.
+The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `installation/resources/crds/cert-manager/` directory.
 
 ## Installation
 
 To install `cert-manager`, use the Kyma Installer and follow these steps:
 
-1. Manually apply CRDs from the `files/` directory:
+1. Manually apply CRDs from the project root directory:
 
    ```bash
-   $ kubectl apply -f ./files
+   $ kubectl apply -f ./installation/resources/crds/cert-manager
    ```
 
 2. Update the appropriate Installer CR template in `installation/resources/` by adding the following lines to the `spec.components` section:
