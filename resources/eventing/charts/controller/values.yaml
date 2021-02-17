@@ -28,5 +28,5 @@ metrics:
   service:
     nameSuffix: "-metrics"
 
-#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/9984
+#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/10317
 clusterRoleBindingSuffix: "-crole-binding"
