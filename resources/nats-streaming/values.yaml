@@ -17,7 +17,7 @@ global:
     path: eu.gcr.io/kyma-project
   natsInit:
     dir: ""
-    version: PR-10637
+    version: ca375783
   namespace: natss
   natsStreaming:
     fullname: nats-streaming
