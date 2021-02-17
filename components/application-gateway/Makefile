@@ -10,8 +10,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 VERIFY_IGNORE := /vendor\|/mocks
 
 # think this might work
-release:
-	gomod-release
+release: gomod-release
 
 # verify:: gomod-verify-local
 
