@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/common/logging/logger"
+
 	"github.com/gorilla/mux"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
@@ -71,6 +73,9 @@ var (
 )
 
 func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
+
+	log, err := logger.New(logger.TEXT, logger.ERROR)
+	require.NoError(t, err)
 	testCases := []struct {
 		caseDescription string
 		tenant          string
@@ -249,7 +254,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
-				idCache)
+				idCache,
+				log)
 
 			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
@@ -413,7 +419,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
-				idCache)
+				idCache,
+				log)
 
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -469,7 +476,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventMeshDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
-				idCache)
+				idCache,
+				log)
 
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.Name), nil)
 			require.NoError(t, err)
@@ -515,7 +523,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventMeshDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
-			idCache)
+			idCache,
+			log)
 
 		req, err := http.NewRequest(http.MethodGet, "/path", nil)
 		require.NoError(t, err)
@@ -563,7 +572,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventMeshDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
-			idCache)
+			idCache,
+			log)
 
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationMetaName), nil)
 		require.NoError(t, err)
@@ -614,7 +624,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventMeshDestinationPathWhenBEBEnabled,
 					appRegistryPathPrefix,
 					appRegistryHost,
-					idCache)
+					idCache,
+					log)
 				eventTitle := "my-event-1"
 
 				eventPublisherV1ProxyHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -665,7 +676,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventMeshDestinationPathWhenBEBEnabled,
 					appRegistryPathPrefix,
 					appRegistryHost,
-					idCache)
+					idCache,
+					log)
 
 				eventPublisherProxyHandler.PathPrefix("/publish").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var receivedEvent event
@@ -701,7 +713,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHandler := mux.NewRouter()
 				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
-
 				proxyHandlerBEB := NewProxyHandler(
 					testCase.group,
 					testCase.tenant,
@@ -713,7 +724,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventMeshDestinationPathWhenBEBEnabled,
 					appRegistryPathPrefix,
 					appRegistryHost,
-					idCache)
+					idCache,
+					log)
 
 				eventPublisherProxyHandler.Path("/publish").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var receivedEvent event

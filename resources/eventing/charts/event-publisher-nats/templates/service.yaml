@@ -1,0 +1,14 @@
+{{- if eq .Values.global.eventing.backend "nats" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ include "event-publisher-nats.serviceName" . }}
+  labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "event-publisher-nats.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.nats.config.port }}
+{{- end }}

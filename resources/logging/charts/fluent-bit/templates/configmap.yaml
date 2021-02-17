@@ -1,0 +1,274 @@
+{{- if (empty .Values.existingConfigMap) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluent-bit.fullname" . }}
+  labels:
+    {{- include "fluent-bit.labels" . | nindent 4 }}
+data:
+  parsers.conf: |
+  {{- include "fluent-bit.parsers" . | nindent 4 }}
+  {{- if .Values.config.parsers.additional }}
+  {{ toString .Values.config.parsers.additional | nindent 4 }}
+  {{- end }}
+
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         {{ .Values.config.service.flush }}
+        Grace         {{ .Values.config.service.grace }}
+        Daemon        {{ .Values.config.service.daemon }}
+        {{- if .Values.config.service.logFile }}
+        Log_File      {{ .Values.config.service.logFile }}
+        {{- end }}
+        Log_Level     {{ .Values.config.service.logLevel | default "error" }}
+        Parsers_File  parsers.conf
+        HTTP_Server   {{ .Values.config.service.http.server }}
+        HTTP_Listen   {{ .Values.config.service.http.listen }}
+        HTTP_Port     {{ .Values.config.service.http.port }}
+
+{{- if .Values.config.inputs.tail.enabled }}
+    [INPUT]
+        Name              tail
+        {{- if .Values.config.inputs.tail.alias }}
+        Alias             {{ .Values.config.inputs.tail.alias }}
+        {{- end }}             
+        Tag               {{ .Values.config.inputs.tail.tag }}
+        {{- if .Values.config.inputs.tail.pathKey }}
+        Tag_Regex         {{ .Values.config.inputs.tail.tagRegex }}
+        {{- end }}
+        Path              {{ .Values.config.inputs.tail.path }}
+        {{- if .Values.config.inputs.tail.pathKey }}
+        Path_Key          {{ .Values.config.inputs.tail.pathKey }}
+        {{- end }}
+        {{- if or .Values.config.inputs.tail.exclude.namespaces .Values.config.inputs.tail.excludePath}}
+        Exclude_Path      {{ include "loki.namespace.filter" $ | trimSuffix ", " }}
+        {{- end }}
+        {{- if .Values.config.inputs.tail.bufferChunkSize }}
+        Buffer_Chunk_Size {{ .Values.config.inputs.tail.bufferChunkSize }}
+        {{- end }}
+        {{- if .Values.config.inputs.tail.bufferMaxSize }}
+        Buffer_Max_Size   {{ .Values.config.inputs.tail.bufferMaxSize }}
+        {{- end }}
+        Refresh_Interval  {{ .Values.config.inputs.tail.refreshInterval }}
+        Rotate_Wait       {{ .Values.config.inputs.tail.rotateWait }}
+        {{- if .Values.config.inputs.tail.ignoreOlder }}
+        Ignore_Older      {{ .Values.config.inputs.tail.ignoreOlder }}
+        {{- end }}
+        Skip_Long_Lines   {{ .Values.config.inputs.tail.skipLongLines }}
+        DB                {{ .Values.config.inputs.tail.db }}
+        DB.sync           {{ .Values.config.inputs.tail.dbSync }}
+        Mem_Buf_Limit     {{ .Values.config.inputs.tail.memBufLimit }}
+        exit_on_eof       {{ .Values.config.inputs.tail.exitOnEof }}
+        {{- if eq .Values.config.inputs.tail.multiline "Off" }}
+        Parser            {{ .Values.config.inputs.tail.parser }}
+        Docker_Mode       {{ .Values.config.inputs.tail.dockerMode }}
+        Docker_Mode_Flush {{ .Values.config.inputs.tail.dockerModeFlush }}
+        {{- end }}
+        Key               {{ .Values.config.inputs.tail.key }}
+        {{- if eq .Values.config.inputs.tail.multiline "On" }}
+        Multiline         {{ .Values.config.inputs.tail.multiline }}
+        Multiline_Flush   {{ .Values.config.inputs.tail.multilineFlush }}
+        Parser_Firstline  {{ .Values.config.inputs.tail.parserFirstline }}
+        {{- end }}
+        
+{{- end }}
+
+{{ if .Values.config.inputs.additional }}
+{{- toString .Values.config.inputs.additional | indent 4 }}
+{{- end }}
+
+{{- if .Values.config.filters.kubernetes.enabled }}
+    [FILTER]
+        Name                kubernetes
+        Match               {{ .Values.config.filters.kubernetes.match }}
+        Merge_Log           {{ .Values.config.filters.kubernetes.mergeLog }}
+        Keep_Log            {{ .Values.config.filters.kubernetes.keepLog }}
+        {{- if .Values.config.filters.kubernetes.mergeLogKey }}
+        Merge_Log_Key       {{ .Values.config.filters.kubernetes.mergeLogKey }}
+        {{- end }}
+        Merge_Log_Trim      {{ .Values.config.filters.kubernetes.mergeLogTrim }}
+        K8S-Logging.Parser  {{ .Values.config.filters.kubernetes.parser }}
+        K8S-Logging.Exclude {{ .Values.config.filters.kubernetes.exclude }}
+        Buffer_Size         {{ .Values.config.filters.kubernetes.bufferSize }}
+        Kube_URL            {{ .Values.config.filters.kubernetes.kubeUrl }}
+        Kube_Tag_Prefix     {{ .Values.config.filters.kubernetes.kubeTagPrefix }}
+        Use_Journal         {{ .Values.config.filters.kubernetes.useJournal }}
+        Labels              {{ .Values.config.filters.kubernetes.labels }}
+        Annotations         {{ .Values.config.filters.kubernetes.annotations }}
+{{- end }}
+
+{{- if .Values.config.filters.recordModifier.enabled }}
+    [FILTER]
+        Name record_modifier
+        Match {{ .Values.config.filters.recordModifier.match }}
+        Record {{ .Values.config.filters.recordModifier.key }} {{ .Values.config.filters.recordModifier.value }}
+{{- end }}
+
+{{ if .Values.config.filters.additional }}
+{{- toString .Values.config.filters.additional | indent 4 }}
+{{- end }}
+
+{{- if .Values.config.outputs.loki.enabled }}
+    [OUTPUT]
+        Name               loki
+        {{- if .Values.config.outputs.loki.alias }}
+        Alias              {{ .Values.config.outputs.loki.alias }}
+        {{- end }}
+        Match              loki.*
+        {{- if and .Values.config.outputs.loki.user .Values.config.outputs.loki.password }}
+        Url                {{ .Values.config.outputs.loki.serviceScheme }}://{{ .Values.config.outputs.loki.user }}:{{ .Values.config.outputs.loki.password }}@{{ .Values.config.outputs.loki.serviceName }}:{{ .Values.config.outputs.loki.servicePort }}{{ .Values.config.outputs.loki.servicePath }}
+        {{- else }}
+        Url                {{ .Values.config.outputs.loki.serviceScheme }}://{{ .Values.config.outputs.loki.serviceName }}:{{ .Values.config.outputs.loki.servicePort }}{{ .Values.config.outputs.loki.servicePath }}
+        {{- end }}
+        Labels             {{ .Values.config.outputs.loki.config.labels }}
+        RemoveKeys         {{ include "helm-toolkit.utils.joinListWithComma" .Values.config.outputs.loki.config.removeKeys }}
+        LabelMapPath       /fluent-bit/etc/labelmap.json
+        LineFormat         {{ .Values.config.outputs.loki.config.lineFormat }}
+        LogLevel           {{ .Values.config.outputs.loki.config.loglevel }}
+{{- end }}
+
+{{- if .Values.config.outputs.es.enabled }}
+    [OUTPUT]
+        Name            es
+        {{- if .Values.config.outputs.es.alias }}
+        Alias           {{ .Values.config.outputs.es.alias }}
+        {{- end }}
+        Match           {{ .Values.config.outputs.es.match }}
+        Host            {{ .Values.config.outputs.es.host }}
+        Port            {{ .Values.config.outputs.es.port }}
+        Buffer_Size     {{ .Values.config.outputs.es.bufferSize }}
+        {{- if .Values.config.outputs.es.pipeline }}
+        Pipeline        {{ .Values.config.outputs.es.pipeline }}
+        {{- end }}
+        {{- if .Values.config.outputs.es.logstashFormat }}
+        Logstash_Format On
+        Logstash_Prefix {{ .Values.config.outputs.es.logstashPrefix }}
+        {{- else }}
+        Index           {{ .Values.config.outputs.es.index }}
+        {{- end }}
+        Retry_Limit     {{ .Values.config.outputs.es.retryLimit }}
+        Generate_ID     {{ .Values.config.outputs.es.generateID }}
+        {{- if .Values.config.outputs.es.replaceDots }}
+        Replace_Dots    {{ .Values.config.outputs.es.replaceDots }}
+        {{- end }}
+        {{- if .Values.config.outputs.es.timeKey }}
+        Time_Key        {{ .Values.config.outputs.es.timeKey }}
+        {{- end }}
+        {{- if .Values.config.outputs.es.httpUser }}
+        HTTP_User       {{ .Values.config.outputs.es.httpUser }}
+        HTTP_Passwd     {{ .Values.config.outputs.es.httpPasswd }}
+        {{- end }}
+        {{- if .Values.config.outputs.es.tls.enabled }}
+        tls             On
+        tls.verify      {{ .Values.config.outputs.es.tls.verify }}
+        tls.debug       {{ .Values.config.outputs.es.tls.debug }}
+        {{- if and (.Values.config.outputs.es.tls.cert) (.Values.config.outputs.es.tls.key) }}
+        tls.crt_file    /secure/es-tls.crt
+        tls.key_file    /secure/es-tls.key
+        {{- end }}
+        {{- if .Values.config.outputs.es.tls.ca }}
+        tls.ca_file     /secure/es-tls-ca.crt
+        {{- end }}
+        {{- if .Values.config.outputs.es.tls.keyPasswd }}
+        tls.key_passwd  {{ .Values.config.outputs.es.tls.keyPasswd }}
+        {{- end }}
+        {{- end }}
+{{- end }}
+
+{{- if .Values.config.outputs.forward.enabled }}
+    [OUTPUT]
+        Name            forward
+        {{- if .Values.config.outputs.forward.alias  }}
+        Alias           {{ .Values.config.outputs.forward.alias }}
+        {{- end }}
+        Match           {{ .Values.config.outputs.forward.match }}
+        Host            {{ .Values.config.outputs.forward.host }}
+        Port            {{ .Values.config.outputs.forward.port }}
+        Retry_Limit     {{ .Values.config.outputs.forward.retryLimit }}
+        {{- if .Values.config.outputs.forward.tls.enabled  }}
+        tls             On
+        tls.verify      {{ .Values.config.outputs.forward.tls.verify }}
+        {{- if .Values.config.outputs.forward.tls.ca  }}
+        tls.ca_file     /secure/forward-tls-ca.crt
+        {{- end }}
+        {{- if .Values.config.outputs.forward.tls.debug  }}
+        tls.debug       {{ .Values.config.outputs.forward.tls.debug }}
+        {{- end }}
+        {{- if and (.Values.config.outputs.forward.tls.cert) (.Values.config.outputs.forward.tls.key) }}
+        tls.crt_file    /secure/forward-tls.crt
+        tls.key_file    /secure/forward-tls.key
+        {{- end }}
+        {{- end }}
+{{- end }}
+
+{{- if .Values.config.outputs.http.enabled }}
+    [OUTPUT]
+        Name                        http
+        {{- if .Values.config.outputs.http.alias }}
+        Alias                       {{ .Values.config.outputs.http.alias }}
+        {{- end }}
+        Match                       {{ .Values.config.outputs.http.match }}
+        Host                        {{ .Values.config.outputs.http.host }}
+        Port                        {{ .Values.config.outputs.http.port }}
+        {{- if .Values.config.outputs.http.proxy }}
+        Proxy                       {{ .Values.config.outputs.http.proxy }}
+        {{- end }}
+        URI                         {{ .Values.config.outputs.http.uri }}
+        {{- if .Values.config.outputs.http.compress }}
+        compress                    {{ .Values.config.outputs.http.compress }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.format }}
+        Format                      {{ .Values.config.outputs.http.format }}
+        {{- end }}
+        allow_duplicated_headers    {{ .Values.config.outputs.http.allowDuplicatedHeaders }}
+        {{- if .Values.config.outputs.http.headerTag }}
+        header_tag                  {{ .Values.config.outputs.http.headerTag }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.header }}
+        header                      {{ .Values.config.outputs.http.header }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.jsonDateKey }}
+        json_date_key               {{ .Values.config.outputs.http.jsonDateKey }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.jsonDateFormat }}
+        json_date_format            {{ .Values.config.outputs.http.jsonDateFormat }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.httpUser }}
+        HTTP_User                   {{ .Values.config.outputs.http.httpUser }}
+        HTTP_Passwd                 {{ .Values.config.outputs.http.httpPasswd }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.tls.enabled  }}
+        tls                         On
+        tls.verify                  {{ .Values.config.outputs.http.tls.verify }}
+        {{- if .Values.config.outputs.http.tls.ca  }}
+        tls.ca_file                 /secure/http-tls-ca.crt
+        {{- end }}
+        {{- if .Values.config.outputs.http.tls.debug  }}
+        tls.debug                   {{ .Values.config.outputs.http.tls.debug }}
+        {{- end }}
+        {{- if and (.Values.config.outputs.http.tls.cert) (.Values.config.outputs.http.tls.key) }}
+        tls.crt_file                /secure/http-tls.crt
+        tls.key_file                /secure/http-tls.key
+        {{- end }}
+        {{- end }}
+{{- end }}
+
+{{ if .Values.config.outputs.additional }}
+{{- toString .Values.config.outputs.additional | indent 4 }}
+{{- end }}
+
+{{- if .Values.config.extra }}
+{{- toString .Values.config.extra | indent 4 }}
+{{- end }}
+
+{{- if .Values.config.outputs.loki.enabled }}
+  labelmap.json: |-
+    {{- .Values.config.outputs.loki.config.labelMap | toPrettyJson | nindent 4}}
+{{- end }}
+
+{{- if .Values.config.script }}
+  script.lua:
+{{- toYaml .Values.config.script | indent 2 }}
+{{- end }}
+
+{{- end -}}

@@ -1,15 +1,22 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
+
+	"go.uber.org/zap/zapcore"
+
+	"go.uber.org/zap"
 
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
@@ -31,21 +38,33 @@ func init() {
 }
 
 type config struct {
-	MetricsAddress        string `envconfig:"default=:8080"`
-	LeaderElectionEnabled bool   `envconfig:"default=false"`
-	LeaderElectionID      string `envconfig:"default=serverless-controller-leader-election-helper"`
-	Kubernetes            k8s.Config
-	Function              serverless.FunctionConfig
+	MetricsAddress            string `envconfig:"default=:8080"`
+	LeaderElectionEnabled     bool   `envconfig:"default=false"`
+	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
+	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
+	LogLevel                  string `envconfig:"default=info"`
+	Kubernetes                k8s.Config
+	Function                  serverless.FunctionConfig
 }
 
 func main() {
-	ctrl.SetLogger(zap.New())
 
 	config, err := loadConfig("APP")
 	if err != nil {
+		ctrl.SetLogger(ctrlzap.New())
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
+
+	logLevel, err := toZapLogLevel(config.LogLevel)
+	if err != nil {
+		ctrl.SetLogger(ctrlzap.New())
+		setupLog.Error(err, "unable to set logging level")
+		os.Exit(2)
+	}
+
+	atomicLevel := zap.NewAtomicLevelAt(logLevel)
+	ctrl.SetLogger(ctrlzap.New(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel)))
 
 	setupLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
@@ -56,6 +75,7 @@ func main() {
 		MetricsBindAddress: config.MetricsAddress,
 		LeaderElection:     config.LeaderElectionEnabled,
 		LeaderElectionID:   config.LeaderElectionID,
+		Port:               config.SecretMutatingWebhookPort,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
@@ -68,6 +88,13 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
+
+	mgr.GetWebhookServer().Register(
+		"/mutate-v1-secret",
+		&webhook.Admission{
+			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
+		},
+	)
 
 	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
 		SetupWithManager(mgr); err != nil {
@@ -114,6 +141,7 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Running manager")
+
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
 		os.Exit(1)
@@ -128,4 +156,19 @@ func loadConfig(prefix string) (config, error) {
 	}
 
 	return cfg, nil
+}
+
+func toZapLogLevel(level string) (zapcore.Level, error) {
+	switch level {
+	case "debug":
+		return zapcore.DebugLevel, nil
+	case "info":
+		return zapcore.InfoLevel, nil
+	case "warn":
+		return zapcore.WarnLevel, nil
+	case "error":
+		return zapcore.ErrorLevel, nil
+	default:
+		return 0, errors.New(fmt.Sprintf("Desired log level: %s not exist", level))
+	}
 }

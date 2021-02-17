@@ -6,14 +6,14 @@ fullnameOverride: "serverless"
 
 injectCerts:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20210113-12c4e3b5"
+    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+    tag: "20210208-080d17ad"
     pullPolicy: IfNotPresent
 
 migration:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20210113-12c4e3b5"
+    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+    tag: "20210208-080d17ad"
     pullPolicy: IfNotPresent
 
 tests:
@@ -33,8 +33,8 @@ tests:
         memory: 256Mi
         cpu: 200m
     image:
-      repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-      tag: "20210113-12c4e3b5"
+      repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
+      tag: "20210208-080d17ad"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "9e5c2a22"
+    tag: "76ba4f03"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "cc7dd53f"
+      tag: "5daaf5c9"
 
 deployment:
   replicas: 1
@@ -104,6 +104,15 @@ pod:
     terminationGracePeriodSeconds: 10
 
 containers:
+  daemonset:
+    initContainerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 0
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
   manager:
     resources:
       limits:
@@ -112,6 +121,10 @@ containers:
       requests:
         cpu: 10m
         memory: 32Mi
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
     extraProperties: {}
     envs:
       configMapRequeueDuration:
@@ -126,14 +139,16 @@ containers:
         value: 5m
       namespaceExcludedNames:
         value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imageRegistryDockerConfigSecretName:
-        value: '{{ template "fullname" . }}-image-pull-secret'
+      imageRegistryExternalDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config'
+      imageRegistryDefaultDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config-default'
       imagePullAccountName:
-        value: '{{ template "fullname" . }}'
+        value: '{{ template "fullname" . }}-function'
+      buildServiceAccountName:
+        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
-      kserviceRequeueDuration:
-        value: 5m
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
@@ -141,15 +156,20 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.3.0
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:9e5c2a22
+        value: eu.gcr.io/kyma-project/function-build-init:76ba4f03
       functionBuildMaxSimultaneousJobs:
         value: "5"
+      logLevel:
+        value: "info"
 
 services:
   manager:
     type: ClusterIP
     labels: {}
     annotations: {}
+    https:
+      port: 443
+      targetPort: 8443
 
 metrics:
   enabled: true
@@ -203,7 +223,7 @@ docker-registry:
   extraVolumes:
     - name: registry-credentials
       secret:
-        secretName: serverless-registry-credentials
+        secretName: serverless-registry-config-default
         items:
           - key: username
             path: username.txt
@@ -217,7 +237,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "858bc2c2"
+    tag: "76ba4f03"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

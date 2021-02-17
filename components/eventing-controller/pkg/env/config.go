@@ -23,6 +23,10 @@ type Config struct {
 
 	// Domain holds the Kyma domain
 	Domain string `envconfig:"DOMAIN" required:"true"`
+
+	// EventTypePrefix prefix for the EventType
+	// note: eventType format is <prefix>.<application>.<event>.<version>
+	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
 }
 
 func GetConfig() Config {

@@ -64,6 +64,10 @@ spec:
             name: http-api-port
           - containerPort: 9090
             name: http-metrics
+        securityContext:
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}

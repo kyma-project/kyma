@@ -25,15 +25,15 @@ import (
 //
 
 func HaveSubscriptionName(name string) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
+	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
 }
 
 func HaveSubscriptionSink(sink string) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) string { return s.Spec.Sink }, Equal(sink))
+	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Spec.Sink }, Equal(sink))
 }
 
 func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
+	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
 
 func HaveNotFoundSubscription(isReallyDeleted bool) GomegaMatcher {
@@ -41,9 +41,9 @@ func HaveNotFoundSubscription(isReallyDeleted bool) GomegaMatcher {
 }
 
 func IsAnEmptySubscription() GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
 		emptySub := eventingv1alpha1.Subscription{}
-		return reflect.DeepEqual(s, emptySub)
+		return reflect.DeepEqual(*s, emptySub)
 	}, BeTrue())
 }
 
@@ -127,25 +127,25 @@ func HaveAPIRuleOwnersRefs(uids ...types.UID) GomegaMatcher {
 //
 
 func HaveNoneEmptyAPIRuleName() GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) string {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) string {
 		return s.Status.APIRuleName
 	}, Not(BeEmpty()))
 }
 
 func HaveAPIRuleName(name string) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
 		return s.Status.APIRuleName == name
 	}, BeTrue())
 }
 
 func HaveSubscriptionReady() GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) bool {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
 		return s.Status.Ready
 	}, BeTrue())
 }
 
 func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
-	return WithTransform(func(s eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Type":    Equal(condition.Type),
 		"Reason":  Equal(condition.Reason),
 		"Message": Equal(condition.Message),
@@ -163,4 +163,12 @@ func HaveEvent(event v1.Event) GomegaMatcher {
 
 func IsK8sUnprocessableEntity() GomegaMatcher {
 	return WithTransform(func(err *errors.StatusError) metav1.StatusReason { return err.ErrStatus.Reason }, Equal(metav1.StatusReasonInvalid))
+}
+
+//
+// int matchers
+//
+
+func BeGreaterThanOrEqual(a int) GomegaMatcher {
+	return WithTransform(func(b int) bool { return b >= a }, BeTrue())
 }

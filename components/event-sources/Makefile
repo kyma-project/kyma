@@ -6,6 +6,13 @@ SCRIPTS_DIR = ../../common/makefiles
 # COMPONENT_DIR is a local path to component
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+# Override to use go modules
+release:
+	$(MAKE) gomod-release
+
+# This target patch opencensus lib (add required method). This patch is required by knative.dev/eventing
+gomod-deps-local:: vendor/go.opencensus.io/trace/trace.go.patched
+
 #########
 #       #
 #  Dev  #
@@ -29,7 +36,6 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 MOUNT_TARGETS = $(cmds)
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
-
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
 
@@ -47,7 +53,7 @@ build-local: $(cmds) test-local ;
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local istio-injection $(patched_trace)
+$(cmds): %: gomod-deps-local $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -60,18 +66,17 @@ $(patched_trace): hack/set-span-id.patch vendor
 	patch -p0 < $<
 	cp $< $@
 
-
-test-local: istio-injection $(patched_trace)
+test-local: gomod-vendor-local $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
 # override image goals from common Makefile because we need to build several images
-build-image: $(patched_trace) $(cmds_images) ;
+build-image: gomod-deps $(patched_trace) $(cmds_images) ;
 push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: build pull-licenses 
+$(cmds_images): %.image: pull-licenses
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
@@ -169,7 +174,7 @@ istio-injection: bin/injection-gen
         --versioned-clientset-package $(ISTIO_CLIENT_GO_PKG)/clientset/versioned \
         --external-versions-informers-package $(ISTIO_CLIENT_GO_PKG)/informers/externalversions
 
-$(generators_bin): vendor
+$(generators_bin): gomod-vendor-local
 	@if [ -d ./vendor/k8s.io/code-generator/cmd/$(notdir $@) ]; then \
 		go build -o bin/$(notdir $@) ./vendor/k8s.io/code-generator/cmd/$(notdir $@); \
 	else \

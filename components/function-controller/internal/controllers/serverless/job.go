@@ -23,15 +23,15 @@ import (
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options) bool {
-	image := r.buildImageAddress(instance)
+func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
+	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	var expectedJob batchv1.Job
 	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		expectedJob = r.buildJob(instance, rtmCfg, "")
+		expectedJob = r.buildJob(instance, rtmCfg, "", dockerConfig)
 	} else {
-		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg)
+		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
 	}
 
 	if len(deployments) == 1 &&
@@ -77,12 +77,12 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 	}
 }
 
-func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options) (ctrl.Result, error) {
-	newJob := r.buildGitJob(instance, gitOptions, rtmCfg)
+func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
-func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, rtmCfg, configMapName)
+func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newJob := r.buildJob(instance, rtmCfg, configMapName, dockerConfig)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
 

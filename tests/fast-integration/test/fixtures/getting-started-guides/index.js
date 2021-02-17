@@ -124,9 +124,9 @@ async function ensureGettingStartedTestFixture() {
   const apiRulePath = `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${orderService}/apirules`
   await waitForK8sObject(apiRulePath, {}, (_type, _apiObj, watchObj) => {
     return (watchObj.object.metadata.name == orderService && watchObj.object.status.APIRuleStatus.code == "OK")
-  }, 10 * 1000, "Waiting for APIRule to be ready timeout")
+  }, 60 * 1000, "Waiting for APIRule to be ready timeout")
   await waitForVirtualService(orderService, orderService);
-  await waitForServiceInstance('redis-service', orderService, 180 * 1000);
+  await waitForServiceInstance('redis-service', orderService, 300 * 1000);
   await waitForServiceBinding(orderService, orderService);
   await k8sApply([sbuObj], orderService);
   const sbu = await waitForServiceBindingUsage(orderService, orderService);

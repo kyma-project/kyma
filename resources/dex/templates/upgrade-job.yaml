@@ -61,11 +61,9 @@ spec:
     spec:
       serviceAccountName: dex-upgrade-job
       restartPolicy: Never
-      securityContext:
-        runAsUser: 2000
       containers:
       - name: job
-        image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
+        image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
@@ -73,3 +71,5 @@ spec:
           - |
             set -e
             kubectl delete svc -n kyma-system dex-service
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}

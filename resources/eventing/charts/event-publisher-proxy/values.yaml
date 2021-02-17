@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "cacbe4f2"
+  tag: "657ff89e"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 
@@ -27,6 +27,6 @@ resources:
 
 beb:
   config:
-   # eventTypePrefix is the prefix of the eventType as per BEB specification
-   eventTypePrefix: sap.kyma.custom
+    # emsPublisherUrlSuffix is the suffix added to EMS url obtained from service key
+    emsPublisherUrlSuffix: sap/ems/v1/events
 

@@ -1,0 +1,27 @@
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: 002-kyma-privileged
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+spec:
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - '*'
+  hostPorts:
+  - max: 65535
+    min: 1024
+  privileged: true
+  fsGroup:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+    - "*"

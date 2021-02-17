@@ -47,6 +47,10 @@ spec:
           ports:
             - containerPort: {{ .Values.tests.gateway.mockServicePort }}
               name: http-port
+          securityContext:
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       restartPolicy: Never
 ---
 apiVersion: v1

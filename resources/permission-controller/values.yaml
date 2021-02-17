@@ -15,6 +15,19 @@ deployment:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    readOnlyRootFilesystem: true
+    runAsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+
+podSecurityPolicy:
+  enabled: true
 
 global:
   kymaRuntime:

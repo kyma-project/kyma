@@ -1,0 +1,2 @@
+knative-eventing:
+  loglevel: warn

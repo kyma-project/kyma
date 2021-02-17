@@ -86,8 +86,9 @@ func TestParametersBuilder_Generate(t *testing.T) {
 }
 
 func parametersAreEqual(t *testing.T, schema Schema) {
-	roles := []string{"KymaRuntimeDeveloper_uaa_test", "KymaRuntimeNamespaceAdmin_uaa_test"}
-	rolesWithName := []string{"$XSAPPNAME.KymaRuntimeDeveloper_uaa_test", "$XSAPPNAME.KymaRuntimeNamespaceAdmin_uaa_test"}
+	roles := []string{"KymaRuntimeDeveloper", "KymaRuntimeNamespaceAdmin"}
+	rolesWithSuffix := []string{"KymaRuntimeDeveloper___uaa_test", "KymaRuntimeNamespaceAdmin___uaa_test"}
+	rolesWithName := []string{"$XSAPPNAME.KymaRuntimeDeveloper", "$XSAPPNAME.KymaRuntimeNamespaceAdmin"}
 	groups := []string{"$XSAPPNAME.runtimeDeveloper", "$XSAPPNAME.runtimeNamespaceAdmin"}
 	scopesGroup := []string{"$XSAPPNAME.email", "$XSAPPNAME.runtimeDeveloper", "$XSAPPNAME.runtimeNamespaceAdmin"}
 
@@ -115,8 +116,8 @@ func parametersAreEqual(t *testing.T, schema Schema) {
 	require.Contains(t, groups, schema.RoleTemplates[1].ScopeReferences[0])
 
 	require.Len(t, schema.RoleCollections, 2)
-	require.Contains(t, roles, schema.RoleCollections[0].Name)
-	require.Contains(t, roles, schema.RoleCollections[1].Name)
+	require.Contains(t, rolesWithSuffix, schema.RoleCollections[0].Name)
+	require.Contains(t, rolesWithSuffix, schema.RoleCollections[1].Name)
 	require.Len(t, schema.RoleCollections[0].RoleTemplateReference, 1)
 	require.Len(t, schema.RoleCollections[1].RoleTemplateReference, 1)
 	require.Contains(t, rolesWithName, schema.RoleCollections[0].RoleTemplateReference[0])

@@ -7,12 +7,19 @@ global:
   # secretName defines optionally another name than the default secret name
   secretName: ""
 
+  secretNamespace: "kyma-installer"
+
   # domainName is the global domain used in Kyma
   domainName: ""
 
-  # isBEBEnabled determines whether BEB is enabled
-  # if true BEB is enabled else NATS is enabled
-  isBEBEnabled: false
+  eventing:
+    # backend defines the provisioned eventing backend, either NATS or BEB
+    backend: nats
+
+  # eventTypePrefix is the prefix of the eventType
+  # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
+  # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
+  eventTypePrefix: "sap.kyma.custom"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB

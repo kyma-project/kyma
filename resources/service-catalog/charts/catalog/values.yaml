@@ -123,9 +123,8 @@ servicePlanDefaultsEnabled: false
 cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
-## securityContext: { runAsUser: 1001 }
-securityContext: {}
+securityContext: { runAsUser: 1001 }
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20210113-12c4e3b5
+  alpineKcImage: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad

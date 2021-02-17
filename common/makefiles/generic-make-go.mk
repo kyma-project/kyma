@@ -128,7 +128,7 @@ $(eval $(call buildpack-mount,gomod-component-check))
 gomod-release:gomod-component-check build-image push-image
 
 gomod-vendor-local:
-	GO111MODULE=on go mod vendor -v
+	GO111MODULE=on go mod vendor
 
 gomod-verify-local:
 	GO111MODULE=on go mod verify
