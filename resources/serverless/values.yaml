@@ -85,10 +85,10 @@ images:
       tag: "5daaf5c9"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "5daaf5c9"
+      tag: "PR-10629"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "5daaf5c9"
+      tag: "PR-10629"
 
 deployment:
   replicas: 1
