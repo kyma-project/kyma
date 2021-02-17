@@ -12,7 +12,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   retryPromise,
   expectNoK8sErr,
-  expectNoAxiosErr,
+  convertAxiosError,
   sleep,
   k8sApply,
   waitForK8sObject,
@@ -49,10 +49,10 @@ async function checkAppGatewayResponse() {
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
   let res = await retryPromise(
-    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }),
+    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" },{timeout:5000}),
     45,
     2000
-  ).catch(expectNoAxiosErr);
+  ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
   expect(res.data).to.have.nested.property(
     "order.totalPriceWithTax.value",
     100
@@ -85,7 +85,7 @@ async function sendEventAndCheckResponse() {
         .catch((e) => {
           console.log("Cannot send event, the response from event gateway:");
           console.dir(e.response.data);
-          throw e;
+          throw convertAxiosError(e, "Cannot send event, the response from event gateway");
         });
 
       await sleep(500);
@@ -113,7 +113,7 @@ async function sendEventAndCheckResponse() {
           expect(res.data).to.have.nested.property("event.ce-time");
           return res;
         })
-        .catch(expectNoAxiosErr);
+        .catch((e) => { throw convertAxiosError(e, "Error during request to function lastorder") });
     },
     45,
     2 * 1000
@@ -122,16 +122,17 @@ async function sendEventAndCheckResponse() {
 
 async function registerAllApis(mockHost) {
   const localApis = await retryPromise(
-    () => axios.get(`https://${mockHost}/local/apis`),
-    10,
+    () => axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
+      console.dir(err);
+      throw convertAxiosError(err, "API registration error - commerce mock local API not available");
+    }
+    ),
+    1,
     3000
-  ).catch((err) => {
-    throw new Error(
-      `API registration error - commerce mock local API not available: ${err.response.data}`
-    );
-  });
-
-  for (let api of localApis.data) {
+  );
+  console.dir(localApis.data)
+  const filteredApis = localApis.data.filter((api) => (api.name.includes("Commerce Webservices") || api.name.includes("Events")));
+  for (let api of filteredApis) {
     await retryPromise(
       async () => {
         await axios
@@ -143,23 +144,21 @@ async function registerAllApis(mockHost) {
                 "content-type": "application/json",
                 origin: `https://${mockHost}`,
               },
+              timeout: 5000
             }
-          )
-          },
+          ).catch((err) => {
+            throw convertAxiosError(err, "Error during Commerce Mock API registration");
+          });
+      },
       10,
       3000
-    ).catch((err) => {
-      throw new Error(
-        `Error during Commerce Mock API registration: ${err.response.data}`
-      );
-    });
+    );
   }
+
   const remoteApis = await axios
     .get(`https://${mockHost}/remote/apis`)
     .catch((err) => {
-      throw new Error(
-        `Commerce Mock registered apis not available: ${err.response}`
-      );
+      throw convertAxiosError(err, "Commerce Mock registered apis not available");
     });
   expect(remoteApis.data).to.have.lengthOf.at.least(2);
   return remoteApis;
@@ -182,7 +181,7 @@ async function connectMock(mockHost, targetNamespace) {
 
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${targetNamespace}/tokenrequests`;
 
-  await k8sDynamicApi.delete(tokenRequest).catch(() => {}); // Ignore delete error
+  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
   const tokenObj = await waitForK8sObject(
     path,
@@ -197,8 +196,7 @@ async function connectMock(mockHost, targetNamespace) {
     5 * 1000,
     "Wait for TokenRequest timeout"
   );
-
-  await axios
+  const res = await axios
     .post(
       `https://${mockHost}/connection`,
       {
@@ -210,12 +208,11 @@ async function connectMock(mockHost, targetNamespace) {
         headers: {
           "content-type": "application/json",
         },
+        timeout: 5000,
       }
     )
     .catch((err) => {
-      throw new Error(
-        `Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`
-      );
+      throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
     });
 }
 function serviceInstanceObj(name, serviceClassExternalName) {
@@ -303,8 +300,8 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await patchAppGatewayDeployment();
   await retryPromise(
     () =>
-      axios.get(`https://${mockHost}/local/apis`).catch(() => {
-        throw new Error("Commerce mock local API not available - timeout");
+      axios.get(`https://${mockHost}/local/apis`).catch((err) => {
+        throw convertAxiosError(err, "Commerce mock local API not available - timeout");
       }),
     40,
     3000
