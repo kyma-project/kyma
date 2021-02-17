@@ -123,14 +123,12 @@ async function sendEventAndCheckResponse() {
 async function registerAllApis(mockHost) {
   const localApis = await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
-      console.dir(err);
       throw convertAxiosError(err, "API registration error - commerce mock local API not available");
     }
     ),
     1,
     3000
   );
-  console.dir(localApis.data)
   const filteredApis = localApis.data.filter((api) => (api.name.includes("Commerce Webservices") || api.name.includes("Events")));
   for (let api of filteredApis) {
     await retryPromise(
