@@ -92,16 +92,16 @@
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
 # The `event-sources` chart
-/resources/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The `eventing` chart
-/resources/eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/nats-streaming/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/knative-provisioner-natss/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @crabtree @kjaksik
@@ -131,7 +131,7 @@
 /resources/istio/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/knative-eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
@@ -164,7 +164,7 @@
 /resources/permission-controller/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Kafka Channel for knative eventing
-/resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # Components
 
@@ -221,13 +221,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Event Sources Component
-/components/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/components/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # Nats-init Component
-/components/nats-init/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/components/nats-init/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # Event Service Component
-/components/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/components/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # UAA Component
 /components/uaa-activator/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree @kjaksik
@@ -251,10 +251,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Event Publisher Proxy
-/components/event-publisher-proxy @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh
+/components/event-publisher-proxy @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
 
 # Eventing Controller
-/components/eventing-controller @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh
+/components/eventing-controller @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
 
 # Tests
 # Service Catalog acceptance tests
@@ -320,7 +320,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tools/kyma-installer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 #
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
@@ -329,10 +329,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/end-to-end/external-solution-integration/ @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r
 
 # Event Service Tests
-/tests/integration/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/tests/integration/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # Kafka Channel Integration Tests
-/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r @crabtree @kjaksik @suleymanakbas91
