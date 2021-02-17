@@ -156,6 +156,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
 					reconcilertesting.HaveSubscriptionReady(),
 				))
+
+				By("Sending valid webhook requests only")
+				validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
+				Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+				Expect(invalidRequests).Should(BeZero())
 			})
 		})
 	})
@@ -171,14 +176,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Subscriptions
 			subscription1Name := "test-delete-valid-subscription-1"
-			subscription1ID := "test-subs-1"
-			subscription1 := reconcilertesting.FixtureValidSubscription(subscription1Name, namespaceName, subscription1ID)
+			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)
 			ensureSubscriptionCreated(subscription1, ctx)
 
 			subscription2Name := "test-delete-valid-subscription-2"
-			subscription2ID := "test-subs-2"
-			subscription2 := reconcilertesting.FixtureValidSubscription(subscription2Name, namespaceName, subscription2ID)
+			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service1.Name, service1.Namespace)
 			ensureSubscriptionCreated(subscription2, ctx)
 
@@ -247,6 +250,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Removing the APIRule")
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
+
+			By("Sending valid webhook requests only")
+			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
+			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(2))
+			Expect(invalidRequests).Should(BeZero())
 		})
 	})
 
