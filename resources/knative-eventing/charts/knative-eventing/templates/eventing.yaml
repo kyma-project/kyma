@@ -245,6 +245,36 @@ kind: ClusterRole
 metadata:
   labels:
     eventing.knative.dev/release: "v0.12.0"
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: knative-eventing-flows-namespaced-admin
+rules:
+  - apiGroups:
+      - flows.knative.dev
+    resources:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    eventing.knative.dev/release: "v0.12.0"
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: knative-sources-namespaced-admin
+rules:
+  - apiGroups:
+      - sources.knative.dev
+    resources:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    eventing.knative.dev/release: "v0.12.0"
     rbac.authorization.k8s.io/aggregate-to-edit: "true"
   name: knative-eventing-namespaced-edit
 rules:
@@ -409,6 +439,14 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+    - {{ .Release.Name }}
 
 ---
 aggregationRule:
@@ -632,6 +670,14 @@ rules:
   - subjectaccessreviews
   verbs:
   - create
+- apiGroups:
+  - policy
+  resourceNames:
+  - {{ .Release.Name }}
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -712,6 +758,14 @@ rules:
   - delete
   - patch
   - watch
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+  - {{ .Release.Name }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -931,16 +985,18 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.eventingController.resources.limits.cpu }}
+            memory: {{ .Values.eventingController.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ .Values.eventingController.resources.requests.cpu }}
+            memory: {{ .Values.eventingController.resources.requests.memory }}
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - mountPath: /etc/config-logging
           name: config-logging
       serviceAccountName: eventing-controller
+      securityContext:
+        runAsUser: 1000
       volumes:
       - configMap:
           name: config-logging
@@ -991,15 +1047,17 @@ spec:
           name: metrics
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.sourcesController.resources.limits.cpu }}
+            memory: {{ .Values.sourcesController.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: {{ .Values.sourcesController.resources.requests.cpu }}
+            memory: {{ .Values.sourcesController.resources.requests.memory }}
         volumeMounts:
         - mountPath: /etc/config-logging
           name: config-logging
       serviceAccountName: eventing-source-controller
+      securityContext:
+        runAsUser: 1000
       volumes:
       - configMap:
           name: config-logging
@@ -1071,48 +1129,6 @@ webhooks:
   sideEffects: None
   timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: MutatingWebhookConfiguration
-metadata:
-  labels:
-    eventing.knative.dev/release: "v0.12.0"
-  name: sinkbindings.webhook.sources.knative.dev
-webhooks:
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: eventing-webhook
-      namespace: knative-eventing
-  failurePolicy: Fail
-  name: sinkbindings.webhook.sources.knative.dev
-  sideEffects: None
-  namespaceSelector:
-    matchExpressions:
-{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
-  timeoutSeconds: {{ .Values.webhook.timeout }}
----
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: MutatingWebhookConfiguration
-metadata:
-  labels:
-    eventing.knative.dev/release: "v0.12.0"
-  name: legacysinkbindings.webhook.sources.knative.dev
-webhooks:
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: eventing-webhook
-      namespace: knative-eventing
-  failurePolicy: Fail
-  name: legacysinkbindings.webhook.sources.knative.dev
-  sideEffects: None
-  namespaceSelector:
-    matchExpressions:
-{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
-  timeoutSeconds: {{ .Values.webhook.timeout }}
----
 apiVersion: v1
 kind: Secret
 metadata:
@@ -1160,22 +1176,22 @@ spec:
         name: eventing-webhook
         resources:
           limits:
-            cpu: 200m
-            memory: 200Mi
+            cpu: {{ .Values.eventingWebhook.resources.limits.cpu }}
+            memory: {{ .Values.eventingWebhook.resources.limits.memory }}
           requests:
-            cpu: 20m
-            memory: 20Mi
+            cpu: {{ .Values.eventingWebhook.resources.requests.cpu }}
+            memory: {{ .Values.eventingWebhook.resources.requests.memory }}
         terminationMessagePolicy: FallbackToLogsOnError
       serviceAccountName: eventing-webhook
+      securityContext:
+        runAsUser: 1000
 
 ---
 apiVersion: v1
 data:
-  loglevel.controller: info
-  loglevel.webhook: info
   zap-logger-config: |
     {
-      "level": "info",
+      "level": "{{ .Values.loglevel }}",
       "development": false,
       "outputPaths": ["stdout"],
       "errorOutputPaths": ["stderr"],

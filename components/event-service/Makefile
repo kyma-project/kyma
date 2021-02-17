@@ -7,3 +7,6 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 MAIN_PATH = ./cmd/eventservice/eventgateway.go
+
+release:
+	$(MAKE) gomod-release

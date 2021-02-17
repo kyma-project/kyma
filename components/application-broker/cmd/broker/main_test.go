@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -39,6 +39,8 @@ const (
 
 	serviceOneID = "001"
 	serviceTwoID = "002"
+
+	newEventingFlow = false
 )
 
 type testSuite struct {
@@ -182,7 +184,7 @@ func newTestSuite(t *testing.T) *testSuite {
 func newOSBClient(url string) (osb.Client, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
-	config.APIVersion = osb.Version2_13()
+	config.APIVersion = osb.Version2_14()
 
 	osbClient, err := osb.NewClient(config)
 	if err != nil {

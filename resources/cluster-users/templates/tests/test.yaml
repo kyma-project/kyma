@@ -13,7 +13,6 @@ metadata:
     {{- range $key, $val := .Values.tests.labels }}
     kyma-project.io/test.{{ $key }}: {{ $val | quote }}
     {{- end }}
-
 spec:
   disableConcurrency: false
   template:
@@ -101,6 +100,10 @@ spec:
             value: {{ .Values.tests.env.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
             value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
+          - name: HOME
+            value: /tmp
+          securityContext:
+{{- toYaml .Values.tests.securityContext | nindent 12 }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

@@ -3,8 +3,8 @@ kind: PrometheusRule
 metadata:
   name: general.rules
   labels:
-    app: {{ template "prometheus-operator.name" . }}
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
   - name: general.rules
@@ -17,7 +17,7 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+        description: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
           will exhaust in file/socket descriptors within the next 4 hours'
     - alert: FdExhaustionClose
       expr: predict_linear(fd_utilization[10m], 3600) > 1
@@ -25,5 +25,5 @@ spec:
       labels:
         severity: critical
       annotations:
-        message: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
+        description: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
           will exhaust in file/socket descriptors within the next hour'

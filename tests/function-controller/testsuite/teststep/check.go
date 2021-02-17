@@ -3,9 +3,12 @@ package teststep
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
@@ -39,7 +42,24 @@ func (h HTTPCheck) Name() string {
 }
 
 func (h HTTPCheck) Run() error {
-	return errors.Wrap(h.poll.PollForAnswer(h.endpoint, "", h.expectedMsg), "while checking function through the gateway")
+	// backoff is needed because even tough the deployment may be ready
+	// the language specific server may not start yet
+	// there may also be some problems with istio sidecars etc
+	backoff := wait.Backoff{
+		Steps:    6,
+		Duration: 250 * time.Millisecond,
+		Factor:   2.0,
+		Jitter:   0.1,
+	}
+	return retry.OnError(backoff, func(err error) bool {
+		return true
+	}, func() error {
+		err := errors.Wrap(h.poll.PollForAnswer(h.endpoint, "", h.expectedMsg), "while checking connection to function")
+		if err != nil {
+			h.log.Warn(err)
+		}
+		return err
+	})
 }
 
 func (h HTTPCheck) Cleanup() error {

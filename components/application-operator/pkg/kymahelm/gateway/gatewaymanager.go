@@ -35,11 +35,12 @@ type ServiceInstanceClient interface {
 	List(ctx context.Context, opts metav1.ListOptions) (*v1beta12.ServiceInstanceList, error)
 }
 
-func NewGatewayManager(helmClient kymahelm.HelmClient, overrides OverridesData, serviceInstanceClient ServiceInstanceClient) GatewayManager {
+func NewGatewayManager(helmClient kymahelm.HelmClient, overrides OverridesData, serviceInstanceClient ServiceInstanceClient, profile string) GatewayManager {
 	return &gatewayManager{
 		helmClient:            helmClient,
 		overrides:             overrides,
 		serviceInstanceClient: serviceInstanceClient,
+		profile:               profile,
 	}
 }
 
@@ -48,6 +49,7 @@ type gatewayManager struct {
 	overrides             OverridesData
 	serviceInstanceClient ServiceInstanceClient
 	namespaces            v1.NamespaceInterface
+	profile               string
 }
 
 func (g *gatewayManager) InstallGateway(namespace string) error {
@@ -58,7 +60,7 @@ func (g *gatewayManager) InstallGateway(namespace string) error {
 
 	name := getGatewayReleaseName(namespace)
 
-	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, name, namespace, overrides)
+	_, err = g.helmClient.InstallReleaseFromChart(gatewayChartDirectory, name, namespace, overrides, g.profile)
 	if err != nil {
 		return errors.Errorf("Error installing Gateway: %s", err.Error())
 	}
@@ -176,7 +178,7 @@ func (g *gatewayManager) upgradeGateway(gateway string, namespace string) error 
 		return errors.Errorf("Error parsing overrides: %s", err.Error())
 	}
 
-	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, namespace, overrides)
+	_, err = g.helmClient.UpdateReleaseFromChart(gatewayChartDirectory, gateway, namespace, overrides, g.profile)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Failed to update %s Gateway", gateway))
 	}

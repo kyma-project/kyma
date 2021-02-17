@@ -81,6 +81,8 @@ spec:
           value: {{ .Values.channel.cpuRequest | quote }}
         - name: CHANNEL_CPU_LIMIT
           value: {{ .Values.channel.cpuLimit | quote }}
+        securityContext:
+          runAsUser: 1000
         resources:
           requests:
             cpu: {{ .Values.controller.cpuRequest }}

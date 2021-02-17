@@ -5,11 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -19,6 +15,13 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
@@ -55,6 +58,9 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
+		}).
 		Complete(r)
 }
 
@@ -131,7 +137,13 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		log.Error(err, "Cannot list HorizontalPodAutoscalers")
+		return ctrl.Result{}, err
+	}
+
+	dockerConfig, err := r.readDockerConfig(ctx, instance)
+	if err != nil {
+		log.Error(err, "Cannot read Docker registry configuration")
 		return ctrl.Result{}, err
 	}
 
@@ -142,7 +154,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Sources update failed: %v", err),
+			Message:            fmt.Sprintf("Reading git options failed: %v", err),
 		})
 	}
 
@@ -168,14 +180,14 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
 		return r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}):
-		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items)
-	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items)
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
+		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
+		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
+	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
+		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
 	case r.isOnServiceChange(instance, services.Items):
 		return r.onServiceChange(ctx, log, instance, services.Items)
 	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
@@ -243,6 +255,39 @@ func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serve
 		Reference: instance.Spec.Reference,
 		Auth:      auth,
 	}, nil
+}
+
+func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
+	var secret corev1.Secret
+	// try reading user config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
+	}
+
+	// try reading default config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		if data["isInternal"] == "true" {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["serverAddress"],
+			}, nil
+		} else {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["registryAddress"],
+			}, nil
+		}
+	}
+
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 }
 
 func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {

@@ -1,18 +1,18 @@
 package prom
 
 // To parse JSON response from http://monitoring-prometheus.kyma-system:9090/api/v1/rules
-type AlertResponse struct {
+type RulesResponse struct {
 	Status    string    `json:"status"`
-	Data      AlertData `json:"data"`
+	Data      RulesData `json:"data"`
 	ErrorType string    `json:"errorType"`
 	Error     string    `json:"error"`
 }
 
-type AlertData struct {
-	Groups []AlertDataGroup `json:"groups"`
+type RulesData struct {
+	Groups []RulesGroup `json:"groups"`
 }
 
-type AlertDataGroup struct {
+type RulesGroup struct {
 	Rules []Rule `json:"rules"`
 }
 

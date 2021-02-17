@@ -25,7 +25,8 @@ func (s installStep) Run() error {
 	installResp, installErr := s.helmClient.InstallRelease(
 		chartDir,
 		s.GetNamespacedName(),
-		s.overrideData.ForRelease(s.component.GetReleaseName()))
+		s.overrideData.ForRelease(s.component.GetReleaseName()),
+		string(s.step.profile))
 
 	if installErr != nil {
 		return s.onError(installErr)

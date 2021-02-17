@@ -38,11 +38,11 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        resources:
-          limits:
-            memory: 300Mi
-          requests:
-            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+        resources: 
+          {{- toYaml .Values.resources | nindent 10 }}
         env:
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
@@ -84,6 +84,8 @@ spec:
             value: {{ .Values.tracing.serviceSpanName }}
           - name: APP_SERVERLESS_USAGE_KIND
             value: serverless-function
+          - name: APP_EVENT_SUBSCRIPTION
+            value: {{ .Values.global.isBEBEnabled | quote }}
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}

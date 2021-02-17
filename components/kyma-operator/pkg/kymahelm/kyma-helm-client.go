@@ -10,7 +10,9 @@ import (
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	"github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -22,8 +24,8 @@ type ClientInterface interface {
 	IsReleaseDeletable(nn NamespacedName) (bool, error)
 	IsReleasePresent(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
-	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
-	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
+	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map, profile string) (*Release, error)
+	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map, profile string) (*Release, error)
 	UninstallRelease(nn NamespacedName) error
 	RollbackRelease(nn NamespacedName, revision int) error
 	WaitForReleaseDelete(nn NamespacedName) (bool, error)
@@ -206,7 +208,7 @@ func (hc *Client) ReleaseDeployedRevision(nn NamespacedName) (int, error) {
 }
 
 // InstallRelease installs a Helm chart
-func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideValues overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -225,9 +227,15 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 	install.Wait = true
 	install.CreateNamespace = true
 
-	hc.PrintOverrides(values, nn.Name, "install")
+	comboValues, err := GetProfileValues(*chart, profile)
+	if err != nil {
+		return nil, err
+	}
 
-	installedRelease, err := install.Run(chart, values)
+	overrides.MergeMaps(comboValues, overrideValues)
+	hc.PrintOverrides(overrideValues, nn.Name, "install")
+
+	installedRelease, err := install.Run(chart, comboValues)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +244,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, values over
 }
 
 // UpgradeRelease upgrades a Helm chart
-func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values overrides.Map) (*Release, error) {
+func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, overrideValues overrides.Map, profile string) (*Release, error) {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)
 	if err != nil {
@@ -256,9 +264,15 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, values over
 	upgrade.Recreate = false
 	upgrade.MaxHistory = hc.maxHistory
 
-	hc.PrintOverrides(values, nn.Name, "update")
+	comboValues, err := GetProfileValues(*chart, profile)
+	if err != nil {
+		return nil, err
+	}
 
-	upgradedRelease, err := upgrade.Run(nn.Name, chart, values)
+	overrides.MergeMaps(comboValues, overrideValues)
+	hc.PrintOverrides(overrideValues, nn.Name, "update")
+
+	upgradedRelease, err := upgrade.Run(nn.Name, chart, comboValues)
 	if err != nil {
 		return nil, err
 	}
@@ -330,4 +344,25 @@ func (hc *Client) newActionConfig(namespace string) (*action.Configuration, erro
 	}
 
 	return cfg, nil
+}
+
+//GetProfileValues Return Map of chart values for profileName profile file
+func GetProfileValues(ch chart.Chart, profileName string) (map[string]interface{}, error) {
+	var profile *chart.File
+	for _, f := range ch.Files {
+		if (f.Name == fmt.Sprintf("profile-%s.yaml", profileName)) || (f.Name == fmt.Sprintf("%s.yaml", profileName)) {
+			profile = f
+			log.Printf("Found %s, extracing profile values.\n", f.Name)
+			break
+		}
+	}
+	if profile == nil {
+		log.Println("No profile file found. Using default.")
+		return ch.Values, nil
+	}
+	profileValues, err := chartutil.ReadValues(profile.Data)
+	if err != nil {
+		return nil, err
+	}
+	return profileValues, nil
 }

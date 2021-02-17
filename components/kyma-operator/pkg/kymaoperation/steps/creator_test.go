@@ -213,7 +213,8 @@ func fakeInstallationData() *config.InstallationData {
 			v1alpha1.KymaComponent{Name: "componentTwo", Namespace: "testNamespaceTwo"},
 			v1alpha1.KymaComponent{Name: "componentThree", Namespace: "testNamespaceTwo"},
 		},
-		Action: "install",
+		Action:  "install",
+		Profile: "test",
 	}
 }
 

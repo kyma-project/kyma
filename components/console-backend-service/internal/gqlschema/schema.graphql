@@ -15,6 +15,23 @@ scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/consol
 scalar UID @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.UID")
 scalar URI @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.URI")
 
+type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: UID!
+}
+
+input OwnerReferenceInput @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference"){
+    apiVersion: String!
+    blockOwnerDeletion: Boolean
+    controller: Boolean
+    kind: String!
+    name: String!
+    UID: UID!
+}
 
 input ResourceValuesInput {
   memory: String
@@ -985,8 +1002,6 @@ type VersionInfo {
 # Queries
 
 type Query {
-    clusterAssetGroups(viewContext: String, groupName: String): [ClusterAssetGroup!]! @HasAccess(attributes: {resource: "clusterassetgroups", verb: "list", apiGroup: "rafter.kyma-project.io", apiVersion: "v1beta1"})
-
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 

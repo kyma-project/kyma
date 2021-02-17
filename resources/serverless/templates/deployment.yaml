@@ -43,12 +43,19 @@ spec:
       {{- end }}
       {{- end }}
     spec:
+      volumes:
+        - name: {{ template "fullname" . }}-k8s-webhook-cert
+          secret:
+            secretName: {{ template "fullname" . }}-k8s-webhook-cert
       serviceAccountName: {{ template "fullname" . }}-controller-manager
       {{- if .Values.pod.extraProperties }}
       {{ include "tplValue" ( dict "value" .Values.pod.extraProperties  "context" . ) | nindent 6 }}
       {{- end }}
       containers:
         - name: manager
+          volumeMounts:
+            - name: {{ template "fullname" . }}-k8s-webhook-cert
+              mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
           imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
           command:
@@ -57,7 +64,14 @@ spec:
           resources:
             {{- include "tplValue" ( dict "value" .Values.containers.manager.resources "context" . ) | nindent 12 }}
           {{- end }}
+          {{- if .Values.containers.manager.containerSecurityContext }}
+          securityContext:
+            {{- include "tplValue" ( dict "value" .Values.containers.manager.containerSecurityContext "context" . ) | nindent 12 }}
+          {{- end }}
           ports:
+            - containerPort: {{ .Values.services.manager.https.targetPort }}
+              name: "webhook"
+              protocol: TCP
             {{- if .Values.metrics.enabled }}
             - containerPort: {{ .Values.metrics.manager.port.port }}
               name: {{ .Values.metrics.manager.port.name }}
@@ -72,24 +86,23 @@ spec:
             - name: APP_LEADER_ELECTION_ENABLED
               value: "true"
           {{- end }}
-            - name: APP_FUNCTION_DOCKER_INTERNAL_REGISTRY_ENABLED
-              value: "{{ .Values.dockerRegistry.enableInternal }}"
-            - name: APP_FUNCTION_DOCKER_INTERNAL_SERVER_ADDRESS
-              value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.internalServerAddress "context" . ) }}"
-            - name: APP_FUNCTION_DOCKER_REGISTRY_ADDRESS
-              value: "{{- include "tplValue" ( dict "value" .Values.dockerRegistry.registryAddress "context" . ) }}"
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_KSERVICE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.kserviceRequeueDuration "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleRequeueDuration "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLEBINDING_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleBindingRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDockerConfigSecretName "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DEFAULT_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDefaultDockerConfigSecretName "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_EXTERNAL_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryExternalDockerConfigSecretName "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_SERVICE_ACCOUNT_NAME" "value" .Values.containers.manager.envs.buildServiceAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPOFETCHER_IMAGE" "value" .Values.containers.manager.envs.functionBuildRepoFetcherImage "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_LOG_LEVEL" "value" .Values.containers.manager.envs.logLevel "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}

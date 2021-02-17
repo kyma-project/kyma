@@ -115,7 +115,7 @@ kubectl -n kyma-integration get secrets
 To fetch the certificate and key encoded with base64, run this command:
 
 ```bash
-kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID} -o yaml
+kubectl -n kyma-integration get secrets {APP_NAME}-{SERVICE_ID} -o yaml
 ```
 
 >**NOTE:** Replace the `APP_NAME` placeholder with the name of the Application used to connect the external solution that is the origin of the API. Replace the `SERVICE_ID` placeholder with the ID of the registered service to which the API belongs. You get this ID after you register an external solution's service in Kyma.
@@ -124,7 +124,7 @@ kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID} -o yaml
 If the API you registered provides a certificate-key pair or the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the Kyma-generated pair with your certificate and key, run this command:
 
 ```bash
-kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'data:
+kubectl -n kyma-integration patch secrets {APP_NAME}-{SERVICE_ID} --patch 'data:
   crt: {BASE64_ENCODED_CRT}
   key: {BASE64_ENCODED_KEY}'
 ```

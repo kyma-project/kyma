@@ -1,0 +1,11 @@
+apiVersion: bindings.kyma-project.io/v1alpha1
+kind: TargetKind
+metadata:
+  name: deployment
+spec:
+  displayName: Deployment
+  resource:
+    group: apps
+    kind: deployment
+    version: v1
+  labelsPath: spec.template.metadata.labels

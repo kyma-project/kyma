@@ -4,20 +4,18 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
-	apiruleTypes "github.com/kyma-project/kyma/tests/function-controller/pkg/apirule/types"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type APIRule struct {
@@ -30,8 +28,14 @@ type APIRule struct {
 }
 
 func New(name string, c shared.Container) *APIRule {
+	gvr := schema.GroupVersionResource{
+		Group:    "gateway.kyma-project.io",
+		Version:  "v1alpha1",
+		Resource: "apirules",
+	}
+
 	return &APIRule{
-		resCli:      resource.New(c.DynamicCli, apiruleTypes.GroupVersion.WithResource("apirules"), c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, gvr, c.Namespace, c.Log, c.Verbose),
 		name:        name,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -43,39 +47,40 @@ func New(name string, c shared.Container) *APIRule {
 func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) {
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
-	rule := &apiruleTypes.APIRule{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "APIRule",
-			APIVersion: apiruleTypes.GroupVersion.String(),
-		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:      a.name,
-			Namespace: a.namespace,
-		},
-		Spec: apiruleTypes.APIRuleSpec{
-			Gateway: &gateway,
-			Rules: []apiruleTypes.Rule{
-				{
-					Path:    "/.*",
-					Methods: []string{"GET"},
-					AccessStrategies: []*apiruleTypes.Authenticator{
-						{
-							Handler: &apiruleTypes.Handler{
-								Name: "allow",
+	apirule := unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "gateway.kyma-project.io/v1alpha1",
+			"kind":       "APIRule",
+			"metadata": map[string]interface{}{
+				"name":      a.name,
+				"namespace": a.namespace,
+			},
+			"spec": map[string]interface{}{
+				"gateway": gateway,
+				"service": map[string]interface{}{
+					"name": serviceName,
+					"port": port,
+					"host": host,
+				},
+				"rules": []map[string]interface{}{
+					{
+						"accessStrategies": []map[string]interface{}{
+							{
+								"config":  map[string]interface{}{},
+								"handler": "allow",
 							},
 						},
+						"methods": []interface{}{
+							"GET",
+						},
+						"path": "/.*",
 					},
 				},
-			},
-			Service: &apiruleTypes.Service{
-				Name: &serviceName,
-				Port: &port,
-				Host: &host,
 			},
 		},
 	}
 
-	resourceVersion, err := a.resCli.Create(rule)
+	resourceVersion, err := a.resCli.Create(&apirule)
 	if err != nil {
 		return resourceVersion, errors.Wrapf(err, "while creating APIRule %s in namespace %s", a.name, a.namespace)
 	}
@@ -83,7 +88,7 @@ func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) 
 }
 
 func (a *APIRule) Delete() error {
-	err := a.resCli.Delete(a.name, a.waitTimeout)
+	err := a.resCli.Delete(a.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting APIRule %s in namespace %s", a.name, a.namespace)
 	}
@@ -91,18 +96,12 @@ func (a *APIRule) Delete() error {
 	return nil
 }
 
-func (a *APIRule) Get() (*apiruleTypes.APIRule, error) {
-	u, err := a.resCli.Get(a.name)
+func (a *APIRule) Get() (*unstructured.Unstructured, error) {
+	apirule, err := a.resCli.Get(a.name)
 	if err != nil {
-		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
+		return &unstructured.Unstructured{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
 	}
-
-	apirule, err := convertFromUnstructuredToAPIRule(u)
-	if err != nil {
-		return &apiruleTypes.APIRule{}, err
-	}
-
-	return &apirule, nil
+	return apirule, nil
 }
 
 func (a *APIRule) WaitForStatusRunning() error {
@@ -119,11 +118,7 @@ func (a *APIRule) WaitForStatusRunning() error {
 	defer cancel()
 
 	condition := a.isApiRuleReady(a.name)
-	_, err = watchtools.Until(ctx, apirule.GetResourceVersion(), a.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, a.resCli.ResCli, condition)
 }
 
 func (a *APIRule) LogResource() error {
@@ -143,41 +138,34 @@ func (a *APIRule) LogResource() error {
 
 func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
-		u, ok := event.Object.(*unstructured.Unstructured)
+		apirule, ok := event.Object.(*unstructured.Unstructured)
 		if !ok {
 			return false, shared.ErrInvalidDataType
 		}
-		if u.GetName() != name {
-			a.log.Infof("names mismatch, object's name %s, supplied %s", u.GetName(), name)
+		if apirule.GetName() != name {
+			a.log.Infof("names mismatch, object's name %s, supplied %s", apirule.GetName(), name)
 			return false, nil
 		}
 
-		apirule, err := convertFromUnstructuredToAPIRule(u)
-		if err != nil {
-			return false, err
-		}
-
-		return a.isStateReady(apirule), nil
+		return a.isStateReady(*apirule), nil
 	}
 }
 
-func (a *APIRule) isStateReady(apirule apiruleTypes.APIRule) bool {
-	status := apirule.Status
-	if status.VirtualServiceStatus == nil || status.APIRuleStatus == nil || status.AccessRuleStatus == nil {
-		return false
-	}
+func (a *APIRule) isStateReady(apirule unstructured.Unstructured) bool {
+	correctCode := "OK"
 
-	ready := status.AccessRuleStatus.Code == apiruleTypes.StatusOK &&
-		status.APIRuleStatus.Code == apiruleTypes.StatusOK &&
-		status.VirtualServiceStatus.Code == apiruleTypes.StatusOK
+	apiruleStatusCode, apiruleStatusCodeFound, err := unstructured.NestedString(apirule.Object, "status", "APIRuleStatus", "code")
+	apiruleStatus := err != nil || !apiruleStatusCodeFound || apiruleStatusCode != correctCode
+
+	virtualServiceStatusCode, virtualServiceStatusCodeFound, err := unstructured.NestedString(apirule.Object, "status", "virtualServiceStatus", "code")
+	virtualServiceStatus := err != nil || !virtualServiceStatusCodeFound || virtualServiceStatusCode != correctCode
+
+	accessRuleStatusCode, accessRuleStatusCodeFound, err := unstructured.NestedString(apirule.Object, "status", "accessRuleStatus", "code")
+	accessRuleStatus := err != nil || !accessRuleStatusCodeFound || accessRuleStatusCode != correctCode
+
+	ready := apiruleStatus && virtualServiceStatus && accessRuleStatus
 
 	shared.LogReadiness(ready, a.verbose, a.name, a.log, apirule)
 
 	return ready
-}
-
-func convertFromUnstructuredToAPIRule(u *unstructured.Unstructured) (apiruleTypes.APIRule, error) {
-	apirule := apiruleTypes.APIRule{}
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &apirule)
-	return apirule, err
 }

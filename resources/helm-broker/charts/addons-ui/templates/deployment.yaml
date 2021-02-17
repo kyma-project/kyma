@@ -23,10 +23,16 @@ spec:
         release: {{ .Release.Name }}
         kyma-project.io/component: frontend
     spec:
+      serviceAccountName: {{ template "addons-ui-fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
           ports:
           - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:

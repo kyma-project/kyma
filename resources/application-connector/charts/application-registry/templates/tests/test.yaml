@@ -38,6 +38,10 @@ spec:
             value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
           - name: NAMESPACE
             value: {{ .Values.global.namespace | quote }}
+          securityContext:
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

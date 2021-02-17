@@ -59,11 +59,17 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
           requests:
-            cpu: 100m
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: http-proxy
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+        securityContext:
+          runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 {{- end }}

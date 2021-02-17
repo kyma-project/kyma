@@ -1,8 +1,0 @@
-global:
-  isLocalEnv: false
-
-istio_kyma_patch:
-  image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-  tag: "20201023-5de446cf"
-required_istio_version: 1.7.4-distroless
-

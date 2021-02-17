@@ -39,13 +39,15 @@ spec:
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           resources:
             requests:
-              cpu: 30m
-              memory: 50Mi
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+              memory: {{ .Values.deployment.resources.requests.memory }}
             limits:
-              cpu: 300m
-              memory: 300Mi
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
+            privileged:  {{ .Values.container.privileged }}
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+            runAsUser: {{ .Values.container.runAsUser }}
           ports:
             - name: {{ .Values.service.ports.httpMetrics.name }}
               containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}

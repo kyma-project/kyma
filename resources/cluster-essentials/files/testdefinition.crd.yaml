@@ -41,6 +41,10 @@ spec:
                 to don't execute them. On Testsuite level such test should be marked
                 as a skipped. Default value is false
               type: boolean
+            description:
+              description: Describe the test case in detail
+                (e.g. scope, test scenario, edge cases, known limitations etc.).
+              type: string
             template:
               type: object
           required:

@@ -2,11 +2,11 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
 metadata:
-  name: {{ template "prometheus-operator.fullname" . }}-server
+  name: {{ template "prometheus.server.fullname" . }}-server
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: {{ template "prometheus-operator.name" . }}-server
-{{ include "prometheus-operator.labels" . | indent 4 }}
+    app: {{ template "prometheus.server.fullname" . }}-server
+    {{- include "prometheus.server.labels" . | nindent 4 }}
 spec:
   namespaceSelector:
     matchNames:

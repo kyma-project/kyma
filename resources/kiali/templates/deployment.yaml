@@ -1,0 +1,163 @@
+{{- /*
+  Taken from https://github.com/kiali/helm-charts/tree/master/kiali-server
+  */ -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kiali-server.fullname" . }}-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.kiali.spec.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "kiali-server.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      name: {{ include "kiali-server.fullname" . }}
+      labels:
+        {{- include "kiali-server.labels" . | nindent 8 }}
+        {{- if .Values.kiali.spec.deployment.pod_labels }}
+        {{- toYaml .Values.kiali.spec.deployment.pod_labels | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- if .Values.kiali.spec.server.metrics_enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.kiali.spec.server.metrics_port | quote }}
+        {{- else }}
+        prometheus.io/scrape: "false"
+        prometheus.io/port: null
+        {{- end }}
+        kiali.io/runtimes: go,kiali
+        {{- if .Values.kiali.spec.deployment.pod_annotations }}
+        {{- toYaml .Values.kiali.spec.deployment.pod_annotations | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "kiali-server.fullname" . }}
+      {{- if .Values.kiali.spec.deployment.priority_class_name }}
+      priorityClassName: {{ .Values.kiali.spec.deployment.priority_class_name | quote }}
+      {{- end }}
+      {{- if .Values.kiali.spec.deployment.image_pull_secrets }}
+      imagePullSecrets:
+      {{- range .Values.kiali.spec.deployment.image_pull_secrets }}
+      - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      containers:
+      - image: "{{ .Values.kiali.spec.deployment.image_name }}:{{ .Values.kiali.spec.deployment.image_version }}"
+        imagePullPolicy: {{ .Values.kiali.spec.deployment.image_pull_policy | default "Always" }}
+        name: {{ include "kiali-server.fullname" . }}
+        command:
+        - "/opt/kiali/kiali"
+        - "-config"
+        - "/kiali-configuration/config.yaml"
+        ports:
+        - name: api-port
+          containerPort: {{ .Values.kiali.spec.server.port | default 20001 }}
+        {{- if .Values.kiali.spec.server.metrics_enabled }}
+        - name: http-metrics
+          containerPort: {{ .Values.kiali.spec.server.metrics_port | default 9090 }}
+        {{- end }}
+        readinessProbe:
+          httpGet:
+            path: {{ include "kiali-server.server.web_root" . | trimSuffix "/"  }}/healthz
+            port: api-port
+            {{- if (include "kiali-server.identity.cert_file" .) }}
+            scheme: HTTPS
+            {{- else }}
+            scheme: HTTP
+            {{- end }}
+          initialDelaySeconds: 5
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: {{ include "kiali-server.server.web_root" . | trimSuffix "/"  }}/healthz
+            port: api-port
+            {{- if (include "kiali-server.identity.cert_file" .) }}
+            scheme: HTTPS
+            {{- else }}
+            scheme: HTTP
+            {{- end }}
+          initialDelaySeconds: 5
+          periodSeconds: 30
+        env:
+        - name: ACTIVE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: LOG_LEVEL
+          value: "{{ include "kiali-server.logLevel" . }}"
+        - name: LOG_FORMAT
+          value: "{{ .Values.kiali.spec.deployment.logger.log_format }}"
+        - name: LOG_TIME_FIELD_FORMAT
+          value: "{{ .Values.kiali.spec.deployment.logger.time_field_format }}" 
+        - name: LOG_SAMPLER_RATE
+          value: "{{ .Values.kiali.spec.deployment.logger.sampler_rate }}"
+        volumeMounts:
+        - name: {{ include "kiali-server.fullname" . }}-configuration
+          mountPath: "/kiali-configuration"
+        - name: {{ include "kiali-server.fullname" . }}-cert
+          mountPath: "/kiali-cert"
+        - name: {{ include "kiali-server.fullname" . }}-secret
+          mountPath: "/kiali-secret"
+        {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+        - name: {{ include "kiali-server.fullname" . }}-cabundle
+          mountPath: "/kiali-cabundle"
+        {{- end }}
+        {{- if .Values.kiali.spec.deployment.resources }}
+        resources:
+        {{- toYaml .Values.kiali.spec.deployment.resources | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: {{ include "kiali-server.fullname" . }}-configuration
+        configMap:
+          name: {{ include "kiali-server.fullname" . }}-server
+      - name: {{ include "kiali-server.fullname" . }}-cert
+        secret:
+          {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+          secretName: {{ include "kiali-server.fullname" . }}-cert-secret
+          {{- else }}
+          secretName: istio.{{ include "kiali-server.fullname" . }}-service-account
+          {{- end }}
+          {{- if not (include "kiali-server.identity.cert_file" .) }}
+          optional: true
+          {{- end }}
+      - name: {{ include "kiali-server.fullname" . }}-secret
+        secret:
+          secretName: {{ .Values.kiali.spec.deployment.secret_name }}
+          optional: true
+      {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+      - name: {{ include "kiali-server.fullname" . }}-cabundle
+        configMap:
+          name: {{ include "kiali-server.fullname" . }}-cabundle
+      {{- end }}
+      {{- if or (.Values.kiali.spec.deployment.affinity.node) (or (.Values.kiali.spec.deployment.affinity.pod) (.Values.kiali.spec.deployment.affinity.pod_anti)) }}
+      affinity:
+        {{- if .Values.kiali.spec.deployment.affinity.node }}
+        nodeAffinity:
+        {{- toYaml .Values.kiali.spec.deployment.affinity.node | nindent 10 }}
+        {{- end }}
+        {{- if .Values.kiali.spec.deployment.affinity.pod }}
+        podAffinity:
+        {{- toYaml .Values.kiali.spec.deployment.affinity.pod | nindent 10 }}
+        {{- end }}
+        {{- if .Values.kiali.spec.deployment.affinity.pod_anti }}
+        podAntiAffinity:
+        {{- toYaml .Values.kiali.spec.deployment.affinity.pod_anti | nindent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.kiali.spec.deployment.tolerations }}
+      tolerations:
+      {{- toYaml .Values.kiali.spec.deployment.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kiali.spec.deployment.node_selector }}
+      nodeSelector:
+      {{- toYaml .Values.kiali.spec.deployment.node_selector | nindent 8 }}
+      {{- end }}
+...

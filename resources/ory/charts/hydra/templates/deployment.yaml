@@ -98,6 +98,7 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 10
             failureThreshold: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health/ready
@@ -105,6 +106,7 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 10
             failureThreshold: 10
+            timeoutSeconds: 5
           env:
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}

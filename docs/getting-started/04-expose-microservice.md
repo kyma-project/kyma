@@ -67,7 +67,7 @@ Console UI
 
 1. Select the `orders-service` Namespace from the drop-down list in the top navigation panel.
 
-2. Go to **Configuration** > **API Rules** in the left navigation panel and select **Create API Rule**.
+2. Go to **Discovery and Network** > **API Rules** in the left navigation panel and select **Create API Rule**.
 
 3. In the **General settings** section:
 

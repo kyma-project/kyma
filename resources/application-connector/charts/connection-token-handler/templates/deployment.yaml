@@ -38,4 +38,15 @@ spec:
       - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/connection-token-handler:{{ .Values.global.connection_token_handler.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
+        securityContext:
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
 {{- end }}

@@ -1,0 +1,27 @@
+webhook:
+  values:
+    buildJob:
+      resources:
+        defaultPreset: "fast"
+    function:
+      replicas:
+        defaultPreset: "L"
+      resources:
+        defaultPreset: "L"
+  deployment:
+    resources:
+      requests:
+        cpu: 50m
+
+docker-registry:
+  resources:
+    requests:
+      cpu: 50m
+
+containers:
+  manager:
+    envs:
+      functionBuildMaxSimultaneousJobs:
+        value: "5"
+      logLevel:
+        value: "warn"

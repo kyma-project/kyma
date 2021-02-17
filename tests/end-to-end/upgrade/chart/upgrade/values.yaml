@@ -7,7 +7,8 @@ subscriberimage:
 
 image:
   dir:
-  version: 9b08e575
+  version: 40007ec9
+
   pullPolicy: "IfNotPresent"
 
 dex:

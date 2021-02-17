@@ -1,6 +1,6 @@
 echo 'TESTING has started'
 sleep 20
-/app/main.test -test.v
+/app/main.test kyma-integration
 exit_code=$?
 echo exit_code is $exit_code
 echo 'stopping pilot-agent...'

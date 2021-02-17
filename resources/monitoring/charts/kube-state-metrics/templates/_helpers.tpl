@@ -1,3 +1,14 @@
+{{- /*
+  Customization: Some changes are made to the default label set.
+  Added labels recommended by Kubernetes and Helm:
+    helm.sh/chart
+    app.kubernetes.io/managed-by
+    app.kubernetes.io/name
+    app.kubernetes.io/instance
+
+  Added labels to be used by label selectors
+*/ -}}
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.

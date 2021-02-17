@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"golang.org/x/oauth2"
 )
 
@@ -24,9 +26,9 @@ func TestAuthenticator(t *testing.T) {
 	if err := os.Setenv("TOKEN_ENDPOINT", "foo"); err != nil {
 		t.Errorf("error while setting env var TOKEN_ENDPOINT")
 	}
-
+	cfg := env.Config{}
 	// authenticate
-	authenticator := NewAuthenticator()
+	authenticator := NewAuthenticator(cfg)
 
 	httpClient := authenticator.GetClient().GetHttpClient()
 

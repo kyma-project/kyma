@@ -14,6 +14,7 @@ type TargetKindPhase string
 
 const (
 	TargetKindRegistered = "Registered"
+	TargetKindFailed     = "Failed"
 )
 
 // TargetKindSpec defines the desired state of TargetKind
@@ -36,15 +37,27 @@ type TargetKindStatus struct {
 	LastProcessedTime *metav1.Time    `json:"lastProcessedTime,omitempty"`
 }
 
+func (tks *TargetKindStatus) IsEmpty() bool {
+	return tks.Phase == ""
+}
+
 func (tks *TargetKindStatus) IsRegistered() bool {
-	if tks.Phase == TargetKindRegistered {
-		return true
-	}
-	return false
+	return tks.Phase == TargetKindRegistered
 }
 
 func (tks *TargetKindStatus) Registered() error {
 	tks.Phase = TargetKindRegistered
+	tks.LastProcessedTime = &metav1.Time{Time: time.Now()}
+
+	return nil
+}
+
+func (tks *TargetKindStatus) IsFailed() bool {
+	return tks.Phase == TargetKindFailed
+}
+
+func (tks *TargetKindStatus) Failed() error {
+	tks.Phase = TargetKindFailed
 	tks.LastProcessedTime = &metav1.Time{Time: time.Now()}
 
 	return nil

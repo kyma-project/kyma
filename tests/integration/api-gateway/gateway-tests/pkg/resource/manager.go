@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+//Manager .
 type Manager struct {
 	RetryOptions []retry.Option
 }
@@ -63,16 +64,39 @@ func (m *Manager) DeleteResource(client dynamic.Interface, resourceSchema schema
 }
 
 //GetResource returns chosed k8s object
-func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
-	panicOnErr(retry.Do(func() error {
-		resource, err := client.Resource(resourceSchema).Namespace(namespace).Get(resourceName, metav1.GetOptions{})
-		if err != nil {
-			log.Printf("Error: %+v", err)
-			return err
-		}
-		log.Printf("Resource found: %+v", resource.GetName())
-		return nil
-	}, m.RetryOptions...))
+func (m *Manager) GetResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) (*unstructured.Unstructured, error) {
+	var res *unstructured.Unstructured
+	err := retry.Do(
+		func() error {
+			var err error
+			res, err = client.Resource(resourceSchema).Namespace(namespace).Get(resourceName, metav1.GetOptions{})
+			if err != nil {
+				log.Printf("Error: %+v", err)
+				return err
+			}
+			return nil
+		}, m.RetryOptions...)
+	if err != nil {
+		log.Panicf("Error: %+v", err)
+		return nil, err
+	}
+	log.Printf("Resource found: %+v", res.GetName())
+	return res, nil
+}
+
+//GetStatus do a GetResource and extract status field
+func (m *Manager) GetStatus(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) (map[string]interface{}, error) {
+	obj, err := m.GetResource(client, resourceSchema, namespace, resourceName)
+	if err != nil {
+		log.Panicf("Error: %+v", err)
+		return nil, err
+	}
+	status, found, err := unstructured.NestedMap(obj.Object, "status")
+	if err != nil || !found {
+		log.Panicf("Error: Could not retrive status, or status not found:\n %+v", err)
+		return nil, err
+	}
+	return status, nil
 }
 
 func panicOnErr(err error) {

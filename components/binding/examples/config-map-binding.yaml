@@ -1,0 +1,11 @@
+apiVersion: bindings.kyma-project.io/v1alpha1
+kind: Binding
+metadata:
+  name: config-map-binding
+spec:
+  source:
+    kind: config-map
+    name: config-map
+  target:
+    kind: deployment
+    name: env-sample

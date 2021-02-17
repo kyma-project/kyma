@@ -7,21 +7,3 @@ kiali:
       requests:
         cpu: 10m
         memory: 20Mi
-
-  operator:
-    resources:
-      limits:
-        cpu: 25m
-        memory: 20Mi
-      requests:
-        cpu: 10m
-        memory: 5Mi
-
-kcproxy:
-  resources:
-    limits:
-      cpu: 600m
-      memory: 250Mi
-    requests:
-      cpu: 20m
-      memory: 50Mi

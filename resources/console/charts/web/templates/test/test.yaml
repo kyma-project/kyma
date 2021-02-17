@@ -33,11 +33,9 @@ spec:
               - "instances.{{ .Values.global.ingress.domainName }}"
               - "brokers.{{ .Values.global.ingress.domainName }}"
               - "dex.{{ .Values.global.ingress.domainName }}"
-              - "docs.{{ .Values.global.ingress.domainName }}"
               - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
               - "console-backend.{{ .Values.global.ingress.domainName }}"
               - "storage.{{ .Values.global.ingress.domainName }}"
-              - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
               - "core-ui.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: {{ template "fullname" . }}-tests
@@ -71,8 +69,6 @@ spec:
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
                 - name: CYPRESS_FUNCTIONS_ENABLED
                   value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
-                - name: CYPRESS_RAFTER_ENABLED
-                  value: {{ .Values.test.acceptance.ui.rafter.enabled | quote }}
               command:
                 - "/bin/sh"
               args:

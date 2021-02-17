@@ -8,7 +8,6 @@ deployment:
   image:
     pullPolicy: IfNotPresent
     pullSecret: ""
-  runAsUser: 1000
   args:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
@@ -38,6 +37,13 @@ deployment:
     lookupConfigMapName: "lookup-config"
     lookupConfig: |
       { "url": "http://example.com/graphql", "headers": { } }
+  resources:
+    limits:
+      cpu: 100m
+      memory: 96Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
 
 service:
   externalapi:
@@ -66,6 +72,3 @@ tests:
   central: *central
   image:
     pullPolicy: IfNotPresent
-
-podSecurityPolicy:
-  enabled: false

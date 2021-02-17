@@ -11,7 +11,7 @@ image:
   controller: kafka-channel-controller
   dispatcher: knative-kafka-dispatcher
   channel: knative-kafka-channel
-  tag: v0.12.3
+  tag: v0.12.5
   pullPolicy: Always
 
 # Networking Configuration for the Pods container and the K8S Service
@@ -67,3 +67,4 @@ test:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true

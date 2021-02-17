@@ -3,7 +3,7 @@ title: Revoke a client certificate
 type: Tutorials
 ---
 
-You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](#tutorials-renew-the-client-certificate). A revoked certificate, however, continues to be valid until it expires.
+You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](#tutorials-renew-the-client-certificate). A revoked certificate, however, continues to be valid until it expires. 
 
 To revoke a client certificate, send a request to the `certificates/revocations` endpoint. Pass the certificate you want to revoke and a key that matches this certificate in the call. Run:
     
@@ -18,13 +18,13 @@ If you have admin access to the Kyma cluster, you can revoke client certificates
 1. Convert the certificate from the `pem` format to the `der` format.
 
     ```bash
-    openssl x509 -in {CLIENT_CERT_FILE}.crt -outform der -out {CLIENT_CERT_DER_FILE}.der
+    openssl x509 -in {CLIENT_CERT_FILE_NAME}.crt -outform der -out {CLIENT_CERT_DER_FILE_NAME}.der
     ```
    
 2. Get the SHA256 fingerprint of the certificate.
 
     ```bash
-    shasum -a 256 {CLIENT_CERT_DER_FILE}.der
+    shasum -a 256 {CLIENT_CERT_DER_FILE_NAME}.der
     ```
    
 3. Revoke the certificate using the SHA256 fingerprint.

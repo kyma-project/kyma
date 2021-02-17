@@ -16,24 +16,25 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "1784b537"
+    tag: 36f3be4c
   service:
     externalPort: 80
     internalPort: 8080
     name: nginx
   statusPort: 6080
+  resources: {}
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "2169ffb0"
+    tag: "4f6246be"
   service:
     externalPort: 80
     internalPort: 80
     name: nginx
   statusPort: 6081
+  resources: {}
 managementPlane: {}
 replicaCount: 1
-resources: {}
 test:
   acceptance:
     labels:
@@ -54,3 +55,6 @@ test:
         enabled: true
       rafter:
         enabled: true
+
+podSecurityPolicy:
+    enabled: true

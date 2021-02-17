@@ -1,11 +1,11 @@
-{{- if .Values.global.deployGatewayOncePerNamespace }}
+{{- if and .Values.global.deployGatewayOncePerNamespace .Values.autoscaling.enable }}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}-application-gateway
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}-application-gateway
+    app: {{ .Release.Name }}
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
@@ -17,6 +17,6 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}-application-gateway
+    name: {{ .Release.Name }}
   targetCPUUtilizationPercentage: {{ .Values.autoscaling.cpuUsagePercent }}
 {{- end }}

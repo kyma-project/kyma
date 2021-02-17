@@ -1,3 +1,9 @@
+{{- /*
+  Customization: due to kyma-installer limitations, extraExposePorts has to be a multi-line string and not a list
+  Extra label to be excluded by the service monitor:
+    app.kubernetes.io/component: auth-proxy
+*/ -}}
+
 {{- if .Values.kyma.authProxy.enabled }}
 apiVersion: v1
 kind: Service

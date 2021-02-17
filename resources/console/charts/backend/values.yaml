@@ -17,16 +17,24 @@ verifySSL: false
 tracing:
   debug: false
   serviceSpanName: console-backend-service
-
+resources:
+  requests:
+    cpu: 5m
+    memory: 40Mi
+  limits:
+    cpu: 50m
+    memory: 170Mi
 tests:
   enabled: true
   labels:
     integration: true
     after-upgrade: true
 
-
 systemNamespaces: "istio-system,knative-eventing,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
 
 global:
   tracing:
     zipkinAddress: zipkin.kyma-system:9411
+
+podSecurityPolicy:
+    enabled: true

@@ -40,12 +40,7 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-          limits:
-            memory: 76Mi
-            cpu: 100m
-          requests:
-            memory: 24Mi
-            cpu: 80m
+{{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
           - name: APP_PORT
             value: {{ .Values.service.internalPort | quote }}
@@ -65,6 +60,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: APP_API_PACKAGES_SUPPORT
             value: {{ .Values.global.disableLegacyConnectivity | quote }}
+          - name: APP_NEW_EVENTING_FLOW
+            value: {{ .Values.global.isBEBEnabled | quote  }}
           {{ if .Values.global.disableLegacyConnectivity }}
           - name: APP_DIRECTOR_PROXY_URL
             value: {{ .Values.director.proxyURL | quote }}
@@ -75,6 +72,9 @@ spec:
           - name: APP_GATEWAY_BASE_URL_FORMAT
             value: {{ .Values.gatewayBaseURLFormat | quote }}
           {{ end }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume

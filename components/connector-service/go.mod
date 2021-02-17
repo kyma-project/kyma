@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/connector-service
 
-go 1.14
+go 1.15
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/procfs v0.0.8 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
-	github.com/tidwall/gjson v1.3.5
+	github.com/tidwall/gjson v1.6.7
 	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a // indirect
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
 	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
@@ -23,10 +23,10 @@ require (
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.16.10
-	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6 // indirect
 )
 
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
+	github.com/tidwall/gjson => github.com/tidwall/gjson v1.6.7
 	golang.org/x/text => golang.org/x/text v0.3.3
 )

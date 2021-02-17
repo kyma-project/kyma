@@ -10,7 +10,6 @@ The following diagram presents the overall Kiali architecture and the way the co
 2. To ensure authentication, the Keycloak Gatekeeper checks if you have a valid token.
 3. If not, the Keycloak Gatekeeper redirects you to dex to log in.
 4. After a successful log in, you can access the Kiali service which serves the website. The service exposes an endpoint and acts as an entry point for the Kiali deployment.
-5. Kiali deployment is the central part of the solution. For it to provide the necessary functionality, the Kiali Operator reads the Kiali CR and configures the API server so it can deploy Kiali.
-6. Kiali collects the information on the cluster health from the following sources:
+5. Kiali collects the information on the cluster health from the following sources:
   * API server which provides data on the cluster state.
   * Service Mesh by analyzing metrics Prometheus scrapes from the Istio Pod.

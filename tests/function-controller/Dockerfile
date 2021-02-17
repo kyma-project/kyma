@@ -15,14 +15,14 @@ RUN GO111MODULE=on go mod download
 
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./main_test.go ${BASE_APP_DIR}
+COPY ./cmd/ ${BASE_APP_DIR}/cmd/
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
 #
 
-RUN CGO_ENABLED=0 go test main_test.go -c
+RUN CGO_ENABLED=0 go build -o main.test ./cmd/main.go
 
 FROM alpine:3.12
 LABEL source = git@github.com:kyma-project/kyma.git
@@ -47,4 +47,4 @@ COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 # Run tests
 #
 
-CMD ["/app/main.test"]
+ENTRYPOINT ["/app/main.test"]

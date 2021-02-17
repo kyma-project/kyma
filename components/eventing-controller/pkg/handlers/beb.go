@@ -4,27 +4,31 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-logr/logr"
+
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
-
-	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
 // compile time check
 var _ Interface = &Beb{}
 
 type Interface interface {
-	Initialize()
-	SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error)
+	Initialize(cfg env.Config)
+	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, cleaner eventtype.Cleaner) (bool, error)
 	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
 type Beb struct {
-	Client *client.Client
-	Log    logr.Logger
+	Client      *client.Client
+	WebhookAuth *types.WebhookAuth
+	Log         logr.Logger
 }
 
 type BebResponse struct {
@@ -32,18 +36,31 @@ type BebResponse struct {
 	Error      error
 }
 
-func (b *Beb) Initialize() {
+func (b *Beb) Initialize(cfg env.Config) {
 	if b.Client == nil {
-		authenticator := auth.NewAuthenticator()
-		b.Client = client.NewClient(config.GetDefaultConfig(), authenticator)
+		authenticator := auth.NewAuthenticator(cfg)
+		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
+		b.WebhookAuth = getWebHookAuth(cfg)
 	}
 }
 
-// SyncBebSubscription synchronize the EV@ subscription with the EMS subscription. It returns true, if the EV2 susbcription status was changed
-func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (bool, error) {
+// getWebHookAuth returns the webhook auth config from the given env config
+// or returns an error if the env config contains invalid grant type or auth type.
+func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
+	return &types.WebhookAuth{
+		ClientID:     cfg.WebhookClientID,
+		ClientSecret: cfg.WebhookClientSecret,
+		TokenURL:     cfg.WebhookTokenEndpoint,
+		Type:         types.AuthTypeClientCredentials,
+		GrantType:    types.GrantTypeClientCredentials,
+	}
+}
+
+// SyncBebSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
+func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, cleaner eventtype.Cleaner) (bool, error) {
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err
@@ -58,7 +75,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 	if newEv2Hash != subscription.Status.Ev2hash {
 		// delete & create a new Ems subscription
 		var newEmsHash int64
-		emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
+		emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner)
 		if err != nil {
 			return false, err
 		}
@@ -85,7 +102,7 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 		}
 		if newEmsHash != subscription.Status.Emshash {
 			// delete & create a new Ems subscription
-			emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2)
+			emsSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner)
 			if err != nil {
 				return false, err
 			}
@@ -94,38 +111,42 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription) (
 		}
 	}
 	// set the status of emsSubscription in ev2Subscription
-	statusChanged = b.setEmsSubscritionStatus(subscription, emsSubscription) || statusChanged
+	statusChanged = b.setEmsSubscriptionStatus(subscription, emsSubscription) || statusChanged
 
 	return statusChanged, nil
 }
 
 // DeleteBebSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
-	sEv2, err := getInternalView4Ev2(subscription)
-	if err != nil {
-		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
-		return err
-	}
-	return b.deleteSubscription(sEv2.Name)
+	return b.deleteSubscription(subscription.Name)
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) (*types.Subscription, int64, error) {
-	// delete Ems susbcription
+func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner) (*types.Subscription, int64, error) {
+	// delete Ems subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
 		b.Log.Error(err, "delete ems subscription failed", "subscription name:", subscription.Name)
 		return nil, 0, err
 	}
+
+	// clean the application name segment in the subscription event-types from none-alphanumeric characters
+	if err := cleanEventTypes(subscription, cleaner); err != nil {
+		b.Log.Error(err, "clean application name in the subscription event-types failed", "subscription name:", subscription.Name)
+		return nil, 0, err
+	}
+
 	// create a new Ems subscription
 	if err := b.createSubscription(subscription); err != nil {
 		b.Log.Error(err, "create ems subscription failed", "subscription name:", subscription.Name)
 		return nil, 0, err
 	}
+
 	// get the new Ems subscription
 	emsSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
 		b.Log.Error(err, "failed to get ems subscription", "subscription name", subscription.Name)
 		return nil, 0, err
 	}
+
 	// get the new hash
 	sEms, err := getInternalView4Ems(emsSubscription)
 	if err != nil {
@@ -136,11 +157,27 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription) 
 		b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
 		return nil, 0, err
 	}
+
 	return emsSubscription, newEmsHash, nil
 }
 
-// Set the status of emsSubscription in ev2Subscription
-func (b *Beb) setEmsSubscritionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types.Subscription) bool {
+// cleanEventTypes cleans the application name segment in the subscription event-types from none-alphanumeric characters
+// note: the given subscription instance will be updated with the cleaned event-types
+func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner) error {
+	events := make(types.Events, 0, len(subscription.Events))
+	for _, event := range subscription.Events {
+		eventType, err := cleaner.Clean(event.Type)
+		if err != nil {
+			return err
+		}
+		events = append(events, types.Event{Source: event.Source, Type: eventType})
+	}
+	subscription.Events = events
+	return nil
+}
+
+// setEmsSubscriptionStatus sets the status of emsSubscription in ev2Subscription
+func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, emsSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(emsSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(emsSubscription.SubscriptionStatus)

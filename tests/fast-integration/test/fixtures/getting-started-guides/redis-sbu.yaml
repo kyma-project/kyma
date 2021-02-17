@@ -1,0 +1,15 @@
+---
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  name: orders-service
+  namespace: orders-service
+spec:
+  serviceBindingRef:
+    name: orders-service
+  usedBy:
+    kind: deployment
+    name: orders-service
+  parameters:
+    envPrefix:
+      name: "REDIS_"

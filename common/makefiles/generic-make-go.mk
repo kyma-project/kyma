@@ -78,7 +78,11 @@ endef
 verify:: test check-imports check-fmt
 format:: imports fmt
 
-release: resolve dep-status verify build-image push-image
+release:
+	$(MAKE) release-dep
+
+#Old Target for dep projects
+release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
 build-image: pull-licenses
@@ -111,6 +115,31 @@ ensure-local:
 dep-status-local:
 	dep status -v
 
+#Go mod
+gomod-deps-local:: gomod-vendor-local gomod-verify-local gomod-status-local
+$(eval $(call buildpack-mount,gomod-deps))
+
+gomod-check-local:: test-local check-imports-local check-fmt-local
+$(eval $(call buildpack-cp-ro,gomod-check))
+
+gomod-component-check-local:: gomod-deps-local gomod-check-local
+$(eval $(call buildpack-mount,gomod-component-check))
+
+gomod-release:gomod-component-check build-image push-image
+
+gomod-vendor-local:
+	GO111MODULE=on go mod vendor
+
+gomod-verify-local:
+	GO111MODULE=on go mod verify
+
+gomod-status-local:
+	GO111MODULE=on go mod graph
+
+gomod-tidy-local:
+	GO111MODULE=on go mod tidy
+
+## Source Code tools
 check-imports-local:
 	@if [ -n "$$(goimports -l $$($(FILES_TO_CHECK)))" ]; then \
 		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \

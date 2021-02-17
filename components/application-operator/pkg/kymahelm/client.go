@@ -1,7 +1,12 @@
 package kymahelm
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chartutil"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -15,8 +20,8 @@ import (
 //go:generate mockery -name HelmClient
 type HelmClient interface {
 	ListReleases(namespace string) ([]*release.Release, error)
-	InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
-	UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error)
+	InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}, profile string) (*release.Release, error)
+	UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}, profile string) (*release.Release, error)
 	DeleteRelease(releaseName string, namespace string) (*release.UninstallReleaseResponse, error)
 	ReleaseStatus(releaseName string, namespace string) (*release.Release, error)
 }
@@ -63,7 +68,7 @@ func (hc *helmClient) ListReleases(namespace string) ([]*release.Release, error)
 	return results, nil
 }
 
-func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}, profile string) (*release.Release, error) {
 
 	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
@@ -82,6 +87,13 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, name
 		return nil, err
 	}
 
+	if profile != "" {
+		overrides, err = includeProfile(*chartRequested, profile, overrides)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	response, err := installAction.Run(chartRequested, overrides)
 	if err != nil {
 		return nil, err
@@ -90,7 +102,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, releaseName string, name
 	return response, nil
 }
 
-func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}) (*release.Release, error) {
+func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, namespace string, overrides map[string]interface{}, profile string) (*release.Release, error) {
 
 	actionConfig, err := hc.actionConfigInit(namespace)
 	if err != nil {
@@ -105,6 +117,13 @@ func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName string, names
 	chartRequested, err := loader.Load(chartDir)
 	if err != nil {
 		return nil, err
+	}
+
+	if profile != "" {
+		overrides, err = includeProfile(*chartRequested, profile, overrides)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	response, err := upgradeAction.Run(releaseName, chartRequested, overrides)
@@ -165,4 +184,30 @@ func (hc *helmClient) actionConfigInit(namespace string) (*action.Configuration,
 	}
 
 	return actionConfig, nil
+}
+
+func includeProfile(chart chart.Chart, profileName string, overrides map[string]interface{}) (map[string]interface{}, error) {
+	profileValues, err := getProfileValues(chart, profileName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if profileValues != nil {
+		utils.MergeMaps(overrides, profileValues)
+	}
+	return overrides, nil
+}
+
+func getProfileValues(chart chart.Chart, profileName string) (map[string]interface{}, error) {
+	for _, file := range chart.Files {
+		if (file.Name == fmt.Sprintf("profile-%s.yaml", profileName)) || (file.Name == fmt.Sprintf("%s.yaml", profileName)) {
+			profileValues, err := chartutil.ReadValues(file.Data)
+			if err != nil {
+				return nil, err
+			}
+			return profileValues, nil
+		}
+	}
+	return nil, nil
 }

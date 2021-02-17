@@ -58,15 +58,22 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
           requests:
-            cpu: 100m
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+        securityContext:
+          runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 {{- end }}
 ---
+{{- if not .Values.global.isBEBEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -94,6 +101,7 @@ spec:
         app: {{ .Release.Name }}-event-service
         kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
         kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
+        kyma-project.io/dashboard: event-mesh
         release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{.Release.Name }}-event-service
@@ -121,6 +129,16 @@ spec:
             port: {{ .Values.eventService.deployment.args.externalAPIPort }}
           initialDelaySeconds: 10
           periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.eventService.deployment.resources.limits.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.eventService.deployment.resources.requests.cpu }}
+            memory: {{ .Values.eventService.deployment.resources.requests.memory }}
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
+        securityContext:
+          runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
+{{- end }}

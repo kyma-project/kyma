@@ -3,3 +3,5 @@ dependencies:
     condition: dockerRegistry.enableInternal
   - name: webhook
     condition: webhook.enabled  
+  - name: k3s-tests
+    condition: k3s-tests.enabled # this chart is installed manually

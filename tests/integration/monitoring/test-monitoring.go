@@ -41,9 +41,10 @@ func main() {
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	// testTargetsAreHealthy()
+	testTargetsAreHealthy()
 	checkScrapePools()
 	testRulesAreHealthy()
+	checkAlerts()
 	testGrafanaIsReady()
 	checkLambdaUIDashboard()
 
@@ -173,7 +174,7 @@ func testTargetsAreHealthy() {
 
 }
 
-func shouldIgnoreTarget(target prom.Labels) bool {
+func shouldIgnoreTarget(target prom.TargetLabels) bool {
 	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
 		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
@@ -289,8 +290,6 @@ func buildScrapePoolSet() map[string]struct{} {
 
 func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 	var serviceMonitorsToBeIgnored = []string{
-		// kiali-operator-metrics is created automatically by kiali operator and can't be disabled
-		"kiali-operator-metrics",
 		// tracing-metrics is created automatically by jaeger operator and can't be disabled
 		"tracing-metrics",
 	}
@@ -328,7 +327,7 @@ func testRulesAreHealthy() {
 			tick.Stop()
 			log.Fatal(timeoutMessage)
 		case <-tick.C:
-			var resp prom.AlertResponse
+			var resp prom.RulesResponse
 			url := fmt.Sprintf("%s/api/v1/rules", prometheusURL)
 			respBody, statusCode := doGet(url)
 			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
@@ -338,9 +337,9 @@ func testRulesAreHealthy() {
 				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
 			}
 			allRulesAreHealthy := true
-			alertDataGroups := resp.Data.Groups
+			rulesGroups := resp.Data.Groups
 			timeoutMessage = ""
-			for _, group := range alertDataGroups {
+			for _, group := range rulesGroups {
 				for _, rule := range group.Rules {
 					if rule.Health != "ok" {
 						allRulesAreHealthy = false
@@ -355,6 +354,65 @@ func testRulesAreHealthy() {
 		}
 	}
 
+}
+
+func checkAlerts() {
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(5 * time.Second)
+	var timeoutMessage string
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			var resp prom.AlertsResponse
+			url := fmt.Sprintf("%s/api/v1/alerts", prometheusURL)
+			respBody, statusCode := doGet(url)
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			noFiringAlerts := true
+			alerts := resp.Data.Alerts
+			timeoutMessage = ""
+			for _, alert := range alerts {
+				if shouldIgnoreAlert(alert) {
+					continue
+				}
+				if alert.State == "firing" {
+					noFiringAlerts = false
+					timeoutMessage += fmt.Sprintf("Alert with name=%s is firing\n", alert.Labels.AlertName)
+				}
+			}
+			if noFiringAlerts {
+				log.Println("No alerts are firing")
+				return
+			}
+		}
+	}
+}
+
+func shouldIgnoreAlert(alert prom.Alert) bool {
+	if alert.Labels.Severity != "critical" {
+		return true
+	}
+
+	var alertNamesToIgnore = []string{
+		// Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
+		"Watchdog",
+		// Scrape limits can be exceeded on long-running clusters and can be ignored
+		"ScrapeLimitForTargetExceeded",
+	}
+
+	for _, name := range alertNamesToIgnore {
+		if name == alert.Labels.AlertName {
+			return true
+		}
+	}
+	return false
 }
 
 func testGrafanaIsReady() {

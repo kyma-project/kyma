@@ -40,6 +40,13 @@ spec:
       - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/connector-service:{{ .Values.global.connector_service.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         args:
           - "/connectorservice"
           - "--appName={{ .Chart.Name }}"
@@ -87,7 +94,9 @@ spec:
           - containerPort: 9090
             name: http-metrics
         securityContext:
-          runAsUser: {{ .Values.deployment.runAsUser }}
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       {{- if .Values.deployment.externalClusterLookup.enabled }}
       volumes:
       - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}

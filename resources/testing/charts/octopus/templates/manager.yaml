@@ -62,12 +62,7 @@ spec:
           - name: SECRET_NAME
             value: webhook-server-secret
         resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
-          requests:
-            cpu: 100m
-            memory: 20Mi
+          {{- toYaml .Values.resources | nindent 10 }}
         ports:
         - containerPort: 9876
           name: tcp-webhook-srv

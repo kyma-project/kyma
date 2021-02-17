@@ -5,10 +5,7 @@ metadata:
   annotations:
 {{ .Values.serviceAnnotations | toYaml | indent 4 }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
-    {{- if .Values.serviceAccountLabels }}
-    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
-    {{- end }}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.serviceLabels) .  }}
 spec:
   type: {{ .Values.service.type }}
   ports:

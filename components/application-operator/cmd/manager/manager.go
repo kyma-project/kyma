@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
+
 	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
 
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -21,7 +23,7 @@ import (
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	runtimeConfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
@@ -34,10 +36,13 @@ func main() {
 
 	log.Info("Starting Application Operator.")
 
-	options := parseArgs()
+	options, err := parseOptions()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Infof("Options: %s", options)
 
-	cfg, err := config.GetConfig()
+	cfg, err := runtimeConfig.GetConfig()
 
 	if err != nil {
 		log.Fatal(err)
@@ -127,7 +132,7 @@ func main() {
 }
 
 func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (gateway.GatewayManager, error) {
-	overrides := gateway.OverridesData{
+	overridesMap := gateway.OverridesData{
 		ApplicationGatewayImage:      options.applicationGatewayImage,
 		ApplicationGatewayTestsImage: options.applicationGatewayTestsImage,
 		GatewayOncePerNamespace:      options.gatewayOncePerNamespace,
@@ -139,19 +144,23 @@ func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.H
 		return nil, err
 	}
 
-	return gateway.NewGatewayManager(helmClient, overrides, serviceCatalogueClient.ServiceInstances("")), nil
+	return gateway.NewGatewayManager(helmClient, overridesMap, serviceCatalogueClient.ServiceInstances(""), options.profile), nil
 }
 
 func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (appRelease.ApplicationReleaseManager, error) {
-	overridesDefaults := appRelease.OverridesData{
+	overridesDefaults := overrides.OverridesData{
 		DomainName:                            options.domainName,
 		ApplicationGatewayImage:               options.applicationGatewayImage,
 		ApplicationGatewayTestsImage:          options.applicationGatewayTestsImage,
 		EventServiceImage:                     options.eventServiceImage,
 		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
+		LogFormat:                             options.LogFormat,
+		LogLevel:                              options.LogLevel,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
+		IsBEBEnabled:                          options.isBEBEnabled,
+		PodSecurityPolicyEnabled:              options.podSecurityPolicyEnabled,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)
@@ -159,7 +168,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		log.Fatal(err)
 	}
 
-	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
+	releaseManager := appRelease.NewApplicationReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace, options.profile)
 
 	return releaseManager, nil
 }

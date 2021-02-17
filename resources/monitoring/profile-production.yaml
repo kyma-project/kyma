@@ -2,11 +2,11 @@ prometheus:
   prometheusSpec:
     resources:
       limits:
-        cpu: 600m
-        memory: 3Gi
+        cpu: 1000m
+        memory: 4Gi
       requests:
-        cpu: 150m
-        memory: 1000Mi
+        cpu: 300m
+        memory: 1Gi
     retention: 30d
     retentionSize: 15GB
     storageSpec:
@@ -20,7 +20,7 @@ prometheus-istio:
   server:
     resources:
       limits:
-        memory: 3Gi
+        memory: 4Gi
 
 alertmanager:
   alertmanagerSpec:

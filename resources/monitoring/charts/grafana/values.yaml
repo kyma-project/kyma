@@ -1,5 +1,7 @@
 rbac:
   create: true
+  ## Use an existing ClusterRole/Role (depending on rbac.namespaced false/true)
+  # useExistingRole: name-of-some-(cluster)role
   pspEnabled: true
   pspUseAppArmor: true
   namespaced: false
@@ -16,6 +18,7 @@ serviceAccount:
   name:
   nameTest:
 #  annotations:
+#    eks.amazonaws.com/role-arn: arn:aws:iam::123456789000:role/iam-role-name-here
 
 replicas: 1
 
@@ -52,8 +55,9 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/external/grafana/grafana
-  tag: 7.0.6
+  repository: eu.gcr.io/kyma-project/incubator/grafana
+  tag: 7.4.0-9b4f06c3
+  sha: ""
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -62,6 +66,13 @@ image:
   ##
   # pullSecrets:
   #   - myRegistrKeySecretName
+
+testFramework:
+  enabled: false
+  image: "bats/bats"
+  tag: "v1.1.0"
+  imagePullPolicy: IfNotPresent
+  securityContext: {}
 
 securityContext:
   runAsUser: 472
@@ -87,7 +98,8 @@ extraEmptyDirMounts: []
 
 downloadDashboardsImage:
   repository: curlimages/curl
-  tag: 7.70.0
+  tag: 7.73.0
+  sha: ""
   pullPolicy: IfNotPresent
 
 downloadDashboards:
@@ -119,14 +131,38 @@ service:
   labels: {}
   portName: http-service
 
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+  path: /metrics
+  #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
+  labels: {}
+  interval: 1m
+  scheme: http
+  tlsConfig: {}
+  scrapeTimeout: 30s
+  relabelings: []
+
+# Customization: due to kyma-installer limitations, this override has to be a multi-line string and not a list
 extraExposePorts:
  # - name: keycloak
  #   port: 8080
  #   targetPort: 8080
  #   type: ClusterIP
 
+# overrides pod.spec.hostAliases in the grafana deployment's pods
+hostAliases: []
+  # - ip: "1.2.3.4"
+  #   hostnames:
+  #     - "my.host.com"
+
 ingress:
   enabled: false
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  # ingressClassName: nginx
   # Values can be templated
   annotations: {}
     # kubernetes.io/ingress.class: nginx
@@ -223,6 +259,7 @@ initChownData:
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
     tag: "1.32.0"
+    sha: ""
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -322,6 +359,30 @@ extraSecretMounts: []
   #   secretName: grafana-secret-files
   #   readOnly: true
   #   subPath: ""
+  #
+  # for AWS EKS (cloudwatch) use the following (see also instruction in env: above)
+  # - name: aws-iam-token
+  #   mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
+  #   readOnly: true
+  #   projected:
+  #     defaultMode: 420
+  #     sources:
+  #       - serviceAccountToken:
+  #           audience: sts.amazonaws.com
+  #           expirationSeconds: 86400
+  #           path: token
+  #
+  # for CSI e.g. Azure Key Vault use the following
+  # - name: secrets-store-inline
+  #  mountPath: /run/secrets
+  #  readOnly: true
+  #  csi:
+  #    driver: secrets-store.csi.k8s.io
+  #    readOnly: true
+  #    volumeAttributes:
+  #      secretProviderClass: "akv-grafana-spc"
+  #    nodePublishSecretRef:                       # Only required when using service principal mode
+  #       name: grafana-akv-creds                  # Only required when using service principal mode
 
 ## Additional grafana server volume mounts
 # Defines additional volume mounts.
@@ -349,6 +410,14 @@ datasources: {}
 #      url: http://prometheus-prometheus-server
 #      access: proxy
 #      isDefault: true
+#    - name: CloudWatch
+#        type: cloudwatch
+#        access: proxy
+#        uid: cloudwatch
+#        editable: false
+#        jsonData:
+#          authType: credentials
+#          defaultRegion: us-east-1
 
 ## Configure notifiers
 ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -409,7 +478,7 @@ dashboards: {}
   #     url: https://example.com/repository/test-b64.json
   #     b64content: true
 
-## Reference to external ConfigMap per provider. Use provider name as key and ConfiMap name as value.
+## Reference to external ConfigMap per provider. Use provider name as key and ConfigMap name as value.
 ## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
 ## ConfigMap data example:
 ##
@@ -447,7 +516,7 @@ grafana.ini:
  #    scopes: user:email,read:org
  #    auth_url: https://github.com/login/oauth/authorize
  #    token_url: https://github.com/login/oauth/access_token
- #    api_url: https://github.com/user
+ #    api_url: https://api.github.com/user
  #    team_ids:
  #    allowed_organizations:
  #    client_id:
@@ -497,7 +566,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/incubator/develop/k8s-sidecar
-    tag: 0.1.178-d89491d2
+    tag: 1.1.0-780d37cd
   imagePullPolicy: IfNotPresent
   resources: {}
 #   limits:
@@ -508,6 +577,7 @@ sidecar:
 #     memory: 50Mi
   # skipTlsVerify Set to true to skip tls verification for kube api calls
   # skipTlsVerify: true
+  enableUniqueFilenames: false
   dashboards:
     enabled: false
     SCProvider: true
@@ -521,6 +591,9 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # If specified, the sidecar will look for annotation with this name to create folder and put graph here.
+    # You can use this parameter together with `provider.foldersFromFilesStructure`to annotate configmaps and create folder structure.
+    folderAnnotation: null
     # provider configuration that lets grafana manage the dashboards
     provider:
       # name of the provider, should be unique
@@ -535,6 +608,8 @@ sidecar:
       disableDelete: false
       # allow updating provisioned dashboards from the UI
       allowUiUpdates: false
+      # allow Grafana to replicate dashboard structure from filesystem
+      foldersFromFilesStructure: false
   datasources:
     enabled: false
     # label that the configmaps with datasources are marked with
@@ -543,10 +618,68 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+  notifiers:
+    enabled: false
+    # label that the configmaps with notifiers are marked with
+    label: grafana_notifier
+    # If specified, the sidecar will search for notifier config-maps inside this namespace.
+    # Otherwise the namespace in which the sidecar is running will be used.
+    # It's also possible to specify ALL to search in all namespaces
+    searchNamespace: null
 
 ## Override the deployment namespace
 ##
 namespaceOverride: ""
+
+## Number of old ReplicaSets to retain
+##
+revisionHistoryLimit: 10
+
+## Add a seperate remote image renderer deployment/service
+imageRenderer:
+  # Enable the image-renderer deployment & service
+  enabled: false
+  replicas: 1
+  image:
+    # image-renderer Image repository
+    repository: grafana/grafana-image-renderer
+    # image-renderer Image tag
+    tag: latest
+    # image-renderer Image sha (optional)
+    sha: ""
+    # image-renderer ImagePullPolicy
+    pullPolicy: Always
+  # extra environment variables
+  env: {}
+    # RENDERING_ARGS: --disable-gpu,--window-size=1280x758
+    # RENDERING_MODE: clustered
+  # image-renderer deployment securityContext
+  securityContext: {}
+  # image-renderer deployment Host Aliases
+  hostAliases: []
+  # image-renderer deployment priority class
+  priorityClassName: ''
+  service:
+    # image-renderer service port name
+    portName: 'http'
+    # image-renderer service port used by both service and deployment
+    port: 8081
+  # name of the image-renderer port on the pod
+  podPortName: http
+  # number of image-renderer replica sets to keep
+  revisionHistoryLimit: 10
+  networkPolicy:
+    # Enable a NetworkPolicy to limit inbound traffic to only the created grafana pods
+    limitIngress: true
+    # Enable a NetworkPolicy to limit outbound traffic to only the created grafana pods
+    limitEgress: false
+  resources: {}
+#   limits:
+#     cpu: 100m
+#     memory: 100Mi
+#   requests:
+#     cpu: 50m
+#     memory: 50Mi
 
 virtualservice:
   ## If true, Grafana VirtualService will be created

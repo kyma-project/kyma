@@ -1,0 +1,11 @@
+---
+
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""
+
+istio_operator_cluster_file: istio-operator-cluster-production.yaml

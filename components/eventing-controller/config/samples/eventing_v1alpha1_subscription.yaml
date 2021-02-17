@@ -25,12 +25,12 @@ spec:
         eventSource: {
           type: exact,
           property: source,
-          value: "/default/kyma/myinstance"
+          value: "/default/kyma/id"
         },
         eventType: {
           type: exact,
           property: type,
-          value: "kyma.ev2.poc.event1.v1"
+          value: "sap.kyma.test-app.order.created.v1"
         }
       },
     ]

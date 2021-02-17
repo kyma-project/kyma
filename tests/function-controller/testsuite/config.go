@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	HelloWorld   = "Hello World"
 	TestDataKey  = "testData"
 	EventPing    = "event-ping"
 	RedisEnvPing = "env-ping"
@@ -33,4 +32,5 @@ type Config struct {
 	Cleanup            step.CleanupMode `envconfig:"default=yes"`
 	GitServerImage     string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:PR-2696"`
 	GitServerRepoName  string           `envconfig:"default=function"`
+	IstioEnabled       bool             `envconfig:"default=true"`
 }

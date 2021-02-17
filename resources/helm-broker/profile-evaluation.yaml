@@ -1,0 +1,37 @@
+
+ctrl:
+  resources:
+    limits:
+      memory: 96Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 30m
+
+broker:
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 60m
+    requests:
+      memory: 60Mi
+      cpu: 20m
+
+etcd-stateful:
+  etcd:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 20m
+        memory: 28Mi
+
+addons-ui:
+  resources: 
+    requests:
+      cpu: 1m
+      memory: 16Mi
+    limits:
+      cpu: 30m
+      memory: 32Mi

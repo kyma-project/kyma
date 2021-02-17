@@ -1,0 +1,6 @@
+tests:
+  image:
+    repository: "overriden-during-installation"
+    tag: "overriden-during-installation"
+
+jobName: k3s-serverless-test # overriden in serverless-integration-k3s.sh in test-infra

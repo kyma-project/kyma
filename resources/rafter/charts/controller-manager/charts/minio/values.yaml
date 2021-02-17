@@ -54,7 +54,7 @@ mountPath: "/export"
 replicas: 4
 zones: 1
 
-patchCredentials:
+ensureSecret:
   secretName: ""
 
 ## TLS Settings for Minio
@@ -284,3 +284,7 @@ metrics:
     # namespace: monitoring
     # interval: 30s
     # scrapeTimeout: 10s
+
+pod:
+  extraProperties: {}
+  extraContainerProperties: {}

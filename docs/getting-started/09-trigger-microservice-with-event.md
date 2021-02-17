@@ -21,36 +21,42 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command:
 
-```yaml
-cat <<EOF | kubectl apply -f  -
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  name: orders-service
-  namespace: orders-service
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce-mock
-      type: order.deliverysent
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
+  ```bash
+  kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
+  ```
+
+2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+
+  ```yaml
+  cat <<EOF | kubectl apply -f  -
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: Trigger
+    metadata:
       name: orders-service
       namespace: orders-service
-EOF
-```
+    spec:
+      broker: default
+      filter:
+        attributes:
+          eventtypeversion: v1
+          source: commerce-mock
+          type: order.deliverysent
+      subscriber:
+        ref:
+          apiVersion: v1
+          kind: Service
+          name: orders-service
+          namespace: orders-service
+  EOF
+  ```
 
 - **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
 - **spec.filter.attributes.type** points to the event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
 
-2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
+3. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
 
    ```bash
    kubectl get trigger orders-service -n orders-service -o=jsonpath="{.status.conditions[2].status}"
@@ -64,7 +70,7 @@ Console UI
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
-2. Go to **Operation** > **Services** in the left navigation panel and select `orders-service`.
+2. Go to **Discovery and Network** > **Services** in the left navigation panel and select `orders-service`.
 
 3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
 
@@ -80,7 +86,7 @@ Console UI
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:  
 
-1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Configuration** > **API Rules** view in the `order-service` Namespace.
+1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Discovery and Network** > **API Rules** view in the `order-service` Namespace.
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 

@@ -6,7 +6,7 @@ This component configures Kyma to use a wildcard DNS provided by `xip.io`.
 
 ## Prerequisites
 
-This component must be installed after the `cluster-essentials` component and before `istio-kyma-patch`.
+This component must be installed after the `cluster-essentials` component.
 
 ## Usage
 

@@ -41,7 +41,7 @@ function __failRetry() {
 
 function __createTestBindings() {
 	echo "---> $1"
-	kubectl create -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
+	kubectl apply -f "${DIR}/kyma-test-bindings.yaml" -n "${NAMESPACE}"
 }
 
 function __deleteTestBindings() {
@@ -204,7 +204,7 @@ function testDescribeClusterScoped() {
 
 function __registrationRequest() {
 	echo "---> $1"
-	curl -k -f -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM" > registration_request
+	curl -k -f -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM" > /tmp/registration_request
 }
 
 function __loginRequest() {
@@ -223,7 +223,7 @@ function __approvalRequest() {
 function __configFileRequest() {
 	local AUTH_TOKEN="$1"
 	echo "---> $2"
-	curl -k -f -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}/kube-config" -o "${PWD}/kubeconfig"
+	curl -k -f -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}/kube-config" -o "/tmp/kubeconfig"
 }
 
 #Creates a file "registration_request"
@@ -254,8 +254,8 @@ function getConfigFile() {
 	registrationRequestRetry
 
 	local REQUEST_ID
-	REQUEST_ID=$(grep '/auth/local?req' < registration_request | cut -d '"' -f 2 | cut -d '?' -f 2)
-	rm -f registration_request
+	REQUEST_ID=$(grep '/auth/local?req' < /tmp/registration_request | cut -d '"' -f 2 | cut -d '?' -f 2)
+	rm -f /tmp/registration_request
 
 	loginRequestRetry "${REQUEST_ID}"
 
@@ -267,7 +267,7 @@ function getConfigFile() {
 	AUTH_TOKEN=$(echo "${APPROVAL_RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
 	configFileRequestRetry "${AUTH_TOKEN}"
 
-	if [[ ! -s "${PWD}/kubeconfig" ]]; then
+	if [[ ! -s "/tmp/kubeconfig" ]]; then
 		echo "---> KUBECONFIG not created, or is empty!"
 		exit 1
 	fi
@@ -407,12 +407,10 @@ function testIstio() {
 	readonly editPermissionText viewAccessText
 
 	local -r resources=(
-	    "adapters.config.istio.io" "attributemanifests.config.istio.io" "authorizationpolicies.security.istio.io"
-	    "destinationrules.networking.istio.io" "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
-	    "handlers.config.istio.io" "httpapispecbindings.config.istio.io" "httpapispecs.config.istio.io"
-	    "instances.config.istio.io" "peerauthentications.security.istio.io" "quotaspecbindings.config.istio.io"
-	    "quotaspecs.config.istio.io" "requestauthentications.security.istio.io" "rules.config.istio.io"
-	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" "templates.config.istio.io"
+	    "authorizationpolicies.security.istio.io" "destinationrules.networking.istio.io" 
+	    "envoyfilters.networking.istio.io" "gateways.networking.istio.io"
+	    "peerauthentications.security.istio.io" "requestauthentications.security.istio.io" 
+	    "serviceentries.networking.istio.io" "sidecars.networking.istio.io" 
 	    "virtualservices.networking.istio.io" "workloadentries.networking.istio.io" )
 
 	# View
@@ -434,7 +432,7 @@ function testIstio() {
 
 function runTests() {
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
-	export KUBECONFIG="${PWD}/kubeconfig"
+	export KUBECONFIG="/tmp/kubeconfig"
 
 	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
 	testPermissionsClusterScoped "get" "clusterrole" "yes"
@@ -444,6 +442,9 @@ function runTests() {
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
 	testPermissions "delete" "deployment" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should be able to delete apirules.gateway.kyma-project.io in the cluster"
+	testPermissionsClusterScoped "delete" "apirules.gateway.kyma-project.io" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to get ory Access Rule"
 	testPermissions "get" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
@@ -542,7 +543,7 @@ function runTests() {
 	testIstio "${ADMIN_EMAIL}" "${NAMESPACE}" "yes" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
-	export KUBECONFIG="${PWD}/kubeconfig"
+	export KUBECONFIG="/tmp/kubeconfig"
 
 	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole"
 	testPermissionsClusterScoped "get" "clusterrole" "yes"
@@ -564,6 +565,12 @@ function runTests() {
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create apirules.gateway.kyma-project.io"
+	testPermissions "create" "apirules.gateway.kyma-project.io" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should be able to get apirules.gateway.kyma-project.io"
+	testPermissions "get" "apirules.gateway.kyma-project.io" "${NAMESPACE}" "yes"
 
 	echo "--> ${VIEW_EMAIL} should be able to get serverless-webhook-envs configmap"
 	testPermissions "get" "configmap/serverless-webhook-envs" "${NAMESPACE}" "yes"
@@ -610,7 +617,7 @@ function runTests() {
 	testPermissionsClusterScoped "create" "backendmodule" "no"
 
 	EMAIL=${NAMESPACE_ADMIN_EMAIL} PASSWORD=${NAMESPACE_ADMIN_PASSWORD} getConfigFile
-	export KUBECONFIG="${PWD}/kubeconfig"
+	export KUBECONFIG="/tmp/kubeconfig"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to create new namespace"
 	createNamespaceForNamespaceAdmin
@@ -623,6 +630,9 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to get ory Access Rule in system namespace"
 	testPermissions "get" "rule.oathkeeper.ory.sh" "${SYSTEM_NAMESPACE}" "no"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create apirules.gateway.kyma-project.io in system namespace"
+	testPermissions "create" "apirules.gateway.kyma-project.io" "${SYSTEM_NAMESPACE}" "no"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should NOT be able to create secret in system namespace"
 	testPermissions "create" "secret" "${SYSTEM_NAMESPACE}" "no"
@@ -722,6 +732,9 @@ function runTests() {
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete ORY Access Rule in the namespace they created"
 	testPermissions "delete" "rule.oathkeeper.ory.sh" "${CUSTOM_NAMESPACE}" "yes"
+
+	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to delete apirules.gateway.kyma-project.io in the namespace they created"
+	testPermissions "delete" "apirules.gateway.kyma-project.io" "${CUSTOM_NAMESPACE}" "yes"
 
 	echo "--> ${NAMESPACE_ADMIN_EMAIL} should be able to list Secrets in the namespace they created"
 	testPermissions "list" "secrets" "${CUSTOM_NAMESPACE}" "yes"
@@ -861,7 +874,7 @@ function runTests() {
 
 	# developer who was granted kyma-developer role should be able to operate in the scope of its namespace
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
-	export KUBECONFIG="${PWD}/kubeconfig"
+	export KUBECONFIG="/tmp/kubeconfig"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${CUSTOM_NAMESPACE}"
 	testPermissions "get" "deployment" "${CUSTOM_NAMESPACE}" "yes"

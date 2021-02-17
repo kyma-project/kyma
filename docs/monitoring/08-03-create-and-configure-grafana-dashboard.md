@@ -23,7 +23,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Create a dashboard](./assets/create-dashboard.png)
 
-3. Select **Add Query**.
+3. Select **Add new panel**.
 
    ![Add Query](./assets/add-query.png)
 
@@ -35,11 +35,11 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Instant option](./assets/instant.png)
 
-6. Switch to the **Visualization** section and select the **Gauge** dashboard type.
+6. Switch on the right menu to the **Panel** tab and select in the **Visualization** section the **Gauge** dashboard type.
 
    ![Gauge dashboard type](./assets/gauge-dashboard-type.png)
 
-7. Click the disk icon in the top right corner of the page to save the changes. Provide a name for the dashboard.
+7. Click the save button in the top right corner of the page to save the changes. Provide a name for the dashboard.
 
    ![Save the dashboard](./assets/save-dashboard.png)
 
@@ -49,11 +49,11 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Edit the dashboard](./assets/edit-dashboard.png)
 
-2. Back in the **Visualization** section, set up the measuring unit to Celsius degrees to reflect the metric data type.
+2. Back in the right menu switch to the **Field** tab and go to the **Standard options** section, set up the measuring unit to Celsius degrees to reflect the metric data type.
 
    ![Temperature](./assets/temperature-celsius.png)
 
-3. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range. Enable the **Labels** option to display this range on the dashboard.
+3. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range.
 
    ![Minimum and maximum values](./assets/min-max-values.png)
 
@@ -61,11 +61,15 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Threshold](./assets/threshold.png)
 
-5. Go to the **General** section and give a title to the dashboard.
+5. Go to the **Panel** tab and give a title to the dashboard.
 
    ![Panel title](./assets/panel-title.png)
 
-6. Click the disk icon in the top right corner of the page to save the changes. Add an optional note to describe the changes made.
+6. Enable the **Labels** option to display this range on the dashboard.
+
+   ![Panel title](./assets/enable-labels.png)
+
+7. Click the save button in the top right corner of the page to save the changes. Add an optional note to describe the changes made.
 
    ![Note](./assets/save-note.png)
 

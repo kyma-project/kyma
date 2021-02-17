@@ -2,8 +2,9 @@
 
 ## Overview
 
-This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The controller comes with this container:
-- [controller](https://github.com/kubernetes-sigs/controller-runtime)
+This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controllers come with this container:
+- [`controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
+- [`nats-controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
@@ -12,7 +13,9 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 ### Installation
 
-- To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
+- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage).
+ 
+- For `controller`, run:
 
     ```sh
     make deploy-local
@@ -21,15 +24,54 @@ This component contains controllers for various CustomResourceDefinitions relate
     make deploy-local-dry-run
     ```
 
+- For `nats-controller`, run:
+
+    ```sh
+    make deploy-eventing-controller-nats-local
+
+    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".    
+    make deploy-eventing-controller-nats-local-dry-run
+    ```
+
 ## Usage 
 
 This section explains how to use the Eventing Controller.
 
-- The Eventing Controller comes with the following command line argument flags:
+- `controller` comes with the following command line argument flags:
 
-    | Flag    | Default Value | Description                                                                                   |
-    | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
-    | metrics-addr            | :8080          | The address the metric endpoint binds to.
+    | Flag                    | Description                                           | Default Value   |
+    | ----------------------- | ----------------------------------------------------- | --------------- |
+    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`         |
+    | `reconcile-period`        | The period between triggering of reconciling calls. | `10 minutes`    |
+    | `enable-debug-logs`       | Enable debug logs.                                  | `false`         |
+
+- `nats-controller` comes with the following command line argument flags:
+
+    | Flag                    | Description                                           | Default Value |
+    | ----------------------- | ----------------------------------------------------- | ------------- |
+    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`       |
+    | `reconcile-period`        | The period between triggering reconciling calls.    | `10 minutes`  |
+    | `enable-debug-logs`       | The parameter that enables debug logs.              | `false`       |
+    | `max-reconnects`          | The maximum number of reconnection attempts.        | `10 `         |
+    | `reconnect-wait`         | Wait time between reconnection attempts.            | `1 second`    |
+
+- `controller` expects the following environment variables:
+
+    | Environment variable       | Description                                                                     |
+    | -------------------------- | ------------------------------------------------------------------------------- |
+    | **CLIENT_ID**              | The Client ID used to acquire Access Tokens from the Authentication server.     |
+    | **CLIENT_SECRET**          | The Client Secret used to acquire Access Tokens from the Authentication server. |
+    | **TOKEN_ENDPOINT**         | The Authentication Server Endpoint to provide Access Tokens.                    |
+    | **WEBHOOK_CLIENT_ID**      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
+    | **WEBHOOK_CLIENT_SECRET**  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
+    | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              |
+    | **DOMAIN**                 | The Kyma cluster public domain.                                                 |
+
+- `nats-controller` expects the following environment variables:
+
+    | Environment variable   | Description                      |
+    | ---------------------- | -------------------------------- |
+    | **NATS_URL**           | The URL for the NATS server.     |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 

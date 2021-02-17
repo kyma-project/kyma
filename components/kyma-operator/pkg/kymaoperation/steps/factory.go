@@ -59,6 +59,7 @@ func (isf installStepFactory) newStep(component v1alpha1.KymaComponent) (Step, e
 	step := step{
 		helmClient: isf.helmClient,
 		component:  component,
+		profile:    isf.stepFactory.installationData.Profile,
 	}
 
 	inststp := installStep{

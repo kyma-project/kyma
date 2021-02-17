@@ -337,8 +337,8 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: eu.gcr.io/kyma-project/external/quay.io/coreos/configmap-reload
-      tag: v0.0.1
+      repository: eu.gcr.io/kyma-project/external/jimmidyson/configmap-reload
+      tag: v0.4.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
@@ -578,7 +578,7 @@ server:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
-    tag: v2.17.1
+    tag: v2.22.1
     pullPolicy: IfNotPresent
 
   ## prometheus server priorityClassName
@@ -904,7 +904,7 @@ server:
   ##
   resources:
     limits:
-      cpu: 600m
+      cpu: 1000m
       memory: 2000Mi
     requests:
       cpu: 40m
@@ -1255,53 +1255,43 @@ serverFiles:
         static_configs:
           - targets:
             - localhost:9090
-      - job_name: istio-system/envoy-stats/0
-        sample_limit: 20000
-        honor_timestamps: true
-        metrics_path: /stats/prometheus
-        scheme: http
-        kubernetes_sd_configs:
-        - role: endpoints
-        relabel_configs:
-        - source_labels: [__meta_kubernetes_service_label_istio_prometheus_ignore]
-          separator: ;
-          regex: .+
-          replacement: $1
-          action: drop
-        - source_labels: [__meta_kubernetes_pod_container_port_number]
-          separator: ;
-          regex: "15090"
-          replacement: $1
-          action: keep
-        - source_labels: [__meta_kubernetes_pod_container_port_name]
-          separator: ;
-          regex: .*-envoy-prom
-          replacement: $1
-          action: keep
-        metric_relabel_configs:
-        - separator: ;
-          regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
-          replacement: $1
-          action: labeldrop
 
 # adds additional scrape configs to prometheus.yml
 # must be a string so you have to add a | after extraScrapeConfigs:
 # example adds prometheus-blackbox-exporter scrape config
-extraScrapeConfigs:
-  # - job_name: 'prometheus-blackbox-exporter'
-  #   metrics_path: /probe
-  #   params:
-  #     module: [http_2xx]
-  #   static_configs:
-  #     - targets:
-  #       - https://example.com
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: __param_target
-  #     - source_labels: [__param_target]
-  #       target_label: instance
-  #     - target_label: __address__
-  #       replacement: prometheus-blackbox-exporter:9115
+extraScrapeConfigs: |
+  - job_name: istio-system/envoy-stats/0
+    sample_limit: {{.Values.envoyStats.sampleLimit}}
+    honor_timestamps: true
+    metrics_path: /stats/prometheus
+    scheme: http
+    kubernetes_sd_configs:
+    - role: endpoints
+    relabel_configs:
+    - source_labels: [__meta_kubernetes_service_label_istio_prometheus_ignore]
+      separator: ;
+      regex: .+
+      replacement: $1
+      action: drop
+    - source_labels: [__meta_kubernetes_pod_container_port_number]
+      separator: ;
+      regex: "15090"
+      replacement: $1
+      action: keep
+    - source_labels: [__meta_kubernetes_pod_container_port_name]
+      separator: ;
+      regex: .*-envoy-prom
+      replacement: $1
+      action: keep
+    metric_relabel_configs:
+    - separator: ;
+      regex: {{.Values.envoyStats.labeldropRegex}}
+      replacement: $1
+      action: labeldrop
+
+envoyStats:
+  sampleLimit: "20000"
+  labeldropRegex: "^(grpc_response_status|source_version|destination_version|source_app|destination_app)$"
 
 # Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
 # useful in H/A prometheus with different external labels but the same alerts

@@ -18,16 +18,19 @@ RUN CGO_ENABLED=0 GOOS=linux go build -v -o ${BASE_DIR}/app ${BASE_DIR}/fetch-to
 ##
 RUN mkdir /test && mv ${BASE_DIR}/app /test/app && mv ${BASE_DIR}/test.sh /test/test.sh && mv ${BASE_DIR}/licenses /test/licenses
 
-FROM alpine:3.10
+FROM eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
 LABEL source=git@github.com:kyma-project/kyma.git
+
+COPY --from=builder --chown=nobody:nogroup /test /test
 WORKDIR /test
 
 RUN apk update &&\
 	apk add curl bash grep &&\
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl &&\
 	chmod +x kubectl &&\
-	mv kubectl /usr/local/bin/kubectl
+	mv kubectl /usr/local/bin/kubectl &&\
+	chown -R nobody:nogroup /test
 
-COPY --from=builder /test /test
+USER nobody
 
 ENTRYPOINT ["/bin/bash", "-c", "/test/test.sh"]

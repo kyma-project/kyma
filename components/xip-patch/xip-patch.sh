@@ -166,6 +166,40 @@ if [ -z "${INGRESS_DOMAIN}" ] ; then
     INGRESS_DOMAIN=$(generateXipDomain)
 fi
 
+echo "Checking if running on local.kyma.dev"
+
+if [ "${INGRESS_DOMAIN}" == "local.kyma.dev" ]; then
+    echo "Configure Kubernetes DNS to support local.kyma.dev"
+
+    COREDNS_PATCH=$(cat << EOF
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        rewrite name regex (.*)\.local\.kyma\.dev istio-ingressgateway.istio-system.svc.cluster.local
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        hosts /etc/coredns/NodeHosts {
+          reload 1s
+          fallthrough
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+EOF
+    )
+
+    kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
+fi
+
 if [ -z "${INGRESS_TLS_CERT}" ] ; then
     generateCerts
     INGRESS_TLS_CERT=${TLS_CERT}

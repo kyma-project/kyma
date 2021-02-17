@@ -4,15 +4,13 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
-	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
-
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -32,8 +30,12 @@ type Broker struct {
 }
 
 func New(c shared.Container) *Broker {
+	gvr := schema.GroupVersionResource{
+		Group: "eventing.knative.dev", Version: "v1alpha1",
+		Resource: "brokers",
+	}
 	return &Broker{
-		resCli:      resource.New(c.DynamicCli, eventingv1alpha1.SchemeGroupVersion.WithResource("brokers"), c.Namespace, c.Log, c.Verbose),
+		resCli:      resource.New(c.DynamicCli, gvr, c.Namespace, c.Log, c.Verbose),
 		name:        DefaultName,
 		namespace:   c.Namespace,
 		waitTimeout: c.WaitTimeout,
@@ -42,22 +44,16 @@ func New(c shared.Container) *Broker {
 	}
 }
 
-func (b *Broker) Get() (*eventingv1alpha1.Broker, error) {
+func (b *Broker) Get() (*unstructured.Unstructured, error) {
 	u, err := b.resCli.Get(b.name)
 	if err != nil {
-		return &eventingv1alpha1.Broker{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
+		return &unstructured.Unstructured{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
 	}
-
-	broker, err := convertFromUnstructuredToBroker(*u)
-	if err != nil {
-		return &eventingv1alpha1.Broker{}, err
-	}
-
-	return &broker, nil
+	return u, nil
 }
 
 func (b *Broker) Delete() error {
-	err := b.resCli.Delete(b.name, b.waitTimeout)
+	err := b.resCli.Delete(b.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Broker %s in namespace %s", b.name, b.namespace)
 	}
@@ -94,41 +90,54 @@ func (b *Broker) WaitForStatusRunning() error {
 	defer cancel()
 
 	condition := b.isBrokerReady(b.name)
-	_, err = watchtools.Until(ctx, broker.GetResourceVersion(), b.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, b.resCli.ResCli, condition)
 }
 
 func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
-		u, ok := event.Object.(*unstructured.Unstructured)
+		broker, ok := event.Object.(*unstructured.Unstructured)
 		if !ok {
 			return false, shared.ErrInvalidDataType
 		}
-		if u.GetName() != name {
-			b.log.Infof("names mismatch, object's name %s, supplied %s", u.GetName(), name)
+		if broker.GetName() != name {
+			b.log.Infof("names mismatch, object's name %s, supplied %s", broker.GetName(), name)
 			return false, nil
 		}
 
-		broker, err := convertFromUnstructuredToBroker(*u)
-		if err != nil {
-			return false, err
-		}
-
-		return b.isStateReady(broker), nil
+		return b.isStateReady(*broker), nil
 	}
 }
 
-func convertFromUnstructuredToBroker(u unstructured.Unstructured) (eventingv1alpha1.Broker, error) {
-	broker := eventingv1alpha1.Broker{}
-	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &broker)
-	return broker, err
-}
+func (b Broker) isStateReady(broker unstructured.Unstructured) bool {
+	conditions, found, err := unstructured.NestedSlice(broker.Object, "status", "conditions")
+	if err != nil {
+		// status.conditions may have not been added by eventing controller by now
+		b.log.Warn("Broker does not have status.conditions")
+		return false
+	}
+	if !found {
+		// or it may not even exist, but it should not be the case
+		b.log.Warn("Broker not found")
+		return false
+	}
 
-func (b Broker) isStateReady(broker eventingv1alpha1.Broker) bool {
-	ready := broker.Status.IsReady()
+	ready := false
+	for _, cond := range conditions {
+		// casting to map[string]string here doesn't work, ok is false
+		cond, ok := cond.(map[string]interface{})
+		if !ok {
+			b.log.Warn("couldn't cast broker's condition to map[string]interface{}")
+			ready = false
+			break
+		}
+		if cond["type"].(string) != "Ready" {
+			continue
+		}
+
+		ready = cond["status"].(string) == "True"
+
+		break
+	}
 
 	shared.LogReadiness(ready, b.verbose, b.name, b.log, broker)
 

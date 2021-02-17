@@ -5,9 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -79,7 +80,23 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 			Namespace: testNamespace,
 		},
 	}
+	ns := corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testNamespace,
+		},
+	}
+	dockerRegistryConfiguration := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "serverless-registry-config-default",
+			Namespace: testNamespace,
+		},
+		StringData: map[string]string{
+			"registryAddress": "registry.kyma.local",
+		},
+	}
+	gomega.Expect(resourceClient.Create(context.TODO(), &ns)).To(gomega.Succeed())
 	gomega.Expect(resourceClient.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
+	gomega.Expect(resourceClient.Create(context.TODO(), &dockerRegistryConfiguration)).To(gomega.Succeed())
 
 	close(done)
 }, 60)

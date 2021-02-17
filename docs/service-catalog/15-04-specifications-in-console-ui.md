@@ -69,7 +69,7 @@ type: {Document type}
 
 ### Display
 
-In the Service Catalog and Instances views, which contain ServiceClasses documentation, Markdown documents are displayed in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
+In the Service Catalog and Instances views, which contain ServiceClasses documentation, Markdown documents are displayed in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top while other documents follow in alphabetical order. If you don't provide `title` and `type`, these UIs display the file name as a fallback. See the following example:
 
 <div tabs>
   <details>

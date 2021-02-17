@@ -153,6 +153,7 @@ data:
   prometheus.prometheusSpec.retentionSize: "256MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
+  prometheus-istio.server.resources.limits.memory: "400Mi"
 ---
 apiVersion: v1
 kind: ConfigMap

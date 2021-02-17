@@ -49,6 +49,8 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:

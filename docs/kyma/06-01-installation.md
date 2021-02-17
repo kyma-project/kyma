@@ -24,11 +24,10 @@ metadata:
   namespace: default
   labels:
     action: install
-  finalizers:
-    - finalizer.installer.kyma-project.io
 spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"
+  profile: "evaluation"
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
@@ -49,9 +48,9 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.labels.action** | Yes | Defines the behavior of the Kyma Installer. Available options are `install` and `uninstall`. |
-| **metadata.finalizers** | No | Protects the CR from deletion. Read the [Kubernetes documentation](https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-deletion) to learn more about finalizers. |
 | **spec.version** | No | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string.|
 | **spec.url** | No | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz`. **This attribute is deprecated.** |
+| **spec.profile** | No | Specifies the profile which will be used for installation or upgrade. Available options are `evaluation` and `production`. |
 | **spec.components** | Yes | Lists which components of Helm chart components to install, update or uninstall. |
 | **spec.components.name** | Yes | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
 | **spec.components.namespace** | Yes | Defines the Namespace in which you want the Installer to install or update the component. |

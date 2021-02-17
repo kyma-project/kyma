@@ -54,7 +54,7 @@ To do this, follow these steps:
 
   > **CAUTION:** Do not remove Pods named `serverless-docker-registry-self-signed-cert-{UNIQUE_ID}`.
 
-3. Search for the `serverless-docker-registry`  PVC again to check that the capacity was resized:
+3. Search for the `serverless-docker-registry` PVC again to check that the capacity was resized:
 
   ```bash
   kubectl get pvc serverless-docker-registry -n kyma-system

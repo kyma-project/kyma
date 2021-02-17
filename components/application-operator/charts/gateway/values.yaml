@@ -10,6 +10,13 @@ deployment:
     proxyCacheTTL: 120
     requestLogging: false
     namespacedGateway: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 service:
   externalapi:
@@ -18,6 +25,7 @@ service:
     port: *proxyPort
 
 autoscaling:
+  enable: true
   minReplicas: 1
   maxReplicas: 10
   cpuUsagePercent: 40
@@ -25,3 +33,6 @@ autoscaling:
 acceptanceTest:
   image:
     pullPolicy: IfNotPresent
+
+podSecurityPolicy:
+  runAsUser: 1000

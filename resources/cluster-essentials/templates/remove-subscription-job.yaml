@@ -66,3 +66,8 @@ spec:
           - -c
           - |
             kubectl delete crd subscriptions.eventing.kyma-project.io --ignore-not-found=true
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
+        env:
+          - name: HOME
+            value: /tmp

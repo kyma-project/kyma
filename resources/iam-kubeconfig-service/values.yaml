@@ -2,12 +2,25 @@ service:
   port: 8000
   name: iam-kubeconfig-service
 
+podSecurityPolicy:
+  enabled: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  runAsGroup: 65534
+  runAsNonRoot: true
+  runAsUser: 65534
+
 resources:
   limits:
     cpu: 100m
     memory: 128Mi
   requests:
-    cpu: 50m
+    cpu: 5m
     memory: 32Mi
 global:
   isLocalEnv: false
@@ -18,4 +31,4 @@ global:
     path: eu.gcr.io/kyma-project
   iam_kubeconfig_service:
     dir:
-    version: "1c48e0a0"
+    version: "405eed8d"

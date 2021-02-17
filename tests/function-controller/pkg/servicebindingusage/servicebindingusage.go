@@ -4,12 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
@@ -74,7 +72,7 @@ func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix
 }
 
 func (sbu *ServiceBindingUsage) Delete() error {
-	err := sbu.resCli.Delete(sbu.name, sbu.waitTimeout)
+	err := sbu.resCli.Delete(sbu.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
@@ -125,11 +123,7 @@ func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), sbu.waitTimeout)
 	defer cancel()
 	condition := sbu.isServiceBindingUsageReady()
-	_, err = watchtools.Until(ctx, servicebinding.GetResourceVersion(), sbu.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, sbu.resCli.ResCli, condition)
 }
 
 func (sbu *ServiceBindingUsage) isServiceBindingUsageReady() func(event watch.Event) (bool, error) {

@@ -9,6 +9,15 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
+  isBEBEnabled: false
+  log:
+    format: "json"
+    level: "warn"
+  podSecurityPolicy:
+    enabled: true
+    runAsUser: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
   ingress:
     domainName: "TBD"
   helm:
@@ -23,37 +32,37 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "82b304ab"
+    version: "PR-10620"
   application_operator_tests:
-    version: "470796a1"
+    version: "f4a3bda0"
   connector_service:
-    version: "470796a1"
+    version: "548ea6b4"
   connector_service_tests:
-    version: "470796a1"
+    version: "77ca2463"
   connection_token_handler:
-    version: "85665778"
+    version: "3083c3d4"
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
-    version: "24c55551"
+    version: "e6b97e48"
   event_service_integration_tests:
-    version: "2c51c024"
+    version: "d6bbc47a"
   application_gateway:
-    version: "c0341336"
+    version: "77ca2463"
   application_gateway_tests:
-    version: "470796a1"
+    version: "77ca2463"
   application_gateway_legacy_tests:
-    version: "470796a1"
+    version: "fc11d39b"
   application_registry:
-    version: "c0341336"
+    version: "PR-10620"
   application_registry_tests:
-    version: "cda9f380"
+    version: "d556963d"
   application_broker:
-    version: "a8a6bca9"
+    version: "52f52cc9"
   application_connectivity_certs_setup_job:
-    version: "470796a1"
+    version: "960b1536"
   application_connectivity_validator:
-    version: "c0341336"
+    version: "56b8cb60"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
@@ -77,8 +86,8 @@ application_connectivity_certs_sync:
       name: kyma-gateway-certs
       namespace: istio-system
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210208-080d17ad"
 
 tests:
   application_connector_tests:
@@ -90,5 +99,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "470796a1"
+      version: "58e57ea1"
       pullPolicy: IfNotPresent

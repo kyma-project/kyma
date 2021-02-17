@@ -22,7 +22,7 @@ spec:
       initContainers:
         - name: inject-certs
           securityContext:
-            runAsUser: 0
+{{- include "tplValue" ( dict "value" .Values.containers.daemonset.initContainerSecurityContext "context" . ) | nindent 12 }}
           image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"
           resources:
             requests:
@@ -50,6 +50,8 @@ spec:
       containers:
         - name: pause
           image: gcr.io/google-containers/pause-amd64:3.2
+          securityContext:
+{{- include "tplValue" ( dict "value" .Values.containers.daemonset.containerSecurityContext "context" . ) | nindent 12 }}
           resources:
             requests:
               cpu: 20m

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kiali.name" . }}-kcproxy
+  name: {{ template "kiali-server.name" . }}-kcproxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kiali.labels" . | nindent 4 }}
+    {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.kcproxy.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "kiali.name" . }}-kcproxy
+      app: {{ template "kiali-server.name" . }}-kcproxy
   template:
     metadata:
       labels:
-        app: {{ template "kiali.name" . }}-kcproxy
+        app: {{ template "kiali-server.name" . }}-kcproxy
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
@@ -60,7 +60,7 @@ spec:
         {{- end }}
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.port }}
-        - --upstream-url=http://{{ template "kiali.name" . }}:{{ .Values.kiali.spec.server.port }}
+        - --upstream-url=http://{{ template "kiali-server.name" . }}-server:{{ .Values.kiali.spec.server.port }}
         - --enable-logging=false
         - --enable-json-logging=true
         - --secure-cookie=true
@@ -80,17 +80,13 @@ spec:
         - --cookie-access-name=KYMA_KIALI_TOKEN
         envFrom:
         - secretRef:
-            name: {{ template "kiali.name" . }}-kcproxy
+            name: {{ template "kiali-server.name" . }}-kcproxy
             optional: false
         ports:
         - name: http
           containerPort: {{ .Values.kcproxy.port }}
           protocol: TCP
         livenessProbe:
-          httpGet:
-            path: /oauth/health
-            port: http
-        readinessProbe:
           httpGet:
             path: /oauth/health
             port: http

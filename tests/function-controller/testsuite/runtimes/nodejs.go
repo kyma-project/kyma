@@ -22,24 +22,35 @@ func BasicNodeJSFunction(msg string, rtm serverlessv1alpha1.Runtime) *function.F
 	}
 }
 
-func NodeJSFunctionWithEnvFromConfigMap(configMapName, envKey string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
-	mappedEnvKey := "CM_KEY"
+func NodeJSFunctionWithEnvFromConfigMapAndSecret(configMapName, cmEnvKey, secretName, secretEnvKey string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
+	mappedCmEnvKey := "CM_KEY"
+	mappedSecretEnvKey := "SECRET_KEY"
 
 	return &function.FunctionData{
-		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return process.env["%s"]; } }`, mappedEnvKey),
-		Deps:        `{ "name": "hellowithconfigmapenv", "version": "0.0.1", "dependencies": { } }`,
+		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return process.env["%s"] + "-" + process.env["%s"]; } }`, mappedCmEnvKey, mappedSecretEnvKey),
+		Deps:        `{ "name": "hellowithconfigmapsecretenvs", "version": "0.0.1", "dependencies": { } }`,
 		MaxReplicas: 1,
 		MinReplicas: 1,
 		Runtime:     rtm,
 		Env: []corev1.EnvVar{
 			{
-				Name: mappedEnvKey,
+				Name: mappedCmEnvKey,
 				ValueFrom: &corev1.EnvVarSource{
 					ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: configMapName,
 						},
-						Key: envKey,
+						Key: cmEnvKey,
+					},
+				}},
+			{
+				Name: mappedSecretEnvKey,
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: secretName,
+						},
+						Key: secretEnvKey,
 					},
 				}},
 		},

@@ -1,0 +1,337 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  hub: eu.gcr.io/kyma-project/external/istio
+  tag: {{ .Chart.Version }}
+  addonComponents:
+    istiocoredns:
+      enabled: false
+  components:
+    base:
+      enabled: true
+    cni:
+      enabled: false
+    egressGateways:
+    - enabled: false
+      k8s:
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
+        hpaSpec:
+          maxReplicas: 5
+          metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-egressgateway
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 10m
+            memory: 40Mi
+        service:
+          ports:
+          - name: http2
+            port: 80
+            targetPort: 8080
+            protocol: TCP
+          - name: https
+            port: 443
+            targetPort: 8443
+            protocol: TCP
+          - name: tls
+            port: 15443
+            targetPort: 15443
+            protocol: TCP
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
+      name: istio-egressgateway
+    ingressGateways:
+    - enabled: true
+      k8s:
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
+        hpaSpec:
+          maxReplicas: 1
+          metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-ingressgateway
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 96Mi
+        service:
+          ports:
+          - name: status-port
+            port: 15021
+            targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
+          - name: http2
+            port: 80
+            targetPort: 8080
+          - name: https
+            port: 443
+            targetPort: 8443
+          - name: tcp
+            port: 31400
+            targetPort: 31400
+          - name: tls
+            port: 15443
+            targetPort: 15443
+          - port: 15029
+            targetPort: 15029
+            name: kiali
+          - port: 15030
+            targetPort: 15030
+            name: prometheus
+          - port: 15031
+            targetPort: 15031
+            name: grafana
+          - port: 15032
+            targetPort: 15032
+            name: tracing
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 0
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
+        overlays:
+        - kind: Deployment
+          name: istio-ingressgateway
+          patches:
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8080].hostPort
+            value: 80
+          - path: spec.template.spec.containers.[name:istio-proxy].ports.[containerPort:8443].hostPort
+            value: 443
+      name: istio-ingressgateway
+    istiodRemote:
+      enabled: false
+    pilot:
+      enabled: true
+      k8s:
+        env:
+        - name: PILOT_TRACE_SAMPLING
+          value: "100"
+        - name: PILOT_HTTP10
+          value: "1"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 3
+          timeoutSeconds: 5
+        hpaSpec:
+          maxReplicas: 1
+          metrics:
+            - resource:
+                name: cpu
+                targetAverageUtilization: 80
+              type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istiod
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1024Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
+  meshConfig:
+    accessLogFile: /dev/stdout
+    trustDomain: cluster.local
+    defaultConfig:
+      proxyMetadata: {}
+      tracing:  
+        zipkin: 
+          address: "{{ .Values.global.tracing.zipkinAddress }}"
+    enablePrometheusMerge: false
+  values:
+    base:
+      enableCRDTemplates: false
+      validationURL: ""
+    clusterResources: true
+    gateways:
+      istio-egressgateway:
+        autoscaleEnabled: false
+        env: {}
+        name: istio-egressgateway
+        secretVolumes:
+        - mountPath: /etc/istio/egressgateway-certs
+          name: egressgateway-certs
+          secretName: istio-egressgateway-certs
+        - mountPath: /etc/istio/egressgateway-ca-certs
+          name: egressgateway-ca-certs
+          secretName: istio-egressgateway-ca-certs
+        type: ClusterIP
+        zvpn: {}
+      istio-ingressgateway:
+        autoscaleEnabled: false
+        env: {}
+        name: istio-ingressgateway
+        secretVolumes:
+        - mountPath: /etc/istio/ingressgateway-certs
+          name: ingressgateway-certs
+          secretName: istio-ingressgateway-certs
+        - mountPath: /etc/istio/ingressgateway-ca-certs
+          name: ingressgateway-ca-certs
+          secretName: istio-ingressgateway-ca-certs
+        type: NodePort
+        zvpn: {}
+    global:
+      arch:
+        amd64: 2
+        ppc64le: 2
+        s390x: 2
+      configValidation: true
+      defaultNodeSelector: {}
+      defaultPodDisruptionBudget:
+        enabled: true
+      defaultResources:
+        requests:
+          cpu: 10m
+      imagePullPolicy: IfNotPresent
+      imagePullSecrets: []
+      istioNamespace: istio-system
+      istiod:
+        enableAnalysis: false
+      jwtPolicy: third-party-jwt
+      logAsJson: false
+      logging:
+        level: default:info
+      meshExpansion:
+        enabled: false
+        useILB: false
+      meshNetworks: {}
+      mountMtlsCerts: false
+      multiCluster:
+        clusterName: ""
+        enabled: false
+      network: ""
+      omitSidecarInjectorConfigMap: false
+      oneNamespace: false
+      operatorManageWebhooks: false
+      pilotCertProvider: istiod
+      priorityClassName: ""
+      proxy:
+        autoInject: enabled
+        clusterDomain: cluster.local
+        componentLogLevel: misc:error
+        enableCoreDump: false
+        excludeIPRanges: ""
+        excludeInboundPorts: ""
+        excludeOutboundPorts: ""
+        image: proxyv2
+        includeIPRanges: '*'
+        logLevel: warning
+        privileged: false
+        readinessFailureThreshold: 40
+        readinessInitialDelaySeconds: 5
+        readinessPeriodSeconds: 5
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 250m
+            memory: 254Mi
+        statusPort: 15020
+        tracer: zipkin
+      proxy_init:
+        image: proxyv2
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+      sds:
+        token:
+          aud: istio-ca
+      sts:
+        servicePort: 0
+      useMCP: false
+    istiocoredns:
+      coreDNSImage: coredns/coredns
+      coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
+      coreDNSTag: 1.6.2
+    istiodRemote:
+      injectionURL: ""
+    pilot:
+      autoscaleEnabled: false
+      configMap: true
+      configNamespace: istio-config
+      cpu:
+        targetAverageUtilization: 80
+      enableProtocolSniffingForInbound: true
+      enableProtocolSniffingForOutbound: true
+      env: {}
+      image: pilot
+      keepaliveMaxServerConnectionAge: 30m
+      nodeSelector: {}
+      replicaCount: 1
+      traceSampling: 1
+    sidecarInjectorWebhook:
+      enableNamespacesByDefault: true
+      objectSelector:
+        autoInject: true
+        enabled: false
+      rewriteAppHTTPProbe: true
+    telemetry:
+      enabled: true
+      v2:
+        enabled: true
+        metadataExchange:
+          wasmEnabled: false
+        prometheus:
+          enabled: true
+          wasmEnabled: false
+        stackdriver:
+          configOverride: {}
+          enabled: false
+          logging: false
+          monitoring: false
+          topology: false

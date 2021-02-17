@@ -5,9 +5,15 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: ''
-    version: "e6a594cf"
+    version: "6bbd5901"
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: "e6a594cf" 
+    version: "6bbd5901"
     tracingEnabled: "true"
+
+deployment:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi

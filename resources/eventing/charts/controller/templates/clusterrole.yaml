@@ -1,0 +1,62 @@
+{{- if eq .Values.global.eventing.backend "beb" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "controller.fullname" . }}
+  labels: {{- include "controller.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - list
+  - get
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - subscriptions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - subscriptions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - gateway.kyma-project.io
+  resources:
+  - apirules
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+  - create
+- apiGroups:
+  - applicationconnector.kyma-project.io
+  resources:
+  - applications
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
