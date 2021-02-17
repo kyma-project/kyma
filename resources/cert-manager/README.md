@@ -26,7 +26,13 @@ To install `cert-manager`, use the Kyma Installer and follow these steps:
    $ kubectl apply -f ./installation/resources/crds/cert-manager
    ```
 
-2. Update the appropriate Installer CR template in `installation/resources/` by adding the following lines to the `spec.components` section:
+2. Manually apply namespace resource from the project root directory:
+
+   ```bash
+   $ kubectl apply -f ./installation/resources/namespaces/cert-manager
+   ```
+
+3. Update the appropriate Installer CR template in `installation/resources/` by adding the following lines to the `spec.components` section:
 
     ```yaml
     - name: "cert-manager"
