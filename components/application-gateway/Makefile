@@ -13,7 +13,7 @@ verify:: mod-verify-local
 
 resolve-local:
 	echo "$$(date +"%Y/%m/%d %T %Z") vendor"
-	GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80 GO111MODULE=on go mod vendor -v
+	GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80 GO111MODULE=on go mod vendor
 	echo "$$(date +"%Y/%m/%d %T %Z") vendor done"
 
 ensure-local:
