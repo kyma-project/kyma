@@ -1,27 +1,18 @@
-FROM golang:1.16.0-alpine3.13 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-gateway
 WORKDIR $DOCK_PKG_DIR
-ENV GOPROXY=http://athens-proxy.c.sap-kyma-prow.internal:80
 
 COPY go.mod .
 COPY go.sum .
-# RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] download" && \
-#     go mod download && \ 
-#     echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done"
+RUN go mod download
 
 COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
 
 RUN echo "nobody:x:65534:5534:nobody:/:" > /etc_passwd
 
-RUN echo "$(date +"%Y/%m/%d %T %Z")  [INFO] build" &&\
-    go mod download && \
-    echo "$(date +"%Y/%m/%d %T %Z") [INFO] download done, now build" && \
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway &&\
-    echo "$(date +"%Y/%m/%d %T %Z") [INFO] build done" && \
-    go clean --modcache --cache && \
-    echo "$(date +"%Y/%m/%d %T %Z")  [INFO] go cache cleaned"
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationgateway ./cmd/applicationgateway
 
 
 FROM eu.gcr.io/kyma-project/external/alpine:3.12.0 as certs
@@ -36,4 +27,5 @@ COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
+
 CMD ["/applicationgateway"]
