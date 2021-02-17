@@ -79,6 +79,7 @@ verify:: test-local check-imports-local check-fmt-local
 format:: imports fmt
 
 release:
+	echo "wrong release target :("
 	$(MAKE) release-dep
 
 #Old Target for dep projects
