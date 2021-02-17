@@ -75,7 +75,7 @@ endef
 #
 #   verify:: errcheck
 #
-verify:: test-local check-imports check-fmt
+verify:: test-local check-imports-local check-fmt-local
 format:: imports fmt
 
 release:
@@ -99,8 +99,8 @@ ifdef DOCKER_POST_PR_TAG
 endif
 
 # Targets mounting sources to buildpack
-MOUNT_TARGETS = build resolve-local ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+# MOUNT_TARGETS = build resolve-local ensure dep-status check-imports-local imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
+# $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
 	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
