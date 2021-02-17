@@ -82,7 +82,7 @@ release:
 	$(MAKE) release-dep
 
 #Old Target for dep projects
-release-dep: resolve-local dep-status verify build-image push-image
+release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
 build-image: pull-licenses
@@ -99,7 +99,7 @@ ifdef DOCKER_POST_PR_TAG
 endif
 
 # Targets mounting sources to buildpack
-# MOUNT_TARGETS = build resolve-local ensure dep-status check-imports-local imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
+# MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
 # $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
