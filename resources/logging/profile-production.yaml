@@ -10,12 +10,3 @@ fluent-bit:
   resources:
     limits:
       memory: 256Mi
-
-logui:
-  resources: 
-    requests:
-      cpu: 1m
-      memory: 3Mi
-    limits:
-      cpu: 30m
-      memory: 16Mi
