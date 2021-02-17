@@ -75,18 +75,17 @@ endef
 #
 #   verify:: errcheck
 #
-verify:: test-local check-imports-local check-fmt-local
+verify:: test check-imports check-fmt
 format:: imports fmt
 
 release:
-	echo "wrong release target :("
 	$(MAKE) release-dep
 
 #Old Target for dep projects
 release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
-build-image: pull-licenses-local
+build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
@@ -100,8 +99,8 @@ ifdef DOCKER_POST_PR_TAG
 endif
 
 # Targets mounting sources to buildpack
-# MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
-# $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
+$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
 	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
@@ -117,22 +116,25 @@ dep-status-local:
 	dep status -v
 
 #Go mod
-gomod-deps-local:: gomod-vendor-local gomod-verify-local
-# $(eval $(call buildpack-mount,gomod-deps))
+gomod-deps-local:: gomod-vendor-local gomod-verify-local gomod-status-local
+$(eval $(call buildpack-mount,gomod-deps))
 
 gomod-check-local:: test-local check-imports-local check-fmt-local
-# $(eval $(call buildpack-cp-ro,gomod-check))
+$(eval $(call buildpack-cp-ro,gomod-check))
 
 gomod-component-check-local:: gomod-deps-local gomod-check-local
-# $(eval $(call buildpack-mount,gomod-component-check))
+$(eval $(call buildpack-mount,gomod-component-check))
 
-gomod-release:gomod-component-check-local build-image push-image
+gomod-release:gomod-component-check build-image push-image
 
 gomod-vendor-local:
 	GO111MODULE=on go mod vendor
 
 gomod-verify-local:
 	GO111MODULE=on go mod verify
+
+gomod-status-local:
+	GO111MODULE=on go mod graph
 
 gomod-tidy-local:
 	GO111MODULE=on go mod tidy
@@ -190,7 +192,6 @@ COPY_TARGETS = test
 $(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
 
 test-local:
-	mkdir /tmp/artifacts/
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
