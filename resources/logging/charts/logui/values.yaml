@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 0fa81441
+  tag: "PR-2123"
   pullPolicy: Always
 service:
   name: nginx
@@ -12,4 +12,4 @@ resources: {}
 nameOverride: log-ui
 
 podSecurityPolicy:
-    enabled: true
+  enabled: true

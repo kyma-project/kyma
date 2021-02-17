@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  tag: "4f6246be"
+  tag: "PR-2123"
   pullPolicy: IfNotPresent
 service:
   internalPort: 80
@@ -13,4 +13,4 @@ virtualservice:
 resources: {}
 
 podSecurityPolicy:
-    enabled: true
+  enabled: true
