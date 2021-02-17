@@ -191,6 +191,8 @@ if __name__ == '__main__':
         server='cherrypy',
         host='0.0.0.0',
         port=func_port,
+        # Set this flag to True to auto-reload the server after any source files change
+        reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
         numthreads=os.getenv('CHERRYPY_NUMTHREADS', 10),
     )
