@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         #      - image: eu.gcr.io/kyma-project/xf-application-mocks/commerce-mock:latest
-        - image: eu.gcr.io/kyma-project/test-infra/commerce-mock-lite:0.3 # TODO: change it to proper image
+        - image: ghcr.io/pbochynski/commerce-mock-lite:0.4 # TODO: change it to proper image
           imagePullPolicy: Always
           name: commerce-mock
           ports:

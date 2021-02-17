@@ -65,6 +65,17 @@ function expectNoAxiosErr(err) {
   expect(err).to.be.undefined; // catch non-axios errors
 }
 
+function convertAxiosError(axiosError, message) {
+  if (axiosError.response && axiosError.response.status && axiosError.response.statusText) {
+    message += `\n${axiosError.response.status}: ${axiosError.response.statusText}`;
+  }
+  if (axiosError.response && axiosError.response.data) {
+    message += ": " + JSON.stringify(axiosError.response.data);
+    debug(axiosError.response.data);
+  }
+  return new Error(message)
+}
+
 const updateNamespacedResource = (client, group, version, pluralName) => async (
   name,
   namespace,
@@ -134,6 +145,7 @@ async function promiseAllSettled(promises) {
     )
   );
 }
+
 
 async function k8sApply(listOfSpecs, namespace, patch = true) {
   const options = {
@@ -575,6 +587,7 @@ module.exports = {
   retryPromise,
   expectNoK8sErr,
   expectNoAxiosErr,
+  convertAxiosError,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
