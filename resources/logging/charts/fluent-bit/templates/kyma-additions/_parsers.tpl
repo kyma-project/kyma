@@ -115,4 +115,11 @@
     Name    kube-custom
     Format  regex
     Regex   (?<tag>[^.]+)?\.?(?<pod_name>[a-z0-9](?:[-a-z0-9]*[a-z0-9])?(?:\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)_(?<namespace_name>[^_]+)_(?<container_name>.+)-(?<docker_id>[a-z0-9]{64})\.log$
+
+[PARSER]
+    Name              java
+    Format            regex
+    Regex             ^(?<time>\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2},\d{1,3}) (?<level>[^\s]+) \[(?<thread>.*)\] (?<message>.*)
+    Time_Key          time
+    Time_Format       %Y-%m-%d %H:%M:%S,%L
 {{- end -}}
