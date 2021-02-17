@@ -59,10 +59,17 @@ data:
         DB.sync           {{ .Values.config.inputs.tail.dbSync }}
         Mem_Buf_Limit     {{ .Values.config.inputs.tail.memBufLimit }}
         exit_on_eof       {{ .Values.config.inputs.tail.exitOnEof }}
+        {{- if eq .Values.config.inputs.tail.multiline "Off" }}
         Parser            {{ .Values.config.inputs.tail.parser }}
         Docker_Mode       {{ .Values.config.inputs.tail.dockerMode }}
         Docker_Mode_Flush {{ .Values.config.inputs.tail.dockerModeFlush }}
+        {{- end }}
         Key               {{ .Values.config.inputs.tail.key }}
+        {{- if eq .Values.config.inputs.tail.multiline "On" }}
+        Multiline         {{ .Values.config.inputs.tail.multiline }}
+        Multiline_Flush   {{ .Values.config.inputs.tail.multilineFlush }}
+        Parser_Firstline  {{ .Values.config.inputs.tail.parserFirstline }}
+        {{- end }}
         
 {{- end }}
 
