@@ -82,7 +82,7 @@ images:
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-10629"
+      tag: "5daaf5c9"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
       tag: "PR-10629"
