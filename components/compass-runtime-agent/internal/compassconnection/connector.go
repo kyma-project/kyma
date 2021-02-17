@@ -23,7 +23,7 @@ const (
 	ConnectorTokenHeader = "Connector-Token"
 )
 
-//go:generate mockery -name=Connector
+//go:generate mockery --name=Connector
 type Connector interface {
 	EstablishConnection(connectorURL, token string) (EstablishedConnection, error)
 	MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)

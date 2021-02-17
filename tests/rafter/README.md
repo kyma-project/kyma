@@ -54,7 +54,7 @@ To build the production Docker image, run this command:
 make build-image
 ```
 
-### Environmental variables
+### Environment variables
 
 Use the following environment variables to configure the application:
 

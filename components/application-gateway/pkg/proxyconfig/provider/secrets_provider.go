@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -34,7 +35,7 @@ func NewSecretsProxyTargetConfigProvider(client v12.SecretInterface) *repository
 //  CONFIGURATION - JSON containing credentials and additional parameters
 //	CREDENTIALS_TYPE - Credentials type - BasicAuth, OAuth, Certificate (not supported in Director) or NoAuth
 func (r *repository) GetDestinationConfig(secretName string, apiName string) (proxyconfig.ProxyDestinationConfig, apperrors.AppError) {
-	secret, err := r.client.Get(secretName, metav1.GetOptions{})
+	secret, err := r.client.Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return proxyconfig.ProxyDestinationConfig{}, apperrors.NotFound("secret '%s' not found", secretName)

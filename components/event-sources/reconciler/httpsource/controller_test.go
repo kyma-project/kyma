@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package httpsource
 
 import (
@@ -37,17 +21,16 @@ import (
 	// Link fake informers and clients accessed by our controller
 	_ "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake"
 	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
-	_ "knative.dev/serving/pkg/client/injection/client/fake"
-	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake"
+	_ "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment/fake"
+	_ "knative.dev/pkg/client/injection/kube/informers/core/v1/service/fake"
 
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/client/fake"
-	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/authentication/v1alpha1/policy/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/istio/informers/security/v1beta1/peerauthentication/fake"
 )
 
 const adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
-const adapterTracingEnabledEnvVar = "HTTP_ADAPTER_TRACING_ENABLED"
 
 func TestNewController(t *testing.T) {
 	defer func() {
@@ -58,7 +41,6 @@ func TestNewController(t *testing.T) {
 
 	defer SetEnvVar(t, adapterImageEnvVar, "some-image")()
 	defer SetEnvVar(t, metrics.DomainEnv, "testing")()
-	defer SetEnvVar(t, adapterTracingEnabledEnvVar, "true")()
 
 	cmw := configmap.NewStaticWatcher(
 		NewConfigMap("", metrics.ConfigMapName()),
@@ -66,8 +48,8 @@ func TestNewController(t *testing.T) {
 	)
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected informers: HTTPSource, Channel, Knative Service, Policy
-	if expect, got := 4, len(informers); got != expect {
+	// expected informers: HTTPSource, Channel, Deployment, PeerAuthentication, Service
+	if expect, got := 5, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
 

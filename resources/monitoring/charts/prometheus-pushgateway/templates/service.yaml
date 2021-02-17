@@ -20,5 +20,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "prometheus-pushgateway.name" . }}
-    release: {{ .Release.Name }}
+    {{- include "prometheus-pushgateway.selectorLabels" . | nindent 4 }}

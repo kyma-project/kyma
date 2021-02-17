@@ -25,6 +25,7 @@ data:
       "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
+      "id": 11,
       "links": [],
       "panels": [
         {
@@ -47,6 +48,13 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "description": "Data-plane entrypoint inside the cluster for legacy events.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -82,8 +90,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-connectivity-validator\",destination_workload_namespace=\"knative-serving\",destination_workload=\"activator\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-connectivity-validator\",destination_workload_namespace=\"kyma-integration\",destination_workload=~\".*-event-service\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -91,7 +100,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Connectivity Validator -> Knative Service Activator",
+          "title": "Connectivity Validator -> Event Service",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -107,7 +116,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": "",
               "logBase": 1,
               "max": null,
@@ -134,6 +144,12 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -169,8 +185,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"knative-serving\",source_workload=\"activator\",destination_workload_namespace=\"kyma-integration\",destination_workload=~\".*-deployment\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-event-service\",destination_workload_namespace=\"kyma-integration\",destination_workload=~\".*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -178,7 +195,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Knative Service Activator -> HTTP Event Source",
+          "title": "Event Service -> HTTP Event Source",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -194,7 +211,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -221,6 +239,13 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "description": "Data-plane entrypoint inside the cluster for non-legacy events. Event-service is not required in this eventing flow.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -230,9 +255,8 @@ data:
             "y": 9
           },
           "hiddenSeries": false,
-          "id": 4,
+          "id": 18,
           "legend": {
-            "alignAsTable": false,
             "avg": false,
             "current": false,
             "max": false,
@@ -257,9 +281,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-deployment\",destination_workload_namespace=\"knative-eventing\",destination_workload=~\".*-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*-connectivity-validator\",destination_workload_namespace=\"kyma-integration\",destination_workload!~\".*-event-service\",destination_workload!=\"application-registry\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -267,7 +292,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "HTTP Event Source -> Source Channel",
+          "title": "Connectivity Validator -> HTTP Event Source",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -283,7 +308,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -310,6 +336,12 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -317,6 +349,101 @@ data:
             "w": 12,
             "x": 12,
             "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 4,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*\",destination_workload_namespace=\"knative-eventing\",destination_workload=~\".*-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "HTTP Event Source -> Source Channel",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 0,
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 6,
@@ -345,9 +472,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-ingress\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "hide": false,
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-ingress\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -371,7 +498,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -398,12 +526,18 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 0,
+            "x": 12,
             "y": 17
           },
           "hiddenSeries": false,
@@ -433,8 +567,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload_namespace!=\"kyma-integration\",destination_workload=~\"[a-z0-9-]+-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace!=\"kyma-integration\",destination_workload=~\"[a-z0-9-]+-dispatcher|knative-kafka-channel\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -458,7 +593,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -485,13 +621,19 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 12,
-            "y": 17
+            "x": 0,
+            "y": 25
           },
           "hiddenSeries": false,
           "id": 8,
@@ -520,8 +662,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-filter\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload=~\"[a-z0-9-]+-dispatcher\",destination_workload=\"default-broker-filter\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -545,7 +688,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -572,12 +716,18 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 0,
+            "x": 12,
             "y": 25
           },
           "hiddenSeries": false,
@@ -607,9 +757,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{source_workload=\"default-broker-filter\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload=\"default-broker-filter\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
+              "interval": "",
+              "legendFormat": "{{`{{source_workload_namespace}}`}}/{{`{{source_workload}}`}} -> {{`{{destination_workload_namespace}}`}}/{{`{{destination_workload}}`}} (p99)",
               "refId": "A"
             }
           ],
@@ -633,7 +784,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "decimals": 0,
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -656,7 +808,7 @@ data:
         }
       ],
       "refresh": "10s",
-      "schemaVersion": 21,
+      "schemaVersion": 25,
       "style": "dark",
       "tags": [
         "kyma",
@@ -671,8 +823,6 @@ data:
       },
       "timepicker": {
         "refresh_intervals": [
-          "5s",
-          "10s",
           "30s",
           "1m",
           "5m",
@@ -685,6 +835,6 @@ data:
       },
       "timezone": "",
       "title": "Kyma / Event Mesh / Latency",
-      "uid": "ycULeS8Zz",
+      "uid": "jUfN-ESMk",
       "version": 1
     }

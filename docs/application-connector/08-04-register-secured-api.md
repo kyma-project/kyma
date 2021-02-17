@@ -29,7 +29,7 @@ This is an example of the `api` section of the request body for an API secured w
             "basic": {
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
-            },
+            }
         }  
     }
 ```
@@ -87,7 +87,7 @@ This is an example of the `api` section of the request body for an API secured w
         "credentials": {
             "certificateGen": {
                 "commonName": "{CERT_NAME}"
-            },
+            }
         }  
     }
 ```
@@ -151,7 +151,7 @@ This is an example of the `api` section of the request body for an API secured w
                 "csrfInfo": {
                     "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
                 }
-            },
+            }
         }
     }
 ```
@@ -172,13 +172,13 @@ This is an example of the `api` section of the request body for an API secured w
             },
             "queryParameters": {
                 "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-            },
-        }
+            }
+        },
         "credentials": {
             "basic": {
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
-            },
+            }
         }
     }
 ```

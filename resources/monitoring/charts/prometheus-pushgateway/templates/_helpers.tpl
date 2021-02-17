@@ -50,9 +50,6 @@ Create default labels
 helm.sh/chart: {{ include "prometheus-pushgateway.chart" . }}
 {{ include "prometheus-pushgateway.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- $labelChart := include "prometheus-pushgateway.chart" $ -}}
-{{- $labelApp := include "prometheus-pushgateway.name" $ -}}
-{{- $labels := dict "app" $labelApp "chart" $labelChart "release" .Release.Name -}}
 {{- end -}}
 
 {{/*

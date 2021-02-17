@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"testing"
 
 	hapi_release5 "helm.sh/helm/v3/pkg/release"
@@ -262,7 +263,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		}
 
 		appClient := &mocks.ApplicationClient{}
-		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
+		appClient.On("List", context.Background(), mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, nil)
@@ -316,8 +317,8 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 		}
 
 		appClient := &mocks.ApplicationClient{}
-		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
-		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
+		appClient.On("List", context.Background(), mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
+		appClient.On("Update", context.Background(), updatedApplication, v1.UpdateOptions{}).Return(&applicationList.Items[0], nil)
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", namespace, emptyOverrides).Return(updateResponse, errors.New("Error"))
@@ -337,7 +338,7 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 	t.Run("should return error when failed to fetch application list ", func(t *testing.T) {
 		// given
 		appClient := &mocks.ApplicationClient{}
-		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(nil, errors.New("Error"))
+		appClient.On("List", context.Background(), mock.AnythingOfType("ListOptions")).Return(nil, errors.New("Error"))
 
 		releaseManager := NewApplicationReleaseManager(nil, appClient, OverridesData{}, namespace)
 

@@ -7,6 +7,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+    kyma-project.io/component: backend
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -23,6 +24,7 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
+        kyma-project.io/component: backend
     spec:
       serviceAccountName: {{ template "fullname" . }}
       {{ if .Values.global.isLocalEnv }}
@@ -75,7 +77,7 @@ spec:
             value: "/etc/ingress-tls-cert/tls.crt"
           {{ end }}
           - name: APP_TRACING_COLLECTOR_URL
-            value: {{ .Values.tracing.collectorUrl }}
+            value: http://{{ .Values.global.tracing.zipkinAddress }}/api/v1/spans
           - name: APP_TRACING_DEBUG
             value: "{{ .Values.tracing.debug }}"
           - name: APP_TRACING_SERVICE_SPAN_NAME

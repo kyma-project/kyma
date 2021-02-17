@@ -37,7 +37,6 @@ service:
 serviceMonitor:
   create: false
   name:
-  scrapeInterval: 30s
   labels: {}
   annotations: {}
 

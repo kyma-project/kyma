@@ -3,29 +3,32 @@ package http
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+	"net/url"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/pkg/errors"
 	"go.opencensus.io/trace"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
+	"knative.dev/eventing/pkg/kncloudevents"
 	"knative.dev/eventing/pkg/utils"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/source"
-	"knative.dev/pkg/tracing"
+	pkgtracing "knative.dev/pkg/tracing"
 
 	"github.com/kyma-project/kyma/components/event-sources/apis/sources"
 )
+
+var _ adapter.EnvConfigAccessor = (*envConfig)(nil)
 
 type envConfig struct {
 	adapter.EnvConfig
 	EventSource string `envconfig:"EVENT_SOURCE" required:"true"`
 
-	// PORT as required by knative serving runtime contract
-	Port           int  `envconfig:"PORT" required:"true" default:"8080"`
-	TracingEnabled bool `envconfig:"TRACING_ENABLED" default:"true"`
+	// PORT to access the event-source
+	Port int `envconfig:"PORT" required:"true" default:"8080"`
 }
 
 func (e *envConfig) GetSource() string {
@@ -34,10 +37,6 @@ func (e *envConfig) GetSource() string {
 
 func (e *envConfig) GetPort() int {
 	return e.Port
-}
-
-func (e *envConfig) IsTracingEnabled() bool {
-	return e.TracingEnabled
 }
 
 type httpAdapter struct {
@@ -52,8 +51,12 @@ type AdapterEnvConfigAccessor interface {
 	adapter.EnvConfigAccessor
 	GetSource() string
 	GetPort() int
-	IsTracingEnabled() bool
 }
+
+const (
+	defaultMaxIdleConnections        = 1000
+	defaultMaxIdleConnectionsPerHost = 1000
+)
 
 const resourceGroup = "http." + sources.GroupName
 
@@ -90,32 +93,49 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 	}
 }
 
+// NewCloudEventsClient creates a new client for receiving and sending cloud events
+func NewCloudEventsClient(port int) (cloudevents.Client, error) {
+	options := []cloudeventshttp.Option{
+		cloudevents.WithBinaryEncoding(),
+		cloudevents.WithMiddleware(pkgtracing.HTTPSpanMiddleware),
+		cloudevents.WithPort(port),
+		cloudevents.WithPath(endpointCE),
+		cloudevents.WithMiddleware(WithReadinessMiddleware),
+	}
+
+	httpTransport, err := cloudevents.NewHTTPTransport(
+		options...,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create transport")
+	}
+
+	connectionArgs := kncloudevents.ConnectionArgs{
+		MaxIdleConns:        defaultMaxIdleConnections,
+		MaxIdleConnsPerHost: defaultMaxIdleConnectionsPerHost,
+	}
+
+	ceClient, err := kncloudevents.NewDefaultClientGivenHttpTransport(
+		httpTransport,
+		&connectionArgs)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create client")
+	}
+	return ceClient, nil
+}
+
 // Start is the entrypoint for the adapter and is called by sharedmain coming from pkg/adapter
 func (h *httpAdapter) Start(_ <-chan struct{}) error {
 
-	t, err := cloudevents.NewHTTPTransport(
-		cloudevents.WithPort(h.accessor.GetPort()),
-		cloudevents.WithPath(endpointCE),
-		cloudevents.WithMiddleware(WithReadinessMiddleware),
-		cloudevents.WithMiddleware(tracing.HTTPSpanMiddleware),
-	)
-	if err != nil {
-		return errors.Wrap(err, "failed to create transport")
-	}
-
-	c, err := cloudevents.NewClient(t)
-	if err != nil {
-		return errors.Wrap(err, "failed to create client")
-	}
-
-	log.Printf("listening on :%d%s\n", h.accessor.GetPort(), endpointCE)
+	h.logger.Info("listening on", zap.String("address", fmt.Sprintf("%d%s", h.accessor.GetPort(), endpointCE)))
 
 	// note about graceful shutdown:
 	// TLDR; StartReceiver unblocks as soon as a stop signal is received
 	// `StartReceiver` waits internally until `ctx.Done()` does not block anymore
 	// the context `h.adapterContext` returns a channel (when calling `ctx.Done()`)
 	// which is closed as soon as a stop signal is received, see https://github.com/knative/pkg/blob/master/signals/signal.go#L37
-	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
+	if err := h.ceClient.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
 		return errors.Wrap(err, "error occurred while serving")
 	}
 	h.logger.Info("adapter stopped")
@@ -176,8 +196,13 @@ func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, re
 	// Shamelessly copied from https://github.com/knative/eventing/blob/5631d771968bbf00e64988a0e4217c2915ee778e/pkg/broker/ingress/ingress_handler.go#L116
 	// Due to an issue in utils.ContextFrom, we don't retain the original trace context from ctx, so
 	// bring it in manually.
-	sendingCTX := utils.ContextFrom(tctx, nil)
-	sendingCTX = trace.NewContext(sendingCTX, trace.FromContext(ctx))
+	uri, err := url.Parse(h.accessor.GetSinkURI())
+	if err != nil {
+		return err
+	}
+	sendingCTX := utils.ContextFrom(tctx, uri)
+	trc := trace.FromContext(ctx)
+	sendingCTX = trace.NewContext(sendingCTX, trc)
 	rctx, revt, err := h.ceClient.Send(sendingCTX, event)
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.accessor.GetSinkURI()))

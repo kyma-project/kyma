@@ -1,16 +1,20 @@
 package servicecatalog
 
 import (
+	"bufio"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	appConnectorApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	appBroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	k8sCoreTypes "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -93,6 +97,7 @@ func (ut *AppBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLo
 		appConnectorInterface: ut.AppConnectorInterface,
 		scInterface:           ut.ServiceCatalogInterface,
 		messagingInterface:    ut.MessagingInterface,
+		k8sInterface:          ut.K8sInterface,
 	}
 }
 
@@ -136,6 +141,7 @@ func (f *appBrokerFlow) TestResources() error {
 		f.deleteApplication,
 		f.deleteChannel,
 		f.waitForClassesRemoved,
+		f.undeployEnvTester,
 	} {
 		err := fn()
 		if err != nil {
@@ -148,9 +154,15 @@ func (f *appBrokerFlow) TestResources() error {
 }
 
 func (f *appBrokerFlow) logReport() {
-	f.logK8SReport()
-	f.logServiceCatalogAndBindingUsageReport()
-	f.logApplicationReport()
+	report := NewReport(f.namespace, f.log)
+
+	f.logK8SReport(report)
+	f.logServiceCatalogAndBindingUsageReport(report)
+	f.logApplicationReport(report)
+	f.logChannels(report)
+	f.reportLogs(report)
+
+	report.Print()
 }
 
 func (f *appBrokerFlow) deleteApplication() error {
@@ -313,12 +325,12 @@ func (f *appBrokerFlow) verifyEventActivation() error {
 
 func (f *appBrokerFlow) verifyEnvTesterHasGatewayInjected() error {
 	f.log.Info("Waiting for GATEWAY_URL env injected")
-	return f.waitForEnvInjected(appEnvTester, "GATEWAY_URL", gatewayURL)
+	return f.waitForEnvInjected(appEnvTester, gatewayURL)
 }
 
 func (f *appBrokerFlow) verifyDeploymentDoesNotContainGatewayEnvs() error {
 	f.log.Info("Verify deployment does not contain GATEWAY_URL environment variable")
-	return f.waitForEnvNotInjected(appEnvTester, "GATEWAY_URL")
+	return f.waitForEnvNotInjected(appEnvTester)
 }
 
 func (f *appBrokerFlow) deleteAPIServiceBindingUsage() error {
@@ -441,13 +453,82 @@ func (f *appBrokerFlow) waitForEnvTester() error {
 	return f.waitForDeployment(appEnvTester)
 }
 
-func (f *appBrokerFlow) logApplicationReport() {
+func (f *appBrokerFlow) undeployEnvTester() error {
+	f.log.Info("Removing deployment environment variable tester")
+	return f.deleteDeployment(appEnvTester)
+}
+
+func (f *appBrokerFlow) logApplicationReport(report *Report) {
 	appMappings, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().ApplicationMappings(f.namespace).List(metav1.ListOptions{})
-	f.report("ApplicationMappings", appMappings, err)
+	report.AddApplicationMappings(appMappings, err)
 
 	eventActivations, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).List(metav1.ListOptions{})
-	f.report("EventActivations", eventActivations, err)
+	report.AddEventActivations(eventActivations, err)
 
 	applications, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
-	f.report("Applications", applications, err)
+	report.AddApplications(applications, err)
+}
+
+func (f *appBrokerFlow) logChannels(report *Report) {
+	channels, err := f.messagingInterface.Channels(integrationNamespace).List(metav1.ListOptions{})
+	report.AddChannels(channels, err)
+}
+
+func (f *appBrokerFlow) logFromPod(namespace, labelSelector, container string) ([]string, error) {
+	logs := make([]string, 0)
+
+	pods, err := f.k8sInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		return logs, errors.Wrapf(err, "unable to fetch logs for label %s", labelSelector)
+	}
+	if len(pods.Items) == 0 {
+		return logs, errors.Wrapf(err, "could not find pod for label %s", labelSelector)
+	}
+
+	for _, p := range pods.Items {
+		func() {
+			req := f.k8sInterface.CoreV1().Pods(namespace).
+				GetLogs(p.Name, &k8sCoreTypes.PodLogOptions{
+					Container: container,
+				})
+			readCloser, err := req.Stream()
+			if err != nil {
+				f.log.Warnf("cannot get stream for pod %s: %s", p.Name, err)
+				return
+			}
+			defer func() {
+				err = readCloser.Close()
+				if err != nil {
+					f.log.Warnf("cannot close stream for pod %s: %s", p.Name, err)
+				}
+			}()
+
+			rd := bufio.NewReader(readCloser)
+			lineCounter := 0
+			for {
+				lineCounter++
+				line, _, err := rd.ReadLine()
+				if err != nil {
+					f.log.Warnf("cannot read line %d from stream for pod %s: %s", lineCounter, p.Name, err)
+					return
+				}
+				logs = append(logs, string(line))
+			}
+		}()
+	}
+
+	return logs, nil
+}
+
+func (f *appBrokerFlow) reportLogs(report *Report) {
+	logs, err := f.logFromPod(integrationNamespace, "app=application-broker", "ctrl")
+	report.AddLogs("ApplicationBroker", logs, []string{apiServiceID, eventsServiceID, applicationName}, err)
+
+	logs, err = f.logFromPod("kyma-system", "app=service-catalog-addons-service-binding-usage-controller", "service-binding-usage-controller")
+	report.AddLogs("ServiceBindingUsageController", logs, []string{apiBindingUsageName}, err)
+
+	logs, err = f.logFromPod("kyma-system", "app=service-catalog-catalog-controller-manager", "controller-manager")
+	report.AddLogs("ServiceCatalog", logs, []string{apiServiceID, eventsServiceID, apiBindingName}, err)
 }

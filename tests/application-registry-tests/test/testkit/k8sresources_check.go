@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	application "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	istio "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
 )
@@ -99,35 +98,6 @@ func CheckK8sParamsSecret(t *testing.T, secret *v1core.Secret, name string, labe
 	require.Equal(t, queryParameterValue, queryParameters[queryParameterKey][0])
 
 	checkLabels(t, labels, secret.Labels)
-}
-
-func CheckK8sIstioHandler(t *testing.T, handler *istio.Handler, name string, labels Labels, code int, message string) {
-	require.Equal(t, name, handler.Name)
-
-	denierStatus := handler.Spec.Params.Status
-	require.Equal(t, int32(code), denierStatus.Code)
-	require.Equal(t, message, denierStatus.Message)
-
-	checkLabels(t, labels, handler.Labels)
-}
-
-func CheckK8sIstioRule(t *testing.T, rule *istio.Rule, name, namespace string, labels Labels) {
-	require.Equal(t, name, rule.Name)
-
-	expectedMatchExpression := makeMatchExpression(name, namespace)
-	require.Equal(t, expectedMatchExpression, rule.Spec.Match)
-
-	ruleAction := rule.Spec.Actions[0]
-	require.Equal(t, name, ruleAction.Handler)
-	require.Equal(t, name, ruleAction.Instances[0])
-
-	checkLabels(t, labels, rule.Labels)
-}
-
-func CheckK8sIstioInstance(t *testing.T, instance *istio.Instance, name string, labels Labels) {
-	require.Equal(t, name, instance.Name)
-
-	checkLabels(t, labels, instance.Labels)
 }
 
 func CheckK8sApplication(t *testing.T, app *application.Application, name string, expectedServiceData ServiceData) {

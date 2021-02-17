@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.test.acceptance.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
 
 spec:
     disableConcurrency: false
@@ -18,6 +21,7 @@ spec:
             sidecar.istio.io/inject: "true"
           labels:
             purpose: testing
+            app: {{ template "fullname" . }}-tests
         spec:
           {{ if .Values.global.isLocalEnv }}
           hostAliases:
@@ -49,26 +53,26 @@ spec:
                    memory: {{ .Values.test.acceptance.ui.limits.memory }}
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
-                - name: DOMAIN
+                - name: CYPRESS_DOMAIN
                   value: {{ .Values.global.ingress.domainName }}
-                - name: LOGIN
+                - name: CYPRESS_LOGIN
                   valueFrom:
                     secretKeyRef:
                       name: admin-user
                       key: email
-                - name: PASSWORD
+                - name: CYPRESS_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: admin-user
                       key: password
-                - name: DISABLE_LEGACY_CONNECTIVITY
+                - name: CYPRESS_DISABLE_LEGACY_CONNECTIVITY
                   value: {{ .Values.global.disableLegacyConnectivity | quote }}
-                - name: CATALOG_ENABLED
+                - name: CYPRESS_CATALOG_ENABLED
                   value: {{ .Values.test.acceptance.ui.service_catalog.enabled | quote }}
-                - name: LOGGING_ENABLED
-                  value: {{ .Values.test.acceptance.ui.logging.enabled | quote }}
-                - name: FUNCTIONS_ENABLED
+                - name: CYPRESS_FUNCTIONS_ENABLED
                   value: {{ .Values.test.acceptance.ui.functions.enabled | quote }}
+                - name: CYPRESS_RAFTER_ENABLED
+                  value: {{ .Values.test.acceptance.ui.rafter.enabled | quote }}
               command:
                 - "/bin/sh"
               args:

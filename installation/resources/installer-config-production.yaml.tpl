@@ -28,14 +28,29 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  global.proxy.resources.requests.cpu: "150m"
-  global.proxy.resources.requests.memory: "128Mi"
-  global.proxy.resources.limits.cpu: "500m"
-  global.proxy.resources.limits.memory: "1024Mi"
-
-  gateways.istio-ingressgateway.autoscaleMin: "3" 
-  gateways.istio-ingressgateway.autoscaleMax: "10"
-
+  kyma_istio_operator: |-
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    metadata:
+      namespace: istio-system
+    spec:
+      components:
+        ingressGateways:
+        - name: istio-ingressgateway
+          k8s:
+            hpaSpec:
+              maxReplicas: 10
+              minReplicas: 3
+      values:
+        global:
+          proxy:
+            resources:
+              requests:
+                cpu: 150m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 1024Mi
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -50,10 +65,11 @@ data:
   prometheus.prometheusSpec.retentionSize: "15GB"
   prometheus.prometheusSpec.retention: "30d"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "20Gi"
-  prometheus.prometheusSpec.resources.limits.cpu: "600m"
-  prometheus.prometheusSpec.resources.limits.memory: "2Gi"
+  prometheus.prometheusSpec.resources.limits.cpu: "1"
+  prometheus.prometheusSpec.resources.limits.memory: "3Gi"
   prometheus.prometheusSpec.resources.requests.cpu: "300m"
   prometheus.prometheusSpec.resources.requests.memory: "1Gi"
+  prometheus-istio.server.resources.limits.memory: "3Gi"
   alertmanager.alertmanagerSpec.retention: "240h"
 
 ---

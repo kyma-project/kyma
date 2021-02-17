@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
+    app: istio-ingressgateway
     istio: ingressgateway # use istio default ingress gateway
   servers:
   - port:
@@ -14,7 +15,7 @@ spec:
     tls:
       mode: SIMPLE
       credentialName: {{ .Values.global.istio.gateway.name }}-certs
-      minProtocolVersion: TLSV1_1
+      minProtocolVersion: TLSV1_2
       cipherSuites:
       - ECDHE-RSA-CHACHA20-POLY1305
       - ECDHE-RSA-AES256-GCM-SHA384

@@ -20,7 +20,6 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
 {{ include "nats-streaming.labels.standard" . | indent 8 }}
-{{ include "nats-streaming.labels.kyma" . | indent 8 }}
         rand: {{ randAlpha 6 }}
     spec:
       initContainers:

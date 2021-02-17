@@ -118,8 +118,12 @@ func (f *helmBrokerConflictFlow) TestResources() error {
 }
 
 func (f *helmBrokerConflictFlow) logReport() {
-	f.logK8SReport()
-	f.logServiceCatalogAndBindingUsageReport()
+	report := NewReport(f.namespace, f.log)
+
+	f.logK8SReport(report)
+	f.logServiceCatalogAndBindingUsageReport(report)
+
+	report.Print()
 }
 
 func (f *helmBrokerConflictFlow) createFirstRedisInstance() error {

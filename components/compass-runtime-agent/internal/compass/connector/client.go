@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=Client
+//go:generate mockery --name=Client
 type Client interface {
 	Configuration(headers map[string]string) (schema.Configuration, error)
 	SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error)

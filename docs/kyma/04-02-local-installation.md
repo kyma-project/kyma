@@ -13,7 +13,7 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 1.6.2
+- [Minikube](https://github.com/kubernetes/minikube) 1.12.2
 
 Virtualization:
 
@@ -37,7 +37,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma provision minikube
      ```
-     >**NOTE:** The `provision` command uses the default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
+     >**NOTE:** The `provision` command uses the default Minikube VM driver installed for your operating system. For the list of supported VM drivers, see [this document](https://minikube.sigs.k8s.io/docs/start/).
 
   2. Install the latest Kyma release on Minikube:
      ```bash

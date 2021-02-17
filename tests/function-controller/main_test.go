@@ -5,6 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/client-go/rest"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
+
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -14,27 +21,38 @@ import (
 )
 
 type config struct {
-	KubeconfigPath string `envconfig:"optional"`
-	Test           testsuite.Config
+	Test testsuite.Config
 }
 
-func TestFunctionController(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
+func TestRuntimes(t *testing.T) {
+	runTests(t, scenarios.FunctionTestStep)
+}
 
+func TestGitSourcesFunctions(t *testing.T) {
+	runTests(t, scenarios.GitopsSteps)
+}
+
+type testSuite func(*rest.Config, testsuite.Config, *logrus.Entry) (step.Step, error)
+
+func runTests(t *testing.T, testFunc testSuite) {
+	rand.Seed(time.Now().UnixNano())
 	g := gomega.NewGomegaWithT(t)
 
 	cfg, err := loadConfig("APP")
 	failOnError(g, err)
 
 	restConfig := controllerruntime.GetConfigOrDie()
-	failOnError(g, err)
 
-	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
-	failOnError(g, err)
+	logf := logrus.New()
+	logf.SetFormatter(&logrus.TextFormatter{})
+	logf.SetReportCaller(false)
 
-	defer testSuite.Cleanup()
-	defer testSuite.LogResources()
-	testSuite.Run()
+	steps, err := testFunc(restConfig, cfg.Test, logf.WithField("suite", t.Name()))
+	failOnError(g, err)
+	runner := step.NewRunner(step.WithCleanupDefault(cfg.Test.Cleanup), step.WithLogger(logf))
+
+	err = runner.Execute(steps)
+	failOnError(g, err)
 }
 
 func loadConfig(prefix string) (config, error) {

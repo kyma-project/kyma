@@ -7,6 +7,7 @@ metadata:
     chart: {{ template "service-broker-proxy.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    kyma-project.io/component: backend
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -20,6 +21,7 @@ spec:
       labels:
         app: {{ template "service-broker-proxy.name" . }}
         release: {{ .Release.Name }}
+        kyma-project.io/component: backend
     spec:
       {{- with .Values.securityContext }}
       securityContext:

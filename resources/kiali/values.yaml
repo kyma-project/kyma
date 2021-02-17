@@ -2,8 +2,12 @@
 tests:
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20200703-d5c97fa6
+    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    version: 20201023-5de446cf
+  labels:
+    integration: true
+    after-upgrade: true
+
 nodeSelector: {}
 
 global:
@@ -14,12 +18,31 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin
+  tracing:
+    enabled: true
 
 kcproxy:
   replicaCount: 1
-  inPort: 3000
-  clientId: kiali
-  clientSecret: hiFWLWqIxw5d3gl
+  port: 3000
+  config:
+    clientId: "kiali"
+    clientSecret: "hiFWLWqIxw5d3gl"
+    tlsVerify: false
+    resources:
+      uri: "/*"
+      methods: "GET,POST,PUT,DELETE"
+      useKymaGroups: false
+      groups: ""
+      roles: ""
+    scopes: "groups"
+    headers: ""
+    matchClaims: ""
+    addClaims: ""
   nodeSelector: {}
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
@@ -37,15 +60,24 @@ kiali:
   operator:
     image:
       repository: eu.gcr.io/kyma-project/incubator/develop/kiali-operator
-      tag: 1.20.0-e2756f72
+      tag: 1.24.0-b586f70c
       pullPolicy: IfNotPresent
     resources:
       limits:
-        cpu: 500m
-        memory: 200Mi
+        cpu: 600m
+        memory: 250Mi
       requests:
         cpu: 20m
         memory: 50Mi
+    nodeSelector: {}
+    # debug.enabled: when true the full ansible logs are dumped after each reconciliation run
+    # debug.verbosity: defines the amount of details the operator will log (higher numbers are more noisy)
+    debug:
+      enabled: false
+      verbosity: "1"
+    # Defines where the operator will look for Kial CR resources. "" means "all namespaces".
+    watchNamespace: "kyma-system"
+
   spec:
     # Taken from https://github.com/kiali/kiali-operator/blob/master/deploy/kiali/kiali_cr.yaml
     ###################################################################
@@ -162,46 +194,81 @@ kiali:
     #      - "openshift.*"
     #      - "ibm.*"
     #      - "kiali-operator"
-    #      label_selector: 
+    #      #label_selector:
 
     ##########
     #  ---
     auth:
     #
     # Determines what authentication strategy to use when users log into Kiali.
-    # Options are "login", "anonymous", "openshift", "token", "ldap".
-    # Choose "login" to use a username and password that will be stored in a secret.
+    # Options are "anonymous", "token", "openshift", "openid".
     # Choose "anonymous" to allow full access to Kiali without requiring any credentials.
     # Choose "token" to allow access to Kiali using service account tokens, which controls
     #  access based on RBAC roles assigned to the service account.
     # Choose "openshift" to use the OpenShift OAuth login which controls access based on
     #  the individual's  RBAC roles in OpenShift. Not valid for non-OpenShift environments.
-    # Choose "ldap" to enable LDAP based authentication. There are additional configurations for
-    #  LDAP auth strategy that are required. See below for the additional LDAP configuration section.
-    # When empty, its value will default to "openshift" on OpenShift and "login" on Kubernetes.
+    # Choose "openid" to enable OpenID connect based authentication. Your cluster is required to
+    #  be configured to accept the tokens issued by your IdP. There are additional required
+    #  configurations for this strategy. See below for the additional OpenID configuration section.
+    # When empty, its value will default to "openshift" on OpenShift and "token" on Kubernetes.
     #    ---
       strategy: "anonymous"
+    #
+    # When "openid" strategy is chosen for authentication, you will need to fill some
+    # required configurations in the following openid section. The "openid" authentication strategy
+    # assumes that your Kubernetes cluster is properly configured to accept OpenID connect
+    # tokens and delegates token validation to the cluster's API Server. Thus, "openid" strategy
+    # won't work without the proper configuration on your Kubernetes cluster
+    # (see https://kubernetes.io/docs/reference/access-authn-authz/authentication/#configuring-the-api-server).
+    # In case you are using a managed Kubernetes and your provider does not support configuring OpenID
+    # integration, a workaround is to use API proxies (like kube-oidc-proxy).
+    #
+    # If you are using an API proxy for the cluster API, you will need to specify the URI of the proxy
+    # in the `api_proxy` attribute, and provide the certificate authority file in the
+    # `api_proxy_ca_data` attribute as a base64 encoded string.
+    #
+    # The "openid" strategy should NOT be used when installing Kiali in OpenShift. In this case, you
+    # still should use "openshift" strategy and, in turn, setup OpenShift to use your IdP. For
+    # OpenShift 4.4, you can find related docs here: https://docs.openshift.com/container-platform/4.4/authentication/identity_providers/configuring-oidc-identity-provider.html
+    #
+    # Kiali requires that your IdP allows the Implicit Flow grant. The 'issuer_uri' and 'client_id' attributes
+    # are required values and must match your OpenId-Connect Kubernetes configuration. The 'username_claim'
+    # is optional, but must match the value configured in your cluster (default value is "sub").
+    #
+    # You can, optionally, specify an 'authorization_endpoint' which is the URI where users will
+    # be redirected to login and authorize access to Kiali. If you don't specify it, Kiali will try
+    # to discover it using the 'issuer_uri'.
+    #
+    # By default, Kiali will ask for "openid" (forced), "profile" and "email" scopes when asking
+    # for authentication to the OpenID provider. These are standard OpenID scopes. If this doesn't
+    # suit your needs, you can change the 'scopes' setting as long as your cluster will accept
+    # the issued token.
+    #
+    # When users are logging in, Kiali will wait at most 5 minutes after the "Login" button is pressed
+    # in Kiali and redirected to the OpenID provider. If users don't login within 5 minutes, Kiali will
+    # reject login even if the user authenticates successfully. You can change this time by adjusting
+    # the 'authentication_timeout' option.
+    #
+    # If your OpenID provider is using a certificate signed by an unknown CA, adjust the 'insecure_skip_verify_tls'
+    # to disable the certificate verification. Remember this should be for testing purposes only.
+    #
     #    ---
-    #    ldap:
-    #      ldap_base: ""
+    #    openid:
+    #      api_proxy: ""
+    #      api_proxy_ca_data: ""
+    #      authentication_timeout: 300
+    #      authorization_endpoint: ""
+    #      client_id: ""
+    #      insecure_skip_verify_tls: false
+    #      issuer_uri: ""
+    #      scopes: ["openid", "profile", "email"]
+    #      username_claim: "sub"
     #
-    # The binding that determines a user. For example, "CN={USERID},OU=xyz,OU=Users,OU=Accounts,DC=example,DC=com".
-    #      ---
-    #      ldap_bind_dn: ""
-    #      ldap_group_filter: "(cn=%s)"
-    #      ldap_host: ""
-    #      ldap_insecure_skip_verify: false
-    #      ldap_mail_id_key: "mail"
-    #      ldap_member_of_key: "memberOf"
-    #      ldap_port: 0
-    #
-    # The role filter can be used to filter the user roles using regular expressions. For example, ".*xyz.*".
-    #      ---
-    #      ldap_role_filter: ""
-    #      ldap_search_filter: "(&(name={USERID}))"
-    #      ldap_use_ssl: false
-    #      ldap_user_filter: "(cn=%s)"
-    #      ldap_user_id_key: "cn"
+    # The Route resource name and OAuthClient resource name will have this value as its prefix.
+    # This value normally should never change. The installer will ensure this value is set correctly.
+    #    ---
+    #    openshift:
+    #      client_id_prefix: kiali
 
     ##########
     #  ---
@@ -234,6 +301,19 @@ kiali:
     #      node: {}
     #      pod: {}
     #      pod_anti: {}
+    #
+    # Names of the out-of-box custom monitoring dashboards that are to be installed.
+    # The custom monitoring dashboards are defined in yaml files located within the operator.
+    # Consult the operator templates for the custom monitoring dashboard yaml files available.
+    # For example, see this for the current list of yaml files available:
+    # https://github.com/kiali/kiali-operator/tree/master/roles/default/kiali-deploy/templates/dashboards
+    # These settings will determine the additional metric graphs that you will see within the Kiali UI.
+    # You can specify an includes and excludes list, the excludes list takes precedence.
+    # Each list can have fileglob wildcard characters '*' and '?' for file matching.
+    #    ---
+    #    custom_dashboards:
+    #      excludes: ['']
+    #      includes: ['*']
     #
     # Determines which Kiali image to download and install.
     # If you set this to a specific name (i.e. you do not leave it as the default empty string),
@@ -268,7 +348,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.20.0-e2756f72"
+      image_version: "1.24.0-b586f70c"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -282,7 +362,7 @@ kiali:
     #
     # A set of node labels that dictate onto which node the Kiali pod will be deployed.
     #    ---
-      node_selector: {}
+    #    node_selector: {}
     #
     # Because an ingress into a cluster can vary wildly in its desired configuration,
     # this setting provides a way to override complete portions of the ingress resource
@@ -335,9 +415,7 @@ kiali:
           cpu: 10m
           memory: 20Mi
     #
-    # The name of the secret where the Kiali credentials are found.
-    # These credentials will be required when logging into Kiali.
-    # Only used when auth_strategy is "login".
+    # The name of a secret used by the Kiali. Reserved for future use - not currently used.
     #    ---
     #    secret_name: "kiali"
     #
@@ -358,7 +436,7 @@ kiali:
     # Determines which priority levels of log messages Kiali will output.
     # Typical values are "3" for INFO and higher priority, "4" for DEBUG and higher priority.
     #    ---
-    #    verbose_mode: "3"
+      verbose_mode: "3"
     #
     # Kiali resources will be assigned a "version" label when they are deployed.
     # This determines what value those "version" labels will have.
@@ -403,11 +481,15 @@ kiali:
     #      ---
     #      enabled: false
     #
+    # Istio 3scale template name. Istio instances will use this param as part of the template used in a Mixer Rule.
+    #      ---
+    #      template_name: "threescale-authorization"
+    #
     # Kiali enabled integration with Iter8 project.
     # If this extension is enabled, Kiali will communicate with Iter8 controller allowing to manage Experiments and review results.
     # Additional documentation https://iter8.tools/
     #    ---
-    #    iter8:
+    #    iter_8:
     #
     # Flag to indicate if iter8 extension is enabled in Kiali
     #      ---
@@ -430,10 +512,34 @@ kiali:
     # password, you can store that password in a secret named "myGrafanaCredentials" in a key named "myGrafanaPw".
     # In this case, you would set "external_services.grafana.auth.password" to "secret:myGrafanaCredentials:myGrafanaPw".
     #
+    # **Custom-dashboards settings:
+    # namespace_label: Prometheus label name used for identifying namespaces in metrics for custom dashboards.
+    #   Default is "kubernetes_namespace". It is quite common to use just "namespace" as well, depending on your Prometheus configuration.
+    # prometheus: please check the section below about Prometheus-specific settings: they are identical. The Prometheus
+    #   configuration defined here is dedicated to fetching custom dashboards, hence allowing to use a different instance
+    #   of Prometheus. If omitted, the same Prometheus as for Istio metrics will be reused for custom dashboards.
+    #    ---
+    #    custom_dashboards:
+    #      namespace_label: "kubernetes_namespace"
+    #      prometheus:
+    #        auth:
+    #          ca_file: ""
+    #          insecure_skip_verify: false
+    #          password: ""
+    #          token: ""
+    #          type: "none"
+    #          use_kiali_token: false
+    #          username: ""
+    #        url: ""
+    #
     # **Grafana-specific settings:
     # auth: authentication settings to connect to Grafana:
     #   ca_file: The certificate authority file to use when accessing Grafana using https. An empty string means no extra
     #       certificate authority file is used. Default is an empty string.
+    #   component_status: Grafana info for the Istio Component Status masthead indicator. Only if it is enabled.
+    #       app_label: The value of the Grafana pod(s)'s app label. The name of the app label is defined in the setting 'istio_labels.app_label_name'. It defaults to grafana.
+    #       is_core: Whether the component is core for your deployment. It defaults to false.
+    #       namespace: The namespace where the grafana is installed in. It defaults to the 'istio_namespace' setting.
     #   insecure_skip_verify: Set true to skip verifying certificate validity when Kiali contacts Grafana over https.
     #   password: Password to be used when making requests to Grafana, for basic authentication. User only requires viewer permissions. May refer to a secret - see note above.
     #   token: Token / API key to access Grafana, for token-based authentication. It only requires viewer permissions. May refer to a secret - see note above.
@@ -451,13 +557,17 @@ kiali:
     #     service: The name of a variable that holds the service name, if used in that dashboard (else it must be omitted)
     #     workload: The name of a variable that holds the workload name, if used in that dashboard (else it must be omitted)
     # enabled: When true, Grafana support will be enabled in Kiali.
-    # in_cluster_url: Set URL for in-cluster access. Example: "http://grafana.istio-system:3000".
+    # in_cluster_url: Set URL for in-cluster access. Example: "http://grafana.istio-system:3000". This URL can contain query parameters if needed, such as "?orgId=1".
     # url: The URL that Kiali uses when integrating with Grafana. This URL must be accessible to clients external to
     #      the cluster in order for the integration to work properly. If empty, an attempt to auto-discover it is made.
+    #      This URL can contain query parameters if needed, such as "?orgId=1".
     #    ---
       grafana:
     #      auth:
     #        ca_file: ""
+    #        component_status:
+    #          app_label: "grafana"
+    #          is_core: false
     #        insecure_skip_verify: false
     #        password: ""
     #        token: ""
@@ -474,25 +584,48 @@ kiali:
     #          namespace: "var-namespace"
     #          workload: "var-workload"
         enabled: false
-    #      in_cluster_url: ""
-    #      url: ""
+        in_cluster_url: "http://monitoring-grafana.kyma-system:80"
+        url: "https://grafana.{{ .Values.global.ingress.domainName }}"
     #
     # **Istio-specific settings:
+    # component_status:
+    #   enabled: Enable/Disable of istio component status into masthead indicator. It defaults to true.
+    #   components: A list of components that Kiali will check its statuses.
+    #     app_label: Istio component pod app label.
+    #     is_core: Whether the component is core for your deployment.
+    #     namespace: The namespace where the component is installed in. It defaults to the 'istio_namespace' setting.
+    # config_map_name: The name of the istio control plane config map. It defaults to `istio`.
     # istio_identity_domain: The annotation used by Istio to identify domains.
+    # istio_injection_annotation: The annotation used by Istio to automatically inject a specific workload
     # istio_sidecar_annotation: The pod annotation used by Istio to identify the sidecar.
-    # url_service_version: The Istio service used to determine the Istio version.
-    #                      If empty, assumes it is in the istio namespace at the URL "http://istio-pilot.<istio_namespace>:8080/version"
+    # url_service_version: The Istio service used to determine the Istio version. If empty, assumes the URL for the well-known Istio version endpoint.
     #    ---
       istio:
+        component_status:
+          enabled: true
+          components:
+          - app_label: istiod
+            is_core: true
+          - app_label: istio-ingressgateway
+            is_core: true
+    #        - app_label: istio-egressgateway
+    #          is_core: false
+    #      config_map_name: "istio"
     #      istio_identity_domain: "svc.cluster.local"
+    #      istio_injection_annotation: "sidecar.istio.io/inject"
     #      istio_sidecar_annotation: "sidecar.istio.io/status"
-        url_service_version: "http://istio-pilot:8080/version"
+    # https://github.com/kiali/kiali/issues/2754
+        url_service_version: "http://istio-pilot.istio-system:15014/version"
     #
     #
     # **Prometheus-specific settings:
     # auth: authentication settings to connect to Prometheus:
     #   ca_file: The certificate authority file to use when accessing Prometheus using https. An empty string means no extra
     #       certificate authority file is used. Default is an empty string.
+    #   component_status: Prometheus info for the Istio Component Status masthead indicator. Only if it is enabled.
+    #       app_label: The value of the Prometheus pod(s)'s app label. The name of the app label is defined in the setting 'istio_labels.app_label_name'. It defaults to prometheus.
+    #       is_core: Whether the component is core for your deployment. It defaults to true.
+    #       namespace: The namespace where Prometheus is installed in. It defaults to the 'istio_namespace' setting.
     #   insecure_skip_verify: Set true to skip verifying certificate validity when Kiali contacts Prometheus over https.
     #   password: Password to be used when making requests to Prometheus, for basic authentication. May refer to a secret - see note above.
     #   token: Token / API key to access Prometheus, for token-based authentication. May refer to a secret - see note above.
@@ -502,9 +635,6 @@ kiali:
     #   use_kiali_token: When true and if auth.type is "bearer", Kiali Service Account token will be used for the API calls to Prometheus,
     #       and auth.token config is ignored then.
     #   username: Username to be used when making requests to Prometheus, for basic authentication.
-    # custom_metrics_url: The URL used to query the Prometheus Server for building the runtime metrics dashboards.
-    #                     This URL must be accessible from the Kiali pod.
-    #                     If empty, assumes it is in the istio namespace at the URL "http://prometheus.<istio_namespace>:9090"
     # url: The URL used to query the Prometheus Server. This URL must be accessible from the Kiali pod.
     #      If empty, assumes it is in the istio namespace at the URL "http://prometheus.<istio_namespace>:9090"
     #    ---
@@ -517,12 +647,20 @@ kiali:
     #        type: "none"
     #        use_kiali_token: false
     #        username: ""
-        custom_metrics_url: "http://monitoring-prometheus.kyma-system:9090"
+        component_status:
+          namespace: "kyma-system"
+          # will search for deployments only but prometheus is a statefuleset, so using label of the operator instead, see https://github.com/kiali/kiali/blob/755a5f59a2e402b6c7bc0aa934d70715eb6c80c0/business/istio_status.go#L78
+          app_label: "monitoring-operator"
+          is_core: true
         url: "http://monitoring-prometheus.kyma-system:9090"
     #
     # **Tracing-specific settings:
     #  - Right now we only support Jaeger
     # auth: authentication settings to connect to Jaeger:
+    #   component_status: Jaeger info for the Istio Component Status masthead indicator. Only if it is enabled.
+    #       app_label: The value of the Jaeger pod(s)'s app label. The name of the app label is defined in the setting 'istio_labels.app_label_name'. It defaults to jaeger.
+    #       is_core: Whether the component is core for your deployment. It defaults to false.
+    #       namespace: The namespace where Jaeger is installed in. It defaults to the 'istio_namespace' setting.
     #   ca_file: The certificate authority file to use when accessing Jaeger using https. An empty string means no extra
     #       certificate authority file is used. Default is an empty string.
     #   insecure_skip_verify: Set true to skip verifying certificate validity when Kiali contacts Jaeger over https.
@@ -553,11 +691,32 @@ kiali:
     #        type: "none"
     #        use_kiali_token: false
     #        username: ""
-        enabled: false
-    #      in_cluster_url: ""
+        component_status:
+          namespace: kyma-system
+          app_label: "jaeger"
+          is_core: false
+    #      'enabled' will be overwritten with .Values.global.tracing.enabled in the template
+    #      enabled: true
+        in_cluster_url: "http://tracing-jaeger-query.kyma-system:16686"
     #      namespace_selector: true
-    #      url: ""
+        url: "https://jaeger.{{ .Values.global.ingress.domainName }}"
     #      whitelist_istio_system: ["jaeger-query", "istio-ingressgateway"]
+    ##########
+    #  ---
+    #  health_config:
+    #
+    # rate: A list of health configurations that Kiali uses to determine what is (and is not) healthy nodes. Each item contains:
+    #   namespace: The name of the namespace that this configuration applies to. This is a regular expression.
+    #   kind: The type of resource that this configuration applies to. This is a regular expression.
+    #   name: The name of a resource that this configuration applies to. This is a regular expression.
+    #   tolerance: A list of tolerances for this configuration. Each item contains:
+    #     protocol: The protocol that applies for this tolerance (e.g. grpc or http). This is a regular expression.
+    #     direction: The direction that applies for this tolerance (e.g. inbound or outbound). This is a regular expression.
+    #     code: The status code that applies for this tolerance. This is a regular expression.
+    #     degraded: Health will be considered degraded when the telemetry reaches this value (specified as a %).
+    #     failure: A failure status will be shown when the telemetry reaches this value (specified as a %).
+    #    ---
+    #    rate: []
 
     ##########
     #  ---
@@ -583,9 +742,21 @@ kiali:
     # This section defines what labels Istio is using to indicate apps and versions.
     # Typical values are: ("app" and "version") or ("app.kubernetes.io/name" and "app.kubernetes.io/version").
     # Kiali needs to know what labels Istio is using to be in sync with what Istio considers applications.
+    # It adds the label used to instruct Istio to automatically inject sidecar proxies when applications are deployed.
     #    ---
     #    app_label_name: "app"
+    #    injection_label_name: "istio-injection"
     #    version_label_name: "version"
+
+    ##########
+    # Kiali features that can be enabled/disabled via configuration
+    #  ---
+    #  kiali_feature_flags:
+    #
+    # Flag to indicate Kiali to enable/disable an Action to label a namespace for automatic Istio Sidecar injection.
+    #    ---
+    #    istio_injection_action: true
+    #
 
     ##########
     #  ---
@@ -612,6 +783,10 @@ kiali:
     #    - "Gateway"
     #    - "ServiceEntry"
     #    - "VirtualService"
+    #    - "Sidecar"
+    #    - "PeerAuthentication"
+    #    - "RequestAuthentication"
+    #    - "AuthorizationPolicy"
     #
     # List of namespaces or regex defining namespaces to include in a cache.
     #    ---
@@ -682,16 +857,23 @@ kiali:
     #
     # When true, the metrics endpoint will be available for Prometheus to scrape.
     #    ---
-    #    metrics_enabled: true
+      metrics_enabled: true
     #
     # The port that the server will bind to in order to receive metric requests.
     # This is the port Prometheus will need to scrape when collecting metrics from Kiali.
     #    ---
-    #    metrics_port: 9090
+      metrics_port: 9090
     #
     # The port that the server will bind to in order to receive console and API requests.
     #    ---
       port: 20001
+    #
+    # Defines the public domain where Kiali is being served. This is the "domain" part
+    # of the URL (usually it's a fully-qualified domain name).
+    # For example, "kiali.example.org".
+    # When empty, Kiali will try to guess this value from HTTP headers.
+    #    ---
+    #    web_fqdn: ""
     #
     # Defines the context root path for the Kiali console and API endpoints and readiness probes.
     # When providing a context root path that is not "/", do not add a trailing slash.
@@ -699,3 +881,10 @@ kiali:
     # When empty, will default to "/" on OpenShift and "/kiali" on Kubernetes.
     #    ---
       web_root: "/"
+    #
+    # Defines the public HTTP schema used to serve Kiali. This can only take
+    # two possible values: either "http" or "https".
+    # When empty, Kiali will try to guess this value from HTTP headers.
+    #    ---
+    #    web_schema: ""
+    #

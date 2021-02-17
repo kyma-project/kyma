@@ -1,15 +1,15 @@
 package ui
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/extractor"
+	res "github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"k8s.io/client-go/tools/cache"
 )
 
 type clusterMicroFrontendService struct {
-	informer cache.SharedIndexInformer
+	informer  cache.SharedIndexInformer
+	extractor extractor.CMFUnstructuredExtractor
 }
 
 func newClusterMicroFrontendService(informer cache.SharedIndexInformer) *clusterMicroFrontendService {
@@ -23,11 +23,15 @@ func (svc *clusterMicroFrontendService) List() ([]*v1alpha1.ClusterMicroFrontend
 
 	var clusterMicroFrontends []*v1alpha1.ClusterMicroFrontend
 	for _, item := range items {
-		clusterMicroFrontend, ok := item.(*v1alpha1.ClusterMicroFrontend)
-		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *%s", item, pretty.ClusterMicroFrontend)
+		clusterMicroFrontend, err := res.ToUnstructured(item)
+		if err != nil {
+			return nil, err
 		}
-		clusterMicroFrontends = append(clusterMicroFrontends, clusterMicroFrontend)
+		formattedCMF, err := svc.extractor.FromUnstructured(clusterMicroFrontend)
+		if err != nil {
+			return nil, err
+		}
+		clusterMicroFrontends = append(clusterMicroFrontends, formattedCMF)
 	}
 
 	return clusterMicroFrontends, nil

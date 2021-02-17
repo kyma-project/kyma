@@ -5,3 +5,7 @@ tests:
   central: false
   image:
     pullPolicy: IfNotPresent
+  labels:
+    integration: true
+    after-upgrade: true
+

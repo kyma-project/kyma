@@ -15,16 +15,19 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	v1alpha11 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	v1alpha12 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+	v1alpha11 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	v1alpha12 "github.com/ory/hydra-maester/api/v1alpha1"
+	v1alpha14 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	v11 "k8s.io/api/core/v1"
+	v12 "k8s.io/api/rbac/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"knative.dev/pkg/apis"
-	v11 "knative.dev/pkg/apis/duck/v1"
+	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	v13 "knative.dev/pkg/apis/duck/v1"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -45,6 +48,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	APIRule() APIRuleResolver
 	Application() ApplicationResolver
 	Asset() AssetResolver
 	AssetGroup() AssetGroupResolver
@@ -54,10 +58,15 @@ type ResolverRoot interface {
 	ClusterServicePlan() ClusterServicePlanResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
+	LimitRange() LimitRangeResolver
+	LimitRangeItem() LimitRangeItemResolver
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	NamespaceListItem() NamespaceListItemResolver
+	OAuth2Client() OAuth2ClientResolver
 	Query() QueryResolver
+	ResourceQuota() ResourceQuotaResolver
+	ResourceQuotaSpec() ResourceQuotaSpecResolver
 	ServiceBinding() ServiceBindingResolver
 	ServiceBindingUsage() ServiceBindingUsageResolver
 	ServiceClass() ServiceClassResolver
@@ -75,6 +84,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	APIRule struct {
 		Generation func(childComplexity int) int
+		JSON       func(childComplexity int) int
 		Name       func(childComplexity int) int
 		Spec       func(childComplexity int) int
 		Status     func(childComplexity int) int
@@ -291,6 +301,21 @@ type ComplexityRoot struct {
 		ViewBaseURL     func(childComplexity int) int
 	}
 
+	ClusterRole struct {
+		Name  func(childComplexity int) int
+		Rules func(childComplexity int) int
+	}
+
+	ClusterRoleBinding struct {
+		Name    func(childComplexity int) int
+		RoleRef func(childComplexity int) int
+	}
+
+	ClusterRoleBindingEvent struct {
+		ClusterRoleBinding func(childComplexity int) int
+		Type               func(childComplexity int) int
+	}
+
 	ClusterServiceBroker struct {
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
@@ -438,28 +463,27 @@ type ComplexityRoot struct {
 		Version     func(childComplexity int) int
 	}
 
-	ExceededQuota struct {
-		AffectedResources func(childComplexity int) int
-		QuotaName         func(childComplexity int) int
-		ResourceName      func(childComplexity int) int
-	}
-
 	File struct {
 		Metadata func(childComplexity int) int
 		URL      func(childComplexity int) int
 	}
 
 	Function struct {
-		Dependencies func(childComplexity int) int
-		Env          func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Name         func(childComplexity int) int
-		Namespace    func(childComplexity int) int
-		Replicas     func(childComplexity int) int
-		Resources    func(childComplexity int) int
-		Source       func(childComplexity int) int
-		Status       func(childComplexity int) int
-		UID          func(childComplexity int) int
+		BaseDir        func(childComplexity int) int
+		BuildResources func(childComplexity int) int
+		Dependencies   func(childComplexity int) int
+		Env            func(childComplexity int) int
+		Labels         func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Namespace      func(childComplexity int) int
+		Reference      func(childComplexity int) int
+		Replicas       func(childComplexity int) int
+		Resources      func(childComplexity int) int
+		Runtime        func(childComplexity int) int
+		Source         func(childComplexity int) int
+		SourceType     func(childComplexity int) int
+		Status         func(childComplexity int) int
+		UID            func(childComplexity int) int
 	}
 
 	FunctionEnv struct {
@@ -501,16 +525,32 @@ type ComplexityRoot struct {
 		Reason  func(childComplexity int) int
 	}
 
+	GitRepository struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+		Spec      func(childComplexity int) int
+	}
+
+	GitRepositorySpec struct {
+		Auth func(childComplexity int) int
+		URL  func(childComplexity int) int
+	}
+
 	LimitRange struct {
-		Limits func(childComplexity int) int
-		Name   func(childComplexity int) int
+		JSON func(childComplexity int) int
+		Name func(childComplexity int) int
+		Spec func(childComplexity int) int
 	}
 
 	LimitRangeItem struct {
 		Default        func(childComplexity int) int
 		DefaultRequest func(childComplexity int) int
-		LimitType      func(childComplexity int) int
 		Max            func(childComplexity int) int
+		Type           func(childComplexity int) int
+	}
+
+	LimitRangeSpec struct {
+		Limits func(childComplexity int) int
 	}
 
 	LoadBalancerIngress struct {
@@ -544,12 +584,16 @@ type ComplexityRoot struct {
 		CreateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		CreateApplication                          func(childComplexity int, name string, description *string, labels Labels) int
 		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
+		CreateClusterRoleBinding                   func(childComplexity int, name string, params ClusterRoleBindingInput) int
 		CreateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
+		CreateGitRepository                        func(childComplexity int, namespace string, name string, spec v1alpha11.GitRepositorySpec) int
 		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 		CreateManyTriggers                         func(childComplexity int, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) int
 		CreateNamespace                            func(childComplexity int, name string, labels Labels) int
+		CreateOAuth2Client                         func(childComplexity int, name string, namespace string, params v1alpha12.OAuth2ClientSpec) int
 		CreateResource                             func(childComplexity int, namespace string, resource JSON) int
 		CreateResourceQuota                        func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
+		CreateRoleBinding                          func(childComplexity int, name string, namespace string, params RoleBindingInput) int
 		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters JSON) int
 		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		CreateServiceInstance                      func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
@@ -558,13 +602,17 @@ type ComplexityRoot struct {
 		DeleteAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
 		DeleteApplication                          func(childComplexity int, name string) int
 		DeleteClusterAddonsConfiguration           func(childComplexity int, name string) int
+		DeleteClusterRoleBinding                   func(childComplexity int, name string) int
 		DeleteConfigMap                            func(childComplexity int, name string, namespace string) int
 		DeleteFunction                             func(childComplexity int, namespace string, function FunctionMetadataInput) int
+		DeleteGitRepository                        func(childComplexity int, namespace string, name string) int
 		DeleteManyFunctions                        func(childComplexity int, namespace string, functions []*FunctionMetadataInput) int
 		DeleteManyTriggers                         func(childComplexity int, namespace string, triggerNames []string) int
 		DeleteNamespace                            func(childComplexity int, name string) int
+		DeleteOAuth2Client                         func(childComplexity int, name string, namespace string) int
 		DeletePod                                  func(childComplexity int, name string, namespace string) int
 		DeleteReplicaSet                           func(childComplexity int, name string, namespace string) int
+		DeleteRoleBinding                          func(childComplexity int, namespace string, name string) int
 		DeleteSecret                               func(childComplexity int, name string, namespace string) int
 		DeleteService                              func(childComplexity int, name string, namespace string) int
 		DeleteServiceBinding                       func(childComplexity int, serviceBindingName string, namespace string) int
@@ -587,9 +635,13 @@ type ComplexityRoot struct {
 		UpdateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []*AddonsConfigurationRepositoryInput, urls []string, labels Labels) int
 		UpdateConfigMap                            func(childComplexity int, name string, namespace string, configMap JSON) int
 		UpdateFunction                             func(childComplexity int, name string, namespace string, params FunctionMutationInput) int
+		UpdateGitRepository                        func(childComplexity int, namespace string, name string, spec v1alpha11.GitRepositorySpec) int
+		UpdateLimitRange                           func(childComplexity int, namespace string, name string, json JSON) int
 		UpdateNamespace                            func(childComplexity int, name string, labels Labels) int
+		UpdateOAuth2Client                         func(childComplexity int, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) int
 		UpdatePod                                  func(childComplexity int, name string, namespace string, pod JSON) int
 		UpdateReplicaSet                           func(childComplexity int, name string, namespace string, replicaSet JSON) int
+		UpdateResourceQuota                        func(childComplexity int, namespace string, name string, json JSON) int
 		UpdateSecret                               func(childComplexity int, name string, namespace string, secret JSON) int
 		UpdateService                              func(childComplexity int, name string, namespace string, service JSON) int
 	}
@@ -635,6 +687,31 @@ type ComplexityRoot struct {
 		ViewURL             func(childComplexity int) int
 	}
 
+	OAuth2Client struct {
+		Error      func(childComplexity int) int
+		Generation func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Namespace  func(childComplexity int) int
+		Spec       func(childComplexity int) int
+	}
+
+	OAuth2ClientError struct {
+		Code        func(childComplexity int) int
+		Description func(childComplexity int) int
+	}
+
+	OAuth2ClientEvent struct {
+		Client func(childComplexity int) int
+		Type   func(childComplexity int) int
+	}
+
+	OAuth2ClientSpec struct {
+		GrantTypes    func(childComplexity int) int
+		ResponseTypes func(childComplexity int) int
+		Scope         func(childComplexity int) int
+		SecretName    func(childComplexity int) int
+	}
+
 	Pod struct {
 		ContainerStates   func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
@@ -652,6 +729,12 @@ type ComplexityRoot struct {
 		Type func(childComplexity int) int
 	}
 
+	PolicyRule struct {
+		APIGroups func(childComplexity int) int
+		Resources func(childComplexity int) int
+		Verbs     func(childComplexity int) int
+	}
+
 	Query struct {
 		APIRule                     func(childComplexity int, name string, namespace string) int
 		APIRules                    func(childComplexity int, namespace string, serviceName *string, hostname *string) int
@@ -663,6 +746,9 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurations func(childComplexity int, first *int, offset *int) int
 		ClusterAssetGroups          func(childComplexity int, viewContext *string, groupName *string) int
 		ClusterMicroFrontends       func(childComplexity int) int
+		ClusterRole                 func(childComplexity int, name string) int
+		ClusterRoleBindings         func(childComplexity int) int
+		ClusterRoles                func(childComplexity int) int
 		ClusterServiceBroker        func(childComplexity int, name string) int
 		ClusterServiceBrokers       func(childComplexity int, first *int, offset *int) int
 		ClusterServiceClass         func(childComplexity int, name string) int
@@ -674,16 +760,22 @@ type ComplexityRoot struct {
 		EventActivations            func(childComplexity int, namespace string) int
 		Function                    func(childComplexity int, name string, namespace string) int
 		Functions                   func(childComplexity int, namespace string) int
+		GitRepositories             func(childComplexity int, namespace string) int
+		GitRepository               func(childComplexity int, namespace string, name string) int
 		LimitRanges                 func(childComplexity int, namespace string) int
 		MicroFrontends              func(childComplexity int, namespace string) int
 		Namespace                   func(childComplexity int, name string) int
 		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
+		OAuth2Client                func(childComplexity int, name string, namespace string) int
+		OAuth2Clients               func(childComplexity int, namespace string) int
 		Pod                         func(childComplexity int, name string, namespace string) int
 		Pods                        func(childComplexity int, namespace string, first *int, offset *int) int
 		ReplicaSet                  func(childComplexity int, name string, namespace string) int
 		ReplicaSets                 func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas              func(childComplexity int, namespace string) int
-		ResourceQuotasStatus        func(childComplexity int, namespace string) int
+		Role                        func(childComplexity int, namespace string, name string) int
+		RoleBindings                func(childComplexity int, namespace string) int
+		Roles                       func(childComplexity int, namespace string) int
 		Secret                      func(childComplexity int, name string, namespace string) int
 		Secrets                     func(childComplexity int, namespace string, first *int, offset *int) int
 		SelfSubjectRules            func(childComplexity int, namespace *string) int
@@ -698,7 +790,7 @@ type ComplexityRoot struct {
 		ServiceInstance             func(childComplexity int, name string, namespace string) int
 		ServiceInstances            func(childComplexity int, namespace string, first *int, offset *int, status *InstanceStatusType) int
 		Services                    func(childComplexity int, namespace string, excludedLabels []string, first *int, offset *int) int
-		Triggers                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		Triggers                    func(childComplexity int, namespace string, serviceName string) int
 		UsageKinds                  func(childComplexity int, first *int, offset *int) int
 		VersionInfo                 func(childComplexity int) int
 	}
@@ -713,22 +805,36 @@ type ComplexityRoot struct {
 		Pods              func(childComplexity int) int
 	}
 
+	RepositoryAuth struct {
+		SecretName func(childComplexity int) int
+		Type       func(childComplexity int) int
+	}
+
 	RequiredPermission struct {
 		APIGroup func(childComplexity int) int
 		Resource func(childComplexity int) int
 		Verbs    func(childComplexity int) int
 	}
 
+	ResourceLimits struct {
+		CPU    func(childComplexity int) int
+		Memory func(childComplexity int) int
+	}
+
 	ResourceQuota struct {
+		JSON func(childComplexity int) int
+		Name func(childComplexity int) int
+		Spec func(childComplexity int) int
+	}
+
+	ResourceQuotaHard struct {
 		Limits   func(childComplexity int) int
-		Name     func(childComplexity int) int
 		Pods     func(childComplexity int) int
 		Requests func(childComplexity int) int
 	}
 
-	ResourceQuotasStatus struct {
-		Exceeded       func(childComplexity int) int
-		ExceededQuotas func(childComplexity int) int
+	ResourceQuotaSpec struct {
+		Hard func(childComplexity int) int
 	}
 
 	ResourceRef struct {
@@ -750,6 +856,28 @@ type ComplexityRoot struct {
 	ResourceValues struct {
 		CPU    func(childComplexity int) int
 		Memory func(childComplexity int) int
+	}
+
+	Role struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+		Rules     func(childComplexity int) int
+	}
+
+	RoleBinding struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+		RoleRef   func(childComplexity int) int
+	}
+
+	RoleBindingEvent struct {
+		RoleBinding func(childComplexity int) int
+		Type        func(childComplexity int) int
+	}
+
+	RoleRef struct {
+		Kind func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	Rule struct {
@@ -949,7 +1077,6 @@ type ComplexityRoot struct {
 
 	Subscriber struct {
 		Ref func(childComplexity int) int
-		URI func(childComplexity int) int
 	}
 
 	SubscriberRef struct {
@@ -968,18 +1095,22 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		ClusterAssetEvent               func(childComplexity int) int
 		ClusterAssetGroupEvent          func(childComplexity int) int
+		ClusterRoleBindingEvent         func(childComplexity int) int
 		ClusterServiceBrokerEvent       func(childComplexity int) int
 		ConfigMapEvent                  func(childComplexity int, namespace string) int
 		DeploymentEvent                 func(childComplexity int, namespace string) int
 		FunctionEvent                   func(childComplexity int, namespace string, functionName *string) int
 		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
+		OAuth2ClientEvent               func(childComplexity int, namespace string) int
 		PodEvent                        func(childComplexity int, namespace string) int
+		RoleBindingEvent                func(childComplexity int, namespace string) int
+		SecretEvent                     func(childComplexity int, namespace string) int
 		ServiceBindingEvent             func(childComplexity int, namespace string) int
 		ServiceBindingUsageEvent        func(childComplexity int, namespace string, resourceKind *string, resourceName *string) int
 		ServiceBrokerEvent              func(childComplexity int, namespace string) int
 		ServiceEvent                    func(childComplexity int, namespace string) int
 		ServiceInstanceEvent            func(childComplexity int, namespace string) int
-		TriggerEvent                    func(childComplexity int, namespace string, subscriber *v11.Destination) int
+		TriggerEvent                    func(childComplexity int, namespace string, serviceName string) int
 	}
 
 	Trigger struct {
@@ -997,6 +1128,8 @@ type ComplexityRoot struct {
 	TriggerSpec struct {
 		Broker     func(childComplexity int) int
 		Filter     func(childComplexity int) int
+		Path       func(childComplexity int) int
+		Port       func(childComplexity int) int
 		Subscriber func(childComplexity int) int
 	}
 
@@ -1033,6 +1166,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type APIRuleResolver interface {
+	JSON(ctx context.Context, obj *v1alpha1.APIRule) (JSON, error)
+}
 type ApplicationResolver interface {
 	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
 	EnabledMappingServices(ctx context.Context, obj *Application) ([]*EnabledMappingService, error)
@@ -1064,6 +1200,14 @@ type DeploymentResolver interface {
 }
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]*EventActivationEvent, error)
+}
+type LimitRangeResolver interface {
+	JSON(ctx context.Context, obj *v11.LimitRange) (JSON, error)
+}
+type LimitRangeItemResolver interface {
+	Max(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceLimits, error)
+	Default(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceLimits, error)
+	DefaultRequest(ctx context.Context, obj *v11.LimitRangeItem) (*ResourceLimits, error)
 }
 type MutationResolver interface {
 	CreateResource(ctx context.Context, namespace string, resource JSON) (JSON, error)
@@ -1102,7 +1246,6 @@ type MutationResolver interface {
 	DeleteSecret(ctx context.Context, name string, namespace string) (*Secret, error)
 	UpdateReplicaSet(ctx context.Context, name string, namespace string, replicaSet JSON) (*ReplicaSet, error)
 	DeleteReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
-	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*ResourceQuota, error)
 	UpdateConfigMap(ctx context.Context, name string, namespace string, configMap JSON) (*ConfigMap, error)
 	DeleteConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
@@ -1110,7 +1253,6 @@ type MutationResolver interface {
 	CreateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	UpdateNamespace(ctx context.Context, name string, labels Labels) (*NamespaceMutationOutput, error)
 	DeleteNamespace(ctx context.Context, name string) (*Namespace, error)
-	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	CreateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
 	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionMutationInput) (*Function, error)
 	DeleteFunction(ctx context.Context, namespace string, function FunctionMetadataInput) (*FunctionMetadata, error)
@@ -1118,10 +1260,24 @@ type MutationResolver interface {
 	CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	UpdateAPIRule(ctx context.Context, name string, namespace string, generation int, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha11.Trigger, error)
-	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha11.Trigger, error)
-	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha11.Trigger, error)
-	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha11.Trigger, error)
+	CreateTrigger(ctx context.Context, namespace string, trigger TriggerCreateInput, ownerRef []*v1.OwnerReference) (*v1alpha13.Trigger, error)
+	CreateManyTriggers(ctx context.Context, namespace string, triggers []*TriggerCreateInput, ownerRef []*v1.OwnerReference) ([]*v1alpha13.Trigger, error)
+	DeleteTrigger(ctx context.Context, namespace string, triggerName string) (*v1alpha13.Trigger, error)
+	DeleteManyTriggers(ctx context.Context, namespace string, triggerNames []string) ([]*v1alpha13.Trigger, error)
+	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*v11.LimitRange, error)
+	UpdateLimitRange(ctx context.Context, namespace string, name string, json JSON) (*v11.LimitRange, error)
+	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*v11.ResourceQuota, error)
+	UpdateResourceQuota(ctx context.Context, namespace string, name string, json JSON) (*v11.ResourceQuota, error)
+	CreateOAuth2Client(ctx context.Context, name string, namespace string, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
+	UpdateOAuth2Client(ctx context.Context, name string, namespace string, generation int, params v1alpha12.OAuth2ClientSpec) (*v1alpha12.OAuth2Client, error)
+	DeleteOAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
+	CreateRoleBinding(ctx context.Context, name string, namespace string, params RoleBindingInput) (*v12.RoleBinding, error)
+	DeleteRoleBinding(ctx context.Context, namespace string, name string) (*v12.RoleBinding, error)
+	CreateClusterRoleBinding(ctx context.Context, name string, params ClusterRoleBindingInput) (*v12.ClusterRoleBinding, error)
+	DeleteClusterRoleBinding(ctx context.Context, name string) (*v12.ClusterRoleBinding, error)
+	CreateGitRepository(ctx context.Context, namespace string, name string, spec v1alpha11.GitRepositorySpec) (*v1alpha11.GitRepository, error)
+	UpdateGitRepository(ctx context.Context, namespace string, name string, spec v1alpha11.GitRepositorySpec) (*v1alpha11.GitRepository, error)
+	DeleteGitRepository(ctx context.Context, namespace string, name string) (*v1alpha11.GitRepository, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]*Pod, error)
@@ -1132,6 +1288,9 @@ type NamespaceListItemResolver interface {
 	PodsCount(ctx context.Context, obj *NamespaceListItem) (int, error)
 	HealthyPodsCount(ctx context.Context, obj *NamespaceListItem) (int, error)
 	ApplicationsCount(ctx context.Context, obj *NamespaceListItem) (*int, error)
+}
+type OAuth2ClientResolver interface {
+	Error(ctx context.Context, obj *v1alpha12.OAuth2Client) (*v1alpha12.ReconciliationError, error)
 }
 type QueryResolver interface {
 	ClusterAssetGroups(ctx context.Context, viewContext *string, groupName *string) ([]*ClusterAssetGroup, error)
@@ -1167,10 +1326,7 @@ type QueryResolver interface {
 	ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]*ConfigMap, error)
 	ReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
 	ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]*ReplicaSet, error)
-	ResourceQuotas(ctx context.Context, namespace string) ([]*ResourceQuota, error)
-	ResourceQuotasStatus(ctx context.Context, namespace string) (*ResourceQuotasStatus, error)
 	EventActivations(ctx context.Context, namespace string) ([]*EventActivation, error)
-	LimitRanges(ctx context.Context, namespace string) ([]*LimitRange, error)
 	BackendModules(ctx context.Context) ([]*BackendModule, error)
 	Secret(ctx context.Context, name string, namespace string) (*Secret, error)
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]*Secret, error)
@@ -1181,7 +1337,25 @@ type QueryResolver interface {
 	Functions(ctx context.Context, namespace string) ([]*Function, error)
 	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error)
 	APIRule(ctx context.Context, name string, namespace string) (*v1alpha1.APIRule, error)
-	Triggers(ctx context.Context, namespace string, subscriber *v11.Destination) ([]*v1alpha11.Trigger, error)
+	Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha13.Trigger, error)
+	LimitRanges(ctx context.Context, namespace string) ([]*v11.LimitRange, error)
+	ResourceQuotas(ctx context.Context, namespace string) ([]*v11.ResourceQuota, error)
+	OAuth2Clients(ctx context.Context, namespace string) ([]*v1alpha12.OAuth2Client, error)
+	OAuth2Client(ctx context.Context, name string, namespace string) (*v1alpha12.OAuth2Client, error)
+	Roles(ctx context.Context, namespace string) ([]*v12.Role, error)
+	Role(ctx context.Context, namespace string, name string) (*v12.Role, error)
+	ClusterRoles(ctx context.Context) ([]*v12.ClusterRole, error)
+	ClusterRole(ctx context.Context, name string) (*v12.ClusterRole, error)
+	RoleBindings(ctx context.Context, namespace string) ([]*v12.RoleBinding, error)
+	ClusterRoleBindings(ctx context.Context) ([]*v12.ClusterRoleBinding, error)
+	GitRepositories(ctx context.Context, namespace string) ([]*v1alpha11.GitRepository, error)
+	GitRepository(ctx context.Context, namespace string, name string) (*v1alpha11.GitRepository, error)
+}
+type ResourceQuotaResolver interface {
+	JSON(ctx context.Context, obj *v11.ResourceQuota) (JSON, error)
+}
+type ResourceQuotaSpecResolver interface {
+	Hard(ctx context.Context, obj *v11.ResourceQuotaSpec) (*ResourceQuotaHard, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -1224,18 +1398,24 @@ type SubscriptionResolver interface {
 	DeploymentEvent(ctx context.Context, namespace string) (<-chan *DeploymentEvent, error)
 	ServiceEvent(ctx context.Context, namespace string) (<-chan *ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan *ConfigMapEvent, error)
+	SecretEvent(ctx context.Context, namespace string) (<-chan *SecretEvent, error)
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan *ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan *AddonsConfigurationEvent, error)
 	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan *NamespaceEvent, error)
 	FunctionEvent(ctx context.Context, namespace string, functionName *string) (<-chan *FunctionEvent, error)
 	APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *APIRuleEvent, error)
-	TriggerEvent(ctx context.Context, namespace string, subscriber *v11.Destination) (<-chan *TriggerEvent, error)
+	TriggerEvent(ctx context.Context, namespace string, serviceName string) (<-chan *TriggerEvent, error)
+	OAuth2ClientEvent(ctx context.Context, namespace string) (<-chan *OAuth2ClientEvent, error)
+	RoleBindingEvent(ctx context.Context, namespace string) (<-chan *RoleBindingEvent, error)
+	ClusterRoleBindingEvent(ctx context.Context) (<-chan *ClusterRoleBindingEvent, error)
 }
 type TriggerResolver interface {
-	Status(ctx context.Context, obj *v1alpha11.Trigger) (*TriggerStatus, error)
+	Status(ctx context.Context, obj *v1alpha13.Trigger) (*TriggerStatus, error)
 }
 type TriggerSpecResolver interface {
-	Filter(ctx context.Context, obj *v1alpha11.TriggerSpec) (JSON, error)
+	Filter(ctx context.Context, obj *v1alpha13.TriggerSpec) (JSON, error)
+	Port(ctx context.Context, obj *v1alpha13.TriggerSpec) (uint32, error)
+	Path(ctx context.Context, obj *v1alpha13.TriggerSpec) (string, error)
 }
 
 type executableSchema struct {
@@ -1259,6 +1439,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.APIRule.Generation(childComplexity), true
+
+	case "APIRule.json":
+		if e.complexity.APIRule.JSON == nil {
+			break
+		}
+
+		return e.complexity.APIRule.JSON(childComplexity), true
 
 	case "APIRule.name":
 		if e.complexity.APIRule.Name == nil {
@@ -2106,6 +2293,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterMicroFrontend.ViewBaseURL(childComplexity), true
 
+	case "ClusterRole.name":
+		if e.complexity.ClusterRole.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterRole.Name(childComplexity), true
+
+	case "ClusterRole.rules":
+		if e.complexity.ClusterRole.Rules == nil {
+			break
+		}
+
+		return e.complexity.ClusterRole.Rules(childComplexity), true
+
+	case "ClusterRoleBinding.name":
+		if e.complexity.ClusterRoleBinding.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBinding.Name(childComplexity), true
+
+	case "ClusterRoleBinding.roleRef":
+		if e.complexity.ClusterRoleBinding.RoleRef == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBinding.RoleRef(childComplexity), true
+
+	case "ClusterRoleBindingEvent.clusterRoleBinding":
+		if e.complexity.ClusterRoleBindingEvent.ClusterRoleBinding == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBindingEvent.ClusterRoleBinding(childComplexity), true
+
+	case "ClusterRoleBindingEvent.type":
+		if e.complexity.ClusterRoleBindingEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ClusterRoleBindingEvent.Type(childComplexity), true
+
 	case "ClusterServiceBroker.creationTimestamp":
 		if e.complexity.ClusterServiceBroker.CreationTimestamp == nil {
 			break
@@ -2704,27 +2933,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventActivationEvent.Version(childComplexity), true
 
-	case "ExceededQuota.affectedResources":
-		if e.complexity.ExceededQuota.AffectedResources == nil {
-			break
-		}
-
-		return e.complexity.ExceededQuota.AffectedResources(childComplexity), true
-
-	case "ExceededQuota.quotaName":
-		if e.complexity.ExceededQuota.QuotaName == nil {
-			break
-		}
-
-		return e.complexity.ExceededQuota.QuotaName(childComplexity), true
-
-	case "ExceededQuota.resourceName":
-		if e.complexity.ExceededQuota.ResourceName == nil {
-			break
-		}
-
-		return e.complexity.ExceededQuota.ResourceName(childComplexity), true
-
 	case "File.metadata":
 		if e.complexity.File.Metadata == nil {
 			break
@@ -2738,6 +2946,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.File.URL(childComplexity), true
+
+	case "Function.baseDir":
+		if e.complexity.Function.BaseDir == nil {
+			break
+		}
+
+		return e.complexity.Function.BaseDir(childComplexity), true
+
+	case "Function.buildResources":
+		if e.complexity.Function.BuildResources == nil {
+			break
+		}
+
+		return e.complexity.Function.BuildResources(childComplexity), true
 
 	case "Function.dependencies":
 		if e.complexity.Function.Dependencies == nil {
@@ -2774,6 +2996,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Namespace(childComplexity), true
 
+	case "Function.reference":
+		if e.complexity.Function.Reference == nil {
+			break
+		}
+
+		return e.complexity.Function.Reference(childComplexity), true
+
 	case "Function.replicas":
 		if e.complexity.Function.Replicas == nil {
 			break
@@ -2788,12 +3017,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Resources(childComplexity), true
 
+	case "Function.runtime":
+		if e.complexity.Function.Runtime == nil {
+			break
+		}
+
+		return e.complexity.Function.Runtime(childComplexity), true
+
 	case "Function.source":
 		if e.complexity.Function.Source == nil {
 			break
 		}
 
 		return e.complexity.Function.Source(childComplexity), true
+
+	case "Function.sourceType":
+		if e.complexity.Function.SourceType == nil {
+			break
+		}
+
+		return e.complexity.Function.SourceType(childComplexity), true
 
 	case "Function.status":
 		if e.complexity.Function.Status == nil {
@@ -2935,12 +3178,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FunctionStatus.Reason(childComplexity), true
 
-	case "LimitRange.limits":
-		if e.complexity.LimitRange.Limits == nil {
+	case "GitRepository.name":
+		if e.complexity.GitRepository.Name == nil {
 			break
 		}
 
-		return e.complexity.LimitRange.Limits(childComplexity), true
+		return e.complexity.GitRepository.Name(childComplexity), true
+
+	case "GitRepository.namespace":
+		if e.complexity.GitRepository.Namespace == nil {
+			break
+		}
+
+		return e.complexity.GitRepository.Namespace(childComplexity), true
+
+	case "GitRepository.spec":
+		if e.complexity.GitRepository.Spec == nil {
+			break
+		}
+
+		return e.complexity.GitRepository.Spec(childComplexity), true
+
+	case "GitRepositorySpec.auth":
+		if e.complexity.GitRepositorySpec.Auth == nil {
+			break
+		}
+
+		return e.complexity.GitRepositorySpec.Auth(childComplexity), true
+
+	case "GitRepositorySpec.url":
+		if e.complexity.GitRepositorySpec.URL == nil {
+			break
+		}
+
+		return e.complexity.GitRepositorySpec.URL(childComplexity), true
+
+	case "LimitRange.json":
+		if e.complexity.LimitRange.JSON == nil {
+			break
+		}
+
+		return e.complexity.LimitRange.JSON(childComplexity), true
 
 	case "LimitRange.name":
 		if e.complexity.LimitRange.Name == nil {
@@ -2948,6 +3226,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LimitRange.Name(childComplexity), true
+
+	case "LimitRange.spec":
+		if e.complexity.LimitRange.Spec == nil {
+			break
+		}
+
+		return e.complexity.LimitRange.Spec(childComplexity), true
 
 	case "LimitRangeItem.default":
 		if e.complexity.LimitRangeItem.Default == nil {
@@ -2963,19 +3248,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LimitRangeItem.DefaultRequest(childComplexity), true
 
-	case "LimitRangeItem.limitType":
-		if e.complexity.LimitRangeItem.LimitType == nil {
-			break
-		}
-
-		return e.complexity.LimitRangeItem.LimitType(childComplexity), true
-
 	case "LimitRangeItem.max":
 		if e.complexity.LimitRangeItem.Max == nil {
 			break
 		}
 
 		return e.complexity.LimitRangeItem.Max(childComplexity), true
+
+	case "LimitRangeItem.type":
+		if e.complexity.LimitRangeItem.Type == nil {
+			break
+		}
+
+		return e.complexity.LimitRangeItem.Type(childComplexity), true
+
+	case "LimitRangeSpec.limits":
+		if e.complexity.LimitRangeSpec.Limits == nil {
+			break
+		}
+
+		return e.complexity.LimitRangeSpec.Limits(childComplexity), true
 
 	case "LoadBalancerIngress.hostName":
 		if e.complexity.LoadBalancerIngress.HostName == nil {
@@ -3143,6 +3435,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["repositories"].([]*AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(Labels)), true
 
+	case "Mutation.createClusterRoleBinding":
+		if e.complexity.Mutation.CreateClusterRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createClusterRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateClusterRoleBinding(childComplexity, args["name"].(string), args["params"].(ClusterRoleBindingInput)), true
+
 	case "Mutation.createFunction":
 		if e.complexity.Mutation.CreateFunction == nil {
 			break
@@ -3154,6 +3458,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput)), true
+
+	case "Mutation.createGitRepository":
+		if e.complexity.Mutation.CreateGitRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createGitRepository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateGitRepository(childComplexity, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec)), true
 
 	case "Mutation.createLimitRange":
 		if e.complexity.Mutation.CreateLimitRange == nil {
@@ -3191,6 +3507,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(Labels)), true
 
+	case "Mutation.createOAuth2Client":
+		if e.complexity.Mutation.CreateOAuth2Client == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createOAuth2Client_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateOAuth2Client(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha12.OAuth2ClientSpec)), true
+
 	case "Mutation.createResource":
 		if e.complexity.Mutation.CreateResource == nil {
 			break
@@ -3214,6 +3542,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput)), true
+
+	case "Mutation.createRoleBinding":
+		if e.complexity.Mutation.CreateRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateRoleBinding(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput)), true
 
 	case "Mutation.createServiceBinding":
 		if e.complexity.Mutation.CreateServiceBinding == nil {
@@ -3311,6 +3651,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteClusterAddonsConfiguration(childComplexity, args["name"].(string)), true
 
+	case "Mutation.deleteClusterRoleBinding":
+		if e.complexity.Mutation.DeleteClusterRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteClusterRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteClusterRoleBinding(childComplexity, args["name"].(string)), true
+
 	case "Mutation.deleteConfigMap":
 		if e.complexity.Mutation.DeleteConfigMap == nil {
 			break
@@ -3334,6 +3686,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteFunction(childComplexity, args["namespace"].(string), args["function"].(FunctionMetadataInput)), true
+
+	case "Mutation.deleteGitRepository":
+		if e.complexity.Mutation.DeleteGitRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteGitRepository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteGitRepository(childComplexity, args["namespace"].(string), args["name"].(string)), true
 
 	case "Mutation.deleteManyFunctions":
 		if e.complexity.Mutation.DeleteManyFunctions == nil {
@@ -3371,6 +3735,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteNamespace(childComplexity, args["name"].(string)), true
 
+	case "Mutation.deleteOAuth2Client":
+		if e.complexity.Mutation.DeleteOAuth2Client == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteOAuth2Client_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteOAuth2Client(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
 	case "Mutation.deletePod":
 		if e.complexity.Mutation.DeletePod == nil {
 			break
@@ -3394,6 +3770,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Mutation.deleteRoleBinding":
+		if e.complexity.Mutation.DeleteRoleBinding == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteRoleBinding_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteRoleBinding(childComplexity, args["namespace"].(string), args["name"].(string)), true
 
 	case "Mutation.deleteSecret":
 		if e.complexity.Mutation.DeleteSecret == nil {
@@ -3659,6 +4047,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(FunctionMutationInput)), true
 
+	case "Mutation.updateGitRepository":
+		if e.complexity.Mutation.UpdateGitRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateGitRepository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateGitRepository(childComplexity, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec)), true
+
+	case "Mutation.updateLimitRange":
+		if e.complexity.Mutation.UpdateLimitRange == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateLimitRange_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["json"].(JSON)), true
+
 	case "Mutation.updateNamespace":
 		if e.complexity.Mutation.UpdateNamespace == nil {
 			break
@@ -3670,6 +4082,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateNamespace(childComplexity, args["name"].(string), args["labels"].(Labels)), true
+
+	case "Mutation.updateOAuth2Client":
+		if e.complexity.Mutation.UpdateOAuth2Client == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateOAuth2Client_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateOAuth2Client(childComplexity, args["name"].(string), args["namespace"].(string), args["generation"].(int), args["params"].(v1alpha12.OAuth2ClientSpec)), true
 
 	case "Mutation.updatePod":
 		if e.complexity.Mutation.UpdatePod == nil {
@@ -3694,6 +4118,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string), args["replicaSet"].(JSON)), true
+
+	case "Mutation.updateResourceQuota":
+		if e.complexity.Mutation.UpdateResourceQuota == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateResourceQuota_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["json"].(JSON)), true
 
 	case "Mutation.updateSecret":
 		if e.complexity.Mutation.UpdateSecret == nil {
@@ -3906,6 +4342,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NavigationNode.ViewURL(childComplexity), true
 
+	case "OAuth2Client.error":
+		if e.complexity.OAuth2Client.Error == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Error(childComplexity), true
+
+	case "OAuth2Client.generation":
+		if e.complexity.OAuth2Client.Generation == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Generation(childComplexity), true
+
+	case "OAuth2Client.name":
+		if e.complexity.OAuth2Client.Name == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Name(childComplexity), true
+
+	case "OAuth2Client.namespace":
+		if e.complexity.OAuth2Client.Namespace == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Namespace(childComplexity), true
+
+	case "OAuth2Client.spec":
+		if e.complexity.OAuth2Client.Spec == nil {
+			break
+		}
+
+		return e.complexity.OAuth2Client.Spec(childComplexity), true
+
+	case "OAuth2ClientError.code":
+		if e.complexity.OAuth2ClientError.Code == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientError.Code(childComplexity), true
+
+	case "OAuth2ClientError.description":
+		if e.complexity.OAuth2ClientError.Description == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientError.Description(childComplexity), true
+
+	case "OAuth2ClientEvent.client":
+		if e.complexity.OAuth2ClientEvent.Client == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientEvent.Client(childComplexity), true
+
+	case "OAuth2ClientEvent.type":
+		if e.complexity.OAuth2ClientEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientEvent.Type(childComplexity), true
+
+	case "OAuth2ClientSpec.grantTypes":
+		if e.complexity.OAuth2ClientSpec.GrantTypes == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientSpec.GrantTypes(childComplexity), true
+
+	case "OAuth2ClientSpec.responseTypes":
+		if e.complexity.OAuth2ClientSpec.ResponseTypes == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientSpec.ResponseTypes(childComplexity), true
+
+	case "OAuth2ClientSpec.scope":
+		if e.complexity.OAuth2ClientSpec.Scope == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientSpec.Scope(childComplexity), true
+
+	case "OAuth2ClientSpec.secretName":
+		if e.complexity.OAuth2ClientSpec.SecretName == nil {
+			break
+		}
+
+		return e.complexity.OAuth2ClientSpec.SecretName(childComplexity), true
+
 	case "Pod.containerStates":
 		if e.complexity.Pod.ContainerStates == nil {
 			break
@@ -3982,6 +4509,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PodEvent.Type(childComplexity), true
+
+	case "PolicyRule.apiGroups":
+		if e.complexity.PolicyRule.APIGroups == nil {
+			break
+		}
+
+		return e.complexity.PolicyRule.APIGroups(childComplexity), true
+
+	case "PolicyRule.resources":
+		if e.complexity.PolicyRule.Resources == nil {
+			break
+		}
+
+		return e.complexity.PolicyRule.Resources(childComplexity), true
+
+	case "PolicyRule.verbs":
+		if e.complexity.PolicyRule.Verbs == nil {
+			break
+		}
+
+		return e.complexity.PolicyRule.Verbs(childComplexity), true
 
 	case "Query.APIRule":
 		if e.complexity.Query.APIRule == nil {
@@ -4092,6 +4640,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ClusterMicroFrontends(childComplexity), true
+
+	case "Query.clusterRole":
+		if e.complexity.Query.ClusterRole == nil {
+			break
+		}
+
+		args, err := ec.field_Query_clusterRole_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterRole(childComplexity, args["name"].(string)), true
+
+	case "Query.clusterRoleBindings":
+		if e.complexity.Query.ClusterRoleBindings == nil {
+			break
+		}
+
+		return e.complexity.Query.ClusterRoleBindings(childComplexity), true
+
+	case "Query.clusterRoles":
+		if e.complexity.Query.ClusterRoles == nil {
+			break
+		}
+
+		return e.complexity.Query.ClusterRoles(childComplexity), true
 
 	case "Query.clusterServiceBroker":
 		if e.complexity.Query.ClusterServiceBroker == nil {
@@ -4225,6 +4799,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string)), true
 
+	case "Query.gitRepositories":
+		if e.complexity.Query.GitRepositories == nil {
+			break
+		}
+
+		args, err := ec.field_Query_gitRepositories_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GitRepositories(childComplexity, args["namespace"].(string)), true
+
+	case "Query.gitRepository":
+		if e.complexity.Query.GitRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Query_gitRepository_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GitRepository(childComplexity, args["namespace"].(string), args["name"].(string)), true
+
 	case "Query.limitRanges":
 		if e.complexity.Query.LimitRanges == nil {
 			break
@@ -4272,6 +4870,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Namespaces(childComplexity, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool)), true
+
+	case "Query.oAuth2Client":
+		if e.complexity.Query.OAuth2Client == nil {
+			break
+		}
+
+		args, err := ec.field_Query_oAuth2Client_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.OAuth2Client(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.oAuth2Clients":
+		if e.complexity.Query.OAuth2Clients == nil {
+			break
+		}
+
+		args, err := ec.field_Query_oAuth2Clients_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.OAuth2Clients(childComplexity, args["namespace"].(string)), true
 
 	case "Query.pod":
 		if e.complexity.Query.Pod == nil {
@@ -4333,17 +4955,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ResourceQuotas(childComplexity, args["namespace"].(string)), true
 
-	case "Query.resourceQuotasStatus":
-		if e.complexity.Query.ResourceQuotasStatus == nil {
+	case "Query.role":
+		if e.complexity.Query.Role == nil {
 			break
 		}
 
-		args, err := ec.field_Query_resourceQuotasStatus_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_role_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Query.Role(childComplexity, args["namespace"].(string), args["name"].(string)), true
+
+	case "Query.roleBindings":
+		if e.complexity.Query.RoleBindings == nil {
+			break
+		}
+
+		args, err := ec.field_Query_roleBindings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RoleBindings(childComplexity, args["namespace"].(string)), true
+
+	case "Query.roles":
+		if e.complexity.Query.Roles == nil {
+			break
+		}
+
+		args, err := ec.field_Query_roles_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Roles(childComplexity, args["namespace"].(string)), true
 
 	case "Query.secret":
 		if e.complexity.Query.Secret == nil {
@@ -4523,7 +5169,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Query.Triggers(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Query.usageKinds":
 		if e.complexity.Query.UsageKinds == nil {
@@ -4593,6 +5239,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ReplicaSet.Pods(childComplexity), true
 
+	case "RepositoryAuth.secretName":
+		if e.complexity.RepositoryAuth.SecretName == nil {
+			break
+		}
+
+		return e.complexity.RepositoryAuth.SecretName(childComplexity), true
+
+	case "RepositoryAuth.type":
+		if e.complexity.RepositoryAuth.Type == nil {
+			break
+		}
+
+		return e.complexity.RepositoryAuth.Type(childComplexity), true
+
 	case "RequiredPermission.apiGroup":
 		if e.complexity.RequiredPermission.APIGroup == nil {
 			break
@@ -4614,12 +5274,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RequiredPermission.Verbs(childComplexity), true
 
-	case "ResourceQuota.limits":
-		if e.complexity.ResourceQuota.Limits == nil {
+	case "ResourceLimits.cpu":
+		if e.complexity.ResourceLimits.CPU == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuota.Limits(childComplexity), true
+		return e.complexity.ResourceLimits.CPU(childComplexity), true
+
+	case "ResourceLimits.memory":
+		if e.complexity.ResourceLimits.Memory == nil {
+			break
+		}
+
+		return e.complexity.ResourceLimits.Memory(childComplexity), true
+
+	case "ResourceQuota.json":
+		if e.complexity.ResourceQuota.JSON == nil {
+			break
+		}
+
+		return e.complexity.ResourceQuota.JSON(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -4628,33 +5302,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ResourceQuota.Name(childComplexity), true
 
-	case "ResourceQuota.pods":
-		if e.complexity.ResourceQuota.Pods == nil {
+	case "ResourceQuota.spec":
+		if e.complexity.ResourceQuota.Spec == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuota.Pods(childComplexity), true
+		return e.complexity.ResourceQuota.Spec(childComplexity), true
 
-	case "ResourceQuota.requests":
-		if e.complexity.ResourceQuota.Requests == nil {
+	case "ResourceQuotaHard.limits":
+		if e.complexity.ResourceQuotaHard.Limits == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuota.Requests(childComplexity), true
+		return e.complexity.ResourceQuotaHard.Limits(childComplexity), true
 
-	case "ResourceQuotasStatus.exceeded":
-		if e.complexity.ResourceQuotasStatus.Exceeded == nil {
+	case "ResourceQuotaHard.pods":
+		if e.complexity.ResourceQuotaHard.Pods == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuotasStatus.Exceeded(childComplexity), true
+		return e.complexity.ResourceQuotaHard.Pods(childComplexity), true
 
-	case "ResourceQuotasStatus.exceededQuotas":
-		if e.complexity.ResourceQuotasStatus.ExceededQuotas == nil {
+	case "ResourceQuotaHard.requests":
+		if e.complexity.ResourceQuotaHard.Requests == nil {
 			break
 		}
 
-		return e.complexity.ResourceQuotasStatus.ExceededQuotas(childComplexity), true
+		return e.complexity.ResourceQuotaHard.Requests(childComplexity), true
+
+	case "ResourceQuotaSpec.hard":
+		if e.complexity.ResourceQuotaSpec.Hard == nil {
+			break
+		}
+
+		return e.complexity.ResourceQuotaSpec.Hard(childComplexity), true
 
 	case "ResourceRef.name":
 		if e.complexity.ResourceRef.Name == nil {
@@ -4718,6 +5399,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceValues.Memory(childComplexity), true
+
+	case "Role.name":
+		if e.complexity.Role.Name == nil {
+			break
+		}
+
+		return e.complexity.Role.Name(childComplexity), true
+
+	case "Role.namespace":
+		if e.complexity.Role.Namespace == nil {
+			break
+		}
+
+		return e.complexity.Role.Namespace(childComplexity), true
+
+	case "Role.rules":
+		if e.complexity.Role.Rules == nil {
+			break
+		}
+
+		return e.complexity.Role.Rules(childComplexity), true
+
+	case "RoleBinding.name":
+		if e.complexity.RoleBinding.Name == nil {
+			break
+		}
+
+		return e.complexity.RoleBinding.Name(childComplexity), true
+
+	case "RoleBinding.namespace":
+		if e.complexity.RoleBinding.Namespace == nil {
+			break
+		}
+
+		return e.complexity.RoleBinding.Namespace(childComplexity), true
+
+	case "RoleBinding.roleRef":
+		if e.complexity.RoleBinding.RoleRef == nil {
+			break
+		}
+
+		return e.complexity.RoleBinding.RoleRef(childComplexity), true
+
+	case "RoleBindingEvent.roleBinding":
+		if e.complexity.RoleBindingEvent.RoleBinding == nil {
+			break
+		}
+
+		return e.complexity.RoleBindingEvent.RoleBinding(childComplexity), true
+
+	case "RoleBindingEvent.type":
+		if e.complexity.RoleBindingEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.RoleBindingEvent.Type(childComplexity), true
+
+	case "RoleRef.kind":
+		if e.complexity.RoleRef.Kind == nil {
+			break
+		}
+
+		return e.complexity.RoleRef.Kind(childComplexity), true
+
+	case "RoleRef.name":
+		if e.complexity.RoleRef.Name == nil {
+			break
+		}
+
+		return e.complexity.RoleRef.Name(childComplexity), true
 
 	case "Rule.accessStrategies":
 		if e.complexity.Rule.AccessStrategies == nil {
@@ -5566,13 +6317,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscriber.Ref(childComplexity), true
 
-	case "Subscriber.uri":
-		if e.complexity.Subscriber.URI == nil {
-			break
-		}
-
-		return e.complexity.Subscriber.URI(childComplexity), true
-
 	case "SubscriberRef.apiVersion":
 		if e.complexity.SubscriberRef.APIVersion == nil {
 			break
@@ -5677,6 +6421,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.ClusterAssetGroupEvent(childComplexity), true
 
+	case "Subscription.clusterRoleBindingEvent":
+		if e.complexity.Subscription.ClusterRoleBindingEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ClusterRoleBindingEvent(childComplexity), true
+
 	case "Subscription.clusterServiceBrokerEvent":
 		if e.complexity.Subscription.ClusterServiceBrokerEvent == nil {
 			break
@@ -5732,6 +6483,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
 
+	case "Subscription.oAuth2ClientEvent":
+		if e.complexity.Subscription.OAuth2ClientEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_oAuth2ClientEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.OAuth2ClientEvent(childComplexity, args["namespace"].(string)), true
+
 	case "Subscription.podEvent":
 		if e.complexity.Subscription.PodEvent == nil {
 			break
@@ -5743,6 +6506,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.roleBindingEvent":
+		if e.complexity.Subscription.RoleBindingEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_roleBindingEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.RoleBindingEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.secretEvent":
+		if e.complexity.Subscription.SecretEvent == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_secretEvent_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.SecretEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.serviceBindingEvent":
 		if e.complexity.Subscription.ServiceBindingEvent == nil {
@@ -5814,7 +6601,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["subscriber"].(*v11.Destination)), true
+		return e.complexity.Subscription.TriggerEvent(childComplexity, args["namespace"].(string), args["serviceName"].(string)), true
 
 	case "Trigger.name":
 		if e.complexity.Trigger.Name == nil {
@@ -5871,6 +6658,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TriggerSpec.Filter(childComplexity), true
+
+	case "TriggerSpec.path":
+		if e.complexity.TriggerSpec.Path == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Path(childComplexity), true
+
+	case "TriggerSpec.port":
+		if e.complexity.TriggerSpec.Port == nil {
+			break
+		}
+
+		return e.complexity.TriggerSpec.Port(childComplexity), true
 
 	case "TriggerSpec.subscriber":
 		if e.complexity.TriggerSpec.Subscriber == nil {
@@ -6065,6 +6866,7 @@ type APIRule @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1
     spec: APIRuleSpec!
     status: APIRuleStatuses!
     generation: Int!
+    json: JSON!
 }
 
 type APIRuleSpec @goModel(model: "github.com/kyma-incubator/api-gateway/api/v1alpha1.APIRuleSpec") {
@@ -6145,16 +6947,18 @@ extend type Subscription {
     apiRuleEvent(namespace: String!, serviceName: String): ApiRuleEvent! @HasAccess(attributes: {resource: "apirules", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha", namespaceArg: "namespace"})
 }
 `, BuiltIn: false},
-	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
+	&ast.Source{Name: "internal/gqlschema/eventing.graphql", Input: `type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
     namespace: String!
     spec: TriggerSpec!
     status: TriggerStatus!
 }
 
-type TriggerSpec @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
+type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
+    port: Port!
+    path: String!
     subscriber: Subscriber!
 }
 
@@ -6170,7 +6974,6 @@ enum TriggerStatusType {
 }
 
 type Subscriber @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
     ref: SubscriberRef
 }
 
@@ -6181,9 +6984,10 @@ type SubscriberRef @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
     namespace: String!
 }
 
-input SubscriberInput @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
-    ref: SubscriberRefInput
+input SubscriberInput {
+    ref: SubscriberRefInput!
+    port: Port
+    path: String
 }
 
 input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
@@ -6215,7 +7019,7 @@ type TriggerEvent {
 }
 
 extend type Query {
-    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, serviceName: String!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -6226,7 +7030,294 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}`, BuiltIn: false},
+	&ast.Source{Name: "internal/gqlschema/k8sNew.graphql", Input: `scalar LimitType @goModel(model: "k8s.io/api/core/v1.LimitType")
+
+type ResourceLimits {
+  memory: String
+  cpu: String
+}
+
+# LIMIT RANGE
+type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
+  type: LimitType!
+  max: ResourceLimits!
+  default: ResourceLimits!
+  defaultRequest: ResourceLimits!
+}
+
+type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
+  limits: [LimitRangeItem!]!
+}
+type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
+  name: String!
+  spec: LimitRangeSpec!
+  json: JSON!
+}
+
+# # RESOURCE QUOTA
+
+# type ResourceQuotaHard @goModel(model: "k8s.io/api/core/v1.ResourceList") {
+#   # limits: ResourceLimits!
+#   # requests: ResourceLimits!
+#   pods: String
+# }
+
+type ResourceQuotaHard {
+  limits: ResourceLimits!
+  requests: ResourceLimits!
+  pods: String!
+}
+
+type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
+  hard: ResourceQuotaHard!
+}
+type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
+  name: String!
+  spec: ResourceQuotaSpec!
+  json: JSON!
+}
+
+extend type Query {
+  limitRanges(namespace: String!): [LimitRange!]!
+  @HasAccess(
+    attributes: {
+      resource: "limitRange"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  resourceQuotas(namespace: String!): [ResourceQuota!]!
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  # resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
+  # @HasAccess(
+  #   attributes: {
+  #     resource: "resourcequotas"
+  #     verb: "list"
+  #     apiGroup: ""
+  #     apiVersion: "v1"
+  #     namespaceArg: "namespace"
+  #   }
+  # )
+}
+
+enum LimitRangeType {
+  Container
+  Pod
+}
+
+input ResourceQuotaInput {
+  limits: ResourceValuesInput!
+  requests: ResourceValuesInput!
+}
+
+input LimitRangeInput {
+  default: ResourceValuesInput!
+  defaultRequest: ResourceValuesInput!
+  max: ResourceValuesInput!
+  type: LimitRangeType!
+}
+
+extend type Mutation {
+  createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "update"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "internal/gqlschema/oauth.graphql", Input: `scalar GrantType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.GrantType")
+
+scalar ResponseType @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ResponseType")
+
+scalar StatusCode @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.StatusCode")
+
+type OAuth2Client @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client") {
+	namespace: String!
+	name: String!
+	generation: Int!
+
+	error: OAuth2ClientError
+	spec: OAuth2ClientSpec!
+}
+
+type OAuth2ClientError @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.ReconciliationError") {
+	code: StatusCode
+	description: String
+}
+
+type OAuth2ClientSpec @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2ClientSpec") {
+	grantTypes: [GrantType!]!
+	responseTypes: [ResponseType!]!
+	scope: String!
+	secretName: String!
+}
+
+input OAuth2ClientSpecInput @goModel(model: "github.com/ory/hydra-maester/api/v1alpha1.OAuth2ClientSpec") {
+	grantTypes: [GrantType!]!
+	responseTypes: [ResponseType!]!
+	scope: String!
+	secretName: String!
+}
+
+type OAuth2ClientEvent {
+	type: SubscriptionEventType!
+	client: OAuth2Client!
+}
+
+extend type Query {
+	oAuth2Clients(namespace: String!): [OAuth2Client!]! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "list", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+	oAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "get", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Mutation {
+	createOAuth2Client(name: String!, namespace: String!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "create", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	updateOAuth2Client(name: String!, namespace: String!, generation: Int!, params: OAuth2ClientSpecInput!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "update", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+	deleteOAuth2Client(name: String!, namespace: String!): OAuth2Client @HasAccess(attributes: {resource: "OAuth2Clients", verb: "delete", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+}
+
+extend type Subscription {
+	oAuth2ClientEvent(namespace: String!): OAuth2ClientEvent! @HasAccess(attributes: {resource: "OAuth2Clients", verb: "watch", apiGroup: "hydra.ory.sh", apiVersion: "v1alpha", namespaceArg: "namespace"})
+}
+
+`, BuiltIn: false},
+	&ast.Source{Name: "internal/gqlschema/roles.graphql", Input: `enum SubjectKind { User Group }
+
+enum RoleKind {  Role ClusterRole }
+
+type Role @goModel(model: "k8s.io/api/rbac/v1.Role") {
+    name: String!
+    namespace: String!
+    rules: [PolicyRule!]
+}
+
+type ClusterRole @goModel(model: "k8s.io/api/rbac/v1.ClusterRole") {
+    name: String!
+    rules: [PolicyRule!]
+}
+
+type PolicyRule @goModel(model: "k8s.io/api/rbac/v1.PolicyRule") {
+    apiGroups: [String!]!
+    resources: [String!]!
+    verbs: [String!]!
+}
+
+type RoleRef @goModel(model: "k8s.io/api/rbac/v1.RoleRef") {
+    name: String!
+    kind: String!
+}
+
+type RoleBinding @goModel(model: "k8s.io/api/rbac/v1.RoleBinding") {
+    name: String!
+    namespace: String!
+    roleRef: RoleRef!
+}
+
+type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding") {
+    name: String!
+    roleRef: RoleRef!
+}
+
+input RoleBindingSubject {
+    name: String!
+    kind: SubjectKind!
+}
+
+input RoleBindingInput {
+    roleName: String!
+    roleKind: RoleKind!
+    subjects: [RoleBindingSubject!]!
+}
+
+input ClusterRoleBindingInput {
+    roleName: String!
+    subjects: [RoleBindingSubject!]!
+}
+
+type ClusterRoleBindingEvent {
+    type: SubscriptionEventType!
+    clusterRoleBinding: ClusterRoleBinding!
+}
+
+type RoleBindingEvent {
+    type: SubscriptionEventType!
+    roleBinding: RoleBinding!
+}
+
+extend type Query {
+    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "", apiVersion: "v1"})
+
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "", apiVersion: "v1"})
+}
+
+extend type Mutation {
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+}
+
+extend type Subscription {
+    roleBindingEvent(namespace: String!): RoleBindingEvent! @HasAccess(attributes: {resource: "roleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha", namespaceArg: "namespace"})
+    clusterRoleBindingEvent: ClusterRoleBindingEvent! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha"})
 }`, BuiltIn: false},
 	&ast.Source{Name: "internal/gqlschema/schema.graphql", Input: `# Scalars
 
@@ -6244,6 +7335,12 @@ scalar Port @goModel(model: "github.com/kyma-project/kyma/components/console-bac
 scalar Extension @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RawExtension")
 scalar UID @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.UID")
 scalar URI @goModel(model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.URI")
+
+
+input ResourceValuesInput {
+  memory: String
+  cpu: String
+}
 
 # Directives
 
@@ -6695,29 +7792,7 @@ type EnvPrefix {
     name: String!
 }
 
-type LimitRange {
-    name: String!
-    limits: [LimitRangeItem!]!
-}
 
-type LimitRangeItem {
-    limitType: LimitType!
-    max: ResourceType!
-    default: ResourceType!
-    defaultRequest: ResourceType!
-}
-
-input LimitRangeInput {
-    default: ResourceValuesInput!,
-    defaultRequest: ResourceValuesInput!
-    max: ResourceValuesInput!
-    type: String!
-}
-
-enum LimitType {
-    Container
-    Pod
-}
 
 type ResourceType {
     memory: String
@@ -6887,33 +7962,6 @@ type ResourceValues {
     cpu: String
 }
 
-type ResourceQuota {
-    name: String!
-    pods: String
-    limits: ResourceValues!
-    requests: ResourceValues!
-}
-
-input ResourceValuesInput {
-    memory: String
-    cpu: String
-}
-
-input ResourceQuotaInput {
-    limits: ResourceValuesInput!
-    requests: ResourceValuesInput!
-}
-
-type ResourceQuotasStatus {
-    exceeded: Boolean!
-    exceededQuotas: [ExceededQuota!]!
-}
-
-type ExceededQuota {
-    quotaName: String!
-    resourceName: String!
-    affectedResources: [String!]!
-}
 
 # Applications
 
@@ -7138,6 +8186,11 @@ type Function {
     env: [FunctionEnv!]!
     replicas: FunctionReplicas!
     resources: FunctionResources!
+    buildResources: FunctionResources!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 
     # status
     status: FunctionStatus!
@@ -7212,7 +8265,7 @@ enum FunctionPhaseType {
 enum FunctionReasonType {
     CONFIG # ConfigMap
     JOB # K8S Job
-    SERVICE # KNative Service
+    SERVICE #  Deployment + Service + hpa
 }
 
 input FunctionMutationInput {
@@ -7222,6 +8275,11 @@ input FunctionMutationInput {
     env: [FunctionEnvInput!]!
     replicas: FunctionReplicasInput!
     resources: FunctionResourcesInput!
+    buildResources: FunctionResourcesInput!
+    runtime: String
+    sourceType: String
+    baseDir: String
+    reference: String
 }
 
 type FunctionMetadata {
@@ -7296,13 +8354,10 @@ type Query {
     replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
 
-    resourceQuotas(namespace: String!): [ResourceQuota!]! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    resourceQuotasStatus(namespace: String!): ResourceQuotasStatus! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-
+    
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-
+   
     backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 
     secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -7364,8 +8419,6 @@ type Mutation {
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
-    createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota @HasAccess(attributes: {resource: "resourcequotas", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     
@@ -7373,10 +8426,8 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
-    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
+    updateNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "name"})
-
-    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     createFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     updateFunction(name: String!, namespace: String!, params: FunctionMutationInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
@@ -7404,11 +8455,10 @@ type Subscription {
     deploymentEvent(namespace: String!): DeploymentEvent! @HasAccess(attributes: {resource: "deployments", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secretEvent(namespace: String!): SecretEvent! @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     clusterAddonsConfigurationEvent: ClusterAddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
-
-    # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
 
     namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 
@@ -7420,6 +8470,48 @@ type Subscription {
 schema {
     query: Query
     mutation: Mutation
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "internal/gqlschema/serverless.graphql", Input: `type GitRepository @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository") {
+    name: String!
+    namespace: String!
+    spec: GitRepositorySpec!
+}
+
+type GitRepositorySpec @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepositorySpec") {
+    url: String!
+    auth: RepositoryAuth
+}
+
+input GitRepositorySpecInput @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepositorySpec") {
+    url: String!
+    auth: RepositoryAuthInput
+}
+
+type RepositoryAuth @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuth") {
+    type: RepositoryAuthType!
+    secretName: String!
+}
+
+input RepositoryAuthInput @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuth") {
+    type: RepositoryAuthType!
+    secretName: String!
+}
+
+enum RepositoryAuthType @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuthType") {
+    BASIC
+    KEY
+}
+
+extend type Query {
+    gitRepositories(namespace: String!): [GitRepository!] @HasAccess(attributes: {resource: "gitrepositories", verb: "list", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    gitRepository(namespace: String!, name: String!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "list", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}
+
+extend type Mutation {
+    createGitRepository(namespace: String!, name: String!, spec: GitRepositorySpecInput!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    updateGitRepository(namespace: String!, name: String!, spec: GitRepositorySpecInput!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "update", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteGitRepository(namespace: String!, name: String!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 `, BuiltIn: false},
 }
@@ -7775,6 +8867,28 @@ func (ec *executionContext) field_Mutation_createClusterAddonsConfiguration_args
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createClusterRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 ClusterRoleBindingInput
+	if tmp, ok := rawArgs["params"]; ok {
+		arg1, err = ec.unmarshalNClusterRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createFunction_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7802,6 +8916,36 @@ func (ec *executionContext) field_Mutation_createFunction_args(ctx context.Conte
 		}
 	}
 	args["params"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createGitRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 v1alpha11.GitRepositorySpec
+	if tmp, ok := rawArgs["spec"]; ok {
+		arg2, err = ec.unmarshalNGitRepositorySpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositorySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["spec"] = arg2
 	return args, nil
 }
 
@@ -7887,6 +9031,36 @@ func (ec *executionContext) field_Mutation_createNamespace_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createOAuth2Client_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 v1alpha12.OAuth2ClientSpec
+	if tmp, ok := rawArgs["params"]; ok {
+		arg2, err = ec.unmarshalNOAuth2ClientSpecInput2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createResourceQuota_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7936,6 +9110,36 @@ func (ec *executionContext) field_Mutation_createResource_args(ctx context.Conte
 		}
 	}
 	args["resource"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 RoleBindingInput
+	if tmp, ok := rawArgs["params"]; ok {
+		arg2, err = ec.unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
 	return args, nil
 }
 
@@ -8123,6 +9327,20 @@ func (ec *executionContext) field_Mutation_deleteClusterAddonsConfiguration_args
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteClusterRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteConfigMap_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8164,6 +9382,28 @@ func (ec *executionContext) field_Mutation_deleteFunction_args(ctx context.Conte
 		}
 	}
 	args["function"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteGitRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
 	return args, nil
 }
 
@@ -8225,6 +9465,28 @@ func (ec *executionContext) field_Mutation_deleteNamespace_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteOAuth2Client_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deletePod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8266,6 +9528,28 @@ func (ec *executionContext) field_Mutation_deleteReplicaSet_args(ctx context.Con
 		}
 	}
 	args["namespace"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteRoleBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
 	return args, nil
 }
 
@@ -8873,6 +10157,66 @@ func (ec *executionContext) field_Mutation_updateFunction_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateGitRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 v1alpha11.GitRepositorySpec
+	if tmp, ok := rawArgs["spec"]; ok {
+		arg2, err = ec.unmarshalNGitRepositorySpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositorySpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["spec"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateLimitRange_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["json"]; ok {
+		arg2, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["json"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateNamespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8886,12 +10230,50 @@ func (ec *executionContext) field_Mutation_updateNamespace_args(ctx context.Cont
 	args["name"] = arg0
 	var arg1 Labels
 	if tmp, ok := rawArgs["labels"]; ok {
-		arg1, err = ec.unmarshalNLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLabels(ctx, tmp)
+		arg1, err = ec.unmarshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLabels(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["labels"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateOAuth2Client_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 int
+	if tmp, ok := rawArgs["generation"]; ok {
+		arg2, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["generation"] = arg2
+	var arg3 v1alpha12.OAuth2ClientSpec
+	if tmp, ok := rawArgs["params"]; ok {
+		arg3, err = ec.unmarshalNOAuth2ClientSpecInput2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg3
 	return args, nil
 }
 
@@ -8952,6 +10334,36 @@ func (ec *executionContext) field_Mutation_updateReplicaSet_args(ctx context.Con
 		}
 	}
 	args["replicaSet"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateResourceQuota_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["json"]; ok {
+		arg2, err = ec.unmarshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["json"] = arg2
 	return args, nil
 }
 
@@ -9227,6 +10639,20 @@ func (ec *executionContext) field_Query_clusterAssetGroups_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_clusterRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_clusterServiceBroker_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -9437,6 +10863,42 @@ func (ec *executionContext) field_Query_functions_args(ctx context.Context, rawA
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_gitRepositories_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_gitRepository_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_limitRanges_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -9498,6 +10960,42 @@ func (ec *executionContext) field_Query_namespaces_args(ctx context.Context, raw
 		}
 	}
 	args["withInactiveStatus"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_oAuth2Client_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_oAuth2Clients_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
 	return args, nil
 }
 
@@ -9605,7 +11103,7 @@ func (ec *executionContext) field_Query_replicaSets_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_resourceQuotasStatus_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_resourceQuotas_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -9619,7 +11117,43 @@ func (ec *executionContext) field_Query_resourceQuotasStatus_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_resourceQuotas_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_roleBindings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_role_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_roles_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -10008,14 +11542,14 @@ func (ec *executionContext) field_Query_triggers_args(ctx context.Context, rawAr
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -10169,7 +11703,49 @@ func (ec *executionContext) field_Subscription_namespaceEvent_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Subscription_oAuth2ClientEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Subscription_podEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_roleBindingEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_secretEvent_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -10280,14 +11856,14 @@ func (ec *executionContext) field_Subscription_triggerEvent_args(ctx context.Con
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *v11.Destination
-	if tmp, ok := rawArgs["subscriber"]; ok {
-		arg1, err = ec.unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, tmp)
+	var arg1 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["subscriber"] = arg1
+	args["serviceName"] = arg1
 	return args, nil
 }
 
@@ -10463,7 +12039,41 @@ func (ec *executionContext) _APIRule_generation(ctx context.Context, field graph
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.Authenticator) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRule_json(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.APIRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "APIRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.APIRule().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Authenticator) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10497,7 +12107,7 @@ func (ec *executionContext) _APIRuleAccessStrategy_name(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.Authenticator) (ret graphql.Marshaler) {
+func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *v1alpha14.Authenticator) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -14347,6 +15957,207 @@ func (ec *executionContext) _ClusterMicroFrontend_navigationNodes(ctx context.Co
 	return ec.marshalNNavigationNode2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNavigationNodeᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ClusterRole_name(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRole) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRole",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRole_rules(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRole) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRole",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v12.PolicyRule)
+	fc.Result = res
+	return ec.marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.ClusterRoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleRef, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v12.RoleRef)
+	fc.Result = res
+	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *ClusterRoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ClusterRoleBindingEvent_clusterRoleBinding(ctx context.Context, field graphql.CollectedField, obj *ClusterRoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ClusterRoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ClusterRoleBinding, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17178,108 +18989,6 @@ func (ec *executionContext) _EventActivationEvent_schema(ctx context.Context, fi
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ExceededQuota_quotaName(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "ExceededQuota",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.QuotaName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _ExceededQuota_resourceName(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "ExceededQuota",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ResourceName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _ExceededQuota_affectedResources(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "ExceededQuota",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AffectedResources, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _File_url(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17652,6 +19361,164 @@ func (ec *executionContext) _Function_resources(ctx context.Context, field graph
 	res := resTmp.(*FunctionResources)
 	fc.Result = res
 	return ec.marshalNFunctionResources2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResources(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_buildResources(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BuildResources, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*FunctionResources)
+	fc.Result = res
+	return ec.marshalNFunctionResources2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResources(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_runtime(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Runtime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_sourceType(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourceType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_baseDir(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BaseDir, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Function_reference(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Function",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reference, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) (ret graphql.Marshaler) {
@@ -18282,7 +20149,174 @@ func (ec *executionContext) _FunctionStatus_message(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.CollectedField, obj *LimitRange) (ret graphql.Marshaler) {
+func (ec *executionContext) _GitRepository_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.GitRepository) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitRepository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitRepository_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.GitRepository) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitRepository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitRepository_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.GitRepository) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitRepository",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha11.GitRepositorySpec)
+	fc.Result = res
+	return ec.marshalNGitRepositorySpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositorySpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitRepositorySpec_url(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.GitRepositorySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitRepositorySpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GitRepositorySpec_auth(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.GitRepositorySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "GitRepositorySpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Auth, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha11.RepositoryAuth)
+	fc.Result = res
+	return ec.marshalORepositoryAuth2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -18316,7 +20350,7 @@ func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphql.CollectedField, obj *LimitRange) (ret graphql.Marshaler) {
+func (ec *executionContext) _LimitRange_spec(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -18325,6 +20359,210 @@ func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphq
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "LimitRange",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v11.LimitRangeSpec)
+	fc.Result = res
+	return ec.marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRange_json(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRange) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRange",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LimitRange().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeItem_type(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v11.LimitType)
+	fc.Result = res
+	return ec.marshalNLimitType2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LimitRangeItem().Max(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ResourceLimits)
+	fc.Result = res
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LimitRangeItem().Default(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ResourceLimits)
+	fc.Result = res
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeItem) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.LimitRangeItem().DefaultRequest(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ResourceLimits)
+	fc.Result = res
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LimitRangeSpec_limits(ctx context.Context, field graphql.CollectedField, obj *v11.LimitRangeSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "LimitRangeSpec",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -18345,145 +20583,9 @@ func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*LimitRangeItem)
+	res := resTmp.([]v11.LimitRangeItem)
 	fc.Result = res
-	return ec.marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItemᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LimitRangeItem_limitType(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.LimitType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(LimitType)
-	fc.Result = res
-	return ec.marshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Max, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ResourceType)
-	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Default, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ResourceType)
-	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "LimitRangeItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DefaultRequest, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ResourceType)
-	fc.Result = res
-	return ec.marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx, field.Selections, res)
+	return ec.marshalNLimitRangeItem2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItemᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _LoadBalancerIngress_ip(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerIngress) (ret graphql.Marshaler) {
@@ -21067,68 +23169,6 @@ func (ec *executionContext) _Mutation_deleteReplicaSet(ctx context.Context, fiel
 	return ec.marshalOReplicaSet2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createResourceQuota_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "create"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*ResourceQuota); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ResourceQuota`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*ResourceQuota)
-	fc.Result = res
-	return ec.marshalOResourceQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_updateConfigMap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -21567,68 +23607,6 @@ func (ec *executionContext) _Mutation_deleteNamespace(ctx context.Context, field
 	res := resTmp.(*Namespace)
 	fc.Result = res
 	return ec.marshalONamespace2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐNamespace(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createLimitRange_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().CreateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*LimitRange); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.LimitRange`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*LimitRange)
-	fc.Result = res
-	return ec.marshalOLimitRange2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createFunction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22110,10 +24088,10 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v1alpha11.Trigger); ok {
+		if data, ok := tmp.(*v1alpha13.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22122,9 +24100,9 @@ func (ec *executionContext) _Mutation_createTrigger(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha11.Trigger)
+	res := resTmp.(*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22172,10 +24150,10 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha11.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22184,9 +24162,9 @@ func (ec *executionContext) _Mutation_createManyTriggers(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha11.Trigger)
+	res := resTmp.([]*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22234,10 +24212,10 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(*v1alpha11.Trigger); ok {
+		if data, ok := tmp.(*v1alpha13.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22246,9 +24224,9 @@ func (ec *executionContext) _Mutation_deleteTrigger(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha11.Trigger)
+	res := resTmp.(*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -22296,10 +24274,10 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha11.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22308,9 +24286,889 @@ func (ec *executionContext) _Mutation_deleteManyTriggers(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha11.Trigger)
+	res := resTmp.([]*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createLimitRange_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.LimitRange); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.LimitRange`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.LimitRange)
+	fc.Result = res
+	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateLimitRange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateLimitRange_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitrange", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.LimitRange); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.LimitRange`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.LimitRange)
+	fc.Result = res
+	return ec.marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createResourceQuota_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.ResourceQuota); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.ResourceQuota`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.ResourceQuota)
+	fc.Result = res
+	return ec.marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateResourceQuota(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateResourceQuota_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["json"].(JSON))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v11.ResourceQuota); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/core/v1.ResourceQuota`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v11.ResourceQuota)
+	fc.Result = res
+	return ec.marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createOAuth2Client_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateOAuth2Client(rctx, args["name"].(string), args["namespace"].(string), args["params"].(v1alpha12.OAuth2ClientSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha12.OAuth2Client); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateOAuth2Client_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateOAuth2Client(rctx, args["name"].(string), args["namespace"].(string), args["generation"].(int), args["params"].(v1alpha12.OAuth2ClientSpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha12.OAuth2Client); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteOAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteOAuth2Client_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteOAuth2Client(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha12.OAuth2Client); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateRoleBinding(rctx, args["name"].(string), args["namespace"].(string), args["params"].(RoleBindingInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.RoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.RoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteRoleBinding(rctx, args["namespace"].(string), args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.RoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.RoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createClusterRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createClusterRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateClusterRoleBinding(rctx, args["name"].(string), args["params"].(ClusterRoleBindingInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.ClusterRoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteClusterRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteClusterRoleBinding_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteClusterRoleBinding(rctx, args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.ClusterRoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createGitRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createGitRepository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().CreateGitRepository(rctx, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "serverless.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "gitrepositories", "verb": "create"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha11.GitRepository); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha11.GitRepository)
+	fc.Result = res
+	return ec.marshalOGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateGitRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateGitRepository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateGitRepository(rctx, args["namespace"].(string), args["name"].(string), args["spec"].(v1alpha11.GitRepositorySpec))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "serverless.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "gitrepositories", "verb": "update"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha11.GitRepository); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha11.GitRepository)
+	fc.Result = res
+	return ec.marshalOGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteGitRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteGitRepository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().DeleteGitRepository(rctx, args["namespace"].(string), args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "serverless.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "gitrepositories", "verb": "delete"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha11.GitRepository); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha11.GitRepository)
+	fc.Result = res
+	return ec.marshalOGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
@@ -23189,6 +26047,439 @@ func (ec *executionContext) _NavigationNode_requiredPermissions(ctx context.Cont
 	return ec.marshalNRequiredPermission2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRequiredPermissionᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _OAuth2Client_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2Client) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2Client",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2Client_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2Client) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2Client",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2Client_generation(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2Client) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2Client",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Generation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2Client_error(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2Client) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2Client",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.OAuth2Client().Error(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.ReconciliationError)
+	fc.Result = res
+	return ec.marshalOOAuth2ClientError2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2Client_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2Client) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2Client",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha12.OAuth2ClientSpec)
+	fc.Result = res
+	return ec.marshalNOAuth2ClientSpec2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientError_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.ReconciliationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha12.StatusCode)
+	fc.Result = res
+	return ec.marshalOStatusCode2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐStatusCode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientError_description(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.ReconciliationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientEvent_type(ctx context.Context, field graphql.CollectedField, obj *OAuth2ClientEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientEvent_client(ctx context.Context, field graphql.CollectedField, obj *OAuth2ClientEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Client, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalNOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientSpec_grantTypes(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2ClientSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GrantTypes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha12.GrantType)
+	fc.Result = res
+	return ec.marshalNGrantType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantTypeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientSpec_responseTypes(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2ClientSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ResponseTypes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha12.ResponseType)
+	fc.Result = res
+	return ec.marshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseTypeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientSpec_scope(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2ClientSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Scope, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OAuth2ClientSpec_secretName(ctx context.Context, field graphql.CollectedField, obj *v1alpha12.OAuth2ClientSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OAuth2ClientSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SecretName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Pod_name(ctx context.Context, field graphql.CollectedField, obj *Pod) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -23561,6 +26852,108 @@ func (ec *executionContext) _PodEvent_pod(ctx context.Context, field graphql.Col
 	res := resTmp.(*Pod)
 	fc.Result = res
 	return ec.marshalNPod2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PolicyRule_apiGroups(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PolicyRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIGroups, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PolicyRule_resources(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PolicyRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resources, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PolicyRule_verbs(ctx context.Context, field graphql.CollectedField, obj *v12.PolicyRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "PolicyRule",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Verbs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_clusterAssetGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -25638,136 +29031,6 @@ func (ec *executionContext) _Query_replicaSets(ctx context.Context, field graphq
 	return ec.marshalNReplicaSet2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSetᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_resourceQuotas_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().ResourceQuotas(rctx, args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*ResourceQuota); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ResourceQuota`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ResourceQuota)
-	fc.Result = res
-	return ec.marshalNResourceQuota2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_resourceQuotasStatus_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().ResourceQuotasStatus(rctx, args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*ResourceQuotasStatus); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ResourceQuotasStatus`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*ResourceQuotasStatus)
-	fc.Result = res
-	return ec.marshalNResourceQuotasStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotasStatus(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_eventActivations(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -25831,71 +29094,6 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 	res := resTmp.([]*EventActivation)
 	fc.Result = res
 	return ec.marshalNEventActivation2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐEventActivationᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_limitRanges_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().LimitRanges(rctx, args["namespace"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitranges", "verb": "list"})
-			if err != nil {
-				return nil, err
-			}
-			if ec.directives.HasAccess == nil {
-				return nil, errors.New("directive HasAccess is not implemented")
-			}
-			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*LimitRange); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.LimitRange`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*LimitRange)
-	fc.Result = res
-	return ec.marshalNLimitRange2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -26550,7 +29748,7 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Query().Triggers(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "list"})
@@ -26570,10 +29768,10 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*v1alpha11.Trigger); ok {
+		if data, ok := tmp.([]*v1alpha13.Trigger); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -26582,9 +29780,766 @@ func (ec *executionContext) _Query_triggers(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha11.Trigger)
+	res := resTmp.([]*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+	return ec.marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_limitRanges_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().LimitRanges(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "limitRange", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v11.LimitRange); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/core/v1.LimitRange`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v11.LimitRange)
+	fc.Result = res
+	return ec.marshalNLimitRange2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_resourceQuotas_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().ResourceQuotas(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "resourcequotas", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v11.ResourceQuota); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/core/v1.ResourceQuota`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v11.ResourceQuota)
+	fc.Result = res
+	return ec.marshalNResourceQuota2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_oAuth2Clients(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_oAuth2Clients_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().OAuth2Clients(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v1alpha12.OAuth2Client); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalNOAuth2Client2ᚕᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Clientᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_oAuth2Client(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_oAuth2Client_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().OAuth2Client(rctx, args["name"].(string), args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha1", "nameArg": "name", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "get"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha12.OAuth2Client); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/ory/hydra-maester/api/v1alpha1.OAuth2Client`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha12.OAuth2Client)
+	fc.Result = res
+	return ec.marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_roles_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Roles(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v12.Role); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.Role`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v12.Role)
+	fc.Result = res
+	return ec.marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_role(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_role_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Role(rctx, args["namespace"].(string), args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roles", "verb": "get"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.Role); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.Role`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.Role)
+	fc.Result = res
+	return ec.marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_clusterRoles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().ClusterRoles(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v12.ClusterRole); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.ClusterRole`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v12.ClusterRole)
+	fc.Result = res
+	return ec.marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_clusterRole(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_clusterRole_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().ClusterRole(rctx, args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoles", "verb": "get"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v12.ClusterRole); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *k8s.io/api/rbac/v1.ClusterRole`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.ClusterRole)
+	fc.Result = res
+	return ec.marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_roleBindings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_roleBindings_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().RoleBindings(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v12.RoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.RoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBindingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_clusterRoleBindings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().ClusterRoleBindings(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "resource": "clusterRoleBindings", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v12.ClusterRoleBinding); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*k8s.io/api/rbac/v1.ClusterRoleBinding`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*v12.ClusterRoleBinding)
+	fc.Result = res
+	return ec.marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBindingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_gitRepositories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_gitRepositories_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().GitRepositories(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "serverless.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "gitrepositories", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*v1alpha11.GitRepository); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha11.GitRepository)
+	fc.Result = res
+	return ec.marshalOGitRepository2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_gitRepository(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_gitRepository_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().GitRepository(rctx, args["namespace"].(string), args["name"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "serverless.kyma-project.io", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "gitrepositories", "verb": "list"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*v1alpha11.GitRepository); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha11.GitRepository)
+	fc.Result = res
+	return ec.marshalOGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -26894,6 +30849,74 @@ func (ec *executionContext) _ReplicaSet_json(ctx context.Context, field graphql.
 	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RepositoryAuth_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.RepositoryAuth) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RepositoryAuth",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha11.RepositoryAuthType)
+	fc.Result = res
+	return ec.marshalNRepositoryAuthType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuthType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RepositoryAuth_secretName(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.RepositoryAuth) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RepositoryAuth",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SecretName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RequiredPermission_verbs(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -26996,7 +31019,69 @@ func (ec *executionContext) _RequiredPermission_resource(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuota_name(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceLimits_memory(ctx context.Context, field graphql.CollectedField, obj *ResourceLimits) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ResourceLimits",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Memory, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ResourceLimits_cpu(ctx context.Context, field graphql.CollectedField, obj *ResourceLimits) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ResourceLimits",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CPU, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ResourceQuota_name(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuota) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27030,7 +31115,7 @@ func (ec *executionContext) _ResourceQuota_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuota_pods(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuota_spec(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuota) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27047,21 +31132,24 @@ func (ec *executionContext) _ResourceQuota_pods(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pods, nil
+		return obj.Spec, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(v11.ResourceQuotaSpec)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNResourceQuotaSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuota_limits(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuota_json(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuota) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27070,6 +31158,40 @@ func (ec *executionContext) _ResourceQuota_limits(ctx context.Context, field gra
 	}()
 	fc := &graphql.FieldContext{
 		Object:   "ResourceQuota",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ResourceQuota().JSON(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	fc.Result = res
+	return ec.marshalNJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ResourceQuotaHard_limits(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ResourceQuotaHard",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -27090,12 +31212,12 @@ func (ec *executionContext) _ResourceQuota_limits(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*ResourceValues)
+	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalNResourceValues2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValues(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuotaHard_requests(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27103,7 +31225,7 @@ func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field g
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "ResourceQuota",
+		Object:   "ResourceQuotaHard",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -27124,12 +31246,12 @@ func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*ResourceValues)
+	res := resTmp.(*ResourceLimits)
 	fc.Result = res
-	return ec.marshalNResourceValues2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValues(ctx, field.Selections, res)
+	return ec.marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuotaHard_pods(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaHard) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27137,7 +31259,7 @@ func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "ResourceQuotasStatus",
+		Object:   "ResourceQuotaHard",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -27146,7 +31268,7 @@ func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Exceeded, nil
+		return obj.Pods, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -27158,12 +31280,12 @@ func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) (ret graphql.Marshaler) {
+func (ec *executionContext) _ResourceQuotaSpec_hard(ctx context.Context, field graphql.CollectedField, obj *v11.ResourceQuotaSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -27171,16 +31293,16 @@ func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Con
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "ResourceQuotasStatus",
+		Object:   "ResourceQuotaSpec",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ExceededQuotas, nil
+		return ec.resolvers.ResourceQuotaSpec().Hard(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -27192,9 +31314,9 @@ func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Con
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ExceededQuota)
+	res := resTmp.(*ResourceQuotaHard)
 	fc.Result = res
-	return ec.marshalNExceededQuota2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐExceededQuotaᚄ(ctx, field.Selections, res)
+	return ec.marshalNResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ResourceRef_name(ctx context.Context, field graphql.CollectedField, obj *ResourceRef) (ret graphql.Marshaler) {
@@ -27482,6 +31604,343 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Role_namespace(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Role_rules(ctx context.Context, field graphql.CollectedField, obj *v12.Role) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Role",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v12.PolicyRule)
+	fc.Result = res
+	return ec.marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBinding_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBinding_namespace(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBinding_roleRef(ctx context.Context, field graphql.CollectedField, obj *v12.RoleBinding) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBinding",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleRef, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v12.RoleRef)
+	fc.Result = res
+	return ec.marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *RoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	fc.Result = res
+	return ec.marshalNSubscriptionEventType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriptionEventType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleBindingEvent_roleBinding(ctx context.Context, field graphql.CollectedField, obj *RoleBindingEvent) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleBindingEvent",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoleBinding, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v12.RoleBinding)
+	fc.Result = res
+	return ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleRef_name(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleRef",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RoleRef_kind(ctx context.Context, field graphql.CollectedField, obj *v12.RoleRef) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "RoleRef",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Rule_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Rule) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -27579,7 +32038,7 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*v1alpha12.Authenticator)
+	res := resTmp.([]*v1alpha14.Authenticator)
 	fc.Result = res
 	return ec.marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx, field.Selections, res)
 }
@@ -31481,38 +35940,7 @@ func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, fie
 	return ec.marshalNLoadBalancerStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLoadBalancerStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Subscriber_uri(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Subscriber",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.URI, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*apis.URL)
-	fc.Result = res
-	return ec.marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *v11.Destination) (ret graphql.Marshaler) {
+func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.CollectedField, obj *v13.Destination) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31538,12 +35966,12 @@ func (ec *executionContext) _Subscriber_ref(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v11.KReference)
+	res := resTmp.(*v13.KReference)
 	fc.Result = res
 	return ec.marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field graphql.CollectedField, obj *v13.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31577,7 +36005,7 @@ func (ec *executionContext) _SubscriberRef_apiVersion(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graphql.CollectedField, obj *v13.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31611,7 +36039,7 @@ func (ec *executionContext) _SubscriberRef_kind(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graphql.CollectedField, obj *v13.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -31645,7 +36073,7 @@ func (ec *executionContext) _SubscriberRef_name(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *v11.KReference) (ret graphql.Marshaler) {
+func (ec *executionContext) _SubscriberRef_namespace(ctx context.Context, field graphql.CollectedField, obj *v13.KReference) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -32701,6 +37129,81 @@ func (ec *executionContext) _Subscription_configMapEvent(ctx context.Context, fi
 	}
 }
 
+func (ec *executionContext) _Subscription_secretEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_secretEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().SecretEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1", "namespaceArg": "namespace", "resource": "secrets", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *SecretEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.SecretEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *SecretEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNSecretEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) _Subscription_clusterAddonsConfigurationEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -33094,7 +37597,7 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["subscriber"].(*v11.Destination))
+			return ec.resolvers.Subscription().TriggerEvent(rctx, args["namespace"].(string), args["serviceName"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "eventing.knative.dev", "apiVersion": "v1alpha1", "namespaceArg": "namespace", "resource": "triggers", "verb": "watch"})
@@ -33144,7 +37647,225 @@ func (ec *executionContext) _Subscription_triggerEvent(ctx context.Context, fiel
 	}
 }
 
-func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Subscription_oAuth2ClientEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_oAuth2ClientEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().OAuth2ClientEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "hydra.ory.sh", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "OAuth2Clients", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *OAuth2ClientEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.OAuth2ClientEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *OAuth2ClientEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNOAuth2ClientEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐOAuth2ClientEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_roleBindingEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_roleBindingEvent_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().RoleBindingEvent(rctx, args["namespace"].(string))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "namespaceArg": "namespace", "resource": "roleBindings", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *RoleBindingEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.RoleBindingEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *RoleBindingEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_clusterRoleBindingEvent(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Subscription().ClusterRoleBindingEvent(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			attributes, err := ec.unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceAttributes(ctx, map[string]interface{}{"apiGroup": "", "apiVersion": "v1alpha", "resource": "clusterRoleBindings", "verb": "watch"})
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasAccess == nil {
+				return nil, errors.New("directive HasAccess is not implemented")
+			}
+			return ec.directives.HasAccess(ctx, nil, directive0, attributes)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(<-chan *ClusterRoleBindingEvent); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterRoleBindingEvent`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *ClusterRoleBindingEvent)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNClusterRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33178,7 +37899,7 @@ func (ec *executionContext) _Trigger_name(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33212,7 +37933,7 @@ func (ec *executionContext) _Trigger_namespace(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33241,12 +37962,12 @@ func (ec *executionContext) _Trigger_spec(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v1alpha11.TriggerSpec)
+	res := resTmp.(v1alpha13.TriggerSpec)
 	fc.Result = res
-	return ec.marshalNTriggerSpec2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx, field.Selections, res)
+	return ec.marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.Trigger) (ret graphql.Marshaler) {
+func (ec *executionContext) _Trigger_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.Trigger) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33343,12 +38064,12 @@ func (ec *executionContext) _TriggerEvent_trigger(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v1alpha11.Trigger)
+	res := resTmp.(*v1alpha13.Trigger)
 	fc.Result = res
-	return ec.marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
+	return ec.marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33382,7 +38103,7 @@ func (ec *executionContext) _TriggerSpec_broker(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33413,7 +38134,75 @@ func (ec *executionContext) _TriggerSpec_filter(ctx context.Context, field graph
 	return ec.marshalOJSON2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐJSON(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha11.TriggerSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _TriggerSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Port(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uint32)
+	fc.Result = res
+	return ec.marshalNPort2uint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TriggerSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TriggerSpec",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.TriggerSpec().Path(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field graphql.CollectedField, obj *v1alpha13.TriggerSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -33442,7 +38231,7 @@ func (ec *executionContext) _TriggerSpec_subscriber(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v11.Destination)
+	res := resTmp.(v13.Destination)
 	fc.Result = res
 	return ec.marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, field.Selections, res)
 }
@@ -35053,6 +39842,30 @@ func (ec *executionContext) unmarshalInputAddonsConfigurationRepositoryInput(ctx
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputClusterRoleBindingInput(ctx context.Context, obj interface{}) (ClusterRoleBindingInput, error) {
+	var it ClusterRoleBindingInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "roleName":
+			var err error
+			it.RoleName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "subjects":
+			var err error
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateServiceBindingUsageInput(ctx context.Context, obj interface{}) (CreateServiceBindingUsageInput, error) {
 	var it CreateServiceBindingUsageInput
 	var asMap = obj.(map[string]interface{})
@@ -35239,6 +40052,36 @@ func (ec *executionContext) unmarshalInputFunctionMutationInput(ctx context.Cont
 			if err != nil {
 				return it, err
 			}
+		case "buildResources":
+			var err error
+			it.BuildResources, err = ec.unmarshalNFunctionResourcesInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFunctionResourcesInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "runtime":
+			var err error
+			it.Runtime, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sourceType":
+			var err error
+			it.SourceType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "baseDir":
+			var err error
+			it.BaseDir, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "reference":
+			var err error
+			it.Reference, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -35293,6 +40136,30 @@ func (ec *executionContext) unmarshalInputFunctionResourcesInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGitRepositorySpecInput(ctx context.Context, obj interface{}) (v1alpha11.GitRepositorySpec, error) {
+	var it v1alpha11.GitRepositorySpec
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "url":
+			var err error
+			it.URL, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "auth":
+			var err error
+			it.Auth, err = ec.unmarshalORepositoryAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputLimitRangeInput(ctx context.Context, obj interface{}) (LimitRangeInput, error) {
 	var it LimitRangeInput
 	var asMap = obj.(map[string]interface{})
@@ -35319,7 +40186,7 @@ func (ec *executionContext) unmarshalInputLimitRangeInput(ctx context.Context, o
 			}
 		case "type":
 			var err error
-			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			it.Type, err = ec.unmarshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35344,6 +40211,42 @@ func (ec *executionContext) unmarshalInputLocalObjectReferenceInput(ctx context.
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputOAuth2ClientSpecInput(ctx context.Context, obj interface{}) (v1alpha12.OAuth2ClientSpec, error) {
+	var it v1alpha12.OAuth2ClientSpec
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "grantTypes":
+			var err error
+			it.GrantTypes, err = ec.unmarshalNGrantType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "responseTypes":
+			var err error
+			it.ResponseTypes, err = ec.unmarshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "scope":
+			var err error
+			it.Scope, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "secretName":
+			var err error
+			it.SecretName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35392,6 +40295,30 @@ func (ec *executionContext) unmarshalInputOwnerReference(ctx context.Context, ob
 		case "UID":
 			var err error
 			it.UID, err = ec.unmarshalNUID2k8sᚗioᚋapimachineryᚋpkgᚋtypesᚐUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRepositoryAuthInput(ctx context.Context, obj interface{}) (v1alpha11.RepositoryAuth, error) {
+	var it v1alpha11.RepositoryAuth
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalNRepositoryAuthType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuthType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "secretName":
+			var err error
+			it.SecretName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35539,6 +40466,60 @@ func (ec *executionContext) unmarshalInputResourceValuesInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRoleBindingInput(ctx context.Context, obj interface{}) (RoleBindingInput, error) {
+	var it RoleBindingInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "roleName":
+			var err error
+			it.RoleName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "roleKind":
+			var err error
+			it.RoleKind, err = ec.unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "subjects":
+			var err error
+			it.Subjects, err = ec.unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRoleBindingSubject(ctx context.Context, obj interface{}) (RoleBindingSubject, error) {
+	var it RoleBindingSubject
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "kind":
+			var err error
+			it.Kind, err = ec.unmarshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRuleInput(ctx context.Context, obj interface{}) (v1alpha1.Rule, error) {
 	var it v1alpha1.Rule
 	var asMap = obj.(map[string]interface{})
@@ -35671,21 +40652,27 @@ func (ec *executionContext) unmarshalInputServiceInstanceCreateInputResourceRef(
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (v11.Destination, error) {
-	var it v11.Destination
+func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, obj interface{}) (SubscriberInput, error) {
+	var it SubscriberInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "uri":
+		case "ref":
 			var err error
-			it.URI, err = ec.unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
+			it.Ref, err = ec.unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "ref":
+		case "port":
 			var err error
-			it.Ref, err = ec.unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
+			it.Port, err = ec.unmarshalOPort2ᚖuint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "path":
+			var err error
+			it.Path, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35695,8 +40682,8 @@ func (ec *executionContext) unmarshalInputSubscriberInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSubscriberRefInput(ctx context.Context, obj interface{}) (v11.KReference, error) {
-	var it v11.KReference
+func (ec *executionContext) unmarshalInputSubscriberRefInput(ctx context.Context, obj interface{}) (v13.KReference, error) {
+	var it v13.KReference
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -35757,7 +40744,7 @@ func (ec *executionContext) unmarshalInputTriggerCreateInput(ctx context.Context
 			}
 		case "subscriber":
 			var err error
-			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+			it.Subscriber, err = ec.unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -35789,23 +40776,37 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 		case "name":
 			out.Values[i] = ec._APIRule_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
 			out.Values[i] = ec._APIRule_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
 			out.Values[i] = ec._APIRule_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
 			out.Values[i] = ec._APIRule_generation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._APIRule_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -35819,7 +40820,7 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 
 var aPIRuleAccessStrategyImplementors = []string{"APIRuleAccessStrategy"}
 
-func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *v1alpha14.Authenticator) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aPIRuleAccessStrategyImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -37105,6 +42106,99 @@ func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.S
 	return out
 }
 
+var clusterRoleImplementors = []string{"ClusterRole"}
+
+func (ec *executionContext) _ClusterRole(ctx context.Context, sel ast.SelectionSet, obj *v12.ClusterRole) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterRole")
+		case "name":
+			out.Values[i] = ec._ClusterRole_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rules":
+			out.Values[i] = ec._ClusterRole_rules(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var clusterRoleBindingImplementors = []string{"ClusterRoleBinding"}
+
+func (ec *executionContext) _ClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v12.ClusterRoleBinding) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleBindingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterRoleBinding")
+		case "name":
+			out.Values[i] = ec._ClusterRoleBinding_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "roleRef":
+			out.Values[i] = ec._ClusterRoleBinding_roleRef(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var clusterRoleBindingEventImplementors = []string{"ClusterRoleBindingEvent"}
+
+func (ec *executionContext) _ClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, obj *ClusterRoleBindingEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, clusterRoleBindingEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterRoleBindingEvent")
+		case "type":
+			out.Values[i] = ec._ClusterRoleBindingEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "clusterRoleBinding":
+			out.Values[i] = ec._ClusterRoleBindingEvent_clusterRoleBinding(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var clusterServiceBrokerImplementors = []string{"ClusterServiceBroker"}
 
 func (ec *executionContext) _ClusterServiceBroker(ctx context.Context, sel ast.SelectionSet, obj *ClusterServiceBroker) graphql.Marshaler {
@@ -38011,43 +43105,6 @@ func (ec *executionContext) _EventActivationEvent(ctx context.Context, sel ast.S
 	return out
 }
 
-var exceededQuotaImplementors = []string{"ExceededQuota"}
-
-func (ec *executionContext) _ExceededQuota(ctx context.Context, sel ast.SelectionSet, obj *ExceededQuota) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, exceededQuotaImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ExceededQuota")
-		case "quotaName":
-			out.Values[i] = ec._ExceededQuota_quotaName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "resourceName":
-			out.Values[i] = ec._ExceededQuota_resourceName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "affectedResources":
-			out.Values[i] = ec._ExceededQuota_affectedResources(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var fileImplementors = []string{"File"}
 
 func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *File) graphql.Marshaler {
@@ -38136,6 +43193,19 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "buildResources":
+			out.Values[i] = ec._Function_buildResources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "runtime":
+			out.Values[i] = ec._Function_runtime(ctx, field, obj)
+		case "sourceType":
+			out.Values[i] = ec._Function_sourceType(ctx, field, obj)
+		case "baseDir":
+			out.Values[i] = ec._Function_baseDir(ctx, field, obj)
+		case "reference":
+			out.Values[i] = ec._Function_reference(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._Function_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -38378,24 +43448,29 @@ func (ec *executionContext) _FunctionStatus(ctx context.Context, sel ast.Selecti
 	return out
 }
 
-var limitRangeImplementors = []string{"LimitRange"}
+var gitRepositoryImplementors = []string{"GitRepository"}
 
-func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSet, obj *LimitRange) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeImplementors)
+func (ec *executionContext) _GitRepository(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.GitRepository) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gitRepositoryImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("LimitRange")
+			out.Values[i] = graphql.MarshalString("GitRepository")
 		case "name":
-			out.Values[i] = ec._LimitRange_name(ctx, field, obj)
+			out.Values[i] = ec._GitRepository_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "limits":
-			out.Values[i] = ec._LimitRange_limits(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._GitRepository_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "spec":
+			out.Values[i] = ec._GitRepository_spec(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -38410,9 +43485,84 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var gitRepositorySpecImplementors = []string{"GitRepositorySpec"}
+
+func (ec *executionContext) _GitRepositorySpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.GitRepositorySpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gitRepositorySpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GitRepositorySpec")
+		case "url":
+			out.Values[i] = ec._GitRepositorySpec_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "auth":
+			out.Values[i] = ec._GitRepositorySpec_auth(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var limitRangeImplementors = []string{"LimitRange"}
+
+func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSet, obj *v11.LimitRange) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LimitRange")
+		case "name":
+			out.Values[i] = ec._LimitRange_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "spec":
+			out.Values[i] = ec._LimitRange_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRange_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var limitRangeItemImplementors = []string{"LimitRangeItem"}
 
-func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.SelectionSet, obj *LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.SelectionSet, obj *v11.LimitRangeItem) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeItemImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -38421,23 +43571,77 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LimitRangeItem")
-		case "limitType":
-			out.Values[i] = ec._LimitRangeItem_limitType(ctx, field, obj)
+		case "type":
+			out.Values[i] = ec._LimitRangeItem_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "max":
-			out.Values[i] = ec._LimitRangeItem_max(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_max(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "default":
-			out.Values[i] = ec._LimitRangeItem_default(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_default(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "defaultRequest":
-			out.Values[i] = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._LimitRangeItem_defaultRequest(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var limitRangeSpecImplementors = []string{"LimitRangeSpec"}
+
+func (ec *executionContext) _LimitRangeSpec(ctx context.Context, sel ast.SelectionSet, obj *v11.LimitRangeSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, limitRangeSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LimitRangeSpec")
+		case "limits":
+			out.Values[i] = ec._LimitRangeSpec_limits(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -38686,8 +43890,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateReplicaSet(ctx, field)
 		case "deleteReplicaSet":
 			out.Values[i] = ec._Mutation_deleteReplicaSet(ctx, field)
-		case "createResourceQuota":
-			out.Values[i] = ec._Mutation_createResourceQuota(ctx, field)
 		case "updateConfigMap":
 			out.Values[i] = ec._Mutation_updateConfigMap(ctx, field)
 		case "deleteConfigMap":
@@ -38708,8 +43910,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteNamespace":
 			out.Values[i] = ec._Mutation_deleteNamespace(ctx, field)
-		case "createLimitRange":
-			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		case "createFunction":
 			out.Values[i] = ec._Mutation_createFunction(ctx, field)
 		case "updateFunction":
@@ -38732,6 +43932,46 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteTrigger(ctx, field)
 		case "deleteManyTriggers":
 			out.Values[i] = ec._Mutation_deleteManyTriggers(ctx, field)
+		case "createLimitRange":
+			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
+		case "updateLimitRange":
+			out.Values[i] = ec._Mutation_updateLimitRange(ctx, field)
+		case "createResourceQuota":
+			out.Values[i] = ec._Mutation_createResourceQuota(ctx, field)
+		case "updateResourceQuota":
+			out.Values[i] = ec._Mutation_updateResourceQuota(ctx, field)
+		case "createOAuth2Client":
+			out.Values[i] = ec._Mutation_createOAuth2Client(ctx, field)
+		case "updateOAuth2Client":
+			out.Values[i] = ec._Mutation_updateOAuth2Client(ctx, field)
+		case "deleteOAuth2Client":
+			out.Values[i] = ec._Mutation_deleteOAuth2Client(ctx, field)
+		case "createRoleBinding":
+			out.Values[i] = ec._Mutation_createRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteRoleBinding":
+			out.Values[i] = ec._Mutation_deleteRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createClusterRoleBinding":
+			out.Values[i] = ec._Mutation_createClusterRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteClusterRoleBinding":
+			out.Values[i] = ec._Mutation_deleteClusterRoleBinding(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createGitRepository":
+			out.Values[i] = ec._Mutation_createGitRepository(ctx, field)
+		case "updateGitRepository":
+			out.Values[i] = ec._Mutation_updateGitRepository(ctx, field)
+		case "deleteGitRepository":
+			out.Values[i] = ec._Mutation_deleteGitRepository(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -39022,6 +44262,159 @@ func (ec *executionContext) _NavigationNode(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var oAuth2ClientImplementors = []string{"OAuth2Client"}
+
+func (ec *executionContext) _OAuth2Client(ctx context.Context, sel ast.SelectionSet, obj *v1alpha12.OAuth2Client) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuth2Client")
+		case "namespace":
+			out.Values[i] = ec._OAuth2Client_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "name":
+			out.Values[i] = ec._OAuth2Client_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "generation":
+			out.Values[i] = ec._OAuth2Client_generation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "error":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._OAuth2Client_error(ctx, field, obj)
+				return res
+			})
+		case "spec":
+			out.Values[i] = ec._OAuth2Client_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oAuth2ClientErrorImplementors = []string{"OAuth2ClientError"}
+
+func (ec *executionContext) _OAuth2ClientError(ctx context.Context, sel ast.SelectionSet, obj *v1alpha12.ReconciliationError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuth2ClientError")
+		case "code":
+			out.Values[i] = ec._OAuth2ClientError_code(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._OAuth2ClientError_description(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oAuth2ClientEventImplementors = []string{"OAuth2ClientEvent"}
+
+func (ec *executionContext) _OAuth2ClientEvent(ctx context.Context, sel ast.SelectionSet, obj *OAuth2ClientEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuth2ClientEvent")
+		case "type":
+			out.Values[i] = ec._OAuth2ClientEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "client":
+			out.Values[i] = ec._OAuth2ClientEvent_client(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var oAuth2ClientSpecImplementors = []string{"OAuth2ClientSpec"}
+
+func (ec *executionContext) _OAuth2ClientSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha12.OAuth2ClientSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuth2ClientSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuth2ClientSpec")
+		case "grantTypes":
+			out.Values[i] = ec._OAuth2ClientSpec_grantTypes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "responseTypes":
+			out.Values[i] = ec._OAuth2ClientSpec_responseTypes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "scope":
+			out.Values[i] = ec._OAuth2ClientSpec_scope(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "secretName":
+			out.Values[i] = ec._OAuth2ClientSpec_secretName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var podImplementors = []string{"Pod"}
 
 func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj *Pod) graphql.Marshaler {
@@ -39107,6 +44500,43 @@ func (ec *executionContext) _PodEvent(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "pod":
 			out.Values[i] = ec._PodEvent_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var policyRuleImplementors = []string{"PolicyRule"}
+
+func (ec *executionContext) _PolicyRule(ctx context.Context, sel ast.SelectionSet, obj *v12.PolicyRule) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, policyRuleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PolicyRule")
+		case "apiGroups":
+			out.Values[i] = ec._PolicyRule_apiGroups(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "resources":
+			out.Values[i] = ec._PolicyRule_resources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "verbs":
+			out.Values[i] = ec._PolicyRule_verbs(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -39559,34 +44989,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "resourceQuotas":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_resourceQuotas(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "resourceQuotasStatus":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_resourceQuotasStatus(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "eventActivations":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -39596,20 +44998,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_eventActivations(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "limitRanges":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_limitRanges(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -39757,6 +45145,165 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_triggers(ctx, field)
 				return res
 			})
+		case "limitRanges":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_limitRanges(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "resourceQuotas":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_resourceQuotas(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "oAuth2Clients":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_oAuth2Clients(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "oAuth2Client":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_oAuth2Client(ctx, field)
+				return res
+			})
+		case "roles":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_roles(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "role":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_role(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "clusterRoles":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_clusterRoles(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "clusterRole":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_clusterRole(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "roleBindings":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_roleBindings(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "clusterRoleBindings":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_clusterRoleBindings(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "gitRepositories":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_gitRepositories(ctx, field)
+				return res
+			})
+		case "gitRepository":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_gitRepository(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -39829,6 +45376,38 @@ func (ec *executionContext) _ReplicaSet(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var repositoryAuthImplementors = []string{"RepositoryAuth"}
+
+func (ec *executionContext) _RepositoryAuth(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.RepositoryAuth) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryAuthImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RepositoryAuth")
+		case "type":
+			out.Values[i] = ec._RepositoryAuth_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "secretName":
+			out.Values[i] = ec._RepositoryAuth_secretName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var requiredPermissionImplementors = []string{"RequiredPermission"}
 
 func (ec *executionContext) _RequiredPermission(ctx context.Context, sel ast.SelectionSet, obj *RequiredPermission) graphql.Marshaler {
@@ -39866,9 +45445,35 @@ func (ec *executionContext) _RequiredPermission(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var resourceLimitsImplementors = []string{"ResourceLimits"}
+
+func (ec *executionContext) _ResourceLimits(ctx context.Context, sel ast.SelectionSet, obj *ResourceLimits) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, resourceLimitsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceLimits")
+		case "memory":
+			out.Values[i] = ec._ResourceLimits_memory(ctx, field, obj)
+		case "cpu":
+			out.Values[i] = ec._ResourceLimits_cpu(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var resourceQuotaImplementors = []string{"ResourceQuota"}
 
-func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.SelectionSet, obj *ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.SelectionSet, obj *v11.ResourceQuota) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, resourceQuotaImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -39880,17 +45485,61 @@ func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.Selectio
 		case "name":
 			out.Values[i] = ec._ResourceQuota_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
-		case "pods":
-			out.Values[i] = ec._ResourceQuota_pods(ctx, field, obj)
+		case "spec":
+			out.Values[i] = ec._ResourceQuota_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "json":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ResourceQuota_json(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var resourceQuotaHardImplementors = []string{"ResourceQuotaHard"}
+
+func (ec *executionContext) _ResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, obj *ResourceQuotaHard) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, resourceQuotaHardImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceQuotaHard")
 		case "limits":
-			out.Values[i] = ec._ResourceQuota_limits(ctx, field, obj)
+			out.Values[i] = ec._ResourceQuotaHard_limits(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "requests":
-			out.Values[i] = ec._ResourceQuota_requests(ctx, field, obj)
+			out.Values[i] = ec._ResourceQuotaHard_requests(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pods":
+			out.Values[i] = ec._ResourceQuotaHard_pods(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -39905,27 +45554,31 @@ func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var resourceQuotasStatusImplementors = []string{"ResourceQuotasStatus"}
+var resourceQuotaSpecImplementors = []string{"ResourceQuotaSpec"}
 
-func (ec *executionContext) _ResourceQuotasStatus(ctx context.Context, sel ast.SelectionSet, obj *ResourceQuotasStatus) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, resourceQuotasStatusImplementors)
+func (ec *executionContext) _ResourceQuotaSpec(ctx context.Context, sel ast.SelectionSet, obj *v11.ResourceQuotaSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, resourceQuotaSpecImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ResourceQuotasStatus")
-		case "exceeded":
-			out.Values[i] = ec._ResourceQuotasStatus_exceeded(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "exceededQuotas":
-			out.Values[i] = ec._ResourceQuotasStatus_exceededQuotas(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			out.Values[i] = graphql.MarshalString("ResourceQuotaSpec")
+		case "hard":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ResourceQuotaSpec_hard(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40038,6 +45691,141 @@ func (ec *executionContext) _ResourceValues(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._ResourceValues_memory(ctx, field, obj)
 		case "cpu":
 			out.Values[i] = ec._ResourceValues_cpu(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleImplementors = []string{"Role"}
+
+func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *v12.Role) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Role")
+		case "name":
+			out.Values[i] = ec._Role_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "namespace":
+			out.Values[i] = ec._Role_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rules":
+			out.Values[i] = ec._Role_rules(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleBindingImplementors = []string{"RoleBinding"}
+
+func (ec *executionContext) _RoleBinding(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleBinding) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleBindingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoleBinding")
+		case "name":
+			out.Values[i] = ec._RoleBinding_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "namespace":
+			out.Values[i] = ec._RoleBinding_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "roleRef":
+			out.Values[i] = ec._RoleBinding_roleRef(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleBindingEventImplementors = []string{"RoleBindingEvent"}
+
+func (ec *executionContext) _RoleBindingEvent(ctx context.Context, sel ast.SelectionSet, obj *RoleBindingEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleBindingEventImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoleBindingEvent")
+		case "type":
+			out.Values[i] = ec._RoleBindingEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "roleBinding":
+			out.Values[i] = ec._RoleBindingEvent_roleBinding(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var roleRefImplementors = []string{"RoleRef"}
+
+func (ec *executionContext) _RoleRef(ctx context.Context, sel ast.SelectionSet, obj *v12.RoleRef) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, roleRefImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RoleRef")
+		case "name":
+			out.Values[i] = ec._RoleRef_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "kind":
+			out.Values[i] = ec._RoleRef_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -41264,7 +47052,7 @@ func (ec *executionContext) _ServiceStatus(ctx context.Context, sel ast.Selectio
 
 var subscriberImplementors = []string{"Subscriber"}
 
-func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSet, obj *v11.Destination) graphql.Marshaler {
+func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSet, obj *v13.Destination) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriberImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41273,8 +47061,6 @@ func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Subscriber")
-		case "uri":
-			out.Values[i] = ec._Subscriber_uri(ctx, field, obj)
 		case "ref":
 			out.Values[i] = ec._Subscriber_ref(ctx, field, obj)
 		default:
@@ -41290,7 +47076,7 @@ func (ec *executionContext) _Subscriber(ctx context.Context, sel ast.SelectionSe
 
 var subscriberRefImplementors = []string{"SubscriberRef"}
 
-func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.SelectionSet, obj *v11.KReference) graphql.Marshaler {
+func (ec *executionContext) _SubscriberRef(ctx context.Context, sel ast.SelectionSet, obj *v13.KReference) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriberRefImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41371,6 +47157,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_serviceEvent(ctx, fields[0])
 	case "configMapEvent":
 		return ec._Subscription_configMapEvent(ctx, fields[0])
+	case "secretEvent":
+		return ec._Subscription_secretEvent(ctx, fields[0])
 	case "clusterAddonsConfigurationEvent":
 		return ec._Subscription_clusterAddonsConfigurationEvent(ctx, fields[0])
 	case "addonsConfigurationEvent":
@@ -41383,6 +47171,12 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_apiRuleEvent(ctx, fields[0])
 	case "triggerEvent":
 		return ec._Subscription_triggerEvent(ctx, fields[0])
+	case "oAuth2ClientEvent":
+		return ec._Subscription_oAuth2ClientEvent(ctx, fields[0])
+	case "roleBindingEvent":
+		return ec._Subscription_roleBindingEvent(ctx, fields[0])
+	case "clusterRoleBindingEvent":
+		return ec._Subscription_clusterRoleBindingEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -41390,7 +47184,7 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 
 var triggerImplementors = []string{"Trigger"}
 
-func (ec *executionContext) _Trigger(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) _Trigger(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.Trigger) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, triggerImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41473,7 +47267,7 @@ func (ec *executionContext) _TriggerEvent(ctx context.Context, sel ast.Selection
 
 var triggerSpecImplementors = []string{"TriggerSpec"}
 
-func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha11.TriggerSpec) graphql.Marshaler {
+func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.TriggerSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, triggerSpecImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -41496,6 +47290,34 @@ func (ec *executionContext) _TriggerSpec(ctx context.Context, sel ast.SelectionS
 					}
 				}()
 				res = ec._TriggerSpec_filter(ctx, field, obj)
+				return res
+			})
+		case "port":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_port(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "path":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TriggerSpec_path(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "subscriber":
@@ -42003,11 +47825,11 @@ func (ec *executionContext) marshalNAPIRule2ᚖgithubᚗcomᚋkymaᚑincubator�
 	return ec._APIRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Authenticator) graphql.Marshaler {
 	return ec._APIRuleAccessStrategy(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Authenticator) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -42044,7 +47866,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚕᚖgithubᚗcomᚋo
 	return ret
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Authenticator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -42054,11 +47876,11 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategy2ᚖgithubᚗcomᚋory�
 	return ec._APIRuleAccessStrategy(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha12.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (v1alpha14.Authenticator, error) {
 	return UnmarshalAPIRuleAccessStrategyInput(v)
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v v1alpha14.Authenticator) graphql.Marshaler {
 	res := MarshalAPIRuleAccessStrategyInput(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -42068,7 +47890,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2githubᚗcomᚋor
 	return res
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha12.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, v interface{}) ([]*v1alpha14.Authenticator, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -42078,7 +47900,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗ
 		}
 	}
 	var err error
-	res := make([]*v1alpha12.Authenticator, len(vSlice))
+	res := make([]*v1alpha14.Authenticator, len(vSlice))
 	for i := range vSlice {
 		res[i], err = ec.unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, vSlice[i])
 		if err != nil {
@@ -42088,7 +47910,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗ
 	return res, nil
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticatorᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha14.Authenticator) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx, sel, v[i])
@@ -42097,7 +47919,7 @@ func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚕᚖgithubᚗco
 	return ret
 }
 
-func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha12.Authenticator, error) {
+func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, v interface{}) (*v1alpha14.Authenticator, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -42105,7 +47927,7 @@ func (ec *executionContext) unmarshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcom
 	return &res, err
 }
 
-func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.Authenticator) graphql.Marshaler {
+func (ec *executionContext) marshalNAPIRuleAccessStrategyInput2ᚖgithubᚗcomᚋoryᚋoathkeeperᚑmaesterᚋapiᚋv1alpha1ᚐAuthenticator(ctx context.Context, sel ast.SelectionSet, v *v1alpha14.Authenticator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -42925,6 +48747,126 @@ func (ec *executionContext) marshalNClusterMicroFrontend2ᚖgithubᚗcomᚋkyma�
 	return ec._ClusterMicroFrontend(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNClusterRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v v12.ClusterRole) graphql.Marshaler {
+	return ec._ClusterRole(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNClusterRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.ClusterRole) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNClusterRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRole(ctx context.Context, sel ast.SelectionSet, v *v12.ClusterRole) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ClusterRole(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v v12.ClusterRoleBinding) graphql.Marshaler {
+	return ec._ClusterRoleBinding(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.ClusterRoleBinding) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNClusterRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐClusterRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v12.ClusterRoleBinding) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ClusterRoleBinding(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBindingEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v ClusterRoleBindingEvent) graphql.Marshaler {
+	return ec._ClusterRoleBindingEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNClusterRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v *ClusterRoleBindingEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ClusterRoleBindingEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNClusterRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterRoleBindingInput(ctx context.Context, v interface{}) (ClusterRoleBindingInput, error) {
+	return ec.unmarshalInputClusterRoleBindingInput(ctx, v)
+}
+
 func (ec *executionContext) marshalNClusterServiceBroker2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐClusterServiceBroker(ctx context.Context, sel ast.SelectionSet, v ClusterServiceBroker) graphql.Marshaler {
 	return ec._ClusterServiceBroker(ctx, sel, &v)
 }
@@ -43491,57 +49433,6 @@ func (ec *executionContext) marshalNEventActivationEvent2ᚖgithubᚗcomᚋkyma�
 	return ec._EventActivationEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNExceededQuota2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐExceededQuota(ctx context.Context, sel ast.SelectionSet, v ExceededQuota) graphql.Marshaler {
-	return ec._ExceededQuota(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNExceededQuota2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐExceededQuotaᚄ(ctx context.Context, sel ast.SelectionSet, v []*ExceededQuota) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNExceededQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐExceededQuota(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNExceededQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐExceededQuota(ctx context.Context, sel ast.SelectionSet, v *ExceededQuota) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._ExceededQuota(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNFile2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐFile(ctx context.Context, sel ast.SelectionSet, v File) graphql.Marshaler {
 	return ec._File(ctx, sel, &v)
 }
@@ -43875,6 +49766,72 @@ func (ec *executionContext) marshalNFunctionStatus2ᚖgithubᚗcomᚋkymaᚑproj
 	return ec._FunctionStatus(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNGitRepository2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx context.Context, sel ast.SelectionSet, v v1alpha11.GitRepository) graphql.Marshaler {
+	return ec._GitRepository(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.GitRepository) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._GitRepository(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNGitRepositorySpec2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositorySpec(ctx context.Context, sel ast.SelectionSet, v v1alpha11.GitRepositorySpec) graphql.Marshaler {
+	return ec._GitRepositorySpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNGitRepositorySpecInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositorySpec(ctx context.Context, v interface{}) (v1alpha11.GitRepositorySpec, error) {
+	return ec.unmarshalInputGitRepositorySpecInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNGrantType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantType(ctx context.Context, v interface{}) (v1alpha12.GrantType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v1alpha12.GrantType(tmp), err
+}
+
+func (ec *executionContext) marshalNGrantType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantType(ctx context.Context, sel ast.SelectionSet, v v1alpha12.GrantType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNGrantType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantTypeᚄ(ctx context.Context, v interface{}) ([]v1alpha12.GrantType, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]v1alpha12.GrantType, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNGrantType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNGrantType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha12.GrantType) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNGrantType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐGrantType(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNInstanceStatusType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐInstanceStatusType(ctx context.Context, v interface{}) (InstanceStatusType, error) {
 	var res InstanceStatusType
 	return res, res.UnmarshalGQL(v)
@@ -43948,11 +49905,11 @@ func (ec *executionContext) marshalNLabels2githubᚗcomᚋkymaᚑprojectᚋkyma�
 	return v
 }
 
-func (ec *executionContext) marshalNLimitRange2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v LimitRange) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRange2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v v11.LimitRange) graphql.Marshaler {
 	return ec._LimitRange(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLimitRange2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeᚄ(ctx context.Context, sel ast.SelectionSet, v []*LimitRange) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRange2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.LimitRange) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -43976,7 +49933,7 @@ func (ec *executionContext) marshalNLimitRange2ᚕᚖgithubᚗcomᚋkymaᚑproje
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLimitRange2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx, sel, v[i])
+			ret[i] = ec.marshalNLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -43989,7 +49946,7 @@ func (ec *executionContext) marshalNLimitRange2ᚕᚖgithubᚗcomᚋkymaᚑproje
 	return ret
 }
 
-func (ec *executionContext) marshalNLimitRange2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v *LimitRange) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v *v11.LimitRange) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -44003,11 +49960,11 @@ func (ec *executionContext) unmarshalNLimitRangeInput2githubᚗcomᚋkymaᚑproj
 	return ec.unmarshalInputLimitRangeInput(ctx, v)
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRangeItem2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeItem) graphql.Marshaler {
 	return ec._LimitRangeItem(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*LimitRangeItem) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRangeItem2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItemᚄ(ctx context.Context, sel ast.SelectionSet, v []v11.LimitRangeItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -44031,7 +49988,7 @@ func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑp
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLimitRangeItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx, sel, v[i])
+			ret[i] = ec.marshalNLimitRangeItem2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44044,23 +50001,32 @@ func (ec *executionContext) marshalNLimitRangeItem2ᚕᚖgithubᚗcomᚋkymaᚑp
 	return ret
 }
 
-func (ec *executionContext) marshalNLimitRangeItem2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeItem(ctx context.Context, sel ast.SelectionSet, v *LimitRangeItem) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._LimitRangeItem(ctx, sel, v)
+func (ec *executionContext) marshalNLimitRangeSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRangeSpec(ctx context.Context, sel ast.SelectionSet, v v11.LimitRangeSpec) graphql.Marshaler {
+	return ec._LimitRangeSpec(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx context.Context, v interface{}) (LimitType, error) {
-	var res LimitType
+func (ec *executionContext) unmarshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx context.Context, v interface{}) (LimitRangeType, error) {
+	var res LimitRangeType
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNLimitType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitType(ctx context.Context, sel ast.SelectionSet, v LimitType) graphql.Marshaler {
+func (ec *executionContext) marshalNLimitRangeType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRangeType(ctx context.Context, sel ast.SelectionSet, v LimitRangeType) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNLimitType2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitType(ctx context.Context, v interface{}) (v11.LimitType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v11.LimitType(tmp), err
+}
+
+func (ec *executionContext) marshalNLimitType2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitType(ctx context.Context, sel ast.SelectionSet, v v11.LimitType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNLoadBalancerIngress2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLoadBalancerIngress(ctx context.Context, sel ast.SelectionSet, v LoadBalancerIngress) graphql.Marshaler {
@@ -44325,6 +50291,79 @@ func (ec *executionContext) marshalNNavigationNode2ᚖgithubᚗcomᚋkymaᚑproj
 	return ec._NavigationNode(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNOAuth2Client2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx context.Context, sel ast.SelectionSet, v v1alpha12.OAuth2Client) graphql.Marshaler {
+	return ec._OAuth2Client(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOAuth2Client2ᚕᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Clientᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha12.OAuth2Client) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.OAuth2Client) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OAuth2Client(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOAuth2ClientEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐOAuth2ClientEvent(ctx context.Context, sel ast.SelectionSet, v OAuth2ClientEvent) graphql.Marshaler {
+	return ec._OAuth2ClientEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOAuth2ClientEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐOAuth2ClientEvent(ctx context.Context, sel ast.SelectionSet, v *OAuth2ClientEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OAuth2ClientEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOAuth2ClientSpec2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha12.OAuth2ClientSpec) graphql.Marshaler {
+	return ec._OAuth2ClientSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNOAuth2ClientSpecInput2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2ClientSpec(ctx context.Context, v interface{}) (v1alpha12.OAuth2ClientSpec, error) {
+	return ec.unmarshalInputOAuth2ClientSpecInput(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNOwnerReference2k8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReference(ctx context.Context, v interface{}) (v1.OwnerReference, error) {
 	return ec.unmarshalInputOwnerReference(ctx, v)
 }
@@ -44411,6 +50450,10 @@ func (ec *executionContext) marshalNPodStatusType2githubᚗcomᚋkymaᚑproject�
 	return v
 }
 
+func (ec *executionContext) marshalNPolicyRule2k8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRule(ctx context.Context, sel ast.SelectionSet, v v12.PolicyRule) graphql.Marshaler {
+	return ec._PolicyRule(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNPort2uint32(ctx context.Context, v interface{}) (uint32, error) {
 	return UnmarshalPort(v)
 }
@@ -44494,6 +50537,21 @@ func (ec *executionContext) marshalNReplicaSet2ᚖgithubᚗcomᚋkymaᚑproject�
 	return ec._ReplicaSet(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNRepositoryAuthType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuthType(ctx context.Context, v interface{}) (v1alpha11.RepositoryAuthType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v1alpha11.RepositoryAuthType(tmp), err
+}
+
+func (ec *executionContext) marshalNRepositoryAuthType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuthType(ctx context.Context, sel ast.SelectionSet, v v1alpha11.RepositoryAuthType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNRequiredPermission2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRequiredPermission(ctx context.Context, sel ast.SelectionSet, v RequiredPermission) graphql.Marshaler {
 	return ec._RequiredPermission(ctx, sel, &v)
 }
@@ -44549,11 +50607,25 @@ func (ec *executionContext) unmarshalNResourceAttributes2githubᚗcomᚋkymaᚑp
 	return ec.unmarshalInputResourceAttributes(ctx, v)
 }
 
-func (ec *executionContext) marshalNResourceQuota2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) marshalNResourceLimits2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v ResourceLimits) graphql.Marshaler {
+	return ec._ResourceLimits(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNResourceLimits2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceLimits(ctx context.Context, sel ast.SelectionSet, v *ResourceLimits) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ResourceLimits(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNResourceQuota2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuota) graphql.Marshaler {
 	return ec._ResourceQuota(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNResourceQuota2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaᚄ(ctx context.Context, sel ast.SelectionSet, v []*ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) marshalNResourceQuota2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaᚄ(ctx context.Context, sel ast.SelectionSet, v []*v11.ResourceQuota) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -44577,7 +50649,7 @@ func (ec *executionContext) marshalNResourceQuota2ᚕᚖgithubᚗcomᚋkymaᚑpr
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNResourceQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx, sel, v[i])
+			ret[i] = ec.marshalNResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -44590,7 +50662,7 @@ func (ec *executionContext) marshalNResourceQuota2ᚕᚖgithubᚗcomᚋkymaᚑpr
 	return ret
 }
 
-func (ec *executionContext) marshalNResourceQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v *ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) marshalNResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v *v11.ResourceQuota) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -44600,22 +50672,26 @@ func (ec *executionContext) marshalNResourceQuota2ᚖgithubᚗcomᚋkymaᚑproje
 	return ec._ResourceQuota(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNResourceQuotaInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaInput(ctx context.Context, v interface{}) (ResourceQuotaInput, error) {
-	return ec.unmarshalInputResourceQuotaInput(ctx, v)
+func (ec *executionContext) marshalNResourceQuotaHard2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v ResourceQuotaHard) graphql.Marshaler {
+	return ec._ResourceQuotaHard(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNResourceQuotasStatus2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotasStatus(ctx context.Context, sel ast.SelectionSet, v ResourceQuotasStatus) graphql.Marshaler {
-	return ec._ResourceQuotasStatus(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNResourceQuotasStatus2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotasStatus(ctx context.Context, sel ast.SelectionSet, v *ResourceQuotasStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNResourceQuotaHard2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaHard(ctx context.Context, sel ast.SelectionSet, v *ResourceQuotaHard) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._ResourceQuotasStatus(ctx, sel, v)
+	return ec._ResourceQuotaHard(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNResourceQuotaInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuotaInput(ctx context.Context, v interface{}) (ResourceQuotaInput, error) {
+	return ec.unmarshalInputResourceQuotaInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNResourceQuotaSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuotaSpec(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuotaSpec) graphql.Marshaler {
+	return ec._ResourceQuotaSpec(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNResourceRule2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceRule(ctx context.Context, sel ast.SelectionSet, v ResourceRule) graphql.Marshaler {
@@ -44669,20 +50745,6 @@ func (ec *executionContext) marshalNResourceRule2ᚖgithubᚗcomᚋkymaᚑprojec
 	return ec._ResourceRule(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNResourceType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v ResourceType) graphql.Marshaler {
-	return ec._ResourceType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNResourceType2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceType(ctx context.Context, sel ast.SelectionSet, v *ResourceType) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._ResourceType(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNResourceValues2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValues(ctx context.Context, sel ast.SelectionSet, v ResourceValues) graphql.Marshaler {
 	return ec._ResourceValues(ctx, sel, &v)
 }
@@ -44707,6 +50769,215 @@ func (ec *executionContext) unmarshalNResourceValuesInput2ᚖgithubᚗcomᚋkyma
 	}
 	res, err := ec.unmarshalNResourceValuesInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceValuesInput(ctx, v)
 	return &res, err
+}
+
+func (ec *executionContext) unmarshalNResponseType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseType(ctx context.Context, v interface{}) (v1alpha12.ResponseType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v1alpha12.ResponseType(tmp), err
+}
+
+func (ec *executionContext) marshalNResponseType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseType(ctx context.Context, sel ast.SelectionSet, v v1alpha12.ResponseType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseTypeᚄ(ctx context.Context, v interface{}) ([]v1alpha12.ResponseType, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]v1alpha12.ResponseType, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNResponseType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNResponseType2ᚕgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha12.ResponseType) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNResponseType2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐResponseType(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRole2k8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v v12.Role) graphql.Marshaler {
+	return ec._Role(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRole2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.Role) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNRole2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRole(ctx context.Context, sel ast.SelectionSet, v *v12.Role) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Role(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRoleBinding2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v v12.RoleBinding) graphql.Marshaler {
+	return ec._RoleBinding(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRoleBinding2ᚕᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*v12.RoleBinding) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNRoleBinding2ᚖk8sᚗioᚋapiᚋrbacᚋv1ᚐRoleBinding(ctx context.Context, sel ast.SelectionSet, v *v12.RoleBinding) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._RoleBinding(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRoleBindingEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v RoleBindingEvent) graphql.Marshaler {
+	return ec._RoleBindingEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRoleBindingEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingEvent(ctx context.Context, sel ast.SelectionSet, v *RoleBindingEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._RoleBindingEvent(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRoleBindingInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingInput(ctx context.Context, v interface{}) (RoleBindingInput, error) {
+	return ec.unmarshalInputRoleBindingInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (RoleBindingSubject, error) {
+	return ec.unmarshalInputRoleBindingSubject(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubjectᚄ(ctx context.Context, v interface{}) ([]*RoleBindingSubject, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*RoleBindingSubject, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNRoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNRoleBindingSubject2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx context.Context, v interface{}) (*RoleBindingSubject, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNRoleBindingSubject2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleBindingSubject(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, v interface{}) (RoleKind, error) {
+	var res RoleKind
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNRoleKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐRoleKind(ctx context.Context, sel ast.SelectionSet, v RoleKind) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNRoleRef2k8sᚗioᚋapiᚋrbacᚋv1ᚐRoleRef(ctx context.Context, sel ast.SelectionSet, v v12.RoleRef) graphql.Marshaler {
+	return ec._RoleRef(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNRule2githubᚗcomᚋkymaᚑincubatorᚋapiᚑgatewayᚋapiᚋv1alpha1ᚐRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.Rule) graphql.Marshaler {
@@ -44823,6 +51094,20 @@ func (ec *executionContext) marshalNSecret2ᚖgithubᚗcomᚋkymaᚑprojectᚋky
 		return graphql.Null
 	}
 	return ec._Secret(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSecretEvent2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx context.Context, sel ast.SelectionSet, v SecretEvent) graphql.Marshaler {
+	return ec._SecretEvent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSecretEvent2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSecretEvent(ctx context.Context, sel ast.SelectionSet, v *SecretEvent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SecretEvent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNService2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐService(ctx context.Context, sel ast.SelectionSet, v Service) graphql.Marshaler {
@@ -45491,19 +51776,40 @@ func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalNString2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, sel ast.SelectionSet, v v11.Destination) graphql.Marshaler {
+func (ec *executionContext) unmarshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx context.Context, v interface{}) (SubjectKind, error) {
+	var res SubjectKind
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNSubjectKind2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubjectKind(ctx context.Context, sel ast.SelectionSet, v SubjectKind) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNSubscriber2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, sel ast.SelectionSet, v v13.Destination) graphql.Marshaler {
 	return ec._Subscriber(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (SubscriberInput, error) {
 	return ec.unmarshalInputSubscriberInput(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
+func (ec *executionContext) unmarshalNSubscriberInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx context.Context, v interface{}) (*SubscriberInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalNSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
+	res, err := ec.unmarshalNSubscriberInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐSubscriberInput(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v13.KReference, error) {
+	return ec.unmarshalInputSubscriberRefInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v13.KReference, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
 	return &res, err
 }
 
@@ -45530,11 +51836,11 @@ func (ec *executionContext) marshalNTimestamp2timeᚐTime(ctx context.Context, s
 	return res
 }
 
-func (ec *executionContext) marshalNTrigger2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Trigger) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -45590,7 +51896,7 @@ func (ec *executionContext) marshalNTriggerEvent2ᚖgithubᚗcomᚋkymaᚑprojec
 	return ec._TriggerEvent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTriggerSpec2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha11.TriggerSpec) graphql.Marshaler {
+func (ec *executionContext) marshalNTriggerSpec2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha13.TriggerSpec) graphql.Marshaler {
 	return ec._TriggerSpec(ctx, sel, &v)
 }
 
@@ -46644,6 +52950,57 @@ func (ec *executionContext) marshalOFunctionReasonType2ᚖgithubᚗcomᚋkymaᚑ
 	return v
 }
 
+func (ec *executionContext) marshalOGitRepository2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx context.Context, sel ast.SelectionSet, v v1alpha11.GitRepository) graphql.Marshaler {
+	return ec._GitRepository(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOGitRepository2ᚕᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha11.GitRepository) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOGitRepository2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐGitRepository(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.GitRepository) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GitRepository(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOInstanceStatusType2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐInstanceStatusType(ctx context.Context, v interface{}) (InstanceStatusType, error) {
 	var res InstanceStatusType
 	return res, res.UnmarshalGQL(v)
@@ -46736,11 +53093,11 @@ func (ec *executionContext) marshalOLabels2githubᚗcomᚋkymaᚑprojectᚋkyma�
 	return v
 }
 
-func (ec *executionContext) marshalOLimitRange2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v LimitRange) graphql.Marshaler {
+func (ec *executionContext) marshalOLimitRange2k8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v v11.LimitRange) graphql.Marshaler {
 	return ec._LimitRange(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOLimitRange2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v *LimitRange) graphql.Marshaler {
+func (ec *executionContext) marshalOLimitRange2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐLimitRange(ctx context.Context, sel ast.SelectionSet, v *v11.LimitRange) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -46756,6 +53113,28 @@ func (ec *executionContext) marshalONamespace2ᚖgithubᚗcomᚋkymaᚑproject�
 		return graphql.Null
 	}
 	return ec._Namespace(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOOAuth2Client2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx context.Context, sel ast.SelectionSet, v v1alpha12.OAuth2Client) graphql.Marshaler {
+	return ec._OAuth2Client(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOAuth2Client2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐOAuth2Client(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.OAuth2Client) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OAuth2Client(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOOAuth2ClientError2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v v1alpha12.ReconciliationError) graphql.Marshaler {
+	return ec._OAuth2ClientError(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOOAuth2ClientError2ᚖgithubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐReconciliationError(ctx context.Context, sel ast.SelectionSet, v *v1alpha12.ReconciliationError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._OAuth2ClientError(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOOwnerReference2ᚕᚖk8sᚗioᚋapimachineryᚋpkgᚋapisᚋmetaᚋv1ᚐOwnerReferenceᚄ(ctx context.Context, v interface{}) ([]*v1.OwnerReference, error) {
@@ -46789,6 +53168,69 @@ func (ec *executionContext) marshalOPod2ᚖgithubᚗcomᚋkymaᚑprojectᚋkyma�
 	return ec._Pod(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOPolicyRule2ᚕk8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []v12.PolicyRule) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPolicyRule2k8sᚗioᚋapiᚋrbacᚋv1ᚐPolicyRule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalOPort2uint32(ctx context.Context, v interface{}) (uint32, error) {
+	return UnmarshalPort(v)
+}
+
+func (ec *executionContext) marshalOPort2uint32(ctx context.Context, sel ast.SelectionSet, v uint32) graphql.Marshaler {
+	return MarshalPort(v)
+}
+
+func (ec *executionContext) unmarshalOPort2ᚖuint32(ctx context.Context, v interface{}) (*uint32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOPort2uint32(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOPort2ᚖuint32(ctx context.Context, sel ast.SelectionSet, v *uint32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOPort2uint32(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalOReplicaSet2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐReplicaSet(ctx context.Context, sel ast.SelectionSet, v ReplicaSet) graphql.Marshaler {
 	return ec._ReplicaSet(ctx, sel, &v)
 }
@@ -46800,11 +53242,34 @@ func (ec *executionContext) marshalOReplicaSet2ᚖgithubᚗcomᚋkymaᚑproject�
 	return ec._ReplicaSet(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOResourceQuota2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) marshalORepositoryAuth2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx context.Context, sel ast.SelectionSet, v v1alpha11.RepositoryAuth) graphql.Marshaler {
+	return ec._RepositoryAuth(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalORepositoryAuth2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.RepositoryAuth) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RepositoryAuth(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalORepositoryAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx context.Context, v interface{}) (v1alpha11.RepositoryAuth, error) {
+	return ec.unmarshalInputRepositoryAuthInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalORepositoryAuthInput2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx context.Context, v interface{}) (*v1alpha11.RepositoryAuth, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalORepositoryAuthInput2githubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋfunctionᚑcontrollerᚋpkgᚋapisᚋserverlessᚋv1alpha1ᚐRepositoryAuth(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOResourceQuota2k8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v v11.ResourceQuota) graphql.Marshaler {
 	return ec._ResourceQuota(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOResourceQuota2ᚖgithubᚗcomᚋkymaᚑprojectᚋkymaᚋcomponentsᚋconsoleᚑbackendᚑserviceᚋinternalᚋgqlschemaᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v *ResourceQuota) graphql.Marshaler {
+func (ec *executionContext) marshalOResourceQuota2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐResourceQuota(ctx context.Context, sel ast.SelectionSet, v *v11.ResourceQuota) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47007,6 +53472,15 @@ func (ec *executionContext) marshalOServicePlan2ᚖgithubᚗcomᚋkymaᚑproject
 	return ec._ServicePlan(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOStatusCode2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐStatusCode(ctx context.Context, v interface{}) (v1alpha12.StatusCode, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return v1alpha12.StatusCode(tmp), err
+}
+
+func (ec *executionContext) marshalOStatusCode2githubᚗcomᚋoryᚋhydraᚑmaesterᚋapiᚋv1alpha1ᚐStatusCode(ctx context.Context, sel ast.SelectionSet, v v1alpha12.StatusCode) graphql.Marshaler {
+	return graphql.MarshalString(string(v))
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -47062,46 +53536,22 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return ec.marshalOString2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (v11.Destination, error) {
-	return ec.unmarshalInputSubscriberInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx context.Context, v interface{}) (*v11.Destination, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐDestination(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOSubscriberRef2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v v11.KReference) graphql.Marshaler {
+func (ec *executionContext) marshalOSubscriberRef2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v v13.KReference) graphql.Marshaler {
 	return ec._SubscriberRef(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v *v11.KReference) graphql.Marshaler {
+func (ec *executionContext) marshalOSubscriberRef2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, sel ast.SelectionSet, v *v13.KReference) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._SubscriberRef(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (v11.KReference, error) {
-	return ec.unmarshalInputSubscriberRefInput(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOSubscriberRefInput2ᚖknativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx context.Context, v interface{}) (*v11.KReference, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOSubscriberRefInput2knativeᚗdevᚋpkgᚋapisᚋduckᚋv1ᚐKReference(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOTrigger2githubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2knativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v v1alpha13.Trigger) graphql.Marshaler {
 	return ec._Trigger(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚕᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTriggerᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha13.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -47128,7 +53578,7 @@ func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋevent
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, sel, v[i])
+			ret[i] = ec.marshalNTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -47141,34 +53591,11 @@ func (ec *executionContext) marshalOTrigger2ᚕᚖgithubᚗcomᚋknativeᚋevent
 	return ret
 }
 
-func (ec *executionContext) marshalOTrigger2ᚖgithubᚗcomᚋknativeᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha11.Trigger) graphql.Marshaler {
+func (ec *executionContext) marshalOTrigger2ᚖknativeᚗdevᚋeventingᚋpkgᚋapisᚋeventingᚋv1alpha1ᚐTrigger(ctx context.Context, sel ast.SelectionSet, v *v1alpha13.Trigger) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Trigger(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (apis.URL, error) {
-	return UnmarshalURI(v)
-}
-
-func (ec *executionContext) marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v apis.URL) graphql.Marshaler {
-	return MarshalURI(v)
-}
-
-func (ec *executionContext) unmarshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, v interface{}) (*apis.URL, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOURI2ᚖknativeᚗdevᚋpkgᚋapisᚐURL(ctx context.Context, sel ast.SelectionSet, v *apis.URL) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOURI2knativeᚗdevᚋpkgᚋapisᚐURL(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

@@ -6,10 +6,9 @@ package domain
 import (
 	"context"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 )
 
 func (r *mutationResolver) CreateTrigger(ctx context.Context, namespace string, trigger gqlschema.TriggerCreateInput, ownerRef []*v11.OwnerReference) (*v1alpha1.Trigger, error) {
@@ -28,12 +27,12 @@ func (r *mutationResolver) DeleteManyTriggers(ctx context.Context, namespace str
 	return r.eventing.DeleteTriggers(ctx, namespace, triggerNames)
 }
 
-func (r *queryResolver) Triggers(ctx context.Context, namespace string, subscriber *v1.Destination) ([]*v1alpha1.Trigger, error) {
-	return r.eventing.TriggersQuery(ctx, namespace, subscriber)
+func (r *queryResolver) Triggers(ctx context.Context, namespace string, serviceName string) ([]*v1alpha1.Trigger, error) {
+	return r.eventing.TriggersQuery(ctx, namespace, serviceName)
 }
 
-func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, subscriber *v1.Destination) (<-chan *gqlschema.TriggerEvent, error) {
-	return r.eventing.TriggerEventSubscription(ctx, namespace, subscriber)
+func (r *subscriptionResolver) TriggerEvent(ctx context.Context, namespace string, serviceName string) (<-chan *gqlschema.TriggerEvent, error) {
+	return r.eventing.TriggerEventSubscription(ctx, namespace, serviceName)
 }
 
 func (r *triggerResolver) Status(ctx context.Context, obj *v1alpha1.Trigger) (*gqlschema.TriggerStatus, error) {
@@ -42,6 +41,14 @@ func (r *triggerResolver) Status(ctx context.Context, obj *v1alpha1.Trigger) (*g
 
 func (r *triggerSpecResolver) Filter(ctx context.Context, obj *v1alpha1.TriggerSpec) (gqlschema.JSON, error) {
 	return r.eventing.FilterField(ctx, obj)
+}
+
+func (r *triggerSpecResolver) Port(ctx context.Context, obj *v1alpha1.TriggerSpec) (uint32, error) {
+	return r.eventing.PortField(ctx, obj)
+}
+
+func (r *triggerSpecResolver) Path(ctx context.Context, obj *v1alpha1.TriggerSpec) (string, error) {
+	return r.eventing.PathField(ctx, obj)
 }
 
 // Trigger returns gqlschema.TriggerResolver implementation.

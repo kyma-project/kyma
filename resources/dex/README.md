@@ -22,7 +22,7 @@ This chart allows you to provide configuration for Dex connectors and clients us
 ### Connectors
 
 Configure connectors through the `connectors` override.
-Provide the Dex connectors list as a single string in the `yaml` format. See [these](https://github.com/dexidp/dex/tree/master/Documentation/connectors) documents for syntax details.
+Provide the Dex connectors list as a single string in the `yaml` format. See [these](https://github.com/dexidp/dex/blob/master/README.md#connectors) documents for syntax details.
 
 This is an example of a connector configuration string:
 ```yaml

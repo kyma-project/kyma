@@ -597,10 +597,10 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\"}) by (container)",
+                                "expr": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\", container!=\"\"}) by (container, instance)",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "{{`{{`}}container{{`}}`}}",
+                                "legendFormat": "{{`{{`}}container{{`}}`}}-{{`{{`}}instance{{`}}`}}",
                                 "legendLink": null,
                                 "step": 10
                             },

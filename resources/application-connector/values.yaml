@@ -4,9 +4,6 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-connectivity_certs_controller:
-  enabled: false
-
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -26,37 +23,39 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "1066324c"
+    version: "82b304ab"
   application_operator_tests:
-    version: "1066324c"
+    version: "470796a1"
   connector_service:
-    version: "4e3576cd"
+    version: "470796a1"
   connector_service_tests:
-    version: "27eff119"
+    version: "470796a1"
   connection_token_handler:
-    version: "fbf1000b"
+    version: "85665778"
   connection_token_handler_tests:
-    version: "fbf1000b"
+    version: "470796a1"
   event_service:
-    version: "PR-8874"
+    version: "24c55551"
   event_service_integration_tests:
-    version: "PR-9085"
+    version: "2c51c024"
   application_gateway:
-    version: "b06fbd6f"
+    version: "c0341336"
   application_gateway_tests:
-    version: "1272752c"
+    version: "470796a1"
+  application_gateway_legacy_tests:
+    version: "470796a1"
   application_registry:
-    version: "4bd4dbfb"
+    version: "c0341336"
   application_registry_tests:
-    version: "c608dbf3"
+    version: "cda9f380"
   application_broker:
-    version: "1acc510b"
+    version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "fbf1000b"
+    version: "470796a1"
   application_connectivity_validator:
-    version: "39d1ab87"
-  connectivity_certs_controller:
-    version: "fbf1000b"
+    version: "c0341336"
+  application_broker_eventing_migration:
+    version: "a8a6bca9"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -64,17 +63,32 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: kyma-gateway-certs-cacert
+      name: app-connector-certs
       namespace: istio-system
   certificate:
     validityTime: 92d
 
+application_connectivity_certs_sync:
+  secrets:
+    caCertificateSecret:
+      name: app-connector-certs
+      namespace: istio-system
+    tlsCertificateSecret:
+      name: kyma-gateway-certs
+      namespace: istio-system
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
+
 tests:
   application_connector_tests:
+    labels:
+      integration: true
+      after-upgrade: true
     enabled: true
     connector_service:
       central: false
     skipSslVerify: true
     image:
-      version: "PR-9123"
+      version: "470796a1"
       pullPolicy: IfNotPresent

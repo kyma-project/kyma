@@ -40,11 +40,11 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
    
-5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
+5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `app-connector-certs` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
 
     ```bash
     kubectl get secrets -n istio-system kyma-gateway-certs -oyaml
-    kubectl get secrets -n istio-system kyma-gateway-certs-cacert -oyaml
+    kubectl get secrets -n istio-system app-connector-certs -oyaml
     ```
 
 6. To regenerate a corrupted certificate, follow [this tutorial](components/security/#tutorials-update-tls-certificate). If you are running Kyma provisioned through Gardener, follow [this tutorial](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.

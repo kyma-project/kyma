@@ -1,6 +1,0 @@
-Kyma istio verification tool
-This job will check if Istio has been installed, an properly configured in order to run Kyma. 
-
-To check the job logs, run the following command:
-- kubectl logs -n {{ .Release.Namespace }} -l app=istio-kyma-patch
-

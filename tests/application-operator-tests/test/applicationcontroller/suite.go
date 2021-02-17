@@ -1,6 +1,7 @@
 package applicationcontroller
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -58,13 +59,13 @@ func NewTestSuite(t *testing.T) *TestSuite {
 }
 
 func (ts *TestSuite) CreateApplication(t *testing.T, accessLabel string, skipInstallation bool) {
-	application, err := ts.k8sClient.CreateDummyApplication(ts.application, accessLabel, skipInstallation)
+	application, err := ts.k8sClient.CreateDummyApplication(context.Background(), ts.application, accessLabel, skipInstallation)
 	require.NoError(t, err)
 	require.NotNil(t, application)
 }
 
 func (ts *TestSuite) DeleteApplication(t *testing.T) {
-	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
+	err := ts.k8sClient.DeleteApplication(context.Background(), ts.application, metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
 
@@ -73,7 +74,7 @@ func (ts *TestSuite) CheckAccessLabel(t *testing.T) {
 
 	err := testkit.WaitForFunction(defaultCheckInterval, assessLabelWaitTime, func() bool {
 		var err error
-		application, err = ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
+		application, err = ts.k8sClient.GetApplication(context.Background(), ts.application, metav1.GetOptions{})
 		if err != nil {
 			t.Logf("Failed to get Application while checking Access label: %s", err.Error())
 			return false
@@ -93,7 +94,7 @@ func (ts *TestSuite) CheckAccessLabel(t *testing.T) {
 
 func (ts *TestSuite) CleanUp() {
 	// Do not handle error as RE may already be removed
-	ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
+	ts.k8sClient.DeleteApplication(context.Background(), ts.application, metav1.DeleteOptions{})
 }
 
 func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {

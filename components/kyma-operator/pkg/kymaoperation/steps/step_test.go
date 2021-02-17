@@ -236,7 +236,9 @@ type mockHelmClient struct {
 	failUpgradingRelease    bool
 	failDeletingRelease     bool
 	failRollback            bool
+	failIsReleasePresent    bool
 	failIsReleaseDeletable  bool
+	isReleasePresent        bool
 	isReleaseDeletable      bool
 	deleteReleaseCalled     bool
 	rollbackReleaseCalled   bool
@@ -246,6 +248,13 @@ type mockHelmClient struct {
 
 func (hc *mockHelmClient) ReleaseDeployedRevision(nn kymahelm.NamespacedName) (int, error) {
 	return hc.releaseDeployedRevision(nn.Name)
+}
+
+func (hc *mockHelmClient) IsReleasePresent(nn kymahelm.NamespacedName) (bool, error) {
+	if hc.failIsReleasePresent {
+		return false, errors.New("failed to get release status")
+	}
+	return hc.isReleasePresent, nil
 }
 
 func (hc *mockHelmClient) IsReleaseDeletable(nn kymahelm.NamespacedName) (bool, error) {

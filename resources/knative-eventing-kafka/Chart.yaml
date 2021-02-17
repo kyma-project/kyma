@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 description: Kyma component 'knative-eventing-kafka'
 name: knative-eventing-kafka
 version: 1.0.0

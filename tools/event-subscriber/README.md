@@ -9,7 +9,7 @@ This is a sample subscriber app that simulates an event subscriber via exposing 
 |-------------------------------------------- |------ |------------------------------------------------------------------------------------------------- |
 | `/ce`                                      | POST   | Stores the received CloudEvent.                                                              |
 | `/ce`                                      | GET    | Returns a list of all received CloudEvents.                                                           |
-| `/ce/<uuid>`                               | GET    | Returns a CloudEvent with a matching UUID. Returns `200` on success, `204` if no event was found.        |
+| `/ce/by-uuid/<uuid>`                               | GET    | Returns a CloudEvent with a matching UUID. Returns `200` on success, `204` if no event was found.        |
 | `/ce/<source>/<type>/<event-type-version>` | GET    | Returns all CloudEvents matching the source/type/version. Returns `200` on success, `204` if no event was found. |
 | `/`                                        | POST   | Increases the counter of received requests. CloudEvents sent to `/ce` do not increase this counter.     |
 | `/`                                        | GET    | Returns the current counter value.                                                                     |

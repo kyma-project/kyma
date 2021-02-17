@@ -1,0 +1,5 @@
+# globally shared values among Helm subcharts
+global:
+  image:
+    # repository is the container registry where the image for event-publisher-proxy is located in
+    repository: "eu.gcr.io/kyma-project"

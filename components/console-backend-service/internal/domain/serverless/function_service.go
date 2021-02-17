@@ -3,15 +3,16 @@ package serverless
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	notifierResource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 )
 
 //go:generate mockery -name=functionSvc -output=automock -outpkg=automock -case=underscore

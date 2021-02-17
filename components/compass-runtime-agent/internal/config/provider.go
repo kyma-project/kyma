@@ -24,7 +24,7 @@ type RuntimeConfig struct {
 	Tenant    string `json:"tenant"` // TODO: after full implementation of certs in Director it will no longer be needed
 }
 
-//go:generate mockery -name=Provider
+//go:generate mockery --name=Provider
 type Provider interface {
 	GetConnectionConfig() (ConnectionConfig, error)
 	GetRuntimeConfig() (RuntimeConfig, error)

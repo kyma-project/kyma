@@ -25,7 +25,7 @@ spec:
       serviceAccountName: dex-account
       securityContext:
         runAsUser: 2000
-      nodeSelector: 
+      nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
@@ -42,6 +42,16 @@ spec:
         {{- with .Values.volumeMountsExtra }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.containerPort }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end -}}
       {{ if .Values.dex.useStaticConnector }}
       initContainers:
       - name: dex-users-configurator
@@ -73,4 +83,3 @@ spec:
       {{- with .Values.volumesExtra }}
       {{- tpl . $ | nindent 6 }}
       {{- end }}
-

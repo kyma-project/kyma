@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -72,7 +73,7 @@ func Test_Log(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", meta.ListOptions{}).Return(&v1beta1.NodeMetricsList{
+		nodeMetrics.On("List", context.Background(), meta.ListOptions{}).Return(&v1beta1.NodeMetricsList{
 			Items: []v1beta1.NodeMetrics{{
 				ObjectMeta: meta.ObjectMeta{
 					Name: "somename",
@@ -136,7 +137,7 @@ func Test_Log(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", meta.ListOptions{}).Return(&v1beta1.NodeMetricsList{}, nil)
+		nodeMetrics.On("List", context.Background(), meta.ListOptions{}).Return(&v1beta1.NodeMetricsList{}, nil)
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
@@ -175,7 +176,7 @@ func Test_Log(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", meta.ListOptions{}).Return(nil, fmt.Errorf("someerror"))
+		nodeMetrics.On("List", context.Background(), meta.ListOptions{}).Return(nil, fmt.Errorf("someerror"))
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 

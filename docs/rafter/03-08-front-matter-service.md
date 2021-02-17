@@ -32,7 +32,7 @@ Dolores sit amet
 You can expose the service for development purposes. To use the Front Matter Service on a local machine, run the following command:
 
 ```bash
-kubectl port-forward deployment/rafter-front-matter-service 3000:3000 -n kyma-system
+kubectl port-forward deployment/rafter-front-matter-svc 3000:3000 -n kyma-system
 ```
 
 You can access the service on port `3000`.

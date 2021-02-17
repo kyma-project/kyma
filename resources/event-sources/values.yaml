@@ -5,9 +5,9 @@ global:
     name: controller-manager
     image: event-sources-controller-manager
     dir: ''
-    version: PR-9040
+    version: "e6a594cf"
   httpAdapter:
     image: event-sources-http-adapter
     dir: ''
-    version: PR-9040
+    version: "e6a594cf" 
     tracingEnabled: "true"

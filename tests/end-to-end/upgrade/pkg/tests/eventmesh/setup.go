@@ -67,7 +67,7 @@ func (f *eventMeshFlow) WaitForSubscriber() error {
 }
 
 func (f *eventMeshFlow) WaitForApplication() error {
-	return helpers.WaitForApplication(f.appConnectorInterface, f.messagingClient, f.servingClient, f.applicationName)
+	return helpers.WaitForApplication(f.appConnectorInterface, f.messagingClient, f.sourcesClient, f.applicationName)
 }
 
 func (f *eventMeshFlow) CreateApplicationMapping() error {

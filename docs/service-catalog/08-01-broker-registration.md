@@ -30,7 +30,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
 
 4. Run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
       ```
-     helm install ./charts/ups-broker --name ups-broker --namespace ups-broker
+     helm install ups-broker ./charts/ups-broker --namespace ups-broker
      ```
 
 5. Register a broker:

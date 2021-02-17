@@ -10,6 +10,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
+    kyma-project.io/component: controller
 spec:
   selector:
     app: {{ template "octopus.name" . }}
@@ -44,6 +45,7 @@ spec:
         app: {{ template "octopus.name" . }}
         control-plane: controller-manager
         controller-tools.k8s.io: "1.0"
+        kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ template "octopus.fullname" . }}
       containers:

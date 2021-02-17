@@ -192,7 +192,7 @@ data:
       "steppedLine": false,
       "targets": [
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"2xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"2xx\",event_source=\"$app\"}[5m])",
         "format": "time_series",
         "hide": false,
         "instant": false,
@@ -201,13 +201,13 @@ data:
         "refId": "A"
       },
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"4xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"4xx\",event_source=\"$app\"}[5m])",
         "hide": false,
         "legendFormat": "4XX",
         "refId": "B"
       },
       {
-        "expr": "rate(revision_app_request_count{configuration_name=\"$app\",container_name=\"queue-proxy\",namespace_name=\"kyma-integration\",response_code_class=\"5xx\",revision_name=~\"$app-.*\",service_name=~\"$app\"}[5m])",
+        "expr": "rate(httpsource_event_count{container=\"source\",namespace=\"kyma-integration\",response_code_class=\"5xx\",event_source=\"$app\"}[5m])",
         "hide": false,
         "legendFormat": "5XX",
         "refId": "C"
@@ -472,7 +472,7 @@ data:
       }
     }
     ],
-    "refresh": false,
+    "refresh": "10s",
     "schemaVersion": 21,
     "style": "dark",
     "tags": [
@@ -484,8 +484,9 @@ data:
       {
         "allValue": null,
         "current": {
-          "text": "mocks",
-          "value": "mocks"
+          "selected": true,
+          "text": "test",
+          "value": "test"
         },
         "datasource": "Prometheus",
         "definition": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"})",
@@ -534,7 +535,7 @@ data:
       ]
     },
     "time": {
-      "from": "now-3h",
+      "from": "now-1h",
       "to": "now"
     },
     "timepicker": {

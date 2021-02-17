@@ -1,0 +1,91 @@
+{{- $ca := genCA "service-catalog-webhook-ca" 3650 }}
+{{- $cn := printf "%s-webhook" (include "fullname" .) }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "fullname" . }}-webhook-cert
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ template "fullname" . }}-mutating-webhook
+  namespace: {{ .Release.Namespace }}
+webhooks:
+  - name: "mutating.pods.bindings.kyma-project.io"
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: {{ .Release.Namespace }}
+        path: "/pod-mutating"
+    admissionReviewVersions: ["v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5
+  - name: "mutating.bindings.kyma-project.io"
+    rules:
+      - apiGroups: ["bindings.kyma-project.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["bindings"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: {{ .Release.Namespace }}
+        path: "/binding-mutating"
+    admissionReviewVersions: ["v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "fullname" . }}-validating-webhook
+webhooks:
+  - name: validating.binding.kyma-project.io
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: "{{ .Release.Namespace }}"
+        path: "/binding-validating"
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["bindings.kyma-project.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["bindings"]
+        scope: "Namespaced"
+  - name: validating.targetkind.kyma-project.io
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: "{{ .Release.Namespace }}"
+        path: "/targetkind-validating"
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["bindings.kyma-project.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["targetkinds"]
+        scope: "Namespaced"

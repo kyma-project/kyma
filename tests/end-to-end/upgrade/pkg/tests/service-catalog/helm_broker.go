@@ -134,8 +134,12 @@ func (f *helmBrokerFlow) TestResources() error {
 }
 
 func (f *helmBrokerFlow) logReport() {
-	f.logK8SReport()
-	f.logServiceCatalogAndBindingUsageReport()
+	report := NewReport(f.namespace, f.log)
+
+	f.logK8SReport(report)
+	f.logServiceCatalogAndBindingUsageReport(report)
+
+	report.Print()
 }
 
 func (f *helmBrokerFlow) deployEnvTester() error {
@@ -222,7 +226,7 @@ func (f *helmBrokerFlow) verifyDeploymentContainsRedisEvns() error {
 		return errors.Wrap(err, "while getting redis credentials")
 	}
 
-	return f.waitForEnvInjected(envTesterName, "REDIS_PASSWORD", creds.password)
+	return f.waitForEnvInjected(envTesterName, creds.password)
 }
 
 func (f *helmBrokerFlow) verifyKeyInRedisExists() error {
@@ -296,7 +300,7 @@ func (f *helmBrokerFlow) deleteRedisBindingUsage() error {
 
 func (f *helmBrokerFlow) verifyDeploymentDoesNotContainRedisEnvs() error {
 	f.log.Info("Verify deployment does not contain redis environments")
-	return f.waitForEnvNotInjected(envTesterName, "REDIS_PASSWORD")
+	return f.waitForEnvNotInjected(envTesterName)
 }
 
 func (f *helmBrokerFlow) deleteRedisBinding() error {

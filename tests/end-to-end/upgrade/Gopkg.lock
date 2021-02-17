@@ -125,6 +125,19 @@
   version = "v0.2.1"
 
 [[projects]]
+  digest = "1:73b8447bcbc2217d57c74094b24ca238b31dbd4324e4ec42addb8b100f7e71c6"
+  name = "github.com/coreos/prometheus-operator"
+  packages = [
+    "pkg/apis/monitoring",
+    "pkg/apis/monitoring/v1",
+    "pkg/client/versioned/scheme",
+    "pkg/client/versioned/typed/monitoring/v1",
+  ]
+  pruneopts = "UT"
+  revision = "beaa1a519e21c8230bab86a15c04bf7e0a9267c1"
+  version = "v0.38.3"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -181,11 +194,14 @@
   version = "v3.2.0"
 
 [[projects]]
-  digest = "1:582e25eccee928dc12416ea4c23b6dae8f3b5687730632aa1473ebebe80a2359"
+  digest = "1:85a9bc2805bd82a7d717447eb83015d881855fee0c8201de6d2ca1df1b9ef931"
   name = "github.com/gogo/protobuf"
   packages = [
+    "jsonpb",
     "proto",
+    "protoc-gen-gogo/descriptor",
     "sortkeys",
+    "types",
   ]
   pruneopts = "UT"
   revision = "5628607bb4c51c3157aacc3a50f0ab707582b805"
@@ -366,7 +382,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:65654f7d7ee7491f75738c96a0973515f9e7917c8d9fc1e5c158ee3e9904b93a"
+  digest = "1:6e994f4f591eee9a0a093a72c1aa0eeb17b7dd45677f5103a9eb005ac9709607"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -382,6 +398,10 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/event-sources/apis/sources",
+    "components/event-sources/apis/sources/v1alpha1",
+    "components/event-sources/client/generated/clientset/internalclientset/scheme",
+    "components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
     "components/function-controller/pkg/apis/serverless/v1alpha1",
     "components/kyma-operator/pkg/overrides",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -682,7 +702,7 @@
   revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [[projects]]
-  digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
+  digest = "1:fa940333c48808b0d86ef21f412ffcfd0e5084a82f13905c028a404803b1908f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -703,8 +723,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -911,6 +931,30 @@
   version = "2019.2.3"
 
 [[projects]]
+  digest = "1:8ebab926f874611c31e1ea62fc34ec4b31ee224eca8530db175b30ac62c1086a"
+  name = "istio.io/api"
+  packages = ["authentication/v1alpha1"]
+  pruneopts = "UT"
+  revision = "34e474846e0d348c39ee16a268a71a3104cb6f9e"
+  version = "1.6.7"
+
+[[projects]]
+  digest = "1:3f0537a8015004b5fe8bba6fb6d41193a767a478a91cdbdc16666a0e6c34003d"
+  name = "istio.io/client-go"
+  packages = ["pkg/apis/authentication/v1alpha1"]
+  pruneopts = "UT"
+  revision = "f8d9d8ff84e6e3753cdfcbb82c03f495269e29dc"
+  version = "1.5.8"
+
+[[projects]]
+  digest = "1:c49d54c5c21522692aff4ff2664622b412f78b6b7e397b1681930d60ff8aa3ea"
+  name = "istio.io/gogo-genproto"
+  packages = ["googleapis/google/api"]
+  pruneopts = "UT"
+  revision = "8607e17318e8a875c2e9e75ab576a6f55ffa964d"
+  version = "1.6.7"
+
+[[projects]]
   digest = "1:d89afbf3588e87d2c9e6efdd5528d249b32d23a12fbd7ec324f3cb373c6fb76c"
   name = "k8s.io/api"
   packages = [
@@ -1010,15 +1054,7 @@
   version = "kubernetes-1.15.3"
 
 [[projects]]
-  branch = "release-1.12"
-  digest = "1:9d15b3b19ff07702451e28152bde999bbf216a3fc22cf0760ac8a78bf8e568a6"
-  name = "k8s.io/cli-runtime"
-  packages = ["pkg/genericclioptions/printers"]
-  pruneopts = "UT"
-  revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
-
-[[projects]]
-  digest = "1:d8d3801b555decd0041471264a979c30e95d02540f16fd1694784e3bee4a9ed5"
+  digest = "1:f6ef044c98ccd05be6cf7a130383ee0d9bb84886b49d13150145025f25a95960"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1152,7 +1188,6 @@
     "rest",
     "rest/watch",
     "restmapper",
-    "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -1169,7 +1204,6 @@
     "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
-    "util/jsonpath",
     "util/keyutil",
     "util/retry",
     "util/workqueue",
@@ -1260,7 +1294,7 @@
   revision = "5e3431e56176359316416c5952dcb7797299248f"
 
 [[projects]]
-  digest = "1:457cb733d811cb3840996e2c69a9cf9c6526aa3e2580fb7052108c920dd29905"
+  digest = "1:fc0c5d0f7d8cd02183a789133637d810c41fd245f801a5d0e9f9910f129db5aa"
   name = "knative.dev/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -1272,13 +1306,6 @@
     "pkg/apis/serving/v1",
     "pkg/apis/serving/v1alpha1",
     "pkg/apis/serving/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
-    "pkg/client/clientset/versioned/typed/networking/v1alpha1",
-    "pkg/client/clientset/versioned/typed/serving/v1",
-    "pkg/client/clientset/versioned/typed/serving/v1alpha1",
-    "pkg/client/clientset/versioned/typed/serving/v1beta1",
     "pkg/gc",
     "pkg/network",
     "pkg/reconciler/route/config",
@@ -1316,6 +1343,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
+    "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1",
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/google/go-cmp/cmp",
@@ -1329,6 +1357,7 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
     "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1",
     "github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -1357,7 +1386,6 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/wait",
-    "k8s.io/cli-runtime/pkg/genericclioptions/printers",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
@@ -1372,7 +1400,6 @@
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
-    "knative.dev/serving/pkg/client/clientset/versioned",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
   ]

@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package object
 
 import (
@@ -25,26 +9,27 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-
+	securityv1beta1apis "istio.io/api/security/v1beta1"
+	"istio.io/api/type/v1beta1"
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	authenticationv1alpha1api "istio.io/api/authentication/v1alpha1"
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 const (
-	fixtureChannelPath = "../../test/fixtures/channel.json"
-	fixtureKsvcPath    = "../../test/fixtures/ksvc.json"
-	fixturePolicyPath  = "../../test/fixtures/policy.json"
+	fixtureChannelPath            = "../../test/fixtures/channel.json"
+	fixturePeerAuthenticationPath = "../../test/fixtures/peerAuthentication.json"
+	fixtureDeploymentPath         = "../../test/fixtures/deployment.json"
+	fixtureServicePath            = "../../test/fixtures/service.json"
 )
 
 var fixtureChannel *messagingv1alpha1.Channel
-var fixtureKsvc *servingv1alpha1.Service
-var fixturePolicy *authenticationv1alpha1.Policy
+var fixtureDeployment *appsv1.Deployment
+var fixturePeerAuthentication *securityv1beta1.PeerAuthentication
+var fixtureService *corev1.Service
 
 func TestMain(m *testing.M) {
 	var err error
@@ -54,14 +39,19 @@ func TestMain(m *testing.M) {
 		panic(errors.Wrap(err, "loading Channel from fixtures"))
 	}
 
-	fixtureKsvc = &servingv1alpha1.Service{}
-	if err = loadFixture(fixtureKsvcPath, fixtureKsvc); err != nil {
-		panic(errors.Wrap(err, "loading Knative Service from fixtures"))
+	fixturePeerAuthentication = &securityv1beta1.PeerAuthentication{}
+	if err = loadFixture(fixturePeerAuthenticationPath, fixturePeerAuthentication); err != nil {
+		panic(errors.Wrap(err, "loading PeerAuthentication from fixtures"))
 	}
 
-	fixturePolicy = &authenticationv1alpha1.Policy{}
-	if err = loadFixture(fixturePolicyPath, fixturePolicy); err != nil {
-		panic(errors.Wrap(err, "loading Policy from fixtures"))
+	fixtureDeployment = &appsv1.Deployment{}
+	if err = loadFixture(fixtureDeploymentPath, fixtureDeployment); err != nil {
+		panic(errors.Wrap(err, "loading Deployment from fixtures"))
+	}
+
+	fixtureService = &corev1.Service{}
+	if err = loadFixture(fixtureServicePath, fixtureService); err != nil {
+		panic(errors.Wrap(err, "loading Deployment from fixtures"))
 	}
 
 	os.Exit(m.Run())
@@ -150,86 +140,86 @@ func TestChannelEqual(t *testing.T) {
 	}
 }
 
-func TestKsvcEqual(t *testing.T) {
-	ksvc := fixtureKsvc
+func TestDeploymentEqual(t *testing.T) {
+	deployment := fixtureDeployment
 
-	if !ksvcEqual(nil, nil) {
+	if !deploymentEqual(nil, nil) {
 		t.Error("Two nil elements should be equal")
 	}
 
 	testCases := map[string]struct {
-		prep   func() *servingv1alpha1.Service
+		prep   func() *appsv1.Deployment
 		expect bool
 	}{
 		"not equal when one element is nil": {
-			func() *servingv1alpha1.Service {
+			func() *appsv1.Deployment {
 				return nil
 			},
 			false,
 		},
 		"not equal when labels differ": {
-			func() *servingv1alpha1.Service {
-				ksvcCopy := ksvc.DeepCopy()
-				ksvcCopy.Labels["foo"] += "test"
-				return ksvcCopy
+			func() *appsv1.Deployment {
+				deploymentCopy := deployment.DeepCopy()
+				deploymentCopy.Labels["foo"] += "test"
+				return deploymentCopy
 			},
 			false,
 		},
 		"not equal when annotations differ": {
-			func() *servingv1alpha1.Service {
-				ksvcCopy := ksvc.DeepCopy()
-				ksvcCopy.Annotations["foo"] += "test"
-				return ksvcCopy
+			func() *appsv1.Deployment {
+				deploymentCopy := deployment.DeepCopy()
+				deploymentCopy.Annotations["foo"] += "test"
+				return deploymentCopy
 			},
 			false,
 		},
 		"not equal when template annotations differ": {
-			func() *servingv1alpha1.Service {
-				ksvcCopy := ksvc.DeepCopy()
-				ksvc.Spec.ConfigurationSpec.Template.ObjectMeta.Annotations["foo"] += "test"
-				return ksvcCopy
+			func() *appsv1.Deployment {
+				deploymentCopy := deployment.DeepCopy()
+				deployment.Spec.Template.ObjectMeta.Annotations["foo"] += "test"
+				return deploymentCopy
 			},
 			false,
 		},
 		"not equal when template labels differ": {
-			func() *servingv1alpha1.Service {
-				ksvcCopy := ksvc.DeepCopy()
-				ksvc.Spec.ConfigurationSpec.Template.ObjectMeta.Labels["foo"] += "test"
-				return ksvcCopy
+			func() *appsv1.Deployment {
+				deploymentCopy := deployment.DeepCopy()
+				deployment.Spec.Template.ObjectMeta.Labels["foo"] += "test"
+				return deploymentCopy
 			},
 			false,
 		},
 		"equal when other fields differ": {
-			func() *servingv1alpha1.Service {
-				ksvcCopy := ksvc.DeepCopy()
+			func() *appsv1.Deployment {
+				deploymentCopy := deployment.DeepCopy()
 
 				// metadata
-				lbls := ksvcCopy.Labels
-				anns := ksvcCopy.Annotations
+				lbls := deploymentCopy.Labels
+				anns := deploymentCopy.Annotations
 
-				m := &ksvcCopy.ObjectMeta
+				m := &deploymentCopy.ObjectMeta
 				m.Reset()
 				m.Labels = lbls
 				m.Annotations = anns
 
 				// spec
-				sp := &ksvcCopy.Spec
+				sp := &deploymentCopy.Spec
 
-				tplAnns := sp.ConfigurationSpec.Template.ObjectMeta.Annotations
-				tplLbls := sp.ConfigurationSpec.Template.ObjectMeta.Labels
-				ps := sp.ConfigurationSpec.Template.Spec.PodSpec
+				tplAnns := sp.Template.ObjectMeta.Annotations
+				tplLbls := sp.Template.ObjectMeta.Labels
+				ps := sp.Template.Spec
 
-				*sp = servingv1alpha1.ServiceSpec{} // reset
-				sp.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
-				sp.ConfigurationSpec.Template.ObjectMeta.Annotations = tplAnns
-				sp.ConfigurationSpec.Template.ObjectMeta.Labels = tplLbls
-				sp.ConfigurationSpec.Template.Spec.PodSpec = ps
+				*sp = appsv1.DeploymentSpec{} // reset
+				sp.Template = corev1.PodTemplateSpec{}
+				sp.Template.ObjectMeta.Annotations = tplAnns
+				sp.Template.ObjectMeta.Labels = tplLbls
+				sp.Template.Spec = ps
 
 				// status
-				st := &ksvcCopy.Status
-				*st = servingv1alpha1.ServiceStatus{} // reset
+				st := &deploymentCopy.Status
+				*st = appsv1.DeploymentStatus{} // reset
 
-				return ksvcCopy
+				return deploymentCopy
 			},
 			true,
 		},
@@ -237,19 +227,105 @@ func TestKsvcEqual(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			testKsvc := tc.prep()
-			if ksvcEqual(testKsvc, ksvc) != tc.expect {
+			testDeployment := tc.prep()
+			if deploymentEqual(testDeployment, deployment) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})
 	}
 }
 
+func TestServiceEqual(t *testing.T) {
+	svc := fixtureService
+
+	if !serviceEqual(nil, nil) {
+		t.Error("Two nil elements should be equal")
+	}
+
+	testCases := map[string]struct {
+		prep   func() *corev1.Service
+		expect bool
+	}{
+		"not equal when one element is nil": {
+			func() *corev1.Service {
+				return nil
+			},
+			false,
+		},
+		"not equal when labels differ": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Labels["foo"] += "test"
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when annotations differ": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Annotations = map[string]string{"a": "b"}
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when type differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Type = corev1.ServiceTypeExternalName
+				return svcCopy
+			},
+			false,
+		},
+		"equal when type gets defaulted": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Type = ""
+				return svcCopy
+			},
+			true,
+		},
+		"not equal when ClusterIP differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.ClusterIP = "1.1.1.1"
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when Ports differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Ports = []corev1.ServicePort{}
+				return svcCopy
+			},
+			false,
+		},
+		"not equal when selector differs": {
+			func() *corev1.Service {
+				svcCopy := svc.DeepCopy()
+				svcCopy.Spec.Selector = map[string]string{"a": "b"}
+				return svcCopy
+			},
+			false,
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testService := tc.prep()
+			if serviceEqual(testService, svc) != tc.expect {
+				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+
+}
+
 func TestPodSpecEqual(t *testing.T) {
-	ps := &fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec
+	ps := &fixtureDeployment.Spec.Template.Spec
 
 	if ps.Containers == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureKsvcPath)
+		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureDeploymentPath)
 	}
 
 	if !podSpecEqual(nil, nil) {
@@ -310,16 +386,16 @@ func TestPodSpecEqual(t *testing.T) {
 }
 
 func TestContainerEqual(t *testing.T) {
-	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
+	cs := fixtureDeployment.Spec.Template.Spec.Containers
 
 	if cs == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureKsvcPath)
+		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureDeploymentPath)
 	}
 	if cs[0].Ports == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one ContainerPort", fixtureKsvcPath)
+		t.Fatalf("Test requires fixture object %s to have a least one ContainerPort", fixtureDeploymentPath)
 	}
 	if cs[0].Env == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one EnvVar", fixtureKsvcPath)
+		t.Fatalf("Test requires fixture object %s to have a least one EnvVar", fixtureDeploymentPath)
 	}
 
 	c := &cs[0]
@@ -417,75 +493,6 @@ func TestContainerEqual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			testC := tc.prep()
 			if containerEqual(testC, c) != tc.expect {
-				t.Errorf("Expected output to be %t", tc.expect)
-			}
-		})
-	}
-}
-
-func TestProbeEqual(t *testing.T) {
-	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
-
-	if cs == nil || cs[0].ReadinessProbe == nil {
-		t.Fatalf("Test requires fixture object %s to have a configured ReadinessProbe", fixtureKsvcPath)
-	}
-	if cs[0].ReadinessProbe.SuccessThreshold == 0 {
-		t.Fatalf("Test requires fixture object %s ReadinessProbe to have a defined SuccessThreshold", fixtureKsvcPath)
-	}
-
-	p := cs[0].ReadinessProbe
-
-	testCases := map[string]struct {
-		prep   func() *corev1.Probe
-		expect bool
-	}{
-		"not equal when one element is nil": {
-			func() *corev1.Probe {
-				return nil
-			},
-			false,
-		},
-		"not equal when handlers differ": {
-			func() *corev1.Probe {
-				pCopy := p.DeepCopy()
-				pCopy.Handler.Reset()
-				return pCopy
-			},
-			false,
-		},
-	}
-
-	for _, fieldName := range []string{
-		"InitialDelaySeconds",
-		"TimeoutSeconds",
-		"PeriodSeconds",
-		"SuccessThreshold",
-		"FailureThreshold",
-	} {
-		testCases[fmt.Sprintf("not equal when %s field differs", fieldName)] = struct {
-			prep   func() *corev1.Probe
-			expect bool
-		}{
-			func(fieldName string) func() *corev1.Probe {
-				return func() *corev1.Probe {
-					pCopy := p.DeepCopy()
-
-					ptrProbe := reflect.ValueOf(pCopy)
-					probe := ptrProbe.Elem()
-					f := probe.FieldByName(fieldName)
-					f.SetInt(f.Int() + 1)
-
-					return pCopy
-				}
-			}(fieldName),
-			false,
-		}
-	}
-
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			testP := tc.prep()
-			if probeEqual(testP, p) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})
@@ -598,10 +605,10 @@ func TestEnvEqual(t *testing.T) {
 	}
 }
 func TestHandlerEqual(t *testing.T) {
-	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
+	cs := fixtureDeployment.Spec.Template.Spec.Containers
 
 	if cs == nil || cs[0].ReadinessProbe == nil || cs[0].ReadinessProbe.HTTPGet == nil {
-		t.Fatalf("Test requires fixture object %s to have a configured HTTPGet Handler", fixtureKsvcPath)
+		t.Fatalf("Test requires fixture object %s to have a configured HTTPGet Handler", fixtureDeploymentPath)
 	}
 
 	httpH := &cs[0].ReadinessProbe.Handler
@@ -647,61 +654,59 @@ func TestHandlerEqual(t *testing.T) {
 	}
 }
 
-func TestPolicyEqual(t *testing.T) {
-	policy := fixturePolicy
+func TestPeerAuthenticationEqual(t *testing.T) {
+	peerAuthentication := fixturePeerAuthentication
 	testCases := map[string]struct {
-		prep   func() *authenticationv1alpha1.Policy
+		prep   func() *securityv1beta1.PeerAuthentication
 		expect bool
 	}{
-		"not equal when targets differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
-				p.Spec = authenticationv1alpha1api.Policy{
-					Targets: []*authenticationv1alpha1api.TargetSelector{
-						{Name: "foo"},
-						{Name: "bar"},
+		"not equal when selector differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				p.Spec.Selector = &v1beta1.WorkloadSelector{
+					MatchLabels: map[string]string{"foo": "bar"},
+				}
+				return p
+			},
+			expect: false,
+		},
+		"not equal when portlevel mtls port differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				differentPort := uint32(1234)
+				p.Spec.PortLevelMtls = map[uint32]*securityv1beta1apis.PeerAuthentication_MutualTLS{
+					differentPort: {
+						Mode: securityv1beta1apis.PeerAuthentication_MutualTLS_PERMISSIVE,
 					},
 				}
 				return p
 			},
 			expect: false,
 		},
-		"not equal when peers differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
-				p.Spec.Peers = []*authenticationv1alpha1api.PeerAuthenticationMethod{
-					{
-						Params: &authenticationv1alpha1api.PeerAuthenticationMethod_Mtls{
-							Mtls: &authenticationv1alpha1api.MutualTls{
-								Mode: authenticationv1alpha1api.MutualTls_STRICT,
-							},
-						},
-					},
-				}
+		"not equal when portlevel mtls authentication differs": {
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
+				p.Spec.PortLevelMtls[tTargetPort].Mode = securityv1beta1apis.PeerAuthentication_MutualTLS_STRICT
 				return p
 			},
 			expect: false,
 		},
-		"equal when labels, targets and peers are equal but other fields are different": {
-			func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
+		"equal when labels, mtls and selector are equal but other fields are different": {
+			func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
 				p.Annotations = map[string]string{
 					"foo": fmt.Sprintf("%s%s", p.Annotations["foo"], "bar"),
 				}
-				p.Spec.Origins = []*authenticationv1alpha1api.OriginAuthenticationMethod{
-					{
-						XXX_NoUnkeyedLiteral: struct{}{},
-						XXX_unrecognized:     nil,
-						XXX_sizecache:        0,
-					},
-				}
+				p.Spec.XXX_NoUnkeyedLiteral = struct{}{}
+				p.Spec.XXX_unrecognized = nil
+				p.Spec.XXX_sizecache = 0
 				return p
 			},
 			true,
 		},
 		"not equal when labels differ": {
-			prep: func() *authenticationv1alpha1.Policy {
-				p := policy.DeepCopy()
+			prep: func() *securityv1beta1.PeerAuthentication {
+				p := peerAuthentication.DeepCopy()
 				p.Labels = map[string]string{
 					"foo": fmt.Sprintf("%s%s", p.Labels["foo"], "bar"),
 				}
@@ -713,8 +718,8 @@ func TestPolicyEqual(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			testPol := tc.prep()
-			if policyEqual(testPol, policy) != tc.expect {
+			testPeerAuthentication := tc.prep()
+			if peerAuthenticationEqual(testPeerAuthentication, peerAuthentication) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})

@@ -17,7 +17,7 @@ type service struct {
 	rafter                rafter.Service
 }
 
-//go:generate mockery -name=Service
+//go:generate mockery --name=Service
 type Service interface {
 	Apply(applications []model.Application) ([]Result, apperrors.AppError)
 }

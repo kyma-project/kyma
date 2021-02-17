@@ -6,6 +6,9 @@ import (
 
 // GitRepositorySpec defines the desired state of GitRepository
 type GitRepositorySpec struct {
+
+	// +kubebuilder:validation:Required
+
 	// URL is the address of GIT repository
 	URL string `json:"url"`
 
@@ -18,6 +21,8 @@ type GitRepositorySpec struct {
 type RepositoryAuth struct {
 	// Type is the type of authentication
 	Type RepositoryAuthType `json:"type"`
+
+	// +kubebuilder:validation:Required
 
 	// SecretName is the name of Kubernetes Secret containing credentials used for authentication
 	SecretName string `json:"secretName"`

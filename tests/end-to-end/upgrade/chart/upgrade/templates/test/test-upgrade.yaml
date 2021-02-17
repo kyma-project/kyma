@@ -1,29 +1,32 @@
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+{{- range $test, $enabled := $.Values.tests }}
+---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: test-e2e-upgrade-execute-tests
+  name: execute-{{ $test | lower }}
   labels:
-    "kyma-project.io/upgrade-e2e-test": "executeTests"
+    kyma-project.io/test.after-upgrade: {{ $enabled | quote }}
 spec:
   template:
     metadata:
+      labels:
+        app: {{ $.Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      serviceAccountName:  test-{{ template "fullname" . }}
+      serviceAccountName:  test-{{ template "fullname" $ }}
       restartPolicy: Never
       containers:
       - name: tests
-        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
-        imagePullPolicy: "{{ .Values.image.pullPolicy}}"
+        image: "{{ $.Values.containerRegistry.path }}/{{ $.Values.image.dir }}e2e-upgrade-test:{{ $.Values.image.version }}"
+        imagePullPolicy: "{{ $.Values.image.pullPolicy}}"
         command: 
           - /bin/sh
           - -c
           - |
             echo 'TESTING start'
             sleep 20
-            e2e-upgrade-test --action executeTests
+            e2e-upgrade-test --action executeTests --testName {{ $test }}
             exit_code=$?
             echo exit_code is $exit_code
             echo 'stopping pilot-agent...'
@@ -36,18 +39,71 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: APP_TESTS_INFO_CONFIG_MAP_NAME
-          value: test-{{ template "fullname" . }}-info
+          value: test-{{ template "fullname" $ }}-info
         - name: APP_MAX_CONCURRENCY_LEVEL
           value: "1"
         - name: APP_LOGGER_LEVEL
           value: "info"
         - name: APP_DEX_NAMESPACE
-          value: "{{ .Values.dex.namespace }}"
+          value: "{{ $.Values.dex.namespace }}"
         - name: APP_DEX_USER_SECRET
-          value: "{{ .Values.dex.userSecret }}"
+          value: "{{ $.Values.dex.userSecret }}"
         - name: APP_TESTING_ADDONS_URL
           value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
         - name: APP_EVENT_SUBSCRIBER_IMAGE
-          value: "{{ .Values.containerRegistry.path }}/{{ .Values.subscriberimage.dir}}event-subscriber-tools:{{ .Values.subscriberimage.version }}"
+          value: "{{ $.Values.containerRegistry.path }}/{{ $.Values.subscriberimage.dir}}event-subscriber-tools:{{ $.Values.subscriberimage.version }}"
+---
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: prepare-{{ $test | lower }}
+  labels:
+    kyma-project.io/test.before-upgrade: {{ $enabled | quote }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ $.Chart.Name }}-tests
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName: test-{{ template "fullname" $ }}
+      restartPolicy: Never
+      containers:
+        - name: tests
+          image: "{{ $.Values.containerRegistry.path }}/{{ $.Values.image.dir }}e2e-upgrade-test:{{ $.Values.image.version }}"
+          imagePullPolicy: "{{ $.Values.image.pullPolicy}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo 'TESTING start'
+              sleep 20
+              e2e-upgrade-test --action prepareData --testName {{ $test }}
+              exit_code=$?
+              echo exit_code is $exit_code
+              echo 'stopping pilot-agent...'
+              curl -XPOST http://127.0.0.1:15020/quitquitquit
+              sleep 5
+              exit $exit_code
+          env:
+            - name: APP_WORKING_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: APP_TESTS_INFO_CONFIG_MAP_NAME
+              value: test-{{ template "fullname" $ }}-info
+            - name: APP_MAX_CONCURRENCY_LEVEL
+              value: "1"
+            - name: APP_LOGGER_LEVEL
+              value: "info"
+            - name: APP_DEX_NAMESPACE
+              value: "{{ $.Values.dex.namespace }}"
+            - name: APP_DEX_USER_SECRET
+              value: "{{ $.Values.dex.userSecret }}"
+            - name: APP_TESTING_ADDONS_URL
+              value: "https://github.com/kyma-project/addons/releases/download/0.11.0/index-testing.yaml"
+            - name: APP_EVENT_SUBSCRIBER_IMAGE
+              value: "{{ $.Values.containerRegistry.path }}/{{ $.Values.subscriberimage.dir}}event-subscriber-tools:{{ $.Values.subscriberimage.version }}"
 
-  {{- end }}
+{{- end }}

@@ -23,7 +23,8 @@ import (
 )
 
 var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	serverlessv1alhpa1.GroupVersion.WithKind("Function"): &serverlessv1alhpa1.Function{},
+	serverlessv1alhpa1.GroupVersion.WithKind("Function"):      &serverlessv1alhpa1.Function{},
+	serverlessv1alhpa1.GroupVersion.WithKind("GitRepository"): &serverlessv1alhpa1.GitRepository{},
 }
 
 type config struct {
@@ -39,15 +40,8 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	defaultingCfg := &serverlessv1alhpa1.DefaultingConfig{}
-	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
-	}
-
-	validationCfg := &serverlessv1alhpa1.ValidationConfig{}
-	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
-		panic(errors.Wrap(err, "while reading env defaulting variables"))
-	}
+	defaultingCfg := readDefaultingConfig()
+	validationCfg := readValidationConfig()
 
 	// Scope informers to the webhook's namespace instead of cluster-wide
 	ctx := injection.WithNamespaceScope(signals.NewContext(), cfg.SystemNamespace)
@@ -115,4 +109,39 @@ func NewValidationAdmissionController(cfg *serverlessv1alhpa1.ValidationConfig) 
 			true,
 		)
 	}
+}
+
+func readDefaultingConfig() *serverlessv1alhpa1.DefaultingConfig {
+	defaultingCfg := &serverlessv1alhpa1.DefaultingConfig{}
+	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+
+	functionReplicasPresets, err := serverlessv1alhpa1.ParseReplicasPresets(defaultingCfg.Function.Replicas.PresetsMap)
+	if err != nil {
+		panic(errors.Wrap(err, "while parsing function resources presets"))
+	}
+	defaultingCfg.Function.Replicas.Presets = functionReplicasPresets
+
+	functionResourcesPresets, err := serverlessv1alhpa1.ParseResourcePresets(defaultingCfg.Function.Resources.PresetsMap)
+	if err != nil {
+		panic(errors.Wrap(err, "while parsing function resources presets"))
+	}
+	defaultingCfg.Function.Resources.Presets = functionResourcesPresets
+
+	buildResourcesPresets, err := serverlessv1alhpa1.ParseResourcePresets(defaultingCfg.BuildJob.Resources.PresetsMap)
+	if err != nil {
+		panic(errors.Wrap(err, "while parsing build resources presets"))
+	}
+	defaultingCfg.BuildJob.Resources.Presets = buildResourcesPresets
+
+	return defaultingCfg
+}
+
+func readValidationConfig() *serverlessv1alhpa1.ValidationConfig {
+	validationCfg := &serverlessv1alhpa1.ValidationConfig{}
+	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
+		panic(errors.Wrap(err, "while reading env defaulting variables"))
+	}
+	return validationCfg
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/sirupsen/logrus"
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -18,7 +19,7 @@ type Job struct {
 	client             batchv1typed.JobInterface
 	namespace          string
 	waitTimeout        time.Duration
-	log                shared.Logger
+	log                *logrus.Logger
 	verbose            bool
 	parentFunctionName string
 }
@@ -29,7 +30,6 @@ func New(parentFunctionName string, batchCli batchv1typed.BatchV1Interface, c sh
 		parentFunctionName: parentFunctionName,
 		namespace:          c.Namespace,
 		waitTimeout:        c.WaitTimeout,
-		log:                c.Log,
 		verbose:            c.Verbose,
 	}
 }

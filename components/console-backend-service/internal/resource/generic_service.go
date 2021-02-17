@@ -56,3 +56,14 @@ func (s *GenericService) DeleteInNamespace(namespace, name string, res runtime.O
 	err = s.ServiceBase.DeleteInNamespace(name, namespace)
 	return err
 }
+
+func (s *GenericService) Delete(name string, res runtime.Object) error {
+	err := s.Get(name, res)
+	if err != nil {
+		return err
+	}
+
+	res = res.DeepCopyObject()
+	err = s.ServiceBase.Delete(name)
+	return err
+}

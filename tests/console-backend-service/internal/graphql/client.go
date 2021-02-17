@@ -3,7 +3,9 @@ package graphql
 import (
 	"context"
 	"crypto/tls"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -31,6 +33,16 @@ func New() (*Client, error) {
 	config, err := loadConfig(AdminUser) // by default create client capable of performing all operations on all resources
 	if err != nil {
 		return nil, errors.Wrap(err, "while loading config")
+	}
+
+	dexURL, parseErr := url.Parse(config.IdProviderConfig.DexConfig.BaseUrl)
+	if parseErr != nil {
+		return nil, errors.Wrap(parseErr, "Could not parse Dex URL from config")
+	}
+
+	_, err = net.DialTimeout("tcp", dexURL.Host+dexURL.Path+":80", 60*time.Second)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not resolve Dex URL within a reasonable time")
 	}
 
 	token, err := authenticate(config.IdProviderConfig)

@@ -45,17 +45,23 @@ func (s *Scenario) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		testsuite.NewLoadStoredCertificates(dataStore, state),
 		step.Retry(
-			testsuite.NewResetCounterPod(testService),
-			testsuite.NewSendEventToMesh(s.TestID, helpers.FunctionPayload, state),
-			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+			testsuite.NewSendEventToMeshAndCheckEventId(
+				s.TestID,
+				helpers.FunctionPayload,
+				state,
+				testService,
+				retryOpts...),
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),
 			retry.Delay(500*time.Millisecond)),
 		step.Retry(
-			testsuite.NewResetCounterPod(testService),
-			testsuite.NewSendEventToCompatibilityLayer(s.TestID, helpers.FunctionPayload, state),
-			testsuite.NewCheckCounterPod(testService, 1, retryOpts...),
+			testsuite.NewSendEventToCompatibilityLayerAndCheckEventId(
+				s.TestID,
+				helpers.FunctionPayload,
+				state,
+				testService,
+				retryOpts...),
 		).WithRetryOptions(
 			retry.Attempts(3),
 			retry.DelayType(retry.FixedDelay),

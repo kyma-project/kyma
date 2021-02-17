@@ -4,7 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,8 +25,12 @@ type ServiceBinding struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
+}
+
+func (s ServiceBinding) GetName() string {
+	return s.name
 }
 
 func New(name string, c shared.Container) *ServiceBinding {
@@ -71,7 +78,7 @@ func (sb *ServiceBinding) Delete() error {
 	return nil
 }
 
-func (sb *ServiceBinding) get() (*v1beta1.ServiceBinding, error) {
+func (sb *ServiceBinding) Get() (*v1beta1.ServiceBinding, error) {
 	u, err := sb.resCli.Get(sb.name)
 	if err != nil {
 		return &v1beta1.ServiceBinding{}, errors.Wrapf(err, "while getting ServiceBinding %s in namespace %s", sb.name, sb.namespace)
@@ -85,13 +92,27 @@ func (sb *ServiceBinding) get() (*v1beta1.ServiceBinding, error) {
 	return &servicebinding, nil
 }
 
-func (sb *ServiceBinding) WaitForStatusRunning() error {
-	servicebinding, err := sb.get()
+func (sb *ServiceBinding) LogResource() error {
+	serviceBinding, err := sb.Get()
+	if err != nil {
+		return err
+	}
+	out, err := helpers.PrettyMarshall(serviceBinding)
 	if err != nil {
 		return err
 	}
 
-	// we need to ensure that status is ready first, because otherwise we would not get any events in watchtools.Until
+	sb.log.Infof("Service Binding resource: %s", out)
+	return nil
+}
+
+func (sb *ServiceBinding) WaitForStatusRunning() error {
+	servicebinding, err := sb.Get()
+	if err != nil {
+		return err
+	}
+
+	// we need to ensure that status is ready first, because otherwise we would not Get any events in watchtools.Until
 	if sb.isReadyPhase(*servicebinding) {
 		return nil
 	}

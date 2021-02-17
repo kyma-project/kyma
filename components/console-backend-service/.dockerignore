@@ -1,0 +1,10 @@
+**
+# Allow
+!internal
+!pkg
+!cmd
+!go.mod
+!go.sum
+!licenses
+!main.go
+!Makefile

@@ -99,7 +99,63 @@ Currently, the test cannot be executed locally, as it requires access to interna
 `make clustertest`
 
 >**Requirements:** 
-  kyma-cli github.com/kyma-project/cli
-  ko github.com/google/ko
+  > * [kyma-cli](https://github.com/kyma-project/cli)
+  > * [ko](https://github.com/google/ko)
 
 >**TIP:** If you are running the test on a cluster with invalid or self-signed SSL certificates, use the `--skipSSLVerify` flag.
+
+### Debug it locally
+
+>**Requirements:** 
+  > * [ko](https://github.com/google/ko)
+  > * [delve](https://github.com/go-delve/delve)
+
+Even though the test cannot be run locally, there is a way to debug it locally while the test is actually running inside the cluster.
+The idea is as follows: 
+- build a new container image which contains the delve debugger and the test binary
+- deploy a pod which starts the delve debugger and runs the test while waiting for client connection on a specified port
+- establish a port-forward between the remote debug server and localhost
+- connect with a delve compatible client to the debug server (via port-forward)
+
+#### Start test with delve
+
+Prepare the delve base image. This step needs to be executed once only:
+
+```bash
+make build-push-delve-image
+```
+
+Resolve dependencies. This step needs to be executed each time the dependencies change:
+
+```bash
+make resolve-local
+```
+
+Deploy the new test code and start the dlv debugger:
+
+```bash
+TEST_DEBUG_SCENARIO=e2e-event-mesh make debug-local
+kubectl port-forward -n kyma-system core-test-external-solution 40000
+```
+
+#### Connect to the debugger:
+
+**via CLI:**
+
+```shell
+dlv connect localhost:40000
+```
+
+For further information on how to use dlv, see this [CLI reference](https://github.com/go-delve/delve/tree/master/Documentation/cli).
+
+**via Goland:**
+
+Create a new Run Configuration with type `Go Remote` and select `localhost:40000` as target. Then, click the debug button and debug as usual.
+
+#### Get logs
+
+The test logs can be found inside the container:
+
+```bash
+kubectl logs -n kyma-system -l app=core-test-external-solution -c test -f
+```

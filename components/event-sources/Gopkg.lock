@@ -167,14 +167,6 @@
   version = "v4.5.0"
 
 [[projects]]
-  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
-  name = "github.com/ghodss/yaml"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:6ba54872416168c7f2a8349a681f919ead947cacde2d8e663dfbafeeaf13b17a"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -230,13 +222,6 @@
   ]
   pruneopts = "T"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
-
-[[projects]]
-  digest = "1:cd294c5be5e2f5c7c642c50e4f1c190cdf72fd7a72094351985b97aa0cdeefcb"
-  name = "github.com/google/go-containerregistry"
-  packages = ["pkg/name"]
-  pruneopts = "T"
-  revision = "b02d448a3705facf11018efff34f1d2830be5724"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -593,7 +578,7 @@
   revision = "6d18c012aee9febd81bbf9806760c8c4480e870d"
 
 [[projects]]
-  digest = "1:0a6103b1dc59b52f7e64a491b398b854c0fcaacde43c25ce468610a64311b72d"
+  digest = "1:514f778824d7307cb3452f6b63b650b0024e320eeca7056d286c665a52e1f89f"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -614,8 +599,8 @@
     "unicode/rangetable",
   ]
   pruneopts = "T"
-  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
-  version = "v0.3.2"
+  revision = "23ae387dee1f90d29a23c0e87ee0b46038fbed0e"
+  version = "v0.3.3"
 
 [[projects]]
   branch = "master"
@@ -819,7 +804,7 @@
   version = "2019.2.3"
 
 [[projects]]
-  digest = "1:4b6cfec9f2c7fcc231cd8d63a724398ae1d73ff76de66a5e1e755ccdec8e3666"
+  digest = "1:7e1038ca24143177689cd660d82267933716fdb68c5700ba1ce4d95a9bf19e69"
   name = "istio.io/api"
   packages = [
     "authentication/v1alpha1",
@@ -833,11 +818,11 @@
     "type/v1beta1",
   ]
   pruneopts = "T"
-  revision = "da46fe8e25be0d3f410d5b9dfcd729e7d1d2f85a"
-  version = "1.5.1"
+  revision = "34e474846e0d348c39ee16a268a71a3104cb6f9e"
+  version = "1.6.8"
 
 [[projects]]
-  digest = "1:1d23a2c7f0de8fa769b3cacf7a00f630c66e4c65882a1255b26557513f2bd03f"
+  digest = "1:bb9e105fbded3d1dfb3cd7a334b104e82f86cb2261606a912823469dd80dea67"
   name = "istio.io/client-go"
   packages = [
     "pkg/apis/authentication/v1alpha1",
@@ -882,8 +867,8 @@
     "pkg/listers/security/v1beta1",
   ]
   pruneopts = "T"
-  revision = "065c5926775027f386ef768afd355c14ff3dbdd8"
-  version = "1.5.1"
+  revision = "f8d9d8ff84e6e3753cdfcbb82c03f495269e29dc"
+  version = "1.5.10"
 
 [[projects]]
   digest = "1:08fc4e9de7826015a01fab79f1e21a9261dfd3dab3b696f5f8023177312f1173"
@@ -897,7 +882,7 @@
   version = "1.4.3"
 
 [[projects]]
-  digest = "1:8c8a9e8b1d820b9d74913929ca0cb4240039b3f5c70c82a711c59ac22660acf3"
+  digest = "1:f83efc86c57467f265c44743bb4190699065a13e2170d01987d4485309468380"
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
@@ -941,11 +926,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "T"
-  revision = "d49a3f108dab8e8d25f22c497fb48678b124efd2"
-  version = "kubernetes-1.16.9"
+  revision = "06c037ffc157ce8c1fceab2be50f1c52b9f746ba"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:efe19113bf5e13a16832b542140b6594b837e7bcb6c739c671461bb453cada81"
+  digest = "1:735b518b95051691db862cdf7c4630bcdd4bbb0d4be812202b6bbef010b5ad82"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
@@ -957,11 +942,11 @@
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
   ]
   pruneopts = "T"
-  revision = "e0288c14e6fda28eefbd584da8c657447e414f96"
-  version = "kubernetes-1.16.9"
+  revision = "74cb09c76a53d05301b45f55cfc43042d2a40b65"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:2ef121639d72d1370dc84c80bcdb61d7d90abaf6e7b92f4cd657cf7e10b57dc3"
+  digest = "1:6d562d03f76ae5dbae7da6a25c67ee76132285bfda9eedae00d2fa3359e630ab"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -1011,11 +996,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "T"
-  revision = "f336d9be0221d10a93a7d6d2ec25f6fc799f4fc6"
-  version = "kubernetes-1.16.9"
+  revision = "f7929272bda35db23eaa68452473887898be1a44"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:72a5f5d533ac4af2f528561fbff045ba2d29c12529a81994b215c7c52767afbb"
+  digest = "1:632aeb0f28d737ea5873230e884b14f1d5c043bd08b523f445aefed7f7a58614"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1221,11 +1206,11 @@
     "util/workqueue",
   ]
   pruneopts = "T"
-  revision = "002560d5bf54049bf5b5ae99231cb2b591f15954"
-  version = "kubernetes-1.16.9"
+  revision = "4744acb1ce5432afaa74b71df88af7063572bffc"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
-  digest = "1:2fd39026b0c2742e4f7eb77b305f091f2b32748906f5fcdfc10c4597e334a220"
+  digest = "1:2415a0da257cab92a8e319adddc72799a0008cab1218afe1bdc4c4a08b5437dd"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -1248,8 +1233,8 @@
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "a3045e5e55c03d0173ebdbf7053fc4492eaa29d5"
-  version = "kubernetes-1.16.9"
+  revision = "f5af5c5facffaf331fafd9e8ec9864ff738e9005"
+  version = "kubernetes-1.16.15"
 
 [[projects]]
   branch = "master"
@@ -1377,7 +1362,12 @@
     "client/injection/ducks/duck/v1/addressable/fake",
     "client/injection/kube/client",
     "client/injection/kube/client/fake",
+    "client/injection/kube/informers/apps/v1/deployment",
+    "client/injection/kube/informers/apps/v1/deployment/fake",
+    "client/injection/kube/informers/core/v1/service",
+    "client/injection/kube/informers/core/v1/service/fake",
     "client/injection/kube/informers/factory",
+    "client/injection/kube/informers/factory/fake",
     "codegen/cmd/injection-gen",
     "codegen/cmd/injection-gen/args",
     "codegen/cmd/injection-gen/generators",
@@ -1414,61 +1404,6 @@
   revision = "b8dc5fbc6d2f4717a69d15382921a51f93ab4cbb"
 
 [[projects]]
-  branch = "release-0.12"
-  digest = "1:1d242c5c4e479bf32943c6358122c5662f95e8e7d753b282e053e8108a1f1955"
-  name = "knative.dev/serving"
-  packages = [
-    "pkg/apis/autoscaling",
-    "pkg/apis/autoscaling/v1alpha1",
-    "pkg/apis/config",
-    "pkg/apis/networking",
-    "pkg/apis/networking/v1alpha1",
-    "pkg/apis/serving",
-    "pkg/apis/serving/v1",
-    "pkg/apis/serving/v1alpha1",
-    "pkg/apis/serving/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/fake",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
-    "pkg/client/clientset/versioned/typed/autoscaling/v1alpha1/fake",
-    "pkg/client/clientset/versioned/typed/networking/v1alpha1",
-    "pkg/client/clientset/versioned/typed/networking/v1alpha1/fake",
-    "pkg/client/clientset/versioned/typed/serving/v1",
-    "pkg/client/clientset/versioned/typed/serving/v1/fake",
-    "pkg/client/clientset/versioned/typed/serving/v1alpha1",
-    "pkg/client/clientset/versioned/typed/serving/v1alpha1/fake",
-    "pkg/client/clientset/versioned/typed/serving/v1beta1",
-    "pkg/client/clientset/versioned/typed/serving/v1beta1/fake",
-    "pkg/client/informers/externalversions",
-    "pkg/client/informers/externalversions/autoscaling",
-    "pkg/client/informers/externalversions/autoscaling/v1alpha1",
-    "pkg/client/informers/externalversions/internalinterfaces",
-    "pkg/client/informers/externalversions/networking",
-    "pkg/client/informers/externalversions/networking/v1alpha1",
-    "pkg/client/informers/externalversions/serving",
-    "pkg/client/informers/externalversions/serving/v1",
-    "pkg/client/informers/externalversions/serving/v1alpha1",
-    "pkg/client/informers/externalversions/serving/v1beta1",
-    "pkg/client/injection/client",
-    "pkg/client/injection/client/fake",
-    "pkg/client/injection/informers/factory",
-    "pkg/client/injection/informers/factory/fake",
-    "pkg/client/injection/informers/serving/v1alpha1/service",
-    "pkg/client/injection/informers/serving/v1alpha1/service/fake",
-    "pkg/client/listers/autoscaling/v1alpha1",
-    "pkg/client/listers/networking/v1alpha1",
-    "pkg/client/listers/serving/v1",
-    "pkg/client/listers/serving/v1alpha1",
-    "pkg/client/listers/serving/v1beta1",
-    "pkg/gc",
-    "pkg/network",
-    "pkg/reconciler/route/config",
-  ]
-  pruneopts = "T"
-  revision = "e4922e8a9ec460e78ab02ef598e042650131d6fe"
-
-[[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
@@ -1489,14 +1424,15 @@
     "go.opencensus.io/stats/view",
     "go.opencensus.io/trace",
     "go.uber.org/zap",
-    "istio.io/api/authentication/v1alpha1",
-    "istio.io/client-go/pkg/apis/authentication/v1alpha1",
+    "istio.io/api/security/v1beta1",
+    "istio.io/api/type/v1beta1",
+    "istio.io/client-go/pkg/apis/security/v1beta1",
     "istio.io/client-go/pkg/clientset/versioned",
     "istio.io/client-go/pkg/clientset/versioned/fake",
-    "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1",
+    "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1",
     "istio.io/client-go/pkg/informers/externalversions",
-    "istio.io/client-go/pkg/informers/externalversions/authentication/v1alpha1",
-    "istio.io/client-go/pkg/listers/authentication/v1alpha1",
+    "istio.io/client-go/pkg/listers/security/v1beta1",
+    "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
@@ -1514,7 +1450,10 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/kubernetes/scheme",
+    "k8s.io/client-go/listers/apps/v1",
+    "k8s.io/client-go/listers/core/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
@@ -1538,15 +1477,17 @@
     "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake",
     "knative.dev/eventing/pkg/legacyclient/injection/client/fake",
     "knative.dev/eventing/pkg/reconciler",
-    "knative.dev/eventing/pkg/tracing",
     "knative.dev/eventing/pkg/utils",
     "knative.dev/pkg/apis",
-    "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/client/injection/ducks/duck/v1/addressable",
     "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake",
     "knative.dev/pkg/client/injection/kube/client/fake",
+    "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment",
+    "knative.dev/pkg/client/injection/kube/informers/apps/v1/deployment/fake",
+    "knative.dev/pkg/client/injection/kube/informers/core/v1/service",
+    "knative.dev/pkg/client/injection/kube/informers/core/v1/service/fake",
     "knative.dev/pkg/codegen/cmd/injection-gen",
     "knative.dev/pkg/configmap",
     "knative.dev/pkg/controller",
@@ -1564,19 +1505,6 @@
     "knative.dev/pkg/source",
     "knative.dev/pkg/system",
     "knative.dev/pkg/tracing",
-    "knative.dev/pkg/tracing/config",
-    "knative.dev/serving/pkg/apis/autoscaling",
-    "knative.dev/serving/pkg/apis/serving",
-    "knative.dev/serving/pkg/apis/serving/v1",
-    "knative.dev/serving/pkg/apis/serving/v1alpha1",
-    "knative.dev/serving/pkg/client/clientset/versioned/fake",
-    "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1",
-    "knative.dev/serving/pkg/client/injection/client",
-    "knative.dev/serving/pkg/client/injection/client/fake",
-    "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service",
-    "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake",
-    "knative.dev/serving/pkg/client/listers/serving/v1alpha1",
-    "knative.dev/serving/pkg/reconciler/route/config",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

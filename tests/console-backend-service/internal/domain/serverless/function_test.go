@@ -283,6 +283,7 @@ func mutationFunctionArguments(name, namespaceName string, labels []string) stri
 			env: [  ],
 			replicas: { min: 1, max: 1 },
 			resources: { limits: { memory: "128Mi", cpu: "100m" }, requests: { memory: "64Mi", cpu: "50m" } },
+			buildResources: { limits: { memory: "1100Mi", cpu: "1100m" }, requests: { memory: "700Mi", cpu: "700m" } },
 		},
 	`, name, namespaceName, labelTemplate)
 }

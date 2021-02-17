@@ -10,8 +10,14 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
 spec:
   template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       {{- if .Values.global.isLocalEnv }}

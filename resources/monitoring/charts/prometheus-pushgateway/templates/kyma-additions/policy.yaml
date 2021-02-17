@@ -1,13 +1,13 @@
 # Required because Prometheus Operator doesn't have Istio Sidecar
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: {{ template "prometheus-pushgateway.name" . }}
   labels:
     {{- include "prometheus-pushgateway.labels" . | nindent 4 }}
 spec:
-  peers:
-    - mtls:
-        mode: PERMISSIVE
-  targets:
-    - name: {{ template "prometheus-pushgateway.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
+  mtls:
+    mode: "PERMISSIVE"

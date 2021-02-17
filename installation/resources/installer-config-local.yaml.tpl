@@ -40,36 +40,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio
-    kyma-project.io/installation: ""
-data:
-  pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 500m
-  pilot.resources.requests.memory: 512Mi
-  pilot.resources.requests.cpu: 250m
-  pilot.autoscaleEnabled: "false"
-
-  mixer.policy.resources.limits.memory: 2048Mi
-  mixer.policy.resources.limits.cpu: 500m
-  mixer.policy.resources.requests.memory: 512Mi
-  mixer.policy.resources.requests.cpu: 300m
-
-  mixer.telemetry.resources.limits.memory: 2048Mi
-  mixer.telemetry.resources.limits.cpu: 500m
-  mixer.telemetry.resources.requests.memory: 512Mi
-  mixer.telemetry.resources.requests.cpu: 300m
-  mixer.loadshedding.mode: disabled
-
-  mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.autoscaleEnabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: helm-broker-overrides
   namespace: kyma-installer
   labels:
@@ -109,18 +79,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-tests
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  console.test.acceptance.enabled: "false"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: compass-runtime-agent-tests
   namespace: kyma-installer
   labels:
@@ -145,6 +103,17 @@ data:
   hydra.hydra.autoMigrate: "false"
   hydra.deployment.resources.requests.cpu: "50m"
   hydra.deployment.resources.limits.cpu: "150m"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tracing-global-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    kyma-project.io/installation: ""
+data:
+  global.tracing.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -181,7 +150,7 @@ data:
   prometheus.prometheusSpec.resources.requests.cpu: "100m"
   prometheus.prometheusSpec.resources.requests.memory: "200Mi"
   prometheus.prometheusSpec.retention: "2h"
-  prometheus.prometheusSpec.retentionSize: "500MB"
+  prometheus.prometheusSpec.retentionSize: "256MB"
   prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage: "1Gi"
   grafana.persistence.enabled: "false"
 ---
@@ -195,10 +164,7 @@ metadata:
     component: serverless
     kyma-project.io/installation: ""
 data:
-  containers.manager.envs.buildRequestsCPU.value: "100m"
-  containers.manager.envs.buildRequestsMemory.value: "200Mi"
-  containers.manager.envs.buildLimitsCPU.value: "200m"
-  containers.manager.envs.buildLimitsMemory.value: "400Mi"
+  webhook.values.buildJob.resources.defaultPreset: "local-dev"
   # TODO: Solve a problem with DNS
   tests.enabled: "false"
 
@@ -206,20 +172,11 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-serving-overrides
+  name: console-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative-serving
+    component: console
     kyma-project.io/installation: ""
 data:
-  networking_istio.resources.requests.cpu: "10m"
-  networking_istio.resources.requests.memory: "100Mi"
-  activator.resources.requests.cpu: "100m"
-  activator.resources.requests.memory: "100Mi"
-  autoscaler.resources.requests.cpu: "10m"
-  autoscaler.resources.requests.memory: "100Mi"
-  autoscaler_hpa.resources.requests.cpu: "10m"
-  autoscaler_hpa.resources.requests.memory: "100Mi"
-  controller.resources.requests.cpu: "30m"
-  controller.resources.requests.memory: "100Mi"
+  web.test.acceptance.enabled: "false"

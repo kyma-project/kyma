@@ -29,7 +29,7 @@ The Connector Service has the following parameters, which can be set through the
 - **central** determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** is the name of the ConfigMap containing the revoked certificates list.
 
-The Connector Service also uses the following environmental variables for CSR-related information config:
+The Connector Service also uses the following environment variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)
 - **ORGANIZATION**
 - **ORGANIZATIONALUNIT**

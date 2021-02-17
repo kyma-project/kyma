@@ -1,12 +1,12 @@
-FROM golang:1.12
+FROM golang:1.14
 
 ENV GO111MODULE=off
 
 WORKDIR /go/src/k8s.io
 
 RUN git clone https://github.com/kubernetes/code-generator.git
-# Versions needs to be compatible with Kuberentes client used (currently Kubebuilder requires 1.14.*)
-RUN cd code-generator && git fetch && git checkout release-1.17
+# Versions needs to be compatible with Kuberentes client used
+RUN cd code-generator && git fetch && git checkout release-1.18
 
 RUN go get k8s.io/apimachinery; exit 0
 

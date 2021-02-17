@@ -1,15 +1,29 @@
 ---
 global:
   isLocalEnv: false
+  tracing:
+    enabled: true
+    zipkinAddress: "zipkin.kyma-system:9411"
+    
 kyma:
   namespaces2Label:
     - istio-system
     - kube-system
   labelJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: ff249b80
+    tag: 6fd499b9
+    tag16: fb388134
+    tag17: f93bf007
+
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""

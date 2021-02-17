@@ -182,6 +182,9 @@ func (r *namespaceResolver) UpdateNamespace(ctx context.Context, name string, la
 		glog.Error(errors.Wrapf(err, "while editing %s `%s`", pretty.Namespace, name))
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
+	if ns.Labels == nil {
+		ns.Labels = map[string]string{}
+	}
 	return &gqlschema.NamespaceMutationOutput{
 		Name:   name,
 		Labels: ns.Labels,

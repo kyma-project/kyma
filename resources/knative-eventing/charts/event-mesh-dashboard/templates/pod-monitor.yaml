@@ -32,7 +32,7 @@ spec:
   - port: http-usermetric
   selector:
     matchExpressions:
-    - key: serving.knative.dev/service
+    - key: kyma-project.io/eventsource
       operator: Exists
     matchLabels:
       kyma-project.io/dashboard: event-mesh

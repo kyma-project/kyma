@@ -2,33 +2,12 @@
 title: Overview
 ---
 
-The security model in Kyma uses the Service Mesh component to enforce authorization through [Kubernetes Role Based Authentication](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) (RBAC) in the cluster. The identity federation is managed through [Dex](https://github.com/dexidp/dex), which is an open-source, OpenID Connect identity provider.
+To ensure a stable and secure way of extending your applications and creating functions or microservices, Kyma comes with a comprehensive set of tools that aim to mitigate any security issues, and, at the same time, enable a streamlined experience.
 
-Dex implements a system of connectors that allow you to delegate authentication to external OpenID Connect and SAML2-compliant Identity Providers and use their user stores. Read the [tutorial](#tutorials-add-an-identity-provider-to-dex) to learn how to enable authentication with an external Identity Provider by using a Dex connector.
+To ensure a safe work environment, the Kyma security component uses the following tools:
 
-Out of the box, Kyma comes with its own static user store used by Dex to authenticate users. This solution is designed for use with local Kyma deployments as it allows to easily create predefined users' credentials by creating Secret objects with a custom `dex-user-config` label.
-Read the [tutorial](#tutorials-manage-static-users-in-dex) to learn how to manage users in the static store used by Dex.
+- Predefined [Kubernetes RBAC roles](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to manage the user access to the functionality provided by Kyma.
+- Istio Service Mesh with the global mTLS setup and ingress configuration to ensure secure service-to-service communication.
+- [Dex](https://github.com/dexidp/dex), a local identity provider with federation capabilities that acts as a proxy between the client application and external identity providers to allow seamless authorization. 
+- [ORY Oathkeeper](https://www.ory.sh/oathkeeper/docs/) and [ORY Hydra](https://www.ory.sh/hydra/docs/concepts/oauth2/) used by the API Gateway to authorize HTTP requests, provide the OAuth2 server functionality and.
 
-Kyma uses a group-based approach to managing authorizations.
-To give users that belong to a group access to resources in Kyma, you must create:
-
-- Role and RoleBinding - for resources in a given Namespace.
-- ClusterRole and ClusterRoleBinding - for resources available in the entire cluster.
-
-The RoleBinding or ClusterRoleBinding must have a group specified as their subject.
-See the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to learn how to manage Roles and RoleBindings.
-
->**NOTE:** You cannot define groups for the static user store. Instead, bind the user directly to a role or a cluster role by setting the user as the subject of a RoleBinding or ClusterRoleBinding.
-
-By default, there are 7 roles used to manage permissions in every Kyma cluster. These roles are:
-  - **kyma-essentials**
-  - **kyma-view**
-  - **kyma-namespace-admin-essentials**
-  - **kyma-edit**
-  - **kyma-developer**
-  - **kyma-admin**
-  - **kyma-namespace-admin**
-
-Read more about [roles in Kyma](#details-roles-in-kyma).
-
->**NOTE:** The **Global permissions** view in the **Settings** section of the Kyma Console UI allows you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to the **Configuration** section of the **Permissions** view.

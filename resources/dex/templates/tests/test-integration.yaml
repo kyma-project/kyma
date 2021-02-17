@@ -9,10 +9,16 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:
     metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
       annotations:
         sidecar.istio.io/inject: "true"
     spec:

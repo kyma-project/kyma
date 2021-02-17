@@ -1,6 +1,7 @@
 package serviceinstancecontroller
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -75,13 +76,13 @@ func (ts *TestSuite) Setup(t *testing.T) {
 			Name: ts.namespace,
 		},
 	}
-	namespace, err := ts.k8sClient.CreateNamespace(ns)
+	namespace, err := ts.k8sClient.CreateNamespace(context.Background(), ns)
 	require.NoError(t, err)
 	require.NotEmpty(t, namespace)
 }
 
 func (ts *TestSuite) DeleteTestNamespace(t *testing.T) {
-	err := ts.k8sClient.DeleteNamespace()
+	err := ts.k8sClient.DeleteNamespace(context.Background())
 	require.NoError(t, err)
 }
 
@@ -106,19 +107,19 @@ func (ts *TestSuite) createServiceInstance(t *testing.T, svcInstanceName string)
 			},
 		},
 	}
-	instance, err := ts.k8sClient.CreateServiceInstance(serviceInstance)
+	instance, err := ts.k8sClient.CreateServiceInstance(context.Background(), serviceInstance)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, instance)
 }
 
 func (ts *TestSuite) DeleteFirstServiceInstance(t *testing.T) {
-	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
+	err := ts.k8sClient.DeleteServiceInstance(context.Background(), ts.serviceInstanceOne)
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) DeleteSecondServiceInstance(t *testing.T) {
-	err := ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceTwo)
+	err := ts.k8sClient.DeleteServiceInstance(context.Background(), ts.serviceInstanceTwo)
 	require.NoError(t, err)
 }
 
@@ -144,9 +145,9 @@ func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 
 func (ts *TestSuite) Cleanup() {
 	//errors are not handled because resources can be deleted already
-	ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceOne)
-	ts.k8sClient.DeleteServiceInstance(ts.serviceInstanceTwo)
-	ts.k8sClient.DeleteNamespace()
+	ts.k8sClient.DeleteServiceInstance(context.Background(), ts.serviceInstanceOne)
+	ts.k8sClient.DeleteServiceInstance(context.Background(), ts.serviceInstanceTwo)
+	ts.k8sClient.DeleteNamespace(context.Background())
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {

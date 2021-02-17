@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -14,13 +16,13 @@ type ApplicationClient struct {
 	mock.Mock
 }
 
-// List provides a mock function with given fields: opts
-func (_m *ApplicationClient) List(opts v1.ListOptions) (*v1alpha1.ApplicationList, error) {
-	ret := _m.Called(opts)
+// List provides a mock function with given fields: _a0, opts
+func (_m *ApplicationClient) List(_a0 context.Context, opts v1.ListOptions) (*v1alpha1.ApplicationList, error) {
+	ret := _m.Called(_a0, opts)
 
 	var r0 *v1alpha1.ApplicationList
-	if rf, ok := ret.Get(0).(func(v1.ListOptions) *v1alpha1.ApplicationList); ok {
-		r0 = rf(opts)
+	if rf, ok := ret.Get(0).(func(context.Context, v1.ListOptions) *v1alpha1.ApplicationList); ok {
+		r0 = rf(_a0, opts)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.ApplicationList)
@@ -28,8 +30,8 @@ func (_m *ApplicationClient) List(opts v1.ListOptions) (*v1alpha1.ApplicationLis
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(v1.ListOptions) error); ok {
-		r1 = rf(opts)
+	if rf, ok := ret.Get(1).(func(context.Context, v1.ListOptions) error); ok {
+		r1 = rf(_a0, opts)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -37,13 +39,13 @@ func (_m *ApplicationClient) List(opts v1.ListOptions) (*v1alpha1.ApplicationLis
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: _a0
-func (_m *ApplicationClient) Update(_a0 *v1alpha1.Application) (*v1alpha1.Application, error) {
-	ret := _m.Called(_a0)
+// Update provides a mock function with given fields: _a0, app, opts
+func (_m *ApplicationClient) Update(_a0 context.Context, app *v1alpha1.Application, opts v1.UpdateOptions) (*v1alpha1.Application, error) {
+	ret := _m.Called(_a0, app, opts)
 
 	var r0 *v1alpha1.Application
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Application) *v1alpha1.Application); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, *v1alpha1.Application, v1.UpdateOptions) *v1alpha1.Application); ok {
+		r0 = rf(_a0, app, opts)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.Application)
@@ -51,8 +53,8 @@ func (_m *ApplicationClient) Update(_a0 *v1alpha1.Application) (*v1alpha1.Applic
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*v1alpha1.Application) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(context.Context, *v1alpha1.Application, v1.UpdateOptions) error); ok {
+		r1 = rf(_a0, app, opts)
 	} else {
 		r1 = ret.Error(1)
 	}

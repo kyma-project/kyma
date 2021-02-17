@@ -1,0 +1,17 @@
+{{- if .Values.loki.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "loki.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "loki.name" . }}
+  mtls:
+    mode: "PERMISSIVE"
+{{- end }}

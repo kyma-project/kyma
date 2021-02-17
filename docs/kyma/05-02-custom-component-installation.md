@@ -7,7 +7,7 @@ By default, you install Kyma with a set of components provided in the [**Kyma Li
 
 During installation, the Kyma Installer applies the content of the [local](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl#L14) or [cluster](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14) installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
 
-```
+```yaml
 # - name: "tracing"
 #   namespace: "kyma-system"
 ```
@@ -49,8 +49,6 @@ components:
     namespace: "kyma-installer"
   - name: "istio-kyma-patch"
     namespace: "istio-system"
-  - name: "knative-serving"
-    namespace: "knative-serving"
   - name: "knative-eventing"
     namespace: "knative-eventing"
 ```
@@ -68,12 +66,12 @@ components:
 
 ### Post-installation changes
 
-You can only add a new component after the installation. Removal of the installed components is not possible. To add a component that was not installed with Kyma by default, modify the Installation custom resource.
+You can only add a new component after the installation. Removal of the installed components is not possible. To add a component that was not installed with Kyma by default, perform the following steps.
 
-1. Edit the resource:
+1. Download the current [Installation custom resource](#custom-resource-installation) from the cluster:
 
     ```bash
-    kubectl -n default edit installation kyma-installation
+    kubectl -n default get installation kyma-installation -o yaml > installation.yaml
     ```
 
 2. Add the new component to the list of components or remove the hash character (#) preceding these lines:
@@ -83,12 +81,14 @@ You can only add a new component after the installation. Removal of the installe
     #  namespace: "kyma-system"
     ```
 
-3. Trigger the installation:
+3. Check which version you're currently running. Run this command:
+
+    ```bash
+    kyma version
+    ```
+
+4. Trigger the update using the same version and the modified installation file:
 
    ```bash
-   kubectl -n default label installation/kyma-installation action=install
+   kyma upgrade -s {VERSION} -c {INSTALLATION_FILE_PATH}
    ```
-
-### Verify the installation
-
-You can verify the installation status by calling `./installation/scripts/is-installed.sh` in the terminal.

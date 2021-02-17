@@ -4,11 +4,15 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -23,7 +27,7 @@ type Broker struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
@@ -38,7 +42,7 @@ func New(c shared.Container) *Broker {
 	}
 }
 
-func (b *Broker) get() (*eventingv1alpha1.Broker, error) {
+func (b *Broker) Get() (*eventingv1alpha1.Broker, error) {
 	u, err := b.resCli.Get(b.name)
 	if err != nil {
 		return &eventingv1alpha1.Broker{}, errors.Wrapf(err, "while getting Broker %s in namespace %s", b.name, b.namespace)
@@ -61,8 +65,23 @@ func (b *Broker) Delete() error {
 	return nil
 }
 
+func (b *Broker) LogResource() error {
+	broker, err := b.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(broker)
+	if err != nil {
+		return err
+	}
+
+	b.log.Infof("Broker resource: %s", out)
+	return nil
+}
+
 func (b *Broker) WaitForStatusRunning() error {
-	broker, err := b.get()
+	broker, err := b.Get()
 	if err != nil {
 		return err
 	}
@@ -89,7 +108,7 @@ func (b *Broker) isBrokerReady(name string) func(event watch.Event) (bool, error
 			return false, shared.ErrInvalidDataType
 		}
 		if u.GetName() != name {
-			b.log.Logf("names mismatch, object's name %s, supplied %s", u.GetName(), name)
+			b.log.Infof("names mismatch, object's name %s, supplied %s", u.GetName(), name)
 			return false, nil
 		}
 

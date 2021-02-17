@@ -12,4 +12,8 @@ global:
 test:
   acceptance:
     service_catalog:
+      labels:
+        integration: true
+        after-upgrade: true
+
       enabled: true

@@ -1,6 +1,7 @@
 package rafter
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
@@ -17,15 +18,15 @@ const (
 	AssetGroupModeSingle = "single"
 )
 
-//go:generate mockery -name=ResourceInterface
+//go:generate mockery --name=ResourceInterface
 type ResourceInterface interface {
-	Get(name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
-	Delete(name string, opts *metav1.DeleteOptions, subresources ...string) error
-	Create(obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
-	Update(obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Get(ctx context.Context, name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Delete(ctx context.Context, name string, opts metav1.DeleteOptions, subresources ...string) error
+	Create(ctx context.Context, obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
+	Update(ctx context.Context, obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
 }
 
-//go:generate mockery -name=ClusterAssetGroupRepository
+//go:generate mockery --name=ClusterAssetGroupRepository
 type ClusterAssetGroupRepository interface {
 	Get(id string) (clusterassetgroup.Entry, apperrors.AppError)
 	Create(assetGroup clusterassetgroup.Entry) apperrors.AppError
@@ -53,7 +54,7 @@ func (r repository) Get(id string) (clusterassetgroup.Entry, apperrors.AppError)
 }
 
 func (r repository) Delete(id string) apperrors.AppError {
-	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
+	err := r.resourceInterface.Delete(context.Background(), id, metav1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Failed to delete ClusterAssetGroup: %s.", err)
 	}
@@ -72,7 +73,7 @@ func (r repository) Create(assetGroupEntry clusterassetgroup.Entry) apperrors.Ap
 }
 
 func (r repository) get(id string) (v1beta1.ClusterAssetGroup, apperrors.AppError) {
-	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+	u, err := r.resourceInterface.Get(context.Background(), id, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return v1beta1.ClusterAssetGroup{}, apperrors.NotFound("ClusterAssetGroup with %s id not found.", id)
@@ -96,7 +97,7 @@ func (r repository) create(assetGroup v1beta1.ClusterAssetGroup) apperrors.AppEr
 		return apperrors.Internal("Failed to create ClusterAssetGroup, %s.", err)
 	}
 
-	_, err = r.resourceInterface.Create(u, metav1.CreateOptions{})
+	_, err = r.resourceInterface.Create(context.Background(), u, metav1.CreateOptions{})
 	if err != nil {
 		return apperrors.Internal("Failed to create ClusterAssetGroup, %s.", err)
 	}
@@ -107,7 +108,7 @@ func (r repository) create(assetGroup v1beta1.ClusterAssetGroup) apperrors.AppEr
 func (r repository) update(id string, assetGroup v1beta1.ClusterAssetGroup) apperrors.AppError {
 
 	getRefreshedClusterAssetGroup := func(id string, assetGroup v1beta1.ClusterAssetGroup) (v1beta1.ClusterAssetGroup, error) {
-		newUnstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+		newUnstructured, err := r.resourceInterface.Get(context.Background(), id, metav1.GetOptions{})
 		if err != nil {
 			return v1beta1.ClusterAssetGroup{}, err
 		}
@@ -133,7 +134,7 @@ func (r repository) update(id string, assetGroup v1beta1.ClusterAssetGroup) appe
 			return err
 		}
 
-		_, err = r.resourceInterface.Update(u, metav1.UpdateOptions{})
+		_, err = r.resourceInterface.Update(context.Background(), u, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}

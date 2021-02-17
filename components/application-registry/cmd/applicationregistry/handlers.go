@@ -21,12 +21,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/istio"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification"
 	metauuid "github.com/kyma-project/kyma/components/application-registry/internal/metadata/uuid"
-	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -70,11 +68,6 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 
 	applicationServiceRepository := applications.NewServiceRepository(applicationManager)
 
-	istioService, apperror := newIstioService(k8sConfig, opt.namespace)
-	if apperror != nil {
-		return nil, apperror
-	}
-
 	sei := coreClientset.CoreV1().Secrets(opt.namespace)
 	secretsRepository := secrets.NewRepository(sei)
 
@@ -90,7 +83,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService, istioService)
+	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService, applicationManager), nil
 }
@@ -133,20 +126,4 @@ func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.Nam
 	strategyFactory := strategy.NewSecretsStrategyFactory(certificates.GenerateKeyAndCertificate)
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
-}
-
-func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {
-	ic, err := istioclient.NewForConfig(config)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to create Istio client, %s", err)
-	}
-
-	repository := istio.NewRepository(
-		ic.IstioV1alpha2().Rules(namespace),
-		ic.IstioV1alpha2().Instances(namespace),
-		ic.IstioV1alpha2().Handlers(namespace),
-		istio.RepositoryConfig{Namespace: namespace},
-	)
-
-	return istio.NewService(repository), nil
 }

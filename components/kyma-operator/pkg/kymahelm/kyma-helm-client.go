@@ -20,6 +20,7 @@ import (
 type ClientInterface interface {
 	ListReleases() ([]*Release, error)
 	IsReleaseDeletable(nn NamespacedName) (bool, error)
+	IsReleasePresent(nn NamespacedName) (bool, error)
 	ReleaseDeployedRevision(nn NamespacedName) (int, error)
 	InstallRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
 	UpgradeRelease(chartDir string, nn NamespacedName, overrides overrides.Map) (*Release, error)
@@ -98,6 +99,45 @@ func (hc *Client) ReleaseStatus(nn NamespacedName) (*ReleaseStatus, error) {
 	}
 
 	return helmReleaseToKymaRelease(rel).ReleaseStatus, nil
+}
+
+// IsReleasePresent returns true for release that cis present on the cluster
+func (hc *Client) IsReleasePresent(nn NamespacedName) (bool, error) {
+
+	isPresent := true
+	maxAttempts := 3
+	fixedDelay := 3
+
+	cfg, err := hc.newActionConfig(nn.Namespace)
+	if err != nil {
+		if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+			return false, nil
+		}
+		return true, err
+	}
+
+	status := action.NewStatus(cfg)
+
+	err = retry.Do(
+		func() error {
+			_, err := status.Run(nn.Name)
+			if err != nil {
+				if strings.Contains(err.Error(), driver.ErrReleaseNotFound.Error()) {
+					isPresent = false
+					return nil
+				}
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(uint(maxAttempts)),
+		retry.DelayType(func(attempt uint, config *retry.Config) time.Duration {
+			log.Printf("Retry number %d on getting release status.\n", attempt+1)
+			return time.Duration(fixedDelay) * time.Second
+		}),
+	)
+
+	return isPresent, err
 }
 
 // IsReleaseDeletable returns true for release that can be deleted
@@ -243,7 +283,7 @@ func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 	return rollback.Run(nn.Name)
 }
 
-// DeleteRelease uninstalls a Helm release
+// UninstallRelease uninstalls a Helm release
 func (hc *Client) UninstallRelease(nn NamespacedName) error {
 
 	cfg, err := hc.newActionConfig(nn.Namespace)

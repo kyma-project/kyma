@@ -15,9 +15,9 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 ### Create the dashboard
 
-1. Navigate to Grafana. It is available under the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster, such as `https://grafana.34.63.57.190.xip.io` or `https://grafana.example.com/`. To access it from the Console UI, click **Stats & Metrics** on the left navigation menu.
+1. Navigate to Grafana. It is available under the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster, such as `https://grafana.34.63.57.190.xip.io` or `https://grafana.example.com/`. To access it from the Console UI, click **Metrics** on the left navigation menu.
 
-   ![Stats and Metrics](./assets/stats-and-metrics.png)
+   ![Metrics](./assets/metrics.png)
 
 2. Click the **+** icon on the left sidebar and select **Dashboard** from the **Create** menu.
 

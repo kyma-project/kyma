@@ -13,6 +13,7 @@ metadata:
 rules:
 - apiGroups:
     - "eventing.kyma-project.io"
+    - "ui.kyma-project.io"
 {{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"

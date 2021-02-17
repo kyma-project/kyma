@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1 # more than 1 replica is not currently supported
 image:
-  repository: nats-streaming
+  repository: eu.gcr.io/kyma-project/external/nats-streaming
   tag: 0.11.0
   pullPolicy: IfNotPresent
 nats:
@@ -65,8 +65,3 @@ configurationFiles:
     # authorization {} it handled via init container+secrets. don't extend here
   stan.conf: |
     # content of configuration file used to override default NATS Streaming server settings
-monitoring:
-  grafana: enabled
-  alerts: enabled
-  alertcpu: 'yes'
-  alertmem: 'yes'

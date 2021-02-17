@@ -8,3 +8,5 @@ Similarly to cloud providers, Kyma offers a service (known as "functions-as-a-se
 
 - Configure it to be triggered by events coming from external sources to which you subscribe.
 - Expose it to an external endpoint (HTTPS).
+
+> **CAUTION:** In its default configuration, Serverless uses persistent volumes as the internal registry to store Docker images for Functions. The default storage size of a single volume is 20 GB. This internal registry is suitable for local development. For production purposes, we recommend to use an [external Docker registry](#tutorials-set-an-external-docker-registry).

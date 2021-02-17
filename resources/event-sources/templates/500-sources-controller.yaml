@@ -35,5 +35,3 @@ spec:
             value: kyma-project.io/controller-manager
           - name: HTTP_ADAPTER_IMAGE
             value: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.httpAdapter.dir }}{{ .Values.global.httpAdapter.image }}:{{ .Values.global.httpAdapter.version }}"
-          - name: HTTP_ADAPTER_TRACING_ENABLED
-            value: "{{ .Values.global.httpAdapter.tracingEnabled }}"

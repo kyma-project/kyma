@@ -6,12 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/automock"
-	shared "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
-	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -20,13 +14,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/automock"
+	shared "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
+	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 )
 
 func TestFunctionResolver_FunctionQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "python38", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Find", "a", "1").Return(function, nil).Once()
@@ -81,10 +82,10 @@ func TestFunctionResolver_FunctionQuery(t *testing.T) {
 func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		function2 := fixFunction("2", "a", "1", "content", "dependencies", labels)
-		gqlFunction1 := fixGQLFunction("1", "a", "1", "content", "dependencies", labels)
-		gqlFunction2 := fixGQLFunction("2", "a", "1", "content", "dependencies", labels)
+		function1 := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		function2 := fixFunction("2", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		gqlFunction1 := fixGQLFunction("1", "a", "1", "content", "dependencies", "python38", labels)
+		gqlFunction2 := fixGQLFunction("2", "a", "1", "content", "dependencies", "python38", labels)
 		functions := []*v1alpha1.Function{function1, function2}
 		expected := []*gqlschema.Function{gqlFunction1, gqlFunction2}
 
@@ -141,9 +142,9 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 func TestFunctionResolver_CreateFunction(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", labels)
-		mutationInput := fixGQLMutationInput("content", "dependencies", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs10)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs10", labels)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "dupa", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Create", function).Return(function, nil).Once()
@@ -164,8 +165,8 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Error")
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		mutationInput := fixGQLMutationInput("content", "dependencies", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs12)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "nodejs12", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Create", function).Return(function, expected).Once()
@@ -187,9 +188,9 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 func TestFunctionResolver_UpdateFunction(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", labels)
-		mutationInput := fixGQLMutationInput("content", "dependencies", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs10)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs10", labels)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "nodejs10", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Update", function).Return(function, nil).Once()
@@ -210,8 +211,8 @@ func TestFunctionResolver_UpdateFunction(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Error")
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels)
-		mutationInput := fixGQLMutationInput("content", "dependencies", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Python38)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "python38", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Update", function).Return(function, expected).Once()
@@ -376,15 +377,16 @@ func fixGQLMetadata(name, namespace string) *gqlschema.FunctionMetadata {
 	}
 }
 
-func fixGQLMutationInput(source, dependencies string, labels map[string]string) *gqlschema.FunctionMutationInput {
+func fixGQLMutationInput(source, dependencies, runtime string, labels map[string]string) *gqlschema.FunctionMutationInput {
 	return &gqlschema.FunctionMutationInput{
 		Labels:       labels,
 		Source:       source,
 		Dependencies: dependencies,
+		Runtime:      stringPtr(runtime),
 	}
 }
 
-func fixGQLFunction(name, namespace, uid, source, dependencies string, labels map[string]string) *gqlschema.Function {
+func fixGQLFunction(name, namespace, uid, source, dependencies, runtime string, labels map[string]string) *gqlschema.Function {
 	return &gqlschema.Function{
 		Name:         name,
 		Namespace:    namespace,
@@ -392,6 +394,7 @@ func fixGQLFunction(name, namespace, uid, source, dependencies string, labels ma
 		Labels:       labels,
 		Source:       source,
 		Dependencies: dependencies,
+		Runtime:      &runtime,
 		Env: []*gqlschema.FunctionEnv{
 			{
 				Name:  "foo",
@@ -404,7 +407,17 @@ func fixGQLFunction(name, namespace, uid, source, dependencies string, labels ma
 	}
 }
 
-func fixFunction(name, namespace, uid, source, dependencies string, labels map[string]string) *v1alpha1.Function {
+func fixGQLGitFunction(function *gqlschema.Function, gitRepositoryRef, baseDir, reference string) *gqlschema.Function {
+	var nilStr string
+	function.SourceType = stringPtr(string(v1alpha1.SourceTypeGit))
+	function.Source = gitRepositoryRef
+	function.Dependencies = nilStr
+	function.BaseDir = stringPtr(baseDir)
+	function.Reference = stringPtr(reference)
+	return function
+}
+
+func fixFunction(name, namespace, uid, source, dependencies string, labels map[string]string, runtime v1alpha1.Runtime) *v1alpha1.Function {
 	return &v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -417,8 +430,9 @@ func fixFunction(name, namespace, uid, source, dependencies string, labels map[s
 			UID:       types.UID(uid),
 		},
 		Spec: v1alpha1.FunctionSpec{
-			Source: source,
-			Deps:   dependencies,
+			Source:  source,
+			Runtime: runtime,
+			Deps:    dependencies,
 			Env: []v1.EnvVar{
 				{
 					Name:  "foo",
@@ -428,4 +442,16 @@ func fixFunction(name, namespace, uid, source, dependencies string, labels map[s
 		},
 		Status: v1alpha1.FunctionStatus{},
 	}
+}
+
+func fixGitFunction(function *v1alpha1.Function, gitRepositoryRef, baseDir, reference string) *v1alpha1.Function {
+	var nilStr string
+	function.Spec.Type = v1alpha1.SourceTypeGit
+	function.Spec.Source = gitRepositoryRef
+	function.Spec.Deps = nilStr
+	function.Spec.Repository = v1alpha1.Repository{
+		BaseDir:   baseDir,
+		Reference: reference,
+	}
+	return function
 }

@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -25,7 +26,7 @@ func TestRepository_Create(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Create", secret).Return(secret, nil)
+		secretsManagerMock.On("Create", context.Background(), secret, metav1.CreateOptions{}).Return(secret, nil)
 
 		// when
 		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
@@ -47,7 +48,7 @@ func TestRepository_Create(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Create", secret).Return(nil, errors.New("some error"))
+		secretsManagerMock.On("Create", context.Background(), secret, metav1.CreateOptions{}).Return(nil, errors.New("some error"))
 
 		// when
 		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
@@ -70,7 +71,7 @@ func TestRepository_Create(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
+		secretsManagerMock.On("Create", context.Background(), secret, metav1.CreateOptions{}).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		// when
 		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
@@ -95,7 +96,7 @@ func TestRepository_Get(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Get", "new-secret", metav1.GetOptions{}).Return(secret, nil)
+		secretsManagerMock.On("Get", context.Background(), "new-secret", metav1.GetOptions{}).Return(secret, nil)
 
 		// when
 		data, err := repository.Get("new-secret")
@@ -113,7 +114,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secretsManagerMock.On("Get", "secret-name", metav1.GetOptions{}).Return(
+		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,
 			errors.New("some error"))
 
@@ -136,7 +137,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secretsManagerMock.On("Get", "secret-name", metav1.GetOptions{}).Return(
+		secretsManagerMock.On("Get", context.Background(), "secret-name", metav1.GetOptions{}).Return(
 			nil,
 			k8serrors.NewNotFound(schema.GroupResource{},
 				""))
@@ -163,7 +164,7 @@ func TestRepository_Delete(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secretsManagerMock.On("Delete", "test-secret", &metav1.DeleteOptions{}).Return(
+		secretsManagerMock.On("Delete", context.Background(), "test-secret", metav1.DeleteOptions{}).Return(
 			nil)
 
 		// when
@@ -180,7 +181,7 @@ func TestRepository_Delete(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secretsManagerMock.On("Delete", "test-secret", &metav1.DeleteOptions{}).Return(
+		secretsManagerMock.On("Delete", context.Background(), "test-secret", metav1.DeleteOptions{}).Return(
 			errors.New("some error"))
 
 		// when
@@ -199,7 +200,7 @@ func TestRepository_Delete(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secretsManagerMock.On("Delete", "test-secret", &metav1.DeleteOptions{}).Return(
+		secretsManagerMock.On("Delete", context.Background(), "test-secret", metav1.DeleteOptions{}).Return(
 			k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		// when
@@ -222,7 +223,7 @@ func TestRepository_Upsert(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Update", secret).Return(
+		secretsManagerMock.On("Update", context.Background(), secret, metav1.UpdateOptions{}).Return(
 			secret, nil)
 
 		// when
@@ -245,9 +246,9 @@ func TestRepository_Upsert(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Update", secret).Return(
+		secretsManagerMock.On("Update", context.Background(), secret, metav1.UpdateOptions{}).Return(
 			nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-		secretsManagerMock.On("Create", secret).Return(secret, nil)
+		secretsManagerMock.On("Create", context.Background(), secret, metav1.CreateOptions{}).Return(secret, nil)
 
 		// when
 		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
@@ -269,7 +270,7 @@ func TestRepository_Upsert(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Update", secret).Return(nil, errors.New("some error"))
+		secretsManagerMock.On("Update", context.Background(), secret, metav1.UpdateOptions{}).Return(nil, errors.New("some error"))
 
 		// when
 		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
@@ -295,9 +296,9 @@ func TestRepository_Upsert(t *testing.T) {
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
-		secretsManagerMock.On("Update", secret).Return(
+		secretsManagerMock.On("Update", context.Background(), secret, metav1.UpdateOptions{}).Return(
 			nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-		secretsManagerMock.On("Create", secret).Return(secret, errors.New("some error"))
+		secretsManagerMock.On("Create", context.Background(), secret, metav1.CreateOptions{}).Return(secret, errors.New("some error"))
 
 		// when
 		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{

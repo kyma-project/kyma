@@ -40,7 +40,7 @@ rules:
 - apiGroups: ["messaging.knative.dev"]
   resources: ["channels"]
   verbs: ["list"]
-# Istio policies for authorization and authentication
-- apiGroups: ["authentication.istio.io"]
-  resources: ["policies"]
+# Istio peerauthentiactions for Knative brokers
+- apiGroups: ["security.istio.io"]
+  resources: ["peerauthentications"]
   verbs: ["create","update", "get"]

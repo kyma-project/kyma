@@ -1,6 +1,7 @@
 package compassconnection
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"testing"
@@ -159,7 +160,7 @@ func TestCompassConnectionController(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		if err != nil {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
@@ -193,7 +194,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("Compass Connection should be reinitialized if deleted", func(t *testing.T) {
 		// given
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		require.NoError(t, err)
 
 		// then
@@ -228,13 +229,13 @@ func TestCompassConnectionController(t *testing.T) {
 
 	t.Run("Should renew certificate if RefreshCredentialsNow set to true", func(t *testing.T) {
 		// given
-		connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+		connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 		require.NoError(t, err)
 
 		connectedConnection.Spec.RefreshCredentialsNow = true
 
 		// when
-		connectedConnection, err = compassConnectionCRClient.Update(connectedConnection)
+		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
 		require.NoError(t, err)
 
 		err = waitFor(checkInterval, testTimeout, func() bool {
@@ -429,7 +430,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		if err != nil {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
@@ -438,7 +439,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	defer close(stopChan)
 
 	initConnectionIfNotExist := func() {
-		_, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+		_, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 		if err != nil {
 			if !k8serrors.IsNotFound(err) {
 				t.Fatalf("Failed to initialize Connection: %s", err.Error())
@@ -578,7 +579,7 @@ func waitForResourceUpdate(expectedState v1alpha1.ConnectionState) error {
 }
 
 func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	if err != nil {
 		return false
 	}
@@ -587,34 +588,34 @@ func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
 }
 
 func assertConnectionStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	t.Logf("Connection status error: %s", connectedConnection.Status.ConnectionStatus.Error)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.Error)
 }
 
 func assertSynchronizationStatusError(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	t.Logf("Synchronization status error: %s", connectedConnection.Status.SynchronizationStatus.Error)
 	assert.NotEmpty(t, connectedConnection.Status.SynchronizationStatus.Error)
 }
 
 func assertManagementInfoSetInCR(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, directorURL, connectedConnection.Spec.ManagementInfo.DirectorURL)
 	assert.Equal(t, certSecuredConnectorURL, connectedConnection.Spec.ManagementInfo.ConnectorURL)
 }
 
 func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.ConnectionState) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, expectedState, connectedConnection.Status.State)
 }
 
 func assertConnectionStatusSet(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus)
@@ -622,7 +623,7 @@ func assertConnectionStatusSet(t *testing.T) {
 }
 
 func assertCertificateRenewed(t *testing.T) {
-	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
 	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.CertificateStatus)

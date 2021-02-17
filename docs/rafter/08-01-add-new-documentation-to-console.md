@@ -165,7 +165,7 @@ This tutorial shows how you can customize the Documentation view that is availab
          name: docs-master/content/docs/concepts/data_model.md
    ```
 
-3. Open the Console UI and navigate to the Documentation view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appears at the bottom of the documentation panel:
+3. Open the Console UI and navigate to the Documentation view. The new **Prometheus** section will appear at the bottom of the documentation panel. It consists of the **Concepts** and **Guides** topic groups containing alphabetically ordered Markdown documents.
 
    ![Prometheus section in navigation](./assets/prometheus.png)
 

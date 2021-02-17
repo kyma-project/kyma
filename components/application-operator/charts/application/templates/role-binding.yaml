@@ -40,7 +40,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}subjects:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
 - kind: User
   name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
   apiGroup: rbac.authorization.k8s.io

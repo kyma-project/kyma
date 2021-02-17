@@ -53,6 +53,10 @@ required = [
   name = "github.com/fsnotify/fsnotify"
   version = "1.4.9"
 
+[[override]]
+  name = "golang.org/x/text"
+  version = "v0.3.3"
+
 [prune]
   go-tests = true
   unused-packages = true

@@ -2,6 +2,7 @@
 package metadata
 
 import (
+	"context"
 	"fmt"
 
 	alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -21,6 +22,7 @@ const (
 )
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
+//go:generate mockery --name ServiceDefinitionService
 type ServiceDefinitionService interface {
 	// Create adds new ServiceDefinition.
 	Create(application string, serviceDefinition *model.ServiceDefinition) (id string, err apperrors.AppError)
@@ -41,8 +43,9 @@ type ServiceDefinitionService interface {
 	GetAPI(application, serviceId string) (*model.API, apperrors.AppError)
 }
 
+//go:generate mockery --name ApplicationGetter
 type ApplicationGetter interface {
-	Get(name string, options v1.GetOptions) (*alpha1.Application, error)
+	Get(ctx context.Context, name string, options v1.GetOptions) (*alpha1.Application, error)
 }
 
 type serviceDefinitionService struct {
@@ -111,7 +114,7 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 }
 
 func (sds *serviceDefinitionService) getApplicationUID(application string) (types.UID, apperrors.AppError) {
-	app, err := sds.applicationManager.Get(application, v1.GetOptions{})
+	app, err := sds.applicationManager.Get(context.Background(), application, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Application %s not found", application)

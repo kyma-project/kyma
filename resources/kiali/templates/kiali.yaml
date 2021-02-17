@@ -7,4 +7,6 @@ metadata:
   labels:
     {{- include "kiali.labels" . | nindent 4 }}
 spec:
-{{ tpl (toYaml .Values.kiali.spec | indent 2) . }}
+{{ $myValues := .Values.kiali.spec}}
+{{ $_ := set $myValues.external_services.tracing "enabled" .Values.global.tracing.enabled }}
+{{ tpl (toYaml $myValues | indent 2) . }}

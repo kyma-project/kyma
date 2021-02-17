@@ -32,7 +32,7 @@ webhooks:
       operator: NotIn
       values:
       - kube-system
-  timeoutSeconds: 10
+  timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: v1
 kind: Secret

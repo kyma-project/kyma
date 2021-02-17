@@ -495,7 +495,7 @@ data:
                 }
                 }
             ],
-            "refresh": "30s",
+            "refresh": "10s",
             "schemaVersion": 20,
             "style": "dark",
             "tags": ["logging","kyma"],
@@ -503,7 +503,7 @@ data:
                 "list": []
             },
             "time": {
-                "from": "now-15m",
+                "from": "now-1h",
                 "to": "now"
             },
             "timepicker": {

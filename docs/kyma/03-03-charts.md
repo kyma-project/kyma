@@ -93,7 +93,7 @@ Here are some examples:
 
          initContainers:
          - name: init-helm-broker
-           image: eu.gcr.io/kyma-project/alpine-net:0.2.74
+           image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
            command: ['sh', '-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
 
          containers:
@@ -146,15 +146,6 @@ All notes are based on Helm v3.2.1 implementation and are subject to change in f
 
 * To provide better error handling, Helm validates rendered templates against the Kubernetes OpenAPI schema before they are sent to the Kubernetes API. This means any resources that don't comply with the Kubernetes API docs (for example because of unsupported fields) will fail the release.
 
-## Migration to Helm v3
-
-As of version 1.14, Kyma uses [Helm v3](https://helm.sh/) to install and maintain components. To ensure compatibility, any Helm v2 releases existing on your cluster are automatically migrated to v3 prior to the upgrade process. The migration is handled by the Helm [2to3](https://github.com/helm/helm-2to3) plugin that runs as an init container inside the Kyma Installer Pod. This means that it may take some more time for the component to start operating. If the plugin fails to migrate a release, the container exits with an error and the upgrade process is interrupted.
-
-You can skip the migration of custom components by extending the **CHART_BLACKLIST** variable in the [script](/installation/resources/installer.yaml) run by the init-container. If you decide to skip the migration of a given component, make sure to remove this component from the `Installation` custom resource.
-
-The migration of Helm v2 components is a one-time event. The init-container will be removed with the next release.
-
->**NOTE:** Successful migration does not erase Helm v2 configuration and release data. You can still access pre-upgrade Helm resources using the v2 CLI if you establish a secure connection with Tiller. Read the [additional configuration](#installation-use-helm) document to learn how to access legacy resources using Helm v2 CLI. Alternatively, you can manually remove Tiller and Helm v2 release data after the migration using Helm's [2to3](https://github.com/helm/helm-2to3) plugin.
 
 ## Glossary
 

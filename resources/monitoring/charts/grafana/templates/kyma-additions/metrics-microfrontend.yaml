@@ -1,0 +1,23 @@
+{{- /*
+  Customization: This file is added for UI.
+*/ -}}
+{{- if .Values.kyma.console.enabled }}
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: {{ template "grafana.name" . }}-metrics
+  labels:
+    {{- include "grafana.labels" . | nindent 4 }}
+spec:
+  displayName: Metrics
+  version: v1
+  category: Diagnostics
+  placement: cluster
+  viewBaseUrl: https://grafana.{{ js .Values.global.ingress.domainName }}
+  navigationNodes:
+    - label: Metrics
+      navigationPath: ''
+      viewUrl: ''
+      externalLink: https://grafana.{{ js .Values.global.ingress.domainName }}
+      order: 1
+{{- end }}

@@ -38,9 +38,6 @@ required = [
   go-tests = true
   non-go = true
 
-[[constraint]]
-  name = "github.com/machinebox/graphql"
-  version = "v0.2.2"
 
 [[override]]
   name = "github.com/vektah/gqlparser"
@@ -111,10 +108,6 @@ required = [
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[constraint]]
-  name = "k8s.io/kubernetes"
-  branch = "release-1.16"
-
-[[constraint]]
   name = "k8s.io/gengo"
   revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
 
@@ -123,12 +116,16 @@ required = [
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "8069217e0f42fef97b9e6fddb8b7c86ff5ba1999"
-
-[[constraint]]
   name = "github.com/kyma-incubator/compass"
   revision = "960cf3fa606ce139cea977928be029784bd42be5"
+
+[[constraint]]
+  name = "istio.io/api"
+  version = "1.5.8"
+
+[[constraint]]
+  name = "istio.io/client-go"
+  version = "1.5.8"
 
 [[override]]
   name = "knative.dev/eventing"
@@ -166,3 +163,6 @@ required = [
   name = "gopkg.in/yaml.v2"
   version = "v2.2.8"
 
+[[override]]
+  name = "golang.org/x/text"
+  version = "v0.3.3"

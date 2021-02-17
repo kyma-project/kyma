@@ -1,0 +1,64 @@
+---
+# Microfrontend view
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-mf-view
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-mf-view: "true"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.ui | indent 4 }}
+  resources:
+    - "clustermicrofrontends"
+    - "microfrontends"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+# Microfrontend admin
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-mf-admin
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-admin: "true"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.ui | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+    - "*"
+
+---
+# Backendmodules admin
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-backendmodule-admin
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-backendmodule-admin: "true"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.ui | indent 4 }}
+  resources:
+    - "backendmodules"
+  verbs:
+    - "*"
+
+---
+# ui view
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-ui-view
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-view: "true"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.ui | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}

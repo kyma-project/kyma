@@ -11,9 +11,11 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 04ed8025
-    tests:
-      enabled: true
+    version: 470796a1
+    enabled: true
+    labels:
+      integration: true
+      after-upgrade: true
 
   rbac:
     create: true
@@ -26,14 +28,14 @@ global:
         sendResolved: true
         apiurl: ""
         channel: ""
-        matchExpression:
+        matchExpression: |-
           severity: critical
         routes: |-
       victorOps:
         sendResolved: true
         routingkey: ""
         apikey: ""
-        matchExpression:
+        matchExpression: |-
           severity: critical
         routes: |-
 
@@ -515,19 +517,37 @@ grafana:
 
   ## Configure additional grafana datasources
   ## ref: https://grafana.com/docs/grafana/latest/features/datasources/
+
+
+  dataSources:
+    loki:
+      enabled: true
+      config:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://logging-loki.kyma-system:3100
+          editable: true
+          jsonData:
+            maxLines: 1000
+    jaeger:
+      enabled: true
+      config:
+        - name: Jaeger
+          type: jaeger
+          access: proxy
+          url: http://tracing-jaeger-query.kyma-system:16686
+          editable: true
+    prometheusIstio:
+      enabled: false
+      config:
+        - name: Prometheus-Istio
+          type: prometheus
+          access: proxy
+          url: http://monitoring-prometheus-istio-server.kyma-system:80
+          editable: true
+
   additionalDataSources:
-    - name: Loki
-      type: loki
-      access: proxy
-      url: http://logging-loki.kyma-system:3100
-      editable: true
-      jsonData:
-        maxLines: 1000
-    - name: Jaeger
-      type: jaeger
-      access: proxy
-      url: http://tracing-jaeger-query.kyma-system:16686
-      editable: true
   # - name: prometheus-sample
   #   access: proxy
   #   basicAuth: true
@@ -540,6 +560,7 @@ grafana:
   #   type: prometheus
   #   url: https://prometheus.svc:9090
   #   version: 1
+
 
   ## Passed to grafana subchart and used by servicemonitor below
   ##
@@ -558,7 +579,7 @@ grafana:
     ##
     metricRelabelings:
     - sourceLabels: [ __name__ ]
-      regex: ^(grafana_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
+      regex: ^(http_request_total|grafana_.*|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes)$
       action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -645,7 +666,7 @@ kubelet:
 
     metricRelabelings:
     - sourceLabels: [ __name__ ]
-      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|storage_operation_duration_seconds_bucket|storage_operation_duration_seconds_count|storage_operation_errors_total|volume_manager_total_volumes)$
+      regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total)$
       action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -717,7 +738,7 @@ kubeControllerManager:
 ## Component scraping coreDns. Use either this or kubeDns
 ##
 coreDns:
-  enabled: true
+  enabled: false
   service:
     port: 9153
     targetPort: 9153
@@ -748,7 +769,7 @@ coreDns:
 ## Component scraping kubeDns. Use either this or coreDns
 ##
 kubeDns:
-  enabled: true
+  enabled: false
   service:
     dnsmasq:
       port: 10054
@@ -910,7 +931,7 @@ kubeScheduler:
 ## Component scraping kube proxy
 ##
 kubeProxy:
-  enabled: true
+  enabled: false
 
   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1043,7 +1064,7 @@ prometheusOperator:
   tlsProxy:
     enabled: false
     image:
-      repository: squareup/ghostunnel
+      repository: squareup/ghostunnel # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
       tag: v1.5.2
       pullPolicy: IfNotPresent
     resources: {}
@@ -1060,7 +1081,7 @@ prometheusOperator:
     patch:
       enabled: false
       image:
-        repository: jettech/kube-webhook-certgen
+        repository: jettech/kube-webhook-certgen # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
         tag: v1.0.0
         pullPolicy: IfNotPresent
       resources: {}
@@ -1190,7 +1211,7 @@ prometheusOperator:
   ##
   resources:
     limits:
-      cpu: 200m
+      cpu: 300m
       memory: 200Mi
     requests:
       cpu: 10m
@@ -1258,7 +1279,7 @@ prometheusOperator:
   ## Hyperkube image to use when cleaning up
   ##
   hyperkubeImage:
-    repository: k8s.gcr.io/hyperkube
+    repository: k8s.gcr.io/hyperkube # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
     tag: v1.12.1
     pullPolicy: IfNotPresent
 
@@ -1454,7 +1475,7 @@ prometheus:
 
     ## Interval between consecutive evaluations.
     ##
-    evaluationInterval: ""
+    evaluationInterval: 30s
 
     ## ListenLocal makes the Prometheus server listen on loopback, so that it does not bind against the Pod IP.
     ##
@@ -1530,7 +1551,7 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: [ istio.monitoring-prometheus ]
+    secrets: []
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
@@ -1542,7 +1563,7 @@ prometheus:
     ##
     query:
       maxConcurrency: 100
-      timeout: 1m
+      timeout: 30s
 
     ## Namespaces to be selected for PrometheusRules discovery.
     ## If nil, select own namespace. Namespaces to be selected for ServiceMonitor discovery.
@@ -1625,7 +1646,7 @@ prometheus:
 
     ## Enable compression of the write-ahead log using Snappy.
     ##
-    walCompression: false
+    walCompression: true
 
     ## If true, the Operator won't process any Prometheus configuration changes
     ##
@@ -1700,10 +1721,10 @@ prometheus:
     resources:
       limits:
         cpu: 600m
-        memory: 1500Mi
+        memory: 2Gi
       requests:
-        cpu: 300m
-        memory: 1000Mi
+        cpu: 200m
+        memory: 600Mi
 
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/storage.md
@@ -1830,26 +1851,7 @@ prometheus:
     ##
     portName: "web"
 
-  additionalServiceMonitors:
-  - name: istio-mixer
-    additionalLabels:
-      prometheus: monitoring
-    selector: {}
-    namespaceSelector:
-      matchNames:
-        - istio-system
-    endpoints:
-# disabled to fix wrong istio-ingressgateway service port configuration
-# remove commented config after fix https://github.com/istio/istio/issues/22801
-#      - port: prometheus
-#        interval: 30s
-      - port: statsd-prom
-        interval: 30s
-      - port: http-monitoring
-        metricRelabelings:
-        - sourceLabels: [ __name__ ]
-          regex: ^(envoy_cluster_upstream_cx_active|envoy_cluster_upstream_cx_connect_fail|envoy_cluster_upstream_cx_rx_bytes_total|envoy_cluster_upstream_cx_total|envoy_cluster_upstream_cx_tx_bytes_total|envoy_server_hot_restart_epoch|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_io_server_completed_rpcs|grpc_io_server_server_latency_bucket|istio_build|istio_mcp_request_acks_total|istio_mcp_request_nacks_total|mixer_runtime_dispatch_duration_seconds_bucket|mixer_runtime_dispatches_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|istio_build|istio_mcp_request_acks_total|pilot_conflict_inbound_listener|pilot_conflict_outbound_listener_http_over_current_tcp|pilot_conflict_outbound_listener_tcp_over_current_http|pilot_conflict_outbound_listener_tcp_over_current_tcp|pilot_proxy_convergence_time_bucket|pilot_services|pilot_virt_services|pilot_xds_push_context_errors|pilot_total_xds_rejects|pilot_total_xds_internal_errors|pilot_xds_write_timeout|pilot_xds_lds_reject|pilot_xds_rds_reject|pilot_xds_push_timeout_failures|pilot_xds_eds_instances|pilot_xds_eds_reject|pilot_xds|pilot_xds_push_timeout|pilot_xds_push_errors|pilot_xds_cds_reject|pilot_xds_pushes|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|galley_istio_authentication_meshpolicies|galley_istio_networking_destinationrules|galley_istio_networking_gateways|galley_istio_networking_virtualservices|galley_runtime_processor_events_processed_total|galley_runtime_processor_snapshot_events_total_bucket|galley_runtime_processor_snapshots_published_total|galley_runtime_state_type_instances_total|galley_runtime_strategy_on_change_total|galley_runtime_strategy_timer_max_time_reached_total|galley_runtime_strategy_timer_quiesce_reached_total|galley_runtime_strategy_timer_resets_total|galley_source_kube_dynamic_converter_failure_total|galley_source_kube_dynamic_converter_success_total|galley_source_kube_event_error_total|galley_source_kube_event_success_total|galley_validation_http_error|galley_validation_cert_key_update_errors|galley_validation_cert_key_updates|galley_validation_passed|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|istio_build|istio_mcp_clients_total|istio_mcp_request_acks_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|citadel_secret_controller_secret_deleted_cert_count|citadel_secret_controller_svc_acc_deleted_cert_count|citadel_secret_controller_svc_acc_created_cert_count|citadel_server_authentication_failure_count|citadel_server_csr_count|citadel_secret_controller_csr_err_count|citadel_server_csr_parsing_err_count|citadel_server_success_cert_issuance_count|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_server_handled_total|grpc_server_handling_seconds_bucket|grpc_server_started_total|istio_build|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|secret_deleted_cert_count|svc_acc_created_cert_count|svc_acc_deleted_cert_count|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|grpc_io_server_completed_rpcs|grpc_io_server_server_latency_bucket|istio_build|istio_mcp_request_acks_total|mixer_runtime_dispatch_duration_seconds_bucket|mixer_runtime_dispatches_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|istio_request_bytes_bucket|istio_request_bytes_sum|istio_request_duration_seconds_bucket|istio_requests_total|istio_response_bytes_bucket|istio_response_bytes_sum|istio_tcp_received_bytes_total|istio_tcp_sent_bytes_total)$
-          action: keep
+  additionalServiceMonitors: []
   ## Name of the ServiceMonitor to create
   ##
   # - name: ""
@@ -1979,3 +1981,5 @@ prometheus:
 
 pushgateway:
   enabled: false
+prometheus-istio:
+  enabled: true

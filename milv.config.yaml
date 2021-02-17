@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio"]
+white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
@@ -29,9 +29,6 @@ files:
   - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
     config:
       white-list-external: ["https://www.orders.com/v1/orders"]
-  - path: "./kyma/docs/security/03-01-iam-kubeconfig-service.md"
-    config:
-      white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
   - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
@@ -77,9 +74,6 @@ files:
   - path: "./kyma/docs/monitoring/08-05-send-notifications.md"
     config:
       white-list-external: ["https://hooks.slack.com/services/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"]
-  - path: "./kyma/docs/security/08-03-add-connector.md"
-    config:
-      white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
   - path: "./kyma/docs/kyma/05-04-component-source-url.md"
     config:
       white-list-external: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
@@ -96,3 +90,9 @@ files:
   - path: "./kyma/docs/migration-guides/1.13-1.14.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]
+  - path: "./kyma/docs/security/08-04-add-connector.md"
+    config:
+      white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
+  - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
+    config:
+      white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]

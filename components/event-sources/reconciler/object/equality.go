@@ -1,42 +1,26 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package object
 
 import (
 	"reflect"
 
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
-
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
 // are not relevant for the reconciliation logic are intentionally omitted.
 var Semantic = conversion.EqualitiesOrDie(
 	channelEqual,
-	ksvcEqual,
-	policyEqual,
+	peerAuthenticationEqual,
+	deploymentEqual,
+	serviceEqual,
 )
 
-// policyEqual asserts the equality of two Policy objects.
-func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
+// peerAuthenticationEqual asserts the equality of two PeerAuthentication objects.
+func peerAuthenticationEqual(p1, p2 *securityv1beta1.PeerAuthentication) bool {
 	if p1 == p2 {
 		return true
 	}
@@ -48,11 +32,11 @@ func policyEqual(p1, p2 *authenticationv1alpha1.Policy) bool {
 		return false
 	}
 
-	if !reflect.DeepEqual(p1.Spec.Targets, p2.Spec.Targets) {
+	if !reflect.DeepEqual(p1.Spec.Selector, p2.Spec.Selector) {
 		return false
 	}
 
-	if !reflect.DeepEqual(p1.Spec.Peers, p2.Spec.Peers) {
+	if !reflect.DeepEqual(p1.Spec.PortLevelMtls, p2.Spec.PortLevelMtls) {
 		return false
 	}
 
@@ -78,8 +62,8 @@ func channelEqual(c1, c2 *messagingv1alpha1.Channel) bool {
 	return true
 }
 
-// ksvcEqual asserts the equality of two Knative Service objects.
-func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
+// deploymentEqual asserts the equality of two Deployment objects.
+func deploymentEqual(s1, s2 *appsv1.Deployment) bool {
 	if s1 == s2 {
 		return true
 	}
@@ -94,32 +78,74 @@ func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 		return false
 	}
 
-	cst1 := s1.Spec.ConfigurationSpec.Template
-	cst2 := s2.Spec.ConfigurationSpec.Template
-	if cst1 == nil && cst2 != nil {
+	cst1 := s1.Spec.Template
+	cst2 := s2.Spec.Template
+
+	if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
+
 		return false
 	}
-	if cst1 != nil {
-		if cst2 == nil {
-			return false
-		}
 
-		if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
-			return false
-		}
+	if !reflect.DeepEqual(cst1.Labels, cst2.Labels) {
+		return false
+	}
 
-		if !reflect.DeepEqual(cst1.Labels, cst2.Labels) {
-			return false
-		}
-
-		ps1 := &cst1.Spec.PodSpec
-		ps2 := &cst2.Spec.PodSpec
-		if !podSpecEqual(ps1, ps2) {
-			return false
-		}
+	ps1 := &cst1.Spec
+	ps2 := &cst2.Spec
+	if !podSpecEqual(ps1, ps2) {
+		return false
 	}
 
 	return true
+}
+
+func serviceEqual(s1, s2 *corev1.Service) bool {
+	if s1 == s2 {
+		return true
+	}
+	if s1 == nil || s2 == nil {
+		return false
+	}
+
+	if !reflect.DeepEqual(s1.Labels, s2.Labels) {
+		return false
+	}
+	if !reflect.DeepEqual(s1.Annotations, s2.Annotations) {
+		return false
+	}
+	sp1, sp2 := s1.Spec.Ports, s2.Spec.Ports
+	if len(sp1) != len(sp2) {
+		return false
+	}
+	for i := range sp1 {
+		p1, p2 := &sp1[i], &sp2[i]
+
+		if p1.Name != p2.Name ||
+			p1.TargetPort != p2.TargetPort ||
+			realProto(p1.Protocol) != realProto(p2.Protocol) || p1.Port != p2.Port {
+			return false
+		}
+	}
+	if !reflect.DeepEqual(s1.Spec.Selector, s2.Spec.Selector) {
+		return false
+	}
+
+	spec1, spec2 := s1.Spec, s2.Spec
+	if getServiceType(spec1.Type) != getServiceType(spec2.Type) {
+		return false
+	}
+
+	if spec1.ClusterIP != spec2.ClusterIP {
+		return false
+	}
+	return true
+}
+
+func getServiceType(typ corev1.ServiceType) corev1.ServiceType {
+	if typ == "" {
+		return corev1.ServiceTypeClusterIP
+	}
+	return typ
 }
 
 // podSpecEqual asserts the equality of two PodSpec objects.
@@ -205,13 +231,14 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 		return false
 	}
 
-	if p1.InitialDelaySeconds != p2.InitialDelaySeconds ||
-		p1.TimeoutSeconds != p2.TimeoutSeconds ||
-		p1.PeriodSeconds != p2.PeriodSeconds ||
-		// Knative sets a default when that value is 0
-		p1.SuccessThreshold != p2.SuccessThreshold && !(p1.SuccessThreshold == 0 || p2.SuccessThreshold == 0) ||
-		p1.FailureThreshold != p2.FailureThreshold {
+	isInitialDelaySecondsEqual := p1.InitialDelaySeconds != p2.InitialDelaySeconds
+	isTimeoutSecondsEqual := p1.TimeoutSeconds != p2.TimeoutSeconds && p1.TimeoutSeconds != 0 && p2.TimeoutSeconds != 0
+	isPeriodSecondsEqual := p1.PeriodSeconds != p2.PeriodSeconds && p1.PeriodSeconds != 0 && p2.PeriodSeconds != 0
+	// Knative sets a default when that value is 0
+	isSuccessThresholdEqual := p1.SuccessThreshold != p2.SuccessThreshold && p1.SuccessThreshold != 0 && p2.SuccessThreshold != 0
+	isFailureThresholdEqual := p1.FailureThreshold != p2.FailureThreshold && p1.FailureThreshold != 0 && p2.FailureThreshold != 0
 
+	if isInitialDelaySecondsEqual || isTimeoutSecondsEqual || isPeriodSecondsEqual || isSuccessThresholdEqual || isFailureThresholdEqual {
 		return false
 	}
 

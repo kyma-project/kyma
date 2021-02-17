@@ -16,6 +16,7 @@ tracing:
 
 loki:
   enabled: true
+
   podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
@@ -37,7 +38,7 @@ loki:
     # log.level: debug
 
   image:
-    repository: grafana/loki
+    repository: eu.gcr.io/kyma-project/external/grafana/loki
     tag: 1.5.0
     pullPolicy: IfNotPresent
 
@@ -174,7 +175,7 @@ loki:
   # maxUnavailable: 1
 
   serviceMonitor:
-    enabled: false
+    enabled: true
     interval: ""
     additionalLabels: {}
     # scrapeTimeout: 10s
@@ -230,6 +231,9 @@ global:
     enabled: true
     env:
       testUser: "admin-user"
+    labels:
+      integration: true
+      after-upgrade: true
   istio:
     gateway:
       name: kyma-gateway

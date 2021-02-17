@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 )
 
-//go:generate mockery -name=TargetConfigProvider
+//go:generate mockery --name=TargetConfigProvider
 
 // TargetConfigProvider allows to fetch ProxyDestinationConfig for specific service
 type TargetConfigProvider interface {

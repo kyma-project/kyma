@@ -74,7 +74,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-migrate-ac-certs
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200309-9a88ce97
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
             - /bin/sh
             - -c

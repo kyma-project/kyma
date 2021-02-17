@@ -18,7 +18,7 @@ import (
 var (
 	podPort      int32  = 8080
 	svcPort      int32  = 80
-	defaultImage string = "hudymi/mockice:0.1.3"
+	defaultImage string = "eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3"
 )
 
 func Start(client dynamic.Interface, namespace, name, testID string) (string, error) {

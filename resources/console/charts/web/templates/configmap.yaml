@@ -35,7 +35,8 @@ data:
           'FUNC_HANDLER',
           'FUNC_PORT',
           'MOD_NAME',
-          'NODE_PATH'
+          'NODE_PATH',
+          'PYTHONPATH'
         ],
         resources: {
           min: {

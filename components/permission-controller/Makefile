@@ -44,7 +44,7 @@ path-to-referenced-charts:
 # development #
 ###############
 
-EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, knative-serving, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, tekton-pipelines"
+EXCLUDED_NAMESPACES ?= "kyma-system, istio-system, default, knative-eventing, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, tekton-pipelines"
 SUBJECT_GROUPS ?= "runtimeNamespaceAdmin"
 STATIC_CONNECTOR ?= true
 

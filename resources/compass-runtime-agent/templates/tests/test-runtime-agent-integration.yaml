@@ -12,6 +12,10 @@ metadata:
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- range $key, $val := .Values.compassRuntimeAgent.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: false
   template:

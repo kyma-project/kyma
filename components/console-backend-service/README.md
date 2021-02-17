@@ -13,17 +13,17 @@ See the [GraphQL schema definition](internal/gqlschema/schema.graphql) file for 
 
 Use the following tools to set up the project:
 
-* [Go](https://golang.org)
-* [Docker](https://www.docker.com/)
+- [Go](https://golang.org)
+- [Docker](https://www.docker.com/)
 
 ## Usage
 
 ### Run a local version
 
-To run the application without building the binary, run this command:
+To start the application without building the binary, set your `$KUBECONFIG` environment variable, and run:
 
 ```bash
-APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_RAFTER_ADDRESS=https://storage.{kymaDomain} APP_RAFTER_VERIFY_SSL=false APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration APP_APPLICATION_CONNECTOR_URL=http://dummy.url APP_OIDC_ISSUER_URL=https://dex.{kymaDomain} APP_OIDC_CLIENT_ID=kyma-client go run main.go
+APP_KUBECONFIG_PATH=$KUBECONFIG APP_DEBUG_DOMAIN={kymaDomain} go run main.go
 ```
 
 For the descriptions of the available environment variables, see the [Configuration](./docs/configuration.md) document.
@@ -36,7 +36,7 @@ Before using the console on a cluster, set a valid token for all requests. Click
 
 ```json
 {
-    "Authorization": "Bearer {YOUR_BEARER_TOKEN}"
+  "Authorization": "Bearer {YOUR_BEARER_TOKEN}"
 }
 ```
 
@@ -52,8 +52,8 @@ docker build {image_name}:{image_tag}
 
 The variables are:
 
-* `{image_name}` - name of the output image (default: `console-backend-service`)
-* `{image_tag}` - tag of the output image (default: `latest`)
+- `{image_name}` - name of the output image (default: `console-backend-service`)
+- `{image_tag}` - tag of the output image (default: `latest`)
 
 ### Certificate error
 
@@ -98,6 +98,6 @@ go test ./...
 
 ### Verify the code
 
-To check if the code is correct and you can push it, use the `make` command. It builds the application, runs tests, checks the status of the vendored libraries, runs the static code analysis, and checks if the formatting of the code is correct. 
+To check if the code is correct and you can push it, use the `make` command. It builds the application, runs tests, checks the status of the vendored libraries, runs the static code analysis, and checks if the formatting of the code is correct.
 
 To automatically format the incorrect code, use the `make format` command.

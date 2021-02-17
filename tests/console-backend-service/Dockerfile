@@ -11,7 +11,6 @@ COPY ./internal/ ${BASE_APP_DIR}/internal/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./tester.go ${BASE_APP_DIR}/tester.go
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
@@ -49,7 +48,6 @@ COPY ./run-compiled-tests.sh /app/tests/
 
 RUN mkdir -p /app/tests
 COPY --from=builder ${TESTS_DIR} /app/tests/
-COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/console-backend-service/licenses/ /app/licenses/
 
 #
 # Run tests

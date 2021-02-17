@@ -20,16 +20,4 @@ app.kubernetes.io/name: {{ .Values.global.natsStreaming.fullname }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{- /*
-nats-streaming.labels.kyma prints Kyma-specific labels.
-
-Kyma labels are set on various objects to integrate with other technical components (monitoring, ...).
-*/ -}}
-{{- define "nats-streaming.labels.kyma" -}}
-kyma-grafana: {{ .Values.monitoring.grafana }}
-kyma-alerts: {{ .Values.monitoring.alerts }}
-alertcpu: {{ .Values.monitoring.alertcpu | quote }}
-alertmem: {{ .Values.monitoring.alertmem | quote }}
-{{- end -}}
-
 {{/* vim: set filetype=mustache: */}}

@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=ClientsProvider
+//go:generate mockery --name=ClientsProvider
 type ClientsProvider interface {
 	GetDirectorClient(runtimeConfig config.RuntimeConfig) (director.DirectorClient, error)
 	GetConnectorTokensClient(url string) (connector.Client, error)

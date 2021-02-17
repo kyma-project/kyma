@@ -1,11 +1,8 @@
 global:
   isLocalEnv: false
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  istio_webhook:
-    dir: develop/
-    version: 84219cbc
-  istio_kyma_patch:
-    dir:
-    version: d022112f
-  required_istio_version: 1.4.10-distroless
+
+istio_kyma_patch:
+  image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+  tag: "20201023-5de446cf"
+required_istio_version: 1.7.4-distroless
+

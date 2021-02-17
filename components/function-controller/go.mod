@@ -2,6 +2,12 @@ module github.com/kyma-project/kyma/components/function-controller
 
 go 1.14
 
+replace (
+	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
+	golang.org/x/text => golang.org/x/text v0.3.3
+	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
+)
+
 require (
 	cloud.google.com/go v0.47.0 // indirect
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect
@@ -12,19 +18,15 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/golang/protobuf v1.3.3 // indirect
-	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/markbates/inflect v1.0.4 // indirect
-	github.com/onsi/ginkgo v1.11.0
-	github.com/onsi/gomega v1.8.1
+	github.com/onsi/ginkgo v1.14.0
+	github.com/onsi/gomega v1.10.1
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.2.1 // indirect
-	github.com/prometheus/procfs v0.0.8 // indirect
-	github.com/stretchr/testify v1.5.1
-	github.com/vrischmann/envconfig v1.2.0
+	github.com/stretchr/testify v1.6.1
+	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/atomic v1.5.1 // indirect
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/zap v1.13.0 // indirect
@@ -37,13 +39,10 @@ require (
 	google.golang.org/api v0.15.0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/grpc v1.26.0 // indirect
-	gopkg.in/yaml.v2 v2.2.8
-	k8s.io/api v0.17.4
-	k8s.io/apiextensions-apiserver v0.17.3 // indirect
-	k8s.io/apimachinery v0.17.4
-	k8s.io/client-go v0.17.4
+	gopkg.in/yaml.v2 v2.3.0
+	k8s.io/api v0.17.11
+	k8s.io/apimachinery v0.17.11
+	k8s.io/client-go v0.17.11
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	sigs.k8s.io/controller-runtime v0.5.1
+	sigs.k8s.io/controller-runtime v0.5.10
 )
-
-replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.8

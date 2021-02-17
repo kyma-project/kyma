@@ -83,11 +83,16 @@ release: resolve dep-status verify build-image push-image
 .PHONY: build-image push-image
 build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
-push-image:
+push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
 docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
+.PHONY: post-pr-tag-image
+post-pr-tag-image:
+ifdef DOCKER_POST_PR_TAG
+	docker tag $(IMG_NAME) $(IMG_NAME):$(DOCKER_POST_PR_TAG)
+endif
 
 # Targets mounting sources to buildpack
 MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen

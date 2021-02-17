@@ -9,7 +9,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
 # Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
-MINIKUBE_VERSION=1.6.2
+MINIKUBE_VERSION=1.12.2
 KUBERNETES_VERSION=1.16.3
 KUBECTL_CLI_VERSION=1.16.3
 VM_DRIVER=hyperkit
@@ -209,6 +209,9 @@ function start() {
     --extra-config=apiserver.authorization-mode=RBAC \
     --extra-config=apiserver.cors-allowed-origins="http://*" \
     --extra-config=apiserver.enable-admission-plugins="DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook" \
+    --extra-config=apiserver.service-account-signing-key-file=/var/lib/minikube/certs/sa.key \
+    --extra-config=apiserver.service-account-issuer=kubernetes/serviceaccount \
+    --extra-config=apiserver.service-account-api-audiences=api \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
