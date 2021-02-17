@@ -168,6 +168,8 @@ resources:
   requests:
     memory: 256Mi
     cpu: 250m
+  limits:
+    memory: 320Mi
 
 ## Create a bucket after minio install
 ##

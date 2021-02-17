@@ -3,7 +3,7 @@ controller-manager:
     resources:
       requests:
         cpu: 150m
-        memory: 320Mi
+        memory: 32Mi
   envs:
     loglevel: "warn"
 
