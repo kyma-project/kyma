@@ -40,7 +40,8 @@ dnsConfig: {}
 #     value: "2"
 #   - name: edns0
 securityContext:
-  {}
+  allowPrivilegeEscalation: false
+  privileged: false
   # capabilities:
   #   drop:
   #   - ALL
