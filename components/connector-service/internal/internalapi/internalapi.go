@@ -1,6 +1,7 @@
 package internalapi
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
@@ -31,6 +32,7 @@ type TokenHandler interface {
 }
 
 type handlerBuilder struct {
+	ctx                   context.Context
 	router                *mux.Router
 	functionalMiddlewares FunctionalMiddlewares
 }
@@ -43,6 +45,7 @@ func NewHandlerBuilder(functionalMiddlewares FunctionalMiddlewares, globalMiddle
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
 
 	return &handlerBuilder{
+		ctx:                   context.Background(),
 		router:                router,
 		functionalMiddlewares: functionalMiddlewares,
 	}
@@ -50,7 +53,7 @@ func NewHandlerBuilder(functionalMiddlewares FunctionalMiddlewares, globalMiddle
 
 func (hb *handlerBuilder) WithApps(appCfg Config) {
 	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
-	appRevocationHandler := NewRevocationHandler(appCfg.RevokedCertsRepo)
+	appRevocationHandler := NewRevocationHandler(hb.ctx, appCfg.RevokedCertsRepo)
 
 	applicationTokenRouter := hb.router.PathPrefix("/v1/applications").Subrouter()
 	httphelpers.WithMiddlewares(applicationTokenRouter, hb.functionalMiddlewares.ApplicationCtxMiddleware)
@@ -62,7 +65,7 @@ func (hb *handlerBuilder) WithApps(appCfg Config) {
 
 func (hb *handlerBuilder) WithRuntimes(runtimeCfg Config) {
 	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenManager, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
-	runtimeRevocationHandler := NewRevocationHandler(runtimeCfg.RevokedRuntimeCertsRepo)
+	runtimeRevocationHandler := NewRevocationHandler(hb.ctx, runtimeCfg.RevokedRuntimeCertsRepo)
 
 	clusterTokenRouter := hb.router.PathPrefix("/v1/runtimes").Subrouter()
 	httphelpers.WithMiddlewares(clusterTokenRouter, hb.functionalMiddlewares.RuntimeCtxMiddleware)
