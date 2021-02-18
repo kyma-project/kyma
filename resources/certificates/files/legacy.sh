@@ -12,6 +12,14 @@ fi
 
 echo "Legacy mode detected"
 
+echo "Checking if running on Gardener"
+
+SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"
+if [ -n "$SHOOT_INFO" ]; then
+  echo "Shoot ConfigMap shoot-info/kube-system present. Ignoring user provided values. Exiting..."
+  exit 0
+fi
+
 for var in DOMAIN TLS_KEY TLS_CRT KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE; do
   if [ -z "${!var}" ] ; then
     echo "ERROR: $var is not set"

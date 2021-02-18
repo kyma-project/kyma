@@ -21,7 +21,6 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
-    resourceNames: ['coredns']
     verbs: ["get", "patch"]
 ---
 kind: Role
