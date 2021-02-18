@@ -46,7 +46,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
-		middleware := NewRevocationCheckMiddleware(testContext, repository, headerParser)
+		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -72,7 +72,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		repository.On("Contains", testContext, hash).Return(false, nil)
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
-		middleware := NewRevocationCheckMiddleware(testContext, repository, headerParser)
+		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -98,7 +98,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		repository.On("Contains", testContext, hash).Return(false, errors.New("Some error"))
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
-		middleware := NewRevocationCheckMiddleware(testContext, repository, headerParser)
+		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -125,7 +125,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 		repository := &mocks.RevocationListRepository{}
 
-		middleware := NewRevocationCheckMiddleware(testContext, repository, headerParser)
+		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

@@ -16,9 +16,9 @@ type revocationCheckMiddleware struct {
 	headerParser   certificates.HeaderParser
 }
 
-func NewRevocationCheckMiddleware(ctx context.Context, revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationCheckMiddleware {
+func NewRevocationCheckMiddleware(revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationCheckMiddleware {
 	return &revocationCheckMiddleware{
-		ctx:            ctx,
+		ctx:            context.Background(),
 		revocationList: revocationList,
 		headerParser:   headerParser,
 	}

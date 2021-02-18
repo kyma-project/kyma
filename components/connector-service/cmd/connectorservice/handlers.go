@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -82,7 +81,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
 	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
-	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(context.Background(), revocationListRepository, headerParser)
+	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
