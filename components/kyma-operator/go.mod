@@ -16,10 +16,12 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/vrischmann/envconfig v1.1.0
-	helm.sh/helm/v3 v3.2.1
+	helm.sh/helm/v3 v3.5.2
 	k8s.io/api v0.18.15
 	k8s.io/apimachinery v0.18.15
 	k8s.io/cli-runtime v0.18.15
 	k8s.io/client-go v0.18.15
 	rsc.io/letsencrypt v0.0.3 // indirect
 )
+
+replace golang.org/x/crypto/ssh => golang.org/x/crypto/ssh v0.0.0-20201216223049-8b5274cf687f
