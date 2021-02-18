@@ -3,14 +3,9 @@ title: Install Kyma on a cluster
 type: Installation
 ---
 
-This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
+This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [xip.io](http://xip.io) using a GitHub release of your choice.
 
-These are the supported Kubernetes cluster versions:
-- Azure - AKS - 1.19
-- Google Cloud Platform - GKE - 1.18
-- GARDENER on AWS, Azure or GCP - 1.19
-
->**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
+>**TIP:** The xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
 ## Prerequisites
 
@@ -20,6 +15,7 @@ These are the supported Kubernetes cluster versions:
   GKE
   </summary>
 
+- Kubernetes cluster in Google Cloud Platform (GCP) v1.18
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -33,6 +29,7 @@ These are the supported Kubernetes cluster versions:
   AKS
   </summary>
 
+- Kubernetes cluster in Azure v1.19
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Microsoft Azure](https://azure.microsoft.com) account
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -46,6 +43,7 @@ These are the supported Kubernetes cluster versions:
   Gardener
   </summary>
 
+- Gardener cluster in AWS, Azure or GCP v1.19
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
