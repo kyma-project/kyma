@@ -5,6 +5,7 @@ TAG = $(DOCKER_TAG)
 .PHONY: build
 build:
 	./before-commit.sh
+	cd  logging && ./before-commit.sh && cd -
 
 .PHONY: ci-pr
 ci-pr: build
