@@ -12,6 +12,6 @@ Logging in Kyma uses [Loki](https://github.com/grafana/loki) which is a Promethe
 
 >**CAUTION:** Loki is designed for application logging. Do not log any sensitive information, such as passwords or credit card numbers.
 
-You can install Logging as part of Kyma predefined [profiles](/root/kyma/#installation-overview-profiles). For production purposes, use the **production profile** which has higher memory limits set for Loki and Fluent Bit logging solutions. It ensures stable log processing for 40 active Pods without causing any memory issues. If you want to work with a larger number of active Pods or experience a prolonged query time, [configure the Logging chart](/components/logging/#configuration-logging-chart) to increase the memory and CPU values.
+You can install Logging as part of Kyma predefined [profiles](/root/kyma/#installation-overview-profiles). For production purposes, use the **production profile** which has higher memory limits set for Loki and Fluent Bit logging solutions. It ensures stable log processing for 40 active Pods without causing any memory issues. If you want to work with a larger number of active Pods or experience a prolonged query time, [configure the Logging chart](#configuration-logging-chart) to increase the memory and CPU values.
 
 **>NOTE:** The production profile does not allow for horizontal scaling for which you need additional, dedicated storage systems.
