@@ -28,5 +28,7 @@ require (
 replace (
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
 	github.com/tidwall/gjson => github.com/tidwall/gjson v1.6.7
+
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad 
 	golang.org/x/text => golang.org/x/text v0.3.3
 )
