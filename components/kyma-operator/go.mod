@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/vrischmann/envconfig v1.1.0
-	helm.sh/helm/v3 v3.5.2
+	helm.sh/helm/v3 v3.3.2
 	k8s.io/api v0.18.15
 	k8s.io/apimachinery v0.18.15
 	k8s.io/cli-runtime v0.18.15
