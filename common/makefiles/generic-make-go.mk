@@ -123,8 +123,11 @@ gomod-check-local:: test-local check-imports-local check-fmt-local
 $(eval $(call buildpack-cp-ro,gomod-check))
 
 gomod-component-check-local:: gomod-deps-local gomod-check-local
+$(eval $(call buildpack-mount,gomod-component-check))
 
-gomod-release:gomod-component-check-local build-image push-image
+gomod-release:gomod-component-check build-image push-image
+
+gomod-release-local:gomod-component-check-local build-image push-image
 
 gomod-vendor-local:
 	GO111MODULE=on go mod vendor
