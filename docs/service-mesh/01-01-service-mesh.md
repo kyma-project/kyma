@@ -14,4 +14,4 @@ By default, Istio in Kyma has [mutual TLS (mTLS)](https://istio.io/docs/concepts
 
 >**NOTE:** For security and performance we use the [distroless](https://istio.io/docs/ops/configuration/security/harden-docker-images/) version of Istio images. Those images are not Debian-based and are slimmed down to reduce any potential attack surface and increase startup time.
 
-You can install Service Mesh as part of Kyma predefined [profiles](/root/kyma/#installation-overview-profiles). For production purposes, use the **production profile** which has resource quotas for all Istio components increased. It also has Horizontal Pod Autoscaler (HPA) enabled for all Istio components.
+You can install Service Mesh as part of Kyma predefined [profiles](/root/kyma/#installation-overview-profiles). For production purposes, use the **production profile** which has increased resource quotas for all Istio components. It also has Horizontal Pod Autoscaler (HPA) enabled for all Istio components.
