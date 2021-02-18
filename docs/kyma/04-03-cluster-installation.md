@@ -43,7 +43,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   Gardener
   </summary>
 
-- Gardener cluster in AWS, Azure or GCP v1.19
+- Gardener cluster in AWS, Azure, or GCP v1.19
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
