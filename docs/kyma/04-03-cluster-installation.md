@@ -15,7 +15,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
-- Kubernetes cluster running on Google Cloud Platform (GCP) v1.18
+- Kubernetes cluster in v1.18 running on Google Cloud Platform (GCP)
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -29,7 +29,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   AKS
   </summary>
 
-- Kubernetes cluster running on Azure v1.19
+- Kubernetes cluster in v1.19 running on Azure
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Microsoft Azure](https://azure.microsoft.com) account
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -43,7 +43,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   Gardener
   </summary>
 
-- Gardener cluster running on AWS, Azure, or GCP v1.19
+- Gardener cluster in v1.19 running on AWS, Azure, or GCP
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
