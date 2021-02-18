@@ -13,13 +13,13 @@ require (
 	github.com/prometheus/common v0.6.0 // indirect
 	github.com/prometheus/procfs v0.0.3 // indirect
 	github.com/stretchr/testify v1.4.0
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v0.18.2
-	k8s.io/code-generator v0.18.2
+	k8s.io/apimachinery v0.18.15
+	k8s.io/client-go v0.18.15
+	k8s.io/code-generator v0.18.15
 	sigs.k8s.io/controller-runtime v0.6.0
 )
 
 replace (
 	golang.org/x/text => golang.org/x/text v0.3.3
-	k8s.io/apimachinery => k8s.io/apimachinery v0.18.8
+	k8s.io/apimachinery => k8s.io/apimachinery v0.18.15
 )
