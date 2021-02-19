@@ -9,9 +9,10 @@ replicaCount: 1
 
 image:
   # ORY Oathkeeper image
-  repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper
+  # repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper
+  repository: oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.38.2-beta.1-alpine
+  tag: v0.38.6-alpine
   # Image pull policy
   pullPolicy: IfNotPresent
 
