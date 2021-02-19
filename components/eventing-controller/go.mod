@@ -17,14 +17,13 @@ require (
 	github.com/onsi/gomega v1.10.2
 	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.6.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	k8s.io/api v0.20.2
-	k8s.io/apiextensions-apiserver v0.20.2  // indirect
+	k8s.io/apiextensions-apiserver v0.20.2 // indirect
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.20.2
-	sigs.k8s.io/controller-runtime v0.6.0
+	sigs.k8s.io/controller-runtime v0.6.2
 )
 
 replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.10.1-0.20201204000952-090c71e95cd0
