@@ -8,9 +8,8 @@ loki:
       memory: 128Mi
   persistence:
     enabled: false
-  config:
-    server:
-      log_level: warn
+  extraArgs:
+    log.level: warn
 
 fluent-bit:
   resources:

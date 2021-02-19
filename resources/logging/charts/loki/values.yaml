@@ -108,8 +108,8 @@ config:
 #    enable_api: true
 
 ## Additional Loki container arguments, e.g. log level (debug, info, warn, error)
-extraArgs: {}
-  # log.level: debug
+extraArgs:
+  log.level: info
 
 livenessProbe:
   httpGet:
