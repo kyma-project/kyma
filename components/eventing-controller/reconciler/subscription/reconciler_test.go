@@ -241,7 +241,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			getAPIRule(apiRule, ctx).Should(And(
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/.*"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/"),
 				reconcilertesting.HaveAPIRuleGateway(constants.ClusterLocalAPIGateway),
 				reconcilertesting.HaveAPIRuleLabels(expectedLabels),
 				reconcilertesting.HaveAPIRuleService(subscriberSvc.Name, 443, domain),
