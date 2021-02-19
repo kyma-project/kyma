@@ -1,6 +1,7 @@
 package certificates
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/base64"
 
@@ -23,6 +24,7 @@ type Service interface {
 }
 
 type certificateService struct {
+	ctx                         context.Context
 	secretsRepository           secrets.Repository
 	certUtil                    CertificateUtility
 	caSecretName                types.NamespacedName
@@ -31,6 +33,7 @@ type certificateService struct {
 
 func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName types.NamespacedName) Service {
 	return &certificateService{
+		ctx:                         context.Background(),
 		secretsRepository:           secretRepository,
 		certUtil:                    certUtil,
 		caSecretName:                caSecretName,
@@ -53,7 +56,7 @@ func (svc *certificateService) SignCSR(encodedCSR []byte, subject CSRSubject) (E
 }
 
 func (svc *certificateService) signCSR(csr *x509.CertificateRequest) (EncodedCertificateChain, apperrors.AppError) {
-	secretData, err := svc.secretsRepository.Get(svc.caSecretName)
+	secretData, err := svc.secretsRepository.Get(svc.ctx, svc.caSecretName)
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}
@@ -95,7 +98,7 @@ func (svc *certificateService) encodeCertificates(rawCaCertificate, rawClientCer
 }
 
 func (svc *certificateService) loadRootCACert() ([]byte, apperrors.AppError) {
-	secretData, err := svc.secretsRepository.Get(svc.rootCACertificateSecretName)
+	secretData, err := svc.secretsRepository.Get(svc.ctx, svc.rootCACertificateSecretName)
 	if err != nil {
 		return nil, err
 	}
