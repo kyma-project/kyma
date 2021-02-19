@@ -40,6 +40,9 @@
 # The `rafter` chart
 /resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
+# The `cert-manager` chart
+/resources/cert-manager/ @Tomasz-Smelcerz-SAP @strekm @Demonsthere @colunira @mjakobczyk
+
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
@@ -309,7 +312,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Fast Integration Tests
-/tests/fast-integration/ @crabtree @pbochynski @adamwalach @dariadomagala @parostatkiem @akucharska @aerfio @kwiatekus
+/tests/fast-integration/ @crabtree @pbochynski @adamwalach @aerfio
 
 # Tools
 

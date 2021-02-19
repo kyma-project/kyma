@@ -117,7 +117,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi

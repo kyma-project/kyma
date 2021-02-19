@@ -20,9 +20,9 @@ require (
 	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v0.16.10
+	k8s.io/api v0.18.15
+	k8s.io/apimachinery v0.18.15
+	k8s.io/client-go v0.18.15
 )
 
 replace (
