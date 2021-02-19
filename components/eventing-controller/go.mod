@@ -19,10 +19,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	k8s.io/api v0.20.2
-	k8s.io/apiextensions-apiserver v0.20.2 // indirect
-	k8s.io/apimachinery v0.20.2
-	k8s.io/client-go v0.20.2
+	k8s.io/api v0.18.12
+	k8s.io/apiextensions-apiserver v0.18.12 // indirect
+	k8s.io/apimachinery v0.18.12
+	k8s.io/client-go v0.18.12
 	sigs.k8s.io/controller-runtime v0.6.2
 )
 
