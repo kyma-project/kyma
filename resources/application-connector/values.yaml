@@ -62,7 +62,7 @@ global:
   application_connectivity_certs_setup_job:
     version: "PR-10651"
   application_connectivity_validator:
-    version: "56b8cb60"
+    version: "PR-10651"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
