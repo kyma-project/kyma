@@ -22,4 +22,4 @@ backend:
       memory: 40Mi
     limits:
       cpu: 50m
-      memory: 170Mi
+      memory: 220Mi
