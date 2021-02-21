@@ -3,6 +3,7 @@ package applications
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/normalizator"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,8 +18,7 @@ type Converter interface {
 	Do(application model.Application) v1alpha1.Application
 }
 
-type converter struct {
-}
+type converter struct{}
 
 func NewConverter() Converter {
 	return converter{}
@@ -45,7 +45,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: application.Name,
+			Name: c.prepareName(application),
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,
@@ -55,6 +55,19 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
 		},
 	}
+}
+
+func (c converter) prepareName(application model.Application) string {
+	normalized, ok := application.Labels["isNormalized"]
+	if !ok {
+		normalized = false
+	}
+
+	if v, ok := normalized.(bool); !ok || v {
+		return application.Name
+	}
+
+	return normalizator.Normalize(application.Name)
 }
 
 func (c converter) toServices(applicationName, appProvider string, packages []model.APIPackage) []v1alpha1.Service {

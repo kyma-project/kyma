@@ -32,7 +32,7 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name: "mp-appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description not provided",
@@ -114,7 +114,7 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name: "mp-appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
@@ -223,7 +223,7 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name: "mp-appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",

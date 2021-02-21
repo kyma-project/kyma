@@ -99,7 +99,7 @@ func (s *service) createApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if !ApplicationExists(directorApplication.Name, runtimeApplications) {
+		if !ApplicationExists(directorApplication.ID, runtimeApplications) {
 			result := s.createApplication(directorApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
@@ -218,8 +218,8 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if ApplicationExists(directorApplication.Name, runtimeApplications) {
-			existentApplication := GetApplication(directorApplication.Name, runtimeApplications)
+		if ApplicationExists(directorApplication.ID, runtimeApplications) {
+			existentApplication := GetApplication(directorApplication.ID, runtimeApplications)
 			result := s.updateApplication(directorApplication, existentApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
