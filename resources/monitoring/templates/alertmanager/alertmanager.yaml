@@ -101,7 +101,7 @@ spec:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.containers | indent 4 }}
 {{- end }}
 {{- if or .Values.alertmanager.alertmanagerSpec.priorityClassName .Values.global.priorityClassName }}
-  priorityClassName: {{ coalesce Values.alertmanager.alertmanagerSpec.priorityClassName .Values.global.priorityClassName }}
+  priorityClassName: {{ coalesce .Values.alertmanager.alertmanagerSpec.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.additionalPeers }}
   additionalPeers:
