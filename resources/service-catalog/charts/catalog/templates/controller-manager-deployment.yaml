@@ -40,7 +40,7 @@ spec:
           emptyDir: {}
       containers:
       - name: healthcheck
-        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.2
+        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:bd223692
         securityContext:
           privileged: false
           allowPrivilegeEscalation: false
