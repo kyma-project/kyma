@@ -1,5 +1,5 @@
 ---
-title: Install Kyma with your own domain
+title: Deploy Kyma with your own domain
 type: Installation
 ---
 
@@ -44,9 +44,9 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 
 </div>
 
-## Choose the release to install
+## Choose the release to deploy
 
-1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to install.
+1. Go to [Kyma releases](https://github.com/kyma-project/kyma/releases/) and choose the release you want to deploy.
 
 2. Export the release version as an environment variable. Run:
 
@@ -389,16 +389,16 @@ Get the TLS certificate:
 
 </div>
 
-## Install Kyma
+## Deploy Kyma
 
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
       >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
       >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
-1. Install Kyma using Kyma CLI:
+1. Deploy Kyma using Kyma CLI:
 
     ```bash
-    kyma install -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
+    kyma deploy -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
     ```
 
 ## Configure DNS for the cluster load balancer
@@ -457,7 +457,7 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
     kyma console
     ```
 
-2. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password printed after the installation. To get the password manually, you can also run:
+2. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password printed after the deployment. To get the password manually, you can also run:
 
     ```bash
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode

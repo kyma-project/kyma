@@ -38,11 +38,5 @@ Follow these steps:
   >**CAUTION:** Do not forget to supply the same overrides using the `-o` flag and the same component list using the `-c` flag if you provided any of them during the installation. There might be new components on the version that you would like to upgrade to. It is important to add them also to your custom component list.
 
   ```bash
-  kyma upgrade -s {VERSION}
-  ```
-
-  If you want to upgrade Kyma to use one of the predefined [profiles](#installation-overview-profiles), run:
-
-  ```bash
-  kyma upgrade -s {VERSION} --profile {evaluation|production}
+  kyma deploy -s {VERSION}
   ```

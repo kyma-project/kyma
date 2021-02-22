@@ -14,6 +14,6 @@ Kubernetes provides the [VolumeSnapshot API resource](https://kubernetes.io/docs
 
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/) which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
-Follow the [tutorial](#tutorials-create-on-demand-volume-snapshots-for-cloud-providers) to create on-demand volume snapshots for cloud providers. 
+Follow the [tutorial](#tutorials-create-on-demand-volume-snapshots-for-cloud-providers) to create on-demand volume snapshots for cloud providers.
 
 >**TIP:** Follow the instructions on [restoring resources using Velero](#tutorials-restore-resources-using-velero) to learn how to back up and restore individual resources.
