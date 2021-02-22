@@ -10,7 +10,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 VERIFY_IGNORE := /vendor\|/mocks
 
 release:
-	$(MAKE) gomod-release
+	$(MAKE) gomod-release-local
 
 
 # overrides
