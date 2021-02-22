@@ -14,7 +14,7 @@ Quoting from the [official README](https://github.com/jetstack/cert-manager):
 
 ## Changes introduced
 
-The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD with its name indicating the resource type. They are available in the `installation/resources/crds/cert-manager/` directory.
+The `crds.yaml` file has been split into multiple files. Each of these contains exactly one CRD, with its name indicating the resource type. They are available in the `installation/resources/crds/cert-manager/` directory.
 
 ## Installation
 
