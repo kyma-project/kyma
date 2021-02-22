@@ -12,6 +12,10 @@ VERIFY_IGNORE := /vendor\|/mocks
 release:
 	$(MAKE) gomod-release
 
+
+# overrides
+pull-licenses: pull-licenses-local
+
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/application-connector"
