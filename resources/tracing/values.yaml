@@ -7,6 +7,10 @@ image:
   pullPolicy: IfNotPresent
   imagePullSecrets: []
 
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+
 resources:
   limits:
     cpu: 50m
@@ -127,6 +131,11 @@ kcproxy:
     matchClaims: ""
     addClaims: ""
   nodeSelector: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
     tag: 10.0.0

@@ -74,10 +74,14 @@ testFramework:
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-securityContext:
+podSecurityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
 
 
 extraConfigmapMounts: []
@@ -105,6 +109,9 @@ downloadDashboardsImage:
 downloadDashboards:
   env: {}
   resources: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
 
 ## Pod Annotations
 # podAnnotations: {}
@@ -272,6 +279,12 @@ initChownData:
   #  requests:
   #    cpu: 100m
   #    memory: 128Mi
+
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+    allowPrivilegeEscalation: false
+    privileged: false
 
 
 # Administrator credentials when not using an existing secret (see below)
@@ -568,13 +581,16 @@ sidecar:
     repository: eu.gcr.io/kyma-project/incubator/develop/k8s-sidecar
     tag: 1.1.0-780d37cd
   imagePullPolicy: IfNotPresent
-  resources: {}
-#   limits:
-#     cpu: 100m
-#     memory: 100Mi
-#   requests:
-#     cpu: 50m
-#     memory: 50Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # skipTlsVerify Set to true to skip tls verification for kube api calls
   # skipTlsVerify: true
   enableUniqueFilenames: false
@@ -712,6 +728,10 @@ kyma:
       matchClaims: ""
       addClaims: ""
     nodeSelector: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      runAsNonRoot: true
     port: 3000
     image:
       repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper

@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "76ba4f03"
+    tag: "abb3d162"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "5daaf5c9"
+      tag: "4bed80da"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "5daaf5c9"
+      tag: "4bed80da"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "5daaf5c9"
+      tag: "4bed80da"
 
 deployment:
   replicas: 1
@@ -117,7 +117,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi

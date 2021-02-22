@@ -178,11 +178,16 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-securityContext:
+podSecurityContext:
   fsGroup: 10001
   runAsGroup: 10001
   runAsNonRoot: true
   runAsUser: 10001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  readOnlyRootFilesystem: true
 
 service:
   type: ClusterIP

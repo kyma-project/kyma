@@ -1421,11 +1421,16 @@ prometheusOperator:
     #         - e2e-az1
     #         - e2e-az2
 
-  securityContext:
+  podSecurityContext:
     fsGroup: 65534
     runAsGroup: 65534
     runAsNonRoot: true
     runAsUser: 65534
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    privileged: false
 
   ## Prometheus-operator image
   ##

@@ -367,6 +367,11 @@ configmapReload:
         memory: 25Mi
       requests:
         memory: 10Mi
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+
   alertmanager:
     ## If false, the configmap-reload container will not be deployed
     ##
@@ -921,11 +926,14 @@ server:
 
   ## Security context to be added to server pods
   ##
-  securityContext:
+  podSecurityContext:
     runAsUser: 65534
     runAsNonRoot: true
     runAsGroup: 65534
     fsGroup: 65534
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
 
   service:
     annotations: {}

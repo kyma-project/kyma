@@ -52,7 +52,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 To install Kyma with any of the predefined profiles, follow the instructions described in the [cluster Kyma installation](#installation-install-kyma-on-a-cluster) document and set a profile with the `--profile` flag, as described in the [Install Kyma](#installation-install-kyma-on-a-cluster-install-kyma) section.
 
->**NOTE:** You can also set profiles during the [Kyma upgrade operation](#installation-upgrade-kyma).
+>**NOTE:** You can also set profiles on a running cluster during the [Kyma upgrade operation](#installation-upgrade-kyma).
 
 ## Installation guides
 

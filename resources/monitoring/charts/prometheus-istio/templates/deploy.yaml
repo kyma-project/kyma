@@ -60,6 +60,10 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.configmapReload.prometheus.resources | indent 12 }}
+          {{- if .Values.configmapReload.prometheus.securityContext }}
+          securityContext:
+{{ toYaml .Values.configmapReload.prometheus.securityContext | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
@@ -119,6 +123,10 @@ spec:
             successThreshold: {{ .Values.server.livenessProbeSuccessThreshold }}
           resources:
 {{ toYaml .Values.server.resources | indent 12 }}
+          {{- if .Values.server.securityContext }}
+          securityContext:
+{{ toYaml .Values.server.securityContext | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
@@ -161,9 +169,9 @@ spec:
       hostAliases:
 {{ toYaml .Values.server.hostAliases | indent 8 }}
     {{- end }}
-    {{- if .Values.server.securityContext }}
+    {{- if .Values.server.podSecurityContext }}
       securityContext:
-{{ toYaml .Values.server.securityContext | indent 8 }}
+{{ toYaml .Values.server.podSecurityContext | indent 8 }}
     {{- end }}
     {{- if .Values.server.tolerations }}
       tolerations:

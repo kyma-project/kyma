@@ -40,7 +40,8 @@ dnsConfig: {}
 #     value: "2"
 #   - name: edns0
 securityContext:
-  {}
+  allowPrivilegeEscalation: false
+  privileged: false
   # capabilities:
   #   drop:
   #   - ALL
@@ -80,7 +81,7 @@ readinessProbe:
 resources:
   limits:
     cpu: 100m
-    memory: 128Mi
+    memory: 192Mi
   requests:
     cpu: 20m
     memory: 50Mi
