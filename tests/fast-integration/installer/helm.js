@@ -1,10 +1,21 @@
 const execa = require("execa");
 const fs = require('fs');
-const k8s = require("@kubernetes/client-node");
 const { join } = require("path");
 const { installIstio, upgradeIstio } = require("./istioctl");
 const pRetry = require("p-retry");
-const { debug } = require("../utils");
+const {
+  debug,
+  k8sCoreV1Api,
+  kubectlDeleteDir,
+  kubectlDelete,
+  kubectlApplyDir,
+  kubectlApply,
+  k8sDelete,
+  deleteAllK8sResources,
+  deleteNamespaces,
+  getAllCRDs,
+  k8sApply
+} = require("../utils");
 const notDeployed = "not-deployed";
 
 async function waitForNodesToBeReady(timeout = "180s") {
@@ -18,23 +29,12 @@ async function waitForNodesToBeReady(timeout = "180s") {
   debug("All nodes are ready!");
 }
 
-// TODO: replace by kubectlApply from utils
-async function kubectlApply(path, namespace) {
-  const args = ["apply", "-f", path];
-  if (!!namespace) {
-    args.push("-n", namespace);
-  }
-  await execa("kubectl", args);
-}
 
 async function updateCoreDNSConfigMap() {
-  const kc = new k8s.KubeConfig();
-  kc.loadFromDefault();
 
   const cmName = "coredns";
   const cmNamespace = "kube-system";
 
-  const k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
   const { body } = await k8sCoreV1Api.readNamespacedConfigMap(
     "coredns",
     "kube-system"
@@ -108,6 +108,15 @@ async function helmStatus(release, namespace) {
   }
 }
 
+async function helmList() {
+  const { stdout } = await execa("helm", [
+    "ls",
+    "-A",
+    "-ojson",
+  ]);
+  return JSON.parse(stdout);
+}
+
 async function helmUninstall(release, namespace) {
   await execa("helm", ["uninstall", release, "-n", namespace]);
 }
@@ -130,7 +139,7 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile) {
       if (fs.existsSync(profilePath)) {
         args.push("-f", profilePath);
       }
-    } catch(err) {
+    } catch (err) {
       console.error(`profile-${profile}.yaml file not found in ${chart} - switching to default profile instead`)
     }
   }
@@ -147,8 +156,10 @@ async function installRelease(
   namespace = "kyma-system",
   chart,
   values,
-  profile
+  profile,
+  isUpgrade
 ) {
+
   let status = await helmStatus(release, namespace);
   switch (status) {
     case "pending-install":
@@ -168,8 +179,14 @@ async function installRelease(
       await helmInstallUpgrade(release, chart, namespace, values, profile);
       break;
     case "deployed":
-      debug(`Upgrading release ${release}`);
-      await helmInstallUpgrade(release, chart, namespace, values, profile);
+      if (isUpgrade) {
+        debug(`Upgrading release ${release}`);
+        await helmInstallUpgrade(release, chart, namespace, values, profile);
+
+      } else {
+        debug(`Release ${release} already installed - skipped`);
+        return;
+      }
     default:
       break;
   }
@@ -183,133 +200,182 @@ async function installRelease(
   debug(`Release ${release} deployed`);
 }
 
-const isGardener = process.env["GARDENER"] || "false";
-const domain = process.env["KYMA_DOMAIN"] || "local.kyma.dev";
+async function chartList() {
+  const gardernerDomain = await getGardenerDomain();
+  const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
+  const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
 
-const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK`;
+  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK`;
+  // https://github.com/kyma-project/test-infra/pull/2967
+  let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
+  if (isGardener == "true") {
+    registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
+  }
 
-const kymaCharts = [
-  {
-    release: "pod-preset",
-    namespace: "kyma-system",
-    customPath: (root) =>
-      join(root, "cluster-essentials", "charts", "pod-preset"),
-  },
-  {
-    release: `cluster-users`,
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "core",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "ory",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "serverless",
-    namespace: "kyma-system",
-    // https://github.com/kyma-project/test-infra/pull/2967
-    values: `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
-  },
-  {
-    release: "dex",
-    namespace: "kyma-system",
-    values: `${overrides},resources.requests.cpu=10m`,
-  },
-  {
-    release: "api-gateway",
-    namespace: "kyma-system",
-    values: `${overrides},deployment.resources.requests.cpu=10m`,
-  },
-  {
-    release: "rafter",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "service-catalog",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "service-catalog-addons",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "helm-broker",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "console",
-    namespace: "kyma-system",
-    values: `${overrides},pamela.enabled=false`,
-  },
-  {
-    release: "knative-eventing",
-    namespace: "knative-eventing",
-    values: `${overrides}`,
-  },
-  {
-    release: "application-connector",
-    namespace: "kyma-integration",
-    values: `${overrides}`,
-  },
-  {
-    release: "knative-provisioner-natss",
-    namespace: "knative-eventing",
-    values: `${overrides}`,
-  },
-  {
-    release: "nats-streaming",
-    namespace: "natss",
-  },
-  {
-    release: "event-sources",
-    namespace: "kyma-system",
-  },
-  {
-    release: "monitoring",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "kiali",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "tracing",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "logging",
-    namespace: "kyma-system",
-    values: `${overrides}`,
-  },
-  {
-    release: "ingress-dns-cert",
-    namespace: "istio-system",
-    values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
-    customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
-  },
-];
+  const kymaCharts = [
+    {
+      release: "pod-preset",
+      namespace: "kyma-system",
+      customPath: (root) =>
+        join(root, "cluster-essentials", "charts", "pod-preset"),
+    },
+    {
+      release: `cluster-users`,
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "core",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "ory",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "serverless",
+      namespace: "kyma-system",
+      values: registryOverrides,
+    },
+    {
+      release: "dex",
+      namespace: "kyma-system",
+      values: `${overrides},resources.requests.cpu=10m`,
+    },
+    {
+      release: "api-gateway",
+      namespace: "kyma-system",
+      values: `${overrides},deployment.resources.requests.cpu=10m`,
+    },
+    {
+      release: "rafter",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "service-catalog",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "service-catalog-addons",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "helm-broker",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "console",
+      namespace: "kyma-system",
+      values: `${overrides},pamela.enabled=false`,
+    },
+    {
+      release: "knative-eventing",
+      namespace: "knative-eventing",
+      values: `${overrides}`,
+    },
+    {
+      release: "application-connector",
+      namespace: "kyma-integration",
+      values: `${overrides}`,
+    },
+    {
+      release: "knative-provisioner-natss",
+      namespace: "knative-eventing",
+      values: `${overrides}`,
+    },
+    {
+      release: "nats-streaming",
+      namespace: "natss",
+    },
+    {
+      release: "event-sources",
+      namespace: "kyma-system",
+    },
+    {
+      release: "monitoring",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "kiali",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "tracing",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "logging",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+    },
+    {
+      release: "ingress-dns-cert",
+      namespace: "istio-system",
+      values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
+      customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
+    },
+  ];
+  return kymaCharts;
+}
+
+async function getGardenerDomain() {
+  try {
+    const { body } = await k8sCoreV1Api.readNamespacedConfigMap(
+      "shoot-info",
+      "kube-system"
+    );
+    return body.data.domain;
+  } catch (err) {
+    if (err.statusCode == 404) {
+      return null;
+    }
+    throw err;
+  }
+}
+async function uninstallIstio(){
+  const crds = await getAllCRDs();
+  const istioCRDs = crds.filter(crd => crd.spec.group.endsWith('istio.io'));
+  await k8sDelete(istioCRDs);
+  await deleteNamespaces(["istio-system"], true);
+}
+
+async function uninstallKyma(
+  installLocation = join(__dirname, "..", "..", "..", "resources"),
+) {
+  const releases = await helmList();
+  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace)))
+  await kubectlDelete(join(__dirname, "installer-local.yaml")); // needed for the console to start
+  await kubectlDeleteDir(
+    join(installLocation, "cluster-essentials/files"),
+    "kyma-system"
+  );
+  await kubectlDelete(join(__dirname, "system-namespaces.yaml"));
+  await deleteAllK8sResources('/api/v1/namespaces/kyma-system/secrets');
+  await uninstallIstio();                               
+
+}
 
 async function installKyma(
   installLocation = join(__dirname, "..", "..", "..", "resources"),
   istioVersion,
   ignoredComponents = "monitoring,tracing,kiali,logging,console,cluster-users,dex",
-  isUpgrade = false
+  isUpgrade = false,
+  kymaVersion
 ) {
+  console.log('Installing Kyma from folder', installLocation);
   await waitForNodesToBeReady();
+  if (kymaVersion) {
 
+  }
   if (isUpgrade) {
     await upgradeIstio(istioVersion);
   } else {
@@ -320,11 +386,11 @@ async function installKyma(
   await removeKymaGatewayCertsYaml(installLocation);
   await kubectlApply(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlApply(join(__dirname, "system-namespaces.yaml"));
-  await kubectlApply(
+  await kubectlApplyDir(
     join(installLocation, "cluster-essentials/files"),
     "kyma-system"
   );
-
+  const kymaCharts = await chartList();
   return await Promise.all(
     kymaCharts
       .filter((arg) => !ignoredComponents.includes(arg.release))
@@ -334,7 +400,7 @@ async function installKyma(
           : join(installLocation, release);
         return pRetry(
           async () =>
-            installRelease(release, namespace, chartLocation, values, profile || "evaluation"),
+            installRelease(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
           {
             retries: 10,
             onFailedAttempt: async (err) => {
@@ -349,4 +415,8 @@ async function installKyma(
 
 module.exports = {
   installKyma,
+  uninstallKyma,
+  uninstallIstio,
+  helmList
 };
+

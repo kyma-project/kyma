@@ -16,6 +16,7 @@
     "mocha-multi-reporters": "^1.5.1"
   },
   "dependencies": {
+    "adm-zip": "^0.5.3",
     "axios": "^0.21.0",
     "execa": "^5.0.0",
     "lodash": "^4.17.20",
