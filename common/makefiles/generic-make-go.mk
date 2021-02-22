@@ -85,7 +85,7 @@ release:
 release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
-build-image: pull-licenses-local
+build-image:
 	docker build -t $(IMG_NAME) .
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
@@ -99,7 +99,7 @@ ifdef DOCKER_POST_PR_TAG
 endif
 
 # Targets mounting sources to buildpack
-MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate gqlgen
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
