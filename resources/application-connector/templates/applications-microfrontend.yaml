@@ -14,7 +14,7 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
+  viewBaseUrl: core-ui
   navigationNodes:
     - label: Applications/Systems
       navigationPath: apps

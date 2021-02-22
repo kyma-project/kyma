@@ -1,15 +1,16 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: catalog
+  name: servicecatalogmicrofrontend
   labels:
-    app: catalog
+    app: servicecatalogmicrofrontend
 spec:
   displayName: Service Catalog
   version: v1
   category: Service Management
   placement: namespace
   navigationNodes:
+  viewBaseUrl: catalog
     - label: Catalog
       navigationPath: service-catalog
       order: 1

@@ -39,7 +39,7 @@ spec:
               type: string
             viewBaseUrl:
               type: string
-              pattern: '^(https?)://.+$'
+              pattern: (^(https?)://.+$)|(^[a-z0-9-]+$)
             navigationNodes:
               type: array
               items:
