@@ -600,11 +600,12 @@ function genRandom(len) {
 }
 
 function shouldRunSuite(suite) {
+  debug("COMPASS_ENABLED", process.env.COMPASS_ENABLED);
   switch(suite) {
     case "commerce-mock-compass":
-      return process.env.COMPASS_ENABLED;
+      return process.env.COMPASS_ENABLED !== void 0;
     default:
-      return !process.env.COMPASS_ENABLED;
+      return process.env.COMPASS_ENABLED === void 0;
   }
 }
 
