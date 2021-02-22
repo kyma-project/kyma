@@ -45,7 +45,7 @@ async function updateCoreDNSConfigMap() {
     "-f",
     "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
     "/registry.localhost",
-  ]);
+  ]).catch(()=>"127.0.0.1");
 
   // this file need to be updated when we update k3s to use k8s 1.20
   body.data["Corefile"] = `registry.localhost:53 {
