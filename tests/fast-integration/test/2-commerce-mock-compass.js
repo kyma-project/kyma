@@ -11,6 +11,7 @@ const {
 const {
   genRandom,
   shouldRunSuite,
+  getEnvOrThrow,
 } = require("../utils");
 
 const {
@@ -26,10 +27,10 @@ describe("CommerceMock with Compass tests", function () {
     this.slow(5000);
     const testNamespace = "compass-test";
   
-    const compassHost = process.env["COMPASS_HOST"] || "";
-    const clientID = process.env["COMPASS_CLIENT_ID"] || "";
-    const clientSecret = process.env["COMPASS_CLIENT_SECRET"] || "";
-    const tenantID = process.env["COMPASS_TENANT"] || "";
+    const compassHost = getEnvOrThrow("COMPASS_HOST");
+    const clientID = getEnvOrThrow("COMPASS_CLIENT_ID");
+    const clientSecret = getEnvOrThrow("COMPASS_CLIENT_SECRET");
+    const tenantID = getEnvOrThrow("COMPASS_TENANT");
 
     const director = new DirectorClient(compassHost, clientID, clientSecret, tenantID);
 

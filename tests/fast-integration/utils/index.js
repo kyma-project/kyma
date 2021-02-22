@@ -609,6 +609,14 @@ function shouldRunSuite(suite) {
   }
 }
 
+function getEnvOrThrow(key) {
+  if(!process.env[key]) {
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
 module.exports = {
   retryPromise,
   expectNoK8sErr,
@@ -639,5 +647,6 @@ module.exports = {
   debug,
   toBase64,
   genRandom,
-  shouldRunSuite
+  shouldRunSuite,
+  getEnvOrThrow
 };
