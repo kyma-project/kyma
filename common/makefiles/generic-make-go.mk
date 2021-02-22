@@ -191,6 +191,7 @@ COPY_TARGETS = test
 $(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
 
 test-local:
+	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
