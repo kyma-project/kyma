@@ -14,7 +14,7 @@ spec:
     matchLabels:
       app: {{ template "fullname" . }}
       release: {{ .Release.Name }}
-      # not used anymore but need to stay as the selector is immutable 
+      # not used anymore but need to stay as the selector is immutable
       kyma-alerts: enabled
       kyma-component: ui
       kyma-grafana: enabled
@@ -39,7 +39,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
-          resources: 
+          resources:
             {{- toYaml .Values.console.resources | nindent 12 }}
           livenessProbe:
             httpGet:
@@ -60,7 +60,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
-          resources: 
+          resources:
             {{- toYaml .Values.core_ui.resources | nindent 12 }}
           livenessProbe:
             httpGet:
@@ -88,3 +88,6 @@ spec:
           items:
           - key: nginx-extended.conf
             path: nginx-extended.conf
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

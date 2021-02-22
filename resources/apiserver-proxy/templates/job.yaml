@@ -88,3 +88,6 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ template "name" . }}-ssl-helper-service-account
 {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

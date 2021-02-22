@@ -1,0 +1,9 @@
+{{- if .Values.global.priorityClassName }}
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.global.priorityClassName }}
+value: {{ .Values.global.priorityClassValue }}
+globalDefault: false
+description: "Default scheduling priority of Kyma installer. Must not be blocked by unschedulable user or Kyma workloads."
+{{- end }}

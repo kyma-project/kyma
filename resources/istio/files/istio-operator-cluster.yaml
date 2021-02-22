@@ -247,7 +247,7 @@ spec:
       oneNamespace: false
       operatorManageWebhooks: false
       pilotCertProvider: istiod
-      priorityClassName: ""
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         autoInject: enabled
         clusterDomain: cluster.local

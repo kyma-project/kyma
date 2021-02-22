@@ -35,8 +35,8 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if .Values.priorityClassName }}
-      priorityClassName: "{{ .Values.priorityClassName }}"
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
 {{- end }}
 {{- if .Values.securityContext.enabled }}
       securityContext:
@@ -58,7 +58,7 @@ spec:
           {{- with .Values.extraVolumeMounts }}
           {{- toYaml . | nindent 12 }}
           {{- end }}
-          command: 
+          command:
           # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
           # might want to investigate
             - sh
@@ -105,9 +105,9 @@ spec:
             - name: REGISTRY_AUTH_HTPASSWD_PATH
               value: "/data/htpasswd"
             - name: REGISTRY_HTTP_SECRET
-            # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen 
+            # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen
             # using kubectl describe
-              value: {{ randAlphaNum 16 | b64enc | quote }} 
+              value: {{ randAlphaNum 16 | b64enc | quote }}
 {{- if .Values.tlsSecretName }}
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
               value: /etc/ssl/docker/tls.crt

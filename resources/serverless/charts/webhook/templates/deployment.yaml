@@ -69,5 +69,6 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.metricsDomain "context" . ) | nindent 14 }}
             - name: CONFIG_OBSERVABILITY_NAME
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
-
-            
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
