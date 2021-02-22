@@ -1,7 +1,5 @@
 # kubeless/python:3.7
-# Temporary image built manually to contain security patches for vulnerability CVE-2021-3177,
-# replace with official python image once python 3.8.8 is released
-FROM eu.gcr.io/kyma-project/incubator/python:20210219-652db865
+FROM python:3.8.8-alpine3.13
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
