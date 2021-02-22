@@ -600,12 +600,12 @@ function genRandom(len) {
 }
 
 function shouldRunSuite(suite) {
-  debug("COMPASS_ENABLED", process.env.COMPASS_ENABLED);
+  debug("COMPASS_INTEGRATION_ENABLED", process.env.COMPASS_INTEGRATION_ENABLED);
   switch(suite) {
     case "commerce-mock-compass":
-      return process.env.COMPASS_ENABLED !== void 0;
+      return process.env.COMPASS_INTEGRATION_ENABLED !== void 0;
     default:
-      return process.env.COMPASS_ENABLED === void 0;
+      return process.env.COMPASS_INTEGRATION_ENABLED === void 0;
   }
 }
 
@@ -647,6 +647,5 @@ module.exports = {
   debug,
   toBase64,
   genRandom,
-  shouldRunSuite,
-  getEnvOrThrow
+  shouldRunSuite
 };
