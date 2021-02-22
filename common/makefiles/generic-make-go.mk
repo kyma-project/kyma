@@ -85,7 +85,7 @@ release:
 release-dep: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
-build-image: pull-licenses
+build-image: pull-licenses-local
 	docker build -t $(IMG_NAME) .
 push-image: post-pr-tag-image
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
