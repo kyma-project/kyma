@@ -11,7 +11,7 @@ VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 release:
 	$(MAKE) gomod-release
 
-build-image: pull-licenses
+build-image: pull-licenses-local
 	docker build -t $(IMG_NAME) -f cmd/broker/Dockerfile .
 
 push-image:

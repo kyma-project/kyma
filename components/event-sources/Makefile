@@ -76,7 +76,7 @@ push-image: $(cmds_images_push) ;
 
 # Example:
 #   make controller-manager.image
-$(cmds_images): %.image: pull-licenses
+$(cmds_images): %.image: pull-licenses-local
 	$(eval $@_img_name := $(APP_NAME)-$*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .

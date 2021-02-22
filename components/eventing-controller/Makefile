@@ -181,7 +181,7 @@ $(cmds): %: resolve-local
 
 # Example:
 #   make eventing-controller.image
-$(cmds_images): %.image: build pull-licenses
+$(cmds_images): %.image: build pull-licenses-local
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .

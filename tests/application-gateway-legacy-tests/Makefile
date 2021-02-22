@@ -16,7 +16,7 @@ release:
 test-local:
 	@echo "Tests are not to be run at this stage."
 
-build-image: pull-licenses
+build-image: pull-licenses-local
 	docker build -t $(APP_NAME):latest . -f ./test/helmtest/Dockerfile --build-arg TEST_EXECUTOR_IMAGE=$(TEST_EXECUTOR_IMG_NAME):$(TAG)
 	docker build -t $(TEST_EXECUTOR_APP_NAME):latest . -f ./test/executor/Dockerfile
 
