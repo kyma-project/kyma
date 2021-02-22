@@ -599,6 +599,15 @@ function genRandom(len) {
   return res;
 }
 
+function shouldRunSuite(suite) {
+  switch(suite) {
+    case "commerce-mock-compass":
+      return process.env.COMPASS_ENABLED;
+    default:
+      return !process.env.COMPASS_ENABLED;
+  }
+}
+
 module.exports = {
   retryPromise,
   expectNoK8sErr,
@@ -628,5 +637,6 @@ module.exports = {
   printRestartReport,
   debug,
   toBase64,
-  genRandom
+  genRandom,
+  shouldRunSuite
 };

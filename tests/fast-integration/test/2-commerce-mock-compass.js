@@ -9,7 +9,8 @@ const {
 } = require("./fixtures/commerce-mock");
 
 const {
-  genRandom
+  genRandom,
+  shouldRunSuite,
 } = require("../utils");
 
 const {
@@ -17,6 +18,10 @@ const {
 } = require("../compass");
 
 describe("CommerceMock with Compass tests", function () {
+  if(!shouldRunSuite("commerce-mock-compass")) {
+    return;
+  }
+
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
     const testNamespace = "compass-test";
