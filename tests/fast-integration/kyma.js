@@ -4,6 +4,7 @@ const axios = require("axios");
 var AdmZip = require('adm-zip');
 var fs = require('fs');
 const { join } = require("path");
+const { switchDebug } = require("./utils");
 
 function installOptions(yargs) {
   yargs.options({
@@ -21,7 +22,7 @@ function installOptions(yargs) {
 }
 function verbose(argv){
   if (argv.verbose) {
-    process.env.DEBUG="true";
+    switchDebug(true);
   }
 }
 const argv = require('yargs/yargs')(process.argv.slice(2))

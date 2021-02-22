@@ -669,13 +669,15 @@ function ignoreNotFound(e) {
     throw e;
   }
 }
-
-const DEBUG = process.env.DEBUG;
+let DEBUG = process.env.DEBUG;
 
 function debug() {
   if (DEBUG) {
     console.log.apply(null, arguments);
   }
+}
+function switchDebug(on = true){
+  DEBUG=on;
 }
 
 function toBase64(s) {
@@ -745,6 +747,7 @@ module.exports = {
   k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
   debug,
+  switchDebug,
   printRestartReport,
   toBase64,
   genRandom,
