@@ -82,13 +82,13 @@ images:
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "c072f2f9"
+      tag: "4bed80da"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "c072f2f9"
+      tag: "4bed80da"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "c072f2f9"
+      tag: "4bed80da"
 
 deployment:
   replicas: 1
