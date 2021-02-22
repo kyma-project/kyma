@@ -14,6 +14,7 @@ release:
 
 
 # overrides
+MOUNT_TARGETS = ''
 pull-licenses: pull-licenses-local
 
 .PHONY: path-to-referenced-charts
