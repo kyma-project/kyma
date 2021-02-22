@@ -3,6 +3,8 @@ APP_PATH = components/$(APP_NAME)
 # BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
 SCRIPTS_DIR = $(realpath $(shell pwd))
 
+override MOUNT_TARGETS = ''
+
 override ENTRYPOINT = cmd/applicationgateway/
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
@@ -14,7 +16,7 @@ release:
 
 
 # overrides
-MOUNT_TARGETS = ''
+
 pull-licenses: pull-licenses-local
 
 .PHONY: path-to-referenced-charts
