@@ -43,6 +43,6 @@ To fix this, follow one of these two approaches:
       </details>
     </div>
 
-2. Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://origin-symwisedownload.symantec.com/resources/webguides/sslv/sslva_first_steps/Content/Topics/Configure/ssl_firefox_cert.htm) for Firefox. You must trust the certificate for these addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, and `console-backend.foo.bar`.
+2. Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://support.mozilla.org/en-US/kb/error-codes-secure-websites?redirectslug=troubleshoot-SEC_ERROR_UNKNOWN_ISSUER&redirectlocale=en-US#w_self-signed-certificate) for Firefox. You must trust the certificate for these addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, and `console-backend.foo.bar`.
 
     >**TIP:** This solution is suitable for users who don't have administrative access to the OS.
