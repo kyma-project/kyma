@@ -22,7 +22,13 @@ console:
     internalPort: 8080
     name: nginx
   statusPort: 6080
-  resources: {}
+  resources: 
+    requests:
+      cpu: 2m
+      memory: 2Mi
+    limits:
+      cpu: 40m
+      memory: 64Mi
 core_ui:
   image:
     pullPolicy: IfNotPresent
@@ -32,7 +38,13 @@ core_ui:
     internalPort: 80
     name: nginx
   statusPort: 6081
-  resources: {}
+  resources:
+    requests:
+      cpu: 2m
+      memory: 16Mi
+    limits:
+      cpu: 40m
+      memory: 64Mi
 managementPlane: {}
 replicaCount: 1
 test:
