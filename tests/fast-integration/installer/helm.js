@@ -119,8 +119,9 @@ async function helmList() {
   return JSON.parse(stdout);
 }
 
-async function helmUninstall(release, namespace) {
-  await execa("helm", ["uninstall", release, "-n", namespace]);
+function helmUninstall(release, namespace) {
+  debug(`Uninstalling ${release} (${namespace})`);
+  return execa("helm", ["uninstall", release, "-n", namespace]);
 }
 
 async function helmInstallUpgrade(release, chart, namespace, values, profile) {
@@ -365,7 +366,10 @@ async function uninstallKyma(options
 ) {
   const releases = await helmList();
 
-  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace).catch())); // ignore errors during uninstall ()
+  await Promise.allSettled(releases.map((r) => helmUninstall(r.name, r.namespace).catch( ()=>{
+    // ignore errors during uninstall ()
+  })));
+
   await kubectlDelete(join(__dirname, "installer-local.yaml")); // needed for the console to start
   if (!options.skipCrd) {
     const crds = await getAllCRDs();
