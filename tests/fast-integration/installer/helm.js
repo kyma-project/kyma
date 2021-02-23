@@ -202,12 +202,12 @@ async function installRelease(
   debug(`Release ${release} deployed`);
 }
 
-async function chartList() {
+async function chartList(options) {
   const gardernerDomain = await getGardenerDomain();
   const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
   const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
-
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK`;
+  const isBEBEnabled = !!options.newEventing;
+  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.isBEBEnabled=${isBEBEnabled}`;
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
   if (isGardener == "true") {
@@ -280,6 +280,13 @@ async function chartList() {
       release: "knative-eventing",
       namespace: "knative-eventing",
       values: `${overrides}`,
+      filter: !isBEBEnabled,
+    },
+    {
+      release: "eventing",
+      namespace: "kyma-system",
+      values: `${overrides}`,
+      filter: isBEBEnabled,
     },
     {
       release: "application-connector",
@@ -290,14 +297,17 @@ async function chartList() {
       release: "knative-provisioner-natss",
       namespace: "knative-eventing",
       values: `${overrides}`,
+      filter: !isBEBEnabled,
     },
     {
       release: "nats-streaming",
       namespace: "natss",
+      filter: !isBEBEnabled,
     },
     {
       release: "event-sources",
       namespace: "kyma-system",
+      filter: !isBEBEnabled,
     },
     {
       release: "monitoring",
@@ -326,7 +336,8 @@ async function chartList() {
       customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
     },
   ];
-  return kymaCharts;
+
+  return kymaCharts.filter(c => c.filter == undefined || c.filter);
 }
 
 async function getGardenerDomain() {
@@ -361,7 +372,13 @@ async function uninstallKyma(options
     await k8sDelete(crds.filter(crd => kymaCrds.includes(crd.metadata.name)));
   }
   await kubectlDelete(join(__dirname, "system-namespaces.yaml"));
-  await deleteAllK8sResources('/api/v1/namespaces/kyma-system/secrets');
+  const usualLeftovers = [
+    '/api/v1/namespaces/kyma-system/secrets',
+    '/apis/oathkeeper.ory.sh/v1alpha1/namespaces/kyma-system/rules',
+    '/apis/rafter.kyma-project.io/v1beta1/clusterassets',
+    '/apis/rafter.kyma-project.io/v1beta1/clusterbuckets',
+  ]
+  await Promise.allSettled(usualLeftovers.map(path => deleteAllK8sResources(path)));
   if (!options.skipIstio) {
     await uninstallIstio();
   }
@@ -373,6 +390,7 @@ async function installKyma(
   istioVersion,
   ignoredComponents = "monitoring,tracing,kiali,logging,console,cluster-users,dex",
   isUpgrade = false,
+  options
 ) {
   console.log('Installing Kyma from folder', installLocation);
   await waitForNodesToBeReady();
@@ -391,7 +409,30 @@ async function installKyma(
     join(installLocation, "cluster-essentials/files"),
     "kyma-system"
   );
-  const kymaCharts = await chartList();
+  if (options.newEventing) {
+    const eventingSecret = {
+      apiVersion: "v1",
+      data: {
+        "beb-namespace": "",
+        "client-id": "",
+        "client-secret": "",
+        "ems-publish-url": "",
+        "token-endpoint": "",
+      },
+      kind: "Secret",
+      metadata: {
+        name: "eventing",
+        namespace: "kyma-installer",
+        "labels": {
+          "app.kubernetes.io/instance": "eventing",
+          "app.kubernetes.io/name": "eventing",
+          "component": "eventing",
+        },
+      }
+    }
+    await k8sApply([eventingSecret]);
+  }
+  const kymaCharts = await chartList(options);
   await Promise.all(
     kymaCharts
       .filter((arg) => !ignoredComponents.includes(arg.release))

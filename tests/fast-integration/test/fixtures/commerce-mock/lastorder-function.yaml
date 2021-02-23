@@ -81,3 +81,25 @@ spec:
       apiVersion: v1
       kind: Service
       name: lastorder
+---
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: Subscription
+metadata:
+  name: function-lastorder
+spec:
+  filter:
+    dialect: beb,
+    filters:
+    - eventSource:
+        property: source
+        type: exact
+        value: ""
+      eventType:
+        property: type
+        type: exact
+        value: sap.kyma.custom.commerce.order.created.v1
+  protocol: BEB
+  protocolsettings:
+    exemptHandshake: true
+    qos: AT-LEAST-ONCE
+  sink: http://lastorder.test.svc.cluster.local

@@ -16,6 +16,9 @@ function installOptions(yargs) {
     },
     'skip-modules': {
       describe: 'Skip modules from the list (comma separated)'
+    },
+    'new-eventing' : {
+      describe: 'Install new eventing instead of knative'
     }
   });
 
@@ -32,17 +35,17 @@ function uninstallOptions(yargs) {
 
 }
 
-function verbose(argv){
+function verbose(argv) {
   if (argv.verbose) {
     switchDebug(true);
   }
 }
 const argv = require('yargs/yargs')(process.argv.slice(2))
   .usage('Usage: $0 <command> [options]')
-  .options({'verbose':{alias:'v', describe:'Displays details of actions triggered by the command.'}})
+  .options({ 'verbose': { alias: 'v', describe: 'Displays details of actions triggered by the command.' } })
   .command('install', 'Installs Kyma on a running Kubernetes cluster', installOptions, install)
   .command('uninstall', 'Removes Kyma from cluster', uninstallOptions, uninstall)
-  .command('download', 'Downloads Kyma sources into ./tmp folder', {}, download)
+  .command('download', 'Downloads Kyma sources into ./tmp folder', installOptions, download)
   .demandCommand(1, 1, 'Command is missing')
   .example('$0 install --skip-modules=monitoring,tracing,kiali')
   .strict()
@@ -57,7 +60,7 @@ async function install(argv) {
     await download(argv)
     src = join(__dirname, './tmp/resources')
   }
-  await installer.installKyma(src, "1.8.2", "");
+  await installer.installKyma(src, "1.8.2", "", false, argv);
   console.log('Kyma installed')
 }
 

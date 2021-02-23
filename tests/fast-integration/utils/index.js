@@ -68,6 +68,9 @@ function expectNoAxiosErr(err) {
 }
 
 function convertAxiosError(axiosError, message) {
+  if (!axiosError.response) {
+    return axiosError;
+  }
   if (axiosError.response && axiosError.response.status && axiosError.response.statusText) {
     message += `\n${axiosError.response.status}: ${axiosError.response.statusText}`;
   }

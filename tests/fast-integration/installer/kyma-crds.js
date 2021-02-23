@@ -88,6 +88,8 @@ const kymaCrds =
     'offlinesessionses.dex.coreos.com',
     'connectors.dex.coreos.com',
     'devicerequests.dex.coreos.com',
-    'devicetokens.dex.coreos.com'
+    'devicetokens.dex.coreos.com',
+    'natsclusters.nats.io',
+    'natsserviceroles.nats.io',
   ];
 module.exports = kymaCrds;
