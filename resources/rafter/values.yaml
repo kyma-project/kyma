@@ -251,7 +251,7 @@ controller-manager:
         memory: 32Mi
         cpu: 10m
       limits:
-        memory: 256Mi
+        memory: 320Mi
         cpu: 250m
 
     gcsgateway:
