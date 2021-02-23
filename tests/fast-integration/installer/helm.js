@@ -352,7 +352,8 @@ async function uninstallKyma(
   installLocation = join(__dirname, "..", "..", "..", "resources"),
 ) {
   const releases = await helmList();
-  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace)))
+  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace))
+    .catch()); // ignore errors during uninstall ()
   await kubectlDelete(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlDeleteDir(
     join(installLocation, "cluster-essentials/files"),
