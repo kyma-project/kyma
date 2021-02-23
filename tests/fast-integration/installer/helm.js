@@ -356,7 +356,7 @@ async function uninstallKyma(options
 
   await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace).catch())); // ignore errors during uninstall ()
   await kubectlDelete(join(__dirname, "installer-local.yaml")); // needed for the console to start
-  if (!options.skipICrd) {
+  if (!options.skipCrd) {
     const crds = await getAllCRDs();
     await k8sDelete(crds.filter(crd => kymaCrds.includes(crd.metadata.name)));
   }
