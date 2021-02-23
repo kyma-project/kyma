@@ -97,15 +97,13 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, ownerName, na
 }
 
 func (r *Resolver) getBEBSourceName() (string, error) {
-	secrets, err := r.client.CoreV1().Secrets("kyma-installer").List(metav1.ListOptions{
-		LabelSelector: "component=eventing",
-	})
+	secrets, err := r.client.CoreV1().Secrets("kyma-system").Get("eventing", metav1.GetOptions{})
 
 	if err != nil {
 		return "", err
 	}
 
-	sourceName := secrets.Items[0].Data["authentication.bebNamespace"]
+	sourceName := secrets.Data["authentication.bebNamespace"]
 	return string(sourceName), nil
 }
 
