@@ -12,6 +12,7 @@ const {
   genRandom,
   shouldRunSuite,
   getEnvOrThrow,
+  debug,
 } = require("../utils");
 
 const {
@@ -38,8 +39,7 @@ describe("CommerceMock with Compass tests", function () {
     const appName = `commerce-${suffix}`;
     const runtimeName = `kyma-${suffix}`;
     const scenarioName = `integration-${suffix}`;
-
-    console.log(runtimeName, appName, scenarioName);
+    debug(`Scenario ${scenarioName}`, `Runtime: ${runtimeName}`, `Application ${appName}`);
     
     it("Register Kyma in Compass", async function() {
       await registerKymaInCompass(director, runtimeName, scenarioName);
