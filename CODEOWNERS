@@ -13,7 +13,7 @@
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @crabtree @piotrmsc @adamwalach @colunira @mjakobczyk @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
+/installation/ @Tomasz-Smelcerz-SAP @strekm @piotrmsc @adamwalach @colunira @mjakobczyk @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm
@@ -56,16 +56,16 @@
 /resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # The `application-operator` subchart
 /resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector-helper/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # The `console` subchart
 /resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -209,7 +209,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Application Registry Component
-/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Application Operator Component
 /components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
@@ -291,13 +291,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Application Registry Tests
-/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Application Gateway Tests
 /tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
 
 # Application Gateway Legacy Tests
-/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
 
 # Application Operator Tests
 /tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
