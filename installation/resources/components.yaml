@@ -9,8 +9,8 @@ prerequisites:
 components:
   - name: "testing"
   - name: "logging"
-  - name: "tracing"
-  - name: "kiali"
+#  - name: "tracing"
+#  - name: "kiali"
   - name: "monitoring"
   - name: "knative-eventing"
     namespace: "knative-eventing"
