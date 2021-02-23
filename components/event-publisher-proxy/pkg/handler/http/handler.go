@@ -9,7 +9,7 @@ import (
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
 	"github.com/sirupsen/logrus"
 
@@ -136,7 +136,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 
-	message := cehttp.NewMessageFromHttpRequest(request)
+	message := cev2http.NewMessageFromHttpRequest(request)
 	defer func() { _ = message.Finish(nil) }()
 
 	event, err := binding.ToEvent(ctx, message)
@@ -150,6 +150,10 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		h.Logger.Warnf("Request is invalid as per CE spec with error: %s", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
+	}
+
+	if request.Header.Get(cev2http.ContentType) == cloudevents.CEStructuredMode {
+		ctx = binding.WithForceStructured(ctx)
 	}
 
 	h.receive(ctx, event)
