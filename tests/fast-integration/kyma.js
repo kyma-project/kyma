@@ -20,6 +20,18 @@ function installOptions(yargs) {
   });
 
 }
+function uninstallOptions(yargs) {
+  yargs.options({
+    'skip-crd': {
+      describe: 'Do not delete CRDs'
+    },
+    'skip-istio': {
+      describe: 'Do not delete istio'
+    }
+  });
+
+}
+
 function verbose(argv){
   if (argv.verbose) {
     switchDebug(true);
@@ -29,7 +41,7 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
   .usage('Usage: $0 <command> [options]')
   .options({'verbose':{alias:'v', describe:'Displays details of actions triggered by the command.'}})
   .command('install', 'Installs Kyma on a running Kubernetes cluster', installOptions, install)
-  .command('uninstall', 'Removes Kyma from cluster', {}, uninstall)
+  .command('uninstall', 'Removes Kyma from cluster', uninstallOptions, uninstall)
   .command('download', 'Downloads Kyma sources into ./tmp folder', {}, download)
   .demandCommand(1, 1, 'Command is missing')
   .example('$0 install --skip-modules=monitoring,tracing,kiali')

@@ -16,7 +16,9 @@ const {
   getAllCRDs,
   k8sApply
 } = require("../utils");
+const { map } = require("lodash");
 const notDeployed = "not-deployed";
+const kymaCrds = require("./kyma-crds");
 
 async function waitForNodesToBeReady(timeout = "180s") {
   await execa("kubectl", [
@@ -45,7 +47,7 @@ async function updateCoreDNSConfigMap() {
     "-f",
     "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
     "/registry.localhost",
-  ]).catch(()=>"127.0.0.1");
+  ]).catch(() => "127.0.0.1");
 
   // this file need to be updated when we update k3s to use k8s 1.20
   body.data["Corefile"] = `registry.localhost:53 {
@@ -341,27 +343,28 @@ async function getGardenerDomain() {
     throw err;
   }
 }
-async function uninstallIstio(){
+async function uninstallIstio() {
   const crds = await getAllCRDs();
   const istioCRDs = crds.filter(crd => crd.spec.group.endsWith('istio.io'));
   await k8sDelete(istioCRDs);
   await deleteNamespaces(["istio-system"], true);
 }
 
-async function uninstallKyma(
-  installLocation = join(__dirname, "..", "..", "..", "resources"),
+async function uninstallKyma(options
 ) {
   const releases = await helmList();
-  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace))
-    .catch()); // ignore errors during uninstall ()
+
+  await Promise.all(releases.map((r) => helmUninstall(r.name, r.namespace).catch())); // ignore errors during uninstall ()
   await kubectlDelete(join(__dirname, "installer-local.yaml")); // needed for the console to start
-  await kubectlDeleteDir(
-    join(installLocation, "cluster-essentials/files"),
-    "kyma-system"
-  );
+  if (!options.skipICrd) {
+    const crds = await getAllCRDs();
+    await k8sDelete(crds.filter(crd => kymaCrds.includes(crd.metadata.name)));
+  }
   await kubectlDelete(join(__dirname, "system-namespaces.yaml"));
   await deleteAllK8sResources('/api/v1/namespaces/kyma-system/secrets');
-  await uninstallIstio();                               
+  if (!options.skipIstio) {
+    await uninstallIstio();
+  }
 
 }
 
@@ -370,13 +373,10 @@ async function installKyma(
   istioVersion,
   ignoredComponents = "monitoring,tracing,kiali,logging,console,cluster-users,dex",
   isUpgrade = false,
-  kymaVersion
 ) {
   console.log('Installing Kyma from folder', installLocation);
   await waitForNodesToBeReady();
-  if (kymaVersion) {
-
-  }
+  const crdsBefore = await getAllCRDs();
   if (isUpgrade) {
     await upgradeIstio(istioVersion);
   } else {
@@ -392,7 +392,7 @@ async function installKyma(
     "kyma-system"
   );
   const kymaCharts = await chartList();
-  return await Promise.all(
+  await Promise.all(
     kymaCharts
       .filter((arg) => !ignoredComponents.includes(arg.release))
       .map(({ release, namespace, values, customPath, profile }) => {
@@ -412,12 +412,14 @@ async function installKyma(
         );
       })
   );
+  const crdsAfter = await getAllCRDs();
+  const installedCrds = crdsAfter.filter(crd => !crdsBefore.some(c => c.metadata.name == crd.metadata.name));
+  debug("Installed crds:")
+  debug(installedCrds.map(crd => crd.metadata.name));
 }
 
 module.exports = {
   installKyma,
-  uninstallKyma,
-  uninstallIstio,
-  helmList
+  uninstallKyma
 };
 
