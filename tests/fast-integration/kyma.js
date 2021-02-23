@@ -63,7 +63,7 @@ async function install(argv) {
 
 async function uninstall(argv) {
   verbose(argv);
-  await installer.uninstallKyma();
+  await installer.uninstallKyma(argv);
   console.log('Kyma uninstalled')
 }
 
