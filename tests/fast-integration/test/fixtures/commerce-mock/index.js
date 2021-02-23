@@ -15,13 +15,13 @@ const {
   convertAxiosError,
   sleep,
   k8sApply,
-  waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForTokenRequest,
   deleteAllK8sResources,
   k8sAppsApi,
   k8sDynamicApi,
@@ -176,43 +176,35 @@ async function connectMock(mockHost, targetNamespace) {
     kind: "TokenRequest",
     metadata: { name: "commerce", namespace: targetNamespace },
   };
-
-  const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${targetNamespace}/tokenrequests`;
-
   await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForK8sObject(
-    path,
-    {},
-    (type, apiObj, watchObj) => {
-      return (
-        watchObj.object.status &&
-        watchObj.object.status.state == "OK" &&
-        watchObj.object.status.url
-      );
-    },
-    5 * 1000,
-    "Wait for TokenRequest timeout"
-  );
-  const res = await axios
-    .post(
-      `https://${mockHost}/connection`,
-      {
-        token: tokenObj.status.url,
-        baseUrl: `https://${mockHost}`,
-        insecure: true,
-      },
-      {
-        headers: {
-          "content-type": "application/json",
-        },
-        timeout: 5000,
-      }
-    )
-    .catch((err) => {
-      throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
-    });
+  const tokenObj = await waitForTokenRequest("commerce", targetNamespace);
+
+  const pairingBody = {
+    token: tokenObj.status.url,
+    baseUrl: `https://${mockHost}`,
+    insecure: true,
+  };
+  await connectCommerceMock(mockHost, pairingBody);
 }
+
+async function connectCommerceMock(mockHost, tokenData) {
+  const url = `https://${mockHost}/connection`;
+  const body = tokenData;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.post(url, body, params);
+  } catch(err) {
+    throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
+  }
+}
+
 function serviceInstanceObj(name, serviceClassExternalName) {
   return {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
