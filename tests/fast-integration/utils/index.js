@@ -647,5 +647,6 @@ module.exports = {
   debug,
   toBase64,
   genRandom,
-  shouldRunSuite
+  shouldRunSuite,
+  getEnvOrThrow
 };
