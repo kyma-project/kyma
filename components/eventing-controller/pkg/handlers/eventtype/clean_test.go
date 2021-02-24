@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 )
@@ -25,6 +26,7 @@ func TestCleaner(t *testing.T) {
 			givenApplicationName: "testapp",
 			givenEventType:       "sap.kyma.testapp.order.created.v1",
 			wantEventType:        "sap.kyma.testapp.order.created.v1",
+			wantError:            false,
 		},
 		{
 			givenEventTypePrefix:   "sap.kyma",
@@ -32,12 +34,14 @@ func TestCleaner(t *testing.T) {
 			givenApplicationLabels: map[string]string{application.TypeLabel: "testapptype"},
 			givenEventType:         "sap.kyma.testapp.order.created.v1",
 			wantEventType:          "sap.kyma.testapptype.order.created.v1",
+			wantError:              false,
 		},
 		{
 			givenEventTypePrefix: "sap.kyma",
 			givenApplicationName: "t..e--s__t!!a@@p##p%%",
 			givenEventType:       "sap.kyma.t..e--s__t!!a@@p##p%%.order.created.v1",
 			wantEventType:        "sap.kyma.testapp.order.created.v1",
+			wantError:            false,
 		},
 		{
 			givenEventTypePrefix:   "sap.kyma",
@@ -45,32 +49,34 @@ func TestCleaner(t *testing.T) {
 			givenApplicationLabels: map[string]string{application.TypeLabel: "t..e--s__t!!a@@p##p%%t^^y&&p**e"},
 			givenEventType:         "sap.kyma.t..e--s__t!!a@@p##p%%.order.created.v1",
 			wantEventType:          "sap.kyma.testapptype.order.created.v1",
+			wantError:              false,
 		},
 		// valid even-types but have not existing applications
 		{
 			givenEventTypePrefix: "sap.kyma",
 			givenApplicationName: "test-app",
 			givenEventType:       "sap.kyma.testapp.order.created.v1",
-			wantError:            true,
-		},
-		{
-			givenEventTypePrefix: "sap.kyma",
-			givenApplicationName: "testapp",
-			givenEventType:       "sap.kyma.test-app.order.created.v1",
-			wantError:            true,
-		},
-		// invalid even-types
-		{
-			givenEventTypePrefix: "sap.kyma",
-			givenApplicationName: "test-app",
-			givenEventType:       "sap.kyma.testapp.order.created.v1",
-			wantError:            true,
+			wantEventType:        "sap.kyma.testapp.order.created.v1",
+			wantError:            false,
 		},
 		{
 			givenEventTypePrefix: "sap.kyma",
 			givenApplicationName: "testapp",
 			givenEventType:       "sap.kyma.test-app.order.created.v1",
 			wantEventType:        "sap.kyma.testapp.order.created.v1",
+			wantError:            false,
+		},
+		// invalid even-types
+		{
+			givenEventTypePrefix: "sap.kyma",
+			givenApplicationName: "testapp",
+			givenEventType:       "sap.kyma.testapp.order.created", // missing the version
+			wantError:            true,
+		},
+		{
+			givenEventTypePrefix: "sap.kyma",
+			givenApplicationName: "testapp",
+			givenEventType:       "sap.testapp.order.created.v1", // prefix not matched
 			wantError:            true,
 		},
 	}
@@ -78,7 +84,7 @@ func TestCleaner(t *testing.T) {
 	for _, tc := range testCases {
 		app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 		appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-		cleaner := NewCleaner(tc.givenEventTypePrefix, appLister)
+		cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, ctrl.Log.WithName("cleaner"))
 
 		gotEventType, err := cleaner.Clean(tc.givenEventType)
 

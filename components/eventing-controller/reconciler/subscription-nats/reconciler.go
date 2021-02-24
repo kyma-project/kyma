@@ -59,7 +59,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 		natsClient:       natsClient,
 		Log:              log,
 		recorder:         recorder,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister),
+		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}
 }
 
