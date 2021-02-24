@@ -62,8 +62,8 @@ var (
 var _ = Describe("Subscription Reconciliation Tests", func() {
 	var namespaceName string
 	var subscriptionName string
-	var subscription *eventingv1alpha1.Subscription
-	var subscriberService *v1.Service
+	var givenSubscription *eventingv1alpha1.Subscription
+	var subscriberSvc *v1.Service
 	var ctx context.Context
 
 	// enable me for debugging
@@ -99,13 +99,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	When("Creating a Subscription with invalid Sink", func() {
 		BeforeEach(func() {
 			// Ensuring subscriber svc
-			subscriberService = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(subscriberService, ctx)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 			// Create subscription
 			subscriptionName = "sub-create-with-invalid-sink"
-			subscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
-			subscription.Spec.Sink = "invalid"
-			ensureSubscriptionCreated(subscription, ctx)
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
+			givenSubscription.Spec.Sink = "invalid"
+			ensureSubscriptionCreated(givenSubscription, ctx)
 		})
 
 		It("Should mark the Subscription as not ready", func() {
@@ -116,24 +116,24 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				v1.ConditionFalse,
 				"",
 			)
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyFalseCondition),
 			))
 		})
 
 		It("Should fix the Subscirption with a valid Sink and mark it as ready", func() {
-			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberService.Name, subscriberService.Namespace)
-			subscription.Spec.Sink = validSink
-			updateSubscription(subscription, ctx).Should(reconcilertesting.HaveSubscriptionSink(validSink))
+			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberSvc.Name, subscriberSvc.Namespace)
+			givenSubscription.Spec.Sink = validSink
+			updateSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionSink(validSink))
 
 			By("Creating a valid APIRule")
-			getAPIRuleForASvc(subscriberService, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
-			apiRuleUpdated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberService), subscriberService)
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+			apiRuleUpdated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
 			getAPIRule(&apiRuleUpdated, ctx).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
-				reconcilertesting.HaveAPIRuleOwnersRefs(subscription.UID),
+				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
 			))
 
 			By("Updating the APIRule status to be Ready")
@@ -146,7 +146,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				v1.ConditionTrue,
 				"",
 			)
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
 			))
@@ -158,7 +158,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				v1.ConditionTrue,
 				"",
 			)
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveAPIRuleName(apiRuleUpdated.Name),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
@@ -175,25 +175,25 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	When("Two Subscriptions which are using the same sink but different paths are deleted", func() {
 		It("Should update the APIRule accordingly", func() {
 			// Service
-			service1 := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			ensureSubscriberSvcCreated(service1, ctx)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Subscriptions
 			subscription1Name := "test-delete-valid-subscription-1"
 			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
-			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberSvc.Name, subscriberSvc.Namespace)
 			ensureSubscriptionCreated(subscription1, ctx)
 
 			subscription2Name := "test-delete-valid-subscription-2"
 			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
-			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service1.Name, service1.Namespace)
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", subscriberSvc.Name, subscriberSvc.Namespace)
 			ensureSubscriptionCreated(subscription2, ctx)
 
 			By("Creating a valid APIRule")
-			getAPIRuleForASvc(service1, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Updating the APIRule status to be Ready")
-			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, service1), service1)
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
 			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx)
 
 			By("Using the same APIRule for both Subscriptions")
@@ -264,13 +264,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("Creating a valid Subscription", func() {
 		It("Should mark the Subscription as ready", func() {
-			subscriptionName := "test-valid-subscription-1"
+			subscriptionName = "test-valid-subscription-1"
 
 			// Ensuring subscriber svc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -370,11 +370,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("Subscription sink name is changed", func() {
 		It("Should update the BEB subscription webhookURL by creating a new APIRule", func() {
-			subscriptionName := "test-subscription-sink-name-changed"
+			subscriptionName = "test-subscription-sink-name-changed"
 
 			// prepare objects
 			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			reconcilertesting.WithValidSink(serviceOld.Namespace, serviceOld.Name, givenSubscription)
 
 			// create them and wait for Subscription to be ready
@@ -464,14 +464,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("BEB subscription creation failed", func() {
 		It("Should not mark the subscription as ready", func() {
-			subscriptionName := "test-subscription-beb-not-status-not-ready"
+			subscriptionName = "test-subscription-beb-not-status-not-ready"
 
 			// Ensuring subscriber svc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -520,13 +520,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("BEB subscription is set to paused after creation", func() {
 		It("Should not mark the subscription as active", func() {
-			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
+			subscriptionName = "test-subscription-beb-not-status-not-ready-2"
 
 			// Ensuring subscriber subscriberSvc
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 
 			isBebSubscriptionCreated := false
@@ -596,12 +596,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
-			subscriptionName := "test-delete-valid-subscription-1"
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			subscriptionName = "test-delete-valid-subscription-1"
+			givenSubscription = reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
 			processedBebRequests := 0
 
 			// Create service
-			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			subscriberSvc = reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Create subscription
@@ -683,7 +683,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
 		func(subscription *eventingv1alpha1.Subscription) {
-			ctx := context.Background()
 			subscription.Namespace = namespaceName
 
 			By("Letting the APIServer reject the custom resource")
@@ -691,22 +690,20 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		},
 		Entry("filter missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-filter-missing", "")
-				subscription.Spec.Filter = nil
-				return subscription
+				givenSubscription = reconcilertesting.NewSubscription("schema-filter-missing", "")
+				givenSubscription.Spec.Filter = nil
+				return givenSubscription
 			}()),
 		Entry("protocolsettings missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
-				subscription.Spec.ProtocolSettings = nil
-				return subscription
+				givenSubscription = reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
+				givenSubscription.Spec.ProtocolSettings = nil
+				return givenSubscription
 			}()),
 	)
 
 	DescribeTable("Schema tests: ensuring optional fields are not treated as required",
 		func(subscription *eventingv1alpha1.Subscription) {
-			ctx := context.Background()
-			namespaceName := getUniqueNamespaceName()
 			subscription.Namespace = namespaceName
 
 			By("Letting the APIServer reject the custom resource")
@@ -714,9 +711,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		},
 		Entry("protocolsettings.webhookauth missing",
 			func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
-				subscription.Spec.ProtocolSettings.WebhookAuth = nil
-				return subscription
+				givenSubscription = reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
+				givenSubscription.Spec.ProtocolSettings.WebhookAuth = nil
+				return givenSubscription
 			}()),
 	)
 })
