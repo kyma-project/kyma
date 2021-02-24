@@ -32,6 +32,7 @@ async function upgradeIstio(version) {
 
 async function installIstio(version, istioProfile = "demo") {
   await ensureIstioctl(version);
+  debug("Installing istio", version);
   const istioctl = istioctlLocation(version);
   const { stdout } = await execa(
     istioctl,
@@ -58,6 +59,7 @@ async function ensureIstioctl(version) {
 }
 
 async function downloadIstioctl(version) {
+  debug("Download istio version", version)
   const { stdout } = await execa.command(
     `curl -sL https://istio.io/downloadIstio | ISTIO_VERSION=${version} sh -`,
     {
