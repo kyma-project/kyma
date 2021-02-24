@@ -9,89 +9,50 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/go-logr/logr"
-	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func TestNatsSender(t *testing.T) {
+func TestNatsSender2(t *testing.T) {
 	logger := logrus.New()
 	logger.Info("TestNatsSender started")
 
-	// test environment
-	natsPort := 5222
-	subscriberPort := 8080
-	subscriberReceiveURL := fmt.Sprintf("http://localhost:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://localhost:%d/check", subscriberPort)
-
 	// Start Nats server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	natsServer := testingutils.StartNatsServer()
 	assert.NotNil(t, natsServer)
 	defer natsServer.Shutdown()
 
-	natsURL := natsServer.ClientURL()
-	natsClient := handlers.Nats{
-		Subscriptions: make(map[string]*nats.Subscription),
-		Config: env.NatsConfig{
-			Url:           natsURL,
-			MaxReconnects: 2,
-			ReconnectWait: time.Second,
-		},
-		Log: logr.Discard(),
-	}
-	err := natsClient.Initialize()
-	if err != nil {
-		t.Fatalf("failed to connect to Nats Server: %v", err)
-	}
+	// connect to nats
+	connection, err := pkgnats.ConnectToNats(natsServer.ClientURL(), true, 1, time.Second)
+	assert.Nil(t, err)
+	assert.NotNil(t, connection)
 
-	// create a Nats sender
-	natsUrl := natsServer.ClientURL()
-	assert.NotEmpty(t, natsUrl)
+	// create message sender
 	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, natsUrl, logger)
+	sender := NewNatsMessageSender(ctx, connection, logger)
 
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-	defer subscriber.Shutdown()
+	// subscribe to subject
+	done := make(chan bool, 1)
+	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
+	testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
-	// Check subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	if err != nil {
-		t.Errorf("failed to check subscriber's store: %v", err)
-	}
-
-	// Create a subscription
-	sub := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventType))
-	sub.Spec.Sink = subscriberReceiveURL
-	err = natsClient.SyncSubscription(sub)
-	if err != nil {
-		t.Fatalf("failed to Sync subscription: %v", err)
-	}
-
-	// create a CE event
-	ce := testingutils.StructuredCloudEventPayload
+	// create cloudevent
+	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
 	event := cloudevents.NewEvent()
+	event.SetType(testingutils.CloudEventType)
 	err = json.Unmarshal([]byte(ce), &event)
 	assert.Nil(t, err)
-	// set ce event type the same as the event type from subscription's filter. The Nats subject is defined by ce.Type
-	event.SetType(testingutils.CloudEventType)
 
-	// send the event
-	c, err := sender.Send(ctx, &event)
+	// send cloudevent
+	status, err := sender.Send(ctx, &event)
 	assert.Nil(t, err)
-	assert.Equal(t, c, http.StatusNoContent)
+	assert.Equal(t, status, http.StatusNoContent)
 
-	// Check for the event
-	expectedDataInStore := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Errorf("subscriber did not receive the event: %v", err)
+	// wait for subscriber to receive the messages
+	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
+		t.Fatalf("Subscriber did not receive the message with error: %v", err)
 	}
 }

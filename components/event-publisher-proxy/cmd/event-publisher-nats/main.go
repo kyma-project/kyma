@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -35,8 +36,15 @@ func main() {
 	// assure uniqueness
 	ctx := signals.NewContext()
 
+	// connect to nats
+	connection, err := pkgnats.ConnectToNats(cfgNats.URL, cfgNats.RetryOnFailedConnect, cfgNats.MaxReconnects, cfgNats.ReconnectWait)
+	if err != nil {
+		logger.Fatalf("Failed to connect to NATS server with error: %s", err)
+	}
+	defer connection.Close()
+
 	// configure message sender
-	messageSenderToNats := sender.NewNatsMessageSender(ctx, cfgNats.NatsPublishURL, logger)
+	messageSenderToNats := sender.NewNatsMessageSender(ctx, connection, logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
