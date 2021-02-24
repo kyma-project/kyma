@@ -186,7 +186,10 @@ async function installRelease(
 const isGardener = process.env["GARDENER"] || "false";
 const domain = process.env["KYMA_DOMAIN"] || "local.kyma.dev";
 
-const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK`;
+let overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK`;
+if(shouldInstallCompassAgent()) {
+  overrides += `,global.disableLegacyConnectivity=true`;
+}
 
 const kymaCharts = [
   {
@@ -301,6 +304,18 @@ const kymaCharts = [
     customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
   },
 ];
+
+if(shouldInstallCompassAgent()) {
+  kymaCharts.push({
+    release: "compass-runtime-agent",
+    namespace: "compass-system",
+    values: `${overrides}`
+  });
+}
+
+function shouldInstallCompassAgent() {
+  return process.env["COMPASS_INTEGRATION_ENABLED"] !== void 0;
+}
 
 async function installKyma(
   installLocation = join(__dirname, "..", "..", "..", "resources"),
