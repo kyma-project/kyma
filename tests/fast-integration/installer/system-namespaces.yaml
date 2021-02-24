@@ -25,3 +25,10 @@ metadata:
   labels:
     istio-injection: enabled
   name: natss
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: compass-system
