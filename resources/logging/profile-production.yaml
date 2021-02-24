@@ -2,9 +2,8 @@ loki:
   resources:
     limits:
       memory: 512Mi
-  config:
-    server:
-      log_level: warn
+  extraArgs:
+    log.level: warn
 
 fluent-bit:
   resources:
