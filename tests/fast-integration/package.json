@@ -10,12 +10,11 @@
     "directory": "tests/fast-integration"
   },
   "scripts": {
-    "test": "mocha --inline-diffs --check-leaks",
-    "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert",
-    "test-utils": "mocha --inline-diffs --check-leaks './utils/**/*.test.js'",
-    "test-commerce-mock": "mocha --inline-diffs --check-leaks ./test/2-commerce-mock.js",
-    "test-commerce-mock-compass": "mocha --inline-diffs --check-leaks ./test/2-commerce-mock-compass.js",
-    "test-getting-started": "mocha --inline-diffs --check-leaks ./test/3-getting-started-guides.js",
+    "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+    "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+    "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
+    "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
+    "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
     "test-commerce-mock-skr": "mocha --inline-diffs --check-leaks ./test/1-provision-skr.js"
   },
   "license": "Apache-2.0",
