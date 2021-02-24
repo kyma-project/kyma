@@ -5,5 +5,5 @@ metadata:
   name: {{ .Values.global.priorityClassName }}
 value: {{ .Values.global.priorityClassValue }}
 globalDefault: false
-description: "Default scheduling priority of Kyma installer. Must not be blocked by unschedulable user or Kyma workloads."
+description: "Global (default) scheduling priority of Kyma components. Must not be blocked by unschedulable user workloads."
 {{- end }}
