@@ -70,7 +70,7 @@ async function sendEventAndCheckResponse() {
         .post(
           `https://${mockHost}/events`,
           {
-            "event-type": "order.created",
+            "event-type": "sap.kyma.custom.commerce.order.created",
             "event-type-version": "v1",
             "event-time": "2020-09-28T14:47:16.491Z",
             data: { orderCode: "567" },
