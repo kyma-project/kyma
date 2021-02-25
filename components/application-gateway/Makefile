@@ -1,9 +1,7 @@
 APP_NAME = application-gateway
 APP_PATH = components/$(APP_NAME)
 # BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
-SCRIPTS_DIR = $(realpath $(shell pwd))
-
-override MOUNT_TARGETS = ''
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/applicationgateway/
 
@@ -13,8 +11,6 @@ VERIFY_IGNORE := /vendor\|/mocks
 
 release:
 	$(MAKE) gomod-release-local
-
-
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
