@@ -123,7 +123,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 
 		It("Should fix the Subscirption with a valid Sink and mark it as ready", func() {
-			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberSvc.Name, subscriberSvc.Namespace)
+			path := "/path1"
+			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, path)
 			givenSubscription.Spec.Sink = validSink
 			updateSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionSink(validSink))
 
@@ -133,6 +134,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(&apiRuleUpdated, ctx).Should(And(
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, path),
 				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
 			))
 
@@ -179,14 +181,16 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Subscriptions
+			subscription1Path := "/path1"
 			subscription1Name := "test-delete-valid-subscription-1"
 			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
-			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", subscriberSvc.Name, subscriberSvc.Namespace)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription1Path)
 			ensureSubscriptionCreated(subscription1, ctx)
 
+			subscription2Path := "/path2"
 			subscription2Name := "test-delete-valid-subscription-2"
 			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
-			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", subscriberSvc.Name, subscriberSvc.Namespace)
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription2Path)
 			ensureSubscriptionCreated(subscription2, ctx)
 
 			By("Creating a valid APIRule")
@@ -205,8 +209,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
 				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID, subscription2.UID),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
 			))
 
 			By("Deleting the first Subscription")
@@ -229,13 +233,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.HaveNotEmptyHost(),
 				reconcilertesting.HaveNotEmptyAPIRule(),
 				reconcilertesting.HaveAPIRuleOwnersRefs(subscription2.UID),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path2"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
 			))
 
 			By("Ensuring the deleted Subscription is removed as Owner from the APIRule")
 			getAPIRule(&apiRuleCreated, ctx).ShouldNot(And(
 				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID),
-				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, "/path1"),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
 			))
 
 			By("Deleting the second Subscription")
