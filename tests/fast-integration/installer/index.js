@@ -282,6 +282,7 @@ async function chartList(options) {
       namespace: "istio-system",
       values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
       customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
+      filter: !isBEBEnabled,
     },
   ];
 
@@ -349,6 +350,7 @@ async function uninstallKyma(options) {
  * @param {boolean} options.isUpgrade Upgrade existing installation
  * @param {boolean} options.newEventing Use new eventing
  * @param {Array<string>} options.skipComponents List of components to not install
+ * @param {boolean} options.isCompassEnabled
  */
 async function installKyma(options) {
   options = options || {};

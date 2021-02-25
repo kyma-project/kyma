@@ -39,7 +39,6 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile) {
   const args = [
     "upgrade",
     "--wait",
-    "--force",
     "-i",
     "-n",
     namespace,

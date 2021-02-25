@@ -28,7 +28,7 @@ async function downloadCharts(options) {
   options = options || {};
   const repo = options.repo || 'kyma-project/kyma'
   const branch = options.source || 'master';
-  var dir = fs.mkdtempSync('kyma');
+  var dir = fs.mkdtempSync('tmp-');
   const resourcesPath = join(dir, 'resources')
 
   const zipFile = join(dir, branch + '.zip')

@@ -117,4 +117,4 @@ dist
 
 istio-*
 junit_kyma-fast-integration.xml
-tmp
+tmp-*

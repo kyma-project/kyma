@@ -13,16 +13,12 @@ describe("Kyma end to end upgrade tests", function () {
   const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
 
   it(`Install Kyma ${kymaVersion}`, async function () {
-    const resourcesPath = await installer.downloadCharts({ source: kymaVersion })
+    const resourcesPath = await installer.downloadCharts({ source: "master" })
     await installer.installKyma({ resourcesPath, skipComponents })
   });
 
   it("CommerceMock test fixture should be ready", async function () {
     await commerceMock.ensureCommerceMockTestFixture("mocks", testNamespace);
-  });
-
-  it("Getting started guide fixture should be ready", async function () {
-    await gettingStartedGuide.ensureGettingStartedTestFixture()
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
@@ -35,18 +31,22 @@ describe("Kyma end to end upgrade tests", function () {
     await commerceMock.sendEventAndCheckResponse();
   });
 
-  it("Getting started Guide", async function () {
-    this.timeout(60 * 1000);
-    await gettingStartedGuide.verifyOrderPersisted();
+  it("Kyma should be upgraded to Kyma 2.0 (master branch)", async function () {
+    await installer.installKyma({isUpgrade: true, skipComponents, newEventing: true, source: "master"});    
   })
 
-  it("Kyma should be upgraded to Kyma 2.0 (master branch)", async function () {
-    await installer.installKyma({isUpgrade: true, skipComponents, newEventing: true});    
+  it("function should reach Commerce mock API through app gateway after upgrade", async function () {
+    this.timeout(60 * 1000);
+    await commerceMock.checkAppGatewayResponse()
   })
+
+  it("order.created.v1 event should trigger the lastorder function after upgrade", async function () {
+    this.timeout(60 * 1000);
+    await commerceMock.sendEventAndCheckResponse();
+  });
 
   it.skip("Test fixtures should be deleted", async function () {
     await commerceMock.cleanMockTestFixture("mocks", testNamespace)
-    await gettingStartedGuide.cleanGettingStartedTestFixture();
   })
 
 });
