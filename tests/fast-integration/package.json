@@ -1,6 +1,9 @@
 {
-  "name": "fast-integration",
-  "version": "0.0.1",
+  "name": "kyma-js",
+  "version": "0.0.1-alpha.1",
+  "main": "installer/index.js",
+  "bin": "kyma.js",
+  "author": "Kyma contributors",
   "scripts": {
     "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",

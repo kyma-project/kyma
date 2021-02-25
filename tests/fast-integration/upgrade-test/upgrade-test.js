@@ -45,8 +45,8 @@ describe("Kyma end to end upgrade tests", function () {
     await commerceMock.sendEventAndCheckResponse();
   });
 
-  it.skip("Test fixtures should be deleted", async function () {
-    await commerceMock.cleanMockTestFixture("mocks", testNamespace)
+  it("Test fixtures should be deleted", async function () {
+    await commerceMock.cleanMockTestFixture("mocks", testNamespace, true)
   })
 
 });
