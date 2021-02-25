@@ -39,7 +39,7 @@ strategy: {}
 featureGates: ""
 
 image:
-  repository: quay.io/jetstack/cert-manager-controller
+  repository: eu.gcr.io/kyma-project/external/quay.io/jetstack/cert-manager-controller:v1.1.0
   # You can manage a registry with
   # registry: quay.io
   # repository: jetstack/cert-manager-controller
@@ -243,7 +243,7 @@ webhook:
   podLabels: {}
 
   image:
-    repository: quay.io/jetstack/cert-manager-webhook
+    repository: eu.gcr.io/kyma-project/external/quay.io/jetstack/cert-manager-webhook:v1.1.0
     # You can manage a registry with
     # registry: quay.io
     # repository: jetstack/cert-manager-webhook
@@ -330,7 +330,7 @@ cainjector:
   podLabels: {}
 
   image:
-    repository: quay.io/jetstack/cert-manager-cainjector
+    repository: eu.gcr.io/kyma-project/external/quay.io/jetstack/cert-manager-cainjector:v1.1.0
     # You can manage a registry with
     # registry: quay.io
     # repository: jetstack/cert-manager-cainjector
