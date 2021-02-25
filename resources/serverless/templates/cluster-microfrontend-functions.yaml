@@ -14,19 +14,35 @@ spec:
   navigationNodes:
     - label: Functions
       navigationPath: functions
-      viewUrl: "/home/namespaces/:namespaceId/functions?hasDetailsView=false&resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1"
+      viewUrl: "/namespaces/:namespaceId/functions?hasDetailsView=true&resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1"
       order: -1
       viewGroup: "_core_ui_"
       requiredBackendModules:
         - serverless
-    - label: Functions
+    - label: Functions Details
       navigationPath: functions/details
-      viewUrl: '/lambdas'
       showInNavigation: false
       viewGroup: "_core_ui_"
     - label: Function Details
-      navigationPath: functions/details/:lambda
-      viewUrl: '/lambda/:lambda'
+      navigationPath: functions/details/:functionId
+      viewUrl: '/namespaces/:namespaceId/functions/:functionId?resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1'
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+
+    - label: Git Repositories
+      navigationPath: gitrepositories
+      viewUrl: "/namespaces/:namespaceId/gitrepositories?hasDetailsView=true&resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1"
+      order: -1
+      viewGroup: "_core_ui_"
+      requiredBackendModules:
+        - serverless
+    - label: Git Repositories Details
+      navigationPath: gitrepositories/details
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+    - label: Git Repositories Details
+      navigationPath: gitrepositories/details/:gitId
+      viewUrl: '/namespaces/:namespaceId/gitrepositories/:gitId?resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1'
       showInNavigation: false
       viewGroup: "_core_ui_"
 {{- end }}
