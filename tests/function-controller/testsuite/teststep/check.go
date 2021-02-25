@@ -47,7 +47,7 @@ func (h HTTPCheck) Run() error {
 	// there may also be some problems with istio sidecars etc
 	backoff := wait.Backoff{
 		Steps:    6,
-		Duration: 250 * time.Millisecond,
+		Duration: 500 * time.Millisecond,
 		Factor:   2.0,
 		Jitter:   0.1,
 	}
