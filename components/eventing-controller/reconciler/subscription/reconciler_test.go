@@ -122,7 +122,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 		})
 
-		It("Should fix the Subscirption with a valid Sink and mark it as ready", func() {
+		It("Should fix the Subscription with a valid Sink and mark it as ready", func() {
 			path := "/path1"
 			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, path)
 			givenSubscription.Spec.Sink = validSink
@@ -148,10 +148,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				v1.ConditionTrue,
 				"",
 			)
-			getSubscription(givenSubscription, ctx).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(subscriptionActiveCondition),
-			))
 
 			By("Setting APIRule status in Subscription to Ready")
 			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(
@@ -162,6 +158,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionActiveCondition),
 				reconcilertesting.HaveAPIRuleName(apiRuleUpdated.Name),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
 				reconcilertesting.HaveSubscriptionReady(),
