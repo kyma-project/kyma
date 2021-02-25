@@ -13,7 +13,7 @@ describe("Kyma end to end upgrade tests", function () {
   const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
 
   it(`Install Kyma ${kymaVersion}`, async function () {
-    const resourcesPath = await installer.downloadCharts({ source: "master" })
+    const resourcesPath = await installer.downloadCharts({ source: kymaVersion })
     await installer.installKyma({ resourcesPath, skipComponents })
   });
 
@@ -32,7 +32,7 @@ describe("Kyma end to end upgrade tests", function () {
   });
 
   it("Kyma should be upgraded to Kyma 2.0 (master branch)", async function () {
-    await installer.installKyma({isUpgrade: true, skipComponents, newEventing: true, source: "master"});    
+    await installer.installKyma({isUpgrade: true, skipComponents, newEventing: true});    
   })
 
   it("function should reach Commerce mock API through app gateway after upgrade", async function () {
