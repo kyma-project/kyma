@@ -578,6 +578,40 @@ function debug() {
   }
 }
 
+function toBase64(s) {
+  return Buffer
+    .from(s)
+    .toString("base64");
+}
+
+function genRandom(len) {
+  let res = "";
+  const chrs = "abcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < len; i++ ) {
+    res += chrs.charAt(Math.floor(Math.random() * chrs.length));
+  }
+
+  return res;
+}
+
+function shouldRunSuite(suite) {
+  debug("COMPASS_INTEGRATION_ENABLED", process.env.COMPASS_INTEGRATION_ENABLED);
+  switch(suite) {
+    case "commerce-mock-compass":
+      return process.env.COMPASS_INTEGRATION_ENABLED !== void 0;
+    default:
+      return process.env.COMPASS_INTEGRATION_ENABLED === void 0;
+  }
+}
+
+function getEnvOrThrow(key) {
+  if(!process.env[key]) {
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
 module.exports = {
   retryPromise,
   expectNoK8sErr,
@@ -605,4 +639,8 @@ module.exports = {
   getContainerRestartsForAllNamespaces,
   debug,
   printRestartReport,
+  toBase64,
+  genRandom,
+  shouldRunSuite,
+  getEnvOrThrow
 };
