@@ -12,20 +12,20 @@ spec:
   viewBaseUrl: core-ui
   navigationNodes:
     - label: "Addons"
-      navigationPath: addonsconfigurations
-      viewUrl: "/namespaces/:namespaceId/addonsconfigurations?hasDetailsView=true&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      navigationPath: AddonsConfigurations
+      viewUrl: "/namespaces/:namespaceId/AddonsConfigurations?hasDetailsView=true&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: -1
       requiredPermissions:
         - apiGroup: addons.kyma-project.io
-          resource: addonsconfigurations
+          resource: AddonsConfigurations
           verbs:
             - create
     - label: "Addons details"
-      navigationPath: addonsconfigurations/details
+      navigationPath: AddonsConfigurations/details
       showInNavigation: false
       viewGroup: "_core_ui_"
     - label: "Addons details"
-      navigationPath: addonsconfigurations/details/:addonName
+      navigationPath: AddonsConfigurations/details/:addonName
       showInNavigation: false
       viewGroup: _core_ui_
-      viewUrl: "/namespaces/:namespaceId/addonsconfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: "/namespaces/:namespaceId/AddonsConfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
