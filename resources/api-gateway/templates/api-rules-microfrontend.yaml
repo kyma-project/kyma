@@ -9,7 +9,7 @@ spec:
   version: v1
   category: Discovery and Network
   placement: namespace
-  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
+  viewBaseUrl: core-ui
   navigationNodes:
     - label: API Rules
       navigationPath: apirules
