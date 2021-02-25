@@ -47,7 +47,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		Log:         logf,
 	}
 
-	nodejs12Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs12", genericContainer.WithLogger(python38Logger))
+	nodejs12Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs12", genericContainer.WithLogger(nodejs12Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating nodejs12 config")
 	}
