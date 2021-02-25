@@ -95,11 +95,11 @@ async function sendEventAndCheckResponse() {
         .then((res) => {
           expect(res.data).to.have.nested.property(
             "event.ce-type",
-            "order.created"
+            "sap.kyma.custom.commerce.order.created"
           );
           expect(res.data).to.have.nested.property(
             "event.ce-source",
-            "commerce"
+            "kyma"
           );
           expect(res.data).to.have.nested.property(
             "event.ce-eventtypeversion",
