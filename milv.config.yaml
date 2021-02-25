@@ -1,98 +1,133 @@
 white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
+external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
 black-list: ["/vendor/", "/testdata/"]
+files-to-ignore: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
+files-to-ignore-internal-links-in: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
 files:
   - path: "./kyma/docs/kyma/04-10-upgrade.md"
     config:
       white-list-external: ["https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml"]
+      external-links-to-ignore: ["https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml"]
   - path: "./kyma/resources/service-manager-proxy/README.md"
     config:
       white-list-external: ["http://service-manager.dev.cfdev.sh"]
+      external-links-to-ignore: ["http://service-manager.dev.cfdev.sh"]
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
       white-list-internal: ["{CVSS"]
+      internal-links-to-ignore: ["{CVSS"]
       white-list-external: ["https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N"]
+      external-links-to-ignore: ["https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N"]
   - path: "./kyma/docs/README.md"
     config:
       white-list-external: ["kyma-project.io"]
+      external-links-to-ignore: ["kyma-project.io"]
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
+      external-links-to-ignore: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
   - path: "./kyma/components/helm-broker/docs/proposals/addon-git-support.md"
     config:
       white-list-external: ["https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml"]
+      external-links-to-ignore: ["https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml"]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
     config:
       white-list-external: ["https://alert.victorops.com/integrations/generic/20131114/alert"]
+      external-links-to-ignore: ["https://alert.victorops.com/integrations/generic/20131114/alert"]
   - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
     config:
       white-list-external: ["https://www.orders.com/v1/orders"]
+      external-links-to-ignore: ["https://www.orders.com/v1/orders"]
   - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
+      external-links-to-ignore: ["custom.bundles-repository"]
   - path: "./kyma/docs/kyma/04-07-aks-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.xip.io"]
   - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.xip.io"]
   - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       white-list-external: ["https://{host}/{path}/{bundle_repo_version"]
+      external-links-to-ignore: ["https://{host}/{path}/{bundle_repo_version"]
   - path: "./kyma/docs/application-connector/08-09-revoke-cert.md"
     config:
       white-list-external: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
+      external-links-to-ignore: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
   - path: "./kyma/resources/istio/README.md"
     config:
       white-list-external: ["https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection"]
+      external-links-to-ignore: ["https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection"]
   - path: "./kyma/docs/migration-guides/0.8-0.9.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/releases/tag/0.9.0"]
+      external-links-to-ignore: ["https://github.com/kyma-project/kyma/releases/tag/0.9.0"]
   - path: "./kyma/docs/asset-store/05-02-asset-store-metadata-service.md"
     config:
       white-list-external: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
+      external-links-to-ignore: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
   - path: "./kyma/docs/asset-store/05-04-asset-upload-service.md"
     config:
       white-list-external: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
+      external-links-to-ignore: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
   - path: "./kyma/docs/asset-store/05-01-asset-store.md"
     config:
       white-list-external: ["https://minio.{DOMAIN}/minio"]
+      external-links-to-ignore: ["https://minio.{DOMAIN}/minio"]
   - path: "./kyma/components/console-backend-service/docs/configuration.md"
     config:
       white-list-external: ["http://zipkin.kyma-system"]
+      external-links-to-ignore: ["http://zipkin.kyma-system"]
   - path: "./kyma/tests/perf/README.md"
     config:
       white-list-external: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]
+      external-links-to-ignore: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]
   - path: "./kyma/docs/monitoring/08-02-create-and-configure-grafana-dashboard.md"
     config:
       white-list-external: ["https://grafana.example.com/"]
+      external-links-to-ignore: ["https://grafana.example.com/"]
   - path: "./kyma/docs/helm-broker/03-03-create-addons-repo.md"
     config:
       white-list-external: ["https://admin:secretPassword@repository.addons.com/index.yaml"]
+      external-links-to-ignore: ["https://admin:secretPassword@repository.addons.com/index.yaml"]
   - path: "./kyma/docs/monitoring/08-05-send-notifications.md"
     config:
       white-list-external: ["https://hooks.slack.com/services/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"]
+      external-links-to-ignore: ["https://hooks.slack.com/services/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"]
   - path: "./kyma/docs/kyma/05-04-component-source-url.md"
     config:
       white-list-external: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
+      external-links-to-ignore: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
   - path: "./kyma/docs/runtime-agent/08-07-establish-secure-connection-with-compass.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+      external-links-to-ignore: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/docs/migration-guides/1.10-1.11.md"
     config:
       white-list-external: ["https://gateway.domain/APP_NAME/v1/events",
       "https://gateway.domain/APP_NAME/events"]
+      external-links-to-ignore: ["https://gateway.domain/APP_NAME/v1/events",
+      "https://gateway.domain/APP_NAME/events"]
   - path: "./kyma/docs/runtime-agent/08-01-basic-flow-tutorial.md"
     config:
       white-list-external: ["https://compass.{CLUSTER_DOMAIN"]
+      external-links-to-ignore: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/docs/migration-guides/1.13-1.14.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]
+      external-links-to-ignore: ["https://github.com/kyma-project/kyma/blob/release-1.14/docs/kyma/03-03-charts.md#migration-to-helm-v3"]
   - path: "./kyma/docs/security/08-04-add-connector.md"
     config:
       white-list-external: ["https://dex.{CLUSTER_DOMAIN}/callback"]
+      external-links-to-ignore: ["https://dex.{CLUSTER_DOMAIN}/callback"]
   - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+      external-links-to-ignore: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
