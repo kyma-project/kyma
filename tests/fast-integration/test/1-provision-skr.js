@@ -1,5 +1,6 @@
 const {
     KEBClient,
+    KEBConfig,
     provisionSKR,
     ensureOperationSucceeded,
 } = require("../keb");
@@ -8,17 +9,10 @@ const { debug, genRandom } = require("../utils");
 
 describe("Provisioning SKR", function () {
 
-    const kebHost = process.env["KEB_HOST"] || "";
-    const clientID = process.env["KEB_CLIENT_ID"] || "";
-    const clientSecret = process.env["KEB_CLIENT_SECRET"] || "";
-    const globalAccountID = process.env["KEB_GLOBALACCOUNT_ID"] || "";
-    const subAccountID = process.env["KEB_SUBACCOUNT_ID"] || "";
-    const planID = process.env["KEB_PLAN_ID"] || "";
-    const name = process.env["KEB_SKR_NAME"] || "";
-    const instanceID = process.env["KEB_INSTANCE_ID"] || "";
+    let config = new KEBConfig()
     var operationID;
 
-    const kebClient = new KEBClient(kebHost,clientID,clientSecret,globalAccountID,subAccountID)
+    const kebClient = new KEBClient(config)
     it("Send provisioning call to KEB", async function(){
     operationID =  await provisionSKR(kebClient, instanceID, planID, name)
     });

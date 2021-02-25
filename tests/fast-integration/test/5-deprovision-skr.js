@@ -6,7 +6,7 @@ const {
 const { debug, genRandom } = require("../utils");
 
 
-describe("Provisioning SKR", function () {
+describe("Deprovisioning SKR", function () {
 
     const kebHost = process.env["KEB_HOST"] || "";
     const clientID = process.env["KEB_CLIENT_ID"] || "";
@@ -16,11 +16,11 @@ describe("Provisioning SKR", function () {
     const planID = process.env["KEB_PLAN_ID"] || "";
     const name = process.env["KEB_SKR_NAME"] || "";
     const instanceID = process.env["KEB_INSTANCE_ID"] || "";
-    var operationID;
+    let operationID;
 
     const kebClient = new KEBClient(kebHost,clientID,clientSecret,globalAccountID,subAccountID)
     it("Send deprovisioning call to KEB", async function(){
-    operationID =  await deprovisionSKR(kebClient, instanceID, planID, name)
+    operationID =  await deprovisionSKR(kebClient, instanceID, planID)
     });
 
     it("Wait for the SKR to deprovision", async function(){

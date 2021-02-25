@@ -1,14 +1,15 @@
 const axios = require("axios");
 const { debug } = require("../utils");
 
+const kymaServiceID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
 class KEBClient {
-  constructor(host, clientID, clientSecret, globalAccountID, subAccountID) {
-    this.host = host;
-    this.clientID = clientID;
-    this.clientSecret = clientSecret;
-    this.globalAccountID = globalAccountID;
-    this.subAccountID = subAccountID;
-    this.serviceID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
+  constructor(config) {
+    this.host = config.host;
+    this.clientID = config.clientID;
+    this.clientSecret = config.clientSecret;
+    this.globalAccountID = config.globalAccountID;
+    this.subAccountID = config.subAccountID;
+    this.serviceID = kymaServiceID;
     this._token = void 0;
   }
 
@@ -103,35 +104,30 @@ class KEBClient {
       },
     };
     const endpoint = `service_instances/${instanceID}`;
-    var res;
     try {
-      res = await this.callKEB(payload, endpoint, "put");
+      return await this.callKEB(payload, endpoint, "put");
     } catch (err) {
       throw new Error(`error while provisioning SKR: ${err.toString()}`);
     }
-    return res;
   }
 
-  async getSKRState(instanceID, operationID) {
+  async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
-    var res;
     try {
-      res = await this.callKEB({}, endpoint, "get");
+      return await this.callKEB({}, endpoint, "get");
     } catch (err) {
       throw new Error(`error while checking SKR State: ${err.toString()}`);
     }
-    return res;
   }
 
-  async deprovisionSKR(instanceID) {
+  async deprovisionSKR(instanceID, planID) {
     const endpoint = `service_instances/${instanceID}?service_id=${this.serviceID}&plan_id=${planID}`;
     var res;
     try {
-      res = await this.callKEB(null, endpoint, "delete");
+      return await this.callKEB(null, endpoint, "delete");
     } catch (err) {
       throw new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
-    return res;
   }
 }
 
