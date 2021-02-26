@@ -20,7 +20,7 @@ $ make
 
 ### Run the controller inside the cluster
 
-To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage), then run:
+To deploy the controller inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup), then run:
 
 ```console
 $ ko apply -f config/
