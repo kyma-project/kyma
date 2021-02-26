@@ -16,7 +16,7 @@ function installOptions(yargs) {
     'upgrade': {
       describe: 'Upgrade components if already installed'
     },
-    'new-eventing' : {
+    'new-eventing': {
       describe: 'Install new eventing instead of knative'
     }
   });
@@ -59,7 +59,7 @@ async function install(argv) {
   }
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
 
-  await installer.installKyma({resourcesPath:src,skipComponents, isUpgrade: !!src.upgrade});
+  await installer.installKyma({ resourcesPath: src, skipComponents, isUpgrade: !!argv.upgrade });
   console.log('Kyma installed')
 }
 
