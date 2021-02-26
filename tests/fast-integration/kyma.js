@@ -11,7 +11,10 @@ function installOptions(yargs) {
           - To use the local sources, write "kyma install --source=local".'
     },
     'skip-components': {
-      describe: 'Skip components from the list (comma separated)'
+      describe: 'Skip components  (comma separated list)'
+    },
+    'components': {
+      describe: 'Install only these components (comma separated list)'
     },
     'upgrade': {
       describe: 'Upgrade components if already installed'
@@ -42,10 +45,16 @@ function verbose(argv) {
 const argv = require('yargs/yargs')(process.argv.slice(2))
   .usage('Usage: $0 <command> [options]')
   .options({ 'verbose': { alias: 'v', describe: 'Displays details of actions triggered by the command.' } })
-  .command('install', 'Installs Kyma on a running Kubernetes cluster', installOptions, install)
+  .command('install', 'Installs Kyma on a running Kubernetes cluster in 5 minutes', installOptions, install)
   .command('uninstall', 'Removes Kyma from cluster', uninstallOptions, uninstall)
   .demandCommand(1, 1, 'Command is missing')
-  .example('$0 install --skip-modules=monitoring,tracing,kiali')
+  .example('Install kyma from local sources:\n  $0 install --skip-modules=monitoring,tracing,kiali')
+  .example('Install kyma from kyma-project/kyma master branch:\n  $0 install -s master')
+  .example('Install kyma 1.19.1:\n  $0 install -s 1.19.1')
+  .example('Upgrade kyma to the current master and use new eventing:\n  $0 install -s master --upgrade --new-eventing')
+  .example('Upgrade application-connector and eventing modules to the current master and use new eventing:\n  $0 install --components=application-connector,eventing -s master --upgrade --new-eventing')
+  .example('Uninstall kyma:\n  $0 uninstall')
+  .example('Uninstall kyma, but keep istio and CRDs:\n  $0 uninstall --skip-istio --skip-crd')
   .strict()
   .wrap(null)
   .help()
@@ -55,11 +64,13 @@ async function install(argv) {
   let src = undefined;
   verbose(argv);
   if (argv.source) {
+
     src = await installer.downloadCharts(argv)
   }
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
+  const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
 
-  await installer.installKyma({ resourcesPath: src, skipComponents, isUpgrade: !!argv.upgrade });
+  await installer.installKyma({ resourcesPath: src, components, skipComponents, isUpgrade: !!argv.upgrade });
   console.log('Kyma installed')
 }
 
