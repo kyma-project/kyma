@@ -3,14 +3,27 @@ const fs = require("fs");
 const { join } = require("path");
 
 const kc = new k8s.KubeConfig();
+
 kc.loadFromDefault();
+var k8sDynamicApi;
+var k8sAppsApi;
+var k8sCoreV1Api;
 
-const k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
-const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
-const k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+var watch;
 
-const watch = new k8s.Watch(kc);
-
+function initializeK8sClient() {
+  try{
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    watch = new k8s.Watch(kc);
+    
+  } catch(err) {
+    console.log(err.message);
+  }
+  
+}
+initializeK8sClient();
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
  *
