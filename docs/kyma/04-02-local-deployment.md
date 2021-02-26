@@ -7,8 +7,6 @@ This Deployment guide shows you how to quickly deploy Kyma locally on the MacOS,
 
 **NOTE:** Local deployment using Minikube is deprecated.
 
->**NOTE:** By default, the local **Kyma Lite** deployment on Minikube requires 4 CPU and 8GB of RAM. If you want to add more components to your deployment, [deploy Kyma on a cluster](/root/kyma/#installation-install-kyma-on-a-cluster).
-
 >**TIP:** See the [troubleshooting guide](#troubleshooting-overview) for tips.
 
 ## Prerequisites
@@ -48,8 +46,8 @@ Follow these instructions to deploy Kyma from a release or from sources:
 
 <div tabs name="deploy-kyma" group="deploy-kyma-locally">
   <details>
-  <summary label="from-a-release">
-  From a release
+  <summary label="from-a-release-k3s">
+  From a release - k3s
   </summary>
 
   1. Provision a Kubernetes cluster on Minikube. Run:
@@ -59,6 +57,25 @@ Follow these instructions to deploy Kyma from a release or from sources:
      ```
 
   2. Deploy the latest Kyma release on k3s:
+     ```bash
+     kyma deploy
+     ```
+
+     >**NOTE:** If you want to deploy a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma deploy --source {KYMA_RELEASE}`.
+
+  </details>
+  <details>
+  <summary label="from-a-release-minikube">
+  From a release - Minikube (deprecated)
+  </summary>
+
+  1. Provision a Kubernetes cluster on Minikube. Run:
+
+     ```bash
+     kyma provision minikube
+     ```
+
+  2. Deploy the latest Kyma release on Minikube:
      ```bash
      kyma deploy
      ```

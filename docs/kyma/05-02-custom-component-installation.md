@@ -3,8 +3,6 @@ title: Custom component installation
 type: Configuration
 ---
 
-By default, you deploy Kyma with a set of components provided in the [**Kyma Lite**](#installation-overview) package.
-
 During deployment, the Kyma Installer applies the content of the [local](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl#L14) or [cluster](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14) deployment file that includes the list of component names and Namespaces in which the components are deployed. The Installer skips the lines starting with a hash character (#):
 
 ```yaml

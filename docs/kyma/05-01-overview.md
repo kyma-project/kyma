@@ -49,7 +49,6 @@ Before you start the Kyma deployment process, you can customize the default sett
 One of the released Kyma artifacts is the Kyma Installer, a Docker image that combines the Kyma Operator executable with charts of all components available in the release.
 The Kyma Installer can deploy only the components contained in its image.
 The Installation CR specifies which components of the available components are deployed.
-The component list in the Installation CR has the components that are not an integral part of the default Kyma Lite package commented out with a hash character (#). The Kyma Installer doesn't deploy these components.
 You can customize the list of components by:
 - Uncommenting a component entry to deploy the component.
 - Commenting out a component entry using the hash character (#) to skip the deployment of that component.
