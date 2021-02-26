@@ -97,3 +97,6 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

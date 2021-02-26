@@ -35,8 +35,8 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "loki.serviceAccountName" . }}
-    {{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName }}
+    {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
     {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

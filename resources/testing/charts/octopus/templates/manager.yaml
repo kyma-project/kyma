@@ -79,6 +79,9 @@ spec:
         secret:
           defaultMode: 420
           secretName: webhook-server-secret
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 ---
 apiVersion: v1
 kind: Secret

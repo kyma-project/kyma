@@ -35,4 +35,7 @@ spec:
         - /root/manager
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end -}}

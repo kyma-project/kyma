@@ -72,3 +72,6 @@ spec:
         - name: hydra-dsn
           secret:
             secretName: {{ include "hydra-maester.hydraSecret" . }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -49,3 +49,6 @@ spec:
           name: kyma-extra-manifests
       restartPolicy: Never
       serviceAccountName: istio-job
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

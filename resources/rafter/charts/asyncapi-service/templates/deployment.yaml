@@ -65,3 +65,6 @@ spec:
             - name: APP_SERVICE_HOST
               value: "0.0.0.0"
             {{ include "rafterAsyncAPIService.createEnv" ( dict "name" "APP_VERBOSE" "value" .Values.envs.verbose "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

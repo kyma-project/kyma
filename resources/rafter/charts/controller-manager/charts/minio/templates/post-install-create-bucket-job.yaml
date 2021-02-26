@@ -75,4 +75,7 @@ spec:
           {{ end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}

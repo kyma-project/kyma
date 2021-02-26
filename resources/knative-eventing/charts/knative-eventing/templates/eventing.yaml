@@ -1001,6 +1001,9 @@ spec:
       - configMap:
           name: config-logging
         name: config-logging
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 ---
 apiVersion: apps/v1
@@ -1062,6 +1065,9 @@ spec:
       - configMap:
           name: config-logging
         name: config-logging
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
