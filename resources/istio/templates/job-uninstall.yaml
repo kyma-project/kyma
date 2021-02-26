@@ -40,3 +40,6 @@ spec:
           name: kyma-istio-operator-config
       restartPolicy: Never
       serviceAccountName: istio-job
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

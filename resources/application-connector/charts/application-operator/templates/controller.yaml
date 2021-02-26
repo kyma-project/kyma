@@ -76,3 +76,6 @@ spec:
           privileged: {{ .Values.global.podSecurityPolicy.privileged }}
           allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       terminationGracePeriodSeconds: 10
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

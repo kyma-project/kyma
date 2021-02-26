@@ -11,6 +11,8 @@ global:
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false
+  priorityClassName: ""
+  priorityClassValue: 2000000
 
 containerRegistry:
   path: eu.gcr.io/kyma-project

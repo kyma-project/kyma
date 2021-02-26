@@ -66,3 +66,6 @@ spec:
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_VERBOSE" "value" .Values.envs.verbose "context" . ) | nindent 12 }}
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_PROCESS_TIMEOUT" "value" .Values.envs.timeout "context" . ) | nindent 12 }}
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_MAX_WORKERS" "value" .Values.envs.workers "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

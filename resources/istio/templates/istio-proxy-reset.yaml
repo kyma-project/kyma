@@ -25,7 +25,7 @@ rules:
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
-    resourceNames: 
+    resourceNames:
       - {{ template "istio.fullname" . }}
 {{- end }}
 ---
@@ -77,3 +77,6 @@ spec:
 {{.Files.Get "files/istio-proxy-reset.sh" | printf "%s" | indent 16}}
           securityContext:
 {{- toYaml .Values.kyma.securityContext | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
