@@ -22,10 +22,30 @@ const {
   getAllCRDs,
   k8sApply
 } = require("../utils");
-const { map } = require("lodash");
 const notDeployed = "not-deployed";
 const kymaCrds = require("./kyma-crds");
 const defaultIstioVersion = "1.8.2";
+
+const eventingSecret = {
+  apiVersion: "v1",
+  data: {
+    "beb-namespace": "",
+    "client-id": "",
+    "client-secret": "",
+    "ems-publish-url": "",
+    "token-endpoint": "",
+  },
+  kind: "Secret",
+  metadata: {
+    name: "eventing",
+    namespace: "kyma-installer",
+    "labels": {
+      "app.kubernetes.io/instance": "eventing",
+      "app.kubernetes.io/name": "eventing",
+      "component": "eventing",
+    },
+  }
+}
 
 async function waitForNodesToBeReady(timeout = "180s") {
   await execa("kubectl", [
@@ -350,6 +370,7 @@ async function uninstallKyma(options) {
  * @param {boolean} options.isUpgrade Upgrade existing installation
  * @param {boolean} options.newEventing Use new eventing
  * @param {Array<string>} options.skipComponents List of components to not install
+ * @param {Array<string>} options.components List of components to install
  * @param {boolean} options.isCompassEnabled
  */
 async function installKyma(options) {
@@ -358,15 +379,20 @@ async function installKyma(options) {
   const istioVersion = options.istioVersion || defaultIstioVersion;
   const isUpgrade = options.isUpgrade || false;
   const skipComponents = options.skipComponents || [];
-
+  const components = options.components;
+  fs
   console.log('Installing Kyma from folder', installLocation);
   await waitForNodesToBeReady();
   const crdsBefore = await getAllCRDs();
-  if (options.isUpgrade) {
-    await upgradeIstio(istioVersion);
-  } else {
-    await updateCoreDNSConfigMap();
-    await installIstio(istioVersion);
+  const skipIstio = skipComponents.includes("istio") || (components && !components.includes("istio"));
+  
+  if (!skipIstio) {
+    if (options.isUpgrade) {
+      await upgradeIstio(istioVersion);
+    } else {
+      await updateCoreDNSConfigMap();
+      await installIstio(istioVersion);
+    }  
   }
 
   await removeKymaGatewayCertsYaml(installLocation);
@@ -377,48 +403,32 @@ async function installKyma(options) {
     "kyma-system"
   );
   if (options.newEventing) {
-    const eventingSecret = {
-      apiVersion: "v1",
-      data: {
-        "beb-namespace": "",
-        "client-id": "",
-        "client-secret": "",
-        "ems-publish-url": "",
-        "token-endpoint": "",
-      },
-      kind: "Secret",
-      metadata: {
-        name: "eventing",
-        namespace: "kyma-installer",
-        "labels": {
-          "app.kubernetes.io/instance": "eventing",
-          "app.kubernetes.io/name": "eventing",
-          "component": "eventing",
-        },
-      }
-    }
     await k8sApply([eventingSecret]);
   }
-  const kymaCharts = await chartList(options);
+  let kymaCharts = await chartList(options);
+  if (components) {
+    kymaCharts = kymaCharts.filter(c => components.includes(c.release));
+  }
+  if (skipComponents) {
+    kymaCharts = kymaCharts.filter(c => !skipComponents.includes(c.release))
+  }
   await Promise.all(
-    kymaCharts
-      .filter(c=> !skipComponents.includes(c.release))
-      .map(({ release, namespace, values, customPath, profile }) => {
-        const chartLocation = !!customPath
-          ? customPath(installLocation)
-          : join(installLocation, release);
-        return pRetry(
-          async () =>
-            installRelease(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
-          {
-            retries: 10,
-            onFailedAttempt: async (err) => {
-              console.log(`retrying install of ${release}`);
-              console.log(err);
-            },
-          }
-        );
-      })
+    kymaCharts.map(({ release, namespace, values, customPath, profile }) => {
+      const chartLocation = !!customPath
+        ? customPath(installLocation)
+        : join(installLocation, release);
+      return pRetry(
+        async () =>
+          installRelease(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
+        {
+          retries: 10,
+          onFailedAttempt: async (err) => {
+            console.log(`retrying install of ${release}`);
+            console.log(err);
+          },
+        }
+      );
+    })
   );
   const crdsAfter = await getAllCRDs();
   const installedCrds = crdsAfter.filter(crd => !crdsBefore.some(c => c.metadata.name == crd.metadata.name));

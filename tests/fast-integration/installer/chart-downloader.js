@@ -2,6 +2,7 @@ const fs = require("fs");
 const { join } = require("path");
 var AdmZip = require("adm-zip");
 const axios = require("axios");
+const { debug } = require("../utils");
 
 
 async function downloadFile(url, filename) {
@@ -28,21 +29,32 @@ async function downloadCharts(options) {
   options = options || {};
   const repo = options.repo || 'kyma-project/kyma'
   const branch = options.source || 'master';
-  var dir = fs.mkdtempSync('tmp-');
+  const dir = 'tmp-' + branch;
   const resourcesPath = join(dir, 'resources')
+  debug("Resource path:",resourcesPath)
+  if (fs.existsSync(resourcesPath)) {
+    debug("The resources path already exists - download skipped")
+    return;
+  }
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+  }
 
   const zipFile = join(dir, branch + '.zip')
-  await downloadFile(`https://codeload.github.com/${repo}/zip/${branch}`, zipFile)
+  const url = `https://codeload.github.com/${repo}/zip/${branch}`;
+  debug("Downloading Kyma charts from ",url);
+  await downloadFile(url, zipFile)
+  debug("Kyma charts downloaded");
   var zip = new AdmZip(zipFile);
   var zipEntries = zip.getEntries();
   zipEntries.forEach(function (zipEntry) {
     const target = zipEntry.entryName.split('/').slice(1).join('/');
     if (target == 'resources/') {
       zip.extractEntryTo(zipEntry.entryName, dir);
-      fs.renameSync(join(dir, zipEntry.entryName), resourcesPath );
+      fs.renameSync(join(dir, zipEntry.entryName), resourcesPath);
     }
   });
   return resourcesPath;
 }
 
-module.exports = {downloadCharts};
+module.exports = { downloadCharts };

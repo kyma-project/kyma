@@ -1,5 +1,4 @@
 const k8s = require("@kubernetes/client-node");
-const _ = require("lodash");
 const fs = require("fs");
 const { join } = require("path");
 
