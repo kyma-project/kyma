@@ -2,7 +2,7 @@ package main
 
 import (
 	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kelseyhightower/envconfig"
