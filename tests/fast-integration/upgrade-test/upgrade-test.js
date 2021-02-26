@@ -36,12 +36,10 @@ describe("Kyma end to end upgrade tests", function () {
   })
 
   it("function should reach Commerce mock API through app gateway after upgrade", async function () {
-    this.timeout(60 * 1000);
     await commerceMock.checkAppGatewayResponse()
   })
 
   it("order.created.v1 event should trigger the lastorder function after upgrade", async function () {
-    this.timeout(60 * 1000);
     await commerceMock.sendEventAndCheckResponse();
   });
 

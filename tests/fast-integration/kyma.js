@@ -1,6 +1,23 @@
 #!/usr/bin/env node
 const installer = require("./installer")
+const k3d = require("./provisioner/k3d")
 const { switchDebug } = require("./utils");
+
+function provisionCommand(yargs) {
+  yargs.command('k3d', 'Provision k3d cluster', {}, provision);
+}
+function deprovisionCommand(yargs) {
+  yargs.command('k3d', 'Deprovision k3d cluster', {}, deprovision);
+}
+
+async function provision() {
+  await k3d.provisionK3d()
+  console.log("k3d cluster created");
+}
+async function deprovision() {
+  await k3d.deprovisionK3d()
+  console.log("k3d cluster deleted");
+}
 
 function installOptions(yargs) {
   yargs.options({
@@ -47,6 +64,8 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
   .options({ 'verbose': { alias: 'v', describe: 'Displays details of actions triggered by the command.' } })
   .command('install', 'Installs Kyma on a running Kubernetes cluster in 5 minutes', installOptions, install)
   .command('uninstall', 'Removes Kyma from cluster', uninstallOptions, uninstall)
+  .command('provision', 'Provision kubernetes cluster', provisionCommand)
+  .command('deprovision', 'Deprovision kubernetes cluster', deprovisionCommand)
   .demandCommand(1, 1, 'Command is missing')
   .example('Install kyma from local sources:\n  $0 install --skip-modules=monitoring,tracing,kiali')
   .example('Install kyma from kyma-project/kyma master branch:\n  $0 install -s master')
@@ -58,6 +77,7 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
   .strict()
   .wrap(null)
   .help()
+  .completion()
   .argv
 
 async function install(argv) {
@@ -69,8 +89,9 @@ async function install(argv) {
   }
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
+  const newEventing = argv.newEventing;
 
-  await installer.installKyma({ resourcesPath: src, components, skipComponents, isUpgrade: !!argv.upgrade });
+  await installer.installKyma({ resourcesPath: src, components, skipComponents, isUpgrade: !!argv.upgrade, newEventing });
   console.log('Kyma installed')
 }
 

@@ -34,7 +34,7 @@ async function downloadCharts(options) {
   debug("Resource path:",resourcesPath)
   if (fs.existsSync(resourcesPath)) {
     debug("The resources path already exists - download skipped")
-    return;
+    return resourcesPath;
   }
   if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);

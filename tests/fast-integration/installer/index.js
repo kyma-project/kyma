@@ -302,7 +302,6 @@ async function chartList(options) {
       namespace: "istio-system",
       values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
       customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
-      filter: !isBEBEnabled,
     },
   ];
 
