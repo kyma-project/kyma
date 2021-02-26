@@ -4,7 +4,7 @@ const { debug } = require("../utils");
 const { join } = require("path");
 
 function istioctlLocation(version) {
-  return join(__dirname, "..", `istio-${version}`, "bin", "istioctl");
+  return join(`istio-${version}`, "bin", "istioctl");
 }
 
 function isIstioctlDownloaded(version) {

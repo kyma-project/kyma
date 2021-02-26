@@ -1,5 +1,4 @@
 const k8s = require("@kubernetes/client-node");
-const { expect } = require("chai");
 const _ = require("lodash");
 const fs = require("fs");
 const { join } = require("path");
@@ -49,23 +48,6 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function expectNoK8sErr(err) {
-  if (!!err.body && !!err.body.message) {
-    expect(err.body.message).to.be.empty; // handle native k8s errors
-  }
-
-  expect(err).to.be.undefined; // handle rest of errors
-}
-
-function expectNoAxiosErr(err) {
-  if (err.reponse) {
-    // https://github.com/axios/axios#handling-errors
-    const { request, ...errorObject } = err.response; // request is too verbose
-    expect(errorObject).to.deep.eq({});
-  }
-
-  expect(err).to.be.undefined; // catch non-axios errors
-}
 
 function convertAxiosError(axiosError, message) {
   if (!axiosError.response) {
@@ -719,8 +701,6 @@ function getEnvOrThrow(key) {
 
 module.exports = {
   retryPromise,
-  expectNoK8sErr,
-  expectNoAxiosErr,
   convertAxiosError,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,

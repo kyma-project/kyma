@@ -11,7 +11,6 @@ axios.defaults.httpsAgent = httpsAgent;
 
 const {
   retryPromise,
-  expectNoK8sErr,
   convertAxiosError,
   sleep,
   k8sApply,
@@ -246,8 +245,8 @@ async function patchAppGatewayDeployment() {
       body: patch,
       json: true,
       headers: options.headers,
-    })
-    .catch(expectNoK8sErr);
+    });
+  
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(
     "commerce-application-gateway",
