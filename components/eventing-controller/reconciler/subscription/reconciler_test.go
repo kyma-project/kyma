@@ -165,8 +165,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
-	When("Two Subscriptions which are using the same sink but different paths are deleted", func() {
-		It("Should update the APIRule accordingly", func() {
+	When("Two Subscriptions using different Sinks are made to use the same Sink and then both are deleted", func() {
+		It("Should update the APIRule accordingly and then remove the APIRule", func() {
 			// Service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
