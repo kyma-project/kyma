@@ -1,0 +1,21 @@
+mirrors:
+  registry.localhost:5000:
+    endpoint:
+    - http://registry.localhost:5000
+  docker.io:
+    endpoint:
+    - http://registry.localhost:5000
+  gcr.io:
+    endpoint:
+    - http://registry.localhost:5000
+  ghcr.io:
+    endpoint:
+    - http://registry.localhost:5000
+  quay.io:
+    endpoint:
+    - http://registry.localhost:5000
+  eu.gcr.io:
+    endpoint:
+    - http://registry.localhost:5000
+  configs: {}
+  auths: {}

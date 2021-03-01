@@ -83,4 +83,6 @@ kind: Application
 metadata:
   name: commerce
 spec:
+  labels: 
+    override.deployment.args.skipVerify: "true"
   description: Commerce mock
