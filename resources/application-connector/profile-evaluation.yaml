@@ -13,7 +13,7 @@ application-operator:
       profile: "evaluation"
       limits:
         cpu: 50m
-        memory: 128Mi
+        memory: 192Mi
       requests:
         cpu: 25m
         memory: 40Mi
