@@ -12,18 +12,18 @@ The project also contains the `kyma-js` tool which you can use in the developmen
 - KUBECONFIG pointing to the Kubernetes cluster which has Kyma installed. If you don't have Kyma yet, you can quickly run it locally using [this project](https://github.com/kyma-incubator/local-kyma).
 - Docker configured with 4GB RAM
 - [k3d](https://github.com/rancher/k3d) - you can install it with these commands:
-```
-brew install k3d
-```
-or
-```
-curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
-```
+    ```
+    brew install k3d
+    ```
+    or
+    ```
+    curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+    ```
 
 - [crane](https://github.com/google/go-containerregistry/tree/master/cmd/crane) (optional) - a tool to copy Docker images. You can install it with this command:
-```
-GO111MODULE=on go get -u github.com/google/go-containerregistry/cmd/crane
-```
+    ```
+    GO111MODULE=on go get -u github.com/google/go-containerregistry/cmd/crane
+    ```
 
 
 ## Usage
