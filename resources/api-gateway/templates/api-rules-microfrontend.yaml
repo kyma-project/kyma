@@ -27,3 +27,17 @@ spec:
       viewUrl: "/namespaces/:namespaceId/apirules/:apiName?resourceApiPath=/apis/gateway.kyma-project.io/v1alpha1"
       showInNavigation: false
       viewGroup: "_core_ui_"
+    - label: API Rule edit
+      navigationPath: apirules/edit
+      showInNavigation: false
+      viewGroup: _core_ui_
+    - label: API Rule edit
+      navigationPath: 'apirules/edit/:apiName'
+      showInNavigation: false
+      viewGroup: _core_ui_
+      viewUrl: '/apirules/edit/:apiName'
+    - label: Create API rule
+      navigationPath: apirules/create
+      showInNavigation: false
+      viewGroup: _core_ui_
+      viewUrl: /apirules/create
