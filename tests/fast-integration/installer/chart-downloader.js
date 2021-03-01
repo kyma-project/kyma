@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { join } = require("path");
-var AdmZip = require("adm-zip");
+const AdmZip = require("adm-zip");
 const axios = require("axios");
 const { debug } = require("../utils");
 
@@ -40,13 +40,13 @@ async function downloadCharts(options) {
     fs.mkdirSync(dir);
   }
 
-  const zipFile = join(dir, branch + '.zip')
+  const zipFile = join(dir, `${branch}.zip`);
   const url = `https://codeload.github.com/${repo}/zip/${branch}`;
   debug("Downloading Kyma charts from ",url);
   await downloadFile(url, zipFile)
   debug("Kyma charts downloaded");
-  var zip = new AdmZip(zipFile);
-  var zipEntries = zip.getEntries();
+  const zip = new AdmZip(zipFile);
+  const zipEntries = zip.getEntries();
   zipEntries.forEach(function (zipEntry) {
     const target = zipEntry.entryName.split('/').slice(1).join('/');
     if (target == 'resources/') {

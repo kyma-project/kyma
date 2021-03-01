@@ -49,7 +49,7 @@ Here you have sample development tasks you can execute on your local machine wor
 
 2. Create local cluster:
     ```
-    ./hack/create-cluster-k3d.sh
+    kyma-js provision k3d
     ```
 3. Install kyma without some modules, and with new eventing (instead of knative):
     ```
@@ -65,7 +65,7 @@ Here you have sample development tasks you can execute on your local machine wor
     ```
 6. Delete all, and start from scratch:
     ```
-    ./hack/delete-cluster.sh
+    kyma-js deprovision k3d
 
 Execute `kyma-js <command> --help` to learn more about possibilities.
 
