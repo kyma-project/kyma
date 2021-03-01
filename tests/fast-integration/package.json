@@ -1,6 +1,6 @@
 {
   "name": "kyma-js",
-  "version": "0.0.1-alpha.10",
+  "version": "0.0.1-alpha.11",
   "main": "installer/index.js",
   "bin": "kyma.js",
   "author": "Kyma contributors",

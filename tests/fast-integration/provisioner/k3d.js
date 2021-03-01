@@ -64,8 +64,7 @@ async function createRegistry() {
 
 async function k3dClusterCreate() {
   const registriesYaml = join(__dirname, 'registries.yaml');
-
-  try {
+   try {
     const { stdout } = await execa("k3d", [
       "cluster", "create", "kyma",
       "--image", "docker.io/rancher/k3s:v1.19.7-k3s1",
@@ -74,7 +73,7 @@ async function k3dClusterCreate() {
       "--k3s-server-arg", "--no-deploy",
       "--k3s-server-arg", "traefik",
       "--network", "kyma",
-      "--volume", `${registriesYaml}:/etc/rancher/k3s/registries.yaml`,
+      "--registry-config", registriesYaml,
       "--wait",
       "--kubeconfig-switch-context",
       "--timeout", "60s"

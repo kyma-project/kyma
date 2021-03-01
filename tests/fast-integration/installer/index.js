@@ -379,7 +379,7 @@ async function installKyma(options) {
   const isUpgrade = options.isUpgrade || false;
   const skipComponents = options.skipComponents || [];
   const components = options.components;
-  fs
+  console.time('Installation');
   console.log('Installing Kyma from folder', installLocation);
   await waitForNodesToBeReady();
   const crdsBefore = await getAllCRDs();
@@ -393,7 +393,7 @@ async function installKyma(options) {
       await installIstio(istioVersion);
     }  
   }
-
+  console.timeLog('Installation','Istio installed');
   await removeKymaGatewayCertsYaml(installLocation);
   await kubectlApply(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlApply(join(__dirname, "system-namespaces.yaml"));
@@ -433,6 +433,7 @@ async function installKyma(options) {
   const installedCrds = crdsAfter.filter(crd => !crdsBefore.some(c => c.metadata.name == crd.metadata.name));
   debug("Installed crds:")
   debug(installedCrds.map(crd => crd.metadata.name));
+  console.timeEnd('Installation');
 }
 
 module.exports = {
