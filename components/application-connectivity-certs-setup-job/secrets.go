@@ -12,6 +12,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+const connectorName = "application-connector"
+
 // ManagerConstructor creates Secret Manager for specified namespace
 type ManagerConstructor func(namespace string) Manager
 
@@ -114,6 +116,10 @@ func makeSecret(name types.NamespacedName, data map[string][]byte) *v1.Secret {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name.Name,
 			Namespace: name.Namespace,
+			Labels: map[string]string{
+				"release":                    connectorName,
+				"app.kubernetes.io/instance": connectorName,
+			},
 		},
 		Data: data,
 	}
