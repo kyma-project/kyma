@@ -21,7 +21,6 @@ components:
   - name: "helm-broker"
   - name: "nats-streaming"
     namespace: "natss"
-  - name: "core"
   - name: "cluster-users"
   - name: "serverless"
   - name: "knative-provisioner-natss"

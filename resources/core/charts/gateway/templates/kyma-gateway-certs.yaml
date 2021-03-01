@@ -1,4 +1,3 @@
-{{ if not .Values.global.newInstallation }}
  {{ if not .Values.global.environment.gardener }}
 apiVersion: v1
 data:
@@ -10,4 +9,3 @@ metadata:
   namespace: istio-system
 type: Opaque
  {{ end }}
-{{ end }}

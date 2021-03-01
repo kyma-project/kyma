@@ -1,7 +1,6 @@
 global:
   environment:
     gardener: false
-  newInstallation: false
   compass:
     mtls:
       secret:
