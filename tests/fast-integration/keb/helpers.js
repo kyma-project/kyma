@@ -41,9 +41,17 @@ async function ensureOperationSucceeded(keb, instanceID, operationID) {
   ).catch(expectNoAxiosErr);
 }
 
+async function getProvisionerID(keb, instanceID){
+  const response = await keb.getRuntime(instanceID)
+  expect(response.data).to.be.lengthOf(1)
+
+  return response.data[0].runtimeID
+}
+
 module.exports = {
   KEBConfig,
   provisionSKR,
   deprovisionSKR,
   ensureOperationSucceeded,
+  getProvisionerID
 };

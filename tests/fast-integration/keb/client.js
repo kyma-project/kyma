@@ -122,11 +122,19 @@ class KEBClient {
 
   async deprovisionSKR(instanceID, planID) {
     const endpoint = `service_instances/${instanceID}?service_id=${this.serviceID}&plan_id=${planID}`;
-    var res;
     try {
       return await this.callKEB(null, endpoint, "delete");
     } catch (err) {
       throw new Error(`error while deprovisioning SKR: ${err.toString()}`);
+    }
+  }
+
+  async getRuntime(instanceID) {
+    const endpoint = `runtimes?instance_id=/${instanceID}`;
+    try {
+      return await this.callKEB(null, endpoint, "get");
+    } catch (err) {
+      throw new Error(`error while getting SKR details: ${err.toString()}`);
     }
   }
 }
