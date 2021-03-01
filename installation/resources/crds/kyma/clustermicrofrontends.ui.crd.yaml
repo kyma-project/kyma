@@ -1,0 +1,73 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: "clustermicrofrontends.ui.kyma-project.io"
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: ui.kyma-project.io
+  version: v1alpha1
+  scope: Cluster
+  names:
+    plural: "clustermicrofrontends"
+    singular: "clustermicrofrontend"
+    kind: ClusterMicroFrontend
+    shortNames:
+      - "cmf"
+  validation:
+    openAPIV3Schema:
+      required:
+      - "spec"
+      properties:
+        spec:
+          type: object
+          required:
+            - "placement"
+            - "navigationNodes"
+          properties:
+            appName:
+              type: string
+            displayName:
+              type: string
+            version:
+              type: string
+              pattern: "[a-zA-Z0-9]+"
+            placement:
+              type: string
+              pattern: "^(environment|cluster|namespace)$"
+            category:
+              type: string
+            viewBaseUrl:
+              type: string
+              pattern: '^(https?)://.+$'
+            navigationNodes:
+              type: array
+              items:
+                type: object
+                required:
+                - "label"
+                - "navigationPath"
+                properties:
+                  label:
+                    type: string
+                  navigationPath:
+                    type: string
+                  viewUrl:
+                    type: string
+                  showInNavigation:
+                    type: boolean
+                  externalLink:
+                    type: string
+                  requiredPermissions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        apiGroup: 
+                          type: string
+                        resource:
+                          type: string
+                        verbs:
+                          type: array
+                          items: 
+                            type: string

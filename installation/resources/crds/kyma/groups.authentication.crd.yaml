@@ -1,0 +1,34 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: groups.authentication.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: authentication.kyma-project.io
+  version: v1alpha1
+  scope: Cluster
+  names:
+    plural: groups
+    singular: group
+    kind: Group
+    shortNames:
+    - grp
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          type: object
+          required:
+            - idpName
+            - name            
+          properties:
+            idpName:
+              type: string
+              maxLength: 32
+            name:
+              type: string
+              maxLength: 64
+            description:
+              type: string
+              maxLength: 256
