@@ -30,8 +30,8 @@ spec:
 {{ toYaml .Values.prometheusOperator.podAnnotations | indent 8 }}
 {{- end }}
     spec:
-    {{- if .Values.prometheusOperator.priorityClassName }}
-      priorityClassName: {{ .Values.prometheusOperator.priorityClassName }}
+    {{- if or .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
     {{- end }}
       containers:
         - name: {{ template "kube-prometheus-stack.name" . }}

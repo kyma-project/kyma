@@ -97,6 +97,9 @@ spec:
         - name: cert
           secret:
             secretName: connector-service-app-ca
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

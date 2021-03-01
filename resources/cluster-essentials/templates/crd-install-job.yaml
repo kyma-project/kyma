@@ -57,3 +57,6 @@ spec:
           name: {{ .Release.Name }}-crd-{{ $idx }}
       {{- end }}
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

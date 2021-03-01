@@ -91,3 +91,6 @@ spec:
       - name: tls-cert
         secret:
           secretName: {{ template "name" . }}-tls-cert
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -177,8 +177,8 @@ spec:
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}
-      tracing:  
-        zipkin: 
+      tracing:
+        zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
     enableTracing: {{ .Values.global.tracing.enabled }}
@@ -248,7 +248,7 @@ spec:
       oneNamespace: false
       operatorManageWebhooks: false
       pilotCertProvider: istiod
-      priorityClassName: ""
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         autoInject: enabled
         clusterDomain: cluster.local

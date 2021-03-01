@@ -103,5 +103,8 @@ spec:
         configMap:
           name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 {{- end }}

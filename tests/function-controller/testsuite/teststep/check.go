@@ -46,8 +46,8 @@ func (h HTTPCheck) Run() error {
 	// the language specific server may not start yet
 	// there may also be some problems with istio sidecars etc
 	backoff := wait.Backoff{
-		Steps:    6,
-		Duration: 250 * time.Millisecond,
+		Steps:    10,
+		Duration: 500 * time.Millisecond,
 		Factor:   2.0,
 		Jitter:   0.1,
 	}

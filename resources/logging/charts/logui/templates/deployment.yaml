@@ -28,7 +28,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
-          resources: 
+          resources:
             {{- toYaml .Values.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
@@ -42,3 +42,6 @@ spec:
             items:
             - key: config.js
               path: config.js
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

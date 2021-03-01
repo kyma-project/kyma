@@ -57,3 +57,6 @@ spec:
         - name: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
           secret:
             secretName: {{ .Values.application_connectivity_certs_sync.secrets.tlsCertificateSecret.name }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
