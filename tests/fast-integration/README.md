@@ -94,7 +94,7 @@ kyma-js <command> --help
 
 ### Why don't you use Octopus?
 
-[Octopus](https://github.com/kyma-incubator/octopus/blob/master/README.md) is a great tool for running tests inside the Kubernetes cluster in a declarative way. But it is not the right tool for fast integration testing. The goal is to execute the tests in 4 minutes. With Octopus, you need 4 minutes or more before the tests even start (2 minutes to build the test image and push it to the Docker registry, 1 minute to deploy Octopus, and 1 minute to deploy the test Pod).
+[Octopus](https://github.com/kyma-incubator/octopus/blob/master/README.md) is a great tool for running tests inside the Kubernetes cluster in a declarative way. However, it is not the right tool for fast integration testing. The goal is to execute the tests in 4 minutes. With Octopus, you need 4 minutes or more before the tests even start (2 minutes to build the test image and push it to the Docker registry, 1 minute to deploy Octopus, and 1 minute to deploy the test Pod).
 
 Octopus testing flow looks as follows:
 1. Build a test image (or images) and push it (~ 2min/image).
