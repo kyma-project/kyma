@@ -80,7 +80,7 @@ Here you have sample development tasks you can execute on your local machine wor
     kyma-js install -v --component=application-connector --new-eventing
     ```
 
-6. Delete all and start from scratch:
+6. Delete the cluster and start from scratch:
     ```
     kyma-js deprovision k3d
     ```
