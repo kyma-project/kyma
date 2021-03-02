@@ -12,7 +12,7 @@ The project also contains the `kyma-js` tool which you can use in the developmen
 - KUBECONFIG pointing to the Kubernetes cluster which has Kyma installed. If you don't have Kyma yet, you can quickly run it locally using [this project](https://github.com/kyma-incubator/local-kyma).
 - Docker configured with 4GB RAM
 - [k3d](https://github.com/rancher/k3d) - you can install it with these commands:
-    ```
+    ```bash
     brew install k3d
     ```
     or
