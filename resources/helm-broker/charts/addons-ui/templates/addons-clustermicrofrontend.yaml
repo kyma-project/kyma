@@ -13,11 +13,11 @@ spec:
   navigationNodes:
     - label: "Cluster Addons"
       navigationPath: addons-config
-      viewUrl: "/clusteraddonsconfigurations?hasDetailsView=true&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: "/ClusterAddonsConfigurations?hasDetailsView=true&resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
       order: 3
       requiredPermissions:
         - apiGroup: addons.kyma-project.io
-          resource: clusteraddonsconfigurations
+          resource: ClusterAddonsConfigurations
           verbs:
             - create
     - label: "Cluster Addons details"
@@ -28,4 +28,4 @@ spec:
       navigationPath: addons-config/details/:addonName
       showInNavigation: false
       viewGroup: _core_ui_
-      viewUrl: /clusteraddonsconfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: /ClusterAddonsConfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
