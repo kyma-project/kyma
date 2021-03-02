@@ -4,7 +4,7 @@
 
 This project provides fast integration tests for Kyma. The goal is to decrease the minimal turnaround time ten times, from the current 90 minutes to less than 10 minutes. Fast integration tests will partially solve the problem of long-running tests. Other initiatives that are executed in parallel are equally important: switching to k3s, reducing Kubernetes provisioning time, and implementing the parallel installation of Kyma components.
 
-The project also contains the `kyma-js` tool which you can use in the development process. Kyma-js is a temporary solution that implements the subset of Kyma CLI commands but focuses on local development and minimal turnaround time (parallel installation). It provides some additional features that are useful for development, such as upgrade of the selected components, skipping some components from the installation, testing upgrade to the new eventing, and provisioning/deprovisioning of the k3d cluster.
+The project also contains the `kyma-js` tool which you can use in the development process. `kyma-js` is a temporary solution that implements the subset of Kyma CLI commands, focusing on local development and minimal turnaround time (parallel installation). It provides some additional features that are useful for development, such as upgrading the selected components, skipping some components from the installation queue, testing the upgrade to the new eventing, and provisioning or deprovisioning a k3d cluster.
 
 ## Prerequisites
 
