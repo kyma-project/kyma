@@ -21,6 +21,14 @@ image:
 
 podSecurityContext:
 
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 30m
+    memory: 64Mi
+
 bebSecret:
   nameSuffix: "-beb-oauth2"
 
