@@ -27,7 +27,7 @@ resources:
     memory: 128Mi
   requests:
     cpu: 30m
-    memory: 64Mi
+    memory: 32Mi
 
 bebSecret:
   nameSuffix: "-beb-oauth2"
