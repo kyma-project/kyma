@@ -21,7 +21,7 @@ The project also contains the `kyma-js` tool which you can use in the developmen
     ```
 
 - [crane](https://github.com/google/go-containerregistry/tree/master/cmd/crane) (optional) - a tool to copy Docker images. You can install it with this command:
-    ```
+    ```bash
     GO111MODULE=on go get -u github.com/google/go-containerregistry/cmd/crane
     ```
 
