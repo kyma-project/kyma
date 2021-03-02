@@ -419,7 +419,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: d999a403
+    tag: "49766840"
     pullPolicy: IfNotPresent
 
   deployment:
