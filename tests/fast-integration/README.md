@@ -70,7 +70,7 @@ Here you have sample development tasks you can execute on your local machine wor
     kyma-js install -v --skip-modules=monitoring,tracing,logging,kiali --new-eventing
     ```
 
-4. Execute the Commerce Mock test with DEBUG enabled:
+4. Execute the Commerce Mock test with `DEBUG` enabled:
     ```
     DEBUG=true mocha test/2-commerce-mock.js
     ```
