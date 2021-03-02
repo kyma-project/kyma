@@ -578,7 +578,7 @@ smtp:
 ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
 sidecar:
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-sidecar
+    repository: eu.gcr.io/kyma-project/incubator/k8s-sidecar
     tag: 1.10.6-e8ecdc26
   imagePullPolicy: IfNotPresent
   resources:
