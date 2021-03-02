@@ -21,6 +21,9 @@ userProvided:
 global:
   certificates:
     selfSigned: false
+  istio:
+    gateway:
+      name: kyma-gateway
 
 securityContext:
   allowPrivilegeEscalation: false
