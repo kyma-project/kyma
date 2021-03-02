@@ -49,3 +49,6 @@ spec:
                     break
                   fi
               done
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

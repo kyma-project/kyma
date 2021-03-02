@@ -182,6 +182,9 @@ spec:
                     values:
                     - {{ template "etcd-hb-fullname" . }}
               topologyKey: "kubernetes.io/hostname"
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data

@@ -60,4 +60,7 @@ spec:
               cpu: 30m
               memory: 30Mi
       terminationGracePeriodSeconds: 30
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}
