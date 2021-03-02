@@ -16,7 +16,7 @@ The project also contains the `kyma-js` tool which you can use in the developmen
     brew install k3d
     ```
     or
-    ```
+    ```bash
     curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
     ```
 
