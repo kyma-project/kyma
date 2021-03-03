@@ -130,7 +130,7 @@ async function registerAllApis(mockHost) {
             "content-type": "application/json",
             origin: `https://${mockHost}`,
           },
-          timeout: 5000
+          timeout: 30000
         }
       ).catch((err) => {
         throw convertAxiosError(err, "Error during Commerce Mock API registration");
