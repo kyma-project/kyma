@@ -1,4 +1,7 @@
 config:
+  # brokerCredentials allows to disable credentials rotation
+  brokerCredentials:
+    enabled: false
   app:
     legacy_url: null
     url: null
@@ -24,10 +27,16 @@ config:
     request_timeout: 2m
     skip_ssl_validation: false
     url: http://service-manager.dev.cfdev.sh
+
 file:
   format: yml
   location: /etc/config
   name: application
+
+sm:
+  password: admin
+  user: admin
+
 image:
   pullPolicy: IfNotPresent
   pullsecret: null
@@ -38,9 +47,6 @@ securityContext: { }
 service:
   port: 80
   type: ClusterIP
-sm:
-  password: admin
-  user: admin
 
 resources:
   limits:

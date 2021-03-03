@@ -47,6 +47,8 @@ spec:
           mountPath: {{ .Values.file.location }}
           readOnly: true
         env:
+        - name: BROKER_CREDENTIALS_ENABLED
+          value: {{ .Values.config.brokerCredentials.enabled }}
         - name: K8S_SECRET_NAME
           value: {{ template "service-broker-proxy.fullname" . }}-regsecret
         - name: K8S_SECRET_NAMESPACE
