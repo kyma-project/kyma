@@ -11,7 +11,6 @@ axios.defaults.httpsAgent = httpsAgent;
 
 const {
   retryPromise,
-  expectNoK8sErr,
   convertAxiosError,
   sleep,
   k8sApply,
@@ -49,7 +48,7 @@ async function checkAppGatewayResponse() {
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
   let res = await retryPromise(
-    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" },{timeout:5000}),
+    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
     45,
     2000
   ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
@@ -91,31 +90,23 @@ async function sendEventAndCheckResponse() {
       await sleep(500);
 
       return axios
-        .get(`https://lastorder.${host}`)
+        .get(`https://lastorder.${host}`, { timeout: 5000 })
         .then((res) => {
-          expect(res.data).to.have.nested.property(
-            "event.ce-type",
-            "order.created"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-source",
-            "commerce"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-eventtypeversion",
-            "v1"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-specversion",
-            "1.0"
-          );
+          expect(res.data).to.have.nested.property("event.data.orderCode","567");        
+          // See: https://github.com/kyma-project/kyma/issues/10720
+          expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created"); 
+          expect(res.data).to.have.nested.property("event.ce-source"); 
+          expect(res.data).to.have.nested.property("event.ce-eventtypeversion","v1");
+          expect(res.data).to.have.nested.property("event.ce-specversion","1.0");
           expect(res.data).to.have.nested.property("event.ce-id");
           expect(res.data).to.have.nested.property("event.ce-time");
           return res;
         })
-        .catch((e) => { throw convertAxiosError(e, "Error during request to function lastorder") });
+        .catch((e) => { 
+          throw convertAxiosError(e, "Error during request to function lastorder") 
+        });
     },
-    45,
+    30,
     2 * 1000
   );
 }
@@ -200,7 +191,7 @@ async function connectCommerceMock(mockHost, tokenData) {
 
   try {
     await axios.post(url, body, params);
-  } catch(err) {
+  } catch (err) {
     throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
   }
 }
@@ -250,8 +241,8 @@ async function patchAppGatewayDeployment() {
       body: patch,
       json: true,
       headers: options.headers,
-    })
-    .catch(expectNoK8sErr);
+    });
+
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(
     "commerce-application-gateway",
