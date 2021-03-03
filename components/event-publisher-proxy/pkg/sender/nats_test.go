@@ -16,7 +16,7 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestNatsSender2(t *testing.T) {
+func TestSendCloudEvent(t *testing.T) {
 	logger := logrus.New()
 	logger.Info("TestNatsSender started")
 
