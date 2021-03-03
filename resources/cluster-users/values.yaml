@@ -107,4 +107,5 @@ global:
     domainName: "kyma.local"
 
 users:
+  adminName: "admin@kyma.cx"
   adminGroup:

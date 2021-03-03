@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "certificates.name" . }}-legacy
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: {{ template "certificates.name" . }}-kube-system-legacy
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "patch"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kyma-installer
+  name: {{ template "certificates.name" . }}-kyma-installer-legacy
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update", "patch"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: istio-system
+  name: {{ template "certificates.name" . }}-istio-system-legacy
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "update", "patch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-legacy
+  namespace: kube-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-legacy
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kube-system-legacy
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-legacy
+  namespace: kyma-installer
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-legacy
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kyma-installer-legacy
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-legacy
+  namespace: istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-legacy
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-istio-system-legacy
+  apiGroup: rbac.authorization.k8s.io
