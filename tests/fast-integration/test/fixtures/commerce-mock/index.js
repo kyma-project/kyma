@@ -93,18 +93,18 @@ async function sendEventAndCheckResponse() {
       return axios
         .get(`https://lastorder.${host}`, { timeout: 5000 })
         .then((res) => {
-          expect(res.data).to.have.nested.property("event.data.orderCode","567");        
+          expect(res.data).to.have.nested.property("event.data.orderCode", "567");
           // See: https://github.com/kyma-project/kyma/issues/10720
-          expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created"); 
-          expect(res.data).to.have.nested.property("event.ce-source"); 
-          expect(res.data).to.have.nested.property("event.ce-eventtypeversion","v1");
-          expect(res.data).to.have.nested.property("event.ce-specversion","1.0");
+          expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created");
+          expect(res.data).to.have.nested.property("event.ce-source");
+          expect(res.data).to.have.nested.property("event.ce-eventtypeversion", "v1");
+          expect(res.data).to.have.nested.property("event.ce-specversion", "1.0");
           expect(res.data).to.have.nested.property("event.ce-id");
           expect(res.data).to.have.nested.property("event.ce-time");
           return res;
         })
-        .catch((e) => { 
-          throw convertAxiosError(e, "Error during request to function lastorder") 
+        .catch((e) => {
+          throw convertAxiosError(e, "Error during request to function lastorder")
         });
     },
     30,
@@ -114,37 +114,26 @@ async function sendEventAndCheckResponse() {
 
 async function registerAllApis(mockHost) {
   debug("Listing Commerce Mock local APIs")
-  const localApis = await retryPromise(
-    () => axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
-      throw convertAxiosError(err, "API registration error - commerce mock local API not available");
-    }
-    ),
-    1,
-    3000
-  );
+  axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
+    throw convertAxiosError(err, "API registration error - commerce mock local API not available");
+  });
   debug("Commerce Mock local APIs received")
   const filteredApis = localApis.data.filter((api) => (api.name.includes("Commerce Webservices") || api.name.includes("Events")));
   for (let api of filteredApis) {
-    await retryPromise(
-      async () => {
-        await axios
-          .post(
-            `https://${mockHost}/local/apis/${api.id}/register`,
-            {},
-            {
-              headers: {
-                "content-type": "application/json",
-                origin: `https://${mockHost}`,
-              },
-              timeout: 5000
-            }
-          ).catch((err) => {
-            throw convertAxiosError(err, "Error during Commerce Mock API registration");
-          });
-      },
-      10,
-      3000
-    );
+    await axios
+      .post(
+        `https://${mockHost}/local/apis/${api.id}/register`,
+        {},
+        {
+          headers: {
+            "content-type": "application/json",
+            origin: `https://${mockHost}`,
+          },
+          timeout: 5000
+        }
+      ).catch((err) => {
+        throw convertAxiosError(err, "Error during Commerce Mock API registration");
+      });
   }
   debug("Verifying if APIs are properly registered")
 
