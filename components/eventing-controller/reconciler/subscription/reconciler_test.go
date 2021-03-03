@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -158,10 +159,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				reconcilertesting.HaveSubscriptionReady(),
 			))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation requests for the Subscription")
+			_, postRequests, _ := countBebRequests(subscriptionName)
+			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+
 		})
 	})
 
@@ -250,10 +255,18 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Removing the APIRule")
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(2))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation and one deletion request for each subscription")
+			_, creationRequestSubscription1, deletionRequestSubscription1 := countBebRequests(subscription1Name)
+			Expect(creationRequestSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+
+			_, creationRequestSubscription2, deletionRequestSubscription2 := countBebRequests(subscription2Name)
+			Expect(creationRequestSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -356,10 +369,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Marking it as ready")
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -403,10 +419,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Cleanup not used APIRule")
 			getAPIRule(apiRule, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation request")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -450,10 +469,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Deleting APIRule from Subscription 1")
 			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(2))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation request for Subscription 1")
+			_, creationRequests, _ := countBebRequests(subscriptionName1)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+
+			By("Sending at least one creation request for Subscription 2")
+			_, creationRequests, _ = countBebRequests(subscriptionName2)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -506,10 +532,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -582,10 +611,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -669,10 +701,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			By("Cleaning the application name and not sending invalid webhook requests")
+			invalidRequests := countRequestsWithInvalidEventType()
 			Expect(invalidRequests).Should(BeZero())
+
+			By("Sending at least one creation and one deletion request for the Subscription")
+			_, creationRequests, deletionRequests := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
@@ -1092,20 +1128,45 @@ func createSubscriptionObjectsAndWaitForReadiness(givenSubscription *eventingv1a
 	return subscription, apiRule
 }
 
-// countRequestsForWebhooks returns how many webhook requests are sent for each given event-type
-func countRequestsForWebhooks(eventType1, eventType2 string) (int, int) {
-	count1, count2 := 0, 0
+// countRequestsWithInvalidEventType returns how many requests with not-clean event types are sent
+func countRequestsWithInvalidEventType() int {
+	count := 0
 	for _, v := range beb.Requests {
 		subscription, ok := v.(bebtypes.Subscription)
 		if ok && len(subscription.Events) > 0 {
 			for _, event := range subscription.Events {
-				if event.Type == eventType1 {
-					count1++
-				} else if event.Type == eventType2 {
-					count2++
+				if event.Type == reconcilertesting.EventTypeNotClean {
+					count++
 				}
 			}
 		}
 	}
-	return count1, count2
+	return count
+}
+
+// countBebRequests returns how many requests for a given subscription are sent for each HTTP method
+func countBebRequests(subscriptionName string) (countGet int, countPost int, countDelete int) {
+	countGet, countPost, countDelete = 0, 0, 0
+	for req, v := range beb.Requests {
+		switch method := req.Method; method {
+		case "GET":
+			if strings.Contains(req.URL.Path, subscriptionName) {
+				countGet++
+			}
+		case "POST":
+			subscription, ok := v.(bebtypes.Subscription)
+			if ok && len(subscription.Events) > 0 {
+				for _, event := range subscription.Events {
+					if event.Type == reconcilertesting.EventType && subscription.Name == subscriptionName {
+						countPost++
+					}
+				}
+			}
+		case "DELETE":
+			if strings.Contains(req.URL.Path, subscriptionName) {
+				countDelete++
+			}
+		}
+	}
+	return countGet, countPost, countDelete
 }
