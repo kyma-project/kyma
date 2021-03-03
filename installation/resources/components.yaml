@@ -23,6 +23,7 @@ components:
     namespace: "natss"
   - name: "core"
   - name: "cluster-users"
+  - name: "rafter"
   - name: "serverless"
   - name: "knative-provisioner-natss"
     namespace: "knative-eventing"
