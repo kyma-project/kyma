@@ -166,7 +166,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Sending at least one creation requests for the Subscription")
 			_, postRequests, _ := countBebRequests(subscriptionName)
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-
 		})
 	})
 
@@ -260,13 +259,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(invalidRequests).Should(BeZero())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestSubscription1, deletionRequestSubscription1 := countBebRequests(subscription1Name)
-			Expect(creationRequestSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(deletionRequestSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(subscription1Name)
+			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
-			_, creationRequestSubscription2, deletionRequestSubscription2 := countBebRequests(subscription2Name)
-			Expect(creationRequestSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(deletionRequestSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(subscription2Name)
+			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
