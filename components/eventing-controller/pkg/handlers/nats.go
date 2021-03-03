@@ -181,12 +181,9 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
 
-		err = n.client.Send(ctxWithCE, *ce)
-		if err != nil {
-			if !strings.Contains(err.Error(), "200") {
-				n.log.Error(err, "failed to dispatch event")
-				return
-			}
+		if err = n.client.Send(ctxWithCE, *ce); err != nil {
+			n.log.Error(err, "failed to dispatch event")
+			return
 		}
 
 		n.log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), sink))
