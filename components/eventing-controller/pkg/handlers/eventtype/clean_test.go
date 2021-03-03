@@ -60,8 +60,8 @@ func TestCleaner(t *testing.T) {
 		{
 			name:                 "success if the given application name is empty",
 			givenEventTypePrefix: "sap.kyma",
-			givenApplicationName: "test-app",
-			givenEventType:       "sap.kyma.testapp.order.created.v1",
+			givenApplicationName: "",
+			givenEventType:       "sap.kyma.test-app.order.created.v1",
 			wantEventType:        "sap.kyma.testapp.order.created.v1",
 			wantError:            false,
 		},
