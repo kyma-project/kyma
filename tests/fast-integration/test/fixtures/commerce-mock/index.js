@@ -114,7 +114,7 @@ async function sendEventAndCheckResponse() {
 
 async function registerAllApis(mockHost) {
   debug("Listing Commerce Mock local APIs")
-  const localApis = axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
+  const localApis = await axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
     throw convertAxiosError(err, "API registration error - commerce mock local API not available");
   });
   debug("Commerce Mock local APIs received")
