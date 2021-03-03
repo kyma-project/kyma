@@ -3,14 +3,16 @@ const {
   KEBConfig,
   provisionSKR,
   ensureOperationSucceeded,
-  getProvisionerID,
+  getShootName,
 } = require("../keb");
 
 const {
-  ProvisionerClient,
-  ProvisionerConfig,
-  getKubeconfig,
-} = require("../provisioner");
+  k8sCoreV1Api
+} = require("../utils")
+
+const {
+  fs
+} = require("fs")
 
 describe("Provisioning SKR", function () {
   let kebConfig = new KEBConfig();
@@ -33,7 +35,11 @@ describe("Provisioning SKR", function () {
   }).timeout(3600000);
 
   it("Download SKR Kubeconfig", async function () {
-    const provisionerID = await getProvisionerID(kebClient, config.instanceID);
-    await getKubeconfig(provisionerClient, provisionerID);
+    const shootName = await getShootName(kebClient, config.instanceID);
+    let secret = await k8sCoreV1Api.readNamespacedSecret(`${shootName}.kubeconfig`);
+    let b64kubeconfig = secret.body.data["kubeconfig"]
+    const buff = Buffer.from(b64kubeconfig, 'base64');
+    const str = buff.toString('utf-8');
+    fs.writeFile("kubeconfig.yaml", str)
   });
 });
