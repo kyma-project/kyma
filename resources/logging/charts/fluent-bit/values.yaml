@@ -40,7 +40,8 @@ dnsConfig: {}
 #     value: "2"
 #   - name: edns0
 securityContext:
-  {}
+  allowPrivilegeEscalation: false
+  privileged: false
   # capabilities:
   #   drop:
   #   - ALL
@@ -80,7 +81,7 @@ readinessProbe:
 resources:
   limits:
     cpu: 100m
-    memory: 128Mi
+    memory: 192Mi
   requests:
     cpu: 20m
     memory: 50Mi
@@ -182,6 +183,12 @@ config:
       dockerModeFlush: 4
       # When a message is unstructured (no parser applied), it's appended as a string under the key name log. This option allows to define an alternative name for that key.
       key: log
+      # If enabled, the plugin will try to discover multiline messages and use the proper parsers to compose the outgoing messages. Note that when this option is enabled the Parser option is not used.
+      multiline: "Off"
+      # Wait period time in seconds to process queued multiline messages
+      multilineFlush: 4
+      # Name of the parser that matchs the beginning of a multiline message.
+      parserFirstline:
       exclude:
         namespaces:
     additional: ""

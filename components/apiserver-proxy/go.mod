@@ -21,4 +21,7 @@ require (
 	k8s.io/klog/v2 v2.5.0 // indirect
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.19.7
+replace (
+	k8s.io/client-go => k8s.io/client-go v0.19.7
+	golang.org/x/crypto/ssh => golang.org/x/crypto/ssh v0.0.0-20201216223049-8b5274cf687f
+)

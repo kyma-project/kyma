@@ -23,8 +23,8 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
     spec:
       serviceAccountName: {{ template "gcloud-sqlproxy.serviceAccountName" . }}
-      {{- if .Values.priorityClassName }}
-      priorityClassName: "{{ .Values.priorityClassName }}"
+      {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
       {{- end }}
       containers:
       - name: sqlproxy

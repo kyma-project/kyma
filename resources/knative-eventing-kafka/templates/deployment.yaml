@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-channel-controller
   namespace: {{ .Release.Namespace }}
-  labels: 
+  labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -92,10 +92,12 @@ spec:
             memory: {{ .Values.controller.memoryLimit }}
         volumeMounts:
         - mountPath: {{ .Values.logging.mountPath | quote }}
-          name: "logging-config" 
+          name: "logging-config"
       volumes:
       - name: "logging-config"
         configMap:
           defaultMode: 420
           name:  "knative-kafka-logging"
-
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

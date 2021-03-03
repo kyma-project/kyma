@@ -50,11 +50,15 @@ serviceAccount:
   name:
   imagePullSecrets: []
 
-securityContext:
+podSecurityContext:
   fsGroup: 65534
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
 
 rbac:
   ## If true, create & use RBAC resources

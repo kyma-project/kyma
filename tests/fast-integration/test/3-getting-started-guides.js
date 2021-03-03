@@ -6,9 +6,14 @@ const {
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
+  shouldRunSuite,
 } = require("../utils");
 
 describe("Getting Started Guide Tests", function () {
+  if(!shouldRunSuite("getting-started-guide")) {
+    return;
+  }
+
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;

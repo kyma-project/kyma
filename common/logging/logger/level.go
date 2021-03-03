@@ -31,7 +31,7 @@ func MapLevel(level string) (Level, error) {
 	}
 }
 
-func (l Level) toZapLevel() (zapcore.Level, error) {
+func (l Level) ToZapLevel() (zapcore.Level, error) {
 	switch l {
 	case DEBUG:
 		return zap.DebugLevel, nil

@@ -1,0 +1,31 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook: "post-install,post-upgrade"
+    helm.sh/hook-weight: "60"
+  name: {{ template "certificates.name" . }}-check
+spec:
+  activeDeadlineSeconds: 1000
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - command:
+            - bash
+            - "-c"
+            - |
+{{ .Files.Get "files/check.sh" | printf "%s" | indent 16 }}
+          image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
+          name: installer
+          env:
+            - name: KYMA_SECRET_NAME
+              value: "{{ .Values.certificates.kyma.name }}"
+            - name: KYMA_SECRET_NAMESPACE
+              value: "{{ .Values.certificates.kyma.namespace }}"
+          securityContext:
+{{- toYaml .Values.securityContext | nindent 12 }}
+      restartPolicy: Never
+      serviceAccountName: {{ template "certificates.name" . }}-check

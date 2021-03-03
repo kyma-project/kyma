@@ -40,8 +40,8 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "kiali-server.fullname" . }}
-      {{- if .Values.kiali.spec.deployment.priority_class_name }}
-      priorityClassName: {{ .Values.kiali.spec.deployment.priority_class_name | quote }}
+      {{- if or .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
       {{- end }}
       {{- if .Values.kiali.spec.deployment.image_pull_secrets }}
       imagePullSecrets:
@@ -63,6 +63,10 @@ spec:
         {{- if .Values.kiali.spec.server.metrics_enabled }}
         - name: http-metrics
           containerPort: {{ .Values.kiali.spec.server.metrics_port | default 9090 }}
+        {{- end }}
+        {{- if .Values.kiali.spec.server.securityContext }}
+        securityContext:
+        {{- toYaml .Values.kiali.spec.server.securityContext | nindent 10 }}
         {{- end }}
         readinessProbe:
           httpGet:
@@ -96,7 +100,7 @@ spec:
         - name: LOG_FORMAT
           value: "{{ .Values.kiali.spec.deployment.logger.log_format }}"
         - name: LOG_TIME_FIELD_FORMAT
-          value: "{{ .Values.kiali.spec.deployment.logger.time_field_format }}" 
+          value: "{{ .Values.kiali.spec.deployment.logger.time_field_format }}"
         - name: LOG_SAMPLER_RATE
           value: "{{ .Values.kiali.spec.deployment.logger.sampler_rate }}"
         volumeMounts:

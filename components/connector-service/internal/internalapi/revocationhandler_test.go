@@ -2,6 +2,7 @@ package internalapi
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -17,15 +18,16 @@ import (
 
 func TestRevocationHandler(t *testing.T) {
 
+	testContext := context.Background()
 	urlRevocation := "/v1/applications/certificates/revocations"
 	hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", testContext, hashedTestCert).Return(nil)
 
-		handler := NewRevocationHandler(revocationListRepository)
+		handler := NewRevocationHandler(testContext, revocationListRepository)
 
 		rr := httptest.NewRecorder()
 
@@ -49,9 +51,9 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 201 when certificate already revoked", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", testContext, hashedTestCert).Return(nil)
 
-		handler := NewRevocationHandler(revocationListRepository)
+		handler := NewRevocationHandler(testContext, revocationListRepository)
 
 		rr := httptest.NewRecorder()
 
@@ -85,7 +87,7 @@ func TestRevocationHandler(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
 
-		handler := NewRevocationHandler(revocationListRepository)
+		handler := NewRevocationHandler(testContext, revocationListRepository)
 
 		rr := httptest.NewRecorder()
 
@@ -96,7 +98,7 @@ func TestRevocationHandler(t *testing.T) {
 
 		//then
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("string"))
+		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("context.Context"), mock.AnythingOfType("string"))
 	})
 
 	t.Run("should return http code 400 when failed to unmarshall", func(t *testing.T) {
@@ -104,7 +106,7 @@ func TestRevocationHandler(t *testing.T) {
 
 		revocationListRepository := &mocks.RevocationListRepository{}
 
-		handler := NewRevocationHandler(revocationListRepository)
+		handler := NewRevocationHandler(testContext, revocationListRepository)
 
 		rr := httptest.NewRecorder()
 
@@ -124,15 +126,15 @@ func TestRevocationHandler(t *testing.T) {
 
 		//then
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("string"))
+		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("context.Context"), mock.AnythingOfType("string"))
 	})
 
 	t.Run("should return http code 500 when certificate revocation not persisted", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hashedTestCert).Return(errors.New("Error"))
+		revocationListRepository.On("Insert", testContext, hashedTestCert).Return(errors.New("Error"))
 
-		handler := NewRevocationHandler(revocationListRepository)
+		handler := NewRevocationHandler(testContext, revocationListRepository)
 
 		rr := httptest.NewRecorder()
 

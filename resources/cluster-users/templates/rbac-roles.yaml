@@ -502,7 +502,7 @@ roleRef:
   name: kyma-admin
 subjects:
 - kind: User
-  name: admin@kyma.cx
+  name: {{ .Values.users.adminName }}
   apiGroup: rbac.authorization.k8s.io
 {{ if .Values.users.adminGroup }}
 - kind: Group

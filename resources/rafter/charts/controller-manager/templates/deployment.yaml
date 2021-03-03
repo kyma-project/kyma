@@ -140,3 +140,6 @@ spec:
               value: {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.namespace "context" . ) }}
             - name: APP_LOG_LEVEL
               value: {{ .Values.envs.loglevel }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

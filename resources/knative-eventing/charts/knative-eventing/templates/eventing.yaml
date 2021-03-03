@@ -1001,6 +1001,9 @@ spec:
       - configMap:
           name: config-logging
         name: config-logging
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 ---
 apiVersion: apps/v1
@@ -1062,6 +1065,9 @@ spec:
       - configMap:
           name: config-logging
         name: config-logging
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1127,48 +1133,6 @@ webhooks:
       operator: Exists
 {{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
   sideEffects: None
-  timeoutSeconds: {{ .Values.webhook.timeout }}
----
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: MutatingWebhookConfiguration
-metadata:
-  labels:
-    eventing.knative.dev/release: "v0.12.0"
-  name: sinkbindings.webhook.sources.knative.dev
-webhooks:
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: eventing-webhook
-      namespace: knative-eventing
-  failurePolicy: {{ .Values.webhook.failurePolicy }}
-  name: sinkbindings.webhook.sources.knative.dev
-  sideEffects: None
-  namespaceSelector:
-    matchExpressions:
-{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
-  timeoutSeconds: {{ .Values.webhook.timeout }}
----
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: MutatingWebhookConfiguration
-metadata:
-  labels:
-    eventing.knative.dev/release: "v0.12.0"
-  name: legacysinkbindings.webhook.sources.knative.dev
-webhooks:
-- admissionReviewVersions:
-  - v1beta1
-  clientConfig:
-    service:
-      name: eventing-webhook
-      namespace: knative-eventing
-  failurePolicy: {{ .Values.webhook.failurePolicy }}
-  name: legacysinkbindings.webhook.sources.knative.dev
-  sideEffects: None
-  namespaceSelector:
-    matchExpressions:
-{{ toYaml .Values.webhook.webhookMatchExp | indent 4 }}
   timeoutSeconds: {{ .Values.webhook.timeout }}
 ---
 apiVersion: v1

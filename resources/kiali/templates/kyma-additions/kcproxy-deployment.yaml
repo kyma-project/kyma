@@ -90,5 +90,9 @@ spec:
           httpGet:
             path: /oauth/health
             port: http
+        {{- if .Values.kcproxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.kcproxy.securityContext | nindent 10 }}
+        {{- end }}
         resources:
 {{ toYaml .Values.kcproxy.resources | indent 10 }}

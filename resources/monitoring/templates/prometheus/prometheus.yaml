@@ -105,7 +105,7 @@ spec:
 {{- if .Values.resourceSelector.namespaces }}
   serviceMonitorSelector: {}
   serviceMonitorNamespaceSelector:
-    matchExpressions: 
+    matchExpressions:
     - key: name
       operator: In
       values:
@@ -295,8 +295,8 @@ spec:
   initContainers:
 {{ toYaml .Values.prometheus.prometheusSpec.initContainers | indent 4 }}
 {{- end }}
-{{- if .Values.prometheus.prometheusSpec.priorityClassName }}
-  priorityClassName: {{ .Values.prometheus.prometheusSpec.priorityClassName }}
+{{- if or .Values.prometheus.prometheusSpec.priorityClassName .Values.global.priorityClassName }}
+  priorityClassName: {{ coalesce .Values.prometheus.prometheusSpec.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.thanos }}
   thanos:

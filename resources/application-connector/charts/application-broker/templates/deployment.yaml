@@ -101,3 +101,6 @@ spec:
       - name: config-volume
         configMap:
           name: app-broker-config-map
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
