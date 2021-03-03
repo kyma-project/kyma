@@ -31,13 +31,14 @@ func (c cleaner) Clean(eventType string) (string, error) {
 		return "", err
 	}
 
-	appObj, err := c.applicationLister.Get(appName)
-	if err != nil {
-		c.logger.Info("failed to get application", "name", appName)
-		eventType = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
+	// handle existing applications
+	if appObj, err := c.applicationLister.Get(appName); err == nil {
+		eventType = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
 		return eventType, nil
 	}
 
-	eventType = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
+	// handle non-existing applications
+	c.logger.Info("failed to get application", "name", appName)
+	eventType = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
 	return eventType, nil
 }
