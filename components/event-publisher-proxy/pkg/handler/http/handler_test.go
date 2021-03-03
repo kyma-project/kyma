@@ -13,9 +13,8 @@ import (
 	"time"
 
 	"github.com/cloudevents/sdk-go/v2/binding"
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -464,17 +463,19 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 
 func validateApplicationName(appName string) testingutils.Validator {
 	return func(r *http.Request) error {
-		if r.Header.Get(cev2http.ContentType) == cloudevents.CEStructuredMode {
+		if r.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
 			// CE structured mode
 			message := cev2http.NewMessageFromHttpRequest(r)
 			defer func() { _ = message.Finish(nil) }()
-			if event, err := binding.ToEvent(context.Background(), message); err != nil {
+			var event *cev2event.Event
+			var err error
+			if event, err = binding.ToEvent(context.Background(), message); err != nil {
 				return err
-			} else if strings.Contains(event.Type(), appName) {
-				return nil
-			} else {
-				return errors.New(fmt.Sprintf("expected the event-type [%s] to contain the application name [%s] for structured mode", event.Type(), appName))
 			}
+			if strings.Contains(event.Type(), appName) {
+				return nil
+			}
+			return errors.New(fmt.Sprintf("expected the event-type [%s] to contain the application name [%s] for structured mode", event.Type(), appName))
 		}
 		// default CE binary mode
 		for k, v := range r.Header {

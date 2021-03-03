@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
-
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -136,7 +134,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	if request.Header.Get(cev2http.ContentType) == cloudevents.CEStructuredMode {
+	if request.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
 		ctx = binding.WithForceStructured(ctx)
 	} else {
 		ctx = binding.WithForceBinary(ctx)

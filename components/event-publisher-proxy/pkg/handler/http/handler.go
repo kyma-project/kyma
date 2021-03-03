@@ -152,7 +152,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	if request.Header.Get(cev2http.ContentType) == cloudevents.CEStructuredMode {
+	if request.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
 		ctx = binding.WithForceStructured(ctx)
 	} else {
 		ctx = binding.WithForceBinary(ctx)
