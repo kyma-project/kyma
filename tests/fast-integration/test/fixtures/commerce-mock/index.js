@@ -25,6 +25,7 @@ const {
   k8sAppsApi,
   k8sDynamicApi,
   deleteNamespaces,
+  debug,
 } = require("../../../utils");
 
 const commerceMockYaml = fs.readFileSync(
@@ -112,6 +113,7 @@ async function sendEventAndCheckResponse() {
 }
 
 async function registerAllApis(mockHost) {
+  debug("Listing Commerce Mock local APIs")
   const localApis = await retryPromise(
     () => axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
       throw convertAxiosError(err, "API registration error - commerce mock local API not available");
@@ -120,6 +122,7 @@ async function registerAllApis(mockHost) {
     1,
     3000
   );
+  debug("Commerce Mock local APIs received")
   const filteredApis = localApis.data.filter((api) => (api.name.includes("Commerce Webservices") || api.name.includes("Events")));
   for (let api of filteredApis) {
     await retryPromise(
@@ -143,6 +146,7 @@ async function registerAllApis(mockHost) {
       3000
     );
   }
+  debug("Verifying if APIs are properly registered")
 
   const remoteApis = await axios
     .get(`https://${mockHost}/remote/apis`)
@@ -150,6 +154,7 @@ async function registerAllApis(mockHost) {
       throw convertAxiosError(err, "Commerce Mock registered apis not available");
     });
   expect(remoteApis.data).to.have.lengthOf.at.least(2);
+  debug("Commerce APIs registered");
   return remoteApis;
 }
 
@@ -176,7 +181,9 @@ async function connectMock(mockHost, targetNamespace) {
     baseUrl: `https://${mockHost}`,
     insecure: true,
   };
+  debug("Token URL", tokenObj.status.url);
   await connectCommerceMock(mockHost, pairingBody);
+  debug("Commerce mock connected");
 }
 
 async function connectCommerceMock(mockHost, tokenData) {
