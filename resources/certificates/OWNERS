@@ -1,0 +1,8 @@
+approvers:
+  - Tomasz-Smelcerz-SAP
+  - strekm
+  - Demonsthere
+  - colunira
+
+labels:
+- area/security
