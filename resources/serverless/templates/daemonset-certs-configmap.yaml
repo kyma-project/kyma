@@ -43,10 +43,10 @@ data:
       exit 0
     fi
 
-    DOMAIN_NAME = "{{ .Values.global.ingress.domainName }}"
+    DOMAIN_NAME="{{ .Values.global.ingress.domainName }}"
 
     echo "Certificate is self-signed, patching Docker..."
-    DIR="/kube-etc/docker/certs.d/registry.$DOMAIN_NAME"
+    DIR="/kube-etc/docker/certs.d/registry.${DOMAIN_NAME}"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi
@@ -54,16 +54,16 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
 
     echo "Certificate is self-signed, patching Containerd..."
-    DIR="/kube-etc/ssl/certs/registry.$DOMAIN_NAME"
+    DIR="/kube-etc/ssl/certs/registry.${DOMAIN_NAME}"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi
 
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
 
-    echo "[plugins.cri.registry.mirrors.\"registry.$DOMAIN_NAME\"]" >> "/etc/containerd/config.toml"
-    echo "  endpoint = [\"https://registry.$DOMAIN_NAME\"]" >> "/etc/containerd/config.toml"
-    echo "[plugins.cri.registry.configs.\"registry.$DOMAIN_NAME\".tls]" >> "/etc/containerd/config.toml"
+    echo "[plugins.cri.registry.mirrors.\"registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
+    echo "  endpoint = [\"https://registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
+    echo "[plugins.cri.registry.configs.\"registry.${DOMAIN_NAME}\".tls]" >> "/etc/containerd/config.toml"
     echo "  ca_file = \"/etc/ssl/certs/ca.crt\"" >> "/etc/containerd/config.toml"
 
     echo "Done."
