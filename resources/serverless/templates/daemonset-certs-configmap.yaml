@@ -43,13 +43,15 @@ data:
       exit 0
     fi
 
-    echo "Certificate is self-signed, patching Docker..."
-    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
+    echo "Certificate is self-signed, patching certs..."
+    DIR="/kube-usr/local/share/ca-certificates/"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi
 
-    cat "${CERT_FILE}" > "${DIR}/ca.crt"
+    cat "${CERT_FILE}" > "${DIR}/kubernetes.crt"
+    sudo update-ca-certificates
+
     echo "Done."
     exit 0
 {{- end }}
