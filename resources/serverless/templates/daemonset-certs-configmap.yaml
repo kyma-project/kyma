@@ -10,8 +10,6 @@ metadata:
 data:
   patch-docker.sh: |
     #!/usr/bin/env bash
-
-    echo "where are my logs??!!"
         
     set -o nounset
     set -o pipefail
@@ -45,14 +43,28 @@ data:
       exit 0
     fi
 
-    echo "Certificate is self-signed, patching certs..."
-    DIR="/kube-etc/ssl/certs"
+    DOMAIN_NAME = "{{ .Values.global.ingress.domainName }}"
+
+    echo "Certificate is self-signed, patching Docker..."
+    DIR="/kube-etc/docker/certs.d/registry.$DOMAIN_NAME"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi
 
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
-    sudo update-ca-certificates
+
+    echo "Certificate is self-signed, patching Containerd..."
+    DIR="/kube-etc/ssl/certs/registry.$DOMAIN_NAME"
+    if [ ! -d "${DIR}" ]; then
+      mkdir -p "${DIR}"
+    fi
+
+    cat "${CERT_FILE}" > "${DIR}/ca.crt"
+
+    echo "[plugins.cri.registry.mirrors.\"\"]" >> "/etc/containerd/config.toml"
+    echo "  endpoint = [\"https://registry.$DOMAIN_NAME\"]" >> "/etc/containerd/config.toml"
+    echo "[plugins.cri.registry.configs.\"\".tls]" >> "/etc/containerd/config.toml"
+    echo "  ca_file = \"/etc/ssl/certs/ca.crt\"" >> "/etc/containerd/config.toml"
 
     echo "Done."
     exit 0
