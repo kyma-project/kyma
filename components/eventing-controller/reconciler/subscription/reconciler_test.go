@@ -306,7 +306,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Subscription1 sink is changed to reuse Subscription2 APIRule", func() {
-
 		It("Should delete APIRule for Subscription1 and use APIRule2 from Subscription2 instead", func() {
 			ctx := context.Background()
 

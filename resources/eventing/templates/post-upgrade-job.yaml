@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "eventing.fullname" . }}
+  name: {{ template "eventing.fullname" . }}-post-upgrade
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "eventing.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postUpgrade.labels" . | nindent 4 }}
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
@@ -12,9 +12,9 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
+  name: {{ template "eventing.fullname" . }}-post-upgrade
   namespace: {{.Release.Namespace}}
-  name: {{ template "eventing.fullname" . }}
-  labels: {{- include "eventing.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postUpgrade.labels" . | nindent 4 }}
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
@@ -25,8 +25,10 @@ rules:
     verbs: ["get", "list", "delete", "patch", "update"]
   - apiGroups: [""]
     resources: ["configmaps"]
-    resourceNames: ["eventing-post-upgrade-backed-up-data"]
-    verbs: ["get", "list", "delete", "update"]
+    verbs: ["get", "list", "delete", "update", "create"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "update", "patch"]
   - apiGroups: ["eventing.knative.dev"]
     resources: ["triggers", "brokers"]
     verbs: ["delete", "get", "list"]
@@ -36,24 +38,30 @@ rules:
   - apiGroups: ["sources.kyma-project.io"]
     resources: ["httpsources"]
     verbs: ["get", "list", "delete"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications"]
+    verbs: ["get", "list"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["get", "list", "create"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ template "eventing.fullname" . }}
+  name: {{ template "eventing.fullname" . }}-post-upgrade
   namespace: {{.Release.Namespace}}
-  labels: {{- include "eventing.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postUpgrade.labels" . | nindent 4 }}
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
     "helm.sh/hook": "post-upgrade"
 subjects:
   - kind: ServiceAccount
-    name: {{ template "eventing.fullname" . }}
+    name: {{ template "eventing.fullname" . }}-post-upgrade
     namespace: {{.Release.Namespace}}
 roleRef:
   kind: ClusterRole
-  name: {{ template "eventing.fullname" . }}
+  name: {{ template "eventing.fullname" . }}-post-upgrade
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
@@ -61,10 +69,13 @@ kind: Job
 metadata:
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
-    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook": "post-install,post-upgrade"
     helm.sh/hook-weight: "1"
-  name: {{ template "eventing.fullname" . }}
+  name: {{ template "eventing.fullname" . }}-post-upgrade
+  namespace: {{.Release.Namespace}}
+  labels: {{- include "eventing.postUpgrade.labels" . | nindent 4 }}
 spec:
+  backoffLimit: 5
   template:
     metadata:
       annotations:
@@ -75,7 +86,7 @@ spec:
           name: eventing-post-upgrade-job
           env:
             - name: RELEASE
-              value: "{{  .Release }}"
+              value: "{{  .Release.Name }}"
             - name: EVENT_TYPE_PREFIX
               value: "{{ .Values.global.eventTypePrefix }}"
             - name: EVENTING_BACKEND
@@ -83,7 +94,7 @@ spec:
             - name: BEB_NAMESPACE
               value: "{{  .Values.authentication.bebNamespace }}"
       restartPolicy: Never
-      serviceAccountName: {{ template "eventing.fullname" . }}
+      serviceAccountName: {{ template "eventing.fullname" . }}-post-upgrade
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
