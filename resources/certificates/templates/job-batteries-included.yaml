@@ -3,12 +3,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    #helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     helm.sh/hook: "post-install,post-upgrade"
-    helm.sh/hook-weight: "60"
-  name: {{ template "certificates.name" . }}-check
+    helm.sh/hook-weight: "30"
+  name: {{ template "certificates.name" . }}-batteries-included
 spec:
-  activeDeadlineSeconds: 1000
+  activeDeadlineSeconds: 100
   backoffLimit: 1
   template:
     spec:
@@ -17,10 +17,14 @@ spec:
             - bash
             - "-c"
             - |
-{{ .Files.Get "files/check.sh" | printf "%s" | indent 16 }}
+{{ .Files.Get "files/batteries-included.sh" | printf "%s" | indent 16 }}
           image: {{ .Values.job.image.repository }}:{{ .Values.job.image.tag }}
           name: installer
           env:
+            - name: DOMAIN
+              value: "{{ .Values.global.domainName }}"
+            - name: ISSUER_NAME
+              value: "{{ .Values.certificates.issuer.name}}"
             - name: KYMA_SECRET_NAME
               value: "{{ .Values.certificates.kyma.name }}"
             - name: KYMA_SECRET_NAMESPACE
@@ -28,4 +32,5 @@ spec:
           securityContext:
 {{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never
-      serviceAccountName: {{ template "certificates.name" . }}-check
+      serviceAccountName: {{ template "certificates.name" . }}-batteries-included
+

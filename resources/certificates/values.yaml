@@ -10,6 +10,8 @@ certificates:
   apiserverProxy:
     name: apiserver-proxy-tls-cert
     namespace: kyma-system
+  issuer:
+    name: kyma-ca-issuer
 
 userProvided:
   issuer:

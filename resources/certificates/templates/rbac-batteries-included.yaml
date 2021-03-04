@@ -1,0 +1,136 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: ["cert-manager.io"]
+    resources: ["certificates", "clusterissuers"]
+    verbs: ["*"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kyma-installer
+  name: {{ template "certificates.name" . }}-kyma-installer-batteries-included
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update", "patch"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: istio-system
+  name: {{ template "certificates.name" . }}-istio-system-batteries-included
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get","list","watch","create"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: {{ template "certificates.name" . }}-kube-system-batteries-included
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get","list","watch","update"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-batteries-included
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "certificates.name" . }}-batteries-included
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  namespace: kyma-installer
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-batteries-included
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kyma-installer-batteries-included
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  namespace: istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-batteries-included
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-istio-system-batteries-included
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-batteries-included
+  namespace: kube-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-batteries-included
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kube-system-batteries-included
+  apiGroup: rbac.authorization.k8s.io
