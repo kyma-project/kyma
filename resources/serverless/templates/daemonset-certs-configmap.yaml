@@ -10,6 +10,8 @@ metadata:
 data:
   patch-docker.sh: |
     #!/usr/bin/env bash
+
+    echo "where are my logs??!!"
         
     set -o nounset
     set -o pipefail
@@ -44,13 +46,10 @@ data:
     fi
 
     echo "Certificate is self-signed, patching certs..."
-    DIR="/kube-usr/local/share/ca-certificates/"
+    DIR="/kube-usr/ssl/certs/"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi
-
-    echo "ls $DIR"
-    ls $DIR
 
     cat "${CERT_FILE}" > "${DIR}/kubernetes.crt"
     sudo update-ca-certificates
