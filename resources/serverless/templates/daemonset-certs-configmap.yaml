@@ -46,7 +46,7 @@ data:
     fi
 
     echo "Certificate is self-signed, patching certs..."
-    DIR="/kube-usr/ssl/certs/"
+    DIR="/kube-etc/ssl/certs/"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi

@@ -32,17 +32,17 @@ spec:
               cpu: 100m
               memory: 100Mi
           volumeMounts:
-            - name: usrkube
-              mountPath: /kube-usr/
+            - name: etckube
+              mountPath: /kube-etc/
               readOnly: false
             - name: scripts
               mountPath: /scripts
               readOnly: true
           command: ["sh", "/scripts/patch-docker.sh"]
       volumes:
-        - name: usrkube
+        - name: etckube
           hostPath:
-            path: /usr/
+            path: /etc/
         - configMap:
             defaultMode: 420
             name: {{ template "registry-fullname" }}-cert-patch
