@@ -408,7 +408,8 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 		{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
 		{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
 		{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
-		{Name: "credentials", MountPath: "/docker", ReadOnly: true}}
+		{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+		{Name: "npm-registry-config", MountPath: "/workspace/src/.npmrc", SubPath: ".npmrc", ReadOnly: true}}
 	expectedVolumes := []expectedVolume{
 		{name: "sources", localObjectReference: cmName},
 		{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName}}
@@ -427,7 +428,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
 
 	g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(4))
+	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(5))
 	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(expectedVolumeMounts))
 }
 
