@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: jaeger-dashboard
+  name: {{ include "jaeger-operator.fullname" . }}-grafana-dashboard
   labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
     grafana_dashboard: "1"
-    app: monitoring-grafana
 data:
   jaeger-dashboard.json: |-
         {

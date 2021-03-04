@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "loki.fullname" . }}-grafana-datasource
+  labels:
+    grafana_datasource: "1"
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+data:
+    loki-datasource.yaml: |-
+      apiVersion: 1
+      datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://{{ template "loki.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
+        editable: true
+        jsonData:
+          maxLines: 1000
+{{- if .Values.global.tracing.enabled }}
+          derivedFields:
+          - datasourceUid: Jaeger
+            matcherRegex: "traceId=(\\w+)"
+            name: TraceID
+            # url will be interpreted as query for the datasource
+            url: "$${__value.raw}"
+{{- end }}
