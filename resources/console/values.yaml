@@ -10,7 +10,7 @@ console:
 
 global:
   isLocalEnv: false
-  isBEBEnabled: false
+  isBEBEnabled: true
   knative:
     false
     # Change value below to your own GitHub user name if you want point to documentation sources from your fork

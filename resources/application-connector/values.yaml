@@ -9,7 +9,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
-  isBEBEnabled: false
+  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
