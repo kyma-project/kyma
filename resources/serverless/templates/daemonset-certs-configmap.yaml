@@ -64,7 +64,7 @@ data:
     echo "[plugins.cri.registry.mirrors.\"registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
     echo "  endpoint = [\"https://registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
     echo "[plugins.cri.registry.configs.\"registry.${DOMAIN_NAME}\".tls]" >> "/etc/containerd/config.toml"
-    echo "  ca_file = \"/etc/ssl/certs/ca.crt\"" >> "/etc/containerd/config.toml"
+    echo "  ca_file = \"/etc/ssl/certs/registry.${DOMAIN_NAME}/ca.crt\"" >> "/etc/containerd/config.toml"
 
     echo "Done."
     exit 0
