@@ -49,6 +49,9 @@ data:
       mkdir -p "${DIR}"
     fi
 
+    echo "ls $DIR"
+    ls $DIR
+
     cat "${CERT_FILE}" > "${DIR}/kubernetes.crt"
     sudo update-ca-certificates
 
