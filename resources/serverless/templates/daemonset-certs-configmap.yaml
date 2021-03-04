@@ -54,12 +54,12 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
 
     echo "Certificate is self-signed, patching Containerd..."
-    DIR="/kube-etc/ssl/certs/registry.${DOMAIN_NAME}"
-    if [ ! -d "${DIR}" ]; then
-      mkdir -p "${DIR}"
+    CONTAINERD_DIR="/kube-etc/ssl/certs/registry.${DOMAIN_NAME}"
+    if [ ! -d "${CONTAINERD_DIR}" ]; then
+      mkdir -p "${CONTAINERD_DIR}"
     fi
 
-    cat "${CERT_FILE}" > "${DIR}/ca.crt"
+    cat "${CERT_FILE}" > "${CONTAINERD_DIR}/ca.crt"
 
     echo "[plugins.cri.registry.mirrors.\"registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
     echo "  endpoint = [\"https://registry.${DOMAIN_NAME}\"]" >> "/etc/containerd/config.toml"
