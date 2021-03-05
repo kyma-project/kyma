@@ -1,4 +1,3 @@
-{{if .Values.kcproxy.enabled}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -13,7 +12,11 @@ spec:
   http:
   - route:
     - destination:
+        {{if .Values.kcproxy.enabled}}
         host: {{ template "jaeger-operator.fullname" . }}-jaeger-query-secured
+        {{else}}
+        host: {{ template "jaeger-operator.fullname" . }}-jaeger-query
+        {{end}}
         port:
           number: {{ .Values.jaeger.kyma.uiPort }}
-{{end}}
+
