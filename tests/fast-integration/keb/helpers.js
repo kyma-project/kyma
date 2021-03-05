@@ -16,10 +16,20 @@ class KEBConfig {
 }
 
 async function provisionSKR(keb, instanceID, planID, name) {
-  const response = await keb.provisionSKR(planID, name, instanceID);
-  expect(response).to.have.property("operation");
+  let response;
+  try{
 
-  return response.operation;
+  response = await keb.provisionSKR(planID, name, instanceID);
+  } catch(e){
+
+    debug(e)
+  }
+  debug(response)
+  expect(response).to.have.property("operation");
+  const operationID = response.operation
+  const dashboardUrlArr = response.dashboard_url.split(".")
+  const shootName = dashboardUrlArr[1]
+  return {operationID, shootName};
 }
 
 async function deprovisionSKR(keb, instanceID, planID) {
@@ -32,12 +42,13 @@ async function deprovisionSKR(keb, instanceID, planID) {
 async function ensureOperationSucceeded(keb, instanceID, operationID) {
   await retryPromise(
     async () => {
+      debug("SADASD")
       let res = await keb.getOperation(instanceID, operationID);
       debug(res);
       expect(res).to.have.property("state", "succeeded");
     },
     60,
-    36000000
+    60000
   ).catch(expectNoAxiosErr);
 }
 

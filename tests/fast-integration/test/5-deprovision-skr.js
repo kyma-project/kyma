@@ -4,7 +4,6 @@ const {
     deprovisionSKR,
     ensureOperationSucceeded,
 } = require("../keb");
-const { debug, genRandom } = require("../utils");
 
 
 describe("Deprovisioning SKR", function () {

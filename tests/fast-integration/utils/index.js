@@ -4,7 +4,6 @@ const { join } = require("path");
 
 const kc = new k8s.KubeConfig();
 
-kc.loadFromDefault();
 var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
@@ -13,6 +12,7 @@ var watch;
 
 function initializeK8sClient() {
   try{
+    kc.loadFromDefault();
     k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
@@ -683,6 +683,14 @@ function toBase64(s) {
     .toString("base64");
 }
 
+
+function fromBase64(s) {
+  return Buffer
+    .from(s)
+    .toString("utf-8");
+}
+
+
 function genRandom(len) {
   let res = "";
   const chrs = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -745,8 +753,11 @@ module.exports = {
   switchDebug,
   printRestartReport,
   toBase64,
+  fromBase64,
   genRandom,
   shouldRunSuite,
-  getEnvOrThrow
+  getEnvOrThrow,
+  kc,
+  initializeK8sClient
 };
 

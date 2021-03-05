@@ -4,7 +4,7 @@ const { debug } = require("../utils");
 const kymaServiceID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
 class KEBClient {
   constructor(config) {
-    this.host = config.host;
+    this.host = config.kebHost;
     this.clientID = config.clientID;
     this.clientSecret = config.clientSecret;
     this.globalAccountID = config.globalAccountID;
@@ -113,10 +113,16 @@ class KEBClient {
 
   async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
+    debug(endpoint)
     try {
-      return await this.callKEB({}, endpoint, "get");
+      debug("CWEL")
+      let dupa =  await this.callKEB({}, endpoint, "get");
+      debug(dupa)
+      return dupa
     } catch (err) {
-      throw new Error(`error while checking SKR State: ${err.toString()}`);
+      debug("SDADASDAS")
+      debug(err.toString())
+      return new Error(`error while checking SKR State: ${err.toString()}`);
     }
   }
 
@@ -125,18 +131,10 @@ class KEBClient {
     try {
       return await this.callKEB(null, endpoint, "delete");
     } catch (err) {
-      throw new Error(`error while deprovisioning SKR: ${err.toString()}`);
+      return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
   }
 
-  async getRuntime(instanceID) {
-    const endpoint = `runtimes?instance_id=/${instanceID}`;
-    try {
-      return await this.callKEB(null, endpoint, "get");
-    } catch (err) {
-      throw new Error(`error while getting SKR details: ${err.toString()}`);
-    }
-  }
 }
 
 module.exports = {
