@@ -34,7 +34,7 @@ spec:
         name: kcproxy
         command: ["/keycloak-gatekeeper"]
         args:
-        - --discovery-url={{tpl .Values.kcproxy.config.discoveryUrl}}
+        - --discovery-url={{tpl .Values.kcproxy.config.discoveryUrl .}}
         - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
         - --client-id=$(CLIENT_ID)
         - --client-secret=$(CLIENT_SECRET)
