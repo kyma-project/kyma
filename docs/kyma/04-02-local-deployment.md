@@ -50,7 +50,7 @@ Follow these instructions to deploy Kyma from a release or from sources:
   From a release - k3s
   </summary>
 
-  1. Provision a Kubernetes cluster on Minikube. Run:
+  1. Provision a Kubernetes cluster on k3s. Run:
 
      ```bash
      kyma provision k3s
