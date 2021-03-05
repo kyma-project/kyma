@@ -22,7 +22,7 @@ The default settings for the cluster and local deployment are defined in differe
   Local installation
   </summary>
 
-  For the list of all components available to deploy see the `installer-cr.yaml.tpl` file.
+  For the list of all components available to deploy see the `components.yaml` file.
   For the list of the default deployment overrides see the `installer-config-local.yaml.tpl` file.
   Other configuration values are defined directly in the configuration of the respective components.
 
