@@ -115,10 +115,7 @@ class KEBClient {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
     debug(endpoint)
     try {
-      debug("CWEL")
-      let dupa =  await this.callKEB({}, endpoint, "get");
-      debug(dupa)
-      return dupa
+      return await this.callKEB({}, endpoint, "get");
     } catch (err) {
       debug("SDADASDAS")
       debug(err.toString())
