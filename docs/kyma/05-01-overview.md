@@ -8,7 +8,7 @@ You can configure the Kyma deployment by:
   - Providing overrides that change the configuration values used by one or more components.
 
 The list of components to deploy is defined in the [Deployment](#custom-resource-installation) custom resource (CR).
-The overrides are delivered as ConfigMaps or Secrets defined by the user before triggering the deployment.
+The overrides are delivered as a `.yaml` file defined by the user before triggering the deployment.
 The Kyma Installer reads the configuration from the Installation CR and the overrides and applies it in the deployment process.
 
 
@@ -23,7 +23,7 @@ The default settings for the cluster and local deployment are defined in differe
   </summary>
 
   For the list of all components available to deploy see the `components.yaml` file.
-  For the list of the default deployment overrides see the `installer-config-local.yaml.tpl` file.
+  For the list of the default deployment overrides see the `overrides.yaml` file.
   Other configuration values are defined directly in the configuration of the respective components.
 
   >**CAUTION:** The default configuration uses tested and recommended settings. Change them at your own risk.
@@ -34,7 +34,7 @@ The default settings for the cluster and local deployment are defined in differe
   </summary>
 
   The default deployment flow uses a Kyma release.
-  All components available in a given release are listed in the  `kyma-installer-cluster.yaml`, which is one of the release artifacts.
+  All components available in a given release are listed in the  `overrides.yaml`, which is one of the release artifacts.
   Any required overrides are described in the [cluster deployment guide](#installation-install-kyma-on-a-cluster).
   Other settings are defined directly in the configuration of the components released with the given Kyma version.
   </details>
@@ -46,9 +46,9 @@ Before you start the Kyma deployment process, you can customize the default sett
 
 ### Components
 
-One of the released Kyma artifacts is the Kyma Installer, a Docker image that combines the Kyma Operator executable with charts of all components available in the release.
-The Kyma Installer can deploy only the components contained in its image.
-The Installation CR specifies which components of the available components are deployed.
+Kyma CLI takes the components directly from the released Kyma sources or sources that are checked out locally.
+Kyma CLI can deploy the components that are released or that are available locally in case of a deployment from the local sources.
+`components.yaml` file specifies the list of components to deploy. You can use your own `components.yaml` file if necessary.
 You can customize the list of components by:
 - Uncommenting a component entry to deploy the component.
 - Commenting out a component entry using the hash character (#) to skip the deployment of that component.
@@ -66,7 +66,7 @@ To learn more about the configuration options available for a specific component
 
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 
->**CAUTION:** An override must exist in a cluster before the deployment starts. If you fail to deliver the override before the deployment, the configuration can't be applied.
+>**CAUTION:** To pass overrides, use the `overrides.yaml` file. You can also pass them directly by using the command `kyma deploy --value`.
 
 ## Advanced configuration
 

@@ -33,7 +33,7 @@ You can provide a custom list of components to Kyma CLI during the deployment. T
 
 ### Installation from the release
 
-1. Create a file with the list of components you desire to deploy. You can copy and paste most of the components from the regular [installation file](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14), then modify the list as you like. An example file can look like the following:
+1. Create a file with the list of components you desire to deploy. You can copy and paste most of the components from the regular [installation file](https://github.com/kyma-project/kyma/blob/master/installation/resources/components.yaml), then modify the list as you like. An example file can look like the following:
 
 ```yaml
 components:
@@ -53,10 +53,9 @@ components:
 
 ### Deployment from sources
 
-1. Customize the deployment by adding a component to the list of components or removing the hash character (#) in front of the `name` and `namespace` entries in the following deployment files:
+1. Customize the deployment by adding a component to the list of components or removing the hash character (#) in front of the `name` and `namespace` entries in the following deployment file:
 
-   * [`installer-cr.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** deployment
-   *  [`installer-cr-cluster.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** deployment
+   * [`components.yaml`](https://github.com/kyma-project/kyma/blob/master/installation/resources/components.yaml)
 
 2. Follow the deployment steps to [deploy Kyma locally from sources](#installation-install-kyma-locally) or [deploy Kyma on a cluster](#installation-install-kyma-on-a-cluster).
 

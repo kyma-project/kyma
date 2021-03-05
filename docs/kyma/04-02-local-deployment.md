@@ -5,32 +5,21 @@ type: Installation
 
 This Deployment guide shows you how to quickly deploy Kyma locally on the MacOS, Linux, and Windows platforms. Kyma is deployed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
 
-**NOTE:** Local deployment using Minikube is deprecated.
-
 >**TIP:** See the [troubleshooting guide](#troubleshooting-overview) for tips.
 
 ## Prerequisites
 
 <div tabs name="prerequisites" group="deploy-kyma-locally">
   <details>
-  <summary label="k3s">
+  <summary label="k3d">
   k3s
   </summary>
 
-- [Kyma CLI](https://github.com/kyma-project/cli)
-- [Docker](https://www.docker.com/get-started)
+- [Kyma CLI](https://github.com/kyma-project/cli) 
+- [Docker](https://www.docker.com/get-started) 20.x.x
 - [k3d](https://k3d.io/#installation) 4.x.x
 
 </details>
-  <details>
-  <summary label="minikube-deprecated">
-  Minikube (deprecated)
-  </summary>
-
-- [Kyma CLI](https://github.com/kyma-project/cli)
-- [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 1.12.2
-
 </details>
 
 Virtualization:
@@ -47,37 +36,18 @@ Follow these instructions to deploy Kyma from a release or from sources:
 <div tabs name="deploy-kyma" group="deploy-kyma-locally">
   <details>
   <summary label="from-a-release-k3s">
-  From a release - k3s
+  From a release - k3d
   </summary>
 
-  1. Provision a Kubernetes cluster on k3s. Run:
+  1. Provision a Kubernetes cluster on k3d. Run:
 
      ```bash
-     kyma provision k3s
+     kyma provision k3d
      ```
 
-  2. Deploy the latest Kyma release on k3s:
+  2. Deploy the latest Kyma release on k3d:
      ```bash
      kyma deploy --profile evaluation
-     ```
-
-     >**NOTE:** If you want to deploy a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma deploy --source {KYMA_RELEASE}`.
-
-  </details>
-  <details>
-  <summary label="from-a-release-minikube">
-  From a release - Minikube (deprecated)
-  </summary>
-
-  1. Provision a Kubernetes cluster on Minikube. Run:
-
-     ```bash
-     kyma provision minikube
-     ```
-
-  2. Deploy the latest Kyma release on Minikube:
-     ```bash
-     kyma deploy
      ```
 
      >**NOTE:** If you want to deploy a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma deploy --source {KYMA_RELEASE}`.
@@ -96,10 +66,10 @@ Follow these instructions to deploy Kyma from a release or from sources:
      git clone https://github.com/kyma-project/kyma.git
      ```
 
-  3. Provision a Kubernetes cluster on k3s. Run:
+  3. Provision a Kubernetes cluster on k3d. Run:
 
      ```bash
-     kyma provision k3s
+     kyma provision k3d
      ```
 
   4. Deploy Kyma from sources. Run:
@@ -143,7 +113,7 @@ Use the Kyma CLI to restart the k3s cluster without redeploying Kyma. Follow the
 2. Restart the cluster without redeploying Kyma. Run:
 
    ```bash
-   kyma provision k3s
+   kyma provision k3d
    ```
 
 The Kyma CLI discovers that a k3s cluster is initialized and asks if you want to delete it. Answering `no` causes the Kyma CLI to start the k3s cluster and restarts all of the previously deployed components. Even though this procedure takes some time, it is faster than a clean deployment as you don't download all of the required Docker images.

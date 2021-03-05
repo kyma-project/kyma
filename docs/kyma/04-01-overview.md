@@ -5,28 +5,28 @@ type: Installation
 
 Kyma is a complex tool which consists of many different [components](#details-components) that provide various functionalities to extend your application. This entails high technical requirements that can influence your local development process. To meet the customer needs, we ensured Kyma modularity. This way you can decide not to include a given component in the Kyma deployment, or install it after the Kyma deployment process.
 
-These are the Kyma components in their deployment order:
+These are the Kyma prerequisite components, in their deployment order:
 
 - `cluster-essentials`
 - `istio`
-- `xip-patch`
+- `certificates`
+
+These are the Kyma regular components, deployed in parallel in random order:
+
 - `testing`
 - `logging`
 - `tracing`
 - `kiali`
 - `monitoring`
-- `knative-eventing`
+- `eventing`
 - `ory`
 - `api-gateway`
 - `service-catalog`
 - `service-catalog-addons`
+- `rafter`
 - `helm-broker`
-- `nats-streaming`
-- `core`
 - `cluster-users`
 - `serverless`
-- `knative-provisioner-natss`
-- `event-sources`
 - `application-connector`
 
 ## Deployment guides

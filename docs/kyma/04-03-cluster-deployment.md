@@ -3,9 +3,9 @@ title: Deploy Kyma on a cluster
 type: Installation
 ---
 
-This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
+This installation guide explains how you can deploy Kyma on a cluster.
 
->**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [deployment guide](#installation-install-kyma-with-your-own-domain). To deploy Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
+>**TIP:** For production, use the cert-manager.
 
 ## Prerequisites
 
@@ -15,6 +15,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
+- 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -191,6 +192,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 ## Deploy Kyma
 
    >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
+   >* [Profiles](05-05-profiles.md)
    >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
    >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
 
