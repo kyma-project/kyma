@@ -35,10 +35,14 @@ func main() {
 
 	var metricsAddr string
 	var probeAddr string
+	var readyEndpoint string
+	var healthEndpoint string
 	var resyncPeriod time.Duration
 	var enableDebugLogs bool
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(&readyEndpoint, "ready-check-endpoint", "readyz", "The endpoint of the readiness probe.")
+	flag.StringVar(&healthEndpoint, "health-check-endpoint", "healthz", "The endpoint of the health probe.")
 	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls.")
 	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
 	flag.Parse()
@@ -84,11 +88,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+	if err := mgr.AddHealthzCheck(healthEndpoint, healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)
 	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := mgr.AddReadyzCheck(readyEndpoint, healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}

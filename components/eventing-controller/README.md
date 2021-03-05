@@ -66,12 +66,14 @@ This section explains how to use the Eventing Controller.
     | **WEBHOOK_CLIENT_SECRET**  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
     | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              |
     | **DOMAIN**                 | The Kyma cluster public domain.                                                 |
+    | **EVENT_TYPE_PREFIX**      | The prefix for the EventType.                                                   |
 
 - `nats-controller` expects the following environment variables:
 
     | Environment variable   | Description                      |
     | ---------------------- | -------------------------------- |
     | **NATS_URL**           | The URL for the NATS server.     |
+    | **EVENT_TYPE_PREFIX**  | The prefix for the EventType.    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
