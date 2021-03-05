@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kiali-server.name" . }}-secured # Denn brauchen wir ned
+  name: {{ template "kiali-server.name" . }}-secured
   labels:
       {{- include "kiali-server.labels" . | nindent 4 }}
 spec:

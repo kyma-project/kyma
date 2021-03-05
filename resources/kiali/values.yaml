@@ -33,6 +33,7 @@ kcproxy:
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"
