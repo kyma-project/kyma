@@ -3,7 +3,7 @@ title: Profiles
 type: Configuration
 ---
 
-The Kyma Operator allows you to use pre-defined profiles to install or upgrade Kyma. A profile is defined globally for the whole Kyma installation or upgrade. It's not possible to set a profile per single component.
+The Kyma CLI allows you to use pre-defined profiles to install or upgrade Kyma. A profile is defined globally for the whole Kyma deployment. It's not possible to set a profile per single component.
 The currently supported profiles are: 
 - Evaluation - a profile with limited resources that you can use for trial purposes
 - Production - a profile with full resources that you can use on production
