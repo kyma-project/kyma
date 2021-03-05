@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: monitoring-kyma-frontends-dashboard
+  name: {{ template "kube-prometheus-stack.fullname" . }}-kyma-frontends-grafana-dashboard
   labels:
     grafana_dashboard: "1"
-    app: monitoring-grafana
+    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 data:
   kyma-frontends-dashboard.json: |-
     {
