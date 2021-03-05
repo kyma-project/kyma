@@ -3,7 +3,7 @@ title: Installation
 type: Custom Resource - deprecated
 ---
 
-**NOTE**: Custom Resource installation is deprecated.
+**NOTE**: Kyma Installer is deprecated.
 
 The `installations.installer.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to control the Kyma Installer, a proprietary solution based on the
 [Kubernetes operator](https://coreos.com/operators/) principles. To get the up-to-date CRD and show the output in the `yaml` format, run this command:  
