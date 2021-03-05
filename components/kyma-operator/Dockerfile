@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200117-d3885041 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ENV BASE_APP_DIR /workspace/go/src/github.com/kyma-project/kyma/components/kyma-operator
 WORKDIR ${BASE_APP_DIR}
@@ -6,7 +6,8 @@ WORKDIR ${BASE_APP_DIR}
 #
 # Copy files
 #
-
+COPY go.mod ${BASE_APP_DIR}
+COPY go.sum ${BASE_APP_DIR}
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./cmd/ ${BASE_APP_DIR}/cmd/
