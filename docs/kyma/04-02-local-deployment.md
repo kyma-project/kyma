@@ -105,7 +105,7 @@ Follow these instructions to deploy Kyma from a release or from sources:
   4. Deploy Kyma from sources. Run:
 
      ```bash
-     kyma deploy --source local
+     kyma deploy --source local --profile evaluation
      ```
      >**NOTE:** By default, the deployment uses sources located under your [GOPATH](https://github.com/golang/go/wiki/GOPATH). If you want to use a specific source folder, use it as a parameter when calling `kyma deploy --source local --src-path {YOUR_KYMA_SOURCE_PATH}`.
 
