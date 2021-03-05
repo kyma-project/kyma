@@ -16,7 +16,7 @@ You can modify the component list as follows:
 - Add components to the deployment file after the deployment
 - Remove components from the deployment file before the deployment
 
->**NOTE:** Currently, it is not possible to remove a component that is already deployed. If you remove it from the deployment file or precede its entries with a hash character (#) when Kyma is already deployed, the Kyma Installer simply does not update this component during the update process but the component is not removed.
+>**NOTE:** Currently, it is not possible to remove a component that is already deployed. If you remove it from the deployment file or precede its entries with a hash character (#) when Kyma is already deployed, the Kyma CLI simply does not update this component during the update process but the component is not removed.
 
 Each modification requires an action from the Kyma Installer for the changes to take place:
 
