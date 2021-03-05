@@ -86,5 +86,5 @@ You can only add a new component after the deployment. Removal of the deployed c
 4. Trigger the update using the same version and the modified deployment file:
 
    ```bash
-   kyma upgrade -s {VERSION} -c {DEPLOYMENT_FILE_PATH}
+   kyma deploy -s {VERSION} -c {DEPLOYMENT_FILE_PATH}
    ```
