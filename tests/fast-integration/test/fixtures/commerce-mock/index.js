@@ -11,17 +11,16 @@ axios.defaults.httpsAgent = httpsAgent;
 
 const {
   retryPromise,
-  expectNoK8sErr,
-  expectNoAxiosErr,
+  convertAxiosError,
   sleep,
   k8sApply,
-  waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForTokenRequest,
   deleteAllK8sResources,
   k8sAppsApi,
   k8sDynamicApi,
@@ -49,10 +48,10 @@ async function checkAppGatewayResponse() {
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
   let res = await retryPromise(
-    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }),
+    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
     45,
     2000
-  ).catch(expectNoAxiosErr);
+  ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
   expect(res.data).to.have.nested.property(
     "order.totalPriceWithTax.value",
     100
@@ -85,53 +84,44 @@ async function sendEventAndCheckResponse() {
         .catch((e) => {
           console.log("Cannot send event, the response from event gateway:");
           console.dir(e.response.data);
-          throw e;
+          throw convertAxiosError(e, "Cannot send event, the response from event gateway");
         });
 
       await sleep(500);
 
       return axios
-        .get(`https://lastorder.${host}`)
+        .get(`https://lastorder.${host}`, { timeout: 5000 })
         .then((res) => {
-          expect(res.data).to.have.nested.property(
-            "event.ce-type",
-            "order.created"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-source",
-            "commerce"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-eventtypeversion",
-            "v1"
-          );
-          expect(res.data).to.have.nested.property(
-            "event.ce-specversion",
-            "1.0"
-          );
+          expect(res.data).to.have.nested.property("event.data.orderCode","567");        
+          // See: https://github.com/kyma-project/kyma/issues/10720
+          expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created"); 
+          expect(res.data).to.have.nested.property("event.ce-source"); 
+          expect(res.data).to.have.nested.property("event.ce-eventtypeversion","v1");
+          expect(res.data).to.have.nested.property("event.ce-specversion","1.0");
           expect(res.data).to.have.nested.property("event.ce-id");
           expect(res.data).to.have.nested.property("event.ce-time");
           return res;
         })
-        .catch(expectNoAxiosErr);
+        .catch((e) => { 
+          throw convertAxiosError(e, "Error during request to function lastorder") 
+        });
     },
-    45,
+    30,
     2 * 1000
   );
 }
 
 async function registerAllApis(mockHost) {
   const localApis = await retryPromise(
-    () => axios.get(`https://${mockHost}/local/apis`),
-    10,
+    () => axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
+      throw convertAxiosError(err, "API registration error - commerce mock local API not available");
+    }
+    ),
+    1,
     3000
-  ).catch((err) => {
-    throw new Error(
-      `API registration error - commerce mock local API not available: ${err.response.data}`
-    );
-  });
-
-  for (let api of localApis.data) {
+  );
+  const filteredApis = localApis.data.filter((api) => (api.name.includes("Commerce Webservices") || api.name.includes("Events")));
+  for (let api of filteredApis) {
     await retryPromise(
       async () => {
         await axios
@@ -143,23 +133,21 @@ async function registerAllApis(mockHost) {
                 "content-type": "application/json",
                 origin: `https://${mockHost}`,
               },
+              timeout: 5000
             }
-          )
-          },
+          ).catch((err) => {
+            throw convertAxiosError(err, "Error during Commerce Mock API registration");
+          });
+      },
       10,
       3000
-    ).catch((err) => {
-      throw new Error(
-        `Error during Commerce Mock API registration: ${err.response.data}`
-      );
-    });
+    );
   }
+
   const remoteApis = await axios
     .get(`https://${mockHost}/remote/apis`)
     .catch((err) => {
-      throw new Error(
-        `Commerce Mock registered apis not available: ${err.response}`
-      );
+      throw convertAxiosError(err, "Commerce Mock registered apis not available");
     });
   expect(remoteApis.data).to.have.lengthOf.at.least(2);
   return remoteApis;
@@ -179,45 +167,35 @@ async function connectMock(mockHost, targetNamespace) {
     kind: "TokenRequest",
     metadata: { name: "commerce", namespace: targetNamespace },
   };
-
-  const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${targetNamespace}/tokenrequests`;
-
-  await k8sDynamicApi.delete(tokenRequest).catch(() => {}); // Ignore delete error
+  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForK8sObject(
-    path,
-    {},
-    (type, apiObj, watchObj) => {
-      return (
-        watchObj.object.status &&
-        watchObj.object.status.state == "OK" &&
-        watchObj.object.status.url
-      );
-    },
-    5 * 1000,
-    "Wait for TokenRequest timeout"
-  );
+  const tokenObj = await waitForTokenRequest("commerce", targetNamespace);
 
-  await axios
-    .post(
-      `https://${mockHost}/connection`,
-      {
-        token: tokenObj.status.url,
-        baseUrl: `https://${mockHost}`,
-        insecure: true,
-      },
-      {
-        headers: {
-          "content-type": "application/json",
-        },
-      }
-    )
-    .catch((err) => {
-      throw new Error(
-        `Error during establishing connection from Commerce Mock to Kyma connector service: ${err.response.data}`
-      );
-    });
+  const pairingBody = {
+    token: tokenObj.status.url,
+    baseUrl: `https://${mockHost}`,
+    insecure: true,
+  };
+  await connectCommerceMock(mockHost, pairingBody);
 }
+
+async function connectCommerceMock(mockHost, tokenData) {
+  const url = `https://${mockHost}/connection`;
+  const body = tokenData;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.post(url, body, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
+  }
+}
+
 function serviceInstanceObj(name, serviceClassExternalName) {
   return {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
@@ -263,8 +241,8 @@ async function patchAppGatewayDeployment() {
       body: patch,
       json: true,
       headers: options.headers,
-    })
-    .catch(expectNoK8sErr);
+    });
+
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(
     "commerce-application-gateway",
@@ -303,8 +281,8 @@ async function ensureCommerceMockTestFixture(mockNamespace, targetNamespace) {
   await patchAppGatewayDeployment();
   await retryPromise(
     () =>
-      axios.get(`https://${mockHost}/local/apis`).catch(() => {
-        throw new Error("Commerce mock local API not available - timeout");
+      axios.get(`https://${mockHost}/local/apis`).catch((err) => {
+        throw convertAxiosError(err, "Commerce mock local API not available - timeout");
       }),
     40,
     3000

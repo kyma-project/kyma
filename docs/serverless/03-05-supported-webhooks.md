@@ -14,7 +14,7 @@ The defaulting webhook:
 - Sets default values for CPU and memory requests and limits for a Function.
 - Sets default values for CPU and memory requests and limits for a Kubernetes Job responsible for building the Function's image.
 - Adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
-- Sets the default runtime `nodejs12` unless specified otherwise.
+- Sets the default `nodejs12` runtime unless specified otherwise.
 
    | Parameter       | Default value |
    | ----------------- | ------------- |
@@ -74,9 +74,9 @@ It checks the following conditions for these CRs:
 
 ## Admission webhook
 
-There is also the admission webhook that is only triggered in the scenario when you switch in the runtime from one registry to another.
+There is also the admission webhook that is only triggered in the scenario when you switch at runtime from one registry to another.
 
-To switch registries in the runtime, you must create or update a Secret CR that complies with [specific requirements](#details-switching-registries-in-the-runtime). This Secret CR, among other details, contains a username and password to the registry. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. These encoded credentials also allow Kubernetes to pull images of deployed Functions from the registry. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
+To switch registries at runtime, you must create or update a Secret CR that complies with [specific requirements](#details-switching-registries-at-runtime). This Secret CR, among other details, contains a username and password to the registry. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. These encoded credentials also allow Kubernetes to pull images of deployed Functions from the registry. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
 
 ### Requirements
 

@@ -7,9 +7,14 @@ const {
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
+  shouldRunSuite,
 } = require("../utils");
 
 describe("CommerceMock tests", function () {
+  if(!shouldRunSuite("commerce-mock")) {
+    return;
+  }
+
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";

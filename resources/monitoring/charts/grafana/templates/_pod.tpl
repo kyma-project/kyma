@@ -17,16 +17,16 @@
 schedulerName: "{{ .Values.schedulerName }}"
 {{- end }}
 serviceAccountName: {{ template "grafana.serviceAccountName" . }}
-{{- if .Values.securityContext }}
+{{- if .Values.podSecurityContext }}
 securityContext:
-{{ toYaml .Values.securityContext | indent 2 }}
+{{ toYaml .Values.podSecurityContext | indent 2 }}
 {{- end }}
 {{- if .Values.hostAliases }}
 hostAliases:
 {{ toYaml .Values.hostAliases | indent 2 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
 {{- if ( or .Values.persistence.enabled .Values.dashboards .Values.sidecar.datasources.enabled .Values.sidecar.notifiers.enabled .Values.extraInitContainers) }}
 initContainers:
@@ -39,10 +39,11 @@ initContainers:
     image: "{{ .Values.initChownData.image.repository }}:{{ .Values.initChownData.image.tag }}"
     {{- end }}
     imagePullPolicy: {{ .Values.initChownData.image.pullPolicy }}
+    {{- if .Values.initChownData.securityContext }}
     securityContext:
-      runAsNonRoot: false
-      runAsUser: 0
-    command: ["chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }}", "/var/lib/grafana"]
+{{ toYaml .Values.initChownData.securityContext | indent 6 }}
+    {{- end }}
+    command: ["chown", "-R", "{{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.runAsGroup }}", "/var/lib/grafana"]
     resources:
 {{ toYaml .Values.initChownData.resources | indent 6 }}
     volumeMounts:
@@ -64,6 +65,10 @@ initContainers:
     args: [ "-c", "mkdir -p /var/lib/grafana/dashboards/default && /bin/sh /etc/grafana/download_dashboards.sh" ]
     resources:
 {{ toYaml .Values.downloadDashboards.resources | indent 6 }}
+{{- if .Values.downloadDashboards.securityContext }}
+    securityContext:
+{{ toYaml .Values.downloadDashboards.securityContext | indent 6 }}
+{{- end }}
     env:
 {{- range $key, $value := .Values.downloadDashboards.env }}
       - name: "{{ $key }}"
@@ -115,6 +120,10 @@ initContainers:
       {{- end }}
     resources:
 {{ toYaml .Values.sidecar.resources | indent 6 }}
+{{- if .Values.sidecar.securityContext }}
+    securityContext:
+{{ toYaml .Values.sidecar.securityContext | indent 6 }}
+{{- end }}
     volumeMounts:
       - name: sc-datasources-volume
         mountPath: "/etc/grafana/provisioning/datasources"
@@ -150,6 +159,10 @@ initContainers:
       {{- end }}
     resources:
 {{ toYaml .Values.sidecar.resources | indent 6 }}
+{{- if .Values.sidecar.securityContext }}
+    securityContext:
+{{ toYaml .Values.sidecar.securityContext | indent 6 }}
+{{- end }}
     volumeMounts:
       - name: sc-notifiers-volume
         mountPath: "/etc/grafana/provisioning/notifiers"
@@ -199,6 +212,10 @@ containers:
       {{- end }}
     resources:
 {{ toYaml .Values.sidecar.resources | indent 6 }}
+{{- if .Values.sidecar.securityContext }}
+    securityContext:
+{{ toYaml .Values.sidecar.securityContext | indent 6 }}
+{{- end }}
     volumeMounts:
       - name: sc-dashboard-volume
         mountPath: {{ .Values.sidecar.dashboards.folder | quote }}
@@ -383,6 +400,10 @@ containers:
 {{ toYaml .Values.readinessProbe | indent 6 }}
     resources:
 {{ toYaml .Values.resources | indent 6 }}
+{{- if .Values.securityContext }}
+    securityContext:
+{{ toYaml .Values.securityContext | indent 6 }}
+{{- end }}
 {{- with .Values.extraContainers }}
 {{ tpl . $ | indent 2 }}
 {{- end }}

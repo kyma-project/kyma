@@ -51,6 +51,10 @@ spec:
             timeoutSeconds: 10
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.securityContext }}
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
           {{- if .Values.persistentVolume.enabled }}
           volumeMounts:
             - name: storage-volume
@@ -70,9 +74,9 @@ spec:
 {{ toYaml .Values.affinity | indent 8 }}
     {{- end }}
       {{- if .Values.persistentVolume.enabled }}
-    {{- if .Values.securityContext }}
+    {{- if .Values.podSecurityContext }}
       securityContext:
-{{ toYaml .Values.securityContext | indent 8 }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
     {{- end }}
       volumes:
         - name: storage-volume

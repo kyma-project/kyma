@@ -19,9 +19,9 @@ spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "jaeger-operator.serviceAccountName" . }}
       {{- end }}
-      {{- with .Values.securityContext }}
+      {{- if .Values.podSecurityContext }}
       securityContext:
-{{ toYaml . | indent 8 }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
       {{- end }}
       {{- if and .Values.image.imagePullSecrets (not .Values.serviceAccount.create ) }}
       imagePullSecrets:
@@ -58,9 +58,16 @@ spec:
               value: {{ include "jaeger-operator.fullname" . | quote }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.securityContext }}
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
     {{- with .Values.affinity }}
       affinity:

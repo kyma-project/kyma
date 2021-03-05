@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}
-  annotations:  
+  annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
@@ -46,3 +46,6 @@ spec:
               optional: true
         - name: TLS_SECRET_NAME
           value: {{ .Values.tls.secretName }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

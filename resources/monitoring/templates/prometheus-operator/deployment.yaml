@@ -30,8 +30,8 @@ spec:
 {{ toYaml .Values.prometheusOperator.podAnnotations | indent 8 }}
 {{- end }}
     spec:
-    {{- if .Values.prometheusOperator.priorityClassName }}
-      priorityClassName: {{ .Values.prometheusOperator.priorityClassName }}
+    {{- if or .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
     {{- end }}
       containers:
         - name: {{ template "kube-prometheus-stack.name" . }}
@@ -110,9 +110,10 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.prometheusOperator.resources | indent 12 }}
+{{- if .Values.prometheusOperator.securityContext }}
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+{{ toYaml .Values.prometheusOperator.securityContext | indent 12 }}
+{{- end }}
           {{- if .Values.prometheusOperator.tls.enabled }}
           volumeMounts:
             - name: tls-secret
@@ -126,9 +127,9 @@ spec:
             defaultMode: 420
             secretName: {{ template "kube-prometheus-stack.fullname" . }}-admission
 {{- end }}
-{{- if .Values.prometheusOperator.securityContext }}
+{{- if .Values.prometheusOperator.podSecurityContext }}
       securityContext:
-{{ toYaml .Values.prometheusOperator.securityContext | indent 8 }}
+{{ toYaml .Values.prometheusOperator.podSecurityContext | indent 8 }}
 {{- end }}
       serviceAccountName: {{ template "kube-prometheus-stack.operator.serviceAccountName" . }}
 {{- if .Values.prometheusOperator.hostNetwork }}

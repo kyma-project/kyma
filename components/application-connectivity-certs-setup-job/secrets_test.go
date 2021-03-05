@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -26,6 +27,8 @@ const (
 )
 
 var (
+	testContext = context.Background()
+
 	namespacedName = types.NamespacedName{
 		Name:      secretName,
 		Namespace: namespace,
@@ -43,7 +46,7 @@ func TestRepository_Get(t *testing.T) {
 		secret := makeSecret(namespacedName, map[string][]byte{dataKey: []byte("data")})
 
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(secret, nil)
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(secret, nil)
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -60,7 +63,7 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should return an error in case fetching fails", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(
 			nil,
 			errors.New("some error"))
 
@@ -96,8 +99,8 @@ func TestRepository_Upsert(t *testing.T) {
 		})
 
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(secret, nil)
-		secretsManagerMock.On("Update", updatedSecret).Return(secret, nil)
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(secret, nil)
+		secretsManagerMock.On("Update", testContext, updatedSecret, metav1.UpdateOptions{}).Return(secret, nil)
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -114,9 +117,9 @@ func TestRepository_Upsert(t *testing.T) {
 		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretsManagerMock.On("Update", secret).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretsManagerMock.On("Create", secret).Return(secret, nil)
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
+		secretsManagerMock.On("Update", testContext, secret, metav1.UpdateOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
+		secretsManagerMock.On("Create", testContext, secret, metav1.CreateOptions{}).Return(secret, nil)
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -131,7 +134,7 @@ func TestRepository_Upsert(t *testing.T) {
 	t.Run("should return error when failed to get secret", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -148,8 +151,8 @@ func TestRepository_Upsert(t *testing.T) {
 		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretsManagerMock.On("Update", secret).Return(nil, errors.New("error"))
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
+		secretsManagerMock.On("Update", testContext, secret, metav1.UpdateOptions{}).Return(nil, errors.New("error"))
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -166,9 +169,9 @@ func TestRepository_Upsert(t *testing.T) {
 		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretsManagerMock.On("Update", secret).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretsManagerMock.On("Create", secret).Return(nil, errors.New("error"))
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
+		secretsManagerMock.On("Update", testContext, secret, metav1.UpdateOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
+		secretsManagerMock.On("Create", testContext, secret, metav1.CreateOptions{}).Return(nil, errors.New("error"))
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -235,7 +238,7 @@ func TestRepository_ValuesProvided(t *testing.T) {
 		t.Run(test.description, func(t *testing.T) {
 			// given
 			secretsManagerMock := &mocks.Manager{}
-			secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(test.secret, test.error)
+			secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(test.secret, test.error)
 
 			repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 
@@ -251,7 +254,7 @@ func TestRepository_ValuesProvided(t *testing.T) {
 	t.Run("should return error when failed to get secret", func(t *testing.T) {
 		// given
 		secretsManagerMock := &mocks.Manager{}
-		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
+		secretsManagerMock.On("Get", testContext, secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
 
 		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
 

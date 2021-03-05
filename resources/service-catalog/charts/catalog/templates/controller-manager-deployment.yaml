@@ -40,7 +40,7 @@ spec:
           emptyDir: {}
       containers:
       - name: healthcheck
-        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.2
+        image: eu.gcr.io/kyma-project/incubator/develop/health-proxy:bd223692
         securityContext:
           privileged: false
           allowPrivilegeEscalation: false
@@ -155,3 +155,6 @@ spec:
       nodeSelector:
 {{ toYaml .Values.controllerManager.nodeSelector | indent 8 }}
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -71,3 +71,6 @@ spec:
         env:
           - name: HOME
             value: /tmp
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

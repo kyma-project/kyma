@@ -11,7 +11,13 @@ service:
 virtualservice:
   enabled: true
   annotations: {}
-resources: {}
+resources: 
+  requests:
+    cpu: 1m
+    memory: 16Mi
+  limits:
+    cpu: 30m
+    memory: 64Mi
 
 podSecurityPolicy:
     enabled: true

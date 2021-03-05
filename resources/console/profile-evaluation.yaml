@@ -7,7 +7,7 @@ web:
       limits:
         cpu: 40m
         memory: 16Mi
-  core-ui:
+  core_ui:
     resources:
       requests:
         cpu: 2m
