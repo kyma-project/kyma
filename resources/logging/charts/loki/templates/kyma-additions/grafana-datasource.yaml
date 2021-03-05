@@ -20,9 +20,5 @@ data:
           maxLines: 1000
 {{- if .Values.global.tracing.enabled }}
           derivedFields:
-          - datasourceUid: Jaeger
-            matcherRegex: "traceId=(\\w+)"
-            name: TraceID
-            # url will be interpreted as query for the datasource
-            url: "$${__value.raw}"
+            {{- tpl .Values.grafana.datasource.derivedFields . | nindent 10}}
 {{- end }}
