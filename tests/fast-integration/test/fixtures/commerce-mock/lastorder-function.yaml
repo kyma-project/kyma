@@ -63,32 +63,13 @@ kind: ApplicationMapping
 metadata:
   name: commerce
 ---
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  labels:
-    function: lastorder
-  name: function-lastorder
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce
-      type: order.created
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: lastorder
----
 apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
   name: function-lastorder
 spec:
   filter:
-    dialect: beb,
+    dialect: nats,
     filters:
     - eventSource:
         property: source
