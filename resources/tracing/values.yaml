@@ -114,11 +114,13 @@ global:
     enabled: true
 
 kcproxy:
+  enabled: false
   replicaCount: 1
   inPort: 10001
   config:
     clientId: "jaeger"
     clientSecret: "oiEWUWOIEwedfgg"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"
