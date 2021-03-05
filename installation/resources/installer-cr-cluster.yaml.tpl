@@ -49,8 +49,6 @@ spec:
       namespace: "kyma-system"
     - name: "serverless"
       namespace: "kyma-system"
-    - name: "event-sources"
-      namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "tracing"
