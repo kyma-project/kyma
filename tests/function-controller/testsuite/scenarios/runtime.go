@@ -2,6 +2,7 @@ package scenarios
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"net/url"
 	"time"
 
@@ -56,7 +57,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		Log:         logf,
 	}
 	emptyFn := function.NewFunction("empty-fn", genericContainer.WithLogger(nodejs12Logger))
-
+	nodejs10Logger := logf.WithField(scenarioKey, "nodejs10")
 	nodejs12Cfg, err := runtimes.NewFunctionConfig("nodejs12", cfg.UsageKindName, cfg.DomainName, genericContainer.WithLogger(nodejs12Logger), clientset)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating nodejs12 config")
@@ -67,8 +68,11 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	if err != nil {
 		return nil, err
 	}
-
+	secretData2 := map[string]string{
+		".npmrc": "always-auth=true\n      registry=https://packagecloud.io/hrc38035/TestNpm2/npm/\n      //packagecloud.io/hrc38035/TestNpm2/npm/:_authToken=d268d5b69be4d81fa98656957d2b3720c59fabedecb9499e",
+	}
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
+	sec2 := secret.NewSecret("serverless-npm-registry-config", genericContainer.WithLogger(nodejs10Logger))
 
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
@@ -78,6 +82,7 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	return step.NewSerialTestRunner(logf, "runtime Test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
 		teststep.NewAddonConfiguration("Create addon configuration", addon, addonURL, genericContainer),
+		teststep.CreateSecret(nodejs10Logger, sec2, "Create Test Secret", secretData2),
 		teststep.CreateEmptyFunction(emptyFn),
 		teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
 		teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
