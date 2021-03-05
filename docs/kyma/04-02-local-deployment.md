@@ -19,7 +19,7 @@ This Deployment guide shows you how to quickly deploy Kyma locally on the MacOS,
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
-- [k3s](https://k3s.io/) 
+- [k3d](https://k3d.io/#installation) 4.x.x
 
 </details>
   <details>
