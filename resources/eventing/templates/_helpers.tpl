@@ -34,6 +34,11 @@ component: {{ .Release.Name }}
 job: post-upgrade-hook
 {{- end }}
 
+{{- define "eventing.preUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: pre-upgrade-hook
+{{- end }}
+
 {{/*
 Selector labels
 */}}

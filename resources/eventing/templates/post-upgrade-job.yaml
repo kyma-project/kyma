@@ -18,7 +18,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook": "post-install,post-upgrade"
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
@@ -54,7 +54,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
-    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook": "post-install,post-upgrade"
 subjects:
   - kind: ServiceAccount
     name: {{ template "eventing.fullname" . }}-post-upgrade
