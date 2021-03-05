@@ -58,7 +58,7 @@ Follow these instructions to deploy Kyma from a release or from sources:
 
   2. Deploy the latest Kyma release on k3s:
      ```bash
-     kyma deploy
+     kyma deploy --profile evaluation
      ```
 
      >**NOTE:** If you want to deploy a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma deploy --source {KYMA_RELEASE}`.
