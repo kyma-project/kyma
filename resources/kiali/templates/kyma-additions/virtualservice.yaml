@@ -15,4 +15,8 @@ spec:
     - destination:
         port:
           number: {{ .Values.kiali.spec.server.port }}
+        {{if .Values.kcproxy.enabled}}
         host: {{ template "kiali-server.name" . }}-secured
+        {{else}}
+        host: {{ template "kiali-server.name" . }}
+        {{end}}

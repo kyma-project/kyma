@@ -1,7 +1,8 @@
+{{if .Values.kcproxy.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kiali-server.name" . }}-secured
+  name: {{ template "kiali-server.name" . }}-secured # Denn brauchen wir ned
   labels:
       {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
@@ -12,3 +13,4 @@ spec:
       name: http
   selector:
       app: {{ template "kiali-server.name" . }}-kcproxy
+{{end}}

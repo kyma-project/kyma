@@ -1,3 +1,4 @@
+{{if .Values.kcproxy.enabled}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +33,7 @@ spec:
         name: kcproxy
         command: ["/keycloak-gatekeeper"]
         args:
-        - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
+        - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}    # Hardgecoded -> rausziehen in values  yaml
         - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
         - --client-id=$(CLIENT_ID)
         - --client-secret=$(CLIENT_SECRET)
@@ -96,3 +97,4 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.kcproxy.resources | indent 10 }}
+{{end}}
