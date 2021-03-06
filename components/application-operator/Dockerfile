@@ -1,4 +1,5 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
+# Nothing has changed
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-operator
 WORKDIR $DOCK_PKG_DIR
