@@ -118,9 +118,7 @@ class DirectorClient {
         } catch(err) {
             // console.dir(err);
             if (err.response) {
-                for(let e of err.response.data.errors) {
-                    console.log(e);
-                }
+                console.log(err.response);
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {
                 throw new Error(`${msg}: GraphQL responded with errors: ${err.errors[0].message}`)
@@ -227,6 +225,26 @@ class DirectorClient {
             return res.data;
         } catch(err) {
             throw new Error(`Error when querying for applications filtered`);
+        }
+    }
+
+    async setRuntimeLabel(runtimeID, key, value) {
+        const payload = gql.setRuntimeLabel(runtimeID, key, value);
+        try {
+            const res = await this.callDirector(payload);
+            return res.data;
+        } catch(err) {
+            throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}`);
+        }
+    }
+
+    async getRuntime(runtimeID) {
+        const payload = gql.queryRuntime(runtimeID);
+        try {
+            const res = await this.callDirector(payload);
+            return res;
+        } catch(err) {
+            throw new Error(`Error whe querying for the runtime with ID ${runtimeID}`);
         }
     }
 }
