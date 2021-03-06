@@ -38,6 +38,9 @@ function installOptions(yargs) {
     },
     'new-eventing': {
       describe: 'Install new eventing instead of knative'
+    },
+    'with-compass': {
+      describe: 'Install with compass-runtime-agent and disable legacy connectivity'
     }
   });
 
@@ -84,15 +87,22 @@ async function install(argv) {
   let src = undefined;
   verbose(argv);
   if (argv.source) {
-
     src = await installer.downloadCharts(argv)
   }
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const newEventing = argv.newEventing;
+  const withCompass = argv.withCompass;
 
-  await installer.installKyma({ resourcesPath: src, components, skipComponents, isUpgrade: !!argv.upgrade, newEventing });
-  console.log('Kyma installed')
+  await installer.installKyma({ 
+    resourcesPath: src, 
+    components, 
+    skipComponents, 
+    isUpgrade: !!argv.upgrade, 
+    newEventing, 
+    withCompass 
+  });
+  console.log('Kyma installed');
 }
 
 async function uninstall(argv) {

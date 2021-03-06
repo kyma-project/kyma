@@ -77,12 +77,3 @@ spec:
     host: commerce
     name: commerce-mock
     port: 10000
----
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: Application
-metadata:
-  name: commerce
-spec:
-  labels: 
-    override.deployment.args.skipVerify: "true"
-  description: Commerce mock

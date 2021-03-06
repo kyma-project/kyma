@@ -6,7 +6,6 @@ const {
   helmList
 } = require("./helm");
 const execa = require("execa");
-const fs = require('fs');
 const { join } = require("path");
 const { installIstio, upgradeIstio } = require("./istioctl");
 const pRetry = require("p-retry");
@@ -175,7 +174,8 @@ async function chartList(options) {
   const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
   const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
   const isBEBEnabled = !!options.newEventing;
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.isBEBEnabled=${isBEBEnabled}`;
+  const isCompassEnabled = !!options.withCompass;
+  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.isBEBEnabled=${isBEBEnabled}${isCompassEnabled ? ",global.disableLegacyConnectivity=true": ""}`;
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
   if (isGardener == "true") {
@@ -298,6 +298,12 @@ async function chartList(options) {
       values: `${overrides}`,
     },
     {
+      release: "compass-runtime-agent",
+      namespace: "compass-system",
+      values: `${overrides}`,
+      filter: isCompassEnabled
+    },
+    {
       release: "ingress-dns-cert",
       namespace: "istio-system",
       values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
@@ -397,6 +403,9 @@ async function installKyma(options) {
   await removeKymaGatewayCertsYaml(installLocation);
   await kubectlApply(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlApply(join(__dirname, "system-namespaces.yaml"));
+  if (options.withCompass) {
+    await kubectlApply(join(__dirname, "compass-namespace.yaml"));
+  }
   await kubectlApplyDir(
     join(installLocation, "cluster-essentials/files"),
     "kyma-system"
