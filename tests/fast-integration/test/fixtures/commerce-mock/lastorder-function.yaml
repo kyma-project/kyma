@@ -69,7 +69,6 @@ metadata:
   name: function-lastorder
 spec:
   filter:
-    dialect: nats,
     filters:
     - eventSource:
         property: source
@@ -79,8 +78,6 @@ spec:
         property: type
         type: exact
         value: sap.kyma.custom.commerce.order.created.v1
-  protocol: BEB
-  protocolsettings:
-    exemptHandshake: true
-    qos: AT-LEAST-ONCE
+  protocol: "nats"
+  protocolsettings: {}
   sink: http://lastorder.test.svc.cluster.local
