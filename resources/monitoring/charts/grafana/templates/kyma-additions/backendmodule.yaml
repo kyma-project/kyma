@@ -5,5 +5,7 @@
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
-  name: grafana
+  name: {{ template "grafana.fullname" . }}
+  labels:
+    {{- include "grafana.labels" . | nindent 4 }}
 {{- end }}

@@ -1316,3 +1316,7 @@ networkPolicy:
 
 # Force namespace of namespaced resources
 forceNamespace: null
+
+grafana:
+  datasource:
+    enabled: false
