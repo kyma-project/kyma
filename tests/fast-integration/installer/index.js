@@ -363,7 +363,7 @@ async function uninstallKyma(options) {
 
 /**
  * Install Kyma on kubernetes cluster with current kubeconfig
- * @param {Object} options List of installation options
+ * @param {{skipComponents: string, newEventing: boolean}} options List of installation options
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts 
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
