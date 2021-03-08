@@ -24,6 +24,7 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+      namespace: kyma-system
 
 securityContext:
   allowPrivilegeEscalation: false

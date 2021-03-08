@@ -34,6 +34,9 @@
 # The `cluster-users` subchart
 /resources/cluster-users/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
+# The `certificates` chart
+/resources/certificates/ @strekm @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
+
 # The `iam-kubeconfig-service` chart
 /resources/iam-kubeconfig-service/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 

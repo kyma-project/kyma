@@ -17,6 +17,7 @@ components:
   - name: "api-gateway"
   - name: "service-catalog"
   - name: "service-catalog-addons"
+  - name: "rafter"
   - name: "helm-broker"
   - name: "cluster-users"
   - name: "serverless"

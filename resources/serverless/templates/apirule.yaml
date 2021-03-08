@@ -14,7 +14,7 @@ spec:
     host: registry.{{ .Values.global.ingress.domainName }} # docker-registry.{DOMAIN}
   rules:
     - path: /.*
-      methods: ["GET"]
+      methods: ["GET", "HEAD"]
       accessStrategies:
         - handler: noop
 {{- end }}
