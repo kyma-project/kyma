@@ -1,3 +1,5 @@
+global:
+  priorityClassName: ""
 webhook:
   replicaCount: 1
   image:

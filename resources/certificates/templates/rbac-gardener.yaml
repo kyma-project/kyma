@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "certificates.name" . }}-gardener
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: {{ template "certificates.name" . }}-kube-system-gardener
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ['shoot-info']
+    verbs: ["get"]
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: istio-system
+  name: {{ template "certificates.name" . }}-istio-system-gardener
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: ["cert.gardener.cloud"]
+    resources: ["certificates"]
+    verbs: ["get", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "update", "patch"]
+---
+kind: Role # NOTE: this Role can be removed once we get rid of kyma-installer
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kyma-installer
+  name: {{ template "certificates.name" . }}-kyma-installer-gardener
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update", "patch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-gardener
+  namespace: kube-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-gardener
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kube-system-gardener
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-gardener
+  namespace: istio-system
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-gardener
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-istio-system-gardener
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding # NOTE: this RoleBinding can be removed once we get rid of kyma-installer
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "certificates.name" . }}-gardener
+  namespace: kyma-installer
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    "helm.sh/hook": "post-install, post-upgrade"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "certificates.name" . }}-gardener
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: {{ template "certificates.name" . }}-kyma-installer-gardener
+  apiGroup: rbac.authorization.k8s.io

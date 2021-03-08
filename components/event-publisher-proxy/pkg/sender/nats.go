@@ -42,16 +42,13 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 		return http.StatusInternalServerError, err
 	}
 
-	ctxWithCancel, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	client, err := cev2.NewClient(sender)
 	if err != nil {
 		h.logger.Errorf("Failed to create client, %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 
-	err = client.Send(ctxWithCancel, *event)
+	err = client.Send(ctx, *event)
 	if cev2.IsUndelivered(err) {
 		h.logger.Errorf("Failed to send: %s", err.Error())
 		return http.StatusBadGateway, err

@@ -1,16 +1,29 @@
 const k8s = require("@kubernetes/client-node");
-const { expect } = require("chai");
-const _ = require("lodash");
+const fs = require("fs");
+const { join } = require("path");
 
 const kc = new k8s.KubeConfig();
+
 kc.loadFromDefault();
+var k8sDynamicApi;
+var k8sAppsApi;
+var k8sCoreV1Api;
 
-const k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
-const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
-const k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+var watch;
 
-const watch = new k8s.Watch(kc);
-
+function initializeK8sClient() {
+  try{
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    watch = new k8s.Watch(kc);
+    
+  } catch(err) {
+    console.log(err.message);
+  }
+  
+}
+initializeK8sClient();
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
  *
@@ -47,25 +60,11 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function expectNoK8sErr(err) {
-  if (!!err.body && !!err.body.message) {
-    expect(err.body.message).to.be.empty; // handle native k8s errors
-  }
-
-  expect(err).to.be.undefined; // handle rest of errors
-}
-
-function expectNoAxiosErr(err) {
-  if (err.reponse) {
-    // https://github.com/axios/axios#handling-errors
-    const { request, ...errorObject } = err.response; // request is too verbose
-    expect(errorObject).to.deep.eq({});
-  }
-
-  expect(err).to.be.undefined; // catch non-axios errors
-}
 
 function convertAxiosError(axiosError, message) {
+  if (!axiosError.response) {
+    return axiosError;
+  }
   if (axiosError.response && axiosError.response.status && axiosError.response.statusText) {
     message += `\n${axiosError.response.status}: ${axiosError.response.statusText}`;
   }
@@ -146,7 +145,76 @@ async function promiseAllSettled(promises) {
   );
 }
 
+/**
+ * 
+ * @param {string} dir path to the directory with yaml files 
+ */
+async function kubectlApplyDir(dir, namespace) {
+  const files = fs.readdirSync(dir);
+  for (let file of files) {
+    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+      await kubectlApply(join(dir, file), namespace).catch(console.error);
+    }
+  }
+}
+async function kubectlApply(file, namespace) {
+  const yaml = fs.readFileSync(file);
+  const resources = k8s.loadAllYaml(yaml);
+  await k8sApply(resources, namespace);
+}
+async function kubectlDeleteDir(dir, namespace) {
+  const files = fs.readdirSync(dir);
+  for (let file of files) {
+    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+      await kubectlDelete(join(dir, file), namespace).catch(console.error);
+    }
+  }
+}
+function kubectlDelete(file, namespace) {
+  const yaml = fs.readFileSync(file);
+  const listOfSpecs = k8s.loadAllYaml(yaml);
+  return k8sDelete(listOfSpecs, namespace);
+}
+async function k8sDelete(listOfSpecs, namespace) {
+  for (let res of listOfSpecs) {
+    if (namespace) {
+      res.metadata.namespace = namespace;
+    }
+    debug(`Delete ${res.metadata.name}`);
+    try {
+      if (res.kind) {
+        await k8sDynamicApi.delete(res)
+      } else if (res.metadata.selfLink) {
+        await k8sDynamicApi.requestPromise({
+          url: k8sDynamicApi.basePath + res.metadata.selfLink,
+          method: "DELETE",
+        });
+      } else {
+        throw Error("Object kind or metadata.selfLink is required to delete the resource")
+      }
+      if (res.kind == "CustomResourceDefinition") {
+        const version = res.spec.version || res.spec.versions[0].name;
+        const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`
+        await deleteAllK8sResources(path);
+      }        
+    } catch (err) {
+      if (err.response.statusCode!=404) {
+        throw err;
+      }
+    }
+  }
+}
+async function getAllCRDs() {
+  const path = '/apis/apiextensions.k8s.io/v1/customresourcedefinitions';
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const stat = {}
+  const body = JSON.parse(response.body);
+  body.items.forEach(crd => stat[crd.spec.group] = stat[crd.spec.group] ? stat[crd.spec.group] + 1 : 1)
+  return body.items
 
+}
 async function k8sApply(listOfSpecs, namespace, patch = true) {
   const options = {
     headers: { "Content-type": "application/merge-patch+json" },
@@ -217,7 +285,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
             resolve(watchObj.object);
           }
         },
-        () => {}
+        () => { }
       )
       .then((r) => {
         res = r;
@@ -452,6 +520,9 @@ async function deleteAllK8sResources(
   retries = 2,
   interval = 1000
 ) {
+  const options = {
+    headers: { "Content-type": "application/merge-patch+json" },
+  };
   try {
     let i = 0;
     while (i < retries) {
@@ -463,18 +534,44 @@ async function deleteAllK8sResources(
         qs: query,
       });
       const body = JSON.parse(response.body);
-      if (body.items && body.items.length) {
-        for (let o of body.items) {
-          deleteK8sResource(o);
+      if (body.items.length == 0) {
+        break;
+      }
+      for (let o of body.items) {
+        if (o.metadata.finalizers && o.metadata.finalizers.length) {
+          const obj = {
+            kind: o.kind || "Secret", // Secret list doesn't return kind and apiVersion
+            apiVersion: o.apiVersion || "v1",
+            metadata: {
+              name: o.metadata.name,
+              namespace: o.metadata.namespace,
+              finalizers: [],
+            },
+          };
+          debug("Removing finalizers from", obj);
+          await k8sDynamicApi
+            .patch(obj, undefined, undefined, undefined, undefined, options)
+            .catch(ignore404);
         }
-      } else if(!body.items) {
-        deleteK8sResource(body);
+        await k8sDynamicApi
+          .requestPromise({
+            url: k8sDynamicApi.basePath + o.metadata.selfLink,
+            method: "DELETE",
+          })
+          .catch(ignore404);
+        debug(
+          "Deleted resource:",
+          o.metadata.name,
+          "namespace:",
+          o.metadata.namespace
+        );
       }
     }
   } catch (e) {
     debug("Error during delete ", path, String(e).substring(0, 1000));
   }
 }
+
 
 async function deleteK8sResource(obj) {
   const options = {	
@@ -569,13 +666,15 @@ function ignoreNotFound(e) {
     throw e;
   }
 }
-
-const DEBUG = process.env.DEBUG;
+let DEBUG = process.env.DEBUG;
 
 function debug() {
   if (DEBUG) {
     console.log.apply(null, arguments);
   }
+}
+function switchDebug(on = true){
+  DEBUG=on;
 }
 
 function toBase64(s) {
@@ -614,14 +713,17 @@ function getEnvOrThrow(key) {
 
 module.exports = {
   retryPromise,
-  expectNoK8sErr,
-  expectNoAxiosErr,
   convertAxiosError,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
   promiseAllSettled,
+  kubectlApplyDir,
+  kubectlApply,
+  kubectlDelete,
+  kubectlDeleteDir,
   k8sApply,
+  k8sDelete,
   waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
@@ -633,14 +735,18 @@ module.exports = {
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
+  getAllCRDs,
   listResources,
   k8sDynamicApi,
   k8sAppsApi,
+  k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
   debug,
+  switchDebug,
   printRestartReport,
   toBase64,
   genRandom,
   shouldRunSuite,
   getEnvOrThrow
 };
+

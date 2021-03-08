@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/kyma-project/incubator/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.5.7-39280321
+  tag: 1.5.7-3c0add6a
 
 imagePullSecrets: []
 nameOverride: ""
@@ -226,12 +226,12 @@ config:
     loki:
       enabled: true
       alias:
+      match: "loki.*"
       serviceName: "logging-loki"
       servicePort: 3100
       serviceScheme: http
       servicePath: /loki/api/v1/push
       config:
-        port: 2020
         loglevel: warn
         lineFormat: json
         removeKeys:

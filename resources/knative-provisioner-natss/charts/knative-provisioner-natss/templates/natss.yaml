@@ -277,6 +277,9 @@ spec:
         - configMap:
             name: config-logging
           name: config-logging
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 ---
 apiVersion: apps/v1

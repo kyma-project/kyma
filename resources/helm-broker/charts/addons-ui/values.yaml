@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   name: add-ons-ui
   pullPolicy: IfNotPresent
-  version: "4f6246be"
+  version: "896b2ee7"
 service:
   internalPort: 80
   externalPort: 80
@@ -11,7 +11,7 @@ service:
 virtualservice:
   enabled: true
   annotations: {}
-resources: 
+resources:
   requests:
     cpu: 1m
     memory: 16Mi
@@ -20,4 +20,4 @@ resources:
     memory: 64Mi
 
 podSecurityPolicy:
-    enabled: true
+  enabled: true

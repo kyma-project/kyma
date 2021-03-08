@@ -35,3 +35,6 @@ spec:
             value: kyma-project.io/controller-manager
           - name: HTTP_ADAPTER_IMAGE
             value: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.httpAdapter.dir }}{{ .Values.global.httpAdapter.image }}:{{ .Values.global.httpAdapter.version }}"
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

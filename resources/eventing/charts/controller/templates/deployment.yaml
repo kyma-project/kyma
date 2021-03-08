@@ -67,4 +67,7 @@ spec:
             requests:
               cpu: 100m
               memory: 20Mi
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}

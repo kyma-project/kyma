@@ -31,6 +31,9 @@ spec:
 {{- toYaml .Values.kyma.securityContext | nindent 12 }}
       restartPolicy: Never
       serviceAccountName: istio-cleanup-job
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -62,7 +65,7 @@ rules:
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
-    resourceNames: 
+    resourceNames:
       - {{ template "istio.fullname" . }}
 {{- end }}
 ---

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard
+  name: {{ template "grafana.fullname" . }}-grafana-dashboard
   labels:
+    {{- include "grafana.labels" . | nindent 4 }}
     grafana_dashboard: "1"
-    app: monitoring-grafana
 data:
   grafana-dashboard.json: |-
     {

@@ -101,3 +101,6 @@ spec:
             path: tls.crt
           - key: tls.key
             path: tls.key
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
