@@ -15,7 +15,7 @@ Follow these steps to connect a mock application to Kyma.
 3. Click **Create Binding** to bind the application to the Namespace where you will later provision the APIs provided by the mock. You can use the `default` Namespace or create a new one for that purpose.
 4. In the application, click **Connect Application**.
 5. Copy the token.
-6. Access the marketing mock at `https://commerce-{NAMESPACE}.{CLUSTER_DOMAIN}.` or use the link under **{YOUR_NAMESPACE}** > **API Rules**.
+6. Access the marketing mock at `commerce-{NAMESPACE}.{CLUSTER_DOMAIN}.` or use the link under **{YOUR_NAMESPACE}** > **API Rules**.
 7. Click **Connect**.
 8. Paste the token and wait for the application to connect.
 9. Register all or some APIs. Make sure you register **SAP Commerce Cloud - Eventss** to be able to send events.
