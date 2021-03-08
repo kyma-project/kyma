@@ -9,12 +9,27 @@ spec:
   version: v1
   category: Service Management
   placement: namespace
-  viewBaseUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}"
-  preloadUrl: "https://core-ui.{{ js .Values.global.ingress.domainName }}/preload"
+  viewBaseUrl: core-ui
   navigationNodes:
-    - category: Configuration
-        label: Brokers
-        navigationPath: brokers
-        order: 3
-        viewUrl: /namespaces/:namespaceId/servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
-
+    - label: Brokers
+      navigationPath: brokers
+      order: 3
+      viewUrl: /namespaces/:namespaceId/servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+---
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: servicecatalogclusterbrokersmicrofrontend
+  labels:
+    app: servicecatalogclusterbrokersmicrofrontend
+spec:
+  displayName: Service Catalog Cluster Brokers
+  version: v1
+  category: Integration
+  placement: cluster
+  viewBaseUrl: core-ui
+  navigationNodes:
+    - label: Cluster Brokers
+      navigationPath: brokers
+      viewUrl: /servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+      order: 3
