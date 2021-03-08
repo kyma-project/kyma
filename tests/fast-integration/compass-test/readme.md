@@ -1,9 +1,17 @@
 # Compass test
 
-## Run the test
+This test covers Kyma running on k3s with Compass.
 
-Prepare the `.env` file based on the `.env.template`. Run following command to setup the environment variables in your system.
+## Usage
+
+Prepare the `.env` file based on the `.env.template`. Run the following command to set up the environment variables in your system:
 
 ```bash
 export $(xargs < .env)
+```
+
+Run the test scenario:
+
+```bash
+npm run test-compass
 ```
