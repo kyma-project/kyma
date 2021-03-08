@@ -20,7 +20,7 @@ spec:
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
         return e.response.data;
       })
-      console.log(response.data);
+      dump(response);
       return response.data;
     }
     function cloudEventHeaders(event) {
@@ -38,6 +38,9 @@ spec:
         }
       }
       return void 0;
+    }
+    function dump(obj) {
+      console.dir(response, {depth: null});
     }
     module.exports = {
       main: async function (event, context) {
