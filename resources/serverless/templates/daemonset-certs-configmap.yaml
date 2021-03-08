@@ -55,7 +55,7 @@ data:
 
     echo "Disable cert verifying for Containerd..."
     CONTAINERD_DIR="/kube-etc/containerd"
-    if [ ! -d "${CONTAINERD_DIR}" ]; then
+    if [ -d "${CONTAINERD_DIR}" ]; then
       mkdir -p "${CONTAINERD_DIR}"
     fi
 
@@ -64,8 +64,8 @@ data:
     echo "[plugins.cri.registry.configs.\"registry.${DOMAIN_NAME}\".tls]" >> "${CONTAINERD_DIR}/config.toml"
     echo "  insecure_skip_verify = true\"" >> "${CONTAINERD_DIR}/config.toml"
 
-    echo "Restart Containerd daemon..."
-    nsenter --target 1 --mount -- systemctl restart containerd
+    echo "Restart Containerd daemon async..."
+    nsenter --target 1 --mount -- systemctl restart containerd &
 
     echo "Done."
     exit 0
