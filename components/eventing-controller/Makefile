@@ -28,19 +28,11 @@ all: manager
 
 # Build controller binary
 manager: generate-local fmt-local vet-local
-	go build -o bin/controller cmd/eventing-controller/main.go
+	go build -o bin/controller main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate-local fmt-local vet-local manifests
-	go run cmd/eventing-controller/main.go
-
-# Build controller binary with Nats
-manager-nats: generate-local fmt-local vet-local
-	go build -o bin/controller cmd/eventing-controller-nats/main.go
-
-# Run against the configured Kubernetes cluster in ~/.kube/config with Nats
-run-nats: generate-local fmt-local vet-local manifests
-	go run cmd/eventing-controller-nats/main.go
+	go run ./main.go
 
 # Install CRDs into a cluster
 install: manifests
