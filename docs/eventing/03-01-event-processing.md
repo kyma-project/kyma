@@ -1,0 +1,20 @@
+---
+title: Event processing and delivery
+type: Details
+---
+The event processing and delivery flow in the Event Mesh uses NATS server to process events and send them to subscribers.
+This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the Function.
+
+![Eventing flow](./assets/event-mesh-flow.svg)
+
+1. The Eventing Controller watches the Subscription Custom Resource.
+
+2. NATS Eventing Controller creates infrastructure for the NATS server.
+
+3. The [Application Connector](https://kyma-project.io/docs/components/application-connector/) publishes events to the NATS publisher proxy.
+
+4. NATS publisher proxy sends an event to the NATS server.
+
+5. The NATS server dispatches events to the NATS Eventing Controller.
+
+6. NATS Eventing Controller dispatches an event through a Function.

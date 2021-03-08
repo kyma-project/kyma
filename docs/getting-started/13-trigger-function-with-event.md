@@ -3,7 +3,7 @@ title: Trigger the Function with an event
 type: Getting Started
 ---
 
-As the final step, you will trigger the Function with the `order.deliverysent` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
+As the final step, you will trigger the Function with the `order.created.v1` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
 
 ## Steps
 
@@ -17,34 +17,33 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Create a Trigger custom resource (CR) for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
+1. Create a Trigger custom resource (CR) for `orders-function` to subscribe the Function to the `order.created.v1` event type from Commerce mock:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-  apiVersion: eventing.knative.dev/v1alpha1
-  kind: Trigger
-  metadata:
-    name: orders-function
-    namespace: orders-service
-  spec:
-    broker: default
-    filter:
-      attributes:
-        eventtypeversion: v1
-        source: commerce-mock
-        type: order.deliverysent
-    subscriber:
-      ref:
-        apiVersion: v1
-        kind: Service
-        name: orders-function
-        namespace: orders-service
-  EOF
-  ```
+```yaml
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: Subscription
+metadata:
+  name: test-sub
+  namespace: test-ns # namespace should match sink namespace below
+spec:
+  filter:
+    filters:
+    - eventSource:
+        property: source
+        type: exact
+        value: "" # ignore
+      eventType:
+        property: type
+        type: exact
+        value: sap.kyma.custom.commerce.order.created.v1
+  protocol: "nats"
+  protocolsettings: {} # ignore
+  sink: http://test-func.test-ns.svc.cluster.local
+```
 
 - **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
 - **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the event type to which you want to subscribe the Function. In this example, it is `order.deliverysent`.
+- **spec.filter.attributes.type** points to the event type to which you want to subscribe the Function. In this example, it is `order.created`.
 
 2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
 
@@ -64,7 +63,7 @@ Follows these steps:
 
 3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
 
-4. Once the pop-up box opens, find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
+4. Once the pop-up box opens, find the `order.created.v1` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
 
 A message confirming that the event trigger was created will appear in the **Event Triggers** section in the Function's details view.
 
@@ -79,7 +78,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
 
 2. Switch to the **Remote APIs** tab, find **SAP Commerce Cloud - Events**, and select it.
 
-3. From the **Event Topics** drop-down list, select the `order.deliverysent.v1` event type. In the details of the printed event, change **orderCode** to `987654321` and select **Send Event**.
+3. From the **Event Topics** drop-down list, select the `order.created.v1` event type. In the details of the printed event, change **orderCode** to `987654321` and select **Send Event**.
 
    A message confirming that the event was sent will appear in the UI.
 
