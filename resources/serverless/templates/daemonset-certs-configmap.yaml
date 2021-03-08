@@ -54,9 +54,6 @@ data:
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
 
     echo "Certificate is self-signed, patching Containerd..."
-    HOST_CRT_PATH="/kube-etc/ssl/certs/registry.${DOMAIN_NAME}.crt"
-    cat "${CERT_FILE}" > "${HOST_CRT_PATH}"
-
     CONTAINERD_DIR="/kube-etc/containerd"
     if [ ! -d "${CONTAINERD_DIR}" ]; then
       mkdir -p "${CONTAINERD_DIR}"
@@ -65,7 +62,7 @@ data:
     echo "[plugins.cri.registry.mirrors.\"registry.${DOMAIN_NAME}\"]" >> "${CONTAINERD_DIR}/config.toml"
     echo "  endpoint = [\"https://registry.${DOMAIN_NAME}\"]" >> "${CONTAINERD_DIR}/config.toml"
     echo "[plugins.cri.registry.configs.\"registry.${DOMAIN_NAME}\".tls]" >> "${CONTAINERD_DIR}/config.toml"
-    echo "  ca_file = \"/etc/ssl/certs/registry.${DOMAIN_NAME}.crt\"" >> "${CONTAINERD_DIR}/config.toml"
+    echo "  insecure_skip_verify = true\"" >> "${CONTAINERD_DIR}/config.toml"
 
     echo "Done."
     exit 0
