@@ -47,8 +47,3 @@ spec:
       navigationPath: instances/details/:name
       showInNavigation: false
       viewUrl: /instances/details/:name
-    - category: Configuration
-      label: Brokers
-      navigationPath: brokers
-      order: 3
-      viewUrl: /namespaces/:namespaceId/servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
