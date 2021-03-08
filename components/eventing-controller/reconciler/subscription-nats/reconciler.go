@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/go-logr/logr"
-	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -43,11 +42,7 @@ const (
 )
 
 func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
-	natsClient := &handlers.Nats{
-		Log:           log,
-		Config:        cfg,
-		Subscriptions: make(map[string]*nats.Subscription),
-	}
+	natsClient := handlers.NewNats(cfg, log)
 	err := natsClient.Initialize()
 	if err != nil {
 		log.Error(err, "reconciler can't start")
