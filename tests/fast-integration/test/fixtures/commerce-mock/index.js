@@ -76,12 +76,69 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
+function eventingKnativeTrigger(source, fnName, ns) {
+  return {
+    apiVersion: "eventing.knative.dev/v1alpha1",
+    kind: "Trigger",
+    metadata: {
+      labels: { function: fnName },
+      name: `function-${fnName}`,
+      namespace: ns,
+    },
+    spec: {
+      broker: "default",
+      filter: {
+        attributes: {
+          eventtypeversion: "v1",
+          source: source,//commerce,
+          type: "order.created",
+        }
+      },
+      subscriber: {
+        ref: {
+          apiVersion: "v1",
+          kind: "Service",
+          name: fnName,
+        }
+      }
+    }
+  }
+}
+
+function eventingSubscription(eventType, sink, fnName, ns) {
+  return {
+    apiVersion: "eventing.kyma-project.io/v1alpha1",
+    kind: "Subscription",
+    metadata: {
+      name: `function-${fnName}`,
+      namespace: ns,
+    },
+    spec: {
+      filter: {
+        dialect: "beb",
+        filters: [{
+          eventSource: {
+            property: "source", type: "exact", value: "",
+          },
+          eventType: {
+            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
+          } 
+        }]
+      },
+      protocol: "BEB",
+      protocolsettings: {
+        exemptHandshake: true,
+        qos: "AT-LEAST-ONCE",
+      },
+      sink: sink/*http://lastorder.test.svc.cluster.local*/
+    }
+  }
+}
+
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
-  
-  debug("Host", host);
   
   let res = await retryPromise(
     () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
@@ -292,7 +349,7 @@ async function patchApplicationGateway(name, ns) {
 }
 
 async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
-  const mockHost = await provisionCommerceMockResources(mockNamespace, targetNamespace);
+  const mockHost = await provisionCommerceMockResources(appName, mockNamespace, targetNamespace);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
@@ -334,7 +391,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
-  const mockHost = await provisionCommerceMockResources(mockNamespace, targetNamespace);
+  const mockHost = await provisionCommerceMockResources("commerce", mockNamespace, targetNamespace);
 
   await k8sApply(applicationObjs);
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
@@ -387,10 +444,21 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   return mockHost;
 }
 
-async function provisionCommerceMockResources(mockNamespace, targetNamespace) {
+async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
+  await k8sApply([
+    eventingKnativeTrigger(
+      appName, 
+      "lastorder", 
+      targetNamespace),
+    eventingSubscription(
+      `sap.kyma.custom.${appName}.order.created.v1`,
+      "http://lastorder.test.svc.cluster.local",
+      "lastorder",
+      targetNamespace)
+  ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
