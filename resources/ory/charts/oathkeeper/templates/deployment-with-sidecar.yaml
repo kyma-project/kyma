@@ -64,9 +64,9 @@ spec:
                drop:
                - ALL
              privileged: false
-             runAsGroup: 1337
+             runAsGroup: 65534
              runAsNonRoot: true
-             runAsUser: 1337
+             runAsUser: 65534
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
