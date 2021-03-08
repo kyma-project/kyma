@@ -20,7 +20,6 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
 	"github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
@@ -28,13 +27,13 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 type Test struct {
@@ -51,7 +50,7 @@ func (test *Test) init() {
 
 	test.logger = logrus.New()
 	test.natsConfig = newEnvConfig(port, natsPort)
-	test.natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
+	test.natsServer = testingutils.StartNatsServer()
 	test.natsUrl = test.natsServer.ClientURL()
 	test.healthEndpoint = fmt.Sprintf("http://localhost:%d/healthz", port)
 }
@@ -64,8 +63,13 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
 	assert.NotNil(t, messageReceiver)
 
+	// connect to nats
+	connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+	assert.Nil(t, err)
+	assert.NotNil(t, connection)
+
 	// create a Nats sender
-	msgSender := sender.NewNatsMessageSender(ctx, test.natsUrl, test.logger)
+	msgSender := sender.NewNatsMessageSender(ctx, connection, test.logger)
 	assert.NotNil(t, msgSender)
 
 	// configure legacyTransformer
@@ -159,10 +163,14 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		assert.NotEmpty(t, subscription.Spec.Filter.Filters)
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
+		// connect to nats
+		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		assert.Nil(t, err)
+		assert.NotNil(t, connection)
+
 		// publish a message to NATS and validate it
-		connection := connectToNatsOrFail(t, test.natsUrl)
-		validator := validateNatsSubject(t, expectedNatsSubject)
-		subscribeToEventOrFail(t, connection, eventType, validator)
+		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
+		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
 
 		// run the tests for publishing cloudevents
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
@@ -200,10 +208,14 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		assert.NotEmpty(t, subscription.Spec.Filter.Filters)
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
+		// connect to nats
+		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		assert.Nil(t, err)
+		assert.NotNil(t, connection)
+
 		// publish a message to NATS and validate it
-		connection := connectToNatsOrFail(t, test.natsUrl)
-		validator := validateNatsSubject(t, expectedNatsSubject)
-		subscribeToEventOrFail(t, connection, eventType, validator)
+		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
+		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
 
 		// run the tests for publishing legacy events
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {
@@ -273,34 +285,9 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 func newEnvConfig(port, natsPort int) *env.NatsConfig {
 	return &env.NatsConfig{
 		Port:                  port,
-		NatsPublishURL:        fmt.Sprintf("http://localhost:%d", natsPort),
+		URL:                   fmt.Sprintf("http://localhost:%d", natsPort),
 		RequestTimeout:        2 * time.Second,
 		LegacyNamespace:       testingutils.MessagingNamespace,
 		LegacyEventTypePrefix: testingutils.MessagingEventTypePrefix,
-	}
-}
-
-func connectToNatsOrFail(t *testing.T, natsUrl string) *nats.Conn {
-	connection, err := nats.Connect(natsUrl, nats.RetryOnFailedConnect(true), nats.MaxReconnects(3), nats.ReconnectWait(time.Second))
-	if err != nil {
-		t.Fatalf("Failed to connect to NATS server with error: %v", err)
-	}
-	if connection.Status() != nats.CONNECTED {
-		t.Fatal("Failed to connect to NATS server")
-	}
-	return connection
-}
-
-func subscribeToEventOrFail(t *testing.T, connection *nats.Conn, eventType string, validator nats.MsgHandler) {
-	if _, err := connection.Subscribe(eventType, validator); err != nil {
-		t.Fatalf("Failed to subscribe to event with error: %v", err)
-	}
-}
-
-func validateNatsSubject(t *testing.T, subject string) nats.MsgHandler {
-	return func(msg *nats.Msg) {
-		if msg != nil && msg.Subject != subject {
-			t.Errorf("invalid NATS subject, expected [%s] but found [%s]", subject, msg.Subject)
-		}
 	}
 }
