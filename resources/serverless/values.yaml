@@ -106,8 +106,8 @@ pod:
 containers:
   daemonset:
     initContainerSecurityContext:
-      privileged: false
-      allowPrivilegeEscalation: false
+      privileged: true
+      allowPrivilegeEscalation: true
       runAsUser: 0
     containerSecurityContext:
       privileged: false

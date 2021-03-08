@@ -21,6 +21,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}-self-signed-cert
       initContainers:
         - name: inject-certs
+          hostPID: true
           securityContext:
 {{- include "tplValue" ( dict "value" .Values.containers.daemonset.initContainerSecurityContext "context" . ) | nindent 12 }}
           image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"

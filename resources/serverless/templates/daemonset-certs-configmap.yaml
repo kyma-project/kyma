@@ -53,7 +53,7 @@ data:
 
     cat "${CERT_FILE}" > "${DIR}/ca.crt"
 
-    echo "Certificate is self-signed, patching Containerd..."
+    echo "Disable cert verifying for Containerd..."
     CONTAINERD_DIR="/kube-etc/containerd"
     if [ ! -d "${CONTAINERD_DIR}" ]; then
       mkdir -p "${CONTAINERD_DIR}"
@@ -63,6 +63,9 @@ data:
     echo "  endpoint = [\"https://registry.${DOMAIN_NAME}\"]" >> "${CONTAINERD_DIR}/config.toml"
     echo "[plugins.cri.registry.configs.\"registry.${DOMAIN_NAME}\".tls]" >> "${CONTAINERD_DIR}/config.toml"
     echo "  insecure_skip_verify = true\"" >> "${CONTAINERD_DIR}/config.toml"
+
+    echo "Restart Containerd daemon..."
+    nsenter --target 1 --mount -- systemctl restart containerd
 
     echo "Done."
     exit 0
