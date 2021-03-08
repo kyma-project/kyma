@@ -349,7 +349,7 @@ async function patchApplicationGateway(name, ns) {
 }
 
 async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
-  const mockHost = await provisionCommerceMockResources(appName, mockNamespace, targetNamespace);
+  const mockHost = await provisionCommerceMockResources(`mp-${appName}`, mockNamespace, targetNamespace);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
