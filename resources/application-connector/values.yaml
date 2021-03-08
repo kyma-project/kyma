@@ -89,6 +89,11 @@ application_connectivity_certs_sync:
     repository: eu.gcr.io/kyma-project/incubator/k8s-tools
     tag: "20210208-080d17ad"
 
+toolsImage:
+  repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+  tag: "20210208-080d17ad"
+
+
 tests:
   application_connector_tests:
     labels:

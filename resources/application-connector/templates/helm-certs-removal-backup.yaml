@@ -1,0 +1,47 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job
+  namespace: kyma-integration
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+#    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-helm-certs-removal-backup
+      namespace: {{ .Values.global.namespace }}
+      annotations:
+        sidecar.istio.io/inject: “false”
+      labels:
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
+      serviceAccountName: {{ .Chart.Name }}-certs-setup-job
+      restartPolicy: OnFailure
+      containers:
+        - name: backup
+          image: "{{ .Values.toolsImage.repository }}:{{ .Values.toolsImage.tag }}"
+          securityContext:
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
+          command:
+            - /bin/bash
+            - -c
+            - |-
+{{ tpl (.Files.Get "files/certs-backup.sh" | printf "%s" | indent 14) . }}
+{{- end }}
