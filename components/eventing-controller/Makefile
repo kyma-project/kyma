@@ -1,6 +1,5 @@
 APP_NAME = eventing-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = main.go
@@ -31,49 +30,49 @@ manager: generate-local fmt-local vet-local
 	go build -o bin/controller main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate-local fmt-local vet-local manifests
+run: generate-local fmt-local vet-local manifests-local
 	go run ./main.go
 
 # Install CRDs into a cluster
-install: manifests
+install: manifests-local
 	kustomize build config/crd | ko apply -f -
 
 # Install sample CRs into a cluster
-install-samples: manifests
+install-samples: manifests-local
 	ko apply -f config/samples
 
 # Uninstall sample CRs into a cluster
-uninstall-samples: manifests
+uninstall-samples: manifests-local
 	ko delete -f config/samples
 
 # Uninstall CRDs from a cluster
-uninstall: manifests
+uninstall: manifests-local
 	kustomize build config/crd | ko delete -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests deploy-local-dry-run
+deploy-local: manifests-local deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
 # Deploy eventing-controller-nats in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-eventing-controller-nats-local: manifests deploy-eventing-controller-nats-local-dry-run
+deploy-eventing-controller-nats-local: manifests-local deploy-eventing-controller-nats-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/nats | ko apply -f -
 
-undeploy-local: manifests
+undeploy-local: manifests-local
 	kustomize build config/default | kubectl delete -f -
 
-undeploy-eventing-controller-nats-local: manifests
+undeploy-eventing-controller-nats-local: manifests-local
 	kustomize build config/nats | kubectl delete -f -
 
 # Dry run for deploying controller for local development
-deploy-local-dry-run: manifests
+deploy-local-dry-run: manifests-local
 	cd config/manager && kustomize edit set image controller=${DEV_IMG_DEFAULT} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
 
 # Dry run for deploying eventing-controller-nats for local development
-deploy-eventing-controller-nats-local-dry-run: manifests
+deploy-eventing-controller-nats-local-dry-run: manifests-local
 	cd config/manager-nats && kustomize edit set image controller=${DEV_IMG_NATS} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/nats
@@ -86,27 +85,31 @@ manifests-local: controller-gen-local
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-verify:: mod-verify
+# verify:: mod-verify
 
-resolve-local:
-	GO111MODULE=on go mod vendor -v
+# resolve-local:
+# 	@echo "dep-dependent path"
+# 	GO111MODULE=on go mod vendor -v
 
-ensure-local:
-	@echo "Go modules present in component - omitting."
+# ensure-local:
+# 	@echo "Go modules present in component - omitting ensure."
 
-dep-status:
-	@echo "Go modules present in component - omitting."
+# dep-status:
+# 	@echo "Go modules present in component - omitting dep."
 
-dep-status-local:
-	@echo "Go modules present in component - omitting."
+# dep-status-local:
+# 	@echo "Go modules present in component - omitting dep-status."
 
-mod-verify-local:
-	GO111MODULE=on go mod verify
+# mod-verify-local:
+# 	@echo "dep-dependent path"
+# 	GO111MODULE=on go mod verify
 
 test-local: generate-local fmt-local vet-local
+	mkdir -p /tmp/artifacts
 	go test ./... -coverprofile cover.out
 
-release: resolve verify build-image push-image
+release:
+	$(MAKE) gomod-release-local
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
@@ -131,13 +134,6 @@ else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-$(eval $(call buildpack-cp-ro,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,test))
-$(eval $(call buildpack-mount,controller-gen))
-$(eval $(call buildpack-mount,generate))
-$(eval $(call buildpack-mount,manifests))
-
 # produce goals for each cmd program ("bin1 bin2 ...")
 cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
 # produce goals to build images for each cmd program ("bin1.image bin2.image ...")
@@ -146,8 +142,6 @@ cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
@@ -173,7 +167,7 @@ push-image: $(cmds_images_push) ;
 #   make eventing-controller
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
-$(cmds): %: resolve-local
+$(cmds): %: gomod-vendor-local
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
