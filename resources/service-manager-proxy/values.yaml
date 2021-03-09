@@ -1,10 +1,8 @@
 config:
-  # brokerCredentials allows to disable credentials rotation
-  brokerCredentials:
-    enabled: false
   app:
     legacy_url: null
     url: null
+    broker_credentials_enabled: true
   authn:
     client_id: null
     password: admin
@@ -41,7 +39,7 @@ image:
   pullPolicy: IfNotPresent
   pullsecret: null
   repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
-  tag: v0.8.15
+  tag: v0.8.16
 replicaCount: 1
 securityContext: { }
 service:

@@ -47,8 +47,6 @@ spec:
           mountPath: {{ .Values.file.location }}
           readOnly: true
         env:
-        - name: BROKER_CREDENTIALS_ENABLED
-          value: {{ .Values.config.brokerCredentials.enabled }}
         - name: K8S_SECRET_NAME
           value: {{ template "service-broker-proxy.fullname" . }}-regsecret
         - name: K8S_SECRET_NAMESPACE
@@ -63,6 +61,8 @@ spec:
             secretKeyRef:
               name: {{ template "service-broker-proxy.fullname" . }}-regsecret
               key: password
+        - name: APP_BROKER_CREDENTIALS_ENABLED
+          value: '{{ .Values.config.app.broker_credentials_enabled }}'
         - name: APP_URL
           {{- if .Values.config.app.url }}
           value: {{ .Values.config.app.url }}
