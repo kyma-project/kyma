@@ -31,5 +31,5 @@ spec:
   navigationNodes:
     - label: Cluster Brokers
       navigationPath: brokers
-      viewUrl: /servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+      viewUrl: /clusterservicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
       order: 3
