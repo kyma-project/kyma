@@ -2,9 +2,13 @@ package process
 
 import (
 	"fmt"
+	"strings"
+
+	knativeapis "knative.dev/pkg/apis"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	kymaeventingapp "github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	eventingv1alpha1 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
@@ -13,9 +17,10 @@ import (
 var _ Step = &ConvertTriggersToKymaSubscriptions{}
 
 const (
-	eventVersionKey = "eventtypeversion"
-	eventSourceKey  = "source"
-	eventTypeKey    = "type"
+	eventVersionKey    = "eventtypeversion"
+	eventSourceKey     = "source"
+	eventTypeKey       = "type"
+	clusterLocalSuffix = "svc.cluster.local"
 )
 
 type ConvertTriggersToKymaSubscriptions struct {
@@ -37,6 +42,10 @@ func (s ConvertTriggersToKymaSubscriptions) Do() error {
 
 		_, err := s.process.Clients.KymaSubscription.Create(sub)
 		if err != nil {
+			if k8serrors.IsAlreadyExists(err) {
+				// Nothing to do!
+				continue
+			}
 			return errors.Wrapf(err, "failed to create Kyma subscription %s/%s", sub.Namespace, sub.Name)
 		}
 		s.process.Logger.Infof("Step: %s, converted trigger: %s/%s to subscription", s.ToString(), trigger.Namespace, trigger.Name)
@@ -47,7 +56,7 @@ func (s ConvertTriggersToKymaSubscriptions) Do() error {
 func (s ConvertTriggersToKymaSubscriptions) NewSubscription(trigger *eventingv1alpha1.Trigger) *kymaeventingv1alpha1.Subscription {
 	var bebFilters *kymaeventingv1alpha1.BebFilters
 	protocolSettings := new(kymaeventingv1alpha1.ProtocolSettings)
-	eventName, cleanAppName, sink := "", "", ""
+	sink := ""
 
 	var attributes eventingv1alpha1.TriggerFilterAttributes
 	var triggerEventTypeVersion, triggerEventSource, triggerEventType string
@@ -57,17 +66,7 @@ func (s ConvertTriggersToKymaSubscriptions) NewSubscription(trigger *eventingv1a
 		triggerEventSource = attributes[eventSourceKey]
 		triggerEventType = attributes[eventTypeKey]
 	}
-	for _, app := range s.process.State.Applications.Items {
-		if triggerEventSource == app.Name {
-			cleanAppName = kymaeventingapp.CleanName(&app)
-			eventName = build(s.process.EventTypePrefix, cleanAppName, triggerEventType, triggerEventTypeVersion)
-			break
-		}
-	}
-	if eventName == "" {
-		// when app name matches trigger source name and is cleaned
-		eventName = build(s.process.EventTypePrefix, triggerEventSource, triggerEventType, triggerEventTypeVersion)
-	}
+	eventName := build(s.process.EventTypePrefix, triggerEventSource, triggerEventType, triggerEventTypeVersion)
 
 	if trigger.Spec.Filter != nil {
 		eventSource := &kymaeventingv1alpha1.Filter{
@@ -93,7 +92,8 @@ func (s ConvertTriggersToKymaSubscriptions) NewSubscription(trigger *eventingv1a
 	}
 
 	if trigger.Spec.Subscriber.URI != nil {
-		sink = trigger.Spec.Subscriber.URI.String()
+
+		sink = rewriteSink(trigger.Spec.Subscriber.URI, trigger.Namespace)
 	}
 	subscription := &kymaeventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -122,4 +122,33 @@ func (s ConvertTriggersToKymaSubscriptions) ToString() string {
 
 func build(prefix, applicationName, event, version string) string {
 	return fmt.Sprintf("%s.%s.%s.%s", prefix, applicationName, event, version)
+}
+
+func rewriteSink(sinkURL *knativeapis.URL, namespace string) string {
+	finalURL := *sinkURL
+	if sinkURL.Scheme == "" {
+		return sinkURL.String()
+	}
+
+	baseURLWithoutPort := sinkURL.Host
+	portFromBaseURL := ""
+	portFromBaseURLSegments := strings.Split(sinkURL.Host, ":")
+	baseURLSegments := strings.Split(sinkURL.Host, ".")
+	if len(portFromBaseURLSegments) == 2 {
+		baseURLWithoutPort = portFromBaseURLSegments[0]
+		portFromBaseURL = portFromBaseURLSegments[1]
+		baseURLSegments = strings.Split(baseURLWithoutPort, ".")
+	}
+
+	if len(baseURLSegments) == 2 {
+		ns := baseURLSegments[1]
+		if ns == namespace {
+			finalURL.Host = fmt.Sprintf("%s.%s", baseURLWithoutPort, clusterLocalSuffix)
+			if portFromBaseURL != "" {
+				finalURL.Host = fmt.Sprintf("%s:%s", finalURL.Host, portFromBaseURL)
+			}
+		}
+	}
+
+	return finalURL.String()
 }

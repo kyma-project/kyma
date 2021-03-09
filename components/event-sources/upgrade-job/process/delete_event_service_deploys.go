@@ -13,7 +13,7 @@ type DeleteEventServiceDeployments struct {
 
 func NewDeleteEventServiceDeployments(p *Process) DeleteEventServiceDeployments {
 	return DeleteEventServiceDeployments{
-		name:    "Delete Event ServiceDeployments",
+		name:    "Delete EventService Deployments",
 		process: p,
 	}
 }

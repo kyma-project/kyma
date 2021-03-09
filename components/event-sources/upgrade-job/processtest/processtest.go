@@ -310,6 +310,7 @@ func NewNamespace(name string) *corev1.Namespace {
 			Name: name,
 			Labels: map[string]string{
 				"knative-eventing-injection": "enabled",
+				"foo":                        "should-not-be-removed",
 			},
 		},
 	}

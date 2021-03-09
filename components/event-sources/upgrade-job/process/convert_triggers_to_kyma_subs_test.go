@@ -3,6 +3,8 @@ package process
 import (
 	"testing"
 
+	knativeapis "knative.dev/pkg/apis"
+
 	"github.com/kyma-project/kyma/components/event-sources/upgrade-job/processtest"
 
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -122,6 +124,94 @@ func TestNewSubscription(t *testing.T) {
 			gotKymaSub := convertStep.NewSubscription(&tc.inputTrigger)
 			g.Expect(gotKymaSub.ObjectMeta).To(gomega.Equal(tc.inputTrigger.ObjectMeta))
 			g.Expect(gotKymaSub.Spec).To(gomega.Equal(tc.expectedSub.Spec))
+		})
+	}
+}
+
+func TestRewriteSink(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	testCases := []struct {
+		name           string
+		inputSink      *knativeapis.URL
+		inputNamespace string
+		expectedSink   string
+	}{
+		{
+			name: "with protocol and cluster-local sink",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://test.ns.svc.cluster.local:8080/endpoint")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "ns",
+			expectedSink:   "http://test.ns.svc.cluster.local:8080/endpoint",
+		},
+		{
+			name: "with protocol and without cluster-local sink",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://test.ns")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "ns",
+			expectedSink:   "http://test.ns.svc.cluster.local",
+		},
+		{
+			name: "with protocol, without cluster-local sink and with ns mismatch",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://test.ns")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "different",
+			expectedSink:   "http://test.ns",
+		},
+		{
+			name: "with protocol, without cluster-local sink and port 8080",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://test.ns:8080/endpoint")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "ns",
+			expectedSink:   "http://test.ns.svc.cluster.local:8080/endpoint",
+		},
+		{
+			name: "with protocol, port=8080 and without cluster-local sink but with ns mismatch",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://test.ns:8080/endpoint")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "different",
+			expectedSink:   "http://test.ns:8080/endpoint",
+		},
+		{
+			name: "without protocol and cluster-local sink",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("test.ns")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "ns",
+			expectedSink:   "test.ns",
+		},
+		{
+			name: "with something external",
+			inputSink: func() *knativeapis.URL {
+				url, err := knativeapis.ParseURL("http://function.com/execute")
+				g.Expect(err).Should(gomega.BeNil())
+				return url
+			}(),
+			inputNamespace: "ns",
+			expectedSink:   "http://function.com/execute",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotSink := rewriteSink(tc.inputSink, tc.inputNamespace)
+			g.Expect(gotSink).To(gomega.Equal(tc.expectedSink))
 		})
 	}
 }

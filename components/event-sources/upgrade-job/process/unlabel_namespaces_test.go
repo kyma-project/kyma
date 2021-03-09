@@ -30,16 +30,18 @@ func TestUnlabelNamespaces(t *testing.T) {
 			saveCurrentState,
 			unLabelNs,
 		}
+		expectedLabels := map[string]string{
+			"foo": "should-not-be-removed",
+		}
 		err := p.Execute()
 		g.Expect(err).Should(gomega.BeNil())
 		gotNamespaces, err := p.Clients.Namespace.List()
 		g.Expect(err).Should(gomega.BeNil())
 		g.Expect(len(gotNamespaces.Items)).To(gomega.Equal(len(e2eSetup.namespaces.Items)))
-		// Check for event sources for each app
 		for _, expectedNs := range e2eSetup.namespaces.Items {
 			for _, gotNs := range gotNamespaces.Items {
 				if gotNs.Name == expectedNs.Name {
-					g.Expect(gotNs.Namespace).To(gomega.Equal(expectedNs.Namespace))
+					g.Expect(gotNs.Labels).To(gomega.Equal(expectedLabels))
 					g.Expect(gotNs.Labels[knativeEventingLabelKey]).To(gomega.BeEmpty())
 				}
 			}
