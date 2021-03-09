@@ -1,6 +1,5 @@
 APP_NAME = event-sources
 APP_PATH = components/event-sources
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
 SCRIPTS_DIR = ../../common/makefiles
 
 # COMPONENT_DIR is a local path to component
@@ -8,7 +7,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # Override to use go modules
 release:
-	$(MAKE) gomod-release
+	$(MAKE) gomod-release-local
 
 # This target patch opencensus lib (add required method). This patch is required by knative.dev/eventing
 gomod-deps-local:: vendor/go.opencensus.io/trace/trace.go.patched
@@ -33,8 +32,8 @@ cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+#MOUNT_TARGETS = $(cmds)
+#$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
