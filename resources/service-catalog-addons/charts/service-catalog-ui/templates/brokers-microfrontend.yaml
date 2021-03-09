@@ -1,0 +1,35 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: servicecatalogbrokersmicrofrontend
+  labels:
+    app: servicecatalogbrokersmicrofrontend
+spec:
+  displayName: Service Catalog Brokers
+  version: v1
+  category: Service Management
+  placement: namespace
+  viewBaseUrl: core-ui
+  navigationNodes:
+    - label: Brokers
+      navigationPath: brokers
+      order: 3
+      viewUrl: /namespaces/:namespaceId/servicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+---
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: servicecatalogclusterbrokersmicrofrontend
+  labels:
+    app: servicecatalogclusterbrokersmicrofrontend
+spec:
+  displayName: Service Catalog Cluster Brokers
+  version: v1
+  category: Integration
+  placement: cluster
+  viewBaseUrl: core-ui
+  navigationNodes:
+    - label: Cluster Brokers
+      navigationPath: brokers
+      viewUrl: /clusterservicebrokers?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+      order: 3
