@@ -85,25 +85,6 @@ manifests-local: controller-gen-local
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-# verify:: mod-verify
-
-# resolve-local:
-# 	@echo "dep-dependent path"
-# 	GO111MODULE=on go mod vendor -v
-
-# ensure-local:
-# 	@echo "Go modules present in component - omitting ensure."
-
-# dep-status:
-# 	@echo "Go modules present in component - omitting dep."
-
-# dep-status-local:
-# 	@echo "Go modules present in component - omitting dep-status."
-
-# mod-verify-local:
-# 	@echo "dep-dependent path"
-# 	GO111MODULE=on go mod verify
-
 test-local: generate-local fmt-local vet-local
 	mkdir -p /tmp/artifacts
 	go test ./... -coverprofile cover.out
@@ -175,7 +156,7 @@ $(cmds): %: gomod-vendor-local
 
 # Example:
 #   make eventing-controller.image
-$(cmds_images): %.image: build-local pull-licenses
+$(cmds_images): %.image: build-local pull-licenses-local
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
