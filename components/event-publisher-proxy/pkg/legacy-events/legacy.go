@@ -105,16 +105,16 @@ func (t Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, req
 	}
 
 	// clean the application name form non-alphanumeric characters
-	applicationName := ParseApplicationNameFromPath(request.URL.Path)
-	app, err := t.applicationLister.Get(applicationName)
-	if err != nil {
-		response := ErrorResponse(http.StatusInternalServerError, err)
-		writeJSONResponse(writer, response)
-		return nil
+	appName := ParseApplicationNameFromPath(request.URL.Path)
+	if appObj, err := t.applicationLister.Get(appName); err == nil {
+		// handle existing applications
+		appName = application.GetCleanTypeOrName(appObj)
+	} else {
+		// handle non-existing applications
+		appName = application.GetCleanName(appName)
 	}
-	applicationName = application.CleanName(app)
 
-	event, err := t.convertPublishRequestToCloudEvent(applicationName, parameters)
+	event, err := t.convertPublishRequestToCloudEvent(appName, parameters)
 	if err != nil {
 		response := ErrorResponse(http.StatusInternalServerError, err)
 		writeJSONResponse(writer, response)

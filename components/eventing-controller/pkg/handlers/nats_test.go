@@ -123,7 +123,7 @@ func TestSubscription(t *testing.T) {
 	// Prepare event-type cleaner
 	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
