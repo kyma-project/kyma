@@ -181,7 +181,7 @@ async function sendEventAndCheckResponse() {
           throw convertAxiosError(e, "Cannot send event, the response from event gateway");
         });
 
-      await sleep(500);
+      await sleep(2000);
 
       return axios
         .get(`https://lastorder.${host}`, { timeout: 5000 })
@@ -360,7 +360,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     5,
     2000
   );
-  await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
+  await waitForServiceInstance("commerce", targetNamespace, 600 * 1000);
 
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
