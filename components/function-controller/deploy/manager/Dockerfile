@@ -17,7 +17,7 @@ RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mv ./manager /app/manager
 
 # get latest CA certs
-FROM eu.gcr.io/kyma-project/external/alpine:3.13.2
+FROM eu.gcr.io/kyma-project/external/alpine:3.13.2 as certs
 RUN apk --update add ca-certificates
 
 # result container
