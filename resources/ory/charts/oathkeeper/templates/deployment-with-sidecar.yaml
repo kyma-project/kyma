@@ -59,14 +59,14 @@ spec:
               touch /etc/rules/access-rules.json
               chmod 666 /etc/rules/access-rules.json
           securityContext:
-             allowPrivilegeEscalation: false
-             capabilities:
-               drop:
-               - ALL
-             privileged: false
-             runAsGroup: 65534
-             runAsNonRoot: true
-             runAsUser: 65534
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -109,14 +109,14 @@ spec:
             periodSeconds: 10
             failureThreshold: 10
           securityContext:
-             allowPrivilegeEscalation: false
-             capabilities:
-               drop:
-               - ALL
-             privileged: false
-             runAsGroup: 101
-             runAsNonRoot: true
-             runAsUser: 100
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 101
+            runAsNonRoot: true
+            runAsUser: 100
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
         - name: {{ .Chart.Name }}-maester
@@ -137,14 +137,14 @@ spec:
             - containerPort: 8080
               name: metrics
           securityContext:
-             allowPrivilegeEscalation: false
-             capabilities:
-               drop:
-               - ALL
-             privileged: false
-             runAsGroup: 1000
-             runAsNonRoot: true
-             runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules

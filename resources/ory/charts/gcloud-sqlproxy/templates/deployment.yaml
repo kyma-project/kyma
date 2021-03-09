@@ -73,6 +73,15 @@ spec:
           successThreshold: {{ .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
         volumeMounts:
         {{ if $hasCredentials -}}
         - name: cloudsql-oauth-credentials
