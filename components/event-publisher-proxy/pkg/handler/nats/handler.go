@@ -3,6 +3,7 @@ package nats
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/cloudevents/sdk-go/v2/binding"
@@ -106,7 +107,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		return
 	}
 	for k, v := range request.Header {
-		event.SetExtension(k, v[0])
+		event.SetExtension(strings.ToLower(k), v[0])
 	}
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
@@ -131,7 +132,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 	for k, v := range request.Header {
-		event.SetExtension(k, v[0])
+		event.SetExtension(strings.ToLower(k), v[0])
 	}
 
 	if err := event.Validate(); err != nil {
