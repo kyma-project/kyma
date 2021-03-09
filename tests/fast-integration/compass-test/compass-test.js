@@ -29,12 +29,13 @@ describe("Kyma with Compass test", async function() {
   debug(`Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
 
   const testNS = "compass-test";
+  const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
 
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
   it("Install Kyma", async function() {
-    await installer.installKyma({withCompass: true});
+    await installer.installKyma({withCompass: true, skipComponents});
   });
 
   it("Register Kyma instance in Compass", async function() {
