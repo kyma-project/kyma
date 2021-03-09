@@ -110,10 +110,10 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							},
 						},
 						{
-							Name: "npm-registry-config",
+							Name: "registry-config",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.NpmRegistryConfigSecretName,
+									SecretName: r.config.PackageRegistryConfigSecretName,
 									Optional:   &isTrue,
 								},
 							},
@@ -132,7 +132,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
 								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-								{Name: "npm-registry-config", ReadOnly: true, MountPath: path.Join(baseDir, ".npmrc"), SubPath: ".npmrc"},
+								{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/.npmrc"), SubPath: ".npmrc"},
+								{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/pip.conf"), SubPath: "pip.conf"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{

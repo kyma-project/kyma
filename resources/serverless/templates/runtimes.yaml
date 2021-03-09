@@ -12,10 +12,13 @@ data:
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
 
-    COPY /src/package.json /src/.npmrc  $KUBELESS_INSTALL_VOLUME/
+    COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
+    COPY /src/registry-config/* $KUBELESS_INSTALL_VOLUME/
     RUN /kubeless-npm-install.sh
     COPY /src $KUBELESS_INSTALL_VOLUME
+
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
+    RUN rm -rf $KUBELESS_INSTALL_VOLUME/registry-config
 
     USER 1000
 ---
@@ -32,10 +35,14 @@ data:
     FROM {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
-    
+
     COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
+    COPY /src/registry-config/* $KUBELESS_INSTALL_VOLUME/
     RUN /kubeless-npm-install.sh
     COPY /src $KUBELESS_INSTALL_VOLUME
+
+    RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
+    RUN rm -rf $KUBELESS_INSTALL_VOLUME/registry-config
 
     USER 1000
 ---
