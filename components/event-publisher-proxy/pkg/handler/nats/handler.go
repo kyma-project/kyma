@@ -105,6 +105,9 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		h.Logger.Debug("failed to transform legacy event to CE, event is nil")
 		return
 	}
+	for k, v := range request.Header {
+		event.SetExtension(k, v[0])
+	}
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 	h.receive(ctx, event)
@@ -126,6 +129,9 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		h.Logger.Warnf("Failed to extract event from request with error: %s", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
+	}
+	for k, v := range request.Header {
+		event.SetExtension(k, v[0])
 	}
 
 	if err := event.Validate(); err != nil {
