@@ -355,11 +355,11 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 
   await k8sApply([
     eventingKnativeTrigger(
-      appName, 
+      `mp-${appName}`, 
       "lastorder", 
       targetNamespace),
     eventingSubscription(
-      `sap.kyma.custom.${appName}.order.created.v1`,
+      `sap.kyma.custom.mp-${appName}.order.created.v1`,
       "http://lastorder.test.svc.cluster.local",
       "lastorder",
       targetNamespace)
@@ -411,11 +411,11 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
   await k8sApply([
     eventingKnativeTrigger(
-      appName, 
+      "commerce", 
       "lastorder", 
       targetNamespace),
     eventingSubscription(
-      `sap.kyma.custom.${appName}.order.created.v1`,
+      `sap.kyma.custom.commerce.order.created.v1`,
       "http://lastorder.test.svc.cluster.local",
       "lastorder",
       targetNamespace)
