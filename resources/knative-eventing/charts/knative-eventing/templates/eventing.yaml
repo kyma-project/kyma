@@ -674,7 +674,6 @@ rules:
   - policy
   resourceNames:
   - {{ .Release.Name }}
-  - 001-kyma-unprivileged
   resources:
   - podsecuritypolicies
   verbs:
@@ -767,7 +766,6 @@ rules:
   - use
   resourceNames:
   - {{ .Release.Name }}
-  - 0001-kyma-unprivileged
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -998,6 +996,8 @@ spec:
           name: config-logging
       serviceAccountName: eventing-controller
       securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false
         runAsUser: 1000
       volumes:
       - configMap:
