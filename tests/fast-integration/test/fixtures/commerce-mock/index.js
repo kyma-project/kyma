@@ -344,6 +344,10 @@ async function patchApplicationGateway(name, ns) {
   expect(
     patchedDeployment.body.spec.template.spec.containers[0].args[6]
   ).to.equal("--skipVerify=true");
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
   
   return patchedDeployment;
 }
@@ -352,6 +356,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   const mockHost = await provisionCommerceMockResources(`mp-${appName}`, mockNamespace, targetNamespace);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await waitForDeployment(`mp-${appName}`, "kyma-integration");
 
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   
@@ -361,6 +366,8 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     2000
   );
   await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
+
+  await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
 
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
@@ -384,8 +391,6 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   };
   await k8sApply([serviceBindingUsage], targetNamespace);
   await waitForServiceBindingUsage("commerce-lastorder-sbu", targetNamespace);
-
-  await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
 
   return mockHost;
 }
