@@ -385,8 +385,6 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await k8sApply([serviceBindingUsage], targetNamespace);
   await waitForServiceBindingUsage("commerce-lastorder-sbu", targetNamespace);
 
-  await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
-
   return mockHost;
 }
 
