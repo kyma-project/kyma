@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -166,7 +167,12 @@ func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) e
 func (n *Nats) getCallback(sink string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		ce, err := convertMsgToCE(msg)
-		n.log.Info("Test: " + ce.Context.String())
+		n.log.Info("Context: " + ce.Context.String())
+		b := new(bytes.Buffer)
+		for key, value := range ce.Extensions() {
+			fmt.Fprintf(b, "%s=\"%s\"\n", key, value)
+		}
+		n.log.Info("Extensions: " + b.String())
 		if err != nil {
 			n.log.Error(err, "failed to convert Nats message to CE")
 			return
