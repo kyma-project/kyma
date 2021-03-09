@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
@@ -96,7 +98,7 @@ func (t Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, req
 		writeJSONResponse(writer, resp)
 		return nil
 	}
-
+	log.Errorf("Transforming event %s", string(parameters.PublishrequestV1.EventType))
 	// validate the PublishRequestV1 for missing / incoherent values
 	checkResp := t.checkParameters(parameters)
 	if checkResp.Error != nil {

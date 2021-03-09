@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -32,7 +34,9 @@ func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *lo
 
 // Send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
 func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (int, error) {
-	h.logger.Infof("Sending event to NATS, id:[%s]", event.ID())
+
+	log.Infof("Sending event to NATS, id:[%s], context[%s]", event.ID(), event.Context.String())
+
 	// The same Nats subject used by Nats subscription
 	subject := event.Type()
 
