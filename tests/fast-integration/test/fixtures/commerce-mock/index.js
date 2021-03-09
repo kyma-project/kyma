@@ -353,6 +353,18 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
+  await k8sApply([
+    eventingKnativeTrigger(
+      appName, 
+      "lastorder", 
+      targetNamespace),
+    eventingSubscription(
+      `sap.kyma.custom.${appName}.order.created.v1`,
+      "http://lastorder.test.svc.cluster.local",
+      "lastorder",
+      targetNamespace)
+  ]);
+
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   
   await retryPromise(
@@ -396,6 +408,18 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await k8sApply(applicationObjs);
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+
+  await k8sApply([
+    eventingKnativeTrigger(
+      appName, 
+      "lastorder", 
+      targetNamespace),
+    eventingSubscription(
+      `sap.kyma.custom.${appName}.order.created.v1`,
+      "http://lastorder.test.svc.cluster.local",
+      "lastorder",
+      targetNamespace)
+  ]);
 
   const webServicesSC = await waitForServiceClass(
     "webservices",
@@ -448,17 +472,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
-  await k8sApply([
-    eventingKnativeTrigger(
-      appName, 
-      "lastorder", 
-      targetNamespace),
-    eventingSubscription(
-      `sap.kyma.custom.${appName}.order.created.v1`,
-      "http://lastorder.test.svc.cluster.local",
-      "lastorder",
-      targetNamespace)
-  ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
