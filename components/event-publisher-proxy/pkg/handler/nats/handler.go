@@ -107,7 +107,10 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		return
 	}
 	for k, v := range request.Header {
-		event.SetExtension(strings.ToLower(k), v[0])
+		h := strings.ToLower(k)
+		if h == "x-b3-traceid" {
+			event.SetExtension(h, v[0])
+		}
 	}
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
@@ -132,7 +135,10 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 	for k, v := range request.Header {
-		event.SetExtension(strings.ToLower(k), v[0])
+		h := strings.ToLower(k)
+		if h == "x-b3-traceid" {
+			event.SetExtension(h, v[0])
+		}
 	}
 
 	if err := event.Validate(); err != nil {
