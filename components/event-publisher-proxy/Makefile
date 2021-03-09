@@ -22,8 +22,8 @@ cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+# MOUNT_TARGETS = $(cmds)
+# $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
@@ -57,7 +57,7 @@ $(cmds): %: resolve-local
 
 # Example:
 #   make event-publisher-proxy.image
-$(cmds_images): %.image: build pull-licenses
+$(cmds_images): %.image: build-local pull-licenses
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
