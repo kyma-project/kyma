@@ -14,7 +14,7 @@ spec:
     - label: Catalog
       navigationPath: service-catalog
       order: 1
-      viewUrl: /namespaces/:namespaceId/serviceclasses?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+      viewUrl: /catalog
     - label: Service Details
       navigationPath: service-catalog/details
       showInNavigation: false
@@ -38,7 +38,7 @@ spec:
     - label: Instances
       navigationPath: instances
       order: 2
-      viewUrl: /namespaces/:namespaceId/serviceinstances?hasDetailsView=false&resourceApiPath=/apis/servicecatalog.k8s.io/v1beta1
+      viewUrl: /instances
     - label: Instance Details
       navigationPath: instances/details
       showInNavigation: false
