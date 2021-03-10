@@ -12,12 +12,12 @@ import (
 )
 
 type ProtocolZipkin struct {
-	protocol cehttp.Protocol
+	protocol *cehttp.Protocol
 }
 
 func NewProtocolZipkin(proto *cehttp.Protocol) ProtocolZipkin {
 	p := &ProtocolZipkin{
-		protocol: *proto,
+		protocol: proto,
 	}
 	return *p
 }
