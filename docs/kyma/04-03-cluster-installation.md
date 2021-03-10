@@ -9,6 +9,8 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Prerequisites
 
+>**CAUTION:** Kubernetes is [deprecating Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime after v1.20 and [we are working on compatibility](https://github.com/kyma-project/kyma/issues/10842) all of our components with the `containerD`. Be sure that the kyma is not installed on a cluster with the `containerD` and the `self-sign certificate` at the same time. If yes, upgrade the cluster to use the `docker` instead of the `containerD` or [generate the tls certificate](https://kyma-project.io/docs/#installation-install-kyma-with-your-own-domain-generate-the-tls-certificate).
+
 <div tabs name="prerequisites" group="cluster-installation">
   <details>
   <summary label="GKE">
