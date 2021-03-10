@@ -999,8 +999,6 @@ spec:
           name: config-logging
       serviceAccountName: eventing-controller
       securityContext:
-        allowPrivilegeEscalation: false
-        privileged: false
         runAsUser: 1000
       volumes:
       - configMap:
@@ -1068,8 +1066,6 @@ spec:
           name: config-logging
       serviceAccountName: eventing-source-controller
       securityContext:
-        allowPrivilegeEscalation: false
-        privileged: false
         runAsUser: 1000
       volumes:
       - configMap:
@@ -1203,8 +1199,6 @@ spec:
         terminationMessagePolicy: FallbackToLogsOnError
       serviceAccountName: eventing-webhook
       securityContext:
-        allowPrivilegeEscalation: false
-        privileged: false
         runAsUser: 1000
 
 ---

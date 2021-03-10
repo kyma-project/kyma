@@ -16,9 +16,6 @@ spec:
       labels:
 {{ include "knative-kafka.labels" . | indent 8 }}
     spec:
-      securityContext:
-        allowPrivilegeEscalation: false
-        privileged: false
       serviceAccountName: {{ .Release.Name }}-channel-controller
       containers:
       - name: channel-controller
