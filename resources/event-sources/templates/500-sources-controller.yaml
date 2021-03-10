@@ -21,6 +21,9 @@ spec:
       containers:
       - name: controller
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.controllerManager.dir }}{{ .Values.global.controllerManager.image }}:{{ .Values.global.controllerManager.version }}"
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
         resources:
           requests:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
