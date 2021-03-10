@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
 	github.com/cloudevents/sdk-go/v2 v2.3.1
-	github.com/go-logr/logr v0.3.0
+	github.com/go-logr/logr v0.3.0 // indirect
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/kelseyhightower/envconfig v1.4.0

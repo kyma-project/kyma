@@ -90,7 +90,10 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
+
+	protocolZipkin := NewProtocolZipkin(protocol)
+
+	return cev2.NewClientObserved(protocolZipkin, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
 }
 
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {

@@ -109,7 +109,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	for k, v := range request.Header {
 		h := strings.ToLower(k)
 		if strings.HasPrefix(h, "x-b3-") {
-			event.SetExtension(strings.TrimPrefix(h, "x-b3-"), v[0])
+			event.SetExtension("xb3"+strings.TrimPrefix(h, "x-b3-"), v[0])
 		}
 	}
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
@@ -137,7 +137,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	for k, v := range request.Header {
 		h := strings.ToLower(k)
 		if strings.HasPrefix(h, "x-b3-") {
-			event.SetExtension(strings.TrimPrefix(h, "x-b3-"), v[0])
+			event.SetExtension("xb3"+strings.TrimPrefix(h, "x-b3-"), v[0])
 		}
 	}
 
