@@ -72,3 +72,11 @@ tests:
   central: *central
   image:
     pullPolicy: IfNotPresent
+
+
+jobs:
+  image:
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210208-080d17ad"
+  installer:
+    namespace: kyma-installer

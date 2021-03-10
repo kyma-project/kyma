@@ -52,6 +52,7 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 		logrus.Warningf("Certificate or key is invalid: %s", err.Error())
 	}
 
+	logrus.Infoln("Checking if backup certificate and key provided...")
 	namespacedName := csh.options.connectorCertificateSecret
 	namespacedName.Name += "-backup"
 	provided, err := csh.backupCertAndKeyProvided(namespacedName)
@@ -60,14 +61,15 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	}
 
 	if provided {
-		secretData, err := csh.secretRepository.Get(namespacedName)
+		backupSecret, err := csh.secretRepository.Get(namespacedName)
 		if err != nil && !k8serrors.IsNotFound(err) {
 			return errors.Wrap(err, "Failed to get backup data")
 		}
 
 		caKey, caCert, err := csh.validateProvidedCertAndKeyBytes(
-			secretData[connectorKeySecretKey],
-			secretData[connectorCertSecretKey])
+			backupSecret[connectorKeySecretKey],
+			backupSecret[connectorCertSecretKey])
+
 		if err == nil {
 			logrus.Infoln("Valid backup certificate and key provided. Skipping generation.")
 			return csh.populateSecrets(caKey, caCert)
@@ -140,10 +142,10 @@ func (csh *certSetupHandler) validateProvidedCertAndKey(caKeyInput string, caCer
 		return nil, nil, errors.New(fmt.Sprintf("Failed to decode base64 certificate: %s", err.Error()))
 	}
 
-	return csh.validateProvidedCertAndKeyBytes(caCert, caKey)
+	return csh.validateProvidedCertAndKeyBytes(caKey, caCert)
 }
 
-func (csh *certSetupHandler) validateProvidedCertAndKeyBytes(caCert []byte, caKey []byte) ([]byte, []byte, error) {
+func (csh *certSetupHandler) validateProvidedCertAndKeyBytes(caKey []byte, caCert []byte) ([]byte, []byte, error) {
 	_, err := tls.X509KeyPair(caCert, caKey)
 	if err != nil {
 		return nil, nil, errors.New(fmt.Sprintf("Failed to parse key and certificate, key or certificate is invalid: %s", err.Error()))
