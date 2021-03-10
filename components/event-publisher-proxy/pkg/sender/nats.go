@@ -54,7 +54,7 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 		return http.StatusInternalServerError, err
 	}
 
-	client, err := cev2.NewClient(sender)
+	client, err := cev2.NewClientObserved(sender, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
 	if err != nil {
 		h.logger.Errorf("Failed to create client, %s", err.Error())
 		return http.StatusInternalServerError, err
