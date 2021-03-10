@@ -1013,22 +1013,32 @@ var _ = ginkgo.Describe("Function", func() {
 
 		gomega.Expect(deployment.Spec.Template.Annotations).To(gomega.BeNil())
 		copiedDeploy := deployment.DeepCopy()
-		copiedDeploy.Spec.Template.Annotations = map[string]string{
+		restartedAtAnnotation := map[string]string{
 			"kubectl.kubernetes.io/restartedAt": "2021-03-10T11:28:01+01:00", // example annotation added by kubectl
 		}
+		copiedDeploy.Spec.Template.Annotations = restartedAtAnnotation
 		gomega.Expect(resourceClient.Update(context.Background(), copiedDeploy))
 
 		_, err = reconciler.Reconcile(request)
 		gomega.Expect(err).To(gomega.BeNil())
 
+		ginkgo.By("making sure function is ready")
 		function := &serverlessv1alpha1.Function{}
 		gomega.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		gomega.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
 		gomega.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-
 		gomega.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+
+		ginkgo.By("checking whether that added annotation is still there")
+		deployments = &appsv1.DeploymentList{}
+		gomega.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
+		gomega.Expect(len(deployments.Items)).To(gomega.Equal(1))
+		deployment = &deployments.Items[0]
+		gomega.Expect(deployment).ToNot(gomega.BeNil())
+
+		gomega.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
 	})
 })
 
