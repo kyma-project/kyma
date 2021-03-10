@@ -41,7 +41,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-10737"
+    tag: "PR-10809"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "abb3d162"
+    tag: "PR-10809"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "4bed80da"
+      tag: "PR-10809"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "4bed80da"
+      tag: "PR-10809"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "4bed80da"
+      tag: "PR-10809"
 
 deployment:
   replicas: 1
@@ -143,6 +143,8 @@ containers:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config-default'
+      packageRegistryConfigSecretName:
+        value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
       buildServiceAccountName:
@@ -237,7 +239,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "76ba4f03"
+    tag: "PR-10809"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

@@ -61,7 +61,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
-	return batchv1.Job{
+	job := batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -132,8 +132,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
 								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
 								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-								{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/.npmrc"), SubPath: ".npmrc"},
-								{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/pip.conf"), SubPath: "pip.conf"},
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
@@ -150,6 +148,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 			},
 		},
 	}
+
+	// add package registry config volume mount depending on the used runtime
+	job.Spec.Template.Spec.Containers[0].VolumeMounts = append(job.Spec.Template.Spec.Containers[0].VolumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+
+	return job
 }
 
 func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions git.Options) []corev1.EnvVar {
@@ -241,8 +244,9 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
+	isTrue := true
 
-	return batchv1.Job{
+	job := batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -285,6 +289,15 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 						{
 							Name:         "workspace",
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+						},
+						{
+							Name: "registry-config",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.PackageRegistryConfigSecretName,
+									Optional:   &isTrue,
+								},
+							},
 						},
 					},
 					InitContainers: []corev1.Container{
@@ -329,6 +342,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 			},
 		},
 	}
+
+	// add package registry config volume mount depending on the used runtime
+	job.Spec.Template.Spec.Containers[0].VolumeMounts = append(job.Spec.Template.Spec.Containers[0].VolumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+
+	return job
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
@@ -501,4 +519,14 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 		}
 	}
 	return result
+}
+
+func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
+	switch rtm {
+	case serverlessv1alpha1.Nodejs10, serverlessv1alpha1.Nodejs12:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/.npmrc"), SubPath: ".npmrc"}}
+	case serverlessv1alpha1.Python38:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/pip.conf"), SubPath: "pip.conf"}}
+	}
+	return nil
 }

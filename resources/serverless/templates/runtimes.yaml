@@ -18,7 +18,6 @@ data:
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
-    RUN rm -rf $KUBELESS_INSTALL_VOLUME/registry-config
 
     USER 1000
 ---
@@ -42,7 +41,6 @@ data:
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
-    RUN rm -rf $KUBELESS_INSTALL_VOLUME/registry-config
 
     USER 1000
 ---
@@ -61,7 +59,10 @@ data:
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
     COPY /src/requirements.txt $KUBELESS_INSTALL_VOLUME/requirements.txt
+    COPY /src/registry-config/* $HOME/.config/pip/
     RUN pip install -r $KUBELESS_INSTALL_VOLUME/requirements.txt
     COPY /src $KUBELESS_INSTALL_VOLUME
+
+    RUN rm -rf $HOME/.config/pip/pip.conf
 
     USER 1000

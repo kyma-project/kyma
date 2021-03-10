@@ -1,6 +1,7 @@
 package serverless
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -394,42 +395,113 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 
 func TestFunctionReconciler_buildJob(t *testing.T) {
 	g := gomega.NewWithT(t)
+
+	// GIVEN
 	fnName := "my-function"
 	cmName := "test-configmap"
 	rtmCfg := runtime.Config{
-		Runtime:                 "my-runtime",
 		DependencyFile:          "deps.txt",
 		FunctionFile:            "function.abap",
 		DockerfileConfigMapName: "dockerfile-runtime-abap",
 		RuntimeEnvs:             nil,
 	}
-
-	expectedVolumeMounts := []corev1.VolumeMount{
-		{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-		{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
-		{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
-		{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-		{Name: "npm-registry-config", MountPath: "/workspace/src/.npmrc", SubPath: ".npmrc", ReadOnly: true}}
-	expectedVolumes := []expectedVolume{
-		{name: "sources", localObjectReference: cmName},
-		{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName}}
-
+	dockerCfg := DockerConfig{
+		ActiveRegistryConfigSecretName: "docker-secret-name",
+	}
 	instance := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{Name: fnName},
 		Spec:       serverlessv1alpha1.FunctionSpec{},
 	}
+	r := FunctionReconciler{
+		config: FunctionConfig{
+			PackageRegistryConfigSecretName: "pkg-config-secret",
+		},
+	}
 
-	r := FunctionReconciler{}
-	// when
-	job := r.buildJob(&instance, rtmCfg, cmName, DockerConfig{})
+	testCases := []struct {
+		Name                 string
+		Runtime              serverlessv1alpha1.Runtime
+		ExpectedVolumesLen   int
+		ExpectedVolumes      []expectedVolume
+		ExpectedMountsLen    int
+		ExpectedVolumeMounts []corev1.VolumeMount
+	}{
+		{
+			Name:               "Success Node12",
+			Runtime:            serverlessv1alpha1.Nodejs12,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/src/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+			},
+		},
+		{
+			Name:               "Success Node10",
+			Runtime:            serverlessv1alpha1.Nodejs10,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/src/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+			},
+		},
+		{
+			Name:               "Success Python38",
+			Runtime:            serverlessv1alpha1.Python38,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/src/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
+			},
+		},
+	}
 
-	// then
-	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
-	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			rtmCfg.Runtime = testCase.Runtime
 
-	g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(5))
-	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(expectedVolumeMounts))
+			// when
+			job := r.buildJob(&instance, rtmCfg, cmName, dockerCfg)
+
+			// then
+			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", fnName)))
+			g.Expect(job.Spec.Template.Spec.Volumes).To(gomega.HaveLen(testCase.ExpectedVolumesLen))
+			assertVolumes(g, job.Spec.Template.Spec.Volumes, testCase.ExpectedVolumes)
+
+			g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+			g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(testCase.ExpectedMountsLen))
+			g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(testCase.ExpectedVolumeMounts))
+		})
+	}
 }
 
 type expectedVolume struct {
@@ -441,10 +513,12 @@ func assertVolumes(g *gomega.WithT, actual []corev1.Volume, expected []expectedV
 	for _, expVol := range expected {
 		found := false
 		for _, actualVol := range actual {
-			if actualVol.Name == expVol.name {
+			if actualVol.Name == expVol.name &&
+				(actualVol.Secret != nil && actualVol.Secret.SecretName == expVol.localObjectReference) ||
+				(actualVol.ConfigMap != nil && actualVol.ConfigMap.LocalObjectReference.Name == expVol.localObjectReference) {
 				found = true
 			}
 		}
-		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, not found", expVol.name)
+		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, referencing object: %s not found", expVol.name, expVol.localObjectReference)
 	}
 }
