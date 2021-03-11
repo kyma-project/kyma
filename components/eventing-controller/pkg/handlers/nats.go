@@ -181,8 +181,8 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
 
-		if err = n.client.Send(ctxWithCE, *ce); err != nil {
-			n.log.Error(err, "failed to dispatch event")
+		if result := n.client.Send(ctxWithCE, *ce); !cev2.IsACK(result) {
+			n.log.Error(result, "failed to dispatch event")
 			return
 		}
 
