@@ -43,9 +43,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toApplication(unstructuredDeployment *unstructured.Unstructured) (*applicationconnectorv1alpha1.Application, error) {
+func toApplication(unstructuredApp *unstructured.Unstructured) (*applicationconnectorv1alpha1.Application, error) {
 	application := new(applicationconnectorv1alpha1.Application)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, application)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredApp.Object, application)
 	if err != nil {
 		return nil, err
 	}

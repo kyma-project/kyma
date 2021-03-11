@@ -68,9 +68,9 @@ func toUnstructured(sub *kymaeventingv1alpha1.Subscription) (*unstructured.Unstr
 	return &unstructured.Unstructured{Object: object}, nil
 }
 
-func toSubscription(unstructuredDeployment *unstructured.Unstructured) (*kymaeventingv1alpha1.Subscription, error) {
+func toSubscription(unstructuredSub *unstructured.Unstructured) (*kymaeventingv1alpha1.Subscription, error) {
 	subscription := new(kymaeventingv1alpha1.Subscription)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, subscription)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
 	if err != nil {
 		return nil, err
 	}

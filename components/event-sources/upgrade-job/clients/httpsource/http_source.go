@@ -45,9 +45,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toHTTPSource(unstructuredDeployment *unstructured.Unstructured) (*eventsourcesv1alpha1.HTTPSource, error) {
+func toHTTPSource(unstructuredHTTPSource *unstructured.Unstructured) (*eventsourcesv1alpha1.HTTPSource, error) {
 	httpSource := new(eventsourcesv1alpha1.HTTPSource)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, httpSource)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredHTTPSource.Object, httpSource)
 	if err != nil {
 		return nil, err
 	}

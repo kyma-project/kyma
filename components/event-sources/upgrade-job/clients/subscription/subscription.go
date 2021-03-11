@@ -47,9 +47,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toSubscription(unstructuredDeployment *unstructured.Unstructured) (*messagingv1alpha1.Subscription, error) {
+func toSubscription(unstructuredSub *unstructured.Unstructured) (*messagingv1alpha1.Subscription, error) {
 	subscription := new(messagingv1alpha1.Subscription)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, subscription)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
 	if err != nil {
 		return nil, err
 	}

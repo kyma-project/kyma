@@ -44,9 +44,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toBroker(unstructuredDeployment *unstructured.Unstructured) (*eventingv1alpha1.Broker, error) {
+func toBroker(unstructuredBroker *unstructured.Unstructured) (*eventingv1alpha1.Broker, error) {
 	broker := new(eventingv1alpha1.Broker)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, broker)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredBroker.Object, broker)
 	if err != nil {
 		return nil, err
 	}

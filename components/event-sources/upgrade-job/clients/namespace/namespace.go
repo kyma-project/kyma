@@ -54,9 +54,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toNamespace(unstructuredDeployment *unstructured.Unstructured) (*corev1.Namespace, error) {
+func toNamespace(unstructuredNs *unstructured.Unstructured) (*corev1.Namespace, error) {
 	namespace := new(corev1.Namespace)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, namespace)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredNs.Object, namespace)
 	if err != nil {
 		return nil, err
 	}

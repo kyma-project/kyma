@@ -47,9 +47,9 @@ func (c Client) Delete(namespace, name string) error {
 	return nil
 }
 
-func toTrigger(unstructuredDeployment *unstructured.Unstructured) (*eventingv1alpha1.Trigger, error) {
+func toTrigger(unstructuredTrigger *unstructured.Unstructured) (*eventingv1alpha1.Trigger, error) {
 	trigger := new(eventingv1alpha1.Trigger)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, trigger)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredTrigger.Object, trigger)
 	if err != nil {
 		return nil, err
 	}
