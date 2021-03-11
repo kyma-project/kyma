@@ -75,6 +75,12 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		secEnvKey: secEnvValue,
 	}
 
+	pkgCfgSecret := secret.NewSecret(cfg.PackageRegistryConfigSecretName, genericContainer)
+	pkgCfgSecretData := map[string]string{
+		".npmrc":   fmt.Sprintf("registry=%s\nalways-auth=true", cfg.PackageRegistryConfigURLNode),
+		"pip.conf": fmt.Sprintf("[global]\nindex-url = %s", cfg.PackageRegistryConfigURLPython),
+	}
+
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
 
 	poll := poller.Poller{
@@ -84,6 +90,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 	return step.NewSerialTestRunner(logf, "runtime Test",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
+		teststep.CreateSecret(logf, pkgCfgSecret, "Create package configuration secret", pkgCfgSecretData),
 		step.NewParallelRunner(logf, "fn_tests",
 			step.NewSerialTestRunner(python38Logger, "Python38 test",
 				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python38 Function", runtimes.BasicPythonFunction("Hello From python")),
@@ -93,7 +100,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 			),
 			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
 				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
-				teststep.CreateSecret(nodejs10Logger, sec, "Create Test ConfigMap", secretData),
+				teststep.CreateSecret(nodejs10Logger, sec, "Create Test Secret", secretData),
 				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs10)),
 				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunction("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),

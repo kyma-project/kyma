@@ -60,6 +60,10 @@ tests:
       image: "eu.gcr.io/kyma-project/gitserver"
       tag: "c0aa144a"
       repoName: "function"
+    pkgRegistryConfig:
+      secretName: "serverless-package-registry-config"
+      URLNode: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"
+      URLPython: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"
 
 global:
   commonLabels:

@@ -15,7 +15,7 @@ import (
 func BasicNodeJSFunction(msg string, rtm serverlessv1alpha1.Runtime) *function.FunctionData {
 	return &function.FunctionData{
 		Body:        fmt.Sprintf(`module.exports = { main: function(event, context) { return "%s" } }`, msg),
-		Deps:        `{ "name": "hellowithoutdeps", "version": "0.0.1", "dependencies": { } }`,
+		Deps:        `{ "name": "hellowithoutdeps", "version": "0.0.1", "dependencies": { "kyma-npm-test": "^1.0.0" } }`,
 		MaxReplicas: 2,
 		MinReplicas: 1,
 		Runtime:     rtm,
