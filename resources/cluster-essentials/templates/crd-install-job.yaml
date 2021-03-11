@@ -58,5 +58,5 @@ spec:
       {{- end }}
       {{ end }}
     {{- if .Values.global.priorityClassName }}
-      priorityClassName: kyma-installer
+      priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
