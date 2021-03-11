@@ -68,10 +68,9 @@ func getNewContainerArgs(appName string) []string {
 
 func getDeploymentPatchData(oldDeployment appsv1.Deployment) ([]byte, error) {
 	appName := oldDeployment.Annotations[appReleaseNameKey]
-	var oldContainer corev1.Container
-	for _, c := range oldDeployment.Spec.Template.Spec.Containers {
-		oldContainer = c
-	}
+
+	// It is safe as connectivity validator has only one container
+	oldContainer := oldDeployment.Spec.Template.Spec.Containers[0]
 
 	desiredContainer := oldContainer.DeepCopy()
 	desiredContainer.Args = getNewContainerArgs(appName)
