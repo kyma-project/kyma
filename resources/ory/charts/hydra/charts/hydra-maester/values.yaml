@@ -2,8 +2,8 @@ replicaCount: 1
 
 jobs:
   image:
-    repository: tsmsap/custom-hydra-watcher
-    tag: "001"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: 20210310-c03fb8b6
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
