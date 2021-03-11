@@ -156,6 +156,69 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		assert.EqualValues(t, existingConnectorSecret.Data, connectorSecret)
 	})
 
+	t.Run("should not generate certificates if backup provided", func(t *testing.T) {
+		// given
+		existingConnectorSecretBackup := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      connectorSecretNamespacedName.Name + backupSuffix,
+				Namespace: connectorSecretNamespacedName.Namespace,
+			},
+			Data: map[string][]byte{
+				"ca.crt": []byte(certificatePem),
+				"ca.key": []byte(privateKeyPem),
+			},
+		}
+
+		existingCaSecret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      caSecretNamespacedName.Name,
+				Namespace: caSecretNamespacedName.Namespace,
+			},
+			Data: map[string][]byte{
+				"cacert": []byte("cacert"),
+			},
+		}
+		existingConnectorSecret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      connectorSecretNamespacedName.Name,
+				Namespace: connectorSecretNamespacedName.Namespace,
+			},
+			Data: map[string][]byte{
+				"ca.crt": []byte("cacert"),
+				"ca.key": []byte("key"),
+			},
+		}
+
+		fakeClientSet := fake.NewSimpleClientset(existingCaSecret, existingConnectorSecret, existingConnectorSecretBackup).CoreV1()
+
+		secretRepository := NewSecretRepository(func(namespace string) Manager {
+			return fakeClientSet.Secrets(namespace)
+		})
+
+		options := &options{
+			connectorCertificateSecret: connectorSecretNamespacedName,
+			caCertificateSecret:        caSecretNamespacedName,
+			caCertificate:              "",
+			caKey:                      "",
+		}
+
+		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
+
+		// when
+		err := certSetupHandler.SetupApplicationConnectorCertificate()
+
+		// then
+		require.NoError(t, err)
+
+		caSecret, err := secretRepository.Get(caSecretNamespacedName)
+		require.NoError(t, err)
+		assert.EqualValues(t, existingConnectorSecretBackup.Data["ca.crt"], caSecret["cacert"])
+
+		connectorSecret, err := secretRepository.Get(connectorSecretNamespacedName)
+		require.NoError(t, err)
+		assert.EqualValues(t, existingConnectorSecretBackup.Data, connectorSecret)
+	})
+
 	t.Run("should update secrets with provided certificates", func(t *testing.T) {
 		// given
 		secretRepository := fakeRepositoryWithEmptySecrets()

@@ -26,6 +26,8 @@ const (
 
 	connectorCertSecretKey = "ca.crt"
 	connectorKeySecretKey  = "ca.key"
+
+	backupSuffix = "-backup"
 )
 
 type certSetupHandler struct {
@@ -54,7 +56,7 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 
 	logrus.Infoln("Checking if backup certificate and key provided...")
 	namespacedName := csh.options.connectorCertificateSecret
-	namespacedName.Name += "-backup"
+	namespacedName.Name += backupSuffix
 	provided, err := csh.backupCertAndKeyProvided(namespacedName)
 	if err != nil {
 		return errors.Wrap(err, "Failed to check if certificate backup exists")
