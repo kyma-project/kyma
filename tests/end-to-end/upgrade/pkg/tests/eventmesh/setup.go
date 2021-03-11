@@ -15,7 +15,7 @@ const (
 	integrationNamespace = "kyma-integration"
 	eventServiceSuffix   = "event-service"
 	eventServicePort     = "8081"
-	defaultName          = "eventmesh-upgrade"
+	defaultName          = "eventing-upgrade"
 )
 
 type eventMeshFlow struct {
