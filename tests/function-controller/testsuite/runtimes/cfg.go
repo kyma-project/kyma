@@ -8,13 +8,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/job"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/subscription"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 )
 
@@ -29,10 +29,10 @@ type FunctionTestConfig struct {
 	SvcBinding      *servicebinding.ServiceBinding
 	SvcBindingUsage *servicebindingusage.ServiceBindingUsage
 	UsageName       string
-	Broker          *broker.Broker
+	Subscription    *subscription.Subscription
 	Job             *job.Job
 	InClusterURL    *url.URL
-	BrokerURL       *url.URL
+	SinkURL         *url.URL
 	SvcBindingName  string
 }
 
@@ -51,7 +51,7 @@ func NewFunctionConfig(fnName, usageKindName, domainName string, toolBox shared.
 		return FunctionTestConfig{}, err
 	}
 
-	brokerURL, err := url.Parse(fmt.Sprintf("http://%s-broker.%s.svc.cluster.local", broker.DefaultName, toolBox.Namespace))
+	sinkURL, err := url.Parse(fmt.Sprintf("https://%s.%s.svc.cluster.local", fnName, toolBox.Namespace))
 	if err != nil {
 		return FunctionTestConfig{}, err
 	}
@@ -69,9 +69,9 @@ func NewFunctionConfig(fnName, usageKindName, domainName string, toolBox shared.
 		SvcBindingName:  svcBindingName,
 		SvcBindingUsage: servicebindingusage.New(svcUsageName, usageKindName, toolBox),
 		UsageName:       svcUsageName,
+		Subscription:    subscription.New(fmt.Sprintf("%s-subscription", fnName), toolBox),
 		Job:             job.New(fnName, clientset.BatchV1(), toolBox),
-		Broker:          broker.New(toolBox),
-		BrokerURL:       brokerURL,
+		SinkURL:         sinkURL,
 	}, nil
 }
 

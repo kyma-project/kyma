@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
@@ -41,6 +42,7 @@ func main() {
 	logf.SetReportCaller(false)
 
 	if len(os.Args) < 2 {
+		logf.Errorf("Args %s", os.Args)
 		logf.Errorf("Scenario not specified. Specify it as the first argument")
 		os.Exit(2)
 	}

@@ -124,17 +124,15 @@ type E2EFunctionCheck struct {
 	name         string
 	inClusterURL string
 	fnGatewayURL string
-	brokerURL    string
 	poller       poller.Poller
 }
 
-func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL, brokerURL *url.URL, poller poller.Poller) E2EFunctionCheck {
+func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
 		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),
-		brokerURL:    brokerURL.String(),
 		poller:       poller,
 	}
 }
@@ -144,6 +142,7 @@ func (c E2EFunctionCheck) Name() string {
 }
 
 func (c E2EFunctionCheck) Run() error {
+
 	c.log.Infof("Testing local connection through the service to updated Function")
 	err := c.poller.PollForAnswer(c.inClusterURL, testsuite.HappyMsg, fmt.Sprintf("Hello %s world 1", testsuite.HappyMsg))
 	if err != nil {
@@ -157,9 +156,9 @@ func (c E2EFunctionCheck) Run() error {
 		return errors.Wrap(err, "while testing connection throight gateway")
 	}
 
-	c.log.Infof("Step: %s, Testing connection to event-mesh via Trigger", c.Name())
+	c.log.Infof("Step: %s, Sending an event to NATS-publisher-proxy", c.Name())
 	// https://knative.dev/v0.12-docs/eventing/broker-trigger/
-	err = testsuite.CreateEvent(c.brokerURL) // pinging the broker ingress sends an event to function via trigger
+	err = testsuite.CreateEvent(c.inClusterURL) // pinging the broker ingress sends an event to function via trigger
 	if err != nil {
 		return errors.Wrap(err, "while testing connection to event-mesh via Trigger")
 	}
