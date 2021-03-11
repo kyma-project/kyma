@@ -3,6 +3,9 @@ apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
   name: {{ .Values.global.priorityClassName }}
+  annotations:
+    "helm.sh/hook": "pre-install, pre-upgrade"
+    "helm.sh/hook-weight": "-5"
 value: {{ .Values.global.priorityClassValue }}
 globalDefault: false
 description: "Global (default) scheduling priority of Kyma components. Must not be blocked by unschedulable user workloads."
