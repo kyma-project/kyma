@@ -59,10 +59,10 @@ data:
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     
     COPY /src/requirements.txt $KUBELESS_INSTALL_VOLUME/requirements.txt
-    COPY /src/registry-config/* $HOME/.config/pip/
+    COPY /src/registry-config/* /etc/
     RUN pip install -r $KUBELESS_INSTALL_VOLUME/requirements.txt
     COPY /src $KUBELESS_INSTALL_VOLUME
 
-    RUN rm -rf $HOME/.config/pip/pip.conf
+    RUN rm -rf /etc/pip.conf
 
     USER 1000
