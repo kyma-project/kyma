@@ -21,16 +21,16 @@ type ConfigureFunction struct {
 	fnName          string
 	apiRule         *apirule.APIRule
 	apiRuleURL      string
-	sinkUrl         *url.URL
+	sinkURL         *url.URL
+	subscription    *subscription.Subscription
 	svcInstance     *serviceinstance.ServiceInstance
 	svcBinding      *servicebinding.ServiceBinding
 	svcBindingUsage *servicebindingusage.ServiceBindingUsage
-	subscription    *subscription.Subscription
 	domainPort      uint32
 }
 
-func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL, sinkUrl *url.URL,
-	serviceInstance *serviceinstance.ServiceInstance, binding *servicebinding.ServiceBinding, usage *servicebindingusage.ServiceBindingUsage, subscription *subscription.Subscription,
+func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL, sinkURL *url.URL, subscription *subscription.Subscription,
+	serviceInstance *serviceinstance.ServiceInstance, binding *servicebinding.ServiceBinding, usage *servicebindingusage.ServiceBindingUsage,
 	domainPort uint32) step.Step {
 
 	apiruleURLWithoutScheme := strings.Trim(apiruleURL.String(), apiruleURL.Scheme)
@@ -42,11 +42,11 @@ func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule
 		fnName:          fnName,
 		apiRule:         apiRule,
 		apiRuleURL:      apiruleURLWithoutScheme,
-		sinkUrl:         sinkUrl,
+		sinkURL:         sinkURL,
+		subscription:    subscription,
 		svcInstance:     serviceInstance,
 		svcBinding:      binding,
 		svcBindingUsage: usage,
-		subscription:    subscription,
 		domainPort:      domainPort,
 	}
 }
@@ -106,13 +106,13 @@ func (f ConfigureFunction) Run() error {
 	}
 
 	f.log.Infof("Creating the Subscirption...")
-	_, err = f.subscription.Create(f.fnName, f.sinkUrl)
+	subscription, err := f.subscription.Create(f.sinkURL)
 	if err != nil {
 		return errors.Wrap(err, "while creating subscription")
 	}
 
 	f.log.Infof("Waiting for Subscription to have ready phase...")
-	err = f.subscription.WaitForStatusRunning()
+	err = f.subscription.WaitForStatusRunning(subscription)
 	if err != nil {
 		return errors.Wrap(err, "while waiting for subscription ready")
 	}

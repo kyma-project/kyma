@@ -30,7 +30,7 @@ func CreateEvent(url string) error {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "while making request to Broker %s", url)
+		return errors.Wrapf(err, "while making request to NATS publisher %s", url)
 	}
 
 	defer func() {

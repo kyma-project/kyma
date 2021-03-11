@@ -156,11 +156,11 @@ func (c E2EFunctionCheck) Run() error {
 		return errors.Wrap(err, "while testing connection throight gateway")
 	}
 
-	c.log.Infof("Step: %s, Sending an event to NATS-publisher-proxy", c.Name())
-	// https://knative.dev/v0.12-docs/eventing/broker-trigger/
-	err = testsuite.CreateEvent(c.inClusterURL) // pinging the broker ingress sends an event to function via trigger
+	c.log.Infof("Step: %s, Sending an event to NATS publisher proxy", c.Name())
+	publisherURL := "http://eventing-event-publisher-proxy.kyma-system/publish"
+	err = testsuite.CreateEvent(publisherURL)
 	if err != nil {
-		return errors.Wrap(err, "while testing connection to event-mesh via Trigger")
+		return errors.Wrap(err, "while testing connection to event-mesh via NATS publisher proxy")
 	}
 
 	c.log.Infof("Step: %s, Check if event has come to the function through the service", c.Name())

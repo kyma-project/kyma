@@ -1,18 +1,22 @@
 package subscription
 
 import (
-	"context"
+	"fmt"
 	"net/url"
 	"time"
 
+	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/util/retry"
 )
 
 type Subscription struct {
@@ -41,58 +45,29 @@ func New(name string, c shared.Container) *Subscription {
 	}
 }
 
-func (s *Subscription) Create(funcName string, sinkUrl *url.URL) (string, error) {
-	subscription := unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "eventing.kyma-project.io/v1alpha1",
-			"kind":       "Subscription",
-			"metadata": map[string]interface{}{
-				"name":      s.name,
-				"namespace": s.namespace,
-			},
-			"spec": map[string]interface{}{
-				"id":       "id",
-				"protocol": "NATS",
-				"protocolsettings": map[string]interface{}{
-					"contentMode":     "BINARY",
-					"exemptHandshake": true,
-					"qos":             "AT_LEAST_ONCE",
-					"webhookAuth": map[string]interface{}{
-						"type":         "oauth2",
-						"grantType":    "client_credentials",
-						"clientId":     "xxx",
-						"clientSecret": "xxx",
-						"tokenUrl":     "https://oauth2.xxx.com/oauth2/token",
-						"scope":        []string{"guid-identifier"},
-					},
-				},
-				"sink": sinkUrl.String(),
-				"filter": map[string]interface{}{
-					"dialect": "beb",
-					"filters": []map[string]interface{}{
-						{
-							"eventSource": map[string]interface{}{
-								"type":     "exact",
-								"property": "source",
-								"value":    "/default/kyma/id",
-							},
-							"eventType": map[string]interface{}{
-								"type":     "exact",
-								"property": "type",
-								"value":    "sap.kyma.testapp1023.order.created.v1",
-							},
-						},
-					},
-				},
-			},
+func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alpha1.Subscription, err error) {
+	subscription = &kymaeventingv1alpha1.Subscription{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.name,
+			Namespace: s.namespace,
+		},
+		Spec: kymaeventingv1alpha1.SubscriptionSpec{
+			Protocol:         "",
+			ProtocolSettings: &kymaeventingv1alpha1.ProtocolSettings{},
+			Sink:             sinkUrl.String(),
 		},
 	}
 
-	resourceVersion, err := s.resCli.Create(&subscription)
+	unstructuredSub, err := toUnstructured(subscription)
 	if err != nil {
-		return resourceVersion, errors.Wrapf(err, "while creating Subscription %s in namespace %s", s.name, s.namespace)
+		return subscription, errors.Wrapf(err, "while creating Subscription %s", s.name)
 	}
-	return resourceVersion, err
+
+	_, err = s.resCli.Create(&unstructuredSub)
+	if err != nil {
+		return subscription, errors.Wrapf(err, "while creating Subscription %s in namespace %s", s.name, s.namespace)
+	}
+	return subscription, err
 }
 
 func (s *Subscription) Delete() error {
@@ -113,21 +88,18 @@ func (s *Subscription) Get() (*unstructured.Unstructured, error) {
 	return subscription, nil
 }
 
-func (s *Subscription) WaitForStatusRunning() error {
-	subscription, err := s.Get()
-	if err != nil {
-		return err
-	}
-
-	if s.isStateReady(*subscription) {
-		return nil
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), s.waitTimeout)
-	defer cancel()
-
-	condition := s.isSubscriptionReady()
-	return resource.WaitUntilConditionSatisfied(ctx, s.resCli.ResCli, condition)
+func (s *Subscription) WaitForStatusRunning(subscription *kymaeventingv1alpha1.Subscription) error {
+	return retry.OnError(retry.DefaultBackoff, func(err error) bool {
+		if err != nil {
+			return true
+		}
+		return false
+	}, func() error {
+		if subscription.Status.Ready {
+			return nil
+		}
+		return fmt.Errorf("Subscription: %s is not ready yet, retrying", subscription.GetName())
+	})
 }
 
 func (s *Subscription) LogResource() error {
@@ -145,36 +117,20 @@ func (s *Subscription) LogResource() error {
 	return nil
 }
 
-func (s *Subscription) isSubscriptionReady() func(event watch.Event) (bool, error) {
-	return func(event watch.Event) (bool, error) {
-		subscription, ok := event.Object.(*unstructured.Unstructured)
-		if !ok {
-			return false, shared.ErrInvalidDataType
-		}
-		if subscription.GetName() != s.name {
-			s.log.Infof("names mismatch, object's name %s, supplied %s", subscription.GetName(), s.name)
-			return false, nil
-		}
-
-		return s.isStateReady(*subscription), nil
+// not used, can be removed
+func toSubscription(unstructuredSub *unstructured.Unstructured) (*kymaeventingv1alpha1.Subscription, error) {
+	subscription := new(kymaeventingv1alpha1.Subscription)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	if err != nil {
+		return nil, err
 	}
+	return subscription, nil
 }
 
-func (s *Subscription) isStateReady(subscription unstructured.Unstructured) bool {
-	correctCode := "OK"
-
-	subscriptionStatusCode, subscriptionStatusCodeFound, err := unstructured.NestedString(subscription.Object, "status", "SubscriptionRuleStatus", "code")
-	subscriptionStatus := err != nil || !subscriptionStatusCodeFound || subscriptionStatusCode != correctCode
-
-	virtualServiceStatusCode, virtualServiceStatusCodeFound, err := unstructured.NestedString(subscription.Object, "status", "virtualServiceStatus", "code")
-	virtualServiceStatus := err != nil || !virtualServiceStatusCodeFound || virtualServiceStatusCode != correctCode
-
-	accessRuleStatusCode, accessRuleStatusCodeFound, err := unstructured.NestedString(subscription.Object, "status", "accessRuleStatus", "code")
-	accessRuleStatus := err != nil || !accessRuleStatusCodeFound || accessRuleStatusCode != correctCode
-
-	ready := subscriptionStatus && virtualServiceStatus && accessRuleStatus
-
-	shared.LogReadiness(ready, s.verbose, s.name, s.log, subscription)
-
-	return ready
+func toUnstructured(sub *kymaeventingv1alpha1.Subscription) (*unstructured.Unstructured, error) {
+	object, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&sub)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: object}, nil
 }

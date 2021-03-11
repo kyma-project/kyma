@@ -15,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/subscription"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
 )
 
 type FunctionTestConfig struct {
@@ -23,7 +22,6 @@ type FunctionTestConfig struct {
 	APIRuleURL      *url.URL
 	Fn              *function.Function
 	ApiRule         *apirule.APIRule
-	Trigger         *trigger.Trigger
 	SvcInstance     *serviceinstance.ServiceInstance
 	SvcInstanceName string
 	SvcBinding      *servicebinding.ServiceBinding
@@ -62,7 +60,6 @@ func NewFunctionConfig(fnName, usageKindName, domainName string, toolBox shared.
 		InClusterURL:    inClusterURL,
 		ApiRule:         apirule.New(fmt.Sprintf("%s-rule", fnName), toolBox),
 		APIRuleURL:      gatewayURL,
-		Trigger:         trigger.New(fmt.Sprintf("%s-trigger", fnName), toolBox),
 		SvcInstance:     serviceinstance.New(svcInstanceName, toolBox),
 		SvcInstanceName: svcInstanceName,
 		SvcBinding:      servicebinding.New(svcBindingName, toolBox),
