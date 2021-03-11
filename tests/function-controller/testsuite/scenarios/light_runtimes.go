@@ -77,8 +77,8 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 
 	pkgCfgSecret := secret.NewSecret(cfg.PackageRegistryConfigSecretName, genericContainer)
 	pkgCfgSecretData := map[string]string{
-		".npmrc":   fmt.Sprintf("registry=%s\nalways-auth=true", cfg.PackageRegistryConfigURLNode),
-		"pip.conf": fmt.Sprintf("[global]\nindex-url = %s", cfg.PackageRegistryConfigURLPython),
+		".npmrc":   fmt.Sprintf("@kyma:registry=%s\nalways-auth=true", cfg.PackageRegistryConfigURLNode),
+		"pip.conf": fmt.Sprintf("[global]\nextra-index-url = %s", cfg.PackageRegistryConfigURLPython),
 	}
 
 	logf.Infof("Testing function in namespace: %s", cfg.Namespace)
