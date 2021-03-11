@@ -21,7 +21,7 @@ Follow the steps to deploy XF Addons and add the marketing mock to your Namespac
 6. Go to **{YOUR_NAMESPACE}** >  **Catalog** > **Addons**.
 7. Select the mock you want to provision. For this example, use **SAP Marketing Cloud - Mock**.
 8. Click **Add once** to deploy it in your Namespace.
-9. Check if the mock is available under **Instances** > **Add-Ons**. You can access it at `https://marketing-{NAMESPACE}.{CLUSTER_DOMAIN}.`
+9. Check if the mock is available under **Instances** > **Add-Ons**. You can access it at the URL `marketing-{NAMESPACE}.{CLUSTER_DOMAIN}.`
 10. When the mock is provisioned, an API Rule is also created so that the mocked application is available externally. When you go to **{YOUR_NAMESPACE}** > **API Rules** you can see the direct link to the mocked application.
 
 ## Connect a mocked application to Kyma
@@ -32,7 +32,7 @@ Follow these steps to connect the marketing mock to Kyma.
 2. Click **Create Binding** to bind the application to the Namespace where you will later provision the APIs provided by the mocks. You can use the `default` Namespace or create a new one for that purpose.
 3. In the application, click **Connect Application**.
 4. Copy the token.
-5. Access the marketing mock at `https://marketing-{NAMESPACE}.{CLUSTER_DOMAIN}.` or use the link under **{YOUR_NAMESPACE}** > **API Rules**.
+5. Access the marketing mock at the URL `marketing-{NAMESPACE}.{CLUSTER_DOMAIN}.` or use the link under **{YOUR_NAMESPACE}** > **API Rules**.
 6. Click **Connect**.
 7. Paste the token and wait for the application to connect.
 8. Register all or some APIs. Make sure you register **Business Events** to be able to send events.

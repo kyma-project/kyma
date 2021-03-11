@@ -7,14 +7,14 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 ![Eventing flow](./assets/event-mesh-flow.svg)
 
-1. The Eventing Controller watches the Subscription Custom Resource.
+1. The Eventing Controller watches the Subscription Custom Resource. It determines if there are any new incoming events.
 
-2. NATS Eventing Controller creates infrastructure for the NATS server.
+2. The NATS Eventing Controller creates infrastructure for the NATS server.
 
 3. The [Application Connector](https://kyma-project.io/docs/components/application-connector/) publishes events to the NATS publisher proxy.
 
-4. NATS publisher proxy sends an event to the NATS server.
+4. The NATS publisher proxy sends an event to the NATS server.
 
 5. The NATS server dispatches events to the NATS Eventing Controller.
 
-6. NATS Eventing Controller dispatches an event through a Function.
+6. The NATS Eventing Controller dispatches an event through a Function.

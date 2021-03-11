@@ -5,7 +5,7 @@ type: Configuration
 
 ## Event trigger
 
-When an event is created, the event trigger has certain filters and fields that are required for Kyma. If you want to subscribe to an event, you need to create a subscription that matches this.
+When an event is created, the event trigger contains certain filters and fields that are required by Kyma. If you want to subscribe to an event, you need to create a subscription that matches this.
 
 This is an example of an event trigger:
 

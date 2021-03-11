@@ -1,11 +1,13 @@
 ---
-title: Event publisher proxy configuration
+title: Event Publisher Proxy configuration
 type: Configuration
 ---
 
 The Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application.
 
-## Environment Variables
+## Environment variables
+
+This table shows the environment variables that are used by the Event Publisher Proxy.
 
 | Environment Variable    | Default Value | Description                                                                                   |
 | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
@@ -22,6 +24,9 @@ The Event Publisher Proxy receives legacy and Cloud Event publishing requests fr
 
 
 ## Flags
+
+This table shows flags used by the Event Publisher Proxy.
+
 | Flag | Default Value | Description                                                                                   |
 | ----------------------- | ------------- |---------------------------------------------------------------------------------------------- |
 | maxRequestSize | 65536 | The maximum size of the request. |
