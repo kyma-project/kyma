@@ -1,11 +1,7 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/connection-token-handler
 WORKDIR $DOCK_PKG_DIR
-
-COPY go.mod .
-COPY go.sum .
-RUN go mod download
 
 COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR

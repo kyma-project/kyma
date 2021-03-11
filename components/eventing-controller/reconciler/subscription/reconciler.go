@@ -74,7 +74,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 		recorder:         recorder,
 		bebClient:        bebClient,
 		Domain:           cfg.Domain,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister),
+		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}
 }
 

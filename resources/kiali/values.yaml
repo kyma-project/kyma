@@ -27,11 +27,13 @@ global:
     enabled: true
 
 kcproxy:
+  enabled: true
   replicaCount: 1
   port: 3000
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"

@@ -18,7 +18,7 @@ describe("Kyma end to end upgrade tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await commerceMock.ensureCommerceMockTestFixture("mocks", testNamespace);
+    await commerceMock.ensureCommerceMockLocalTestFixture("mocks", testNamespace);
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
