@@ -3,7 +3,7 @@ title: Event Publisher Proxy configuration
 type: Configuration
 ---
 
-The Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservices or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application.
+The Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservices or Serverless functions) and redirects them to the NATS server. It also fetches a list of subscriptions for a connected application.
 
 ## Environment variables
 
