@@ -54,10 +54,10 @@ Follow the steps to create a Function that you will trigger with your event.
 
     ```bash
     module.exports = {
-    main: function (event, context) {
-        console.log(event.data);
-        return "Hello World!";
-    }
+        main: function (event, context) {
+            console.log(event.data);
+            return "Hello World!";
+        }
     }
     ```
 
