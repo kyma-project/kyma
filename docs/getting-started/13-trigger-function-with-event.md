@@ -7,48 +7,50 @@ As the final step, you will trigger the Function with the `order.created.v1` eve
 
 ## Steps
 
-### Create the Trigger
+### Create the Kyma Subscription
 
 Follows these steps:
 
-<div tabs name="steps" group="trigger-function">
+<div tabs name="steps" group="function-subscription">
   <details>
   <summary label="kubectl">
   kubectl
   </summary>
 
-1. Create a Trigger custom resource (CR) for `orders-function` to subscribe the Function to the `order.created.v1` event type from Commerce mock:
+1. Create a Kyma Subscription custom resource (CR) to subscribe the Function to the `order.created.v1` event type from Commerce mock:
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
-  name: test-sub
-  namespace: test-ns # namespace should match sink namespace below
+  name: orders-sub
+  namespace: orders-service
 spec:
   filter:
     filters:
     - eventSource:
         property: source
         type: exact
-        value: "" # ignore
+        value: ""
       eventType:
         property: type
         type: exact
         value: sap.kyma.custom.commerce.order.created.v1
-  protocol: "nats"
-  protocolsettings: {} # ignore
-  sink: http://test-func.test-ns.svc.cluster.local
+  protocol: ""
+  protocolsettings: {}
+  sink: http://orders-function.orders-service.svc.cluster.local
 ```
 
-- **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
-- **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the event type to which you want to subscribe the Function. In this example, it is `order.created`.
+The event type is composed of the following components:
+- Prefix: `sap.kyma.custom`
+- Application: `commerce`
+- Event: `order.created`
+- Version: `v1`
 
-2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
+2. Check that the Subscription CR was created and is ready. This is indicated by its status equal to `true`:
 
   ```bash
-  kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
+  kubectl get subscriptions.eventing.kyma-project.io orders-function -n orders-service -o=jsonpath="{.status.ready}"
   ```
 
     </details>
@@ -61,16 +63,16 @@ spec:
 
 2. Go to **Workloads** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
-3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscriptions** in the **Event Subscriptions** section.
 
 4. Once the pop-up box opens, find the `order.created.v1` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
 
-A message confirming that the event trigger was created will appear in the **Event Triggers** section in the Function's details view.
+A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
     </details>
 </div>
 
-### Test the Trigger
+### Test the Event delivery
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 
@@ -107,6 +109,5 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    x-envoy-upstream-service-time: 991
    x-powered-by: Express
 
-   [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"},
-   {"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
