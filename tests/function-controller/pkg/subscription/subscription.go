@@ -123,7 +123,7 @@ func (s *Subscription) Get() (*unstructured.Unstructured, error) {
 	return subscription, nil
 }
 
-func (s *Subscription) WaitForStatusRunning(subscription *kymaeventingv1alpha1.Subscription) error {
+func (s *Subscription) WaitForStatusRunning(subscriptionName string) error {
 	customBackoff := wait.Backoff{
 		Steps:    backOffSteps,
 		Duration: backOffDuration,
@@ -137,7 +137,7 @@ func (s *Subscription) WaitForStatusRunning(subscription *kymaeventingv1alpha1.S
 		return false
 	}, func() error {
 		ctx := context.Background()
-		subUnstructured, err := s.resCli.ResCli.Get(ctx, subscription.Name, metav1.GetOptions{})
+		subUnstructured, err := s.resCli.ResCli.Get(ctx, subscriptionName, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (s *Subscription) WaitForStatusRunning(subscription *kymaeventingv1alpha1.S
 		if gotSub.Status.Ready {
 			return nil
 		}
-		return fmt.Errorf("subscription: %s is not ready yet, retrying", subscription.GetName())
+		return fmt.Errorf("subscription: %s is not ready yet, retrying", subscriptionName)
 	})
 }
 

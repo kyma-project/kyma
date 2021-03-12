@@ -113,7 +113,7 @@ func (f ConfigureFunction) Run() error {
 	}
 
 	f.log.Infof("Waiting for subscription to be ready...")
-	err = f.subscription.WaitForStatusRunning(sub)
+	err = f.subscription.WaitForStatusRunning(sub.Name)
 	if err != nil {
 		return errors.Wrap(err, "while waiting for subscription ready")
 	}
