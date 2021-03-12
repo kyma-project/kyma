@@ -62,6 +62,7 @@ spec:
       {{- if .Values.securityContext.enabled }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsNonRoot: true
       {{- end }}
       {{- if .Values.serviceAccount.enabled }}
       serviceAccountName: {{ default (include "postgresql.fullname" . ) .Values.serviceAccount.name}}
@@ -92,10 +93,14 @@ spec:
               {{- if and .Values.shmVolume.enabled .Values.shmVolume.chmod.enabled }}
               chmod -R 777 /dev/shm
               {{- end }}
-          {{- if eq ( toString ( .Values.volumePermissions.securityContext.runAsUser )) "auto" }}
           securityContext:
-          {{- else }}
-          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsNonRoot: true
+          {{- if ne ( toString ( .Values.volumePermissions.securityContext.runAsUser )) "auto" }}
             runAsUser: {{ .Values.volumePermissions.securityContext.runAsUser }}
           {{- end }}
           volumeMounts:

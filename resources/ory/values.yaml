@@ -67,15 +67,6 @@ maintenance:
     tag: "20210310-c03fb8b6"
   podSecurityPolicy:
     enabled: true
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-      - ALL
-    privileged: false
-    runAsGroup: 65534
-    runAsNonRoot: true
-    runAsUser: 65534
 
 # Overrides for the Hydra chart
 hydra:
