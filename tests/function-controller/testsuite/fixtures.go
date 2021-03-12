@@ -38,7 +38,7 @@ func CreateEvent(url string) error {
 		resp.Body.Close()
 	}()
 
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("Invalid response status %s while making a request to %s", resp.Status, url)
 	}
 	return nil
