@@ -14,12 +14,17 @@ spec:
         1e+06
       labels:
         quantile: "0.99"
+    - record: apiserver_latency:quantile_seconds
+      expr: histogram_quantile(0.9, rate(apiserver_request_latencies_bucket[5m])) /
+        1e+06
+      labels:
+        quantile: "0.9"
     - record: apiserver_latency_seconds:quantile
       expr: histogram_quantile(0.5, rate(apiserver_request_latencies_bucket[5m])) /
         1e+06
       labels:
         quantile: "0.5"
-    - alert: APIServerLatencyHigh2
+    - alert: APIServerLatencyWarning
       expr: apiserver_latency_seconds:quantile{quantile="0.99",subresource!="log",verb!~"^(?:WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
       for: 10m
       labels:
@@ -27,7 +32,7 @@ spec:
       annotations:
         description: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
           for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}
-    - alert: APIServerLatencyHigh
+    - alert: APIServerLatencyHighCritical
       expr: apiserver_latency_seconds:quantile{quantile="0.99",subresource!="log",verb!~"^(?:WATCH|WATCHLIST|PROXY|CONNECT)$"} > 10
       for: 10m
       labels:
@@ -35,7 +40,7 @@ spec:
       annotations:
         description: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
           for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}
-    - alert: APIServerErrorsHigh2
+    - alert: APIServerErrorsHighWarning
       expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
         * 100 > 2
       for: 10m
@@ -43,7 +48,7 @@ spec:
         severity: warning
       annotations:
         description: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
-    - alert: APIServerErrorsHigh
+    - alert: APIServerErrorsHighCritical
       expr: rate(apiserver_request_total{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_total[5m])
         * 100 > 5
       for: 10m
