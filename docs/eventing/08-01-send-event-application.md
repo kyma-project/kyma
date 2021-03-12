@@ -13,7 +13,7 @@ Follow the steps to deploy XF Addons and add the marketing mock to your Namespac
 1. In the Kyma Console, go to **Cluster Addons**.
 2. Click **Add new configuration**.
     * Provide the name for your configuration.
-    * Provide the URL to the repository: `https://github.com/SAP-samples/xf-addons/blob/master/addons/index.yaml` The `index.yaml` file is an addons manifest which includes Marketing, Cloud for Customer, and Commerce Cloud mocks.
+    * Provide the URL to the repository: `github.com/SAP-samples/xf-addons//addons/index.yaml` The `index.yaml` file is an addons manifest which includes Marketing, Cloud for Customer, and Commerce Cloud mocks.
     * Click **Add** to add the configuration.
 3. Wait for the cluster addon to have the status `READY`.
 4. Go to **Namespaces**.
