@@ -121,18 +121,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 					},
 					Containers: []corev1.Container{
 						{
-							Name:      "executor",
-							Image:     r.config.Build.ExecutorImage,
-							Args:      args,
-							Resources: instance.Spec.BuildResources,
-							VolumeMounts: []corev1.VolumeMount{
-								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
-								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
-								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-							},
+							Name:            "executor",
+							Image:           r.config.Build.ExecutorImage,
+							Args:            args,
+							Resources:       instance.Spec.BuildResources,
+							VolumeMounts:    r.getBuildJobVolumeMounts(rtmConfig),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
@@ -148,11 +141,21 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 			},
 		},
 	}
-
-	// add package registry config volume mount depending on the used runtime
-	job.Spec.Template.Spec.Containers[0].VolumeMounts = append(job.Spec.Template.Spec.Containers[0].VolumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
-
 	return job
+}
+
+func (r *FunctionReconciler) getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+	return volumeMounts
 }
 
 func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions git.Options) []corev1.EnvVar {
@@ -316,17 +319,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					},
 					Containers: []corev1.Container{
 						{
-							Name:      "executor",
-							Image:     r.config.Build.ExecutorImage,
-							Args:      args,
-							Resources: instance.Spec.BuildResources,
-							VolumeMounts: []corev1.VolumeMount{
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-								// If COPY is not used, then the cache will not work
-								{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
-								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-							},
+							Name:            "executor",
+							Image:           r.config.Build.ExecutorImage,
+							Args:            args,
+							Resources:       instance.Spec.BuildResources,
+							VolumeMounts:    r.getGitBuildJobVolumeMounts(instance, rtmConfig),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
@@ -342,11 +339,21 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 			},
 		},
 	}
-
-	// add package registry config volume mount depending on the used runtime
-	job.Spec.Template.Spec.Containers[0].VolumeMounts = append(job.Spec.Template.Spec.Containers[0].VolumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
-
 	return job
+}
+
+func (r *FunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+	return volumeMounts
+
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
@@ -524,9 +531,9 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
 	switch rtm {
 	case serverlessv1alpha1.Nodejs10, serverlessv1alpha1.Nodejs12:
-		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/.npmrc"), SubPath: ".npmrc"}}
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/.npmrc"), SubPath: ".npmrc"}}
 	case serverlessv1alpha1.Python38:
-		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(baseDir, "registry-config/pip.conf"), SubPath: "pip.conf"}}
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/pip.conf"), SubPath: "pip.conf"}}
 	}
 	return nil
 }
