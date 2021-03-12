@@ -1,0 +1,31 @@
+{{- if .Values.clusterMicroFrontend.enabled }}
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: serverless-git-repositories
+  labels:
+    {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  displayName: Git Repositories
+  version: v1
+  category: Configuration
+  placement: namespace
+  viewBaseUrl: core-ui
+  navigationNodes:
+    - label: Git Repositories
+      navigationPath: gitrepositories
+      viewUrl: "/namespaces/:namespaceId/gitrepositories?hasDetailsView=true&resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1"
+      order: -1
+      viewGroup: "_core_ui_"
+      requiredBackendModules:
+        - serverless
+    - label: Git Repositories Details
+      navigationPath: gitrepositories/details
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+    - label: Git Repositories Details
+      navigationPath: gitrepositories/details/:gitId
+      viewUrl: '/namespaces/:namespaceId/gitrepositories/:gitId?resourceApiPath=/apis/serverless.kyma-project.io/v1alpha1'
+      showInNavigation: false
+      viewGroup: "_core_ui_"
+{{- end }}
