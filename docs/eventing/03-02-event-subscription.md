@@ -26,3 +26,7 @@ spec:
   protocolsettings: {}
   sink: http://test.test.svc.cluster.local
 ```
+
+The `sink` field refers to the Subscriber's service cluster local name.
+
+> **NOTE:** Both the subscriber and the subscription should exist in the same Namespace.
