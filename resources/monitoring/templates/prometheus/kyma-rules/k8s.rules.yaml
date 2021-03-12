@@ -1,24 +1,19 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: kyma2.rules
+  name: k8s.rules
   labels:
     app: {{ template "kube-prometheus-stack.name" . }}
 {{ include "kube-prometheus-stack.labels" . | indent 4 }}
 spec:
   groups:
-  - name: kubernetes.rules
+  - name: k8s.rules
     rules:
     - record: apiserver_latency_seconds:quantile
       expr: histogram_quantile(0.99, rate(apiserver_request_latencies_bucket[5m])) /
         1e+06
       labels:
         quantile: "0.99"
-    - record: apiserver_latency:quantile_seconds
-      expr: histogram_quantile(0.9, rate(apiserver_request_latencies_bucket[5m])) /
-        1e+06
-      labels:
-        quantile: "0.9"
     - record: apiserver_latency_seconds:quantile
       expr: histogram_quantile(0.5, rate(apiserver_request_latencies_bucket[5m])) /
         1e+06
@@ -70,10 +65,24 @@ spec:
       annotations:
         description: Kubernetes API Certificate is expiring soon (less than 7 days)
       expr: sum(apiserver_client_certificate_expiration_seconds_bucket{le="604800"}) > 0
-
     - alert: K8sCertificateExpirationNotice
       labels:
         severity: critical
       annotations:
         description: Kubernetes API Certificate is expiring in less than 1 day
       expr: sum(apiserver_client_certificate_expiration_seconds_bucket{le="86400"}) > 0
+    - alert: KubePodOOMKilled
+      expr: sum_over_time(kube_pod_container_status_terminated_reason{reason="OOMKilled"}[5m]) > 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        description: Pod {{`{{`}} $labels.namespace {{`}}`}}/{{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.container {{`}}`}}) is OOMKilled for 5 minutes.
+    - alert: PVC90PercentFull
+      expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|natss" } / kubelet_volume_stats_capacity_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|natss"} * 100 > 90
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+  
