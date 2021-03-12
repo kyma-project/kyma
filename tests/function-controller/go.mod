@@ -26,8 +26,6 @@ require (
 )
 
 replace (
-	//github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29
 	github.com/kyma-project/kyma => github.com/kyma-project/kyma v0.5.1-0.20210302111801-5a4f7610cf45
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
@@ -35,4 +33,6 @@ replace (
 	k8s.io/api => k8s.io/api v0.18.12
 	k8s.io/apimachinery => k8s.io/apimachinery v0.18.12
 	k8s.io/client-go => k8s.io/client-go v0.18.12
+	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29
 )
