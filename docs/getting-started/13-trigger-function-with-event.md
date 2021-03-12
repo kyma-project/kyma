@@ -55,11 +55,11 @@ The event type is composed of the following components:
    kubectl get subscriptions.eventing.kyma-project.io orders-sub -n orders-service -o=jsonpath="{.status.ready}"
    ```
 
-    </details>
-    <details>
-    <summary label="console-ui">
-    Console UI
-    </summary>
+   </details>
+<details>
+<summary label="console-ui">
+Console UI
+</summary>
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
@@ -71,7 +71,7 @@ The event type is composed of the following components:
 
 A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
-    </details>
+  </details>
 </div>
 
 ### Test the Event delivery
