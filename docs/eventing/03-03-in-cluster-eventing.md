@@ -5,7 +5,7 @@ type: Details
 
 Kyma in-cluster Eventing allows publishers to send messages and subscribers to receive them without the need for a Kyma Application. This means that instead of the usual event flow where Application Connector publishes events to the NATS Publisher Proxy, events can be published from within the cluster.
 
-To use in-cluster Eventing, you need to create a subscription where the `value:` field includes the name of your application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an application that does not exist in Kyma.
+To use in-cluster Eventing, you need to create a subscription where the `eventType value` field includes the name of your application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an application that does not exist in Kyma.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
@@ -19,12 +19,12 @@ spec:
     - eventSource:
         property: source
         type: exact
-        value: kyma
+        value: ""
       eventType:
         property: type
         type: exact
         value: sap.kyma.custom.nonexistingapp.order.created.v1
-  protocol: "nats"
+  protocol: ""
   protocolsettings: {}
   sink: http://myservice.mynamespace.svc.cluster.local
 ---
