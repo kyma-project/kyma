@@ -19,27 +19,29 @@ Follows these steps:
 
 1. Create a Kyma Subscription custom resource (CR) to subscribe the Function to the `order.created.v1` event type from Commerce mock:
 
-```yaml
-apiVersion: eventing.kyma-project.io/v1alpha1
-kind: Subscription
-metadata:
-  name: orders-sub
-  namespace: orders-service
-spec:
-  filter:
-    filters:
-    - eventSource:
-        property: source
-        type: exact
-        value: ""
-      eventType:
-        property: type
-        type: exact
-        value: sap.kyma.custom.commerce.order.created.v1
-  protocol: ""
-  protocolsettings: {}
-  sink: http://orders-function.orders-service.svc.cluster.local
-```
+   ```bash
+   cat <<EOF | kubectl apply -f  -
+      apiVersion: eventing.kyma-project.io/v1alpha1
+      kind: Subscription
+      metadata:
+        name: orders-sub
+        namespace: orders-service
+      spec:
+        filter:
+          filters:
+          - eventSource:
+              property: source
+              type: exact
+              value: ""
+            eventType:
+              property: type
+              type: exact
+              value: sap.kyma.custom.commerce.order.created.v1
+        protocol: ""
+        protocolsettings: {}
+        sink: http://orders-function.orders-service.svc.cluster.local
+   EOF
+   ```
 
 The event type is composed of the following components:
 - Prefix: `sap.kyma.custom`
@@ -49,9 +51,9 @@ The event type is composed of the following components:
 
 2. Check that the Subscription CR was created and is ready. This is indicated by its status equal to `true`:
 
-  ```bash
-  kubectl get subscriptions.eventing.kyma-project.io orders-function -n orders-service -o=jsonpath="{.status.ready}"
-  ```
+   ```bash
+   kubectl get subscriptions.eventing.kyma-project.io orders-sub -n orders-service -o=jsonpath="{.status.ready}"
+   ```
 
     </details>
     <details>
@@ -89,7 +91,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    ```bash
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
-
+   
    > **NOTE**: To get the domain of the Function, run:
    >
    > ```bash
@@ -108,6 +110,6 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    server: istio-envoy
    x-envoy-upstream-service-time: 991
    x-powered-by: Express
-
+   
    [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```

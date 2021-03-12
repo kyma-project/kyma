@@ -11,55 +11,52 @@ This guide demonstrates how [Eventing](/components/eventing/) works in Kyma. It 
 
 ## Steps
 
-### Create the event trigger
+### Create the Kyma Subscription
 
 Follow these steps:
 
-<div tabs name="steps" group="trigger-microservice">
+<div tabs name="steps" group="microservice-subscription">
   <details>
   <summary label="kubectl">
   kubectl
   </summary>
 
-1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Trigger creation and event flow. To do that, run this command:
-
-  ```bash
-  kubectl label namespace {NAMESPACE} knative-eventing-injection=enabled
-  ```
-
-2. Create a [Trigger CR](https://knative.dev/docs/eventing/triggers/) for the `orders-service` microservice to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
-
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Trigger
-    metadata:
-      name: orders-service
-      namespace: orders-service
-    spec:
-      broker: default
-      filter:
-        attributes:
-          eventtypeversion: v1
-          source: commerce-mock
-          type: order.deliverysent
-      subscriber:
-        ref:
-          apiVersion: v1
-          kind: Service
-          name: orders-service
-          namespace: orders-service
-  EOF
-  ```
-
-- **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
-- **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the event type to which you want to subscribe the microservice. In this example, it is `order.deliverysent`.
-
-3. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
+1. Create a Kyma Subscription custom resource (CR) to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
    ```bash
-   kubectl get trigger orders-service -n orders-service -o=jsonpath="{.status.conditions[2].status}"
+   cat <<EOF | kubectl apply -f  -
+      apiVersion: eventing.kyma-project.io/v1alpha1
+      kind: Subscription
+      metadata:
+        name: orders-sub
+        namespace: orders-service
+      spec:
+        filter:
+          filters:
+          - eventSource:
+              property: source
+              type: exact
+              value: ""
+            eventType:
+              property: type
+              type: exact
+              value: sap.kyma.custom.commerce.order.deliverysent.v1
+        protocol: ""
+        protocolsettings: {}
+        sink: http://orders-function.orders-service.svc.cluster.local
+   EOF
+   ```
+
+The event type is composed of the following components:
+- Prefix: `sap.kyma.custom`
+- Application: `commerce`
+- Event: `order.deliverysent`
+- Version: `v1`
+
+2. Check that the Subscription CR was created and is ready. This is indicated by its status equal to `true`:
+
+   ```bash
+   kubectl get subscriptions.eventing.kyma-project.io orders-sub -n orders-service -o=jsonpath="{.status.ready}"
    ```
 
    </details>
@@ -72,17 +69,17 @@ Console UI
 
 2. Go to **Discovery and Network** > **Services** in the left navigation panel and select `orders-service`.
 
-3. Once in the service's details view, select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscriptions** in the **Event Subscriptions** section.
 
 4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-   A message confirming that the event trigger was created will appear in the **Event Triggers** section of the service's details view.
+A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
   </details>
 </div>
 
 
-### Test the trigger
+### Test the Event delivery
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:
 
@@ -117,6 +114,6 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
    server: istio-envoy
    vary: Origin
    x-envoy-upstream-service-time: 37
-
-   [{"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   
+   [{"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
