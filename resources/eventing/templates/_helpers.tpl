@@ -29,6 +29,16 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "eventing.postUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: post-upgrade-hook
+{{- end }}
+
+{{- define "eventing.preUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: pre-upgrade-hook
+{{- end }}
+
 {{/*
 Selector labels
 */}}
