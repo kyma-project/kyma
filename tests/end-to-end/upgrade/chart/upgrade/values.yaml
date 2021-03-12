@@ -7,7 +7,7 @@ subscriberimage:
 
 image:
   dir:
-  version: PR-10867 # TODO(marcobebway) use the final version
+  version: 40007ec9
 
   pullPolicy: "IfNotPresent"
 
@@ -37,6 +37,5 @@ tests:
   ApplicationOperatorUpgradeTest: true
   RafterUpgradeTest: true
   EventMeshUpgradeTest: true
-  EventingUpgradeTest: true
   ServerlessUpgradeTest: true
   LoggingUpgradeTest: true
