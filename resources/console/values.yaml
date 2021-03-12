@@ -26,4 +26,4 @@ global:
   console_backend_service:
     version: c024025a
   console_backend_service_test:
-    version: "bc522023"
+    version: "PR-10882"
