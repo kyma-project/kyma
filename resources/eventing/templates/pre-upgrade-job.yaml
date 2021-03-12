@@ -1,71 +1,73 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name }}-remove-subscription-crd
+  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "0"
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-remove-subscription-crd
+  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "0"
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 rules:
-  - apiGroups: [ "apiextensions.k8s.io" ]
-    resources: [ "customresourcedefinitions" ]
-    verbs: [ "delete" ]
-    resourceNames:
-      - subscriptions.eventing.kyma-project.io
+  - apiGroups: ["ui.kyma-project.io"]
+    resources: ["backendmodules"]
+    verbs: ["delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Release.Name }}-remove-subscription-crd
+  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
-    helm.sh/hook-weight: "0"
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook-weight: "1"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}-remove-subscription-crd
+  name: {{ template "eventing.fullname" . }}-remove-backendmodule
 subjects:
   - kind: ServiceAccount
-    name: {{ .Release.Name }}-remove-subscription-crd
+    name: {{ template "eventing.fullname" . }}-remove-backendmodule
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-remove-subscription-crd
+  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "5"
-    helm.sh/hook: "pre-upgrade"
+    helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 spec:
   backoffLimit: 5
   template:
     metadata:
-      name: {{ .Release.Name }}-remove-subscription-crd
+      name: {{ template "eventing.fullname" . }}-remove-backendmodule
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: {{ .Release.Name }}-remove-subscription-crd
+      serviceAccountName: {{ template "eventing.fullname" . }}-remove-backendmodule
       restartPolicy: Never
       containers:
-      - name: {{ .Release.Name }}-remove-subscription-crd
-        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+      - name: {{ template "eventing.fullname" . }}-remove-backendmodule
+        image: "{{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
           - -c
           - |
-            kubectl delete crd subscriptions.eventing.kyma-project.io --ignore-not-found=true
+            kubectl delete backendmodule eventing --ignore-not-found=true
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
         env:

@@ -62,6 +62,15 @@ const (
            "datacontenttype":"` + CloudEventDataContentType + `"
         }`
 
+	StructuredCloudEventPayloadWithCleanEventType = `{
+           "id":"` + EventID + `",
+           "type":"` + CloudEventType + `",
+           "specversion":"` + CloudEventSpecVersion + `",
+           "source":"` + CloudEventSource + `",
+           "data":"` + CloudEventData + `",
+           "datacontenttype":"` + CloudEventDataContentType + `"
+        }`
+
 	ValidLegacyEventPayloadWithEventId = `{
             "event-id": "` + EventID + `",
             "event-type":"` + LegacyEventType + `",

@@ -7,3 +7,8 @@ ci:
 ci-no-install:
 	npm install
 	npm run test-no-install
+
+.PHONY: ci-compass
+ci-compass:
+	npm install
+	npm run test-compass

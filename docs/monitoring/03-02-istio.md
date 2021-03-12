@@ -15,7 +15,7 @@ See the diagram for a broader view of how the Istio-related instance fits into t
 
 ![Istio Monitoring](./assets/monitoring-istio.svg)
 
-By default, `minitoring-prometheus-istio-server` is not provided as a data source in Grafana. However, this can be enabled by adding the override: 
+By default, `monitoring-prometheus-istio-server` is not provided as a data source in Grafana. However, this can be enabled by adding the override: 
 
  ```bash
 cat <<EOF | kubectl apply -f -
@@ -30,7 +30,7 @@ metadata:
     component: monitoring
     kyma-project.io/installation: ""
 data:
-    grafana.dataSources.prometheusIstio.enabled: "true"
+    prometheus-istio.grafana.datasource.enabled: "true"
 EOF
 ```
 

@@ -3,8 +3,6 @@ set -e
 export SECRET_FILE=/etc/secrets/dsn
 export NAMESPACE="{{ .Release.Namespace }}"
 
-apk add inotify-tools
-
 function rollOut() {
   DEPLOY=$(kubectl get deploy -n $NAMESPACE -l "app.kubernetes.io/name=${1}" -o name)
   kubectl set env -n $NAMESPACE ${DEPLOY} sync=$(date "+%Y%m%d-%H%M%S")

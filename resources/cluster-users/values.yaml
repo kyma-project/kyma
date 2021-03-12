@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    version: 20210208-080d17ad
+    version: 20210310-c03fb8b6
   env:
     namespace: default
   securityContext:

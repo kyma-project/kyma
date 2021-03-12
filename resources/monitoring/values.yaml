@@ -615,14 +615,14 @@ grafana:
     dashboards:
       enabled: true
       label: grafana_dashboard
-
+      searchNamespace: ALL
       ## Annotations for Grafana dashboard configmaps
       ##
       annotations: {}
     datasources:
       enabled: true
       defaultDatasourceEnabled: true
-
+      searchNamespace: ALL
       ## Annotations for Grafana datasource configmaps
       ##
       annotations: {}
@@ -642,35 +642,6 @@ grafana:
 
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
-  
-
-  dataSources:
-    loki:
-      enabled: true
-      config:
-        - name: Loki
-          type: loki
-          access: proxy
-          url: http://logging-loki.kyma-system:3100
-          editable: true
-          jsonData:
-            maxLines: 1000
-    jaeger:
-      enabled: true
-      config:
-        - name: Jaeger
-          type: jaeger
-          access: proxy
-          url: http://tracing-jaeger-query.kyma-system:16686
-          editable: true
-    prometheusIstio:
-      enabled: false
-      config:
-        - name: Prometheus-Istio
-          type: prometheus
-          access: proxy
-          url: http://monitoring-prometheus-istio-server.kyma-system:80
-          editable: true
 
   additionalDataSources: []
   # - name: prometheus-sample
