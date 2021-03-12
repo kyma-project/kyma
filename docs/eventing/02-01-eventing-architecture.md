@@ -6,7 +6,7 @@ Kyma Eventing uses NATS to implement an Event Publisher Proxy and Eventing Contr
 
 ## Event Publisher Proxy
 
-The Event Publisher Proxy component receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless Functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application.
+The Event Publisher Proxy component receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless Functions) and redirects them to the NATS server. It also fetches a list of subscriptions for a connected application.
 
 ## Eventing Controller
 
@@ -14,7 +14,7 @@ The Eventing Controller component manages the internal infrastructure in order t
 
 ## Event types
 
-Kyma Eventing supports both cloud events and legacy events. Kyma converts legacy events to cloud events and adds the prefix `sap.kyma`.
+Kyma Eventing supports both cloud events and legacy events. Kyma converts legacy events to cloud events and adds the prefix `sap.kyma.custom`.
 
 For a Subscription Custom Resource, the fully qualified event type is in the form `sap.kyma.custom.commerce.order.created.v1`.
 ​
