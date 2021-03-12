@@ -1,7 +1,6 @@
 package subscription
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 	"time"
@@ -136,8 +135,7 @@ func (s *Subscription) WaitForStatusRunning(subscriptionName string) error {
 		}
 		return false
 	}, func() error {
-		ctx := context.Background()
-		subUnstructured, err := s.resCli.ResCli.Get(ctx, subscriptionName, metav1.GetOptions{})
+		subUnstructured, err := s.Get()
 		if err != nil {
 			return err
 		}
