@@ -107,13 +107,13 @@ func (f ConfigureFunction) Run() error {
 	}
 
 	f.log.Infof("Creating a subscription...")
-	sub, err := f.subscription.Create(f.sinkURL)
+	_, err = f.subscription.Create(f.sinkURL)
 	if err != nil {
 		return errors.Wrap(err, "while creating subscription")
 	}
 
 	f.log.Infof("Waiting for subscription to be ready...")
-	err = f.subscription.WaitForStatusRunning(sub.Name)
+	err = f.subscription.WaitForStatusRunning()
 	if err != nil {
 		return errors.Wrap(err, "while waiting for subscription ready")
 	}

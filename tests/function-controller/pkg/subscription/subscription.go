@@ -122,7 +122,7 @@ func (s *Subscription) Get() (*unstructured.Unstructured, error) {
 	return subscription, nil
 }
 
-func (s *Subscription) WaitForStatusRunning(subscriptionName string) error {
+func (s *Subscription) WaitForStatusRunning() error {
 	customBackoff := wait.Backoff{
 		Steps:    backOffSteps,
 		Duration: backOffDuration,
@@ -146,7 +146,7 @@ func (s *Subscription) WaitForStatusRunning(subscriptionName string) error {
 		if gotSub.Status.Ready {
 			return nil
 		}
-		return fmt.Errorf("subscription: %s is not ready yet, retrying", subscriptionName)
+		return fmt.Errorf("subscription: %s is not ready yet, retrying", s.name)
 	})
 }
 

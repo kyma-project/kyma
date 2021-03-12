@@ -49,7 +49,7 @@ func NewFunctionConfig(fnName, usageKindName, domainName string, toolBox shared.
 		return FunctionTestConfig{}, err
 	}
 
-	sinkURL, err := url.Parse(fmt.Sprintf("https://%s.%s.svc.cluster.local", fnName, toolBox.Namespace))
+	sinkURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", fnName, toolBox.Namespace))
 	if err != nil {
 		return FunctionTestConfig{}, err
 	}
