@@ -4,13 +4,14 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/subscription"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -105,14 +106,14 @@ func (f ConfigureFunction) Run() error {
 		return errors.Wrap(err, "while waiting for service binding usage")
 	}
 
-	f.log.Infof("Creating the Subscirption...")
-	subscription, err := f.subscription.Create(f.sinkURL)
+	f.log.Infof("Creating a subscription...")
+	sub, err := f.subscription.Create(f.sinkURL)
 	if err != nil {
 		return errors.Wrap(err, "while creating subscription")
 	}
 
-	f.log.Infof("Waiting for Subscription to have ready phase...")
-	err = f.subscription.WaitForStatusRunning(subscription)
+	f.log.Infof("Waiting for subscription to be ready...")
+	err = f.subscription.WaitForStatusRunning(sub)
 	if err != nil {
 		return errors.Wrap(err, "while waiting for subscription ready")
 	}

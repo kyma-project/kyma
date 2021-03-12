@@ -1,9 +1,12 @@
 package subscription
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	kymaeventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
@@ -17,6 +20,13 @@ import (
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/retry"
+)
+
+const (
+	backOffJitter   = 0.1
+	backOffFactor   = 5.0
+	backOffSteps    = 10
+	backOffDuration = 4 * time.Second
 )
 
 type Subscription struct {
@@ -46,7 +56,31 @@ func New(name string, c shared.Container) *Subscription {
 }
 
 func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alpha1.Subscription, err error) {
+	eventSource := &kymaeventingv1alpha1.Filter{
+		Type:     "exact",
+		Property: "source",
+		Value:    "",
+	}
+	eventType := &kymaeventingv1alpha1.Filter{
+		Type:     "exact",
+		Property: "type",
+		Value:    "sap.kyma.custom.something.order.created.v1",
+	}
+	bebFilter := &kymaeventingv1alpha1.BebFilter{
+		EventSource: eventSource,
+		EventType:   eventType,
+	}
+	bebFilters := &kymaeventingv1alpha1.BebFilters{
+		Dialect: "",
+		Filters: []*kymaeventingv1alpha1.BebFilter{
+			bebFilter,
+		},
+	}
 	subscription = &kymaeventingv1alpha1.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Subscription",
+			APIVersion: "eventing.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      s.name,
 			Namespace: s.namespace,
@@ -55,6 +89,7 @@ func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alp
 			Protocol:         "",
 			ProtocolSettings: &kymaeventingv1alpha1.ProtocolSettings{},
 			Sink:             sinkUrl.String(),
+			Filter:           bebFilters,
 		},
 	}
 
@@ -89,16 +124,31 @@ func (s *Subscription) Get() (*unstructured.Unstructured, error) {
 }
 
 func (s *Subscription) WaitForStatusRunning(subscription *kymaeventingv1alpha1.Subscription) error {
-	return retry.OnError(retry.DefaultBackoff, func(err error) bool {
+	customBackoff := wait.Backoff{
+		Steps:    backOffSteps,
+		Duration: backOffDuration,
+		Factor:   backOffFactor,
+		Jitter:   backOffJitter,
+	}
+	return retry.OnError(customBackoff, func(err error) bool {
 		if err != nil {
 			return true
 		}
 		return false
 	}, func() error {
-		if subscription.Status.Ready {
+		ctx := context.Background()
+		subUnstructured, err := s.resCli.ResCli.Get(ctx, subscription.Name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		gotSub, err := toSubscription(subUnstructured)
+		if err != nil {
+			return err
+		}
+		if gotSub.Status.Ready {
 			return nil
 		}
-		return fmt.Errorf("Subscription: %s is not ready yet, retrying", subscription.GetName())
+		return fmt.Errorf("subscription: %s is not ready yet, retrying", subscription.GetName())
 	})
 }
 
@@ -117,7 +167,6 @@ func (s *Subscription) LogResource() error {
 	return nil
 }
 
-// not used, can be removed
 func toSubscription(unstructuredSub *unstructured.Unstructured) (*kymaeventingv1alpha1.Subscription, error) {
 	subscription := new(kymaeventingv1alpha1.Subscription)
 	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)

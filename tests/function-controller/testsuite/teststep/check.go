@@ -26,6 +26,10 @@ type HTTPCheck struct {
 
 var _ step.Step = HTTPCheck{}
 
+const (
+	publisherURL = "http://eventing-event-publisher-proxy.kyma-system/publish"
+)
+
 func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller, expectedMsg string) *HTTPCheck {
 	return &HTTPCheck{
 		name:        name,
@@ -124,15 +128,17 @@ type E2EFunctionCheck struct {
 	name         string
 	inClusterURL string
 	fnGatewayURL string
+	publishURL   string
 	poller       poller.Poller
 }
 
-func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL *url.URL, poller poller.Poller) E2EFunctionCheck {
+func NewE2EFunctionCheck(log *logrus.Entry, name, publishURL string, inClusterURL, fnGatewayURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
 		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),
+		publishURL:   publisherURL,
 		poller:       poller,
 	}
 }
@@ -157,8 +163,8 @@ func (c E2EFunctionCheck) Run() error {
 	}
 
 	c.log.Infof("Step: %s, Sending an event to NATS publisher proxy", c.Name())
-	publisherURL := "http://eventing-event-publisher-proxy.kyma-system/publish"
-	err = testsuite.CreateEvent(publisherURL)
+
+	err = testsuite.CreateEvent(c.publishURL)
 	if err != nil {
 		return errors.Wrap(err, "while testing connection to event-mesh via NATS publisher proxy")
 	}

@@ -25,7 +25,7 @@ func CreateEvent(url string) error {
 	req.Header.Add("ce-type", "dev.knative.foo.bar")
 	req.Header.Add("ce-time", "2018-04-05T03:56:24Z")
 	req.Header.Add("ce-id", "45a8b444-3213-4758-be3f-540bf93f85ff")
-	req.Header.Add("ce-source", "dev.knative.example")
+	req.Header.Add("ce-source", "sap.kyma.custom.something.order.created.v1")
 	req.Header.Add("content-type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)

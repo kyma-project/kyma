@@ -86,6 +86,6 @@ func FunctionTestStep(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.APIRuleURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 		teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through gateway", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From nodejs"),
 		teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.GetUpdatedNodeJSFunction()),
-		teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, poll.WithLogger(nodejs12Logger)),
+		teststep.NewE2EFunctionCheck(nodejs12Logger, "NodeJS12 post update e2e check", cfg.PublishURL, nodejs12Cfg.InClusterURL, nodejs12Cfg.APIRuleURL, poll.WithLogger(nodejs12Logger)),
 	), nil
 }
