@@ -1,13 +1,11 @@
 ---
-title: Event trigger
+title: Event subscription
 type: Configuration
 ---
 
-## Event trigger
+## Event subscription
 
-When an event is created, the event trigger contains certain filters and fields that are required by Kyma. If you want to subscribe to an event, you need to create a subscription that matches this.
-
-This is an example of an event trigger:
+When an event is created, the event subscription contains certain filters and fields that are required by Kyma. If you want to subscribe to an event, you need to create a subscription that matches this format:
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
