@@ -61,7 +61,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -141,7 +141,6 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 			},
 		},
 	}
-	return job
 }
 
 func (r *FunctionReconciler) getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
@@ -249,7 +248,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	rootUser := int64(0)
 	isTrue := true
 
-	job := batchv1.Job{
+	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
@@ -339,7 +338,6 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 			},
 		},
 	}
-	return job
 }
 
 func (r *FunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) []corev1.VolumeMount {
