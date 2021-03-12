@@ -7,7 +7,7 @@ This tutorial shows how to trigger the deployed `orders-service` microservice wi
 
 ## Reference
 
-This guide demonstrates how [Event Mesh](/components/event-mesh/) works in Kyma. It allows you to receive business events from external solutions and trigger business flows with Functions or microservices.
+This guide demonstrates how [Eventing](/components/eventing/) works in Kyma. It allows you to receive business events from external solutions and trigger business flows with Functions or microservices.
 
 ## Steps
 
@@ -84,7 +84,7 @@ Console UI
 
 ### Test the trigger
 
-To send events from Commerce mock to the `orders-service` microservice, follow these steps:  
+To send events from Commerce mock to the `orders-service` microservice, follow these steps:
 
 1. Access Commerce mock at `https://commerce-orders-service.{CLUSTER_DOMAIN}.` or use the link under **Host** in the **Discovery and Network** > **API Rules** view in the `order-service` Namespace.
 

@@ -1,9 +1,7 @@
 ---
 title: Event subscription
-type: Configuration
+type: Details
 ---
-
-## Event subscription
 
 When an event is created, the event subscription contains certain filters and fields that are required by Kyma. If you want to subscribe to an event, you need to create a subscription that matches this format:
 
