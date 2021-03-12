@@ -3,7 +3,7 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore the existing one. 
+This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore the existing one.
 
 ## Steps
 
@@ -44,7 +44,7 @@ spec:
     apiGroup: snapshot.storage.k8s.io
 ```
 
-This will create a new `pvc-restored` PVC with pre-populated data from the snapshot. 
+This will create a new `pvc-restored` PVC with pre-populated data from the snapshot.
 
 You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition which includes the required ServiceAccount and roles looks as follows:
 
@@ -92,7 +92,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
             command:
               - /bin/bash
               - -c
