@@ -20,4 +20,4 @@ For a Subscription Custom Resource, the fully qualified event type is in the for
 ​
 For publishers, it is:
 - `order.created` for legacy-events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.cre`
+- `sap.kyma.custom.commerce.order.created.v1` for CloudEvents.
