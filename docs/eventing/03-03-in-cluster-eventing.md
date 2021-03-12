@@ -30,7 +30,7 @@ spec:
 ---
 ```
 
-On the publisher side, you need to include the exact same Application name in the `type:` field like in this example:
+On the publisher side, you need to include the exact same Application name in the `type` field like in this example:
 
 ```yaml
 curl -k -i \
