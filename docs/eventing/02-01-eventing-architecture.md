@@ -2,11 +2,7 @@
 title: Architecture
 ---
 
-Kyma Eventing uses NATS to implement an Event Publisher Proxy and Eventing Controller.
-
-This diagram shows how the Eventing components work together. //TODO proper diagram - this is a placeholder
-
-![Eventing implementation](./assets/eventing-implementation.svg)
+Kyma Eventing uses NATS to implement an Event Publisher Proxy and Eventing Controller which work together to process and deliver events in Kyma.
 
 ## Event Publisher Proxy
 
