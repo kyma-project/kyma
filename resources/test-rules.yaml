@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cpu.temp.rules
+  namespace: kyma-system
+  labels:
+    app: monitoring
+    release: monitoring
+spec:
+  groups:
+  - name: cpu.temp.rules
+    rules:
+    - alert: CPUTempHigh
+      expr: cpu_temperature_celsius >= 75
+      for: 10s
+      labels:
+        severity: critical
+      annotations:
+        description: "CPU temperature is equal to or greater than 75 degrees Celsius"
+        summary: "CPU temperature is too high"
