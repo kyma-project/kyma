@@ -1,35 +1,35 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postInstall.labels" . | nindent 4 }}
   name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "0"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postInstall.labels" . | nindent 4 }}
   name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "0"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
-    verbs: ["delete"]
+    verbs: ["get", "list", "create", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postInstall.labels" . | nindent 4 }}
   name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "1"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -43,11 +43,11 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  labels: {{- include "eventing.preUpgrade.labels" . | nindent 4 }}
+  labels: {{- include "eventing.postInstall.labels" . | nindent 4 }}
   name: {{ template "eventing.fullname" . }}-remove-backendmodule
   annotations:
     helm.sh/hook-weight: "5"
-    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook: "post-install,post-upgrade"
     helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 spec:
   backoffLimit: 5
@@ -61,13 +61,22 @@ spec:
       restartPolicy: Never
       containers:
       - name: {{ template "eventing.fullname" . }}-remove-backendmodule
-        image: "{{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }}"
+        image: "{{ .Values.postInstallJob.image.name }}:{{ .Values.postInstallJob.image.tag }}"
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
           - -c
           - |
-            kubectl delete backendmodule eventing --ignore-not-found=true
+            ns=$(kubectl get backendmodule eventing -ojsonpath="{ .metadata.annotations.meta\.helm\.sh/release-namespace }")
+            if [ $ns != "kyma-system" ]; then
+              kubectl delete backendmodule eventing --ignore-not-found=true
+            cat << EOF | kubectl apply -f -
+            apiVersion: ui.kyma-project.io/v1alpha1
+            kind: BackendModule
+            metadata:
+              name: eventing
+            EOF
+            fi
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
         env:
