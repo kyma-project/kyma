@@ -95,5 +95,5 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      version: "58e57ea1"
+      version: "PR-10883"
       pullPolicy: IfNotPresent
