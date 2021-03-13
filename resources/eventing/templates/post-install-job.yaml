@@ -67,6 +67,7 @@ spec:
           - /bin/bash
           - -c
           - |
+            if [ -n "$(kubectl get backendmodule eventing -ojsonpath="{ .metadata.name }" --ignore-not-found)" ]; then
             ns=$(kubectl get backendmodule eventing -ojsonpath="{ .metadata.annotations.meta\.helm\.sh/release-namespace }")
             if [ $ns != "kyma-system" ]; then
               kubectl delete backendmodule eventing --ignore-not-found=true
@@ -76,6 +77,7 @@ spec:
             metadata:
               name: eventing
             EOF
+            fi
             fi
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
