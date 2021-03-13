@@ -21,6 +21,8 @@ const (
 	applicationGatewayClusterRoleBindingFormat = "%s-application-gateway"
 	applicationGatewaySvcFormat                = "%s-application-gateway"
 	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
+	eventServiceDeploymentFormat               = "%s-event-service"
+	eventServiceSvcFormat                      = "%s-event-service"
 	connectivityValidatorDeploymentFormat      = "%s-connectivity-validator"
 	connectivityValidatorSvcFormat             = "%s-validator"
 
@@ -72,6 +74,8 @@ func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bo
 
 	resources := []k8sResource{
 		newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
+		newResource(ctxBackground, fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(ctxBackground, fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
 		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
 	}

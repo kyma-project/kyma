@@ -10,6 +10,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	// Should match event type in tests/function-controller/pkg/subscription/subscription.go
+	eventType = "sap.kyma.custom.something.order.created.v1"
+)
+
 func CreateEvent(url string) error {
 
 	payload := fmt.Sprintf(`{ "%s": "%s" }`, TestDataKey, EventPing)
@@ -21,7 +26,7 @@ func CreateEvent(url string) error {
 	// headers taken from example from documentation
 	req.Header.Add("x-b3-flags", "1")
 	req.Header.Add("ce-specversion", "1.0")
-	req.Header.Add("ce-type", "sap.kyma.custom.something.order.created.v1")
+	req.Header.Add("ce-type", eventType)
 	req.Header.Add("ce-time", "2018-04-05T03:56:24Z")
 	req.Header.Add("ce-id", "45a8b444-3213-4758-be3f-540bf93f85ff")
 	req.Header.Add("ce-source", "kyma")

@@ -42,7 +42,6 @@ func main() {
 	logf.SetReportCaller(false)
 
 	if len(os.Args) < 2 {
-		logf.Errorf("Args %s", os.Args)
 		logf.Errorf("Scenario not specified. Specify it as the first argument")
 		os.Exit(2)
 	}

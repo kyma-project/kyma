@@ -26,6 +26,7 @@ const (
 	backOffFactor   = 5.0
 	backOffSteps    = 10
 	backOffDuration = 4 * time.Second
+	eventType       = "sap.kyma.custom.something.order.created.v1"
 )
 
 type Subscription struct {
@@ -63,7 +64,7 @@ func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alp
 	eventType := &kymaeventingv1alpha1.Filter{
 		Type:     "exact",
 		Property: "type",
-		Value:    "sap.kyma.custom.something.order.created.v1",
+		Value:    eventType,
 	}
 	bebFilter := &kymaeventingv1alpha1.BebFilter{
 		EventSource: eventSource,
@@ -161,7 +162,7 @@ func (s *Subscription) LogResource() error {
 		return err
 	}
 
-	s.log.Infof("%s", out)
+	s.log.Infof("subscription: %s", out)
 	return nil
 }
 

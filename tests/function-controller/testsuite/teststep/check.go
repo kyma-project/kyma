@@ -148,7 +148,6 @@ func (c E2EFunctionCheck) Name() string {
 }
 
 func (c E2EFunctionCheck) Run() error {
-
 	c.log.Infof("Testing local connection through the service to updated Function")
 	err := c.poller.PollForAnswer(c.inClusterURL, testsuite.HappyMsg, fmt.Sprintf("Hello %s world 1", testsuite.HappyMsg))
 	if err != nil {
