@@ -15,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite/scenarios"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
