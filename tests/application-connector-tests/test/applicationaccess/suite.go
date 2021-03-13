@@ -150,18 +150,6 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 			return false
 		}
 
-		httpSource, err := ts.httpSourceClient.Get(applicationName, metav1.GetOptions{})
-		if err != nil {
-			t.Logf("HTTPSource %s not found: %v", applicationName, err)
-			return false
-		}
-		if !httpSource.Status.IsReady() {
-			t.Logf("HTTPSource %s is not ready. Status: \n%+v",
-				httpSource.Name,
-				httpSource.Status)
-			return false
-		}
-
 		return true
 	})
 
