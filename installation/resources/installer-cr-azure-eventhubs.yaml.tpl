@@ -33,6 +33,8 @@ spec:
       namespace: "kyma-system"
     - name: "helm-broker"
       namespace: "kyma-system"
+    - name: "eventing"
+      namespace: kyma-system
     - name: "core"
       namespace: "kyma-system"
     - name: "cluster-users"
