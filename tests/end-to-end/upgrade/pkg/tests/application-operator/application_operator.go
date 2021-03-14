@@ -20,7 +20,6 @@ import (
 
 const (
 	applicationName                 = "operator-test-app"
-	eventsServiceDeployment         = "operator-test-app-event-service"
 	applicationGatewayDeployment    = "operator-test-app-application-gateway"
 	connectivityValidatorDeployment = "operator-test-app-connectivity-validator"
 	integrationNamespace            = "kyma-integration"
@@ -28,11 +27,7 @@ const (
 	applicationOperatorStatefulset = "application-operator"
 
 	appGatewayImageOptPrefix            = "--applicationGatewayImage="
-	eventServiceImageOptPrefix          = "--eventServiceImage="
 	connectivityValidatorImageOptPrefix = "--applicationConnectivityValidatorImage="
-
-	imageKey     = "image"
-	timestampKey = "timestamp"
 )
 
 type appImagesConfig struct {
@@ -131,9 +126,6 @@ func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error
 	for _, arg := range containerArgs {
 		if strings.HasPrefix(arg, appGatewayImageOptPrefix) {
 			appImagesConfig.appGatewayImage = strings.TrimPrefix(arg, appGatewayImageOptPrefix)
-		}
-		if strings.HasPrefix(arg, eventServiceImageOptPrefix) {
-			appImagesConfig.eventServiceImage = strings.TrimPrefix(arg, eventServiceImageOptPrefix)
 		}
 		if strings.HasPrefix(arg, connectivityValidatorImageOptPrefix) {
 			appImagesConfig.connectivityValidatorImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
