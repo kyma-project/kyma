@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	kymaSystemNamespace  = "kyma-system"
-	publisherServiceName = "eventing-event-publisher-proxy"
+	kymaSystemNamespace           = "kyma-system"
+	publisherServiceName          = "eventing-event-publisher-proxy"
+	eventMeshUpgradeTestNamespace = "eventmeshupgradetest"
 )
 
 var _ runner.UpgradeTest = &EventingUpgradeTest{}
@@ -58,8 +59,8 @@ func (e *EventingUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 }
 
 func (e *EventingUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	// set the target namespace for the test
-	e.withNamespace(namespace)
+	// set the target namespace for the test with the same namespace that the EventMeshUpgradeTest used
+	e.withNamespace(eventMeshUpgradeTestNamespace)
 
 	// prepare steps
 	steps := []step{
