@@ -25,18 +25,18 @@ authorizationPolicy:
     serviceAccount: console-backend
 
 tests:
-  HelmBrokerUpgradeTest: true
-  HelmBrokerConflictUpgradeTest: true
-  ApplicationBrokerUpgradeTest: true
-  GrafanaUpgradeTest: true
-  TargetsAndRulesUpgradeTest: true
-  MetricsUpgradeTest: true
-  MicrofrontendUpgradeTest: true
-  ClusterMicrofrontendUpgradeTest: true
-  ApiGatewayUpgradeTest: true
+  HelmBrokerUpgradeTest: false
+  HelmBrokerConflictUpgradeTest: false
+  ApplicationBrokerUpgradeTest: false
+  GrafanaUpgradeTest: false
+  TargetsAndRulesUpgradeTest: false
+  MetricsUpgradeTest: false
+  MicrofrontendUpgradeTest: false
+  ClusterMicrofrontendUpgradeTest: false
+  ApiGatewayUpgradeTest: false
   ApplicationOperatorUpgradeTest: true
-  RafterUpgradeTest: true
-  EventMeshUpgradeTest: true
-  EventingUpgradeTest: true
-  ServerlessUpgradeTest: true
-  LoggingUpgradeTest: true
+  RafterUpgradeTest: false
+  EventMeshUpgradeTest: false
+  EventingUpgradeTest: false
+  ServerlessUpgradeTest: false
+  LoggingUpgradeTest: false

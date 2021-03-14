@@ -136,7 +136,7 @@ func main() {
 	aInjector, err := injector.NewAddons("end-to-end-upgrade-test", cfg.TestingAddonsURL)
 	fatalOnError(err, "while creating addons configuration injector")
 
-	_ = map[string]runner.UpgradeTest{
+	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
@@ -151,23 +151,6 @@ func main() {
 		"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
 		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
-	}
-
-	tests := map[string]runner.UpgradeTest{
-		//"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
-		//"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		//"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
-		//"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
-		//"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli, monitoringCli),
-		//"MetricsUpgradeTest":              metricUpgradeTest,
-		//"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
-		//"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		//"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
-		"ApplicationOperatorUpgradeTest": applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
-		//"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		//"EventMeshUpgradeTest":            eventmesh.NewEventMeshUpgradeTest(appConnectorCli, k8sCli, messagingCli, sourcesCli, appBrokerCli, scCli, eventingCli, cfg.EventSubscriberImage),
-		//"ServerlessUpgradeTest":           serverless.New(dynamicCli),
-		//"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	if testToRun, found := tests[testName]; found {
