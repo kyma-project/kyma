@@ -2,6 +2,7 @@ package eventmesh
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -88,7 +89,7 @@ func (f *eventMeshFlow) CreateTrigger() error {
 }
 
 func (f *eventMeshFlow) CheckEvent() error {
-	return helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v", f.subscriberName, f.namespace, f.applicationName, f.eventType, f.eventTypeVersion))
+	return helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v", f.subscriberName, f.namespace, f.applicationName, f.eventType, f.eventTypeVersion), http.StatusOK)
 }
 
 func (f *eventMeshFlow) WaitForServiceInstance() error {

@@ -2,11 +2,11 @@ package eventmesh
 
 import (
 	"fmt"
+	"net/http"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
@@ -97,16 +97,11 @@ func (e EventingUpgradeTest) publishTestEvent() error {
 }
 
 func (e EventingUpgradeTest) checkEvent() error {
-	check := func() error {
-		return helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v",
-			e.subscriberName, e.namespace, e.applicationName, e.eventType, e.eventTypeVersion))
+	if err := helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v",
+		e.subscriberName, e.namespace, e.applicationName, e.eventType, e.eventTypeVersion), http.StatusNoContent);
+		err != nil {
+		return err
 	}
 
-	return retry.Do(func() error {
-		if err := check(); err != nil {
-			return err
-		}
-
-		return nil
-	})
+	return nil
 }
