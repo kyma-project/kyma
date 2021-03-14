@@ -42,8 +42,8 @@ func NewEventingUpgradeTest(k8sClient kubernetes.Interface, dynamicClient dynami
 		dynamicClient: dynamicClient,
 
 		// test config same as the EventMesh test config
-		eventTypeVersion:    "v1",
-		eventType:           defaultName,
+		eventTypeVersion:    defaultEventTypeVersion,
+		eventType:           defaultEventType,
 		subscriberName:      defaultName,
 		applicationName:     defaultName,
 		subscriptionName:    defaultName,

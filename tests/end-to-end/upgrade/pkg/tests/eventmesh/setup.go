@@ -12,10 +12,13 @@ import (
 )
 
 const (
-	integrationNamespace = "kyma-integration"
-	eventServiceSuffix   = "event-service"
-	eventServicePort     = "8081"
-	defaultName          = "eventing-upgrade"
+	integrationNamespace    = "kyma-integration"
+	eventServiceSuffix      = "event-service"
+	eventServicePort        = "8081"
+	defaultName             = "eventupgrade"
+	defaultEventType        = "order.created"
+	defaultEventTypeVersion = "v1"
+	defaultBrokerName       = "default"
 )
 
 type eventMeshFlow struct {
@@ -44,10 +47,10 @@ func newEventMeshFlow(e *EventMeshUpgradeTest,
 		applicationName:      defaultName,
 		serviceInstanceName:  defaultName,
 		subscriberName:       defaultName,
-		eventTypeVersion:     "v1",
-		eventType:            defaultName,
+		eventTypeVersion:     defaultEventTypeVersion,
+		eventType:            defaultEventType,
 		subscriptionName:     defaultName,
-		brokerName:           "default",
+		brokerName:           defaultBrokerName,
 	}
 }
 
