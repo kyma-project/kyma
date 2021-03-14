@@ -194,10 +194,6 @@ func (ut *UpgradeTest) verifyResources(namespace string) error {
 		return errors.Wrap(err, "Failed to get expected images from Stateful set")
 	}
 
-	if err := ut.verifyDeployment(eventsServiceDeployment, namespace, appImages.eventServiceImage); err != nil {
-		return errors.Wrap(err, "Events Service is not upgraded")
-	}
-
 	if err := ut.verifyDeployment(applicationGatewayDeployment, namespace, appImages.appGatewayImage); err != nil {
 		return errors.Wrap(err, "Application Gateway is not upgraded")
 	}
