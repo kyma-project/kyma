@@ -64,10 +64,10 @@ These variables refer to the following:
          eventType:
            property: type
            type: exact
-           value: sap.kyma.custom.commerce.order.created.v1
+           value: sap.kyma.custom.$APP_NAME.$EVENT_TYPE.v1
      protocol: ""
      protocolsettings: {}
-     sink: http://orders-function.orders-service.svc.cluster.local
+     sink: http://$NAME.$NAMESPACE.svc.cluster.local
     EOF
     ```
 
