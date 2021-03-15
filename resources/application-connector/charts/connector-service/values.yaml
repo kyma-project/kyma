@@ -23,7 +23,7 @@ deployment:
     runtimesInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
-    central: &central false
+    central: false
     revocationConfigMapName: "revocations-config"
     requestLogging: false
   envvars:
@@ -70,7 +70,6 @@ tests:
     after-upgrade: true
   enabled: true
   skipSslVerify: true
-  central: *central
   image:
     pullPolicy: IfNotPresent
 

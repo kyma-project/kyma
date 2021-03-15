@@ -87,8 +87,6 @@ tests:
       integration: true
       after-upgrade: true
     enabled: true
-    connector_service:
-      central: false
     skipSslVerify: true
     image:
       version: "470796a1"
