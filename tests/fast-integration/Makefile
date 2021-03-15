@@ -1,7 +1,7 @@
 .PHONY: ci
 ci:
 	npm install
-	DEBUG=true npm test
+	npm test
 
 .PHONY: ci-no-install
 ci-no-install:
