@@ -19,11 +19,11 @@ serviceAccount:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 10m
+    memory: 32Mi
   requests:
-    cpu: 32m
-    memory: 64Mi
+    cpu: 5m
+    memory: 16Mi
 
 nats:
   config:
