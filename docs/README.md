@@ -10,7 +10,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Application Connector](./application-connector/)
 -   [Backup](./backup/)
 -   [Console](./console/)
--   [Event Mesh](./event-mesh/)
+-   [Eventing](./eventing/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Monitoring](./monitoring/)
