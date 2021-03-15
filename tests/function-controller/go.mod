@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-project/helm-broker v1.1.0
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210311150052-653b9d72e0d7
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201201100156-840f2b1a3da8
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
@@ -27,7 +27,6 @@ require (
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	github.com/kyma-project/kyma => github.com/kyma-project/kyma v0.5.1-0.20210302111801-5a4f7610cf45
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3
