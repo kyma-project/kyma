@@ -7,7 +7,7 @@ subscriberimage:
 
 image:
   dir:
-  version: PR-10867 # TODO(marcobebway) use the final version
+  version: c682d636
 
   pullPolicy: "IfNotPresent"
 
