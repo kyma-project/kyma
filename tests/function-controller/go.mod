@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-project/helm-broker v1.1.0
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210311150052-653b9d72e0d7
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201201100156-840f2b1a3da8
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
@@ -23,7 +23,6 @@ require (
 	k8s.io/apimachinery v0.19.3
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	sigs.k8s.io/controller-runtime v0.6.4
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 )
 
 replace (

@@ -1182,12 +1182,8 @@ github.com/kyma-project/helm-broker v1.1.0 h1:DW/Hnisd9WifTgTGfdTzlTa5p8YaiB0+/l
 github.com/kyma-project/helm-broker v1.1.0/go.mod h1:G6uGcr/HI3gz4uxntY2g0uCuMCI6MZBhYGrnwxpitLM=
 github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb h1:hxOth4M0qtQk7DmLkjosR1nwRdv5izgTtsBTZSbkIVU=
 github.com/kyma-project/kyma v0.5.1-0.20200317154738-0bb20217c2cb/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
-github.com/kyma-project/kyma v0.5.1-0.20210302111801-5a4f7610cf45 h1:SKj2nooBYuDiyVX1dvrW/xhNpJB2HgrQUwakOCLO814=
-github.com/kyma-project/kyma v0.5.1-0.20210302111801-5a4f7610cf45/go.mod h1:cfj5AQwIOmmoXLZUhW3bIiaB66Z6vgjCYu7TRK3+1lc=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525/go.mod h1:7ibzgr79LxmRwLc4V3pHm2h+bqbguuva3c4lQT0DVTI=
 github.com/kyma-project/kyma/components/event-publisher-proxy v0.0.0-20201014135541-82b304ab245a/go.mod h1:SzxIlsqx8zJXNhqyUabWs8NzYcfEv1SleJ1U0+Gp6Ms=
-github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210311150052-653b9d72e0d7 h1:Bweacp/xZc6GAEsUu/cdl2jk1Zt1qvtfcjhkPe23zTE=
-github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210311150052-653b9d72e0d7/go.mod h1:z5ag0CTgXqR6rZbzp9WeVE1Vrn0xLS8BchMWGjmjcOk=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d h1:CNnPHXiSd9+lt22MlmY1lJf6zPKQ9nK9fhmtaAymJq8=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d/go.mod h1:z5ag0CTgXqR6rZbzp9WeVE1Vrn0xLS8BchMWGjmjcOk=
 github.com/kyma-project/kyma/components/function-controller v0.0.0-20201201100156-840f2b1a3da8 h1:MUuCMoRnMDdpGWfZN1qoHNyt2Nf0WIIl9MKBNEBJ8yI=
