@@ -164,10 +164,10 @@ To create a simple Function and trigger it with an event, you must first registe
          eventType:
            property: type
            type: exact
-           value: sap.kyma.custom.commerce.order.created.v1
+           value: sap.kyma.custom.$APP_NAME.$EVENT.v1
      protocol: ""
      protocolsettings: {}
-     sink: http://orders-function.orders-service.svc.cluster.local
+     sink: http://my-events-function.$NAMESPACE.svc.cluster.local
    EOF
    ```
 
