@@ -142,29 +142,31 @@ To create a simple Function and trigger it with an event, you must first registe
    EOF
    ```
 
-6. Create a Trigger to allow events to trigger the Function.
+6. Create a Subscription to allow events to trigger the Function.
 
    ```bash
    cat <<EOF | kubectl apply -f -
-   apiVersion: eventing.knative.dev/v1alpha1
-   kind: Trigger
+   apiVersion: eventing.kyma-project.io/v1alpha1
+   kind: Subscription
    metadata:
      labels:
        function: my-events-function
      name: function-my-events-function-exampleevent-v1
      namespace: $NAMESPACE
    spec:
-     broker: default
      filter:
-       attributes:
-         eventtypeversion: v1
-         source: $APP_NAME
-         type: exampleevent
-     subscriber:
-       ref:
-         apiVersion: v1
-         kind: Service
-         name: my-events-function
+      filters:
+        - eventSource:
+           property: source
+           type: exact
+           value: ""
+         eventType:
+           property: type
+           type: exact
+           value: sap.kyma.custom.commerce.order.created.v1
+     protocol: ""
+     protocolsettings: {}
+     sink: http://orders-function.orders-service.svc.cluster.local
    EOF
    ```
 
