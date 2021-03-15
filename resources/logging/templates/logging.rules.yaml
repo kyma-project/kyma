@@ -15,12 +15,12 @@ spec:
       labels:
         severity: critical
       annotations:
-        description: 'Data throughput for logging is too high: {{`{{$value}}`}} KB/s'  
+        description: 'Data throughput for logging is too high: {{ `{{$value}}` }} KB/s'  
     - alert: LokiRequestLatencyHigh
       expr: namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*"} > 1
       for: 15m
       annotations:
-        description: The {{ `{{ $labels.job }}` }} {{ `{{ $labels.route }}` }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+        description: The {{ `{{ $labels.job }}` }} {{ `{{ $labels.route }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}s 99th percentile latency.
       labels:
         severity: critical
     - alert: LoggingFailedRequestPercentage
@@ -30,19 +30,19 @@ spec:
         severity: critical
       annotations:
         description: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'
-    # - alert: NoOutputBytesProcessed
-    #   expr: rate(fluentbit_output_proc_bytes_total{{ .Values.kymaRules.fluentBitAlertFilter }}[5m]) == 0
-    #   annotations:
-    #     description: Fluent Bit instance {{ `{{$labels.instance}}` }}'s output plugin {{ `{{$labels.name}}` }} has not processed any
-    #       bytes for at least 15 minutes.
-    #     summary: No Output Bytes Processed
-    #   for: 15m
-    #   labels:
-    #     severity: critical   
+    - alert: NoOutputBytesProcessed
+      expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.kymaRules.fluentBitAlertFilter }} }[5m]) == 0
+      annotations:
+        description: Fluent Bit instance {{ `{{ $labels.instance }}` }}'s output plugin {{ `{{ $labels.name }}` }} has not processed any
+          bytes for at least 15 minutes.
+        summary: No Output Bytes Processed
+      for: 15m
+      labels:
+        severity: critical   
     # - alert: LokiRequestPanics
     #   expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
     #   annotations:
-    #     description: The {{ `{{ $labels.job }}` }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
+    #     description: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
     #   labels:
     #     severity: critical
 
