@@ -152,8 +152,6 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		DomainName:                            options.domainName,
 		ApplicationGatewayImage:               options.applicationGatewayImage,
 		ApplicationGatewayTestsImage:          options.applicationGatewayTestsImage,
-		EventServiceImage:                     options.eventServiceImage,
-		EventServiceTestsImage:                options.eventServiceTestsImage,
 		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 		LogFormat:                             options.LogFormat,
 		LogLevel:                              options.LogLevel,
