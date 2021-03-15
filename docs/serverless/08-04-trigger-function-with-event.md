@@ -27,13 +27,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Run the `kubectl get brokers -n {NAMESPACE}` command to check if there already is the Knative's `default` Broker running in the Namespace where your Function is running. If not, you must manually inject the Broker into the Namespace to enable Subscription creation and event flow. To do that, run this command:
-
-  ```bash
-  kubectl label namespace {NAMESPACE} eventing-injection=enabled
-  ```
-
-2. Export these variables:
+1. Export these variables:
 
     ```bash
     export NAME={FUNCTION_NAME}
@@ -51,7 +45,7 @@ These variables refer to the following:
 - **EVENT_VERSION** points to the specific event version type, such as `v1`.
 - **EVENT_TYPE** points to the event type to which you want to subscribe your Function, such as `user.created`.
 
-3. Create a Subscription CR for your Function to subscribe your Function to a specific event type.
+2. Create a Subscription CR for your Function to subscribe your Function to a specific event type.
 
     ```yaml
     cat <<EOF | kubectl apply -f  -
@@ -74,7 +68,7 @@ These variables refer to the following:
      protocol: ""
      protocolsettings: {}
      sink: http://orders-function.orders-service.svc.cluster.local
-EOF
+    EOF
     ```
 
     </details>
@@ -114,8 +108,6 @@ To test if the Subscription CR is properly connected to the Function:
 
 2.  Send an event manually to trigger the function. The first example shows the implementation introduced with the Kyma 1.11 release where a [CloudEvent](https://github.com/cloudevents/spec/blob/v1.0/spec.md) is sent directly to Kyma Eventing. In the second example, an event also reaches the Kyma, but it is first modified by the compatibility layer to the format compliant with the CloudEvents specification. This solution ensures compatibility if your events follow a format other than CloudEvents, or you use the Event Bus available before 1.11.
 
-    > **TIP:** For details on CloudEvents, exposed endpoints, and the compatibility layer, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
-
     <div tabs name="examples" group="test=subscription">
       <details>
       <summary label="CloudEvents">
@@ -127,8 +119,8 @@ To test if the Subscription CR is properly connected to the Function:
       '{
         "ce-specversion": "1.0",
         "ce-source": "{APP_NAME}",
-        "ce-type": "{EVENT_TYPE}",
-        "ce-eventtypeversion": "{EVENT_VERSION}",
+        "ce-type": "sap.kyma.custom.$APP_NAME.$EVENT_TYPE.v1",
+        "ce-eventtypeversion": "v1",
         "ce-id": "A234-1234-1234",
         "data": "123456789",
         "datacontenttype": "application/json"
@@ -136,15 +128,15 @@ To test if the Subscription CR is properly connected to the Function:
     ```
       </details>
       <details>
-      <summary label="Compatibility layer">
-      Send events to Kyma through compatibility layer
+      <summary label="Legacy events">
+      Send legacy Events to Kyma
       </summary>
 
     ```bash
     curl -H "Content-Type: application/json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
       '{
           "event-type": "{EVENT_TYPE}",
-          "event-type-version": "{EVENT_VERSION}",
+          "event-type-version": "v1",
           "event-time": "2020-04-02T21:37:00Z",
           "data": "123456789"
          }'
