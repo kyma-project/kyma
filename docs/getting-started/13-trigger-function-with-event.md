@@ -17,7 +17,7 @@ Follows these steps:
   kubectl
   </summary>
 
-1. Create a Kyma Subscription custom resource (CR) to subscribe the Function to the `order.created.v1` event type from Commerce mock:
+1. Create a Subscription custom resource (CR) to subscribe the Function to the `order.created.v1` event type from Commerce mock:
 
    ```bash
    cat <<EOF | kubectl apply -f  -
@@ -74,7 +74,7 @@ A message confirming that the Subscription was created will appear in the **Even
   </details>
 </div>
 
-### Test the Event delivery
+### Test the event delivery
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 

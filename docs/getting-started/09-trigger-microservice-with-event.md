@@ -11,7 +11,7 @@ This guide demonstrates how [Eventing](/components/eventing/) works in Kyma. It 
 
 ## Steps
 
-### Create the Kyma Subscription
+### Create the Subscription
 
 Follow these steps:
 
@@ -21,7 +21,7 @@ Follow these steps:
   kubectl
   </summary>
 
-1. Create a Kyma Subscription custom resource (CR) to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
+1. Create a Subscription custom resource (CR) to subscribe it to the `order.deliverysent.v1` event type from Commerce mock:
 
    ```bash
    cat <<EOF | kubectl apply -f  -

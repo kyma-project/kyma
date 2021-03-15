@@ -27,6 +27,6 @@ spec:
   sink: http://test.test.svc.cluster.local
 ```
 
-The `sink` field refers to the Subscriber's service cluster local name.
+The `sink` field refers to the cluster local name of the subscriber's service.
 
 > **NOTE:** Both the subscriber and the subscription should exist in the same Namespace.
