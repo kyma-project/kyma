@@ -23,11 +23,11 @@ require (
 	k8s.io/apimachinery v0.19.3
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	sigs.k8s.io/controller-runtime v0.6.4
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 )
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
-	github.com/kyma-project/kyma => github.com/kyma-project/kyma v0.5.1-0.20210302111801-5a4f7610cf45
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3
