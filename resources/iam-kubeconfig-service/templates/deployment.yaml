@@ -22,23 +22,24 @@ spec:
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
         kyma-project.io/component: backend
     spec:
-      {{ if .Values.global.isLocalEnv }}
+      serviceAccountName: {{ template "name" . }}
+      {{- if .Values.global.isLocalEnv }}
       hostAliases:
       - ip: {{ .Values.global.minikubeIP }}
         hostnames:
           - "dex.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
+      {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
         command:
           - sh
           - -c
-        {{ if .Values.global.environment.gardener }}
+        {{- if .Values.global.environment.gardener }}
           - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client
-        {{ else }}
+        {{- else }}
           - /app/app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
-        {{ end  }}
+        {{- end  }}
         envFrom:
         - configMapRef:
             name: apiserver-proxy
@@ -54,20 +55,25 @@ spec:
           failureThreshold: 10
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
         volumeMounts:
         - name: apiserver-proxy-tls-cert
           mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
         - name: dex-tls-cert
           mountPath: /etc/dex-tls-cert/
-      {{ end }}
+      {{- end }}
       volumes:
-      {{ if not .Values.global.environment.gardener }}
+      {{- if not .Values.global.environment.gardener }}
       - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
-      {{ end }}
+      {{- end }}
       - name: apiserver-proxy-tls-cert
         secret:
           secretName: apiserver-proxy-tls-cert
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

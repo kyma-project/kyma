@@ -7,6 +7,10 @@ image:
   pullPolicy: IfNotPresent
   imagePullSecrets: []
 
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+
 resources:
   limits:
     cpu: 50m
@@ -110,11 +114,13 @@ global:
     enabled: true
 
 kcproxy:
+  enabled: true
   replicaCount: 1
   inPort: 10001
   config:
     clientId: "jaeger"
     clientSecret: "oiEWUWOIEwedfgg"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"
@@ -127,6 +133,11 @@ kcproxy:
     matchClaims: ""
     addClaims: ""
   nodeSelector: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
     tag: 10.0.0

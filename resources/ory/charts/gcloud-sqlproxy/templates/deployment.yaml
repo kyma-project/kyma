@@ -23,8 +23,8 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
     spec:
       serviceAccountName: {{ template "gcloud-sqlproxy.serviceAccountName" . }}
-      {{- if .Values.priorityClassName }}
-      priorityClassName: "{{ .Values.priorityClassName }}"
+      {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
       {{- end }}
       containers:
       - name: sqlproxy
@@ -73,6 +73,15 @@ spec:
           successThreshold: {{ .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: 65532
+          runAsNonRoot: true
+          runAsUser: 65532
         volumeMounts:
         {{ if $hasCredentials -}}
         - name: cloudsql-oauth-credentials

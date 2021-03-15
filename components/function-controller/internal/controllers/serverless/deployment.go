@@ -30,22 +30,22 @@ const (
 	MinimumReplicasAvailable = "MinimumReplicasAvailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) bool {
-	expectedDeployment := r.buildDeployment(instance, rtmConfig)
-	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
+func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
+	expectedDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
+	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment, isScalingEnabled(instance))
 
 	return !resourceOk
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance, rtmConfig)
+func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
 
 	switch {
 	case len(deployments) == 0:
 		return r.createDeployment(ctx, log, instance, newDeployment)
 	case len(deployments) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) deployments by accident
 		return r.deleteAllDeployments(ctx, instance, log)
-	case !r.equalDeployments(deployments[0], newDeployment):
+	case !r.equalDeployments(deployments[0], newDeployment, isScalingEnabled(instance)):
 		return r.updateDeployment(ctx, log, instance, deployments[0], newDeployment)
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments, corev1.ConditionUnknown)
@@ -90,15 +90,15 @@ func (r *FunctionReconciler) updateDeployment(ctx context.Context, log logr.Logg
 	})
 }
 
-func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment) bool {
+func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
 		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
 		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
-		r.mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations()) &&
-		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources)
+		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
+		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
 }
 
 func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment, runningStatus corev1.ConditionStatus) (ctrl.Result, error) {
@@ -108,7 +108,9 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 	// trigger next reconcile loop, in which we should create svc
 	case r.isDeploymentReady(deployments[0]):
 		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
+			RequeueAfter: r.config.FunctionReadyRequeueDuration,
+		}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             runningStatus,
 			LastTransitionTime: metav1.Now(),

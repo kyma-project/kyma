@@ -4,14 +4,14 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/broker"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebinding"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/serviceinstance"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/trigger"
-	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/subscription"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -22,16 +22,16 @@ type ConfigureFunction struct {
 	fnName          string
 	apiRule         *apirule.APIRule
 	apiRuleURL      string
+	sinkURL         *url.URL
+	subscription    *subscription.Subscription
 	svcInstance     *serviceinstance.ServiceInstance
 	svcBinding      *servicebinding.ServiceBinding
 	svcBindingUsage *servicebindingusage.ServiceBindingUsage
-	broker          *broker.Broker
-	trigger         *trigger.Trigger
 	domainPort      uint32
 }
 
-func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL,
-	serviceInstance *serviceinstance.ServiceInstance, binding *servicebinding.ServiceBinding, usage *servicebindingusage.ServiceBindingUsage, broker *broker.Broker, trigger *trigger.Trigger,
+func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule *apirule.APIRule, apiruleURL *url.URL, sinkURL *url.URL, subscription *subscription.Subscription,
+	serviceInstance *serviceinstance.ServiceInstance, binding *servicebinding.ServiceBinding, usage *servicebindingusage.ServiceBindingUsage,
 	domainPort uint32) step.Step {
 
 	apiruleURLWithoutScheme := strings.Trim(apiruleURL.String(), apiruleURL.Scheme)
@@ -43,11 +43,11 @@ func NewConfigureFunction(log *logrus.Entry, name string, fnName string, apiRule
 		fnName:          fnName,
 		apiRule:         apiRule,
 		apiRuleURL:      apiruleURLWithoutScheme,
+		sinkURL:         sinkURL,
+		subscription:    subscription,
 		svcInstance:     serviceInstance,
 		svcBinding:      binding,
 		svcBindingUsage: usage,
-		broker:          broker,
-		trigger:         trigger,
 		domainPort:      domainPort,
 	}
 }
@@ -106,24 +106,18 @@ func (f ConfigureFunction) Run() error {
 		return errors.Wrap(err, "while waiting for service binding usage")
 	}
 
-	f.log.Infof("Waiting for broker to have ready phase...")
-	err = f.broker.WaitForStatusRunning()
+	f.log.Infof("Creating a subscription...")
+	_, err = f.subscription.Create(f.sinkURL)
 	if err != nil {
-		return errors.Wrap(err, "while waiting for broker")
-	}
-	// Trigger needs to be created after broker, as it depends on it
-	// watch out for a situation where broker is not created yet!
-	f.log.Infof("Creating Trigger...")
-	err = f.trigger.Create(f.fnName)
-	if err != nil {
-		return errors.Wrap(err, "while creating trigger")
+		return errors.Wrap(err, "while creating subscription")
 	}
 
-	f.log.Infof("Waiting for Trigger to have ready phase...")
-	err = f.trigger.WaitForStatusRunning()
+	f.log.Infof("Waiting for subscription to be ready...")
+	err = f.subscription.WaitForStatusRunning()
 	if err != nil {
-		return errors.Wrap(err, "while waiting for trigger")
+		return errors.Wrap(err, "while waiting for subscription ready")
 	}
+
 	return nil
 }
 
@@ -144,21 +138,17 @@ func (f ConfigureFunction) OnError() error {
 		return errors.Wrap(err, "while getting service binding usage")
 	}
 
-	if err := f.broker.LogResource(); err != nil {
-		return errors.Wrap(err, "while getting broker")
-	}
-
-	if err := f.trigger.LogResource(); err != nil {
-		return errors.Wrap(err, "while getting trigger")
+	if err := f.subscription.LogResource(); err != nil {
+		return errors.Wrap(err, "while getting subscription")
 	}
 
 	return nil
 }
 
 func (f ConfigureFunction) Cleanup() error {
-	err := f.trigger.Delete()
+	err := f.subscription.Delete()
 	if err != nil {
-		return errors.Wrap(err, "while deleting trigger")
+		return errors.Wrap(err, "while deleting subscription")
 	}
 
 	err = f.svcBindingUsage.Delete()

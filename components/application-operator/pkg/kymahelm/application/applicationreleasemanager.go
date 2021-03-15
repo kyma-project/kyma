@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	hapi_4 "helm.sh/helm/v3/pkg/release"
@@ -30,17 +31,19 @@ type ApplicationReleaseManager interface {
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status, string, error)
 	UpgradeApplicationReleases() error
+	UpgradeApplicationRelease(application *v1alpha1.Application) error
+	ConfigsChanged(application *v1alpha1.Application) (bool, error)
 }
 
 type releaseManager struct {
 	helmClient        kymahelm.HelmClient
 	appClient         ApplicationClient
-	overridesDefaults OverridesData
+	overridesDefaults overrides.OverridesData
 	namespace         string
 	profile           string
 }
 
-func NewApplicationReleaseManager(helmClient kymahelm.HelmClient, appClient ApplicationClient, overridesDefaults OverridesData, namespace string, profile string) ApplicationReleaseManager {
+func NewApplicationReleaseManager(helmClient kymahelm.HelmClient, appClient ApplicationClient, overridesDefaults overrides.OverridesData, namespace string, profile string) ApplicationReleaseManager {
 	return &releaseManager{
 		helmClient:        helmClient,
 		appClient:         appClient,
@@ -51,12 +54,12 @@ func NewApplicationReleaseManager(helmClient kymahelm.HelmClient, appClient Appl
 }
 
 func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4.Status, string, error) {
-	overrides, err := r.prepareOverrides(application)
+	overridesMap, err := r.prepareOverrides(application)
 	if err != nil {
 		return hapi_4.StatusFailed, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
 	}
 
-	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overrides, r.profile)
+	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overridesMap, r.profile)
 	if err != nil {
 		return hapi_4.StatusFailed, "", err
 	}
@@ -74,20 +77,26 @@ func (r *releaseManager) UpgradeApplicationReleases() error {
 			continue
 		}
 
-		status, description, err := r.upgradeChart(&app)
-		if err != nil {
-			log.Errorf("Failed to upgrade release %s: %s", app.Name, err.Error())
-
-			setCurrentStatus(&app, status.String(), description)
-
-			err = r.updateApplication(&app)
-			if err != nil {
-				log.Errorf("Failed to upgrade %s CR: %s", app.Name, err.Error())
-			}
-		}
+		r.UpgradeApplicationRelease(&app)
 	}
 
 	return nil
+}
+
+func (r *releaseManager) UpgradeApplicationRelease(application *v1alpha1.Application) error {
+	status, description, err := r.upgradeChart(application)
+	if err != nil {
+		log.Errorf("Failed to upgrade release %s: %s", application.Name, err.Error())
+
+		setCurrentStatus(application, status.String(), description)
+
+		err = r.updateApplication(application)
+		if err != nil {
+			log.Errorf("Failed to upgrade %s CR: %s", application.Name, err.Error())
+		}
+	}
+
+	return err
 }
 
 func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4.Status, string, error) {
@@ -101,13 +110,13 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 		return hapi_4.StatusUnknown, "", errors.Wrapf(err, "Application %s is missing", application.Name)
 	}
 
-	overrides, err := r.prepareOverrides(application)
+	overridesMap, err := r.prepareOverrides(application)
 	if err != nil {
 		return hapi_4.StatusFailed, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
 	}
 
 	log.Infof("Upgrading release %s", application.Name)
-	upgradeResponse, err := r.helmClient.UpdateReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overrides, r.profile)
+	upgradeResponse, err := r.helmClient.UpdateReleaseFromChart(applicationChartDirectory, application.Name, r.namespace, overridesMap, r.profile)
 	if err != nil {
 		return hapi_4.StatusFailed, "", err
 	}
@@ -133,9 +142,14 @@ func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (ma
 		return nil, err
 	}
 
-	return map[string]interface{}{
+	overridesResult := map[string]interface{}{
 		"global": overridesMap,
-	}, nil
+	}
+
+	overrideLabels := overrides.NewFlatOverridesMap(application.Spec.Labels)
+	overrides.MergeLabelOverrides(overrideLabels, overridesResult)
+
+	return overridesResult, nil
 }
 
 func (r *releaseManager) DeleteReleaseIfExists(name string) error {
@@ -171,6 +185,18 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (r *releaseManager) ConfigsChanged(application *v1alpha1.Application) (bool, error) {
+	status, err := r.helmClient.ReleaseStatus(application.Name, application.Namespace)
+	if err != nil {
+		return false, err
+	}
+
+	oldOverrides := overrides.NewExtractedOverridesMap(status.Config)
+	newOverrides := overrides.NewFlatOverridesMap(application.Spec.Labels)
+
+	return !oldOverrides.ContainsAll(newOverrides), nil
 }
 
 func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status, string, error) {

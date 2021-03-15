@@ -17,3 +17,11 @@ docker-registry:
   resources:
     requests:
       cpu: 50m
+
+containers:
+  manager:
+    envs:
+      functionBuildMaxSimultaneousJobs:
+        value: "5"
+      logLevel:
+        value: "warn"

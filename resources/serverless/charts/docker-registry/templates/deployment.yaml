@@ -35,8 +35,8 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if .Values.priorityClassName }}
-      priorityClassName: "{{ .Values.priorityClassName }}"
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
 {{- end }}
 {{- if .Values.securityContext.enabled }}
       securityContext:
@@ -46,6 +46,11 @@ spec:
       initContainers:
         - name: generate-htpasswd
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+{{- if .Values.securityContext.enabled }}
+          securityContext:
+            privileged: {{ .Values.securityContext.privileged }}
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+{{- end }}
           volumeMounts:
             - name: registry-credentials
               mountPath: /regcred
@@ -54,6 +59,8 @@ spec:
           {{- toYaml . | nindent 12 }}
           {{- end }}
           command:
+          # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
+          # might want to investigate
             - sh
             - -c
             - |
@@ -63,6 +70,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.securityContext.enabled }}
+          securityContext:
+            privileged: {{ .Values.securityContext.privileged }}
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+{{- end }}
           command:
           - /bin/registry
           - serve
@@ -93,9 +105,9 @@ spec:
             - name: REGISTRY_AUTH_HTPASSWD_PATH
               value: "/data/htpasswd"
             - name: REGISTRY_HTTP_SECRET
-            # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen 
+            # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen
             # using kubectl describe
-              value: {{ randAlphaNum 16 | b64enc | quote }} 
+              value: {{ randAlphaNum 16 | b64enc | quote }}
 {{- if .Values.tlsSecretName }}
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
               value: /etc/ssl/docker/tls.crt

@@ -23,11 +23,15 @@ spec:
         release: {{ .Release.Name }}
         kyma-project.io/component: frontend
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/service-catalog-ui:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          resources: 
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          resources:
             {{- toYaml .Values.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
@@ -41,3 +45,6 @@ spec:
           items:
           - key: config.js
             path: config.js
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

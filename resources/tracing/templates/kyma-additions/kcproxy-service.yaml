@@ -1,3 +1,4 @@
+{{if .Values.kcproxy.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,3 +14,4 @@ spec:
   selector:
     app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
     app.kubernetes.io/component: kcproxy
+{{end}}

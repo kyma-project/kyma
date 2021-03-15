@@ -1,5 +1,5 @@
 # remember to deprecate this node version by april 2021 https://nodejs.org/en/about/releases/
-FROM node:10.23.0-alpine3.11
+FROM node:10.23.3-alpine3.11
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

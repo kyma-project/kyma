@@ -20,12 +20,23 @@ If release name contains chart name it will be used as a full name.
 Common labels
 */}}
 {{- define "eventing.labels" -}}
+component: {{ .Release.Name }}
 helm.sh/chart: {{ include "eventing.chart" . }}
 {{ include "eventing.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{- define "eventing.postUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: post-upgrade-hook
+{{- end }}
+
+{{- define "eventing.preUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: pre-upgrade-hook
 {{- end }}
 
 {{/*

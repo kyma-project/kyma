@@ -96,6 +96,10 @@ spec:
           httpGet:
             path: /oauth/health
             port: http
+        {{- if .Values.kyma.authProxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.kyma.authProxy.securityContext | nindent 10 }}
+        {{- end }}
         resources:
 {{ toYaml .Values.kyma.authProxy.resources | indent 10 }}
 {{- end}}

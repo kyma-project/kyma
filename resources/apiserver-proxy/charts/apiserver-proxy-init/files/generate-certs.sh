@@ -47,14 +47,14 @@ if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
   echo "Running on Gardener. Skipping processing secret with cert and key because Gardener will provide"
 {{- else if .Values.global.tlsKey }}
   echo "Running on envrionment with user provided cert and key, creating secret with it"
-  echo "{{ .Values.global.tlsKey }}" | base64 -d > ${HOME}/key.pem
-  echo "{{ .Values.global.tlsCrt }}" | base64 -d > ${HOME}/cert.pem
-  kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem
+  echo "{{ .Values.global.tlsKey }}" | base64 -d > /tmp/key.pem
+  echo "{{ .Values.global.tlsCrt }}" | base64 -d > /tmp/cert.pem
+  kubectl create secret tls {{ template "name" . }}-tls-cert  --key /tmp/key.pem --cert /tmp/cert.pem
 {{- else }}
   echo "Running on xip.io enabled cluster, creating certificate for the domain"
   source /app/utils.sh
-  generateCertificatesForDomain "$DOMAIN" ${HOME}/key.pem ${HOME}/cert.pem
-  kubectl create secret tls {{ template "name" . }}-tls-cert  --key ${HOME}/key.pem --cert ${HOME}/cert.pem -o yaml --dry-run | kubectl apply -f -
+  generateCertificatesForDomain "$DOMAIN" /tmp/key.pem /tmp/cert.pem
+  kubectl create secret tls {{ template "name" . }}-tls-cert  --key /tmp/key.pem --cert /tmp/cert.pem -o yaml --dry-run | kubectl apply -f -
 {{- end }}
 fi
 echo "Done"

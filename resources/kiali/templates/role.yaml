@@ -24,6 +24,12 @@ rules:
   - list
   - patch
   - watch
+- apiGroups: [""]
+  resources:
+  - pods/portforward
+  verbs:
+  - create
+  - post
 - apiGroups: ["extensions", "apps"]
   resources:
   - deployments

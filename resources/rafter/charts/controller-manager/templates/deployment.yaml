@@ -138,3 +138,8 @@ spec:
               value: {{ include "rafter.webhooksConfigMapName" . }}
             - name: APP_WEBHOOK_CONFIG_MAP_CFG_MAP_NAMESPACE
               value: {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.namespace "context" . ) }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.envs.loglevel }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

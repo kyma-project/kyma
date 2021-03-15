@@ -1,0 +1,34 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Values.global.istio.gateway.name }}
+  namespace: {{ .Values.global.istio.gateway.namespace }}
+spec:
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway # use istio default ingress gateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: {{ .Values.global.istio.gateway.name }}-certs
+      minProtocolVersion: TLSV1_2
+      cipherSuites:
+      - ECDHE-RSA-CHACHA20-POLY1305
+      - ECDHE-RSA-AES256-GCM-SHA384
+      - ECDHE-RSA-AES256-SHA
+      - ECDHE-RSA-AES128-GCM-SHA256
+      - ECDHE-RSA-AES128-SHA
+    hosts:
+      - "*.{{ .Values.global.domainName }}"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    tls:
+      httpsRedirect: true # automatic 301 redirect from http to https
+    hosts:
+      - "*.{{ .Values.global.domainName }}"

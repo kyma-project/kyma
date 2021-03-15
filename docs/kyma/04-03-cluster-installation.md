@@ -3,11 +3,13 @@ title: Install Kyma on a cluster
 type: Installation
 ---
 
-This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
+This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [xip.io](http://xip.io) using a GitHub release of your choice.
 
->**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
+>**TIP:** The xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow the [installation guide](#installation-install-kyma-with-your-own-domain). To install Kyma using your own image instead of a GitHub release, follow the [instructions](#installation-use-your-own-kyma-installer-image).
 
 ## Prerequisites
+
+> **CAUTION:** As of version 1.20, [Kubernetes is deprecating Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime in favor of containerd. Due to a different way in which [containerd handles certificate authorities](https://github.com/containerd/containerd/issues/3071), Kyma's built-in Docker registry will not work correctly on clusters running with a self-signed TLS certificate on top of Kubernetes installation where containerd is used as a container runtime. If that is your case, either upgrade the cluster to use Docker instead of containerd, [generate a valid TLS certificate](#installation-install-kyma-with-your-own-domain-generate-the-tls-certificate) for your Kyma instance or [configure an external Docker registry](/components/serverless/#tutorials-set-an-external-docker-registry).
 
 <div tabs name="prerequisites" group="cluster-installation">
   <details>
@@ -15,6 +17,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
+- Kubernetes cluster v1.18
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -28,6 +31,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   AKS
   </summary>
 
+- Kubernetes cluster v1.19
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Microsoft Azure](https://azure.microsoft.com) account
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.16.3 or higher
@@ -41,6 +45,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   Gardener
   </summary>
 
+- Kubernetes cluster v1.19
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Gardener](https://gardener.cloud/) account
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
@@ -154,7 +159,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     * For GCP:
       * Create a project in Gardener.
-      * Add a [new service account and roles](https://gardener.cloud/documentation/050-tutorials/content/howto/gardener_gcp/#create-a-new-serviceaccount-and-assign-roles).
+      * Add a [new service account and roles](https://gardener.cloud/documentation/guides/administer_shoots/gardener_gcp).
       * Add the GCP Secret under **Secrets** in the Gardener dashboard.
       * Add the service account and download Gardener's `kubeconfig` file.
 
@@ -188,15 +193,19 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 ## Install Kyma
 
-   >**NOTE**: If you want to use the Kyma production profile, see the following documents before you go to the next step:
-   >* [Istio production profile](/components/service-mesh/#configuration-service-mesh-production-profile)
-   >* [OAuth2 server production profile](/components/security/#configuration-o-auth2-server-profiles)
+Install Kyma using Kyma CLI:
 
-1. Install Kyma using Kyma CLI:
+```bash
+kyma install -s $KYMA_VERSION
+```
 
-    ```bash
-    kyma install -s $KYMA_VERSION
-    ```
+To install Kyma with one of the predefined [profiles](#installation-overview-profiles), run:
+
+```bash
+kyma install -s $KYMA_VERSION --profile {evaluation|production}
+```
+
+>**NOTE:** If you don't specify `$KYMA_VERSION`, the version from the latest commit on the `master` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
 
 ## Post-installation steps
 

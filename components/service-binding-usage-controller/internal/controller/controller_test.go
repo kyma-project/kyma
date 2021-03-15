@@ -166,7 +166,7 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 	expSBU := fixSBU.DeepCopy()
 	expSBU.OwnerReferences = []metaV1.OwnerReference{}
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempts from 0; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempt; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -189,9 +189,6 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 		ExpectOnIncrementQueueLength(metric.SbuController).
 		Once()
 	tc.metrics.
-		ExpectOnDecrementQueueLength(metric.SbuController).
-		Once()
-	tc.metrics.
 		ExpectOnRecordLatency(metric.SbuController).
 		Once()
 
@@ -205,8 +202,7 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
-		WithTestHookOnAsyncOpDone(hookAsyncOp).
-		WithoutRetries()
+		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -256,7 +252,7 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 	expSBU := fixSBU.DeepCopy()
 	expSBU.OwnerReferences = []metaV1.OwnerReference{}
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempts from 0; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempt; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -280,9 +276,6 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 		ExpectOnIncrementQueueLength(metric.SbuController).
 		Once()
 	tc.metrics.
-		ExpectOnDecrementQueueLength(metric.SbuController).
-		Once()
-	tc.metrics.
 		ExpectOnRecordLatency(metric.SbuController).
 		Once()
 
@@ -296,8 +289,7 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
-		WithTestHookOnAsyncOpDone(hookAsyncOp).
-		WithoutRetries()
+		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -341,7 +333,7 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		Name:       "redis-client",
 	})
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.FetchBindingLabelsErrorReason, "Process error during 0 attempts from 0; while fetching bindings labels for binding [ServiceBinding \"production/redis-client\"]: cannot fetch labels")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.FetchBindingLabelsErrorReason, "Process error during 0 attempt; while fetching bindings labels for binding [ServiceBinding \"production/redis-client\"]: cannot fetch labels")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -362,9 +354,6 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		ExpectOnIncrementQueueLength(metric.SbuController).
 		Once()
 	tc.metrics.
-		ExpectOnDecrementQueueLength(metric.SbuController).
-		Once()
-	tc.metrics.
 		ExpectOnRecordLatency(metric.SbuController).
 		Once()
 
@@ -383,8 +372,7 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
-		WithTestHookOnAsyncOpDone(hookAsyncOp).
-		WithoutRetries()
+		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -442,9 +430,6 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 		ExpectOnIncrementQueueLength(metric.SbuController).
 		Once()
 	tc.metrics.
-		ExpectOnDecrementQueueLength(metric.SbuController).
-		Once()
-	tc.metrics.
 		ExpectOnRecordLatency(metric.SbuController).
 		Once()
 
@@ -458,8 +443,7 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 		tc.sbuGuard,
 		logSink.Logger,
 		tc.metrics).
-		WithTestHookOnAsyncOpDone(hookAsyncOp).
-		WithoutRetries()
+		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

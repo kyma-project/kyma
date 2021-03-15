@@ -4,6 +4,8 @@ controller-manager:
       requests:
         cpu: 10m
         memory: 32Mi
+  envs:
+    loglevel: "warn"
 
 upload-service:
   pod:

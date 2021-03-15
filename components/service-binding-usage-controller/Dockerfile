@@ -1,4 +1,4 @@
-FROM golang:1.14.4-alpine3.11 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/service-binding-usage-controller
 ADD . $SRC_DIR

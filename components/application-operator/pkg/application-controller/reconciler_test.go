@@ -274,6 +274,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", mock.AnythingOfType("*v1alpha1.Application")).Return(false, nil)
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 
@@ -307,6 +308,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", mock.AnythingOfType("*v1alpha1.Application")).Return(false, nil)
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 
@@ -428,6 +430,107 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
 		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", mock.AnythingOfType("*v1alpha1.Application")).Return(false, nil)
+
+		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.Error(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		ApplicationReleaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should upgrade when configs changed", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
+			Run(statusChecker.checkStatus).Return(nil)
+
+		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
+		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
+		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", mock.AnythingOfType("*v1alpha1.Application")).Return(true, nil)
+		ApplicationReleaseManager.On("UpgradeApplicationRelease", mock.AnythingOfType("*v1alpha1.Application")).Return(nil)
+
+		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		ApplicationReleaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should ignore upgrade when configs not changed", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
+			Run(statusChecker.checkStatus).Return(nil)
+
+		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
+		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
+		ApplicationReleaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", mock.AnythingOfType("*v1alpha1.Application")).Return(false, nil)
+
+		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		ApplicationReleaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should ignore update when error occurred during ConfigsChanged", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		anyApplication := mock.AnythingOfType("*v1alpha1.Application")
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+
+		ApplicationReleaseManager := &helmmocks.ApplicationReleaseManager{}
+		ApplicationReleaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
+		ApplicationReleaseManager.On("ConfigsChanged", anyApplication).Return(false, errors.NewBadRequest("Any error"))
 
 		reReconciler := NewReconciler(managerClient, ApplicationReleaseManager, logger)
 

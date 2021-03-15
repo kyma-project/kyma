@@ -76,7 +76,6 @@ metadata:
   namespace: kyma-installer
   labels:
     name: kyma-installer
-    kyma-project.io/installation: "kyma-installer"
     kyma-project.io/installation: ""
 spec:
   selector:
@@ -99,6 +98,47 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsGroup: 65534
+          runAsUser: 65534
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: 000-kyma-installer
+  labels:
+    release: kyma-installer
+    kyma-project.io/installation: "kyma-installer"
+    kyma-project.io/installation: ""
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  hostPorts:
+  - max: 65535
+    min: 1024
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+  - "*"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -110,6 +150,10 @@ rules:
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames: ["000-kyma-installer"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

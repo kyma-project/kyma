@@ -4,23 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
-	ceclient "github.com/cloudevents/sdk-go/v2/client"
-
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
-
-	cloudevents "github.com/cloudevents/sdk-go/v2"
-
 	"k8s.io/apimachinery/pkg/types"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	cev2 "github.com/cloudevents/sdk-go/v2"
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
 
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
 // compile time check
@@ -28,15 +27,20 @@ var _ NatsInterface = &Nats{}
 
 type NatsInterface interface {
 	Initialize() error
-	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 
 type Nats struct {
-	Connection    *nats.Conn
-	Subscriptions map[string]*nats.Subscription
-	Log           logr.Logger
-	Config        env.NatsConfig
+	config        env.NatsConfig
+	log           logr.Logger
+	client        cev2.Client
+	connection    *nats.Conn
+	subscriptions map[string]*nats.Subscription
+}
+
+func NewNats(config env.NatsConfig, log logr.Logger) *Nats {
+	return &Nats{config: config, log: log, subscriptions: make(map[string]*nats.Subscription)}
 }
 
 const (
@@ -45,27 +49,50 @@ const (
 )
 
 // Initialize creates a connection to Nats
-func (n *Nats) Initialize() error {
-	n.Log.Info("Initialize NATS connection")
-	var err error
-	if n.Connection == nil || n.Connection.Status() != nats.CONNECTED {
-		n.Connection, err = nats.Connect(n.Config.Url,
+func (n *Nats) Initialize() (err error) {
+	n.log.Info("Initialize NATS connection")
+	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
+		n.connection, err = nats.Connect(n.config.Url,
 			nats.RetryOnFailedConnect(true),
-			nats.MaxReconnects(n.Config.MaxReconnects),
-			nats.ReconnectWait(n.Config.ReconnectWait))
+			nats.MaxReconnects(n.config.MaxReconnects),
+			nats.ReconnectWait(n.config.ReconnectWait))
 		if err != nil {
 			return errors.Wrapf(err, "failed to connect to Nats")
 		}
-		if n.Connection.Status() != nats.CONNECTED {
-			notConnectedErr := fmt.Errorf("not connected: status: %v", n.Connection.Status())
+		if n.connection.Status() != nats.CONNECTED {
+			notConnectedErr := fmt.Errorf("not connected: status: %v", n.connection.Status())
 			return notConnectedErr
 		}
 	}
-	n.Log.Info(fmt.Sprintf("Successfully connected to Nats: %v", n.Connection.Status()))
+	n.log.Info("Successfully connected to Nats", "status", n.connection.Status())
+
+	if n.client != nil {
+		return nil
+	}
+
+	n.log.Info("Initialize cloudevents client")
+	if n.client, err = newCloudeventClient(n.config); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
+func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
+	transport := &http.Transport{
+		MaxIdleConns:        config.MaxIdleConns,
+		MaxConnsPerHost:     config.MaxConnsPerHost,
+		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
+		IdleConnTimeout:     config.IdleConnTimeout,
+	}
+	protocol, err := cev2.NewHTTP(cev2.WithRoundTripper(transport))
+	if err != nil {
+		return nil, err
+	}
+	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
+}
+
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {
 	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
@@ -76,25 +103,36 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
-		eventType := filter.EventType.Value
-		callback := n.getCallback(sub)
+		eventType := strings.TrimSpace(filter.EventType.Value)
+		if len(eventType) == 0 {
+			err := nats.ErrBadSubject
+			n.log.Error(err, "failed to create a Nats subscription")
+			return err
+		}
 
-		if n.Connection.Status() != nats.CONNECTED {
-			n.Log.Info("connection to Nats", "status",
-				fmt.Sprintf("%v", n.Connection.Status()))
+		callback := n.getCallback(sub.Spec.Sink)
+
+		if n.connection.Status() != nats.CONNECTED {
+			n.log.Info("connection to Nats", "status", fmt.Sprintf("%v", n.connection.Status()))
 			initializeErr := n.Initialize()
 			if initializeErr != nil {
-				n.Log.Error(initializeErr, "failed to reset NATS connection")
+				n.log.Error(initializeErr, "failed to reset NATS connection")
 				return initializeErr
 			}
 		}
 
-		sub, subscribeErr := n.Connection.Subscribe(eventType, callback)
+		// clean the application name segment in the event-type from none-alphanumeric characters
+		eventType, err := cleaner.Clean(eventType)
+		if err != nil {
+			return err
+		}
+
+		sub, subscribeErr := n.connection.Subscribe(eventType, callback)
 		if subscribeErr != nil {
-			n.Log.Error(subscribeErr, "failed to create a Nats subscription")
+			n.log.Error(subscribeErr, "failed to create a Nats subscription")
 			return subscribeErr
 		}
-		n.Subscriptions[fmt.Sprintf("%s.%s", namespacedName.String(), filter.EventType.Value)] = sub
+		n.subscriptions[fmt.Sprintf("%s.%s", namespacedName.String(), filter.EventType.Value)] = sub
 	}
 	return nil
 }
@@ -104,11 +142,11 @@ func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) e
 		Namespace: subscription.Namespace,
 		Name:      subscription.Name,
 	}
-	for k, v := range n.Subscriptions {
+	for k, v := range n.subscriptions {
 		if strings.HasPrefix(k, subNsName.String()) {
-			n.Log.Info("connection status", "status", n.Connection.Status())
+			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
-			if n.Connection.Status() != nats.CONNECTED {
+			if n.connection.Status() != nats.CONNECTED {
 				initializeErr := n.Initialize()
 				if initializeErr != nil {
 					return errors.Wrapf(initializeErr, "can't connect to Nats server")
@@ -118,43 +156,37 @@ func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) e
 			if err != nil {
 				return errors.Wrapf(err, "failed to unsubscribe")
 			}
-			delete(n.Subscriptions, k)
-			n.Log.Info("successfully unsubscribed/deleted subscription")
+			delete(n.subscriptions, k)
+			n.log.Info("successfully unsubscribed/deleted subscription")
 		}
 	}
 	return nil
 }
 
-func (n Nats) getCallback(sub *eventingv1alpha1.Subscription) func(msg *nats.Msg) {
+func (n *Nats) getCallback(sink string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
-			n.Log.Error(err, "failed to convert Nats message to CE")
+			n.log.Error(err, "failed to convert Nats message to CE")
 			return
 		}
-		ctx := context.Background()
+
 		// Creating a context with cancellable
-		ctxWithCancel, cancel := context.WithCancel(ctx)
-		// Creating a context with retries
-		ctxWithRetries := cloudevents.ContextWithRetriesExponentialBackoff(ctxWithCancel, period, maxTries)
-		// Creating a context with target
-		ctxWithCE := cloudevents.ContextWithTarget(ctxWithRetries, sub.Spec.Sink)
-		// Cancel later to clean up
+		ctxWithCancel, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		cev2Client, err := ceclient.NewDefault()
-		if err != nil {
-			n.Log.Error(err, "failed to create CE client")
+
+		// Creating a context with retries
+		ctxWithRetries := cev2.ContextWithRetriesExponentialBackoff(ctxWithCancel, period, maxTries)
+
+		// Creating a context with target
+		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
+
+		if result := n.client.Send(ctxWithCE, *ce); !cev2.IsACK(result) {
+			n.log.Error(result, "failed to dispatch event")
 			return
 		}
-		err = cev2Client.Send(ctxWithCE, *ce)
-		if err != nil {
-			if !strings.Contains(err.Error(), "200") {
-				n.Log.Error(err, "failed to dispatch event")
-				return
-			}
-		}
-		n.Log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(),
-			sub.Spec.Sink))
+
+		n.log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), sink))
 	}
 }
 

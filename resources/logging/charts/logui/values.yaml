@@ -1,12 +1,22 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 0fa81441
+  tag: 896b2ee7
   pullPolicy: Always
 service:
   name: nginx
   type: ClusterIP
   externalPort: 80
   internalPort: 80
-resources: {}
 nameOverride: log-ui
+
+podSecurityPolicy:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 1m
+    memory: 3Mi
+  limits:
+    cpu: 30m
+    memory: 16Mi

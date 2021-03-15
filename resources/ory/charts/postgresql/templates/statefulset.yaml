@@ -117,8 +117,8 @@ spec:
 {{ tpl .Values.master.extraInitContainers . | indent 8 }}
       {{- end }}
       {{- end }}
-      {{- if .Values.master.priorityClassName }}
-      priorityClassName: {{ .Values.master.priorityClassName }}
+      {{- if or .Values.master.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.master.priorityClassName .Values.global.priorityClassName }}
       {{- end }}
       containers:
         - name: {{ template "postgresql.fullname" . }}

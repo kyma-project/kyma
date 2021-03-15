@@ -10,6 +10,14 @@ global:
   namespace: kyma-integration
   strictMode: disabled
   isBEBEnabled: false
+  log:
+    format: "json"
+    level: "warn"
+  podSecurityPolicy:
+    enabled: true
+    runAsUser: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
   ingress:
     domainName: "TBD"
   helm:
@@ -24,37 +32,37 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "PR-10268"
+    version: "34011b0f"
   application_operator_tests:
-    version: "470796a1"
+    version: "f4a3bda0"
   connector_service:
-    version: "PR-10285"
+    version: "34011b0f"
   connector_service_tests:
     version: "PR-10893"
   connection_token_handler:
-    version: "3083c3d4"
+    version: "34011b0f"
   connection_token_handler_tests:
     version: "PR-10893"
   event_service:
-    version: "f98272bd"
+    version: "e6b97e48"
   event_service_integration_tests:
-    version: "PR-10277"
+    version: "d6bbc47a"
   application_gateway:
-    version: "4feb544b"
+    version: "34011b0f"
   application_gateway_tests:
-    version: "470796a1"
+    version: "77ca2463"
   application_gateway_legacy_tests:
-    version: "d0f17bff"
+    version: "fc11d39b"
   application_registry:
-    version: "4feb544b"
+    version: "34011b0f"
   application_registry_tests:
     version: "d556963d"
   application_broker:
-    version: "PR-10294"
+    version: "52f52cc9"
   application_connectivity_certs_setup_job:
-    version: "4feb544b"
+    version: "34011b0f"
   application_connectivity_validator:
-    version: "60463b1d"
+    version: "34011b0f"
   application_broker_eventing_migration:
     version: "a8a6bca9"
 
@@ -78,8 +86,8 @@ application_connectivity_certs_sync:
       name: kyma-gateway-certs
       namespace: istio-system
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210310-c03fb8b6"
 
 tests:
   application_connector_tests:
@@ -89,5 +97,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "470796a1"
+      version: "58e57ea1"
       pullPolicy: IfNotPresent

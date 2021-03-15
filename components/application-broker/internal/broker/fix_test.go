@@ -64,7 +64,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 }
 
 func fixInstanceID() internal.InstanceID {
-	return internal.InstanceID("inst-123")
+	return "inst-123"
 }
 
 func fixNs() internal.Namespace {

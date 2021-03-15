@@ -47,6 +47,10 @@ spec:
             value: {{ .Values.tests.application_connector_tests.skipSslVerify | quote }}
           - name: CENTRAL
             value: {{ .Values.tests.application_connector_tests.connector_service.central | quote }}
+          securityContext:
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       restartPolicy: Never
 {{- end }}
 {{- end }}

@@ -1,0 +1,10 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  # TODO: find some way to override that file with our specific images
+  hub: eu.gcr.io/kyma-project/external/istio
+  tag: 1.8.2-distroless
+  components:
+    egressGateways:
+      - enabled: false
+        name: istio-egressgateway

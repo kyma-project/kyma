@@ -10,15 +10,30 @@ kyma:
     - istio-system
     - kube-system
   labelJob:
-    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    image: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210310-c03fb8b6"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
+  podSecurityPolicy:
+    enabled: true
 
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "PR-10158"
+    tag: "50773916"
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 monitoring:
   enabled: true
@@ -30,12 +45,16 @@ monitoring:
 
 test:
   istio_kyma_validate:
-    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    image: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210310-c03fb8b6"
     enabled: true
     labels:
       integration: true
       after-upgrade: true
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
 
 istio_operator_cluster_file: istio-operator-cluster.yaml
 istio_operator_minikube_file: istio-operator-minikube.yaml

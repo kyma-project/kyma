@@ -47,7 +47,7 @@ func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.H
 	go func() {
 		errChan <- recv.server.Serve(recv.listener)
 	}()
-	logrus.Info("Event Publisher Proxy server has started.")
+	logrus.Info("Event Publisher Receiver has started.")
 
 	// wait for the server to return or ctx.Done().
 	select {

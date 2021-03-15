@@ -1,14 +1,13 @@
 package logstream
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strconv"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/logging/pkg/request"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -67,21 +66,24 @@ func WaitForDummyPodToRun(namespace string, coreInterface kubernetes.Interface) 
 }
 
 // Test querys loki api with the given label key-value pair and checks that the logs of the dummy pod are present
-func Test(labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
+func Test(domain string, labelKey string, labelValue string, authHeader string, httpClient *http.Client) error {
 	timeout := time.After(3 * time.Minute)
 	tick := time.NewTicker(5 * time.Second)
 	currentTimeUnixNano := time.Now().UnixNano()
 	startTimeParam := strconv.FormatInt(currentTimeUnixNano, 10)
-	lokiURL := fmt.Sprintf(`http://logging-loki.kyma-system:3100/api/prom/query?query={%s="%s"}&start=%s`, labelKey, labelValue, startTimeParam)
+	lokiURL := fmt.Sprintf(`https://loki.%s/api/prom/query?query={%s="%s"}&start=%s`, domain, labelKey, labelValue, startTimeParam)
 	for {
 		select {
 		case <-timeout:
 			tick.Stop()
 			return errors.Errorf(`the string "logTest-" is not present in logs when using the following query: {%s="%s"}`, labelKey, labelValue)
 		case <-tick.C:
-			respBody, err := doGet(httpClient, lokiURL, authHeader)
+			respStatus, respBody, err := request.DoGet(httpClient, lokiURL, authHeader)
 			if err != nil {
 				return errors.Wrap(err, "cannot query loki for logs")
+			}
+			if respStatus != http.StatusOK {
+				return errors.Errorf("error in HTTP GET to %s.\nStatus Code: %d\nResponse: %s", lokiURL, respStatus, respBody)
 			}
 			var testDataRegex = regexp.MustCompile(`logTest-`)
 			submatches := testDataRegex.FindStringSubmatch(respBody)
@@ -101,26 +103,4 @@ func Cleanup(namespace string, coreInterface kubernetes.Interface) error {
 		return errors.Wrap(err, "cannot delete test-counter-pod")
 	}
 	return nil
-}
-
-func doGet(httpClient *http.Client, url string, authHeader string) (string, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot create a new HTTP request")
-	}
-	req.Header.Add("Authorization", authHeader)
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return "", errors.Wrapf(err, "cannot send HTTP request to %s", url)
-	}
-	defer resp.Body.Close()
-	var body bytes.Buffer
-	if _, err := io.Copy(&body, resp.Body); err != nil {
-		return "", errors.Wrap(err, "cannot read response body")
-	}
-	if resp.StatusCode != 200 {
-		return "", errors.Errorf("error in HTTP GET to %s.\nStatus Code: %d\nResponse: %s", url, resp.StatusCode, body.String())
-	}
-	return body.String(), nil
 }

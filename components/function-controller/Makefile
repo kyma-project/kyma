@@ -3,61 +3,31 @@ ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200124-69faeef6
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-
 # Image URL to use all building/pushing image targets
 IMG ?= $(APP_NAME):latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
+pull-licenses-local:
+	@echo "Omitting licenses will not be pulled."	
 
-verify:: mod-verify
-release: build-function-webhook \
-	push-function-webhook \
-	build-function-build-init \
-	push-function-build-init \
-	build-image push-image
-
-
-resolve-local:
-	GO111MODULE=on go mod download
-	GO111MODULE=on go mod vendor
-
-ensure-local:
-	@echo "Go modules present in component - omitting."
-
-dep-status:
-	@echo "Go modules present in component - omitting."
-
-dep-status-local:
-	@echo "Go modules present in component - omitting."
-
-mod-verify-local:
-	GO111MODULE=on go mod verify
+release:
+	$(MAKE) gomod-release-local
 
 # Run tests
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test-local: generate-local
-	GO111MODULE=on go test -v -race -coverprofile=/tmp/artifacts/cover.out -mod vendor ./...
+test-local:
+	mkdir -p /tmp/artifacts
+	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
-
-# Install CRDs into a cluster
-install: manifests
-	kubectl apply -f ./config/crd/bases
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
@@ -68,43 +38,47 @@ manifests: controller-gen-local generate-local
 		output:rbac:artifacts:config=config/rbac \
 		output:webhook:artifacts:config=config/webhook
 
+CONTROLLER_GEN := $(shell which controller-gen)
+
 # Generate code
 .PHONY: generate-local
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
-# find or download controller-gen
-# download controller-gen if necessary
-.PHONY: controller-gen-local
-controller-gen-local:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+.PHONY: build-image 
+build-image: build-function-webhook \
+	build-function-build-init \
+	build-image-function-controller
+	@echo "Override generic makefile build-image target to not execute"
 
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/serverless"
+.PHONY: push-image
+push-image: push-function-webhook \
+	push-function-build-init \
+	push-image-function-controller
+	@echo "Override generic makefile push-image target to not execute"
+
+.PHONY: build-image push-image
+build-image: build-function-webhook \
+	build-function-build-init \
+	build-image-function-controller
+	@echo "Override generic makefile build-image target to not execute"
+
+
+push-image: push-function-webhook \
+	push-function-build-init \
+	push-image-function-controller
+	@echo "Override generic makefile push-image target to not execute"
 
 ######## function manager
 
 MANAGER_NAME = function-controller
 MANAGER_IMG_TAG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(MANAGER_NAME)
 
-.PHONY: build-image push-image
-build-image:
+.PHONY: build-image-function-controller push-image-function-controller
+build-image-function-controller:
 	docker build -t $(MANAGER_NAME) -f $(ROOT)/deploy/manager/Dockerfile .
 
-push-image:
+push-image-function-controller:
 	docker tag $(MANAGER_NAME) $(MANAGER_IMG_TAG):$(DOCKER_TAG)
 	docker push $(MANAGER_IMG_TAG):$(DOCKER_TAG)
 
@@ -133,9 +107,3 @@ build-function-build-init:
 push-function-build-init:
 	docker tag $(JOBINIT_NAME) $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
 	docker push $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
-
-$(eval $(call buildpack-mount,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,controller-gen))
-$(eval $(call buildpack-mount,generate))
-$(eval $(call buildpack-mount,test))

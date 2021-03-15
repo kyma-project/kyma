@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -10,12 +11,14 @@ import (
 )
 
 type revocationCheckMiddleware struct {
+	ctx            context.Context
 	revocationList revocation.RevocationListRepository
 	headerParser   certificates.HeaderParser
 }
 
 func NewRevocationCheckMiddleware(revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationCheckMiddleware {
 	return &revocationCheckMiddleware{
+		ctx:            context.Background(),
 		revocationList: revocationList,
 		headerParser:   headerParser,
 	}
@@ -31,7 +34,7 @@ func (rcm revocationCheckMiddleware) Middleware(handler http.Handler) http.Handl
 			return
 		}
 
-		contains, err := rcm.revocationList.Contains(certInfo.Hash)
+		contains, err := rcm.revocationList.Contains(rcm.ctx, certInfo.Hash)
 		if err != nil {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to read revocation list."))
 			return

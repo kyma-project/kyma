@@ -38,7 +38,10 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.global.console_backend_service.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        resources: 
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+        resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
           - name: APP_PORT
@@ -95,3 +98,6 @@ spec:
           secret:
             secretName: ingress-tls-cert
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

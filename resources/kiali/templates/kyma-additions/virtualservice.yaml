@@ -6,13 +6,17 @@ metadata:
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
-  gateways:
-  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
   - kiali.{{ .Values.global.ingress.domainName }}
+  gateways:
+  - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
   - route:
     - destination:
+        {{- if .Values.kcproxy.enabled}}
+        host: {{ template "kiali-server.name" . }}-secured
+        {{- else}}
+        host: {{ template "kiali-server.name" . }}-server
+        {{- end}}
         port:
           number: {{ .Values.kiali.spec.server.port }}
-        host: {{ template "kiali-server.name" . }}-secured

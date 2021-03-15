@@ -13,7 +13,7 @@ application-operator:
       profile: "evaluation"
       limits:
         cpu: 50m
-        memory: 128Mi
+        memory: 256Mi
       requests:
         cpu: 25m
         memory: 40Mi
@@ -30,8 +30,8 @@ application-registry:
   deployment:
     resources:
       limits:
-        cpu: 20m
-        memory: 64Mi
+        cpu: 50m
+        memory: 96Mi
       requests:
         cpu: 10m
         memory: 32Mi
