@@ -68,27 +68,3 @@ spec:
     host: lastorder
     name: lastorder
     port: 80
----
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce
----
-apiVersion: eventing.kyma-project.io/v1alpha1
-kind: Subscription
-metadata:
-  name: function-lastorder
-spec:
-  filter:
-    filters:
-      - eventSource:
-          property: source
-          type: exact
-          value: ""
-        eventType:
-          property: type
-          type: exact
-          value: sap.kyma.custom.commerce.order.created.v1
-  protocol: "nats"
-  protocolsettings: {}
-  sink: http://lastorder.test.svc.cluster.local

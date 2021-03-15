@@ -5,7 +5,7 @@ describe("Installation", function () {
 
   it("Kyma should successfully install", async function () {
     const options = {
-      skipComponents: 'tracing,kiali,knative-eventing,knative-provisioner-natss,nats-streaming,event-sources',
+      skipComponents: ["dex","tracing","monitoring","console","kiali","logging"],
       newEventing: true
     };
     await installKyma(options);
