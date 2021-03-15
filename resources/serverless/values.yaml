@@ -41,7 +41,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-10846"
+    tag: "PR-10888"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
