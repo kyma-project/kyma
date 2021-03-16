@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: {{ printf "%s-%s" (include "logging.fullname" .) "general.rules" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "logging.fullname" .) "kyma-logging.rules" | trunc 63 | trimSuffix "-" }}
   labels:
     app: {{ template "logging.name" . }}
 {{ include "logging.labels" . | indent 4 }}
