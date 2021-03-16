@@ -21,9 +21,17 @@ spec:
           will exhaust in file/socket descriptors within the next 4 hours'
     - alert: FdExhaustionClose
       expr: predict_linear(fd_utilization[10m], 3600) > 1
-      for: 10m
+      for: 1m
       labels:
         severity: critical
       annotations:
         description: '{{`{{ $labels.job }}`}}: {{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} instance
           will exhaust in file/socket descriptors within the next hour'
+    - alert: APIServerLatencyWarning
+      expr: apiserver_latency_seconds:quantile{quantile="0.99",subresource!="log",verb!~"^(?:WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        description: the API server has a 99th percentile latency of {{`{{ $value }}`}} seconds
+          for {{`{{$labels.verb}}`}} {{`{{$labels.resource}}`}}

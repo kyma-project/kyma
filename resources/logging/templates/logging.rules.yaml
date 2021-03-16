@@ -3,8 +3,8 @@ kind: PrometheusRule
 metadata:
   name: logging.rules
   labels:
-    app: {{ template "kube-prometheus-stack.name" . }}
-{{ include "kube-prometheus-stack.labels" . | indent 4 }}
+    app: {{ template "kube-logging-stack.name" . }}
+{{ include "kube-logging-stack.labels" . | indent 4 }}
 spec:
   groups:
   - name: logging.rules
@@ -31,7 +31,7 @@ spec:
       annotations:
         description: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'
     - alert: NoOutputBytesProcessed
-      expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.kymaRules.fluentBitAlertFilter }} }[5m]) == 0
+      expr: rate(fluentbit_output_proc_bytes_total[5m]) == 0
       annotations:
         description: Fluent Bit instance {{ `{{ $labels.instance }}` }}'s output plugin {{ `{{ $labels.name }}` }} has not processed any
           bytes for at least 15 minutes.
@@ -39,10 +39,10 @@ spec:
       for: 15m
       labels:
         severity: critical   
-    # - alert: LokiRequestPanics
-    #   expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
-    #   annotations:
-    #     description: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
-    #   labels:
-    #     severity: critical
+    - alert: LokiRequestPanics
+      expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
+      annotations:
+        description: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
+      labels:
+        severity: critical
 

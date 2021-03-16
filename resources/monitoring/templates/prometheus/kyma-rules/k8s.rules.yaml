@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: k8s.rules
+  name: k8s.custom.rules
   labels:
     app: {{ template "kube-prometheus-stack.name" . }}
 {{ include "kube-prometheus-stack.labels" . | indent 4 }}
@@ -24,7 +24,7 @@ spec:
         1e+06
       labels:
         quantile: "0.5"
-    - alert: APIServerLatencyWarning
+    - alert: APIServerLatencyWarningNEW
       expr: apiserver_latency_seconds:quantile{quantile="0.99",subresource!="log",verb!~"^(?:WATCH|WATCHLIST|PROXY|CONNECT)$"} > 1
       for: 10m
       labels:
