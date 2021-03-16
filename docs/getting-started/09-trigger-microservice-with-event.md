@@ -40,7 +40,7 @@ Follow these steps:
             eventType:
               property: type
               type: exact
-              value: sap.kyma.custom.commerce.order.deliverysent.v1
+              value: sap.kyma.custom.commercemock.order.deliverysent.v1
         protocol: ""
         protocolsettings: {}
         sink: http://orders-function.orders-service.svc.cluster.local
