@@ -21,7 +21,7 @@ spec:
           will exhaust in file/socket descriptors within the next 4 hours'
     - alert: FdExhaustionClose
       expr: predict_linear(fd_utilization[10m], 3600) > 1
-      for: 1m
+      for: 10m
       labels:
         severity: critical
       annotations:
