@@ -69,11 +69,11 @@ Console UI
 
 2. Go to **Discovery and Network** > **Services** in the left navigation panel and select `orders-service`.
 
-3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
+3. Once in the service's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
 
 4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
-A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
+A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the service's details view.
 
   </details>
 </div>
