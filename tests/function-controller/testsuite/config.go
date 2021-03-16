@@ -33,4 +33,5 @@ type Config struct {
 	GitServerImage     string           `envconfig:"default=eu.gcr.io/kyma-project/gitserver:PR-2696"`
 	GitServerRepoName  string           `envconfig:"default=function"`
 	IstioEnabled       bool             `envconfig:"default=true"`
+	PublishURL         string           `envconfig:"default=http://eventing-event-publisher-proxy.kyma-system/publish"`
 }

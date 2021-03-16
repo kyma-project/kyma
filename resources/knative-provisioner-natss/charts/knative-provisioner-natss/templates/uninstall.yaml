@@ -80,7 +80,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Release.Name }}-cr-delete
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
           command:
             - "/bin/bash"
           args:

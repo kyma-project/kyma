@@ -206,7 +206,7 @@ controller-manager:
       secretName: "rafter-minio-old-credentials"
       image:
         repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
-        tag: "20210208-080d17ad"
+        tag: "20210310-c03fb8b6"
         pullPolicy: IfNotPresent
 
     image:
@@ -364,7 +364,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/incubator/k8s-tools
-        tag: "20210208-080d17ad"
+        tag: "20210310-c03fb8b6"
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
