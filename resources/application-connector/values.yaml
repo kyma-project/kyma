@@ -40,7 +40,7 @@ global:
   connector_service_tests:
     version: "77ca2463"
   connection_token_handler:
-    version: "PR-10895"
+    version: "da84b1b3"
   connection_token_handler_tests:
     version: "470796a1"
   event_service:
