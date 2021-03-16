@@ -36,3 +36,4 @@ Follow these basic rules when you add a new document to the official Kyma docume
 4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
 
 DELETE ME
+DELETE ME
