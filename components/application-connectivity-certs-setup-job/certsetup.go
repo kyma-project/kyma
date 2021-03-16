@@ -12,9 +12,6 @@ import (
 	"math/big"
 	"time"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
@@ -26,8 +23,6 @@ const (
 
 	connectorCertSecretKey = "ca.crt"
 	connectorKeySecretKey  = "ca.key"
-
-	backupSuffix = "-backup"
 )
 
 type certSetupHandler struct {
@@ -45,39 +40,13 @@ func NewCertificateSetupHandler(options *options, secretRepo SecretRepository) *
 func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	logrus.Infoln("Checking if certificate and key provided...")
 	if csh.certAndKeyProvided() {
-		caKey, caCert, err := csh.validateProvidedCertAndKey(csh.options.caKey, csh.options.caCertificate)
+		caKey, caCert, err := csh.validateProvidedCertAndKey()
 		if err == nil {
 			logrus.Infoln("Valid certificate and key provided. Skipping generation.")
 			return csh.populateSecrets(caKey, caCert)
 		}
 
 		logrus.Warningf("Certificate or key is invalid: %s", err.Error())
-	}
-
-	logrus.Infoln("Checking if backup certificate and key provided...")
-	namespacedName := csh.options.connectorCertificateSecret
-	namespacedName.Name += backupSuffix
-	provided, err := csh.backupCertAndKeyProvided(namespacedName)
-	if err != nil {
-		return errors.Wrap(err, "Failed to check if certificate backup exists")
-	}
-
-	if provided {
-		backupSecret, err := csh.secretRepository.Get(namespacedName)
-		if err != nil && !k8serrors.IsNotFound(err) {
-			return errors.Wrap(err, "Failed to get backup data")
-		}
-
-		caKey, caCert, err := csh.validateProvidedCertAndKeyBytes(
-			backupSecret[connectorKeySecretKey],
-			backupSecret[connectorCertSecretKey])
-
-		if err == nil {
-			logrus.Infoln("Valid backup certificate and key provided. Skipping generation.")
-			return csh.populateSecrets(caKey, caCert)
-		}
-
-		logrus.Warningf("Backup certificate or key is invalid or not found: %s", err.Error())
 	}
 
 	logrus.Infoln("Checking if certificate and key exists in Secrets...")
@@ -121,34 +90,18 @@ func (csh *certSetupHandler) certAndKeyProvided() bool {
 	return csh.options.caKey != "" && csh.options.caCertificate != ""
 }
 
-func (csh *certSetupHandler) backupCertAndKeyProvided(namespacedName types.NamespacedName) (bool, error) {
-
-	backupConnectorCertsProvided, err := csh.secretRepository.
-		ValuesProvided(namespacedName, []string{connectorKeySecretKey, connectorCertSecretKey})
-
-	if err != nil {
-		return false, errors.Wrap(err, "Error while loading backup certs or backup not found")
-	}
-
-	return backupConnectorCertsProvided, nil
-}
-
-func (csh *certSetupHandler) validateProvidedCertAndKey(caKeyInput string, caCertificate string) ([]byte, []byte, error) {
-	caKey, err := base64.StdEncoding.DecodeString(caKeyInput)
+func (csh *certSetupHandler) validateProvidedCertAndKey() ([]byte, []byte, error) {
+	caKey, err := base64.StdEncoding.DecodeString(csh.options.caKey)
 	if err != nil {
 		return nil, nil, errors.New(fmt.Sprintf("Failed to decode base64 key: %s", err.Error()))
 	}
 
-	caCert, err := base64.StdEncoding.DecodeString(caCertificate)
+	caCert, err := base64.StdEncoding.DecodeString(csh.options.caCertificate)
 	if err != nil {
 		return nil, nil, errors.New(fmt.Sprintf("Failed to decode base64 certificate: %s", err.Error()))
 	}
 
-	return csh.validateProvidedCertAndKeyBytes(caKey, caCert)
-}
-
-func (csh *certSetupHandler) validateProvidedCertAndKeyBytes(caKey []byte, caCert []byte) ([]byte, []byte, error) {
-	_, err := tls.X509KeyPair(caCert, caKey)
+	_, err = tls.X509KeyPair(caCert, caKey)
 	if err != nil {
 		return nil, nil, errors.New(fmt.Sprintf("Failed to parse key and certificate, key or certificate is invalid: %s", err.Error()))
 	}
