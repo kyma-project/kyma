@@ -48,7 +48,7 @@ func SendEvent(target, eventType, eventTypeVersion string) error {
 	return nil
 }
 
-func CheckEvent(target string, retryOptions ...retry.Option) error {
+func CheckEvent(target string, statusCode int, retryOptions ...retry.Option) error {
 	return retry.Do(func() error {
 		transport := &http.Transport{
 			DialContext: (&net.Dialer{
@@ -62,7 +62,7 @@ func CheckEvent(target string, retryOptions ...retry.Option) error {
 			return errors.Wrap(err, fmt.Sprintf("HTTP GET failed in CheckEvent() for target: %v", target))
 		}
 
-		if err := verifyStatusCode(res, 200); err != nil {
+		if err := verifyStatusCode(res, statusCode); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("HTTP GET request returned non-200 in CheckEvent() for target: %v", target))
 		}
 
