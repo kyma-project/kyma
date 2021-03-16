@@ -1,3 +1,0 @@
-dependencies:
-  - name: docs
-    condition: global.docs.enabled
