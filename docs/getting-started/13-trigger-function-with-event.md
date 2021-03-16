@@ -65,7 +65,7 @@ Console UI
 
 2. Go to **Workloads** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
-3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscriptions** in the **Event Subscriptions** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
 
 4. Once the pop-up box opens, find the `order.created.v1` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
 
@@ -91,7 +91,7 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    ```bash
    curl -ik "https://$FUNCTION_DOMAIN"
    ```
-   
+
    > **NOTE**: To get the domain of the Function, run:
    >
    > ```bash
@@ -110,6 +110,6 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    server: istio-envoy
    x-envoy-upstream-service-time: 991
    x-powered-by: Express
-   
+
    [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```

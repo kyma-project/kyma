@@ -81,9 +81,9 @@ These variables refer to the following:
 
 2. In the left navigation panel, go to **Workloads** > **Functions** and navigate to your Function.
 
-3. Once in the Function details view, Switch to the **Configuration** tab, and select **Add Event Subscription** in the **Event Subscriptions** section.
+3. Once in the Function details view, Switch to the **Configuration** tab, and select **Create Event Subscription** in the **Event Subscriptions** section.
 
-4. Select the event type and version that you want to use for your Function and select **Add** to confirm changes.
+4. Select the event type and version that you want to use for your Function and select **Save** to confirm changes.
 
 The message appears on the UI confirming that the Event Subscription was successfully created, and you will see it in the **Event Subscriptions** section in your Function.
 

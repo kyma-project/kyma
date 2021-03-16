@@ -69,7 +69,7 @@ Console UI
 
 2. Go to **Discovery and Network** > **Services** in the left navigation panel and select `orders-service`.
 
-3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscriptions** in the **Event Subscriptions** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
 
 4. Find the `order.deliverysent` event type with the `v1` version from the `commerce-mock` application. Mark it on the list and select **Add**.
 
@@ -114,6 +114,6 @@ To send events from Commerce mock to the `orders-service` microservice, follow t
    server: istio-envoy
    vary: Origin
    x-envoy-upstream-service-time: 37
-   
+
    [{"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
