@@ -36,5 +36,5 @@ type Config struct {
 	PublishURL                      string           `envconfig:"default=http://eventing-event-publisher-proxy.kyma-system/publish"`
 	PackageRegistryConfigSecretName string           `envconfig:"default=serverless-package-registry-config"`
 	PackageRegistryConfigURLNode    string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"`
-	PackageRegistryConfigURLPython  string
+	PackageRegistryConfigURLPython  string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"`
 }
