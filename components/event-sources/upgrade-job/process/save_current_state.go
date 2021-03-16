@@ -83,7 +83,7 @@ func (s SaveCurrentState) Do() error {
 			return err
 		}
 	}
-	s.process.Logger.Debugf("Length of list of validator deployments: %d", len(channels.Items))
+	s.process.Logger.Debugf("Length of list of validator deployments: %d", len(validatorDeployments.Items))
 
 	// Get a list of event service deployments
 	eventServiceDeployments := &appsv1.DeploymentList{}
@@ -93,7 +93,7 @@ func (s SaveCurrentState) Do() error {
 			return err
 		}
 	}
-	s.process.Logger.Debugf("Length of list of event service deployments: %d", len(channels.Items))
+	s.process.Logger.Debugf("Length of list of event service deployments: %d", len(eventServiceDeployments.Items))
 
 	// Get a list of all namespaces
 	namespaces, err := s.process.Clients.Namespace.List()
