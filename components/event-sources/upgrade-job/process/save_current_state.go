@@ -76,16 +76,22 @@ func (s SaveCurrentState) Do() error {
 	s.process.Logger.Debugf("Length of list of HTTP event sources: %d", len(eventSources.Items))
 
 	// Get a list of validator deployments
-	validatorDeployments, err := s.getValidatorDeployments(applications)
-	if err != nil {
-		return err
+	validatorDeployments := &appsv1.DeploymentList{}
+	if len(applications.Items) > 0 {
+		validatorDeployments, err = s.getValidatorDeployments(applications)
+		if err != nil {
+			return err
+		}
 	}
 	s.process.Logger.Debugf("Length of list of validator deployments: %d", len(channels.Items))
 
 	// Get a list of event service deployments
-	eventServiceDeployments, err := s.getEventServiceDeployments(applications)
-	if err != nil {
-		return err
+	eventServiceDeployments := &appsv1.DeploymentList{}
+	if len(applications.Items) > 0 {
+		eventServiceDeployments, err = s.getEventServiceDeployments(applications)
+		if err != nil {
+			return err
+		}
 	}
 	s.process.Logger.Debugf("Length of list of event service deployments: %d", len(channels.Items))
 
