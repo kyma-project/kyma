@@ -1,10 +1,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: logging.rules
+  name: {{ printf "%s-%s" (include "logging.fullname" .) "general.rules" | trunc 63 | trimSuffix "-" }}
   labels:
-    app: {{ template "kube-logging-stack.name" . }}
-{{ include "kube-logging-stack.labels" . | indent 4 }}
+    app: {{ template "logging.name" . }}
+{{ include "logging.labels" . | indent 4 }}
 spec:
   groups:
   - name: logging.rules
