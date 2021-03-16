@@ -153,7 +153,7 @@ A successful call returns the following response:
 
 Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Service API.
 
-## Call the Application Registry and Event Service on local deployment
+## Call the Application Registry and Event Publisher on local deployment
 
 Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification.
 
@@ -163,7 +163,7 @@ Call the Application Registry with this command:
 curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-Use this command to call the Event Service:
+Use this command to call the Event Publisher:
 
 ```bash
 curl -X POST -H "Content-Type: application/json" https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
