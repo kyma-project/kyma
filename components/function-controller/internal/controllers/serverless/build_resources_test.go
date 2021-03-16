@@ -442,7 +442,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-				{Name: "registry-config", MountPath: "/workspace/src/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
 			},
 		},
 		{
@@ -461,7 +461,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-				{Name: "registry-config", MountPath: "/workspace/src/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
 			},
 		},
 		{
@@ -480,7 +480,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-				{Name: "registry-config", MountPath: "/workspace/src/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
 			},
 		},
 	}
