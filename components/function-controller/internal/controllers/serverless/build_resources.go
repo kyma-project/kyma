@@ -55,7 +55,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
-	isTrue := true
+	optional := true
 
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
@@ -114,7 +114,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: r.config.PackageRegistryConfigSecretName,
-									Optional:   &isTrue,
+									Optional:   &optional,
 								},
 							},
 						},
@@ -246,7 +246,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
-	isTrue := true
+	optional := true
 
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -297,7 +297,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: r.config.PackageRegistryConfigSecretName,
-									Optional:   &isTrue,
+									Optional:   &optional,
 								},
 							},
 						},
