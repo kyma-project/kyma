@@ -37,12 +37,12 @@ The system creates a new Kubernetes service for each registered API.
 
 ## Event Service
 
-The Event Service sends events to the Event Mesh and enriches events with metadata that indicates the source of the event.
+The Event Service sends events to Kyma Eventing and enriches events with metadata that indicates the source of the event.
 This allows routing events to Functions and services based on their source Application.
 
 ## Application
 
-An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Mesh.
+An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or Eventing.
 Using the components of the Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
 All Applications are instances of the Application custom resource, which also stores all of the relevant metadata. You can bind an Application to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
 
@@ -54,13 +54,13 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](/components/service-catalog/#architecture-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.  
+The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](/components/service-catalog/#architecture-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
 ## Application Gateway
 
-The Application Gateway is an intermediary component between a Function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, the Application Gateway [proxies the requests](#architecture-application-gateway) based on the services registered with the Application Registry. In the alternative Compass mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.  
+The Application Gateway is an intermediary component between a Function or a service and an external API. The Application Gateway can work in [two modes](#architecture-application-connector-components-application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, the Application Gateway [proxies the requests](#architecture-application-gateway) based on the services registered with the Application Registry. In the alternative Compass mode, the Application Gateway [proxies the requests](#details-application-gateway-proxying-requests) from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 
 The Application Gateway can call services which are not secured, or are secured with:
 
