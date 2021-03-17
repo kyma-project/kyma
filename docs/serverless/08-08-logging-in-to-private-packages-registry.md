@@ -1,5 +1,5 @@
 ---
-title: Logging in to private package registry using credentials from Secret
+title: Log into a private package registry using credentials from a Secret
 type: Tutorials
 ---
 
