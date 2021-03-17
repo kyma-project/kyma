@@ -18,6 +18,7 @@ data:
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
+    RUN rm -rf /etc/pip.conf
 
     USER 1000
 ---
@@ -41,6 +42,7 @@ data:
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
+    RUN rm -rf /etc/pip.conf
 
     USER 1000
 ---
@@ -64,5 +66,6 @@ data:
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf /etc/pip.conf
+    RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
 
     USER 1000
