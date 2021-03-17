@@ -3,7 +3,7 @@ title: Event subscription
 type: Custom Resource
 ---
 
-The Event subscription CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to subscribe to events {more detailed description}. To get the up-to-date CRD and show the output in the yaml format, run this command:
+The Event subscription CustomResourceDefinition (CRD) is used to subscribe to events and a {more detailed description}. To get the up-to-date CRD and show the output in the yaml format, run this command:
 
 `kubectl get crd {CRD name} -o yaml`
 
