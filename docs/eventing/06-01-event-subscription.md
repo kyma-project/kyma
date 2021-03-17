@@ -64,5 +64,5 @@ These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| Eventing Controller | The Eventing Controller reconciles on Subscriptions and creates a connection between subscribers and the Eventing backend. |
-| Event Publisher Proxy | The Event Publisher Proxy reads the Subscriptions to find out how events are used for each Application. |
+| [Eventing Controller](#architecture-architecture-eventing-controller) | The Eventing Controller reconciles on Subscriptions and creates a connection between subscribers and the Eventing backend. |
+| [Event Publisher Proxy](#architecture-architecture-event-publisher-proxy) | The Event Publisher Proxy reads the Subscriptions to find out how events are used for each Application. |
