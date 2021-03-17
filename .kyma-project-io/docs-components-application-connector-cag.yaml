@@ -14,15 +14,3 @@ spec:
       name: docs
       mode: package
       filter: /docs/application-connector/
-    - type: openapi
-      name: connectorapi
-      mode: single
-      url: https://raw.githubusercontent.com/kyma-project/kyma/master/docs/application-connector/assets/connectorapi.yaml
-    - type: openapi
-      name: eventsapi
-      mode: single
-      url: https://raw.githubusercontent.com/kyma-project/kyma/master/docs/application-connector/assets/eventsapi.yaml
-    - type: openapi
-      name: metadataapi
-      mode: single
-      url: https://raw.githubusercontent.com/kyma-project/kyma/master/docs/application-connector/assets/metadataapi.yaml
