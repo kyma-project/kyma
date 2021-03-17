@@ -73,7 +73,6 @@ tests:
   image:
     pullPolicy: IfNotPresent
 
-
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/incubator/k8s-tools
