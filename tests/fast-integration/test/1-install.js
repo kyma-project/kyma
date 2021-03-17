@@ -5,7 +5,7 @@ describe("Installation", function () {
 
   it("Kyma should successfully install", async function () {
     const options = {
-      skipComponents: ["dex","tracing","monitoring","console","kiali","logging"],
+      skipComponents: ["dex","console"],
       newEventing: true
     };
     await installKyma(options);
