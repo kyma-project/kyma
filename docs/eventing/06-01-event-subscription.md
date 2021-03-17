@@ -1,17 +1,17 @@
 ---
-title: Event subscription
+title: Subscription
 type: Custom Resource
 ---
 
-The Event subscription CustomResourceDefinition (CRD) is used to subscribe to events and a {more detailed description}. To get the up-to-date CRD and show the output in the yaml format, run this command:
+The Subscription CustomResourceDefinition (CRD) is used to subscribe to events and a {more detailed description}. To get the up-to-date CRD and show the output in the yaml format, run this command:
 
 `kubectl get crd {CRD name} -o yaml`
 
 ## Sample custom resource
 
-The following event subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
+The following Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
 
-> **NOTE:** Both the subscriber and the subscription should exist in the same Namespace.
+> **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
