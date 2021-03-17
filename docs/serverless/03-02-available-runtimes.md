@@ -46,6 +46,8 @@ EOF
   Node.js 10
   </summary>
 
+>**CAUTION:** Node.js 10 runtime is deprecated, please use Node.js 12.
+
 ```yaml
 cat <<EOF | kubectl apply -f -
 apiVersion: serverless.kyma-project.io/v1alpha1
