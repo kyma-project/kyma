@@ -13,7 +13,7 @@ trap on_error ERR
 readonly KYMA_PROJECT_IO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 readonly WEBSITE_DIR="website"
-readonly WEBSITE_REPO="https://github.com/kyma-project/website"
+readonly WEBSITE_REPO="https://github.com/dbadura/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
 readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
@@ -40,7 +40,7 @@ remove-cached-content() {
 }
 
 copy-website-repo() {
-  git clone -b "master" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "docs" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
