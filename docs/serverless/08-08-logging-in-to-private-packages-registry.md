@@ -117,7 +117,7 @@ EOF
 
 ### Test the package registry switch
 
-[Create a Function](#tutorials-create-an-inline-function) with dependencies from external registry and check if your Function was created and all conditions are set to `True`:
+[Create a Function](#tutorials-create-an-inline-function) with dependencies from the external registry. Check if your Function was created and all conditions are set to `True`:
 
 ```bash
 kubectl get functions -n $NAMESPACE
