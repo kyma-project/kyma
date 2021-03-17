@@ -79,7 +79,7 @@ A message confirming that the Subscription was created will appear in the **Even
 </div>
 
 
-### Test the Event delivery
+### Test the event delivery
 
 To send events from Commerce mock to the `orders-service` microservice, follow these steps:
 

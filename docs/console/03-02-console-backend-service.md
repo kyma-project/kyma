@@ -21,7 +21,7 @@ These are the available Console Backend Service pluggable modules which contain 
 - `authentication` relates to IDP Presets.
 - `application` relates to the Application Connector.
 - `serverless` relates to Serverless.
-- `eventing` relates to Kyma Eventing.
+- `eventing` relates to Eventing.
 - `rafter` relates to Rafter.
 - `servicecatalog` relates to the Service Catalog, including ServiceClasses, ServiceInstances, and ServiceBindings.
 - `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds.

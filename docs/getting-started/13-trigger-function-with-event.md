@@ -67,7 +67,7 @@ Console UI
 
 3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
 
-4. Once the pop-up box opens, find the `order.deliverysent.v1` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
+4. Once the pop-up box opens, find the `order.deliverysent.v1` event from the `commerce-mock` application. Check it on the list and select **Add**.
 
 A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
