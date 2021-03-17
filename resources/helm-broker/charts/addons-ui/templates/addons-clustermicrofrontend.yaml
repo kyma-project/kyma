@@ -28,4 +28,4 @@ spec:
       navigationPath: addons-config/details/:addonName
       showInNavigation: false
       viewGroup: _core_ui_
-      viewUrl: /ClusterAddonsConfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
+      viewUrl: "/ClusterAddonsConfigurations/:addonName?resourceApiPath=/apis/addons.kyma-project.io/v1alpha1"
