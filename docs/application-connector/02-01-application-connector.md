@@ -14,7 +14,7 @@ You can access every exposed Application using the assigned path. For example, t
 
 ## Application Connectivity Validator
 
-The Application Connectivity Validator verifies the subject of the client certificate. It is deployed per Application and it proxies requests to the Application Registry and the Event Service.
+The Application Connectivity Validator verifies the subject of the client certificate. It is deployed per Application and it proxies requests to the Application Registry and the Event Publisher.
 
 ## Connector Service
 
@@ -23,7 +23,7 @@ The Application Connectivity Validator verifies the subject of the client certif
 The Connector Service:
 
 - Handles the exchange of client certificates for a given Application.
-- Provides the Application Registry and Event Service endpoints.
+- Provides the Application Registry and Event Publisher endpoints.
 - Signs client certificates using the server-side certificate stored in a Kubernetes Secret.
 
 ## Application Registry
@@ -54,7 +54,7 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Service for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.
+The Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](#custom-resource-application) custom resources and acts accordingly, either provisioning or deprovisioning an instance of the Application Gateway and the Event Publisher for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](service-catalog#details-resources). In this mode, it provisions an instance of the Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. The Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/master/components/application-operator/README.md#usage) to true.
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 

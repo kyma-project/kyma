@@ -84,7 +84,7 @@ A successful call returns the following response:
 }
 ```
 
-> **NOTE:** The response contains URLs to the Application Registry API and the Events Service API, however, it is not recommended to use them. You should call the `metadata` endpoint URL, which is provided in `api.infoUrl` property, to fetch correct URLs to the Application Registry API and to the Events Service API, and other configuration details.
+> **NOTE:** The response contains URLs to the Application Registry API and the Events Publisher API, however, it is not recommended to use them. You should call the `metadata` endpoint URL, which is provided in `api.infoUrl` property, to fetch correct URLs to the Application Registry API and to the Events Publisher API, and other configuration details.
 
 ## Generate a CSR and send it to Kyma
 
@@ -119,7 +119,7 @@ After you receive the certificates, decode the certificate chain and use it in y
 Call the `metadata` endpoint with the generated certificate to get URLs to the following:
 
 - the Application Registry API
-- the Event Service API
+- the Event Publisher API
 - the certificate renewal endpoint
 - the certificate revocation endpoint
 
@@ -151,7 +151,7 @@ A successful call returns the following response:
 }
 ```
 
-Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Service API.
+Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Publisher API.
 
 ## Call the Application Registry and Event Publisher on local deployment
 
