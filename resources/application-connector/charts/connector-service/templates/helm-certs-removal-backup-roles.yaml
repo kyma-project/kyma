@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 {{- range $key, $value := .Values.certs -}}
 {{- $_ := set $ "key" $key }}
 {{- $_ := set $ "value" $value }}
@@ -41,4 +42,5 @@ subjects:
 - kind: ServiceAccount
   name: {{ $value.name | lower | replace " " "-"}}-helm-certs-removal-acc
   namespace: {{ $value.namespace }}
+{{- end }}
 {{- end }}

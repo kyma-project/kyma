@@ -1,3 +1,4 @@
+{{- if not .Values.global.disableLegacyConnectivity }}
 {{- range $key, $value := .Values.certs -}}
 {{- $_ := set $ "key" $key }}
 {{- $_ := set $ "value" $value }}
@@ -95,4 +96,5 @@ spec:
             - -c
             - |-
 {{ tpl ($.Files.Get "files/certs-restore.sh" | printf "%s" | indent 14) $ }}
+{{- end }}
 {{- end }}
