@@ -13,10 +13,8 @@ import (
 )
 
 const (
-	waitTime    = 5 * time.Second
-	retries     = 5
-	emptyTenant = ""
-	emptyGroup  = ""
+	waitTime = 5 * time.Second
+	retries  = 5
 )
 
 func TestTokenRequests(t *testing.T) {
@@ -28,7 +26,7 @@ func TestTokenRequests(t *testing.T) {
 
 	t.Run("should create token request CR with token", func(t *testing.T) {
 		//when
-		tokenRequest, e := client.CreateTokenRequest(addSuffix(appName), emptyGroup, emptyTenant)
+		tokenRequest, e := client.CreateTokenRequest(addSuffix(appName))
 		require.NoError(t, e)
 
 		//then
