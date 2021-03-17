@@ -9,12 +9,12 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 1. The Eventing Controller watches the Subscription Custom Resource. It determines if there are any new incoming events.
 
-2. The NATS Eventing Controller creates an infrastructure for the NATS server.
+2. The Eventing Controller creates an infrastructure for the NATS server.
 
-3. The [Application Connector](/components/application-connector/) publishes events to the NATS publisher proxy.
+3. The [Application Connector](/components/application-connector/) publishes events to the Event Publisher Proxy.
 
-4. The NATS publisher proxy sends events to the NATS server.
+4. The Event Publisher Proxy sends events to the NATS server.
 
-5. The NATS server dispatches events to the NATS Eventing Controller.
+5. The NATS server dispatches events to the Eventing Controller.
 
-6. The NATS Eventing Controller dispatches events to subscribers (microservices or Functions).
+6. The Eventing Controller dispatches events to subscribers (microservices or Functions).
