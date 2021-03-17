@@ -3,11 +3,11 @@ title: Logging in to private package registry using credentials from Secret
 type: Tutorials
 ---
 
-This tutorial shows how you can login in to private package registry through define credentials in Secret. 
+Serverless allows you to consume private packages in your Functions. This tutorial shows how you can log into a private package registry by defining credentials in a Secret custom resource (CR).
 
 ## Steps
 
-### Create a Secret 
+### Create a Secret CR for your Node.js or Python Functions. You can also create one combined Secret CR for both runtimes. 
 
 <div tabs name="override" group="external-packages-registry">
   <details>
