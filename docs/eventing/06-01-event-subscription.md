@@ -56,7 +56,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. |
 | **spec.protocol** | Yes | Must be set to `""`. |
 | **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
-| **spec.sink** | Yes | Specifies where matching events should be sent to, for example: `http://test.test.svc.cluster.local`.  |
+| **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |
 
 ## Related resources and components
 
