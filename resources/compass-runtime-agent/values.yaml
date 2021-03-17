@@ -3,11 +3,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      version: "4feb544b"
+      version: "95cf01f2"
     runtimeAgentTests:
-      version: "cda9f380"
+      version: "77ca2463"
     compassExternalSolutionTests:
-      version: "1a5b13b8"
+      version: "8f4ccfc0"
   istio:
     gateway:
       name: kyma-gateway

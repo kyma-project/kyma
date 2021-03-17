@@ -38,7 +38,7 @@ spec:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
-            - controller 
+            - controller
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
@@ -50,6 +50,15 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+             allowPrivilegeEscalation: false
+             capabilities:
+               drop:
+               - ALL
+             privileged: false
+             runAsGroup: 1000
+             runAsNonRoot: true
+             runAsUser: 1000
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           {{- with .Values.deployment.envs }}
@@ -68,6 +77,9 @@ spec:
       {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

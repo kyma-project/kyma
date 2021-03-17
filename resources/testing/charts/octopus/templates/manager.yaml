@@ -61,6 +61,9 @@ spec:
                 fieldPath: metadata.namespace
           - name: SECRET_NAME
             value: webhook-server-secret
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         ports:
@@ -79,6 +82,9 @@ spec:
         secret:
           defaultMode: 420
           secretName: webhook-server-secret
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 ---
 apiVersion: v1
 kind: Secret

@@ -10,7 +10,7 @@ image:
   # name is the name of the container image for the nats-eventing-controller
   name: "eventing-controller-nats"
   # tag is the container tag of the eventing-controller image
-  tag: "e140344c"
+  tag: "e2185713"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 

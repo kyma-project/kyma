@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -20,15 +21,17 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options) bool {
-	image := r.buildImageAddress(instance)
+var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
+
+func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
+	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
 	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	var expectedJob batchv1.Job
 	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		expectedJob = r.buildJob(instance, rtmCfg, "")
+		expectedJob = r.buildJob(instance, rtmCfg, "", dockerConfig)
 	} else {
-		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg)
+		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
 	}
 
 	if len(deployments) == 1 &&
@@ -53,6 +56,17 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 
 	switch {
 	case jobsLen == 0:
+		activeJobs, err := r.getActiveAndStatelessJobs(ctx)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if activeJobs >= r.config.Build.MaxSimultaneousJobs {
+			return ctrl.Result{
+				RequeueAfter: time.Second * 5,
+			}, nil
+		}
+
 		return r.createJob(ctx, log, instance, newJob)
 	case jobsLen > 1 || !r.equalJobs(jobs[0], newJob):
 		return r.deleteJobs(ctx, log, instance)
@@ -63,12 +77,12 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 	}
 }
 
-func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options) (ctrl.Result, error) {
-	newJob := r.buildGitJob(instance, gitOptions, rtmCfg)
+func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
-func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job) (ctrl.Result, error) {
-	newJob := r.buildJob(instance, rtmCfg, configMapName)
+func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job, dockerConfig DockerConfig) (ctrl.Result, error) {
+	newJob := r.buildJob(instance, rtmCfg, configMapName, dockerConfig)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
 
@@ -177,4 +191,20 @@ func (r *FunctionReconciler) updateJobLabels(ctx context.Context, log logr.Logge
 		Reason:             serverlessv1alpha1.ConditionReasonJobUpdated,
 		Message:            fmt.Sprintf("Job %s updated", newJob.GetName()),
 	})
+}
+
+func (r *FunctionReconciler) getActiveAndStatelessJobs(ctx context.Context) (int, error) {
+	var allJobs batchv1.JobList
+	if err := r.client.ListByLabel(ctx, "", fcManagedByLabel, &allJobs); err != nil {
+		r.Log.Error(err, "Cannot list Jobs")
+		return 0, err
+	}
+
+	out := 0
+	for _, j := range allJobs.Items {
+		if j.Status.Succeeded == 0 && j.Status.Failed == 0 {
+			out++
+		}
+	}
+	return out, nil
 }

@@ -7,3 +7,4 @@
 !go.mod
 !go.sum
 !licenses
+!vendor

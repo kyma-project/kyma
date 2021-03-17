@@ -14,7 +14,7 @@ spec:
     matchLabels:
       app: {{ template "fullname" . }}
       release: {{ .Release.Name }}
-      # not used anymore but need to stay as the selector is immutable 
+      # not used anymore but need to stay as the selector is immutable
       kyma-alerts: enabled
       kyma-component: ui
       kyma-grafana: enabled
@@ -31,11 +31,15 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: console
           image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
-          resources: 
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          resources:
             {{- toYaml .Values.console.resources | nindent 12 }}
           livenessProbe:
             httpGet:
@@ -53,7 +57,10 @@ spec:
         - name: core-ui
           image: "{{ .Values.global.containerRegistry.path }}/core-ui:{{ .Values.core_ui.image.tag }}"
           imagePullPolicy: {{ .Values.core_ui.image.pullPolicy }}
-          resources: 
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          resources:
             {{- toYaml .Values.core_ui.resources | nindent 12 }}
           livenessProbe:
             httpGet:
@@ -81,3 +88,6 @@ spec:
           items:
           - key: nginx-extended.conf
             path: nginx-extended.conf
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

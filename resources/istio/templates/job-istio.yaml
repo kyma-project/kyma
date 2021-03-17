@@ -26,16 +26,20 @@ spec:
           name: installer
           volumeMounts:
           - name: config
-            mountPath: /etc/istio/
+            mountPath: /opt/istio/config
             readOnly: true
           - name: manifests
-            mountPath: /etc/manifests
+            mountPath: /opt/istio/manifests
             readOnly: true
           env:
+          - name: HOME
+            value: /tmp
           - name: NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: CONFIGMAP_NAME
             value: kyma-istio-operator-config-backup
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}
       volumes:
       - name: config
         configMap:
@@ -45,3 +49,6 @@ spec:
           name: kyma-extra-manifests
       restartPolicy: Never
       serviceAccountName: istio-job
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

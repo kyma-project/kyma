@@ -15,6 +15,13 @@ rules:
 - apiGroups: ["rafter.kyma-project.io"]
   resources: ["clusterassetgroups"]
   verbs: ["get", "update", "list", "create", "delete"]
+{{- if .Values.global.podSecurityPolicy.enabled }}
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs:     ['use']
+  resourceNames:
+  - {{ .Chart.Name }}
+{{- end }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

@@ -20,14 +20,15 @@ RUN mkdir /test &&\
 	mv ${BASE_DIR}/app.test /test/app.test  &&\
 	mv ${BASE_DIR}/licenses /test/licenses
 
-FROM eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+FROM eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 
 RUN apk update &&\
 	apk add curl bash grep ca-certificates
 
-COPY --from=builder /test /test
+COPY --from=builder --chown=nobody:nogroup /test /test
 COPY gateway-tests/manifests /test/manifests
 
+USER nobody
 ENTRYPOINT ["/test/app.test"]

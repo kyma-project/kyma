@@ -1,4 +1,4 @@
-{{- if .Values.global.isNatsEnabled }}
+{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,6 +24,8 @@ spec:
           env:
           - name: NATS_URL
             value: {{ include "nats-controller.natsServer.url" . }}
+          - name: EVENT_TYPE_PREFIX
+            value: {{ .Values.global.eventTypePrefix }}
           resources:
             limits:
               cpu: 100m
@@ -31,4 +33,7 @@ spec:
             requests:
               cpu: 100m
               memory: 20Mi
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}

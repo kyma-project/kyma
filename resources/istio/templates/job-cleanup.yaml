@@ -24,8 +24,16 @@ spec:
               kubectl delete gateways.networking.istio.io -n istio-system ingressgateway --ignore-not-found
           image: {{ .Values.kyma.labelJob.image }}:{{ .Values.kyma.labelJob.tag }}
           name: cleanup
+          env:
+          - name: HOME
+            value: /tmp
+          securityContext:
+{{- toYaml .Values.kyma.securityContext | nindent 12 }}
       restartPolicy: Never
       serviceAccountName: istio-cleanup-job
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -53,6 +61,13 @@ rules:
   - apiGroups: ["networking.istio.io"]
     resources: ["destinationrules"]
     verbs: ["delete"]
+{{- if .Values.kyma.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:
+      - {{ template "istio.fullname" . }}
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

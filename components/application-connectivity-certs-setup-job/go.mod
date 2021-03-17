@@ -19,10 +19,14 @@ require (
 	google.golang.org/protobuf v1.24.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200603094226-e3079894b1e8 // indirect
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v0.16.10
+	k8s.io/api v0.18.15
+	k8s.io/apimachinery v0.18.15
+	k8s.io/client-go v0.18.15
+	k8s.io/kube-openapi v0.0.0-20200410163147-594e756bea31 // indirect
 	k8s.io/utils v0.0.0-20200603063816-c1c6865ac451 // indirect
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
+replace (
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/text => golang.org/x/text v0.3.3
+)

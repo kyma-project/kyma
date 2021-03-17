@@ -29,6 +29,14 @@ spec:
       memory: 32Mi
     type: Container
 ---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: kyma-installer
+value: 2000050
+globalDefault: false
+description: "Default scheduling priority of Kyma installer. Must not be blocked by unschedulable user or Kyma workloads."
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -90,7 +98,8 @@ spec:
       labels:
         name: kyma-installer
     spec:
-      serviceAccountName: kyma-installer      
+      serviceAccountName: kyma-installer
+      priorityClassName: kyma-installer
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
@@ -103,6 +112,46 @@ spec:
             memory: 512Mi
           limits:
             memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsGroup: 65534
+          runAsUser: 65534
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: 000-kyma-installer
+  labels:
+    release: kyma-installer
+    kyma-project.io/installation: ""
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  runAsUser:
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  hostPorts:
+  - max: 65535
+    min: 1024
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+  - "*"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -114,6 +163,10 @@ rules:
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames: ["000-kyma-installer"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

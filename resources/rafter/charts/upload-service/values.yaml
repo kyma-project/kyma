@@ -132,8 +132,8 @@ envs:
 migrator:
   images:
     alpineKubectl:
-      repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-      tag: "20201023-5de446cf"
+      repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+      tag: "20210310-c03fb8b6"
       pullPolicy: IfNotPresent
     minioClient:
       repository: "minio/mc"

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: event-publisher-nats
+description: Helm chart for event-publisher-nats
+type: application
+version: 0.1.0
+appVersion: 0.1.0

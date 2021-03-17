@@ -40,3 +40,9 @@ Follow these steps:
   ```bash
   kyma upgrade -s {VERSION}
   ```
+
+  If you want to upgrade Kyma to use one of the predefined [profiles](#installation-overview-profiles), run:
+
+  ```bash
+  kyma upgrade -s {VERSION} --profile {evaluation|production}
+  ```

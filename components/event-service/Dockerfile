@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ARG DOCK_PKG_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/event-service
 

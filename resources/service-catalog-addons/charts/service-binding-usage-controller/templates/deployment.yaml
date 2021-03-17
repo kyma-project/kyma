@@ -32,6 +32,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.service_binding_usage_controller.dir }}service-binding-usage-controller:{{ .Values.global.service_binding_usage_controller.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:
@@ -51,3 +54,6 @@ spec:
             timeoutSeconds: 2
             successThreshold: 1
             initialDelaySeconds: 15
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

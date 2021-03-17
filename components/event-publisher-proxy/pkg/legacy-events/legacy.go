@@ -8,15 +8,17 @@ import (
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
-	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	apiv1 "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
 var (
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(AllowedEventIDChars).MatchString
 	// eventTypePrefixFormat is driven by BEB specification.
-	// An eventtype must have atleast 4 segments separated by dots in the form of:
+	// An EventType must have at least 4 segments separated by dots in the form of:
 	// <domainNamespace>.<businessObjectName>.<operation>.<version>
 	eventTypePrefixFormat = "%s.%s.%s.%s"
 )
@@ -27,14 +29,16 @@ const (
 )
 
 type Transformer struct {
-	bebNamespace    string
-	eventTypePrefix string
+	bebNamespace      string
+	eventTypePrefix   string
+	applicationLister *application.Lister
 }
 
-func NewTransformer(bebNamespace string, eventTypePrefix string) *Transformer {
+func NewTransformer(bebNamespace string, eventTypePrefix string, applicationLister *application.Lister) *Transformer {
 	return &Transformer{
-		bebNamespace:    bebNamespace,
-		eventTypePrefix: eventTypePrefix,
+		bebNamespace:      bebNamespace,
+		eventTypePrefix:   eventTypePrefix,
+		applicationLister: applicationLister,
 	}
 }
 
@@ -72,20 +76,17 @@ func (t Transformer) checkParameters(parameters *apiv1.PublishEventParametersV1)
 	return &apiv1.PublishEventResponses{}
 }
 
-func (t Transformer) TransformsLegacyRequestsToCE(writer http.ResponseWriter, request *http.Request) *cev2event.Event {
-
+func (t Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, request *http.Request) *cev2event.Event {
 	// parse request body to PublishRequestV1
 	if request.Body == nil || request.ContentLength == 0 {
 		resp := ErrorResponseBadRequest(ErrorMessageBadPayload)
 		writeJSONResponse(writer, resp)
 		return nil
 	}
-	appName := ParseApplicationNameFromPath(request.URL.Path)
-	var err error
+
 	parameters := &apiv1.PublishEventParametersV1{}
 	decoder := json.NewDecoder(request.Body)
-	err = decoder.Decode(&parameters.PublishrequestV1)
-	if err != nil {
+	if err := decoder.Decode(&parameters.PublishrequestV1); err != nil {
 		var resp *apiv1.PublishEventResponses
 		if err.Error() == requestBodyTooLargeErrorMessage {
 			resp = ErrorResponseRequestBodyTooLarge(err.Error())
@@ -103,14 +104,19 @@ func (t Transformer) TransformsLegacyRequestsToCE(writer http.ResponseWriter, re
 		return nil
 	}
 
-	response := &apiv1.PublishEventResponses{}
+	// clean the application name form non-alphanumeric characters
+	appName := ParseApplicationNameFromPath(request.URL.Path)
+	if appObj, err := t.applicationLister.Get(appName); err == nil {
+		// handle existing applications
+		appName = application.GetCleanTypeOrName(appObj)
+	} else {
+		// handle non-existing applications
+		appName = application.GetCleanName(appName)
+	}
 
 	event, err := t.convertPublishRequestToCloudEvent(appName, parameters)
 	if err != nil {
-		response.Error = &apiv1.Error{
-			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
-		}
+		response := ErrorResponse(http.StatusInternalServerError, err)
 		writeJSONResponse(writer, response)
 		return nil
 	}
@@ -138,6 +144,10 @@ func (t Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWr
 
 // convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.
 func (t Transformer) convertPublishRequestToCloudEvent(appName string, publishRequest *apiv1.PublishEventParametersV1) (*cev2event.Event, error) {
+	if !application.IsCleanName(appName) {
+		return nil, errors.New("application name should be cleaned from none-alphanumeric characters")
+	}
+
 	event := cev2event.New(cev2event.CloudEventsVersionV1)
 
 	evTime, err := time.Parse(time.RFC3339, publishRequest.PublishrequestV1.EventTime)

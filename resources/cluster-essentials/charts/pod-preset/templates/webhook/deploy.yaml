@@ -43,10 +43,8 @@ spec:
         - name: webhook-cert
           mountPath: /keys
           readOnly: true
-      {{- with .Values.webhook.securityContext }}
-      securityContext:
-{{ toYaml . | indent 8 }}
-      {{- end }}
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
       volumes:
       - name: webhook-cert
         secret:
@@ -56,6 +54,9 @@ spec:
             path: webhook.crt
           - key: tls.key
             path: webhook.key
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- if .Values.webhook.pdb.enabled }}
 ---
 apiVersion: policy/v1beta1

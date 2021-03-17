@@ -18,7 +18,7 @@ The Application Connectivity Validator verifies the subject of the client certif
 
 ## Connector Service
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
 
 The Connector Service:
 
@@ -28,7 +28,7 @@ The Connector Service:
 
 ## Application Registry
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://kyma-project.io/docs/components/compass/#installation-enable-compass-in-kyma) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
 
 The Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](#custom-resource-application) custom resource.
 The system creates a new Kubernetes service for each registered API.

@@ -22,7 +22,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: job
-          image: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf"
+          image: "eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6"
           command:
             - bash
             - -c
@@ -49,3 +49,6 @@ spec:
                     break
                   fi
               done
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

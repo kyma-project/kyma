@@ -32,15 +32,6 @@ data:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- if .Values.grafana.dataSources.loki.enabled }}
-{{ toYaml .Values.grafana.dataSources.loki.config | indent 4}}
-{{- end }}
-{{- if .Values.grafana.dataSources.jaeger.enabled }}
-{{ toYaml .Values.grafana.dataSources.jaeger.config | indent 4}}
-{{- end }}
-{{- if (and .Values.grafana.dataSources.prometheusIstio.enabled (index .Values "prometheus-istio").enabled )}}
-{{ toYaml .Values.grafana.dataSources.prometheusIstio.config | indent 4}}
-{{- end }}
 {{- if .Values.grafana.additionalDataSources }}
 {{ tpl (toYaml .Values.grafana.additionalDataSources | indent 4) . }}
 {{- end }}

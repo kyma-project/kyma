@@ -4,8 +4,8 @@ fullnameOverride: "kiali"
 tests:
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    version: 20201023-5de446cf
+    name: eu.gcr.io/kyma-project/incubator/k8s-tools
+    version: 20210310-c03fb8b6
   labels:
     integration: true
     after-upgrade: true
@@ -27,11 +27,13 @@ global:
     enabled: true
 
 kcproxy:
+  enabled: true
   replicaCount: 1
   port: 3000
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"
@@ -44,6 +46,10 @@ kcproxy:
     matchClaims: ""
     addClaims: ""
   nodeSelector: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
     tag: 10.0.0
@@ -262,7 +268,7 @@ kiali:
     # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
     # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
     #    ---
-      accessible_namespaces: 
+      accessible_namespaces:
       - "**"
     #
     # Additional custom yaml to add to the service definition. This is used mainly to customize the service type.
@@ -329,7 +335,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.27.0-85eb5cc7"
+      image_version: "1.28.1-aa625b61"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -872,3 +878,8 @@ kiali:
     #    ---
     #    web_schema: ""
     #
+
+    # Containers securityContext, not defined in upstream chart
+      securityContext:
+        allowPrivilegeEscalation: false
+        privileged: false

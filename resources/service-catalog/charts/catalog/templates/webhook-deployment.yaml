@@ -28,6 +28,10 @@ spec:
 {{ toYaml .Values.webhook.annotations | indent 8 }}
       {{- end }}
     spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
       serviceAccountName: "{{ .Values.webhook.serviceAccount }}"
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
@@ -55,6 +59,9 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8443
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - name: service-catalog-webhook-cert
           mountPath: /var/run/service-catalog-webhook
@@ -94,3 +101,6 @@ spec:
             path: tls.crt
           - key: tls.key
             path: tls.key
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

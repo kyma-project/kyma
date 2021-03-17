@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,10 +10,14 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/nats-io/nats.go"
+
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -49,21 +54,21 @@ func TestConvertMsgToCE(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-
 			gotCE, err := convertMsgToCE(&tc.natsMsg)
 			if err != nil && tc.expectedErr == nil {
-				t.Errorf("should not give error, got: %v", err)
-				return
+				t.Fatalf("Should not give error, got: %v", err)
 			}
 			if tc.expectedErr != nil {
 				if err == nil {
-					t.Errorf("received nil error, expected: %v got: %v", tc.expectedErr, err)
-					return
+					t.Fatalf("Received nil error, expected: %v got: %v", tc.expectedErr, err)
 				}
 				if tc.expectedErr.Error() != err.Error() {
-					t.Errorf("received wrong error, expected: %v got: %v", tc.expectedErr, err)
+					t.Fatalf("Received wrong error, expected: %v got: %v", tc.expectedErr, err)
 				}
 				return
+			}
+			if gotCE == nil {
+				t.Fatalf("Test failed, got nil cloudevent")
 			}
 			if !(gotCE.Subject() == tc.expectedCloudEvent.Subject()) ||
 				!(gotCE.ID() == tc.expectedCloudEvent.ID()) ||
@@ -89,13 +94,13 @@ func TestSubscription(t *testing.T) {
 
 	natsURL := natsServer.ClientURL()
 	natsClient := Nats{
-		Subscriptions: make(map[string]*nats.Subscription),
-		Config: env.NatsConfig{
+		subscriptions: make(map[string]*nats.Subscription),
+		config: env.NatsConfig{
 			Url:           natsURL,
 			MaxReconnects: 2,
 			ReconnectWait: time.Second,
 		},
-		Log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
+		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
 	}
 	err := natsClient.Initialize()
 	if err != nil {
@@ -112,13 +117,18 @@ func TestSubscription(t *testing.T) {
 	// Check subscriber is running or not by checking the store
 	err = subscriber.CheckEvent("", subscriberCheckURL)
 	if err != nil {
-		t.Errorf("subscriber did not receive the event: %v", err)
+		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
 
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
+
 	// Create a subscription
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithFilterForNats)
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
 	sub.Spec.Sink = subscriberReceiveURL
-	err = natsClient.SyncSubscription(sub)
+	err = natsClient.SyncSubscription(sub, cleaner)
 	if err != nil {
 		t.Fatalf("failed to Sync subscription: %v", err)
 	}
@@ -134,13 +144,13 @@ func TestSubscription(t *testing.T) {
 	// Check for the event
 	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
 	if err != nil {
-		t.Errorf("subscriber did not receive the event: %v", err)
+		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
 
 	// Delete subscription
 	err = natsClient.DeleteSubscription(sub)
 	if err != nil {
-		t.Errorf("failed to delete subscription: %v", err)
+		t.Fatalf("failed to delete subscription: %v", err)
 	}
 
 	newData := "datawhichdoesnotexist"
@@ -155,19 +165,21 @@ func TestSubscription(t *testing.T) {
 	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
 	err = subscriber.CheckEvent(notExpectedNewDataInStore, subscriberCheckURL)
 	if err != nil && !strings.Contains(err.Error(), "failed to check the event after retries") {
-		t.Errorf("failed to CheckEvent: %v", err)
+		t.Fatalf("failed to CheckEvent: %v", err)
 	}
 	// newdata was received by the subscriber meaning the subscription was not deleted
 	if err == nil {
-		t.Error("subscription still exists in Nats")
+		t.Fatal("subscription still exists in Nats")
 	}
 }
 
 func SendEvent(natsClient *Nats, data string) error {
+	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
+	// because the publisher-application should have cleaned it already before publishing
+	eventType := eventingtesting.EventType
 	eventTime := time.Now().Format(time.RFC3339)
-	eventType := "kyma.ev2.poc.event1.v1"
-	sampleEvent := NewNatsMessagePayload(data, "id", "foosource", eventTime, eventType)
-	return natsClient.Connection.Publish(eventType, []byte(sampleEvent))
+	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
+	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
 func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {

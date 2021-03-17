@@ -36,11 +36,16 @@ spec:
             - --subject-groups={{ .Values.global.kymaRuntime.namespaceAdminGroup }}
           resources:
 {{ toYaml .Values.deployment.resources | indent 12 }}
+          securityContext:
+{{ toYaml .Values.deployment.securityContext | indent 12 }}
       serviceAccountName: {{ include "namespace-permission-controller.name" . }}-account
       nodeSelector:
         {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
       {{- with .Values.deployment.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

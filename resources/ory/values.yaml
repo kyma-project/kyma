@@ -63,8 +63,10 @@ hpa:
 # Maintenance options
 maintenance:
   image:
-    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    name: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210310-c03fb8b6"
+  podSecurityPolicy:
+    enabled: true
 
 # Overrides for the Hydra chart
 hydra:
@@ -117,7 +119,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+    image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
   oathkeeper:
     config:
       authenticators:

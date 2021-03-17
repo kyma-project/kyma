@@ -1,0 +1,66 @@
+{{- if eq .Values.global.eventing.backend "nats" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "event-publisher-nats.fullname" . }}
+  labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "event-publisher-nats.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels: {{- include "event-publisher-nats.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "event-publisher-nats.serviceAccountName" . }}
+      containers:
+        - env:
+            - name: PORT
+              value: {{ .Values.nats.config.port | quote }}
+            - name: NATS_URL
+              value: {{ include "nats-controller.natsServer.url" . }}
+            - name: REQUEST_TIMEOUT
+              value: {{ .Values.nats.config.requestTimeout }}
+            - name: LEGACY_NAMESPACE
+              value: {{ .Values.nats.config.legacyNamespace }}
+            - name: LEGACY_EVENT_TYPE_PREFIX
+              value: {{ .Values.global.eventTypePrefix }}
+          image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          name: {{ .Values.image.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          ports:
+            - containerPort: {{ .Values.nats.config.port }}
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: {{ .Values.nats.config.port }}
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: {{ .Values.nats.config.port }}
+              scheme: HTTP
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
+{{- end }}

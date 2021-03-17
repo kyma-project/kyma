@@ -20,7 +20,6 @@ import (
 
 const (
 	applicationName                 = "operator-test-app"
-	eventsServiceDeployment         = "operator-test-app-event-service"
 	applicationGatewayDeployment    = "operator-test-app-application-gateway"
 	connectivityValidatorDeployment = "operator-test-app-connectivity-validator"
 	integrationNamespace            = "kyma-integration"
@@ -28,11 +27,7 @@ const (
 	applicationOperatorStatefulset = "application-operator"
 
 	appGatewayImageOptPrefix            = "--applicationGatewayImage="
-	eventServiceImageOptPrefix          = "--eventServiceImage="
 	connectivityValidatorImageOptPrefix = "--applicationConnectivityValidatorImage="
-
-	imageKey     = "image"
-	timestampKey = "timestamp"
 )
 
 type appImagesConfig struct {
@@ -132,9 +127,6 @@ func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error
 		if strings.HasPrefix(arg, appGatewayImageOptPrefix) {
 			appImagesConfig.appGatewayImage = strings.TrimPrefix(arg, appGatewayImageOptPrefix)
 		}
-		if strings.HasPrefix(arg, eventServiceImageOptPrefix) {
-			appImagesConfig.eventServiceImage = strings.TrimPrefix(arg, eventServiceImageOptPrefix)
-		}
 		if strings.HasPrefix(arg, connectivityValidatorImageOptPrefix) {
 			appImagesConfig.connectivityValidatorImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
 		}
@@ -192,10 +184,6 @@ func (ut *UpgradeTest) verifyResources(namespace string) error {
 	appImages, err := ut.getImagesConfigFromOperatorOpts()
 	if err != nil {
 		return errors.Wrap(err, "Failed to get expected images from Stateful set")
-	}
-
-	if err := ut.verifyDeployment(eventsServiceDeployment, namespace, appImages.eventServiceImage); err != nil {
-		return errors.Wrap(err, "Events Service is not upgraded")
 	}
 
 	if err := ut.verifyDeployment(applicationGatewayDeployment, namespace, appImages.appGatewayImage); err != nil {

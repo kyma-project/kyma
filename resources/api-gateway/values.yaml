@@ -2,12 +2,12 @@ replicaCount: 1
 
 rbacJob:
   image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: "20210310-c03fb8b6"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "8af556cd"
+  tag: "1a6a2e77"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -19,6 +19,15 @@ deployment:
     requests:
       cpu: 50m
       memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    privileged: false
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
 
 config:
   oathkeeper:
@@ -76,6 +85,10 @@ config:
 # Configure node affinity
 affinity: {}
 
+# Configure PodSecurityPolicy
+podSecurityPolicy:
+  enabled: true
+
 tests:
   enabled: true
   labels:
@@ -83,7 +96,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: 2546ae71
+    version: "a066c1a5"
   env:
     testUser: "admin-user"
     timeout: 120
@@ -93,3 +106,7 @@ tests:
     jwtDelay: 5
     gatewayName: "kyma-gateway"
     gatewayNamespace: "kyma-system"
+  securityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534

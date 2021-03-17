@@ -1,4 +1,4 @@
-{{- if .Values.global.isNatsEnabled }}
+{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: nats.io/v1alpha2
 kind: NatsCluster
 metadata:

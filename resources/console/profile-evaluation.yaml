@@ -7,7 +7,7 @@ web:
       limits:
         cpu: 40m
         memory: 16Mi
-  core-ui:
+  core_ui:
     resources:
       requests:
         cpu: 2m
@@ -23,11 +23,3 @@ backend:
     limits:
       cpu: 50m
       memory: 80Mi
-pamela:
-  resources:
-    requests:
-      cpu: 8m
-      memory: 55Mi
-    limits:
-      cpu: 40m
-      memory: 150Mi

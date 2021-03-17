@@ -54,6 +54,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
       name: istio-egressgateway
     ingressGateways:
     - enabled: true
@@ -82,12 +84,12 @@ spec:
             memory: 32Mi
         service:
           ports:
-          - port: 15012
-            targetPort: 15012
-            name: tcp-istiod
           - name: status-port
             port: 15021
             targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
           - name: http2
             port: 80
             targetPort: 8080
@@ -116,6 +118,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
       name: istio-ingressgateway
     istiodRemote:
       enabled: false
@@ -159,7 +163,7 @@ spec:
         resources:
           limits:
             cpu: 250m
-            memory: 256Mi
+            memory: 384Mi
           requests:
             cpu: 75m
             memory: 128Mi
@@ -168,12 +172,13 @@ spec:
             maxSurge: 100%
             maxUnavailable: 25%
   meshConfig:
-    accessLogFile: /dev/stdout
+    #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
+    accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}
-      tracing:  
-        zipkin: 
+      tracing:
+        zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
     enableTracing: {{ .Values.global.tracing.enabled }}
@@ -229,7 +234,7 @@ spec:
       jwtPolicy: third-party-jwt
       logAsJson: false
       logging:
-        level: default:info
+        level: all:warn
       meshExpansion:
         enabled: false
         useILB: false
@@ -243,7 +248,7 @@ spec:
       oneNamespace: false
       operatorManageWebhooks: false
       pilotCertProvider: istiod
-      priorityClassName: ""
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         autoInject: enabled
         clusterDomain: cluster.local
