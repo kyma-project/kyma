@@ -53,12 +53,12 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $value.name }}-helm-certs-removal-restore
+  name: {{ $value.name }}-certs-restore
   namespace: {{ $value.namespace }}
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation
-    helm.sh/hook-weight: "1"
+    helm.sh/hook-weight: "-1"
   labels:
     release: {{ $.Release.Name }}
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
