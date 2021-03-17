@@ -145,6 +145,9 @@ To create a simple Function and trigger it with an event, you must first registe
 
 6. Create a Subscription to allow events to trigger the Function.
 
+> **NOTE:** In the Subscription CR, provide `$APP_NAME` without any special characters like dashes (`-`) or dots (`.`).
+> For example, `commercemock` instead of `commerce-mock`.
+
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: eventing.kyma-project.io/v1alpha1
