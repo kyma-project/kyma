@@ -1,5 +1,5 @@
 ---
-title: Log into a private package registry using credentials from a Secret
+title: Logging in to private package registry using credentials from Secret
 type: Tutorials
 ---
 
@@ -7,7 +7,10 @@ Serverless allows you to consume private packages in your Functions. This tutori
 
 ## Steps
 
-### Create a Secret CR for your Node.js or Python Functions. You can also create one combined Secret CR for both runtimes. 
+### Create a Secret 
+
+Create a Secret CR for your Node.js or Python Functions. You can also create one combined Secret CR for both runtimes.
+
 
 <div tabs name="override" group="external-packages-registry">
   <details>
