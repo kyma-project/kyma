@@ -3,13 +3,13 @@ title: Subscription
 type: Custom Resource
 ---
 
-The Subscription CustomResourceDefinition (CRD) is used to subscribe to events and a {more detailed description}. To get the up-to-date CRD and show the output in the yaml format, run this command:
+The Subscription CustomResourceDefinition (CRD) is used to subscribe to events. To get the up-to-date CRD and show the output in the yaml format, run this command:
 
 `kubectl get crd subscriptions.eventing.kyma-project.io -o yaml`
 
 ## Sample custom resource
 
-The following Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
+This sample Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
 
 > **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
@@ -42,21 +42,21 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   | Required |  Description |
 |-------------|:---------:|--------------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
-| **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless your specify otherwise |
-| **spec.filter** | Yes | Defines the list of filters |
-| **spec.filter.dialect** | No | Specifies preferred eventing backend. Current release don't provide the capability to switch eventing backends. It is set to nats by default. |
-| **spec.filter.filters** | Yes | Defines the filter element as a combination of two CE filter elements |
-| **spec.filter.filters.eventSource** | Yes | EventSource is the origin from which Events are published. |
-| **spec.filter.filters.eventType** | Yes | eventType is the type of Events to trigger workloads. |
-| **spec.filter.filters.eventSource.property** | Yes | Must be set to `source` |
-| **spec.filter.filters.eventSource.type** | No | Must be set to `exact` |
-| **spec.filter.filters.eventSource.value** | Yes | Must be set to "" for nats backend |
-| **spec.filter.filters.eventType.property** | Yes | Must be set to `type` |
-| **spec.filter.filters.eventType.type** | No | Must be set to `exact` |
-| **spec.filter.filters.eventType.value** | Yes | Name of the event to be subscribed to. Example: `sap.kyma.custom.commerce.order.created.v1` |
-| **spec.protocol** | Yes | Must be set to `""` |
-| **spec.protocolsettings** | Yes | ProtocolSettings defines the CE protocol setting specification implementation. Must be set to "{}" |
-| **spec.sink** | Yes | Specifies where should matching events be sent to. Example: `http://test.test.svc.cluster.local`  |
+| **metadata.namespace** | No | Defines the Namespace in which the CR is available. It is set to `default` unless your specify otherwise. |
+| **spec.filter** | Yes | Defines the list of filters. |
+| **spec.filter.dialect** | No | Specifies the preferred Eventing backend. Currently, the capability to switch between Eventing backends is not available. It is set to NATS by default. |
+| **spec.filter.filters** | Yes | Defines the filter element as a combination of two Cloud Event filter elements. |
+| **spec.filter.filters.eventSource** | Yes | The origin from which events are published. |
+| **spec.filter.filters.eventType** | Yes | The type of events used to trigger workloads. |
+| **spec.filter.filters.eventSource.property** | Yes | Must be set to `source`. |
+| **spec.filter.filters.eventSource.type** | No | Must be set to `exact`. |
+| **spec.filter.filters.eventSource.value** | Yes | Must be set to `""` for the NATS backend. |
+| **spec.filter.filters.eventType.property** | Yes | Must be set to `type`. |
+| **spec.filter.filters.eventType.type** | No | Must be set to `exact`. |
+| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. |
+| **spec.protocol** | Yes | Must be set to `""`. |
+| **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
+| **spec.sink** | Yes | Specifies where matching events should be sent to, for example: `http://test.test.svc.cluster.local`.  |
 
 ## Related resources and components
 
@@ -64,5 +64,5 @@ These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| Eventing Controller | Eventing Controller reconciles on Subscriptions. By reconciling, it creates a connection between subscribers and eventing backend. |
-| Event Publisher Proxy | Event Publisher Proxy reads the Subscriptions to figure out how events used for each application. |
+| Eventing Controller | The Eventing Controller reconciles on Subscriptions and creates a connection between subscribers and the Eventing backend. |
+| Event Publisher Proxy | The Event Publisher Proxy reads the Subscriptions to find out how events are used for each Application. |
