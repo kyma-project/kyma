@@ -38,3 +38,5 @@ Follow these basic rules when you add a new document to the official Kyma docume
 DELETE ME
 DELETE ME
 DELETE ME
+DELETE ME
+DELETE ME
