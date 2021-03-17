@@ -47,6 +47,9 @@ These variables refer to the following:
 
 2. Create a Subscription CR for your Function to subscribe your Function to a specific event type.
 
+> **NOTE:** In the Subscription CR, provide `$APP_NAME` without any special characters like dashes (`-`) or dots (`.`).
+> For example, `commercemock` instead of `commerce-mock`.
+
     ```yaml
     cat <<EOF | kubectl apply -f  -
     apiVersion: eventing.kyma-project.io/v1alpha1
