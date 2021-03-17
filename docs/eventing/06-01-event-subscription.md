@@ -35,8 +35,6 @@ spec:
   sink: http://test.test.svc.cluster.local
 ```
 
-The `sink` field refers to the cluster local name of the subscriber's service.
-
 ## Custom resource parameters
 
 This table lists all the possible parameters of a given resource together with their descriptions:
@@ -61,4 +59,16 @@ This table lists all the possible parameters of a given resource together with t
 | **{another_parameter}** | {Yes/No} | {Parameter description} |
 
 
+## Related resources and components
 
+These are the resources related to this CR:
+
+| Custom resource |   Description |
+|-----------------|---------------|
+| {Related CRD kind} |  {Briefly describe the relation between the resources}. |
+
+These components use this CR:
+
+| Component   |   Description |
+|-------------|---------------|
+| {Component name} |  {Briefly describe the relation between the CR and the given component}. |
