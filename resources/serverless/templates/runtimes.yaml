@@ -7,6 +7,7 @@ metadata:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs12
 data:
+  # scan-image: {{ .Values.images.runtimes.nodejs12.repository}}:{{ .Values.images.runtimes.nodejs12.tag }} # This line allows security scan tools to scan this image
   Dockerfile: |-
     FROM {{ .Values.images.runtimes.nodejs12.repository}}:{{ .Values.images.runtimes.nodejs12.tag }}
     USER root
@@ -27,6 +28,7 @@ metadata:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs10
 data:
+  # scan-image: {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }} # This line allows security scan tools to scan this image
   Dockerfile: |-
     FROM {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }}
     USER root
@@ -47,6 +49,7 @@ metadata:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: python38
 data:
+  # scan-image: {{ .Values.images.runtimes.python38.repository}}:{{ .Values.images.runtimes.python38.tag }} # This line allows security scan tools to scan this image
   Dockerfile: |-
     FROM {{ .Values.images.runtimes.python38.repository}}:{{ .Values.images.runtimes.python38.tag }}
     USER root

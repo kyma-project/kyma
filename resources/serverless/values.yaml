@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "abb3d162"
+    tag: "PR-10856"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "4bed80da"
+      tag: "PR-10900"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "4bed80da"
+      tag: "PR-10900"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "4bed80da"
+      tag: "PR-10900"
 
 deployment:
   replicas: 1

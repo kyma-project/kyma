@@ -97,7 +97,6 @@ func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expect
 		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
 		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
 		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
-		r.mapsEqual(existing.Spec.Template.GetAnnotations(), expected.Spec.Template.GetAnnotations()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
 		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
 }
