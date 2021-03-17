@@ -46,28 +46,23 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.filter** | Yes | Defines the list of filters |
 | **spec.filter.dialect** | No | Specifies preferred eventing backend. Current release don't provide the capability to switch eventing backends. It is set to nats by default. |
 | **spec.filter.filters** | Yes | Defines the filter element as a combination of two CE filter elements |
-| **spec.filter.filters.eventSource** | Yes | Defines the event source in the eventing backend |
-| **spec.filter.filters.eventType** | Yes | Defines the filter for event type |
-| **spec.filter.filters.eventSource.property** | Yes | {Should be set to `source` |
-| **spec.filter.filters.eventSource.type** | No | Should be set to `exact` |
-| **spec.filter.filters.eventSource.value** | Yes | Can be set to "" for nats backend |
-| **spec.filter.filters.eventType.property** | Yes | Should be set to `type` |
-| **spec.filter.filters.eventType.type** | No | Should be set to `exact` |
-| **spec.filter.filters.eventType.value** | Yes | Name of the event to be subscribed to |
-| **spec.protocol** | Yes | Should be set to "" |
-| **spec.protocolsettings** | Yes | Should be set to {} |
-| **spec.sink** | Yes | Specifies where should matching events be sent to |
+| **spec.filter.filters.eventSource** | Yes | EventSource is the origin from which Events are published. |
+| **spec.filter.filters.eventType** | Yes | eventType is the type of Events to trigger workloads. |
+| **spec.filter.filters.eventSource.property** | Yes | Must be set to `source` |
+| **spec.filter.filters.eventSource.type** | No | Must be set to `exact` |
+| **spec.filter.filters.eventSource.value** | Yes | Must be set to "" for nats backend |
+| **spec.filter.filters.eventType.property** | Yes | Must be set to `type` |
+| **spec.filter.filters.eventType.type** | No | Must be set to `exact` |
+| **spec.filter.filters.eventType.value** | Yes | Name of the event to be subscribed to. Example: `sap.kyma.custom.commerce.order.created.v1` |
+| **spec.protocol** | Yes | Must be set to `""` |
+| **spec.protocolsettings** | Yes | ProtocolSettings defines the CE protocol setting specification implementation. Must be set to "{}" |
+| **spec.sink** | Yes | Specifies where should matching events be sent to. Example: `http://test.test.svc.cluster.local`  |
 
 ## Related resources and components
-
-These are the resources related to this CR:
-
-| Custom resource |   Description |
-|-----------------|---------------|
-| {Related CRD kind} |  {Briefly describe the relation between the resources}. |
 
 These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| Eventing Controller |  {Briefly describe the relation between the CR and the given component}. |
+| Eventing Controller | Eventing Controller reconciles on Subscriptions. By reconciling, it creates a connection between subscribers and eventing backend. |
+| Event Publisher Proxy | Event Publisher Proxy reads the Subscriptions to figure out how events used for each application. |
