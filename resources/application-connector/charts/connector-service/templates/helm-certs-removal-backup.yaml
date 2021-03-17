@@ -7,7 +7,7 @@ metadata:
   name: {{ $value.name }}-certs-backup
   namespace: {{ $value.namespace }}
   annotations:
-    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation
     helm.sh/resource-policy: keep
     helm.sh/hook-weight: "1"
