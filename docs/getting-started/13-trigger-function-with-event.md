@@ -7,11 +7,11 @@ As the final step, you will trigger the Function with the `order.deliverysent.v1
 
 ## Steps
 
-### Create the Kyma Subscription
+### Create the Subscription
 
 Follows these steps:
 
-<div tabs name="steps" group="function-subscription">
+<div tabs name="steps" group="subscribe-function">
   <details>
   <summary label="kubectl">
   kubectl

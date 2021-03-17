@@ -11,7 +11,7 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 2. The NATS Eventing Controller creates an infrastructure for the NATS server.
 
-3. The [Application Connector](https://kyma-project.io/docs/components/application-connector/) publishes events to the NATS publisher proxy.
+3. The [Application Connector](/components/application-connector/) publishes events to the NATS publisher proxy.
 
 4. The NATS publisher proxy sends events to the NATS server.
 

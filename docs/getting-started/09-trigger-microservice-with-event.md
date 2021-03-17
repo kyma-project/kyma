@@ -15,7 +15,7 @@ This guide demonstrates how [Eventing](/components/eventing/) works in Kyma. It 
 
 Follow these steps:
 
-<div tabs name="steps" group="microservice-subscription">
+<div tabs name="steps" group="subscribe-microservice">
   <details>
   <summary label="kubectl">
   kubectl

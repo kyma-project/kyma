@@ -37,7 +37,7 @@ The system creates a new Kubernetes service for each registered API.
 
 ## Event Publisher
 
-The Event Publisher sends events to Kyma Eventing with metadata that indicates the source of the event.
+The Event Publisher sends events to Eventing with metadata that indicates the source of the event.
 This allows routing events to Functions and services based on their source Application.
 
 ## Application

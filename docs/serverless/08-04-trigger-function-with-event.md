@@ -21,7 +21,7 @@ You must also have:
 
 Follows these steps:
 
-<div tabs name="steps" group="subscription-function">
+<div tabs name="steps" group="subscribe-function">
   <details>
   <summary label="kubectl">
   kubectl
@@ -47,8 +47,7 @@ These variables refer to the following:
 
 2. Create a Subscription CR for your Function to subscribe your Function to a specific event type.
 
-> **NOTE:** In the Subscription CR, provide `$APP_NAME` without any special characters like dashes (`-`) or dots (`.`).
-> For example, `commercemock` instead of `commerce-mock`.
+> **NOTE:** In the Subscription CR, provide `$APP_NAME` without any special characters like dashes (`-`) or dots (`.`). For example, use `commercemock` instead of `commerce-mock`.
 
     ```yaml
     cat <<EOF | kubectl apply -f  -

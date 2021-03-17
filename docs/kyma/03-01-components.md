@@ -26,7 +26,7 @@ The Application Connector is a proprietary Kyma solution. This endpoint is the K
 
 ## Eventing
 
-Kyma Eventing allows you to easily integrate external applications with Kyma. Under the hood, the Eventing implements [NATS](https://docs.nats.io/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
+Eventing allows you to easily integrate external applications with Kyma. Under the hood, it implements [NATS](https://docs.nats.io/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
 
 ## Service Mesh
 
