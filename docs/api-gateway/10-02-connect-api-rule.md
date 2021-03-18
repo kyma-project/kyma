@@ -129,7 +129,7 @@ Sometimes Oathkeeper Maester controller stops reconciling Rules on long living c
 2. Fetch the access Rules from every Oathkeeper Pod and save them to a file:
 
     ```bash
-   kubectl cp -n kyma-system -c oathkeeper "$POD_NAME":etc/rules/access-rules.json "access-rules.$POD_NAME.json" 
+   kubectl cp -n kyma-system -c oathkeeper "{POD_NAME}":etc/rules/access-rules.json "access-rules.{POD_NAME}.json" 
    ```
 
 3. If you have more than one instance of Oathkeeper, compare whether the files contain the same Rules. Othkeeper stores Rules as a JSON, so you might want to use [jd](https://github.com/josephburnett/jd) to automate it:
