@@ -6,6 +6,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+  {{- with .Values.service.admin.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.admin.type }}
   ports:
@@ -13,10 +17,6 @@ spec:
       targetPort: http-admin
       protocol: TCP
       name: http
-    - port: 15020
-      targetPort: 15020
-      protocol: TCP
-      name: status-port
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -2,26 +2,35 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "hydra.fullname" . }}
+  {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
+  {{- end }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+    {{- with .Values.deployment.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.deployment.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-  strategy:
-    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "hydra.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-      {{- with .Values.deployment.annotations }}
+{{ include "hydra.labels" . | indent 8 }}
+        {{- with .Values.deployment.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- with .Values.deployment.annotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -29,28 +38,6 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
-        - name: wait-for-db
-          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
-          command:
-            - /bin/sh
-            - -c
-            - |
-{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
-          env:
-            - name: DSN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "hydra.secretName" . }}
-                  key: dsn
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 65534
-            runAsNonRoot: true
-            runAsUser: 65534
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -60,26 +47,30 @@ spec:
             - name: {{ include "hydra.name" . }}-config-volume
               mountPath: /etc/config
               readOnly: true
+            {{- if .Values.deployment.extraVolumeMounts }}
+{{ toYaml .Values.deployment.extraVolumeMounts | indent 12 }}
+            {{- end }}
           env:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: dsn
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
+            {{- with .Values.deployment.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
     {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
           configMap:
             name: {{ include "hydra.fullname" . }}
+        {{- if .Values.deployment.extraVolumes }}
+{{ toYaml .Values.deployment.extraVolumes | indent 8 }}
+        {{- end }}
+
+      {{- if .Values.deployment.serviceAccountName  }}
+      serviceAccountName: {{ .Values.deployment.serviceAccountName }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -89,6 +80,9 @@ spec:
             - name: {{ include "hydra.name" . }}-config-volume
               mountPath: /etc/config
               readOnly: true
+            {{- if .Values.deployment.extraVolumeMounts }}
+{{ toYaml .Values.deployment.extraVolumeMounts | indent 12 }}
+            {{- end }}
           args: [
             "serve",
             "all",
@@ -113,19 +107,33 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 45
+            initialDelaySeconds: 30
             periodSeconds: 10
-            failureThreshold: 10
-            timeoutSeconds: 5
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 45
+            initialDelaySeconds: 30
             periodSeconds: 10
-            failureThreshold: 10
-            timeoutSeconds: 5
+            failureThreshold: 5
           env:
+            {{- if .Values.deployment.tracing.datadog.enabled }}
+            - name: TRACING_PROVIDER
+              value: datadog
+            - name: DD_ENV
+              value: {{ .Values.deployment.tracing.datadog.env | default "none" | quote }}
+            - name: DD_VERSION
+              value: {{ .Values.deployment.tracing.datadog.version | default .Values.image.tag | quote }}
+            - name: DD_SERVICE
+              value: {{ .Values.deployment.tracing.datadog.service | default "ory/hydra" | quote }}
+            {{- if .Values.deployment.tracing.datadog.useHostIP }}
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            {{- end }}
+            {{- end }}
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
             - name: URLS_SELF_ISSUER
@@ -134,41 +142,35 @@ spec:
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: dsn
             - name: SECRETS_SYSTEM
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: secretsSystem
             - name: SECRETS_COOKIE
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "hydra.secretName" . }}
+                  name: {{ include "hydra.secretname" . }}
                   key: secretsCookie
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
+            {{- with .Values.deployment.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
-    {{- end }}
-    {{- with .Values.affinity }}
-    affinity:
-      {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.deployment.tolerations }}
-    tolerations:
-      {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,34 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-crd-init
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-weight": "10"
+spec:
+  template:
+    metadata:
+      {{- with .Values.job.podLabels }}
+      labels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-crd-init
+      containers:
+      - name: {{ .Release.Name }}-crd-oauth2clients
+        image: "{{ .Values.rbacJob.image.repository }}:{{ .Values.rbacJob.image.tag }}"
+        volumeMounts:
+        - name: crd-oauth2clients
+          mountPath: /etc/crd
+          readOnly: true
+        command: ["kubectl",  "apply", "-f", "/etc/crd/oauth2clients.yaml"]
+      volumes:
+      - name: crd-oauth2clients
+        configMap:
+          name: {{ .Release.Name }}-crd-oauth2clients
+      restartPolicy: OnFailure

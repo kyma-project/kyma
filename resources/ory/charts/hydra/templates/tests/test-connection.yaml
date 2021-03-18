@@ -12,16 +12,7 @@ metadata:
 spec:
   containers:
     - name: healthcheck-ready
-      image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+      image: busybox
       command: ['wget']
       args:  ['{{ include "hydra.fullname" . }}-admin:{{ .Values.service.admin.port }}/health/ready']
-      securityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-          - ALL
-        privileged: false
-        runAsGroup: 65534
-        runAsNonRoot: true
-        runAsUser: 65534
   restartPolicy: Never

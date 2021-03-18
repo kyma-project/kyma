@@ -1,0 +1,55 @@
+replicaCount: 1
+
+rbacJob:
+  image:
+    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20190325-ff66a3a"
+
+#The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
+enabledNamespaces: []
+
+image:
+  repository: oryd/hydra-maester
+  tag: v0.0.19
+  # Image pull policy
+  pullPolicy: IfNotPresent
+
+## Pod priority
+## https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+# priorityClassName: ""
+
+adminService:
+  name:
+  port:
+
+forwardedProto:
+    
+deployment:
+  resources: {}
+    #  We usually recommend not to specify default resources and to leave this as a conscious
+    #  choice for the user. This also increases chances charts run on environments with little
+    #  resources, such as Minikube. If you do want to specify resources, uncomment the following
+    #  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 30Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 20Mi
+
+  # Node labels for pod assignment.
+  nodeSelector: {}
+  # If you do want to specify node labels, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+  #   foo: bar
+
+  # Configure node tolerations.
+  tolerations: []
+  annotations: {}
+  podLabels: {}
+
+job:
+  podLabels: {}
+
+# Configure node affinity
+affinity: {}
