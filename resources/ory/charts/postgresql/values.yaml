@@ -72,7 +72,8 @@ volumePermissions:
   ## pod securityContext.enabled=false and shmVolume.chmod.enabled=false
   ##
   securityContext:
-    runAsUser: 0
+    ## UID 11 is `operator` in Alpine. It belongs to "root" group so it has higher filesystem permissions necessary for init container, but it's not root.
+    runAsUser: 11
 
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/

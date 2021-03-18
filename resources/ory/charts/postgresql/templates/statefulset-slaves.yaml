@@ -130,6 +130,12 @@ spec:
           {{- end }}
           {{- if .Values.securityContext.enabled }}
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsNonRoot: true
             runAsUser: {{ .Values.securityContext.runAsUser }}
           {{- end }}
           env:
