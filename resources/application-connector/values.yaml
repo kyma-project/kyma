@@ -38,11 +38,11 @@ global:
   connector_service:
     version: "34011b0f"
   connector_service_tests:
-    version: "PR-10893"
+    version: "9776cb81"
   connection_token_handler:
     version: "da84b1b3"
   connection_token_handler_tests:
-    version: "PR-10893"
+    version: "9776cb81"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
@@ -97,5 +97,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "PR-10893"
+      version: "9776cb81"
       pullPolicy: IfNotPresent
