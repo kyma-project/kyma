@@ -7,7 +7,7 @@ Let's now repeat the microservice flow for the Function. This guide shows how yo
 
 ## Reference
 
-This guide demonstrates how [Serverless](/components/event-mesh/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe business events from external solutions to them, and trigger the Function's logic upon receiving a given event type.
+This guide demonstrates how [Serverless](/components/serverless/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe business events from external solutions to them, and trigger the Function's logic upon receiving a given event type.
 
 ## Steps
 
