@@ -3,9 +3,9 @@ title: In-cluster eventing
 type: Details
 ---
 
-Kyma in-cluster Eventing allows publishers to send messages and subscribers to receive them without the need for a Kyma Application. This means that instead of the usual event flow where Application Connector publishes events to the Event Publisher Proxy, events can be published from within the cluster directly to the Event Publisher Proxy.
+In-cluster Eventing allows publishers to send messages and subscribers to receive them without the need for a Kyma Application. This means that instead of the usual event flow where Application Connector publishes events to the Event Publisher Proxy, events can be published from within the cluster directly to the Event Publisher Proxy.
 
-To use in-cluster Eventing, create a subscription where the `eventType value` field includes the name of your application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an application that does not exist in Kyma.
+To use in-cluster Eventing, create a subscription where the **eventType.value** field includes the name of your application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an application that does not exist in Kyma.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
