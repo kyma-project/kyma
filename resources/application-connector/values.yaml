@@ -9,7 +9,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
-  isBEBEnabled: false
+  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -32,9 +32,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "34011b0f"
+    version: "d930fd89"
   application_operator_tests:
-    version: "f4a3bda0"
+    version: "d930fd89"
   connector_service:
     version: "34011b0f"
   connector_service_tests:

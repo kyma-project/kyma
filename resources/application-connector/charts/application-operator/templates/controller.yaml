@@ -46,8 +46,6 @@ spec:
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
         - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-legacy-tests:{{ .Values.global.application_gateway_legacy_tests.version }}"
-        - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/event-service:{{ .Values.global.event_service.version }}"
-        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
         - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"

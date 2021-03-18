@@ -4,6 +4,10 @@ describe("Installation", function () {
   this.timeout(10 * 60 * 1000);
 
   it("Kyma should successfully install", async function () {
-    await installKyma();
+    const options = {
+      skipComponents: ["dex","console"],
+      newEventing: true
+    };
+    await installKyma(options);
   });
 });

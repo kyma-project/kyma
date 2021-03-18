@@ -356,7 +356,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   const mockHost = await provisionCommerceMockResources(`mp-${appName}`, mockNamespace, targetNamespace);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
-  await waitForDeployment(`mp-${appName}`, "kyma-integration");
+  await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
 
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   
@@ -460,7 +460,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
       targetNamespace),
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
-      "http://lastorder.test.svc.cluster.local",
+      `http://lastorder.${targetNamespace}.svc.cluster.local`,
       "lastorder",
       targetNamespace)
   ]);

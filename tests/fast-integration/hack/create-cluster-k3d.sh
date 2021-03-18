@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o errexit
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Create docker network
 docker network create kyma || echo "kyma network already exists"
@@ -10,7 +11,7 @@ docker run -d \
   --restart=always \
   --name registry.localhost \
   --network kyma \
-  -v $PWD/registry:/var/lib/registry \
+  -v $DIR/registry:/var/lib/registry \
   eu.gcr.io/kyma-project/test-infra/docker-registry-2:20200202
 
 # Create Kyma cluster
@@ -21,7 +22,7 @@ k3d cluster create kyma \
     --k3s-server-arg --no-deploy \
     --k3s-server-arg traefik \
     --network kyma \
-    --volume $PWD/registries.yaml:/etc/rancher/k3s/registries.yaml \
+    --volume $DIR/registries.yaml:/etc/rancher/k3s/registries.yaml \
     --wait \
     --kubeconfig-switch-context \
     --timeout 60s 
