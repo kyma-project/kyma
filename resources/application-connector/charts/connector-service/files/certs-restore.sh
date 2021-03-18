@@ -27,5 +27,5 @@ restore() {
   fi
 }
 
-restore {{ .value.namespace }} {{ .value.name }}
+restore kyma-integration connector-service-app-ca
 

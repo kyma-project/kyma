@@ -1,100 +1,95 @@
 {{- if not .Values.global.disableLegacyConnectivity }}
-{{- range $key, $value := .Values.certs -}}
-{{- $_ := set $ "key" $key }}
-{{- $_ := set $ "value" $value }}
----
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $value.name }}-certs-backup
-  namespace: {{ $value.namespace }}
+  name: connector-service-app-ca-certs-backup
+  namespace: kyma-integration
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation
     helm.sh/hook-weight: "1"
   labels:
-    release: {{ $.Release.Name }}
-    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" $ }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   template:
     metadata:
-      name: {{ $value.name }}-helm-certs-removal-backup
-      namespace: {{ $value.namespace }}
+      name: connector-service-app-ca-helm-certs-removal-backup
+      namespace: kyma-integration
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        release: {{ $.Release.Name }}
-        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
-        app.kubernetes.io/name: {{ template "name" $ }}
-        app.kubernetes.io/managed-by: {{ $.Release.Service }}
-        app.kubernetes.io/instance: {{ $.Release.Name }}
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ $value.name }}-helm-certs-removal-acc
+      serviceAccountName: connector-service-app-ca-helm-certs-removal-acc
       restartPolicy: Never
-      {{- if $.Values.global.priorityClassName }}
-      priorityClassName: {{ $.Values.global.priorityClassName }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}
       containers:
-        - name: {{ $value.name }}-helm-certs-removal-backup
-          image: "{{ $.Values.jobs.image.repository }}:{{ $.Values.jobs.image.tag }}"
+        - name: connector-service-app-ca-helm-certs-removal-backup
+          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
           securityContext:
-            runAsUser: {{ $.Values.global.podSecurityPolicy.runAsUser }}
-            privileged: {{ $.Values.global.podSecurityPolicy.privileged }}
-            allowPrivilegeEscalation: {{ $.Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
           command:
             - /bin/bash
             - -c
             - |-
-{{ tpl ($.Files.Get "files/certs-backup.sh" | printf "%s" | indent 14) $ }}
+{{ tpl (.Files.Get "files/certs-backup.sh" | printf "%s" | indent 14) . }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $value.name }}-certs-restore
-  namespace: {{ $value.namespace }}
+  name: connector-service-app-ca-certs-restore
+  namespace: kyma-integration
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation
     helm.sh/hook-weight: "-1"
   labels:
-    release: {{ $.Release.Name }}
-    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" $ }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   template:
     metadata:
-      name: {{ $value.name }}-helm-certs-removal-backup
-      namespace: {{ $value.namespace }}
+      name: connector-service-app-ca-helm-certs-removal-backup
+      namespace: kyma-integration
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        release: {{ $.Release.Name }}
-        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
-        app.kubernetes.io/name: {{ template "name" $ }}
-        app.kubernetes.io/managed-by: {{ $.Release.Service }}
-        app.kubernetes.io/instance: {{ $.Release.Name }}
+        release: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ $value.name }}-helm-certs-removal-acc
+      serviceAccountName: connector-service-app-ca-helm-certs-removal-acc
       restartPolicy: Never
-      {{- if $.Values.global.priorityClassName }}
-      priorityClassName: {{ $.Values.global.priorityClassName }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}
       containers:
-        - name: {{ $value.name }}-helm-certs-removal-restore
-          image: "{{ $.Values.jobs.image.repository }}:{{ $.Values.jobs.image.tag }}"
+        - name: connector-service-app-ca-helm-certs-removal-restore
+          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
           securityContext:
-            runAsUser: {{ $.Values.global.podSecurityPolicy.runAsUser }}
-            privileged: {{ $.Values.global.podSecurityPolicy.privileged }}
-            allowPrivilegeEscalation: {{ $.Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
+            runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+            privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+            allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
           command:
             - /bin/bash
             - -c
             - |-
-{{ tpl ($.Files.Get "files/certs-restore.sh" | printf "%s" | indent 14) $ }}
-{{- end }}
+{{ tpl (.Files.Get "files/certs-restore.sh" | printf "%s" | indent 14) . }}
 {{- end }}

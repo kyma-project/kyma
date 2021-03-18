@@ -18,5 +18,5 @@ backup() {
   fi
 }
 
-backup {{ .value.namespace }} {{ .value.name }}
+backup kyma-integration connector-service-app-ca
 
