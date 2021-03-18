@@ -5,8 +5,6 @@ type: Details
 
 Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
 
->**CAUTION:** Node.js 10 runtime is deprecated, so use Node.js 12 instead.
-
 ## Signature
 
 Function's code is represented by a handler that is a method that processes events. When your Function is invoked, it runs this handler method to process a given request and return a response.
