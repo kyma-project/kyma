@@ -13,7 +13,7 @@ The Application Connector:
 - Manages lifecycles of Applications.
 - Establishes a secure connection and generates the client certificate used by the connected external solution.
 - Registers APIs and event catalogs of the connected external solution.
-- Delivers events from the connected external solution to the Event Mesh.
+- Delivers events from the connected external solution to Eventing.
 - Proxies calls sent from Kyma to external APIs registered by the connected external solution.
 - Allows to map an Application to a Kyma Namespace and use its registered APIs and event catalogs in the context of that Namespace.
 - Integrates the registered APIs and event catalogs with the Kyma Service Catalog.

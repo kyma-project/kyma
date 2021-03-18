@@ -38,11 +38,11 @@ global:
   connector_service:
     version: "34011b0f"
   connector_service_tests:
-    version: "77ca2463"
+    version: "PR-10893"
   connection_token_handler:
     version: "da84b1b3"
   connection_token_handler_tests:
-    version: "470796a1"
+    version: "PR-10893"
   application_gateway:
     version: "34011b0f"
   application_gateway_tests:
@@ -91,9 +91,7 @@ tests:
       integration: true
       after-upgrade: true
     enabled: true
-    connector_service:
-      central: false
     skipSslVerify: true
     image:
-      version: "d930fd89"
+      version: "PR-10893"
       pullPolicy: IfNotPresent

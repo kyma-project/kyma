@@ -3,75 +3,78 @@ title: Trigger the Function with an event
 type: Getting Started
 ---
 
-As the final step, you will trigger the Function with the `order.deliverysent` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
+As the final step, you will trigger the Function with the `order.deliverysent.v1` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
 
 ## Steps
 
-### Create the Trigger
+### Create the Subscription
 
 Follows these steps:
 
-<div tabs name="steps" group="trigger-function">
+<div tabs name="steps" group="subscribe-function">
   <details>
   <summary label="kubectl">
   kubectl
   </summary>
 
-1. Create a Trigger custom resource (CR) for `orders-function` to subscribe the Function to the `order.deliverysent` event type from Commerce mock:
+1. Create a Subscription custom resource (CR) to subscribe the Function to the `order.deliverysent.v1` event type from Commerce mock:
 
-  ```yaml
-  cat <<EOF | kubectl apply -f  -
-  apiVersion: eventing.knative.dev/v1alpha1
-  kind: Trigger
-  metadata:
-    name: orders-function
-    namespace: orders-service
-  spec:
-    broker: default
-    filter:
-      attributes:
-        eventtypeversion: v1
-        source: commerce-mock
-        type: order.deliverysent
-    subscriber:
-      ref:
-        apiVersion: v1
-        kind: Service
-        name: orders-function
+   ```bash
+   cat <<EOF | kubectl apply -f  -
+      apiVersion: eventing.kyma-project.io/v1alpha1
+      kind: Subscription
+      metadata:
+        name: orders-sub
         namespace: orders-service
-  EOF
-  ```
+      spec:
+        filter:
+          filters:
+          - eventSource:
+              property: source
+              type: exact
+              value: ""
+            eventType:
+              property: type
+              type: exact
+              value: sap.kyma.custom.commerce.order.deliverysent.v1
+        protocol: ""
+        protocolsettings: {}
+        sink: http://orders-function.orders-service.svc.cluster.local
+   EOF
+   ```
 
-- **spec.filter.attributes.eventtypeversion** points to the specific event version type. In this example, it is `v1`.
-- **spec.filter.attributes.source** is the name of the Application CR which is the source of the events. In this example, it is `commerce-mock`.
-- **spec.filter.attributes.type** points to the event type to which you want to subscribe the Function. In this example, it is `order.deliverysent`.
+The event type is composed of the following components:
+- Prefix: `sap.kyma.custom`
+- Application: `commerce`
+- Event: `order.deliverysent`
+- Version: `v1`
 
-2. Check that the Trigger CR was created and is ready. This is indicated by its status equal to `True`:
+2. Check that the Subscription CR was created and is ready. This is indicated by its status equal to `true`:
 
-  ```bash
-  kubectl get trigger orders-function -n orders-service -o=jsonpath="{.status.conditions[2].status}"
-  ```
+   ```bash
+   kubectl get subscriptions.eventing.kyma-project.io orders-sub -n orders-service -o=jsonpath="{.status.ready}"
+   ```
 
-    </details>
-    <details>
-    <summary label="console-ui">
-    Console UI
-    </summary>
+   </details>
+<details>
+<summary label="console-ui">
+Console UI
+</summary>
 
 1. From the drop-down list in the top navigation panel, select the `orders-service` Namespace.
 
 2. Go to **Workloads** > **Functions** in the left navigation panel and navigate to `orders-function`.
 
-3. Once in the Function's details view, switch to the **Configuration** tab and select **Add Event Trigger** in the **Event Triggers** section.
+3. Once in the Function's details view, switch to the **Configuration** tab and select **Create Event Subscription** in the **Event Subscriptions** section.
 
-4. Once the pop-up box opens, find the `order.deliverysent` event with the `v1` version from the `commerce-mock` application. Check it on the list and select **Add**.
+4. Once the pop-up box opens, find the `order.deliverysent.v1` event from the `commerce-mock` application. Check it on the list and select **Add**.
 
-A message confirming that the event trigger was created will appear in the **Event Triggers** section in the Function's details view.
+A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
-    </details>
+  </details>
 </div>
 
-### Test the Trigger
+### Test the event delivery
 
 To send events from Commerce mock to `orders-function`, follow these steps:
 
@@ -108,6 +111,5 @@ To send events from Commerce mock to `orders-function`, follow these steps:
    x-envoy-upstream-service-time: 991
    x-powered-by: Express
 
-   [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"},
-   {"orderCode":"762727234","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"762727210","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}, {"orderCode":"123456789","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
+   [{"orderCode":"987654321","consignmentCode":"76272725","consignmentStatus":"PICKUP_COMPLETE"}]
    ```
