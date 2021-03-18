@@ -14,7 +14,9 @@ backup() {
   then
     echo "$secretName exists, backing up to $backupSecretName"
 
-    kubectl get secret "$secretName" -n "$namespace" -ojson | jq "{apiVersion, data, kind, type, metadata: {name: \"$backupSecretName\", namespace: .metadata.namespace}}" | kubectl apply -n "$namespace" -f -
+    secretJson=$(kubectl get secret "$secretName" -n "$namespace" -ojson)
+    truncatedJson=$(echo "$secretJson" | jq "{apiVersion, data, kind, type, metadata: {name: \"$backupSecretName\", namespace: .metadata.namespace}}")
+    echo "$truncatedJson" | kubectl apply -n "$namespace" -f -
   fi
 }
 
