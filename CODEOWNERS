@@ -9,6 +9,9 @@
 
 /common/ @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
+# Logging library
+/common/logging @franpog859 @dbadura @janmedrek
+
 # Microfrontend k8s client
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
