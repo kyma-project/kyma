@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    version: 20210208-080d17ad
+    version: 20210310-c03fb8b6
   labels:
     integration: true
     after-upgrade: true
@@ -27,11 +27,13 @@ global:
     enabled: true
 
 kcproxy:
+  enabled: true
   replicaCount: 1
   port: 3000
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
+    discoveryUrl: https://dex.{{ .Values.global.ingress.domainName }}
     tlsVerify: false
     resources:
       uri: "/*"
@@ -266,7 +268,7 @@ kiali:
     # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
     # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
     #    ---
-      accessible_namespaces: 
+      accessible_namespaces:
       - "**"
     #
     # Additional custom yaml to add to the service definition. This is used mainly to customize the service type.

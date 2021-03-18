@@ -38,11 +38,11 @@ global:
   connector_service:
     version: "34011b0f"
   connector_service_tests:
-    version: "77ca2463"
+    version: "PR-10893"
   connection_token_handler:
-    version: "34011b0f"
+    version: "da84b1b3"
   connection_token_handler_tests:
-    version: "470796a1"
+    version: "PR-10893"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
@@ -87,7 +87,7 @@ application_connectivity_certs_sync:
       namespace: istio-system
   image:
     repository: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210208-080d17ad"
+    tag: "20210310-c03fb8b6"
 
 tests:
   application_connector_tests:
@@ -95,9 +95,7 @@ tests:
       integration: true
       after-upgrade: true
     enabled: true
-    connector_service:
-      central: false
     skipSslVerify: true
     image:
-      version: "58e57ea1"
+      version: "PR-10893"
       pullPolicy: IfNotPresent

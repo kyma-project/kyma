@@ -1,6 +1,9 @@
 package eventtype
 
-import "github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+import (
+	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+)
 
 type Cleaner interface {
 	Clean(eventType string) (string, error)
@@ -9,29 +12,33 @@ type Cleaner interface {
 type cleaner struct {
 	eventTypePrefix   string
 	applicationLister *application.Lister
+	logger            logr.Logger
 }
 
 // compile-time check
 var _ Cleaner = &cleaner{}
 
-func NewCleaner(eventTypePrefix string, applicationLister *application.Lister) Cleaner {
-	return &cleaner{eventTypePrefix: eventTypePrefix, applicationLister: applicationLister}
+func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger logr.Logger) Cleaner {
+	return &cleaner{eventTypePrefix: eventTypePrefix, applicationLister: applicationLister, logger: logger}
 }
 
 // Clean cleans the application name segment in the event-type from none-alphanumeric characters
-func (e cleaner) Clean(eventType string) (string, error) {
-	applicationName, event, version, err := parse(eventType, e.eventTypePrefix)
+// and returns the clean event-type, or returns an error if the event-type parsing failed
+func (c cleaner) Clean(eventType string) (string, error) {
+	appName, event, version, err := parse(eventType, c.eventTypePrefix)
 	if err != nil {
+		c.logger.Error(err, "failed to parse event-type", "prefix", c.eventTypePrefix, "type", eventType)
 		return "", err
 	}
 
-	app, err := e.applicationLister.Get(applicationName)
-	if err != nil {
-		return "", err
+	// handle existing applications
+	if appObj, err := c.applicationLister.Get(appName); err == nil {
+		eventType = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
+		return eventType, nil
 	}
 
-	applicationNameClean := application.CleanName(app)
-	eventType = build(e.eventTypePrefix, applicationNameClean, event, version)
-
+	// handle non-existing applications
+	c.logger.Info("failed to get application", "name", appName)
+	eventType = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
 	return eventType, nil
 }

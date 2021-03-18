@@ -110,11 +110,11 @@ data:
 
 {{- if .Values.config.outputs.loki.enabled }}
     [OUTPUT]
-        Name               loki
+        Name               grafana-loki
         {{- if .Values.config.outputs.loki.alias }}
         Alias              {{ .Values.config.outputs.loki.alias }}
         {{- end }}
-        Match              loki.*
+        Match              {{ .Values.config.outputs.loki.match }}
         {{- if and .Values.config.outputs.loki.user .Values.config.outputs.loki.password }}
         Url                {{ .Values.config.outputs.loki.serviceScheme }}://{{ .Values.config.outputs.loki.user }}:{{ .Values.config.outputs.loki.password }}@{{ .Values.config.outputs.loki.serviceName }}:{{ .Values.config.outputs.loki.servicePort }}{{ .Values.config.outputs.loki.servicePath }}
         {{- else }}

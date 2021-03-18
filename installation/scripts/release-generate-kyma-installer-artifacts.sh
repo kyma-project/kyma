@@ -15,6 +15,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER_YAML_PATH="${RESOURCES_DIR}/installer.yaml"
+COMPONENTS_YAML_PATH="${RESOURCES_DIR}/components.yaml"
 INSTALLER_LOCAL_CONFIG_PATH="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 INSTALLER_LOCAL_CR_PATH="${RESOURCES_DIR}/installer-cr.yaml.tpl"
 INSTALLER_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster.yaml.tpl"
@@ -32,6 +33,7 @@ function generateLocalArtifact() {
     cp ${INSTALLER_LOCAL_CONFIG_PATH} ${ARTIFACTS_DIR}/kyma-config-local.yaml
     cp ${INSTALLER_LOCAL_CR_PATH}  ${ARTIFACTS_DIR}/kyma-installer-cr-local.yaml
     cp ${INSTALLER_YAML_PATH} ${ARTIFACTS_DIR}/kyma-installer.yaml
+    cp ${COMPONENTS_YAML_PATH} ${ARTIFACTS_DIR}/kyma-components.yaml
 
     rm -rf ${TMP_LOCAL_CR}
 }

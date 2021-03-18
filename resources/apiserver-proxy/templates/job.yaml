@@ -78,7 +78,7 @@ spec:
               done
               echo "Maximum retries exceeded"
               exit 1
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
           name: gardener-annotate
           env:
             - name: HOME

@@ -94,13 +94,13 @@ func TestSubscription(t *testing.T) {
 
 	natsURL := natsServer.ClientURL()
 	natsClient := Nats{
-		Subscriptions: make(map[string]*nats.Subscription),
-		Config: env.NatsConfig{
+		subscriptions: make(map[string]*nats.Subscription),
+		config: env.NatsConfig{
 			Url:           natsURL,
 			MaxReconnects: 2,
 			ReconnectWait: time.Second,
 		},
-		Log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
+		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
 	}
 	err := natsClient.Initialize()
 	if err != nil {
@@ -123,7 +123,7 @@ func TestSubscription(t *testing.T) {
 	// Prepare event-type cleaner
 	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
@@ -179,7 +179,7 @@ func SendEvent(natsClient *Nats, data string) error {
 	eventType := eventingtesting.EventType
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
-	return natsClient.Connection.Publish(eventType, []byte(sampleEvent))
+	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
 func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {

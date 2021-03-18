@@ -18,6 +18,7 @@ import (
 	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 )
 
+// TODO remove this test when Kyma is fully integrated with the new Eventing solution https://github.com/kyma-project/kyma/issues/10866
 type EventMeshUpgradeTest struct {
 	k8sInterface kubernetes.Interface
 
@@ -28,6 +29,7 @@ type EventMeshUpgradeTest struct {
 	scCli                 scclientset.Interface
 	eventingCli           eventingv1alpha1clientset.EventingV1alpha1Interface
 	subscriberImage       string
+	skipTestResources     bool
 }
 
 // compile time assertion
@@ -51,6 +53,7 @@ func NewEventMeshUpgradeTest(
 		scCli:                 scCli,
 		eventingCli:           eventingCli,
 		subscriberImage:       subscriberImage,
+		skipTestResources:     true,
 	}
 }
 
@@ -79,6 +82,11 @@ func (e *EventMeshUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.
 }
 
 func (e *EventMeshUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	if e.skipTestResources {
+		log.Info("TestResources for EventMeshUpgradeTest is skipped")
+		return nil
+	}
+
 	f := newEventMeshFlow(e, stop, log, namespace)
 
 	for _, fn := range []func() error{

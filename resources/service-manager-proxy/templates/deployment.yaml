@@ -61,6 +61,8 @@ spec:
             secretKeyRef:
               name: {{ template "service-broker-proxy.fullname" . }}-regsecret
               key: password
+        - name: APP_BROKER_CREDENTIALS_ENABLED
+          value: '{{ .Values.config.app.broker_credentials_enabled }}'
         - name: APP_URL
           {{- if .Values.config.app.url }}
           value: {{ .Values.config.app.url }}
