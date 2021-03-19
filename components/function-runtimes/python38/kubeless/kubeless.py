@@ -181,15 +181,15 @@ if __name__ == '__main__':
     )
 
     # added by Kyma team
-    if os.getenv('KYMA_INTERNAL_LOGGER_DISABLED'):
-        loggedapp = app
-    else:
+    if os.getenv('KYMA_INTERNAL_LOGGER_ENABLED'):
         # default that has been used so far
         loggedapp = requestlogger.WSGILogger(
             app,
             [logging.StreamHandler(stream=sys.stdout)],
             requestlogger.ApacheFormatter(),
         )
+    else:
+        loggedapp = app        
     # end of modified section
 
     bottle.run(
@@ -201,4 +201,5 @@ if __name__ == '__main__':
         reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
         numthreads=os.getenv('CHERRYPY_NUMTHREADS', 10),
+        quiet=True,
     )

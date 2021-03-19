@@ -14,7 +14,7 @@ const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
 const app = express();
 
-if (!process.env["KYMA_INTERNAL_LOGGER_DISABLED"]) {
+if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
 }
 
