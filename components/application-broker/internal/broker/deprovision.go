@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
@@ -13,7 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 )
 
 type DeprovisionProcessRequest struct {
@@ -32,7 +30,6 @@ type DeprovisionService struct {
 	appSvcFinder        appSvcFinder
 	appSvcIDSelector    appSvcIDSelector
 	eaClient            v1client.ApplicationconnectorV1alpha1Interface
-	knClient            knative.Client
 	apiPkgCredsRemover  apiPackageCredentialsRemover
 
 	log       logrus.FieldLogger
@@ -48,7 +45,6 @@ func NewDeprovisioner(
 	operationUpdater operationUpdater,
 	opIDProvider func() (internal.OperationID, error),
 	appSvcFinder appSvcFinder,
-	knClient knative.Client,
 	eaClient v1client.ApplicationconnectorV1alpha1Interface,
 	log logrus.FieldLogger,
 	selector appSvcIDSelector,
@@ -60,7 +56,6 @@ func NewDeprovisioner(
 		operationUpdater:    operationUpdater,
 		operationIDProvider: opIDProvider,
 		appSvcFinder:        appSvcFinder,
-		knClient:            knClient,
 		eaClient:            eaClient,
 		appSvcIDSelector:    selector,
 		apiPkgCredsRemover:  apiPkgCredsRemover,
@@ -209,9 +204,6 @@ func (svc *DeprovisionService) cleanupOnlyIfLast(svcID internal.ApplicationServi
 	}
 
 	svc.log.Infof("Executing clean-up process for resources which should be deleted because this is the last instance of the given plan and service ID [%+v]", instance)
-	if err := svc.deprovisionSubscription(svcID, instance.Namespace); err != nil {
-		return errors.Wrap(err, "while removing Knative Subscription")
-	}
 
 	if err := svc.deprovisionEventActivation(svcID, instance.Namespace); err != nil {
 		return errors.Wrap(err, "while removing Event Activation")
@@ -226,23 +218,6 @@ func (svc *DeprovisionService) cleanupTheWorld(svcID internal.ApplicationService
 
 	if err := svc.cleanupOnlyIfLast(svcID, instance); err != nil {
 		return err
-	}
-	return nil
-}
-
-func (svc *DeprovisionService) deprovisionSubscription(svcID internal.ApplicationServiceID, ns internal.Namespace) error {
-	sub, err := subscriptionForApp(svc.knClient, string(svcID), string(ns))
-	switch {
-	case apierrors.IsNotFound(err):
-		// Subscription missing, nothing to delete
-		return nil
-	case err != nil:
-		return errors.Wrap(err, "getting existing Subscription")
-	}
-
-	err = svc.knClient.DeleteSubscription(sub)
-	if err != nil {
-		return errors.Wrap(err, "deleting existing Subscription")
 	}
 	return nil
 }
@@ -265,12 +240,4 @@ func (svc *DeprovisionService) deprovisionEventActivation(id internal.Applicatio
 	// TODO: implement waiting until EventActivation is deleted
 
 	return nil
-}
-
-func subscriptionForApp(cli knative.Client, svcID, ns string) (*messagingv1alpha1.Subscription, error) {
-	labels := map[string]string{
-		brokerNamespaceLabelKey:      ns,
-		applicationServiceIDLabelKey: svcID,
-	}
-	return cli.GetSubscriptionByLabels(integrationNamespace, labels)
 }

@@ -24,19 +24,19 @@ const (
 )
 
 // nsBrokerFacade is responsible for managing namespaced ServiceBrokers and creating proper k8s Services for them in the system namespace
-//go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=nsBrokerFacade --output=automock --outpkg=automock --case=underscore --exported
 type nsBrokerFacade interface {
 	Create(destinationNs string) error
 	Delete(destinationNs string) error
 	Exist(destinationNs string) (bool, error)
 }
 
-//go:generate mockery -name=mappingLister -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=mappingLister --output=automock --outpkg=automock --case=underscore --exported
 type mappingLister interface {
 	ListApplicationMappings(application string) ([]*v1alpha1.ApplicationMapping, error)
 }
 
-//go:generate mockery -name=nsBrokerSyncer -output=automock -outpkg=automock -case=underscore
+//go:generate mockery --name=nsBrokerSyncer --output=automock --outpkg=automock --case=underscore --exported
 type nsBrokerSyncer interface {
 	SyncBroker(name string) error
 }
