@@ -124,9 +124,9 @@ spec:
 
     class RedisStorage {
       storage = undefined;
-      asyncGet = void 0;
-      asyncKeys = void 0;
-      asyncSet = void 0;
+      asyncGet = undefined;
+      asyncKeys = undefined;
+      asyncSet = undefined;
 
       constructor(options) {
         this.storage = redis.createClient(options);

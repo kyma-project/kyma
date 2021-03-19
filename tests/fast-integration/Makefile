@@ -12,3 +12,8 @@ ci-no-install:
 ci-compass:
 	npm install
 	npm run test-compass
+
+.PHONY: ci-skr
+ci-skr:
+	npm install
+	npm run test-skr
