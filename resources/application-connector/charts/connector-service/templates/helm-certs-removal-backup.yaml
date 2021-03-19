@@ -42,7 +42,7 @@ spec:
             - name: TARGET_SECRET
               value: "connector-service-app-ca-backup"
             - name: NAMESPACE
-              value: kyma-integration
+            - value: kyma-integration
             command:
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
