@@ -10,7 +10,7 @@ var k8sCoreV1Api;
 
 var watch;
 
-function initializeK8sClient(opts = void 0) {
+function initializeK8sClient(opts) {
   opts = opts || {};
   try {
     if(opts.kubeconfigPath) {

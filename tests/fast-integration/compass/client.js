@@ -50,7 +50,7 @@ class DirectorClient {
         this.clientSecret = config.clientSecret;
         this.tenantID = config.tenantID;
 
-        this._token = void 0;
+        this._token = undefined;
     }
 
     async getToken() {

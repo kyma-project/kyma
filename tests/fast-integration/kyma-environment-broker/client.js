@@ -39,7 +39,7 @@ class KEBClient {
     this.planID = config.planID
     this.serviceID = KYMA_SERVICE_ID;
     
-    this._token = void 0;
+    this._token = undefined;
   }
 
   async getToken() {
