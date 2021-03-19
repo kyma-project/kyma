@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-nats
   name: "event-publisher-nats"
   # tag is the container tag of the event-publisher-nats image
-  tag: "PR-10919" # TODO(marcobebway) update to the final image
+  tag: "995b0aec"
   # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 
