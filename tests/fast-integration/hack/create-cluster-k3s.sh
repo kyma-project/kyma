@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o errexit
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 echo "starting docker registry"
 sudo mkdir -p /etc/rancher/k3s
@@ -8,7 +9,7 @@ docker run -d \
 -p 5000:5000 \
 --restart=always \
 --name registry.localhost \
--v $PWD/registry:/var/lib/registry \
+-v $DIR/registry:/var/lib/registry \
 eu.gcr.io/kyma-project/test-infra/docker-registry-2:20200202
 
 echo "starting cluster"

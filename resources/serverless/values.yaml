@@ -41,7 +41,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-10737"
+    tag: "f1205444"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -77,18 +77,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10856"
+    tag: "e4011316"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-10900"
+      tag: "0ee57277"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "PR-10900"
+      tag: "0ee57277"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "PR-10900"
+      tag: "0ee57277"
 
 deployment:
   replicas: 1
@@ -154,9 +154,9 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v1.3.0
+        value: gcr.io/kaniko-project/executor:v1.5.1
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:76ba4f03
+        value: eu.gcr.io/kyma-project/function-build-init:e4011316
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -237,7 +237,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "76ba4f03"
+    tag: "e4011316"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

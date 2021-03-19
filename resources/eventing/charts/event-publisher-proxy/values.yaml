@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "0ece7d31"
+  tag: "995b0aec"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 
@@ -30,3 +30,7 @@ beb:
     # emsPublisherUrlSuffix is the suffix added to EMS url obtained from service key
     emsPublisherUrlSuffix: sap/ems/v1/events
 
+metrics:
+  service:
+    port: 9090
+    nameSuffix: "-metrics"

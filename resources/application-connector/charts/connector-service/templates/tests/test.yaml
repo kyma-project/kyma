@@ -44,8 +44,6 @@ spec:
           value: https://gateway.{{ .Values.global.ingress.domainName }}
         - name: SKIP_SSL_VERIFY
           value: {{ .Values.tests.skipSslVerify | quote }}
-        - name: CENTRAL
-          value: {{ .Values.tests.central | quote }}
         command:
           - "/bin/sh"
         args:

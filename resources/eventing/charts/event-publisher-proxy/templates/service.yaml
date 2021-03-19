@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name:  {{ include "event-publisher-proxy.fullname" . }}
+  name: {{ include "event-publisher-proxy.fullname" . }}
   labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
@@ -11,4 +11,17 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "event-publisher-proxy.fullname" . }}{{ .Values.metrics.service.nameSuffix }}
+  labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "event-publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.metrics.service.port }}
 {{- end }}
