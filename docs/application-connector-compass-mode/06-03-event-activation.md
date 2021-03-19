@@ -49,6 +49,6 @@ These components use this CR:
 | Component   |   Description |
 |----------|------|
 | Application Broker |  Uses this CR to enable the user to receive events from a given service. |
-| Event Mesh | Uses this CR to control the consumption of an event.  |
+| Eventing | Uses this CR to control the consumption of an event.  |
 | Serverless | Functions UI sends a GraphQL query to Console Backend Service to list EventActivations. |
 | Console Backend Service |  Exposes the given CR to the Console UI. |

@@ -5,3 +5,11 @@ nats:
   ports:
     client: 4222
     monitoring: 8222
+
+resources:
+  limits:
+    cpu: 20m
+    memory: 64Mi
+  requests:
+    cpu: 5m
+    memory: 16Mi

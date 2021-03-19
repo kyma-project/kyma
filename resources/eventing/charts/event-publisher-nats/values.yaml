@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-nats
   name: "event-publisher-nats"
   # tag is the container tag of the event-publisher-nats image
-  tag: "0ece7d31"
+  tag: "e84f55a9"
   # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 
@@ -19,11 +19,11 @@ serviceAccount:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 10m
+    memory: 32Mi
   requests:
-    cpu: 32m
-    memory: 64Mi
+    cpu: 5m
+    memory: 16Mi
 
 nats:
   config:

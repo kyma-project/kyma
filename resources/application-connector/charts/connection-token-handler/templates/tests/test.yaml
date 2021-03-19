@@ -33,9 +33,6 @@ spec:
       - name: tests
         image: {{ .Values.global.containerRegistry.path }}/connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
         imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-        env:
-        - name: CENTRAL
-          value: {{ .Values.tests.central | quote }}
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
           privileged: {{ .Values.global.podSecurityPolicy.privileged }}

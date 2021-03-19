@@ -99,8 +99,10 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
+            # scan-image: {{ .Values.containers.manager.envs.functionBuildExecutorImage.value }} # This line allows security scan tools to scan this image
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
+            # scan-image: {{ .Values.containers.manager.envs.functionBuildRepoFetcherImage.value }} # This line allows security scan tools to scan this image
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPOFETCHER_IMAGE" "value" .Values.containers.manager.envs.functionBuildRepoFetcherImage "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_LOG_LEVEL" "value" .Values.containers.manager.envs.logLevel "context" . ) | nindent 12 }}

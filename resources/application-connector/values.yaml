@@ -9,7 +9,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
-  isBEBEnabled: false
+  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -32,17 +32,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    version: "34011b0f"
+    version: "d930fd89"
   application_operator_tests:
-    version: "f4a3bda0"
+    version: "d930fd89"
   connector_service:
     version: "34011b0f"
   connector_service_tests:
-    version: "77ca2463"
+    version: "9776cb81"
   connection_token_handler:
     version: "da84b1b3"
   connection_token_handler_tests:
-    version: "470796a1"
+    version: "9776cb81"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
@@ -95,9 +95,7 @@ tests:
       integration: true
       after-upgrade: true
     enabled: true
-    connector_service:
-      central: false
     skipSslVerify: true
     image:
-      version: "58e57ea1"
+      version: "9776cb81"
       pullPolicy: IfNotPresent
