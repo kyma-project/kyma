@@ -8,7 +8,7 @@ type Options struct {
 }
 
 func ParseArgs() *Options {
-	maxRequestSize := flag.Int64("max-request-Size", 65536, "The maximum request size in bytes.")
+	maxRequestSize := flag.Int64("max-request-size", 65536, "The maximum request size in bytes.")
 	metricsAddress := flag.String("metrics-addr", ":9090", "The address the metric endpoint binds to.")
 
 	flag.Parse()

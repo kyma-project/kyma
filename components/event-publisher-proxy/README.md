@@ -92,5 +92,5 @@ curl -v -X GET \
 ## Flags
 | Flag                    | Default Value | Description                                                                                |
 | ----------------------- | ------------- |------------------------------------------------------------------------------------------- |
-| max-request-Size        | 65536         | The maximum size of the request.                                                           |
+| max-request-size        | 65536         | The maximum size of the request.                                                           |
 | metrics-addr            | :9090         | The address the metric endpoint binds to.                                                  |
