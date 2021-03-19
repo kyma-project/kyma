@@ -4,7 +4,6 @@ const {
   KEBClient,
   provisionSKR,
   deprovisionSKR,
-  SHOOT_KUBECONFIG_PATH,
 } = require("../kyma-environment-broker");
 const {
   DirectorConfig,
@@ -50,7 +49,7 @@ describe("SKR test", function() {
   
   it("Provision SKR", async function() {
     skr = await provisionSKR(keb, gardener, runtimeID, runtimeName);
-    initializeK8sClient({kubeconfigPath: SHOOT_KUBECONFIG_PATH});
+    initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
 
   it("Assign SKR to scenario", async function() {

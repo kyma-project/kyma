@@ -2,13 +2,10 @@ const fs = require("fs");
 const { 
   wait,
   debug,
-  getEnvOrThrow,
 } = require("../utils");
 const { 
   expect 
 } = require("chai");
-
-const SHOOT_KUBECONFIG_PATH = getEnvOrThrow("SHOOT_KUBECONFIG");
 
 async function provisionSKR(keb, gardener, instanceID, name) {
   const resp = await keb.provisionSKR(name, instanceID);
@@ -22,8 +19,6 @@ async function provisionSKR(keb, gardener, instanceID, name) {
 
   const shoot = await gardener.getShoot(shootName);
   debug(`Compass ID ${shoot.compassID}`);
-
-  fs.writeFileSync(SHOOT_KUBECONFIG_PATH, shoot.kubeconfig);
   
   return {
     operationID, 
@@ -65,7 +60,6 @@ async function getShootName(keb, instanceID){
 }
 
 module.exports = {
-  SHOOT_KUBECONFIG_PATH,
   provisionSKR,
   deprovisionSKR,
   ensureOperationSucceeded,
