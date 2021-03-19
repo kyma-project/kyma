@@ -36,7 +36,7 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-backup
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
-          env:
+          - env:
             - name: SOURCE_SECRET
               value: "connector-service-app-ca"
             - name: TARGET_SECRET
@@ -91,7 +91,7 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-restore
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
-          env:
+          - env:
             - name: SOURCE_SECRET
               value: "connector-service-app-ca-backup"
             - name: TARGET_SECRET
