@@ -85,7 +85,7 @@ curl -v -X GET \
 | CLIENT_ID               |               | The Client ID used to acquire Access Tokens from the Authentication server.                |
 | CLIENT_SECRET           |               | The Client Secret used to acquire Access Tokens from the Authentication server.            |
 | TOKEN_ENDPOINT          |               | The Authentication Server Endpoint to provide Access Tokens.                               |
-| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing CloudEvents to it.                   |
+| EMS_PUBLISH_URL         |               | The Messaging Server Endpoint that accepts publishing Cloud Events to it.                   |
 | BEB_NAMESPACE           |               | The name of the namespace in BEB.                                                          |
 | EVENT_TYPE_PREFIX       |               | The prefix of the eventType as per the BEB event specification.                            |
 
