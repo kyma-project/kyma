@@ -1,0 +1,28 @@
+===== feature/sync-ory-hydra >>>
+Hydra-maester was in version: v0.0.15, we upgrade to v0.0.19
+
+
+### OAuth2Client CRD
+
+Hydra-maester had unusable fields in the status: clientID and secret.
+The status is (in both versions):
+```
+// OAuth2ClientStatus defines the observed state of OAuth2Client
+type OAuth2ClientStatus struct {
+	// ObservedGeneration represents the most recent generation observed by the daemon set controller.
+	ObservedGeneration  int64               `json:"observedGeneration,omitempty"`
+	ReconciliationError ReconciliationError `json:"reconciliationError,omitempty"`
+}
+```
+From looking into controller source code, the `secretName` is actually required in previous version, but it wasn't declared as such.
+
+Status:
+File synchronized into cluster-essentials chart, removed from hydra-maester/files directory
+
+### watcher.sh
+
+https://github.com/kyma-project/kyma/pull/9010/files
+Probably introduced to automatically roll-out hydra/hydra-maester on upgrades (eg.: in the case of database switch)
+
+
+<<< feature/sync-ory-hydra =====
