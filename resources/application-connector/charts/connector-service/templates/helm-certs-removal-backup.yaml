@@ -52,7 +52,7 @@ spec:
             - /bin/bash
             - -c
             - |-
-{{ tpl (.Files.Get "files/certs-backup.sh" | printf "%s" | indent 14) . }}
+{{ tpl (.Files.Get "files/copy-secret.sh" | printf "%s" | indent 14) . }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -106,5 +106,5 @@ spec:
             - /bin/bash
             - -c
             - |-
-{{ tpl (.Files.Get "files/certs-restore.sh" | printf "%s" | indent 14) . }}
+{{ tpl (.Files.Get "files/copy-secret.sh" | printf "%s" | indent 14) . }}
 {{- end }}
