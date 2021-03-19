@@ -30,9 +30,9 @@ spec:
     spec:
       serviceAccountName: connector-service-app-ca-helm-certs-removal-acc
       restartPolicy: Never
-      {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
-      {{- end }}
+      #{{- if .Values.global.priorityClassName }}
+      #priorityClassName: {{ .Values.global.priorityClassName }}
+      #{{- end }}
       containers:
         - name: connector-service-app-ca-helm-certs-removal-backup
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
@@ -43,7 +43,6 @@ spec:
               value: "connector-service-app-ca-backup"
             - name: NAMESPACE
             - value: kyma-integration
-            command:
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}
@@ -94,10 +93,10 @@ spec:
           - env:
             - name: SOURCE_SECRET
               value: "connector-service-app-ca-backup"
-            - name: TARGET_SECRET
-              value: "connector-service-app-ca"
-            - name: NAMESPACE
-              value: kyma-integration
+           - name: TARGET_SECRET
+             value: "connector-service-app-ca"
+           - name: NAMESPACE
+             value: kyma-integration
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}
