@@ -13,8 +13,8 @@ then
     kubectl delete secret ${TARGET_SECRET} -n=${NAMESPACE} --ignore-not-found
 
     echo "Fetching data"
-    cacert=$(kubectl -n "${NAMESPACE}" get secret "${SOURCE_SECRET}" -o jsonpath='{.data.ca\.crt}' --ignore-not-found)
-    cakey=$(kubectl -n "${NAMESPACE}" get secret "${SOURCE_SECRET}" -o jsonpath='{.data.ca\.key}' --ignore-not-found)
+    cacert=$(kubectl -n "${NAMESPACE}" get secret "${SOURCE_SECRET}" -o jsonpath='{.data.ca\.crt}')
+    cakey=$(kubectl -n "${NAMESPACE}" get secret "${SOURCE_SECRET}" -o jsonpath='{.data.ca\.key}')
 
     echo "Creating ${TARGET_SECRET} secret"
     kubectl create secret generic "${TARGET_SECRET}" -n "${NAMESPACE}" --from-literal=ca.crt="$cacert" --from-literal=ca.key="$cakey"
