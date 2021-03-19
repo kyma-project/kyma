@@ -241,6 +241,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 # Eventing Controller
 /components/eventing-controller @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
 
+# NATS Operator
+/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan
+
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach @crabtree @kjaksik
