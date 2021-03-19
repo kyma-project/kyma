@@ -89,8 +89,8 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
 				g.Expect(errs).To(gomega.HaveLen(0))
 
-				g.Expect(got.Spec.Template.Spec.Containers[0].LivenessProbe.SuccessThreshold).To(gomega.Equal(1), "documentation states that this value has to be set to 1")
-				g.Expect(got.Spec.Template.Spec.Containers[0].StartupProbe.SuccessThreshold).To(gomega.Equal(1), "documentation states that this value has to be set to 1")
+				g.Expect(got.Spec.Template.Spec.Containers[0].LivenessProbe.SuccessThreshold).To(gomega.BeEquivalentTo(1), "documentation states that this value has to be set to 1")
+				g.Expect(got.Spec.Template.Spec.Containers[0].StartupProbe.SuccessThreshold).To(gomega.BeEquivalentTo(1), "documentation states that this value has to be set to 1")
 			}
 		})
 	}
