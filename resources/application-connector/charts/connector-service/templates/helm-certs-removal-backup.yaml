@@ -38,9 +38,9 @@ spec:
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
           env:
             - name: SOURCE_SECRET
-              value: connector-service-app-ca
+              value: "connector-service-app-ca"
             - name: TARGET_SECRET
-              value: connector-service-app-ca-backup
+              value: "connector-service-app-ca-backup"
             - name: NAMESPACE
               value: kyma-integration
             command:
@@ -93,9 +93,9 @@ spec:
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
           env:
             - name: SOURCE_SECRET
-              value: connector-service-app-ca-backup
+              value: "connector-service-app-ca-backup"
             - name: TARGET_SECRET
-              value: connector-service-app-ca
+              value: "connector-service-app-ca"
             - name: NAMESPACE
               value: kyma-integration
           securityContext:
