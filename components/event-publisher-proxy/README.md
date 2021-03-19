@@ -78,7 +78,7 @@ curl -v -X GET \
 
 | Environment Variable    | Default Value | Description                                                                                |
 | ----------------------- | ------------- |------------------------------------------------------------------------------------------- |
-| INGRESS_PORT            | 8080          | The ingress port for the CloudEvents Gateway Proxy.                                        |
+| INGRESS_PORT            | 8080          | The ingress port for the Cloud Events Gateway Proxy.                                        |
 | MAX_IDLE_CONNS          | 100           | The maximum number of idle (keep-alive) connections across all hosts. Zero means no limit. |
 | MAX_IDLE_CONNS_PER_HOST | 2             | The maximum idle (keep-alive) connections to keep per-host. Zero means the default value.  |
 | REQUEST_TIMEOUT         | 5s            | The timeout for the outgoing requests to the Messaging server.                             |
