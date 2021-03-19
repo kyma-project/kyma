@@ -180,11 +180,17 @@ if __name__ == '__main__':
         'function_failures_total', 'Number of exceptions in user function', ['method']
     )
 
-    loggedapp = requestlogger.WSGILogger(
-        app,
-        [logging.StreamHandler(stream=sys.stdout)],
-        requestlogger.ApacheFormatter(),
-    )
+    # added by Kyma team
+    if os.getenv('KYMA_INTERNAL_LOGGER_DISABLED'):
+        loggedapp = app
+    else:
+        # default that has been used so far
+        loggedapp = requestlogger.WSGILogger(
+            app,
+            [logging.StreamHandler(stream=sys.stdout)],
+            requestlogger.ApacheFormatter(),
+        )
+    # end of modified section
 
     bottle.run(
         loggedapp,

@@ -13,7 +13,11 @@ const morgan = require('morgan');
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
 const app = express();
-app.use(morgan('combined'));
+
+if (!process.env["KYMA_INTERNAL_LOGGER_DISABLED"]) {
+    app.use(morgan("combined"));
+}
+
 const bodParserOptions = {
     type: req => !req.is('multipart/*'),
     limit: `${bodySizeLimit}mb`,
