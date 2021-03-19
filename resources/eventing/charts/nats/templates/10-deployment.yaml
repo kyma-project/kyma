@@ -20,8 +20,8 @@ spec:
       serviceAccountName: nats-operator
       containers:
       - name: nats-operator
-        image: connecteverything/nats-operator:0.7.4
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         args:
         - nats-operator
         # Uncomment to perform a cluster-scoped deployment in supported versions.
