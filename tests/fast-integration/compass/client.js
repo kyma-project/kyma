@@ -108,17 +108,14 @@ class DirectorClient {
         const msg = "Error calling Director API"
         try {
             const resp = await axios.post(url, body, params);
-            
             if(resp.data.errors) {
-                console.log(resp)
-                console.log(resp.data.errors);
+                debug(resp);
                 throw new Error(resp.data);
             }
             return resp.data.data.result;
         } catch(err) {
-            // console.dir(err);
+            debug(err);
             if (err.response) {
-                console.log(err.response);
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {
                 throw new Error(`${msg}: GraphQL responded with errors: ${err.errors[0].message}`)
