@@ -47,7 +47,7 @@ describe("SKR test", function() {
 
   let skr;
   
-  it("Provision SKR", async function() {
+  it(`Provision SKR with ID ${runtimeID}`, async function() {
     skr = await provisionSKR(keb, gardener, runtimeID, runtimeName);
     initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
