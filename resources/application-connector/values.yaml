@@ -60,7 +60,7 @@ global:
   application_broker:
     version: "371f20ae"
   application_connectivity_certs_setup_job:
-    version: "PR-10765"
+    version: "184a7e4f"
   application_connectivity_validator:
     version: "34011b0f"
   application_broker_eventing_migration:
