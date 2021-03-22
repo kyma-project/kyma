@@ -194,5 +194,5 @@ if __name__ == '__main__':
         # Set this flag to True to auto-reload the server after any source files change
         reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
-        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 10)),
+        numthreads=os.getenv('CHERRYPY_NUMTHREADS', 10),
     )
