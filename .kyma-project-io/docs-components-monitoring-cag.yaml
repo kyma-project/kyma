@@ -1,0 +1,16 @@
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterAssetGroup
+metadata:
+  labels:
+    rafter.kyma-project.io/view-context: docs-ui
+    rafter.kyma-project.io/group-name: components
+    rafter.kyma-project.io/order: "8"
+  name: monitoring
+spec:
+  displayName: "Monitoring"
+  description: "Overall documentation for Monitoring"
+  sources:
+    - type: markdown
+      name: docs
+      mode: package
+      filter: /docs/monitoring/

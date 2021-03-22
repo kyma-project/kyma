@@ -1,0 +1,20 @@
+apiVersion: rafter.kyma-project.io/v1beta1
+kind: ClusterAssetGroup
+metadata:
+  labels:
+    rafter.kyma-project.io/view-context: docs-ui
+    rafter.kyma-project.io/group-name: root
+    rafter.kyma-project.io/order: "2"
+  name: getting-started
+spec:
+  displayName: "Getting Started"
+  description: "Getting started guides for Kyma"
+  sources:
+    - type: markdown
+      name: docs
+      mode: package
+      filter: /docs/getting-started/
+    - type: openapi
+      name: orders-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/kyma-project/kyma/master/docs/getting-started/assets/orders-service-openapi.yaml
