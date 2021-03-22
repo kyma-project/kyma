@@ -98,16 +98,14 @@ class KEBClient {
     const msg = "Error calling KEB";
     try {
       const resp = await axios.request(config);
-
       if (resp.data.errors) {
-        console.log(resp);
-        console.log(resp.data.errors);
+        debug(resp);
         throw new Error(resp.data);
       }
       return resp.data;
     } catch (err) {
+      debug(err);
       if (err.response) {
-        debug(err.response);
         throw new Error(
           `${msg}: ${err.response.status} ${err.response.statusText}`
         );

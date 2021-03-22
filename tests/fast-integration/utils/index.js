@@ -271,7 +271,6 @@ async function k8sApply(listOfSpecs, namespace, patch = true) {
             );
           });
         } else {
-          //console.log(e.body)
           throw e;
         }
       }
