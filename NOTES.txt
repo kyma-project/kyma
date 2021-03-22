@@ -59,3 +59,5 @@ The following three files are for creating hydra-maester CRD during chart instal
 
 **Status:** Files removed. All CRDs in Kyma are managed by a dedicated component.
 
+### _helper.tpl
+**Status:** File synchronized. Some parts have to be copied from old version (hydra-maester.adminService).
