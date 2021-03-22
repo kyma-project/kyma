@@ -72,7 +72,12 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   return {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceInstance",
-    metadata: { name },
+    metadata: {
+      name: name,
+      annotations: {
+        "app": "test",
+      },
+    },
     spec: { serviceClassExternalName },
   };
 }
@@ -374,7 +379,12 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceBinding",
-    metadata: { name: "commerce-binding" },
+    metadata: {
+      name: "commerce-binding",
+      annotations: {
+        "app": "test",
+      },
+    },
     spec: {
       instanceRef: { name: "commerce-webservices" },
     },
