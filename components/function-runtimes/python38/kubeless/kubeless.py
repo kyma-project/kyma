@@ -192,6 +192,9 @@ if __name__ == '__main__':
         loggedapp = app        
     # end of modified section
 
+
+    quiet = 'KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ
+    print(quiet)
     bottle.run(
         loggedapp,
         server='cherrypy',
@@ -201,5 +204,5 @@ if __name__ == '__main__':
         reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
         numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 10)),
-        quiet='KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ
+        quiet=quiet
     )
