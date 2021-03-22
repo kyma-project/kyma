@@ -1,9 +1,15 @@
 replicaCount: 1
 
-rbacJob:
+#TODO: REMOVE
+#rbacJob:
+#  image:
+#    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+#    tag: "v20190325-ff66a3a"
+
+jobs:
   image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20190325-ff66a3a"
+    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
+    tag: 20210310-c03fb8b6
 
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
@@ -23,7 +29,7 @@ adminService:
   port:
 
 forwardedProto:
-    
+
 deployment:
   resources: {}
     #  We usually recommend not to specify default resources and to leave this as a conscious

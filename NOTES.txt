@@ -49,3 +49,11 @@ File preserved
 
 ## Directory "templates"
 
+### CRD-related files
+The following three files are for creating hydra-maester CRD during chart installation:
+- crd-configmap.yaml
+- crd-rbac.yaml
+- crd-job.yaml
+
+**Status:** Files removed. All CRDs in Kyma are managed by a dedicated component.
+
