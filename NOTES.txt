@@ -14,7 +14,9 @@ File taken from the new version
 
 ### File values.yaml:
 
-TODO
+Status:
+File synchronized, some values copied from old (ours) version into new one (theirs). Some values removed.
+
 
 
 ## Directory "files"
