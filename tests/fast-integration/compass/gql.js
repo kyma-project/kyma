@@ -41,8 +41,27 @@ function queryApplicationsWithFilter(filter) {
     return `query { result: applications(filter: { key: \\"${filter.key}\\", query: \\"${querySerialized}\\" }) { data { id name } } }`;
 }
 
+function setRuntimeLabel(runtimeID, key, value) {
+    if (typeof value !== "string") {
+        value = Array.isArray(value) 
+            ? escapeForGQLArray(JSON.stringify(value))
+            : escapeForGQL(JSON.stringify(value));
+    } else {
+        value = `\\"${value}\\"`
+    }
+    return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
+}
+
+function queryRuntime(runtimeID) {
+    return `query { result: runtime(id: \\"${runtimeID}\\") { id name labels status { condition } } }`;
+}
+
 function escapeForGQL(str) {
     return str.split('"').join(`\\\\\\"`);
+}
+
+function escapeForGQLArray(str) {
+    return str.split('"').join(`\\\"`);
 }
 
 module.exports = {
@@ -56,4 +75,6 @@ module.exports = {
     updateLabelDefinition,
     queryRuntimesWithFilter,
     queryApplicationsWithFilter,
+    setRuntimeLabel,
+    queryRuntime,
 }
