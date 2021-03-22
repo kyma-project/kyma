@@ -2,16 +2,17 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
 
+	retrygo "github.com/avast/retry-go"
 	servicecatalogclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	scv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/retry"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/pkg/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // CreateLegacyServiceInstance is a step which creates new ServiceInstance
@@ -38,7 +39,7 @@ func NewCreateLegacyServiceInstance(name, instanceName string, get func() string
 
 // Name returns name name of the step
 func (s *CreateLegacyServiceInstance) Name() string {
-	return fmt.Sprintf("Create service instance: %s", s.instanceName)
+	return fmt.Sprintf("Create legacy service instance: %s", s.instanceName)
 }
 
 // Run executes the step
@@ -65,7 +66,7 @@ func (s *CreateLegacyServiceInstance) Run() error {
 	if err != nil {
 		return err
 	}
-	return retry.Do(s.isServiceInstanceCreated)
+	return retry.Do(s.isServiceInstanceCreated, retrygo.Attempts(40), retrygo.Delay(5*time.Second))
 }
 
 func (s *CreateLegacyServiceInstance) findServiceClassExternalName(serviceClassID string) (string, error) {
@@ -87,7 +88,7 @@ func (s *CreateLegacyServiceInstance) isServiceInstanceCreated() error {
 		return err
 	}
 
-	if svcInstance.Status.ProvisionStatus != "Provisioned" {
+	if svcInstance.Status.ProvisionStatus != scv1beta1.ServiceInstanceProvisionStatusProvisioned {
 		return errors.Errorf("unexpected provision status: %s", svcInstance.Status.ProvisionStatus)
 	}
 	return nil
