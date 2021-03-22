@@ -201,5 +201,5 @@ if __name__ == '__main__':
         reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
         numthreads=os.getenv('CHERRYPY_NUMTHREADS', 10),
-        quiet=os.getenv("KYMA_BOTTLE_QUIET_OPTION", False),
+        quiet='KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ
     )
