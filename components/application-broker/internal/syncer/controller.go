@@ -164,7 +164,6 @@ func (c *Controller) processNextItem() bool {
 	switch {
 	case err == nil:
 		c.queue.Forget(key)
-
 		c.scRelistRequester.RequestRelist()
 		c.log.Infof("Relist requested after successful processing of the %q", strKey)
 
