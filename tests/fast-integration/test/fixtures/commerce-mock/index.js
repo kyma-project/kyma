@@ -74,6 +74,7 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     kind: "ServiceInstance",
     metadata: {
       name: name,
+      // annotations should be set because of the Service Catalog issue: https://github.com/kubernetes-sigs/service-catalog/issues/2825
       annotations: {
         "app": "test",
       },
