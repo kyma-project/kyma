@@ -5,7 +5,7 @@ metadata:
   name: {{ .Chart.Name }}-certs-setup-job
   namespace: kyma-integration
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: post-install
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}

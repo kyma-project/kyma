@@ -36,6 +36,13 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-backup
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          env:
+            - name: SOURCE_SECRET
+              value: "connector-service-app-ca"
+            - name: TARGET_SECRET
+              value: "connector-service-app-ca-backup"
+            - name: NAMESPACE
+              value: kyma-integration
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}
@@ -44,7 +51,7 @@ spec:
             - /bin/bash
             - -c
             - |-
-{{ tpl (.Files.Get "files/certs-backup.sh" | printf "%s" | indent 14) . }}
+{{ tpl (.Files.Get "files/copy-secret.sh" | printf "%s" | indent 14) . }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -83,6 +90,13 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-restore
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          env:
+            - name: SOURCE_SECRET
+              value: "connector-service-app-ca-backup"
+            - name: TARGET_SECRET
+              value: "connector-service-app-ca"
+            - name: NAMESPACE
+              value: kyma-integration
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}
@@ -91,5 +105,5 @@ spec:
             - /bin/bash
             - -c
             - |-
-{{ tpl (.Files.Get "files/certs-restore.sh" | printf "%s" | indent 14) . }}
+{{ tpl (.Files.Get "files/copy-secret.sh" | printf "%s" | indent 14) . }}
 {{- end }}
