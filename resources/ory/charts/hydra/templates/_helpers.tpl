@@ -113,10 +113,11 @@ Return true if a secret object should be created
 Generate the configmap data, redacting secrets
 */}}
 {{- define "hydra.configmap" -}}
-{{- $config := unset .Values.hydra.config "dsn" -}}
-{{- $config := unset $config "secrets" -}}
-{{- $config := unset $config "secretAnnotations" -}}
-{{- toYaml $config -}}
+{{- $configCopy := .Values.hydra.config | mustDeepCopy -}}
+{{- $result := unset $configCopy "dsn" -}}
+{{- $result := unset $result "secrets" -}}
+{{- $result := unset $result "secretAnnotations" -}}
+{{- toYaml $result -}}
 {{- end -}}
 
 {{/*
