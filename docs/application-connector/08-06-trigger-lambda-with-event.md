@@ -19,7 +19,7 @@ To create a simple Function and trigger it with an event, you must first registe
    ```bash
    export NAMESPACE={YOUR_NAMESPACE}
    export APP_NAME={YOUR_APPLICATION_NAME}
-   export EVENT={YOUR_EVENT}
+   export EVENT={YOUR_EVENT_TYPE}
    ```
 
 2. Register a service with events in the desired Application. Use the example AsyncAPI specification.
