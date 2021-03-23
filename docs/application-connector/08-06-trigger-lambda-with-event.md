@@ -155,21 +155,21 @@ To create a simple Function and trigger it with an event, you must first registe
      labels:
        function: my-events-function
      name: function-my-events-function-exampleevent-v1
-     namespace: $NAMESPACE
+     namespace: ${NAMESPACE}
    spec:
      filter:
-      filters:
-        - eventSource:
+       filters:
+       - eventSource:
            property: source
            type: exact
            value: ""
          eventType:
            property: type
            type: exact
-           value: sap.kyma.custom.$APP_NAME.$EVENT.v1
+           value: sap.kyma.custom.${APP_NAME}.${EVENT}.v1
      protocol: ""
      protocolsettings: {}
-     sink: http://my-events-function.$NAMESPACE.svc.cluster.local
+     sink: http://my-events-function.${NAMESPACE}.svc.cluster.local
    EOF
    ```
 
