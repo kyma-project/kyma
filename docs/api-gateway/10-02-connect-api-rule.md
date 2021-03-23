@@ -132,7 +132,7 @@ Sometimes Oathkeeper Maester controller stops reconciling Rules on long living c
    kubectl cp -n kyma-system -c oathkeeper "{POD_NAME}":etc/rules/access-rules.json "access-rules.{POD_NAME}.json" 
    ```
 
-3. If you have more than one instance of Oathkeeper, compare whether the files contain the same Rules. Othkeeper stores Rules as a JSON, so you might want to use [jd](https://github.com/josephburnett/jd) to automate it:
+3. If you have more than one instance of Oathkeeper, compare whether the files contain the same Rules. Oathkeeper stores Rules as a JSON, so you might want to use [jd](https://github.com/josephburnett/jd) to automate it:
 
     ```bash
    jd -set {FIRST_FILE} {SECOND_FILE} 
