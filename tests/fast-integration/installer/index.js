@@ -184,12 +184,6 @@ async function chartList(options) {
 
   const kymaCharts = [
     {
-      release: "pod-preset",
-      namespace: "kyma-system",
-      customPath: (root) =>
-        join(root, "cluster-essentials", "charts", "pod-preset"),
-    },
-    {
       release: `cluster-users`,
       namespace: "kyma-system",
       values: `${overrides}`,
