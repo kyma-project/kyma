@@ -67,13 +67,13 @@ memory
 {{- end -}}
 
 {{/*
-Generate the name of the secret resource containing secrets
+Get the name of the secret resource containing secrets
 */}}
 {{- define "hydra.secretname" -}}
-{{- if .Values.hydra.existingSecret -}}
-{{- .Values.hydra.existingSecret -}}
+{{- if .Values.hydra.existingSecret }}
+    {{- printf "%s" .Values.hydra.existingSecret -}}
 {{- else -}}
-{{ include "hydra.fullname" . }}
+    {{- printf "%s" (include "hydra.fullname" .) -}}
 {{- end -}}
 {{- end -}}
 
@@ -96,6 +96,16 @@ Generate the secrets.cookie value
 {{- .Values.hydra.config.secrets.cookie }}
 {{- else -}}
 {{- include "hydra.secrets.system" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return true if a secret object should be created
+*/}}
+{{- define "hydra.createSecret" -}}
+{{- if .Values.hydra.existingSecret }}
+{{- else -}}
+    {{- true -}}
 {{- end -}}
 {{- end -}}
 

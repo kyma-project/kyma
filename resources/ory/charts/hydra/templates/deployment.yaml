@@ -20,6 +20,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -38,6 +40,28 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
+        - name: wait-for-db
+          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretname" . }}
+                  key: dsn
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -59,6 +83,15 @@ spec:
             {{- with .Values.deployment.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
     {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
@@ -107,16 +140,18 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 30
+            initialDelaySeconds: 45
             periodSeconds: 10
-            failureThreshold: 5
+            failureThreshold: 10
+            timeoutSeconds: 5
           env:
             {{- if .Values.deployment.tracing.datadog.enabled }}
             - name: TRACING_PROVIDER
@@ -157,6 +192,15 @@ spec:
             {{- with .Values.deployment.extraEnv }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       {{- if .Values.priorityClassName }}

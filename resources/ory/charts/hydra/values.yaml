@@ -3,6 +3,8 @@ replicaCount: 1
 
 image:
   # ORY Hydra image
+  # TODO: Switch once we have our image
+  #repository: eu.gcr.io/kyma-project/external/oryd/hydra
   repository: oryd/hydra
   # ORY Hydra version
   tag: v1.8.5
@@ -101,7 +103,7 @@ hydra:
     secrets: {}
     secretAnnotations:
     # Create the secret before installation, and only then. This saves the secret from regenerating during an upgrade
-      helm.sh/hook: "pre-install"
+      helm.sh/hook: "pre-install,pre-upgrade"
       helm.sh/hook-delete-policy: "before-hook-creation"
     # Use a pre-existing secret (see secret.yaml for required fields)
     # existingSecret: my-preexisting-secret
@@ -111,8 +113,11 @@ hydra:
   autoMigrate: false
   dangerousForceHttp: false
   dangerousAllowInsecureRedirectUrls: false
+  # existingSecret: secret
 
 deployment:
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
   resources: {}
   #  We usually recommend not to specify default resources and to leave this as a conscious
   #  choice for the user. This also increases chances charts run on environments with little
@@ -141,15 +146,15 @@ deployment:
   # lines, adjust them as necessary, and remove the curly braces after 'nodeSelector:'.
   #   foo: bar
 
-  # If you want to use Jaeger with agents being deployed in a daemonset, you can 
-  # use the following ENV vars to configure the right endpoints using the IP 
-  # address of the node the pod has been deployed to. 
+  # If you want to use Jaeger with agents being deployed in a daemonset, you can
+  # use the following ENV vars to configure the right endpoints using the IP
+  # address of the node the pod has been deployed to.
   #
   # extraEnv:
   #   - name: JAEGER_AGENT_HOST
   #     valueFrom:
   #       fieldRef:
-  #         fieldPath: status.hostIP 
+  #         fieldPath: status.hostIP
   #   - name: TRACING_PROVIDERS_JAEGER_LOCAL_AGENT_ADDRESS
   #     value: $(JAEGER_AGENT_HOST):6831
   #   - name: TRACING_PROVIDERS_JAEGER_SAMPLING_SERVER_URL
@@ -227,3 +232,7 @@ maester:
     # You only need to set this port if you change the value for
     # `service.admin.port` in the parent chart
     # port:
+
+busybox:
+  repository: eu.gcr.io/kyma-project/external/busybox
+  tag: 1.32.0
