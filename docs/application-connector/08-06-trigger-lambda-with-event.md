@@ -145,8 +145,6 @@ To create a simple Function and trigger it with an event, you must first registe
 
 6. Create a Subscription to allow events to trigger the Function.
 
-> **NOTE:** In the Subscription CR, provide `$APP_NAME` without any special characters like dashes (`-`) or dots (`.`). For example, use `commercemock` instead of `commerce-mock`.
-
    ```bash
    cat <<EOF | kubectl apply -f -
    apiVersion: eventing.kyma-project.io/v1alpha1
@@ -155,7 +153,7 @@ To create a simple Function and trigger it with an event, you must first registe
      labels:
        function: my-events-function
      name: function-my-events-function-exampleevent-v1
-     namespace: ${NAMESPACE}
+     namespace: $NAMESPACE
    spec:
      filter:
        filters:
@@ -166,10 +164,10 @@ To create a simple Function and trigger it with an event, you must first registe
          eventType:
            property: type
            type: exact
-           value: sap.kyma.custom.${APP_NAME}.${EVENT}.v1
+           value: sap.kyma.custom.$APP_NAME.$EVENT.v1
      protocol: ""
      protocolsettings: {}
-     sink: http://my-events-function.${NAMESPACE}.svc.cluster.local
+     sink: http://my-events-function.$NAMESPACE.svc.cluster.local
    EOF
    ```
 
