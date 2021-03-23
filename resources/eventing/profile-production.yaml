@@ -17,6 +17,7 @@ controller:
       memory: 512Mi
 
 nats:
+  clusterSize: 3
   resources:
     limits:
       cpu: 500m
