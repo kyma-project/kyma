@@ -31,8 +31,8 @@ func main() {
 	var enableDebugLogs bool
 	var maxReconnects int
 	var reconnectWait time.Duration
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(&metricsAddr, "metrics-address", ":8080", "The TCP address that the controller should bind to for serving prometheus metrics.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The TCP address that the controller should bind to for serving health probes.")
 	flag.StringVar(&readyEndpoint, "ready-check-endpoint", "readyz", "The endpoint of the readiness probe.")
 	flag.StringVar(&healthEndpoint, "health-check-endpoint", "healthz", "The endpoint of the health probe.")
 	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")

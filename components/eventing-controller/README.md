@@ -39,21 +39,26 @@ This section explains how to use the Eventing Controller.
 
 - `controller` comes with the following command line argument flags:
 
-    | Flag                    | Description                                           | Default Value   |
-    | ----------------------- | ----------------------------------------------------- | --------------- |
-    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`         |
-    | `reconcile-period`        | The period between triggering of reconciling calls. | `10 minutes`    |
-    | `enable-debug-logs`       | Enable debug logs.                                  | `false`         |
+    | Flag                         | Description                                                                          | Default Value  |
+    | ---------------------------- | ------------------------------------------------------------------------------------ | -------------- |
+    | `metrics-address`            | The TCP address that the controller should bind to for serving prometheus metrics.   | `:8080`        |
+    | `health-probe-bind-address`  | The TCP address that the controller should bind to for serving health probes.        | `:8081`        |
+    | `ready-check-endpoint`       | The endpoint of the readiness probe.                                                 | `readyz`       |
+    | `health-check-endpoint`      | The endpoint of the health probe.                                                    | `healthz`      |
+    | `reconcile-period`           | The period between triggering of reconciling calls.                                  | `10 minutes`   |
+    | `enable-debug-logs`          | Enable debug logs.                                                                   | `false`        |
 
 - `nats-controller` comes with the following command line argument flags:
 
-    | Flag                    | Description                                           | Default Value |
-    | ----------------------- | ----------------------------------------------------- | ------------- |
-    | `metrics-addr`            | The address the metric endpoint binds to.           | `:8080`       |
-    | `reconcile-period`        | The period between triggering reconciling calls.    | `10 minutes`  |
-    | `enable-debug-logs`       | The parameter that enables debug logs.              | `false`       |
-    | `max-reconnects`          | The maximum number of reconnection attempts.        | `10 `         |
-    | `reconnect-wait`         | Wait time between reconnection attempts.            | `1 second`    |
+    | Flag                         | Description                                                                          | Default Value |
+    | ---------------------------- | ------------------------------------------------------------------------------------ | ------------- |
+    | `metrics-address`            | The TCP address that the controller should bind to for serving prometheus metrics.   | `:8080`       |
+    | `health-probe-bind-address`  | The TCP address that the controller should bind to for serving health probes.        | `:8081`       |
+    | `ready-check-endpoint`       | The endpoint of the readiness probe.                                                 | `readyz`      |
+    | `health-check-endpoint`      | The endpoint of the health probe.                                                    | `healthz`     |
+    | `enable-debug-logs`          | The parameter that enables debug logs.                                               | `false`       |
+    | `max-reconnects`             | The maximum number of reconnection attempts.                                         | `10 `         |
+    | `reconnect-wait`             | Wait time between reconnection attempts.                                             | `1 second`    |
 
 - `controller` expects the following environment variables:
 
