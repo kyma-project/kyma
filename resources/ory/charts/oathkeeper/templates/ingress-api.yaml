@@ -32,8 +32,8 @@ spec:
         {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $fullName }}-api
-              servicePort: http
+              serviceName: {{ $fullName }}-api # TODO: change or leave?
+              servicePort: http # TODO: change or leave?
         {{- end }}
   {{- end }}
 {{- end }}
