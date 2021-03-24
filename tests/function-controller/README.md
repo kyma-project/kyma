@@ -37,7 +37,7 @@ To run integration tests, follow these instructions:
 4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
 
    ```bash
-   kyma test run function-controller
+   kyma test run serverless
    ```
 
 5. Get the test result using this command:
