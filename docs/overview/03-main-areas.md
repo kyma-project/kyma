@@ -13,6 +13,8 @@ Kyma is built of numerous components but these three drive it forward:
     - Manages secure access to external systems
     - Provides monitoring and tracing capabilities to facilitate operational aspects
 
+  ![connectivity](../assets/app-connectivity.svg)
+
 ### Service consumption
 
     - Connects services from external sources
@@ -29,13 +31,15 @@ Kyma is built of numerous components but these three drive it forward:
     - Offers loose coupling of Event providers and consumers
     - Enables flexible application scalability and availability
 
+The Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight Functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on Kubernetes resources like [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), [Services](https://kubernetes.io/docs/concepts/services-networking/service/) and [HorizontalPodAutoscalers](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
+
+  ![serverless](../assets/serverless.svg)
+
 ### Eventing
 
+Eventing allows you to easily integrate external applications with Kyma. Under the hood, it implements [NATS](https://docs.nats.io/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
 
-This basic use case shows how the three components work together in Kyma:
-
-![key-components](./assets/ac-s-sc.svg)
-
+  ![eventing](../assets/eventing.svg)
 
 ## See also
 
