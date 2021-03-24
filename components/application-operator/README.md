@@ -3,8 +3,8 @@
 ## Overview
 
 The Application Operator (AO) can work in two modes.
-By default, it detects changes in [Application](../../docs/application-connector/06-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
-In the alternative mode, it detects changes in [ServiceInstance](../../docs/service-catalog/02-01-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
+By default, it detects changes in [Application](../../docs/05-technical-reference/00-custom-resources/ac-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
+In the alternative mode, it detects changes in [ServiceInstance](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
@@ -34,11 +34,14 @@ The Application Operator has the following parameters:
  - **installationTimeout** is the time after which the release installation will time out. The default value is `240` seconds.
  - **applicationGatewayImage** is the Application Gateway image version to use in the Application chart.
  - **applicationGatewayTestsImage** is the Application Gateway Tests image version to use in the Application chart.
+ - **eventServiceImage** is the Event Service image version to use in the Application chart.
+ - **eventServiceTestsImage** is the Event Service Tests image version to use in the Application chart.
  - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
  - **gatewayOncePerNamespace** is a flag that specifies whether Application Gateway should be deployed once per Namespace based on ServiceInstance or for every Application. The default value is `false`.
  - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
  - **healthPort** is the number of the TCP port used to perform health checking of the Application Operator.
- 
+ - **isBEBEnabled** is a toggle used to enable or disable eventing based on BEB. The default value is `false`.
+
 ## Testing on a local deployment
 
 When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.

@@ -4,8 +4,6 @@
 
 The IAM Kubeconfig Service is a proprietary tool that generates a `kubeconfig` file which allows the user to access the Kyma cluster through the Command Line Interface (CLI), and to manage the connected cluster within the permission boundaries of the user.
 
-Read [this](../../docs/security/08-06-generate-kubeconfig.md) document to learn how to use the service.
-
 ## The kubeconfig file
 
 This is the format of the generated `kubecofig` file:
