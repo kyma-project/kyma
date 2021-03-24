@@ -111,10 +111,10 @@ hydra:
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
     existingSecret: "ory-hydra-credentials"
-  hydra-maester:
-    globalAccess: true
-    config:
-      hydraSecret: "ory-hydra-credentials"
+hydra-maester:
+  globalAccess: true
+  config:
+    hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
