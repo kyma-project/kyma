@@ -45,7 +45,7 @@ copy-website-repo() {
 
 build-preview() {
   export APP_PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
-  export APP_DOCS_BRANCHES="preview"
+  export APP_DOCS_BRANCHES="kyma-2.0-docu"
   export APP_PREPARE_FOR_REPO="kyma"
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
