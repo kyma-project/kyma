@@ -3,9 +3,7 @@ replicaCount: 1
 
 image:
   # ORY Hydra image
-  # TODO: Switch once we have our image
-  #repository: eu.gcr.io/kyma-project/external/oryd/hydra
-  repository: oryd/hydra
+  repository: eu.gcr.io/kyma-project/external/oryd/hydra
   # ORY Hydra version
   tag: v1.8.5
   # Image pull policy

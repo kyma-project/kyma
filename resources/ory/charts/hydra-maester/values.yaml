@@ -1,11 +1,5 @@
 replicaCount: 1
 
-#TODO: REMOVE
-#rbacJob:
-#  image:
-#    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-#    tag: "v20190325-ff66a3a"
-
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/incubator/k8s-tools
@@ -25,9 +19,7 @@ globalAccess: false
 enabledNamespaces: []
 
 image:
-  #TODO: Switch repos once our image is prepared
-  #repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
-  repository: oryd/hydra-maester
+  repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
   tag: v0.0.19
   # Image pull policy
   pullPolicy: IfNotPresent
