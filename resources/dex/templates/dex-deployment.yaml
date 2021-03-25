@@ -75,7 +75,7 @@ spec:
       {{ else }}
       volumes:
       - name: config
-        configMap:
+        secret:
           name: dex-config
           items:
             - key: config.yaml

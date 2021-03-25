@@ -1,13 +1,13 @@
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: dex-config
   namespace: {{ .Release.Namespace }}
   labels:
     app: dex
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-data:
+stringData:
   config.yaml: |
     issuer: https://dex.{{ .Values.global.ingress.domainName }}
     # extending it to 15days because apparently Istio does not handle ID token validation properly

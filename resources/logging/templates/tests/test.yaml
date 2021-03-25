@@ -57,7 +57,7 @@ spec:
               key: password
       volumes:
       - name: dex-config
-        configMap:
+        secret:
             name: dex-config
             items:
                 - key: config.yaml
