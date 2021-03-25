@@ -3,7 +3,6 @@ module github.com/kyma-project/kyma/components/application-connectivity-validato
 go 1.15
 
 require (
-	github.com/go-logr/logr v0.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect; indirect	github.com/gorilla/mux v1.7.4
@@ -11,7 +10,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35
+	github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
