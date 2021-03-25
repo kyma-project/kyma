@@ -7,6 +7,15 @@ event-publisher-nats:
       cpu: 5m
       memory: 16Mi
 
+nats-controller:
+  resources:
+    limits:
+      cpu: 20m
+      memory: 64Mi
+    requests:
+      cpu: 5m
+      memory: 16Mi
+
 controller:
   resources:
     limits:
