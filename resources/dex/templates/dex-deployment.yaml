@@ -20,7 +20,7 @@ spec:
         app: dex
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/dex-config.yaml") . | sha256sum }}
     spec:
       serviceAccountName: dex-account
       nodeSelector:
