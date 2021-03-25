@@ -130,6 +130,11 @@ updateStrategy: {}
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
 
+## Custom configuration for Kyma alerting rules
+kymaRules:
+  ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
+  fluentBitAlertFilter: ""
+
 # Fluentbit configuration section
 # https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
 config:
