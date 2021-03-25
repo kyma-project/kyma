@@ -4,14 +4,13 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: root
-    rafter.kyma-project.io/order: "5"
+    rafter.kyma-project.io/order: "3"
   name: tutorials
 spec:
   displayName: "Tutorials"
-  description: "Overall documentation for API Gateway"
+  description: "Place for advanced tutorials"
   sources:
     - type: markdown
       name: docs
       mode: package
-#      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
       filter: /docs/tutorials/
