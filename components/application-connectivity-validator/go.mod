@@ -31,13 +31,13 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
-	
+
 	k8s.io/api => k8s.io/api v0.0.0-20201020200614-54bcc311e327
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20201020200440-554eef9dbf66
 	k8s.io/client-go => k8s.io/client-go v0.0.0-20201020200834-d1a4fe5f2d96

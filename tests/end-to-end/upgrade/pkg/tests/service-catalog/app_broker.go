@@ -140,7 +140,6 @@ func (f *appBrokerFlow) TestResources() error {
 		f.deleteApplicationMapping,
 		f.deleteApplication,
 		f.deleteChannel,
-		f.waitForClassesRemoved,
 		f.undeployEnvTester,
 	} {
 		err := fn()
@@ -166,6 +165,7 @@ func (f *appBrokerFlow) logReport() {
 }
 
 func (f *appBrokerFlow) deleteApplication() error {
+	f.log.Infof("Removing Application %s", applicationName)
 	return f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
 }
 
@@ -188,6 +188,7 @@ func (f *appBrokerFlow) createChannel() error {
 }
 
 func (f *appBrokerFlow) deleteChannel() error {
+	f.log.Infof("Removing Channel %s", applicationName)
 	return f.messagingInterface.Channels(integrationNamespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
@@ -350,6 +351,7 @@ func (f *appBrokerFlow) deleteEventsServiceInstance() error {
 }
 
 func (f *appBrokerFlow) deleteApplicationMapping() error {
+	f.log.Infof("Removing Application Mapping %s", applicationName)
 	return f.appBrokerInterface.ApplicationconnectorV1alpha1().ApplicationMappings(f.namespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
@@ -362,19 +364,6 @@ func (f *appBrokerFlow) waitForInstances() error {
 	err = f.waitForInstance(eventsServiceID)
 
 	return err
-}
-
-func (f *appBrokerFlow) waitForClassesRemoved() error {
-	return f.wait(5*time.Second, func() (bool, error) {
-		classes, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
-		if err != nil {
-			return false, err
-		}
-		if len(classes.Items) == 0 {
-			return true, nil
-		}
-		return false, nil
-	})
 }
 
 func (f *appBrokerFlow) waitForClassAndPlans() error {
@@ -454,7 +443,7 @@ func (f *appBrokerFlow) waitForEnvTester() error {
 }
 
 func (f *appBrokerFlow) undeployEnvTester() error {
-	f.log.Info("Removing deployment environment variable tester")
+	f.log.Infof("Removing deployment %s", appEnvTester)
 	return f.deleteDeployment(appEnvTester)
 }
 
