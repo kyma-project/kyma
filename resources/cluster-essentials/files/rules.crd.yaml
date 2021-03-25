@@ -130,7 +130,7 @@ spec:
                           this object.
                         type: string
                     required:
-                    - name
+                      - name
                     type: object
                   type: array
                 result:
@@ -262,7 +262,7 @@ spec:
                       type: string
                   type: object
               required:
-              - pending
+                - pending
               type: object
             labels:
               additionalProperties:
@@ -355,10 +355,10 @@ spec:
                     description: 'UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
                     type: string
                 required:
-                - apiVersion
-                - kind
-                - name
-                - uid
+                  - apiVersion
+                  - kind
+                  - name
+                  - uid
                 type: object
               type: array
             resourceVersion:
@@ -395,7 +395,7 @@ spec:
                     description: Name is the name of a handler
                     type: string
                 required:
-                - handler
+                  - handler
                 type: object
               type: array
             authorizer:
@@ -408,8 +408,15 @@ spec:
                   description: Name is the name of a handler
                   type: string
               required:
-              - handler
+                - handler
               type: object
+            configMapName:
+              description: ConfigMapName points to the K8s ConfigMap that contains
+                these rules
+              maxLength: 253
+              minLength: 1
+              pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+              type: string
             match:
               properties:
                 methods:
@@ -423,21 +430,23 @@ spec:
                     regex templates.
                   type: string
               required:
-              - url
-              - methods
+                - url
+                - methods
               type: object
-            mutator:
-              properties:
-                config:
-                  description: Config configures the handler. Configuration keys vary
-                    per handler.
-                  type: object
-                handler:
-                  description: Name is the name of a handler
-                  type: string
-              required:
-              - handler
-              type: object
+            mutators:
+              items:
+                properties:
+                  config:
+                    description: Config configures the handler. Configuration keys
+                      vary per handler.
+                    type: object
+                  handler:
+                    description: Name is the name of a handler
+                    type: string
+                required:
+                  - handler
+                type: object
+              type: array
             upstream:
               properties:
                 preserveHost:
@@ -456,11 +465,11 @@ spec:
                   pattern: ^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)
                   type: string
               required:
-              - url
+                - url
               type: object
           required:
-          - upstream
-          - match
+            - upstream
+            - match
           type: object
         status:
           properties:
@@ -474,9 +483,9 @@ spec:
           type: object
       type: object
   versions:
-  - name: v1alpha1
-    served: true
-    storage: true
+    - name: v1alpha1
+      served: true
+      storage: true
 status:
   acceptedNames:
     kind: ""
