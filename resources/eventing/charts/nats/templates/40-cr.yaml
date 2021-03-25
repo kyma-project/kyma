@@ -7,6 +7,10 @@ spec:
   size: 1
   version: "2.1.8"
   pod:
+    enableMetrics: true
+    metricsImage: "natsio/prometheus-nats-exporter"
+    metricsImageTag: "0.7.0"
+    metricsImagePullPolicy: IfNotPresent
     annotations:
       sidecar.istio.io/inject: "false"
     {{- if .Values.resources }}
