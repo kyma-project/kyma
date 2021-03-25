@@ -26,6 +26,8 @@ spec:
           value: {{ .Values.global.tlsCrt }}
         - name: GLOBAL_TLS_KEY
           value: {{ .Values.global.tlsKey }}
+        - name: MST
+          value: true
         - name: INGRESS_DOMAIN
           valueFrom:
             configMapKeyRef:
