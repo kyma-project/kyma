@@ -1,16 +1,16 @@
 module github.com/kyma-project/kyma/components/function-controller
 
-go 1.15
+go 1.16
 
 replace (
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
-	golang.org/x/text => golang.org/x/text v0.3.3
+	golang.org/x/text => golang.org/x/text v0.3.5
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
-	k8s.io/client-go => k8s.io/client-go v0.18.12
+	k8s.io/client-go => k8s.io/client-go v0.18.16
 )
 
 require (
-	github.com/go-git/go-git/v5 v5.1.0
+	github.com/go-git/go-git/v5 v5.2.0
 	github.com/go-logr/logr v0.1.0
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
@@ -20,8 +20,8 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/api v0.18.12
-	k8s.io/apimachinery v0.18.12
+	k8s.io/api v0.18.16
+	k8s.io/apimachinery v0.18.16
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/utils v0.0.0-20200619165400-6e3d28b6ed19 // indirect
 	knative.dev/pkg v0.0.0-20201026165741-2f75016c1368

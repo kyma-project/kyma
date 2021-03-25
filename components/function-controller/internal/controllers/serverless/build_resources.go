@@ -27,9 +27,12 @@ const (
 	workspaceMountPath    = "/workspace"
 )
 
-var istioSidecarInjectFalse = map[string]string{
-	"sidecar.istio.io/inject": "false",
-}
+var (
+	istioSidecarInjectFalse = map[string]string{
+		"sidecar.istio.io/inject": "false",
+	}
+	svcTargetPort = intstr.FromInt(8080) //  // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+)
 
 func boolPtr(b bool) *bool {
 	return &b
@@ -381,6 +384,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+					Annotations: map[string]string{
+						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+					},
 				},
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{{
@@ -394,11 +400,10 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					}},
 					Containers: []corev1.Container{
 						{
-							Name:            functionContainerName,
-							Image:           imageName,
-							Env:             envs,
-							Resources:       instance.Spec.Resources,
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:      functionContainerName,
+							Image:     imageName,
+							Env:       envs,
+							Resources: instance.Spec.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
@@ -409,6 +414,49 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								MountPath: "/tmp",
 								ReadOnly:  false,
 							}},
+							/*
+								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
+								We do this but first ensuring that sidecar is raedy by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+								Second thing is setting that probe which continously
+							*/
+							StartupProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0,
+								PeriodSeconds:       1, // the lowest acceptable value, we should check it even more often but k8s doesn't let us
+								SuccessThreshold:    1,
+								FailureThreshold:    120, // FailureThreshold * PeriodSeconds = 120s in this case, this should be enough for any function pod to start up
+							},
+							// LivenessProbe should wait till readinessProbe fails a few times until it fails and restarts a container
+							// it's so that the traffic is no longer directed into that pod, so it may recover in that period without restarting it
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+								SuccessThreshold:    1,
+								FailureThreshold:    3,
+								PeriodSeconds:       5,
+							},
+							ReadinessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+								FailureThreshold:    1,
+								PeriodSeconds:       5,
+							},
+							ImagePullPolicy: corev1.PullIfNotPresent,
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
 									Add:  []corev1.Capability{},
@@ -439,8 +487,8 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       "http",               // it has to be here for istio to work properly
-				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Name:       "http", // it has to be here for istio to work properly
+				TargetPort: svcTargetPort,
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},

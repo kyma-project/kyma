@@ -1011,7 +1011,9 @@ var _ = ginkgo.Describe("Function", func() {
 		deployment := &deployments.Items[0]
 		gomega.Expect(deployment).ToNot(gomega.BeNil())
 
-		gomega.Expect(deployment.Spec.Template.Annotations).To(gomega.BeNil())
+		gomega.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(map[string]string{
+			"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+		}))
 		copiedDeploy := deployment.DeepCopy()
 		restartedAtAnnotation := map[string]string{
 			"kubectl.kubernetes.io/restartedAt": "2021-03-10T11:28:01+01:00", // example annotation added by kubectl
