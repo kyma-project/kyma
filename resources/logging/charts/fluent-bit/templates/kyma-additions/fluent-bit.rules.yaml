@@ -9,7 +9,7 @@ spec:
   groups:
   - name: fluent-bit.rules
     - alert: NoOutputBytesProcessed
-      expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.kymaRules.fluentBitAlertFilter }} }[5m]) == 0
+      expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.prometheusRules.fluentBitAlertFilter }} }[5m]) == 0
       annotations:
         description: Fluent Bit instance {{ `{{ $labels.instance }}` }}'s output plugin {{ `{{ $labels.name }}` }} has not processed any
           bytes for at least 15 minutes.
