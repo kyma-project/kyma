@@ -4,21 +4,7 @@
 
 The `docs` folder contains end-to-end documentation on Kyma and its components.
 
-Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/). Then, read about the product in more detail:
-
--   [API Gateway](./api-gateway/)
--   [Application Connector](./application-connector/)
--   [Backup](./backup/)
--   [Console](./console/)
--   [Eventing](./eventing/)
--   [Logging](./logging/)
--   [Monitoring](./monitoring/)
--   [Runtime Agent](./runtime-agent/)
--   [Security](./security/)
--   [Serverless](./serverless/)
--   [Service Catalog](./service-catalog/)
--   [Service Mesh](./service-mesh/)
--   [Tracing](./tracing/)
+Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/). Then, read about the product in more detail.
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
@@ -32,4 +18,3 @@ Follow these basic rules when you add a new document to the official Kyma docume
 2. Follow the [Contribution Guide](https://github.com/kyma-project/community/blob/master/contributing/02-contributing.md) for the general contribution rules and process.
 3. Make use of the [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
 4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
-5.

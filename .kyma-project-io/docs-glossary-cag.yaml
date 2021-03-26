@@ -4,14 +4,14 @@ metadata:
   labels:
     rafter.kyma-project.io/view-context: docs-ui
     rafter.kyma-project.io/group-name: root
-    rafter.kyma-project.io/order: "4"
-  name: technical-references
+    rafter.kyma-project.io/order: "5"
+  name: tutorials
 spec:
-  displayName: "Technical references"
-  description: "Deep-dive into Kyma detailed documentation"
+  displayName: "Glossary"
+  description: "Kyma terminology"
   sources:
     - type: markdown
       name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
-      filter: /docs/technical-references/
+      filter: /docs/glossary.md
