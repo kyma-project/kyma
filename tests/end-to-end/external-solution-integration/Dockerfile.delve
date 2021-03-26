@@ -1,4 +1,0 @@
-FROM golang:alpine
-
-RUN apk add --update git
-RUN go get github.com/go-delve/delve/cmd/dlv
