@@ -13,4 +13,5 @@ spec:
     - type: markdown
       name: docs
       mode: package
+      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
       filter: /docs/overview/
