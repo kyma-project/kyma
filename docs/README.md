@@ -4,7 +4,7 @@
 
 The `docs` folder contains end-to-end documentation on Kyma and its components.
 
-Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/). Then, read about the product in more detail.
+Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/).
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
