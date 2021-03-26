@@ -31,3 +31,6 @@ securityContext:
     drop:
     - ALL
   privileged: false
+# Configure affinity
+affinity: {}
+
