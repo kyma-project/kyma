@@ -36,4 +36,3 @@ spec:
         description: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
       labels:
         severity: critical
-

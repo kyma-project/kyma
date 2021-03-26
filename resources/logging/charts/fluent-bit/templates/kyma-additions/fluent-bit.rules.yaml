@@ -7,7 +7,8 @@ metadata:
 {{ include "fluent-bit.labels" . | indent 4 }}
 spec:
   groups:
-  - name: fluent-bit.rules
+  - name: loki.rules
+    rules:
     - alert: NoOutputBytesProcessed
       expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.prometheusRules.fluentBitAlertFilter }} }[5m]) == 0
       annotations:
