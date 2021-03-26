@@ -5,7 +5,7 @@ WORKDIR /go/src/github.com/kyma-project/kyma/components/busola-migrator
 ADD . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /busola-migrator ./main.go
 
-FROM scratch
+FROM gcr.io/distroless/static
 
 COPY --from=builder ./busola-migrator /app/busola-migrator
 
