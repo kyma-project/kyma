@@ -55,6 +55,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
+Selector labels
+*/}}
+{{- define "fluent-bit.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "fluent-bit.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
 Create the app name of loki clients. Defaults to the same logic as "loki.fullname", and default client expects "promtail".
 */}}
 {{- define "client.name" -}}

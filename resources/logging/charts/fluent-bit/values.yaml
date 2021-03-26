@@ -131,7 +131,7 @@ updateStrategy: {}
 existingConfigMap: ""
 
 ## Custom configuration for Kyma alerting rules
-kymaRules:
+prometheusRules:
   ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
   fluentBitAlertFilter: ""
 
