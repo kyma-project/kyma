@@ -11,7 +11,7 @@ replicaCount: 1
 
 image:
   # ORY Oathkeeper image
-  repository: oryd/oathkeeper # TODO: add to Kyma external repository
+  repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper
   # ORY Oathkeeper version
   tag: v0.38.5
   # Image pull policy
@@ -19,7 +19,7 @@ image:
 
 sidecar:
   image:
-    repository: oryd/oathkeeper-maester # TODO: add to Kyma external repository
+    repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper-maester
     tag: v0.1.0
   port:
     metrics: 8080
@@ -190,7 +190,7 @@ deployment:
 affinity: {}
 
 # Configures controller setup
-oathkeeper-maester:
+oathkeeperMaester:
   enabled: true
 
 busybox:
