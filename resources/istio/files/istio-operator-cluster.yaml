@@ -80,7 +80,10 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+        serviceAnnotations:
+          "service.beta.kubernetes.io/aws-load-balancer-type": "nlb"
         service:
+          externalTrafficPolicy: Local
           ports:
           - name: status-port
             port: 15021

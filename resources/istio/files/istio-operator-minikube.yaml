@@ -81,6 +81,7 @@ spec:
             cpu: 100m
             memory: 96Mi
         service:
+          externalTrafficPolicy: Local
           ports:
           - name: status-port
             port: 15021
