@@ -8,10 +8,10 @@ metadata:
   name: glossary
 spec:
   displayName: "Glossary"
-  description: "Kyma terminology"
+  description: "Kyma terminology explained"
   sources:
     - type: markdown
       name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterAssetGroupsVersion }}.zip
-      filter: /docs/glossary.md
+      filter: /docs/glossary/
