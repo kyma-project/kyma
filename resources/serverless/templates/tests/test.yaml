@@ -47,6 +47,12 @@ spec:
               value: "{{ .Values.tests.envs.gitServer.image }}:{{ .Values.tests.envs.gitServer.tag }}"
             - name: APP_TEST_GIT_SERVER_REPO_NAME
               value: "{{ .Values.tests.envs.gitServer.repoName }}"
+            - name: APP_TEST_PACKAGE_REGISTRY_CONFIG_SECRET_NAME
+              value: "{{ .Values.tests.envs.pkgRegistryConfig.secretName }}"
+            - name: APP_TEST_PACKAGE_REGISTRY_CONFIG_URL_NODE
+              value: "{{ .Values.tests.envs.pkgRegistryConfig.URLNode }}"
+            - name: APP_TEST_PACKAGE_REGISTRY_CONFIG_URL_PYTHON
+              value: "{{ .Values.tests.envs.pkgRegistryConfig.URLPython }}"
           resources:
 {{ include "tplValue" ( dict "value" .Values.tests.resources "context" $ ) | indent 12 }}
 {{- end }}

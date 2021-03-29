@@ -22,11 +22,12 @@ const {
   waitForDeployment,
   waitForTokenRequest,
   deleteAllK8sResources,
-  k8sAppsApi,
   k8sDynamicApi,
   deleteNamespaces,
   debug,
   toBase64,
+  ensureApplicationMapping,
+  patchApplicationGateway
 } = require("../../../utils");
 
 const {
@@ -71,7 +72,12 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   return {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceInstance",
-    metadata: { name },
+    metadata: {
+      name: name,
+      annotations: {
+        "app": "test",
+      },
+    },
     spec: { serviceClassExternalName },
   };
 }
@@ -273,7 +279,11 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
     baseUrl: mockHost,
     insecure: true
   };
+  
+  debug(`Connecting ${mockHost}`);
   await connectCommerceMock(mockHost, pairingBody);
+  
+  debug(`Creating application mapping for mp-${appName} in ${targetNamespace}`);
   await ensureApplicationMapping(`mp-${appName}`, targetNamespace);
   debug("Commerce mock connected to Compass");
 }
@@ -293,63 +303,6 @@ async function connectCommerceMock(mockHost, tokenData) {
   } catch (err) {
     throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
   }
-}
-
-async function ensureApplicationMapping(name, ns) {
-  const applicationMapping = {
-    apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
-    kind: "ApplicationMapping",
-    metadata: { name: name, namespace: ns }
-  };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
-  return await k8sDynamicApi.create(applicationMapping);
-}
-
-async function patchApplicationGateway(name, ns) {
-  const deployment = await retryPromise(
-    async () => {
-      return k8sAppsApi.readNamespacedDeployment(name, ns);
-    },
-    12,
-    5000
-  ).catch((err) => {
-    throw new Error(`Timeout: ${name} is not ready`);
-  });
-  expect(
-    deployment.body.spec.template.spec.containers[0].args[6]
-  ).to.match(/^--skipVerify/);
-  
-  const patch = [
-    {
-      op: "replace",
-      path: "/spec/template/spec/containers/0/args/6",
-      value: "--skipVerify=true",
-    },
-  ];
-  const options = {
-    headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
-  };
-  await k8sDynamicApi
-    .requestPromise({
-      url:
-        k8sDynamicApi.basePath +
-        deployment.body.metadata.selfLink,
-      method: "PATCH",
-      body: patch,
-      json: true,
-      headers: options.headers,
-    });
-
-  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(
-    patchedDeployment.body.spec.template.spec.containers[0].args[6]
-  ).to.equal("--skipVerify=true");
-
-  // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
-  await waitForDeployment(name, ns);
-  
-  return patchedDeployment;
 }
 
 async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
@@ -426,7 +379,12 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceBinding",
-    metadata: { name: "commerce-binding" },
+    metadata: {
+      name: "commerce-binding",
+      annotations: {
+        "app": "test",
+      },
+    },
     spec: {
       instanceRef: { name: "commerce-webservices" },
     },

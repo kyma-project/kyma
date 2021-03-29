@@ -27,9 +27,12 @@ const (
 	workspaceMountPath    = "/workspace"
 )
 
-var istioSidecarInjectFalse = map[string]string{
-	"sidecar.istio.io/inject": "false",
-}
+var (
+	istioSidecarInjectFalse = map[string]string{
+		"sidecar.istio.io/inject": "false",
+	}
+	svcTargetPort = intstr.FromInt(8080) //  // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+)
 
 func boolPtr(b bool) *bool {
 	return &b
@@ -55,6 +58,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
+	optional := true
 
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
@@ -108,21 +112,23 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 								},
 							},
 						},
+						{
+							Name: "registry-config",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.PackageRegistryConfigSecretName,
+									Optional:   &optional,
+								},
+							},
+						},
 					},
 					Containers: []corev1.Container{
 						{
-							Name:      "executor",
-							Image:     r.config.Build.ExecutorImage,
-							Args:      args,
-							Resources: instance.Spec.BuildResources,
-							VolumeMounts: []corev1.VolumeMount{
-								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-								// If COPY is not used, then the cache will not work
-								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
-								{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
-								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-							},
+							Name:            "executor",
+							Image:           r.config.Build.ExecutorImage,
+							Args:            args,
+							Resources:       instance.Spec.BuildResources,
+							VolumeMounts:    r.getBuildJobVolumeMounts(rtmConfig),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
@@ -138,6 +144,20 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 			},
 		},
 	}
+}
+
+func (r *FunctionReconciler) getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.DependencyFile), SubPath: FunctionDepsKey},
+		{Name: "sources", ReadOnly: true, MountPath: path.Join(baseDir, rtmConfig.FunctionFile), SubPath: FunctionSourceKey},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+	return volumeMounts
 }
 
 func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions git.Options) []corev1.EnvVar {
@@ -229,6 +249,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
+	optional := true
 
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -274,6 +295,15 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Name:         "workspace",
 							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 						},
+						{
+							Name: "registry-config",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: r.config.PackageRegistryConfigSecretName,
+									Optional:   &optional,
+								},
+							},
+						},
 					},
 					InitContainers: []corev1.Container{
 						{
@@ -291,17 +321,11 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 					},
 					Containers: []corev1.Container{
 						{
-							Name:      "executor",
-							Image:     r.config.Build.ExecutorImage,
-							Args:      args,
-							Resources: instance.Spec.BuildResources,
-							VolumeMounts: []corev1.VolumeMount{
-								{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-								// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-								// If COPY is not used, then the cache will not work
-								{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
-								{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-							},
+							Name:            "executor",
+							Image:           r.config.Build.ExecutorImage,
+							Args:            args,
+							Resources:       instance.Spec.BuildResources,
+							VolumeMounts:    r.getGitBuildJobVolumeMounts(instance, rtmConfig),
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Env: []corev1.EnvVar{
 								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
@@ -317,6 +341,20 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 			},
 		},
 	}
+}
+
+func (r *FunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) []corev1.VolumeMount {
+	volumeMounts := []corev1.VolumeMount{
+		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
+		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
+		// If COPY is not used, then the cache will not work
+		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
+		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
+	}
+	// add package registry config volume mount depending on the used runtime
+	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+	return volumeMounts
+
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
@@ -346,6 +384,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+					Annotations: map[string]string{
+						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+					},
 				},
 				Spec: corev1.PodSpec{
 					Volumes: []corev1.Volume{{
@@ -359,11 +400,10 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 					}},
 					Containers: []corev1.Container{
 						{
-							Name:            functionContainerName,
-							Image:           imageName,
-							Env:             envs,
-							Resources:       instance.Spec.Resources,
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:      functionContainerName,
+							Image:     imageName,
+							Env:       envs,
+							Resources: instance.Spec.Resources,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name: volumeName,
 								/* needed in order to have python functions working:
@@ -374,6 +414,49 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								MountPath: "/tmp",
 								ReadOnly:  false,
 							}},
+							/*
+								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
+								We do this but first ensuring that sidecar is raedy by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+								Second thing is setting that probe which continously
+							*/
+							StartupProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0,
+								PeriodSeconds:       1, // the lowest acceptable value, we should check it even more often but k8s doesn't let us
+								SuccessThreshold:    1,
+								FailureThreshold:    120, // FailureThreshold * PeriodSeconds = 120s in this case, this should be enough for any function pod to start up
+							},
+							// LivenessProbe should wait till readinessProbe fails a few times until it fails and restarts a container
+							// it's so that the traffic is no longer directed into that pod, so it may recover in that period without restarting it
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+								SuccessThreshold:    1,
+								FailureThreshold:    3,
+								PeriodSeconds:       5,
+							},
+							ReadinessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+								FailureThreshold:    1,
+								PeriodSeconds:       5,
+							},
+							ImagePullPolicy: corev1.PullIfNotPresent,
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
 									Add:  []corev1.Capability{},
@@ -404,8 +487,8 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
-				Name:       "http",               // it has to be here for istio to work properly
-				TargetPort: intstr.FromInt(8080), // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+				Name:       "http", // it has to be here for istio to work properly
+				TargetPort: svcTargetPort,
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
@@ -489,4 +572,14 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 		}
 	}
 	return result
+}
+
+func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
+	switch rtm {
+	case serverlessv1alpha1.Nodejs10, serverlessv1alpha1.Nodejs12:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/.npmrc"), SubPath: ".npmrc"}}
+	case serverlessv1alpha1.Python38:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/pip.conf"), SubPath: "pip.conf"}}
+	}
+	return nil
 }
