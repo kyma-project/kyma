@@ -5,11 +5,11 @@ type: Overview
 
 new architecture diagram:
 
-![architecture](../assets/kyma-2.0-architecture.svg)
+![architecture](./assets/kyma-2.0-architecture.svg)
 
 old architecture diagram:
 
-![old-architecture](../kyma/assets/ac-s-sc.svg)
+![old-architecture](./assets/ac-s-sc.svg)
 
 ## See also
 
