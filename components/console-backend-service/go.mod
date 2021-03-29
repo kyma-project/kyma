@@ -10,12 +10,11 @@ require (
 	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
-	github.com/gobuffalo/envy v1.6.15 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/googleapis/gnostic v0.4.0
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
-	github.com/hashicorp/go-uuid v1.0.2
+	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
@@ -53,7 +52,6 @@ require (
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
-	sigs.k8s.io/kustomize v2.0.3+incompatible // indirect
 )
 
 replace (
