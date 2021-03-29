@@ -20,11 +20,6 @@ fluent-bit:
 loki:
   enabled: true
 
-## Custom configuration for Kyma alerting rules
-kymaRules:
-  ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
-  fluentBitAlertFilter: ""
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
