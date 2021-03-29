@@ -54,9 +54,10 @@ spec:
             path: webhook.crt
           - key: tls.key
             path: webhook.key
-      affinity:
-        {{ toYaml .Values.affinity | indent 10 }}
-        {{- end }}
+      {{- with .Values.affinity }}
+      affinity: 
+         {{ toYaml . | indent 8 }}
+      {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
