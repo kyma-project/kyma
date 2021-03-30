@@ -39,18 +39,6 @@ func TestGetRuntimeConfig(t *testing.T) {
 					{Name: "FUNC_RUNTIME", Value: "python38"}},
 			},
 		},
-		"nodej10": {
-			name:    "nodejs10 config",
-			runtime: serverlessv1alpha1.Nodejs10,
-			want: runtime.Config{
-				Runtime:                 serverlessv1alpha1.Nodejs10,
-				DependencyFile:          "package.json",
-				FunctionFile:            "handler.js",
-				DockerfileConfigMapName: "dockerfile-nodejs-10",
-				RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-					{Name: "FUNC_RUNTIME", Value: "nodejs10"}},
-			},
-		},
 		"default": {
 			name:    "nodejs12",
 			runtime: serverlessv1alpha1.Nodejs12,

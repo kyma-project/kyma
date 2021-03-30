@@ -53,7 +53,7 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 
 func GetRuntime(r serverlessv1alpha1.Runtime) Runtime {
 	switch r {
-	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs10:
+	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs12:
 		return nodejs{}
 	case serverlessv1alpha1.Python38:
 		return python{}
