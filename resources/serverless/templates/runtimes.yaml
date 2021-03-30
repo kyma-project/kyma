@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-nodejs-12
-  namespace: { { .Release.Namespace } }
+  namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs12
@@ -21,12 +21,13 @@ data:
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
 
     USER 1000
+
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dockerfile-python-38
-  namespace: { { .Release.Namespace } }
+  namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: python38
@@ -36,7 +37,7 @@ data:
     FROM {{ .Values.images.runtimes.python38.repository}}:{{ .Values.images.runtimes.python38.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
-
+    
     COPY /src/requirements.txt $KUBELESS_INSTALL_VOLUME/requirements.txt
     COPY /registry-config/* /etc/
     RUN pip install -r $KUBELESS_INSTALL_VOLUME/requirements.txt
