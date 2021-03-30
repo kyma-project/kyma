@@ -313,6 +313,12 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
 
+# Event Service Tests
+/tests/integration/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+
+# Kafka Channel Integration Tests
+/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r @crabtree @kjaksik @suleymanakbas91
 
