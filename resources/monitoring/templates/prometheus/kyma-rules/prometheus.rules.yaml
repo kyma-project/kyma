@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" .) "kyma-prometheus.rules" | trunc 63 | trimSuffix "-" }}
+  labels:
+    app: {{ template "kube-prometheus-stack.name" . }}
+{{ include "kube-prometheus-stack.labels" . | indent 4 }}
+spec:
+  groups:
+  - name: prometheus.rules
+    rules:
+    - alert: ScrapeLimitForTargetExceeded
+      annotations:
+        description: One or more targets in the job monitoring-prometheus-istio-server have scrape limit exceeded
+        summary: Scrape limit for one or more targets is exceeded.
+      expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total{job="monitoring-prometheus-istio-server"}[1m]) > 0
+      for: 10m
+      labels:
+        severity: critical
