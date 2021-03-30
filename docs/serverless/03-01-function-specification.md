@@ -5,17 +5,18 @@ type: Details
 
 Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
 
->**CAUTION:** Node.js 10 runtime is deprecated, so use Node.js 12 instead.
+> **CAUTION:** Node.js 10 runtime is deprecated, so use Node.js 12 instead.
 
 ## Signature
 
 Function's code is represented by a handler that is a method that processes events. When your Function is invoked, it runs this handler method to process a given request and return a response.
 
 All Functions have a predefined signature with elements common for all available runtimes:
+
 - Functions' code must be introduced by the `main` handler name.
 - Functions must accept two arguments that are passed to the Function handler:
-    - `event`
-    - `context`
+  - `event`
+  - `context`
 
 See these signatures for each runtime:
 
@@ -75,6 +76,7 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     }
 }
 ```
+
 </details>
 <details>
 <summary label="Python">
@@ -101,16 +103,16 @@ Python
 
 See the detailed descriptions of these fields:
 
-| Field | Description |
-|-------|-------------|
-| **ce-type** | Type of the CloudEvent data related to the originating occurrence |
-| **ce-source** | Unique context in which an event happened and can relate to an organization or a process |
-| **ce-eventtypeversion** | Version of the CloudEvent type |
-| **ce-specversion** | Version of the CloudEvent specification used for this event |
-| **ce-id** | Unique identifier of the event |
-| **ce-time** | Time at which the event was sent |
-| **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
-| **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
+| Field                   | Description                                                                                                                                                                                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ce-type**             | Type of the CloudEvent data related to the originating occurrence                                                                                                                                                                                    |
+| **ce-source**           | Unique context in which an event happened and can relate to an organization or a process                                                                                                                                                             |
+| **ce-eventtypeversion** | Version of the CloudEvent type                                                                                                                                                                                                                       |
+| **ce-specversion**      | Version of the CloudEvent specification used for this event                                                                                                                                                                                          |
+| **ce-id**               | Unique identifier of the event                                                                                                                                                                                                                       |
+| **ce-time**             | Time at which the event was sent                                                                                                                                                                                                                     |
+| **data**                | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
+| **extensions**          | JSON object that can contain event payload, a Function's incoming request, or an outgoing response                                                                                                                                                   |
 
 ### Context object
 
@@ -122,18 +124,18 @@ See sample context details:
 ...
 { "function-name": "main",
   "timeout": 180,
-  "runtime": "nodejs10",
+  "runtime": "nodejs12",
   "memory-limit": 200Mi }
 ```
 
 See the detailed descriptions of these fields:
 
-| Field | Description |
-|-------|-------------|
-| **function-name** | Name of the invoked Function |
-| **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs10`, `nodejs10`, or `python3.8`. |
-| **memory-limit** | Maximum amount of memory assigned to run a Function |  
+| Field             | Description                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| **function-name** | Name of the invoked Function                                                        |
+| **timeout**       | Time, in seconds, after which the system cancels the request to invoke the Function |
+| **runtime**       | Environment used to run the Function. You can use `nodejs12` or `python3.8`.        |
+| **memory-limit**  | Maximum amount of memory assigned to run a Function                                 |
 
 ## HTTP requests
 
@@ -150,14 +152,14 @@ This object is created by the Express framework and can be customized. For more 
 This example shows how to set such a custom response in Node.js for the HTTP status code `400`:
 
 ```js
-module.exports = {    
-    main: function (event, context) {
-        if (event.extensions.request.query.id === undefined) {
-            res = event.extensions.response;
-            res.status(400)
-            return
-        }
-        return "42"
+module.exports = {
+  main: function (event, context) {
+    if (event.extensions.request.query.id === undefined) {
+      res = event.extensions.response;
+      res.status(400);
+      return;
     }
-}
+    return "42";
+  },
+};
 ```

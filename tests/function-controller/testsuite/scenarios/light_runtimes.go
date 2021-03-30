@@ -36,7 +36,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 
 	python38Logger := logf.WithField(scenarioKey, "python38")
-	nodejs10Logger := logf.WithField(scenarioKey, "nodejs10")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
 
 	genericContainer := shared.Container{
@@ -55,11 +54,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python38", genericContainer.WithLogger(python38Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating python38 config")
-	}
-
-	nodejs10Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs10", genericContainer.WithLogger(nodejs10Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs10 config")
 	}
 
 	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))

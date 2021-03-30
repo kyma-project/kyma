@@ -8,24 +8,24 @@ metadata:
   name: functions.serverless.kyma-project.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status.conditions[?(@.type=='ConfigurationReady')].status
-    name: Configured
-    type: string
-  - JSONPath: .status.conditions[?(@.type=='BuildReady')].status
-    name: Built
-    type: string
-  - JSONPath: .status.conditions[?(@.type=='Running')].status
-    name: Running
-    type: string
-  - JSONPath: .status.runtime
-    name: Runtime
-    type: string
-  - JSONPath: .metadata.generation
-    name: Version
-    type: integer
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
+    - JSONPath: .status.conditions[?(@.type=='ConfigurationReady')].status
+      name: Configured
+      type: string
+    - JSONPath: .status.conditions[?(@.type=='BuildReady')].status
+      name: Built
+      type: string
+    - JSONPath: .status.conditions[?(@.type=='Running')].status
+      name: Running
+      type: string
+    - JSONPath: .status.runtime
+      name: Runtime
+      type: string
+    - JSONPath: .metadata.generation
+      name: Version
+      type: integer
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
+      type: date
   group: serverless.kyma-project.io
   names:
     kind: Function
@@ -39,14 +39,16 @@ spec:
     openAPIV3Schema:
       properties:
         apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
+          description:
+            "APIVersion defines the versioned schema of this representation
             of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources"
           type: string
         kind:
-          description: 'Kind is a string value representing the REST resource this
+          description:
+            "Kind is a string value representing the REST resource this
             object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
           type: string
         metadata:
           type: object
@@ -61,33 +63,38 @@ spec:
                 limits:
                   additionalProperties:
                     type: string
-                  description: 'Limits describes the maximum amount of compute resources
-                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  description:
+                    "Limits describes the maximum amount of compute resources
+                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
                   type: object
                 requests:
                   additionalProperties:
                     type: string
-                  description: 'Requests describes the minimum amount of compute resources
+                  description:
+                    "Requests describes the minimum amount of compute resources
                     required. If Requests is omitted for a container, it defaults
                     to Limits if that is explicitly specified, otherwise to an implementation-defined
-                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
                   type: object
               type: object
             deps:
               description: Deps defines the dependencies for a function
               type: string
             env:
-              description: Env defines an array of key value pairs need to be used
+              description:
+                Env defines an array of key value pairs need to be used
                 as env variable for a function
               items:
-                description: EnvVar represents an environment variable present in
+                description:
+                  EnvVar represents an environment variable present in
                   a Container.
                 properties:
                   name:
                     description: Name of the environment variable. Must be a C_IDENTIFIER.
                     type: string
                   value:
-                    description: 'Variable references $(VAR_NAME) are expanded using
+                    description:
+                      'Variable references $(VAR_NAME) are expanded using
                       the previous defined environment variables in the container
                       and any service environment variables. If a variable cannot
                       be resolved, the reference in the input string will be unchanged.
@@ -96,7 +103,8 @@ spec:
                       of whether the variable exists or not. Defaults to "".'
                     type: string
                   valueFrom:
-                    description: Source for the environment variable's value. Cannot
+                    description:
+                      Source for the environment variable's value. Cannot
                       be used if value is not empty.
                     properties:
                       configMapKeyRef:
@@ -106,74 +114,85 @@ spec:
                             description: The key to select.
                             type: string
                           name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            description:
+                              "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?"
                             type: string
                           optional:
-                            description: Specify whether the ConfigMap or its key
+                            description:
+                              Specify whether the ConfigMap or its key
                               must be defined
                             type: boolean
                         required:
-                        - key
+                          - key
                         type: object
                       fieldRef:
-                        description: 'Selects a field of the pod: supports metadata.name,
+                        description:
+                          "Selects a field of the pod: supports metadata.name,
                           metadata.namespace, metadata.labels, metadata.annotations,
                           spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP,
-                          status.podIPs.'
+                          status.podIPs."
                         properties:
                           apiVersion:
-                            description: Version of the schema the FieldPath is written
+                            description:
+                              Version of the schema the FieldPath is written
                               in terms of, defaults to "v1".
                             type: string
                           fieldPath:
-                            description: Path of the field to select in the specified
+                            description:
+                              Path of the field to select in the specified
                               API version.
                             type: string
                         required:
-                        - fieldPath
+                          - fieldPath
                         type: object
                       resourceFieldRef:
-                        description: 'Selects a resource of the container: only resources
+                        description:
+                          "Selects a resource of the container: only resources
                           limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage,
                           requests.cpu, requests.memory and requests.ephemeral-storage)
-                          are currently supported.'
+                          are currently supported."
                         properties:
                           containerName:
-                            description: 'Container name: required for volumes, optional
-                              for env vars'
+                            description:
+                              "Container name: required for volumes, optional
+                              for env vars"
                             type: string
                           divisor:
-                            description: Specifies the output format of the exposed
+                            description:
+                              Specifies the output format of the exposed
                               resources, defaults to "1"
                             type: string
                           resource:
-                            description: 'Required: resource to select'
+                            description: "Required: resource to select"
                             type: string
                         required:
-                        - resource
+                          - resource
                         type: object
                       secretKeyRef:
                         description: Selects a key of a secret in the pod's namespace
                         properties:
                           key:
-                            description: The key of the secret to select from.  Must
+                            description:
+                              The key of the secret to select from.  Must
                               be a valid secret key.
                             type: string
                           name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                              TODO: Add other useful fields. apiVersion, kind, uid?'
+                            description:
+                              "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                              TODO: Add other useful fields. apiVersion, kind, uid?"
                             type: string
                           optional:
-                            description: Specify whether the Secret or its key must
+                            description:
+                              Specify whether the Secret or its key must
                               be defined
                             type: boolean
                         required:
-                        - key
+                          - key
                         type: object
                     type: object
                 required:
-                - name
+                  - name
                 type: object
               type: array
             labels:
@@ -196,23 +215,24 @@ spec:
                 limits:
                   additionalProperties:
                     type: string
-                  description: 'Limits describes the maximum amount of compute resources
-                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  description:
+                    "Limits describes the maximum amount of compute resources
+                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
                   type: object
                 requests:
                   additionalProperties:
                     type: string
-                  description: 'Requests describes the minimum amount of compute resources
+                  description:
+                    "Requests describes the minimum amount of compute resources
                     required. If Requests is omitted for a container, it defaults
                     to Limits if that is explicitly specified, otherwise to an implementation-defined
-                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
                   type: object
               type: object
             runtime:
               enum:
-              - nodejs12
-              - nodejs10
-              - python38
+                - nodejs12
+                - python38
               type: string
             source:
               description: Source defines the source code of a function
@@ -220,11 +240,12 @@ spec:
             type:
               type: string
           required:
-          - source
+            - source
           type: object
         status:
-          description: 'FunctionStatus defines the observed state of FuncSONPath:
-            .status.phase'
+          description:
+            "FunctionStatus defines the observed state of FuncSONPath:
+            .status.phase"
           properties:
             baseDir:
               type: string
@@ -246,16 +267,15 @@ spec:
                     description: ConditionType defines condition of function.
                     type: string
                 required:
-                - status
+                  - status
                 type: object
               type: array
             reference:
               type: string
             runtime:
               enum:
-              - nodejs12
-              - nodejs10
-              - python38
+                - nodejs12
+                - python38
               type: string
             source:
               type: string
@@ -263,9 +283,9 @@ spec:
       type: object
   version: v1alpha1
   versions:
-  - name: v1alpha1
-    served: true
-    storage: true
+    - name: v1alpha1
+      served: true
+      storage: true
 status:
   acceptedNames:
     kind: ""

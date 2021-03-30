@@ -29,16 +29,6 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs12"},
 			},
 		}
-	case serverlessv1alpha1.Nodejs10:
-		return Config{
-			Runtime:                 serverlessv1alpha1.Nodejs10,
-			DependencyFile:          "package.json",
-			FunctionFile:            "handler.js",
-			DockerfileConfigMapName: "dockerfile-nodejs-10",
-			RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-				{Name: "FUNC_RUNTIME", Value: "nodejs10"},
-			},
-		}
 	case serverlessv1alpha1.Python38:
 		return Config{
 			Runtime:                 serverlessv1alpha1.Python38,
