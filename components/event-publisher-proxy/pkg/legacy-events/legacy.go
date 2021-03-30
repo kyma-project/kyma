@@ -2,8 +2,10 @@ package legacy
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -168,10 +170,23 @@ func (t Transformer) convertPublishRequestToCloudEvent(appName string, publishRe
 		event.SetID(uuid.New().String())
 	}
 
-	eventType := formatEventType4BEB(t.eventTypePrefix, appName, publishRequest.PublishrequestV1.EventType, publishRequest.PublishrequestV1.EventTypeVersion)
+	eventTypeCombined := combineEventTypeSegments(publishRequest.PublishrequestV1.EventType)
+	eventType := formatEventType4BEB(t.eventTypePrefix, appName, eventTypeCombined, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetSource(t.bebNamespace)
 	event.SetType(eventType)
 	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetDataContentType(ContentTypeApplicationJSON)
 	return &event, nil
+}
+
+// combineEventTypeSegments returns an event-type with exactly two segments separated by "." if the given event-type
+// has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created")
+func combineEventTypeSegments(eventType string) string {
+	parts := strings.Split(eventType, ".")
+	if len(parts) > 2 {
+		businessObject := strings.Join(parts[0:len(parts)-1], "")
+		operation := parts[len(parts)-1]
+		eventType = fmt.Sprintf("%s.%s", businessObject, operation)
+	}
+	return eventType
 }

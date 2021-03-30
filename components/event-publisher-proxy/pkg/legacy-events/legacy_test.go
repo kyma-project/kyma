@@ -8,23 +8,27 @@ import (
 	. "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
+const (
+	eventTypeMultiSegment         = "Segment1.Segment2.Segment3.Segment4.Segment5"
+	eventTypeMultiSegmentCombined = "Segment1Segment2Segment3Segment4.Segment5"
+)
+
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	bebNs := MessagingNamespace
 	eventTypePrefix := MessagingEventTypePrefix
 	legacyTransformer := NewTransformer(bebNs, eventTypePrefix, nil)
 	eventID := EventID
 	appName := ApplicationName
-	legacyEventType := LegacyEventType
 	legacyEventVersion := LegacyEventTypeVersion
 	data := LegacyEventData
 	timeNow := time.Now()
-	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, legacyEventType, legacyEventVersion)
+	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, eventTypeMultiSegmentCombined, legacyEventVersion)
 	timeNowStr := timeNow.Format(time.RFC3339)
 	timeNowFormatted, _ := time.Parse(time.RFC3339, timeNowStr)
 	publishReqParams := &legacyapi.PublishEventParametersV1{
 		PublishrequestV1: legacyapi.PublishRequestV1{
 			EventID:          eventID,
-			EventType:        legacyEventType,
+			EventType:        eventTypeMultiSegment,
 			EventTime:        timeNowStr,
 			EventTypeVersion: legacyEventVersion,
 			Data:             data,
@@ -61,5 +65,32 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	}
 	if gotExtension != legacyEventVersion {
 		t.Errorf("incorrect eventtype extension, want: %s, got: %s", legacyEventVersion, gotExtension)
+	}
+}
+
+func TestCombineEventTypeSegments(t *testing.T) {
+	testCases := []struct {
+		name           string
+		givenEventType string
+		wantEventType  string
+	}{
+		{
+			name:           "event-type with two segments",
+			givenEventType: LegacyEventType,
+			wantEventType:  LegacyEventType,
+		},
+		{
+			name:           "event-type with more than two segments",
+			givenEventType: eventTypeMultiSegment,
+			wantEventType:  eventTypeMultiSegmentCombined,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if gotEventType := combineEventTypeSegments(tc.givenEventType); tc.wantEventType != gotEventType {
+				t.Fatalf("invalid event-type want: %s, got: %s", tc.wantEventType, gotEventType)
+			}
+		})
 	}
 }
