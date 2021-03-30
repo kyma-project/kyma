@@ -183,7 +183,10 @@ spec:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local
     defaultConfig:
-      proxyMetadata: {}
+      proxyMetadata:
+         # Enable Istio agent to handle DNS requests for known hosts
+        # Unknown hosts will automatically be resolved using upstream dns servers in resolv.conf
+        ISTIO_META_DNS_CAPTURE: "true"
       tracing:
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
@@ -192,7 +195,6 @@ spec:
     base:
       enableCRDTemplates: false
       validationURL: ""
-    clusterResources: true
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
@@ -294,10 +296,6 @@ spec:
       sts:
         servicePort: 0
       useMCP: false
-    istiocoredns:
-      coreDNSImage: coredns/coredns
-      coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
-      coreDNSTag: 1.6.2
     istiodRemote:
       injectionURL: ""
     pilot:
