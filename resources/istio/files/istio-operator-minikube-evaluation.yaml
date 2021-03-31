@@ -3,8 +3,6 @@ spec:
   hub: eu.gcr.io/kyma-project/external/istio
   tag: {{ .Chart.Version }}
   addonComponents:
-    istiocoredns:
-      enabled: false
   components:
     base:
       enabled: true

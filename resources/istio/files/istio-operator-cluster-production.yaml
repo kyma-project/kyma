@@ -4,8 +4,6 @@ spec:
   hub: docker.io/istio
   tag: {{ .Chart.Version }}
   addonComponents:
-    istiocoredns:
-      enabled: false
   components:
     base:
       enabled: true

@@ -3,6 +3,7 @@ kind: IstioOperator
 spec:
   hub: docker.io/istio
   tag: {{ .Chart.Version }}
+  addonComponents:
   components:
     base:
       enabled: true
