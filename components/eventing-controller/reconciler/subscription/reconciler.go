@@ -65,14 +65,14 @@ const (
 )
 
 func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
-	bebClient := &handlers.Beb{Log: log}
-	bebClient.Initialize(cfg)
+	bebHandler := &handlers.Beb{Log: log}
+	bebHandler.Initialize(cfg)
 	return &Reconciler{
 		Client:           client,
 		Cache:            cache,
 		Log:              log,
 		recorder:         recorder,
-		backend:          bebClient,
+		backend:          bebHandler,
 		Domain:           cfg.Domain,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}

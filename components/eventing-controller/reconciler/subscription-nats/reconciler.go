@@ -42,8 +42,8 @@ const (
 )
 
 func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
-	natsClient := handlers.NewNats(cfg, log)
-	err := natsClient.Initialize(env.Config{})
+	natsHandler := handlers.NewNats(cfg, log)
+	err := natsHandler.Initialize(env.Config{})
 	if err != nil {
 		log.Error(err, "reconciler can't start")
 		panic(err)
@@ -51,7 +51,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 	return &Reconciler{
 		Client:           client,
 		Cache:            cache,
-		backend:          natsClient,
+		backend:          natsHandler,
 		Log:              log,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
