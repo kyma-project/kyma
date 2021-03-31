@@ -1,6 +1,6 @@
 kind: IstioOperator
 spec:
-  hub: eu.gcr.io/kyma-project/external/istio
+  hub: docker.io/istio
   tag: {{ .Chart.Version }}
   addonComponents:
   components:
