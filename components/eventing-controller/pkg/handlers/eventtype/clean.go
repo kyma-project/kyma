@@ -49,8 +49,12 @@ func (c cleaner) Clean(eventType string) (string, error) {
 	}
 
 	// clean the event-type segments
-	eventTypeClean = invalidEventTypeSegment.ReplaceAllString(eventTypeClean, "")
+	eventTypeClean = cleanEventType(eventTypeClean)
 	c.logger.Info("clean event-type", "before", eventType, "after", eventTypeClean)
 
 	return eventTypeClean, nil
+}
+
+func cleanEventType(eventType string) string {
+	return invalidEventTypeSegment.ReplaceAllString(eventType, "")
 }

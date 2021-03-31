@@ -111,7 +111,16 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
@@ -144,7 +153,15 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 // writeResponse writes the HTTP response given the status code and response body.
