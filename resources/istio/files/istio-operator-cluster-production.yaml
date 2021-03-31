@@ -240,9 +240,6 @@ spec:
       logAsJson: false
       logging:
         level: all:warn
-      meshExpansion:
-        enabled: false
-        useILB: false
       meshNetworks: {}
       mountMtlsCerts: false
       multiCluster:
