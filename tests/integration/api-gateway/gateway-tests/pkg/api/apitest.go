@@ -46,6 +46,12 @@ func (h *Tester) TestUnsecuredEndpoint(url string) error {
 	}, httpOkPredicate)
 }
 
+func (h *Tester) TestUnsecuredEndpointContent(url string, validateContentFunc func(string) bool) error {
+	return h.withRetries(func() (*http.Response, error) {
+		return h.client.Get(url)
+	}, validateContentPredicate(validateContentFunc))
+}
+
 func (h *Tester) TestDeletedAPI(url string) error {
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
@@ -89,4 +95,19 @@ func httpUnauthorizedPredicate(response *http.Response) bool {
 
 func NotFoundPredicate(response *http.Response) bool {
 	return response.StatusCode == http.StatusNotFound
+}
+
+func validateContentPredicate(validateContentFunc func(string) bool) func(*http.Response) bool {
+	return func(response *http.Response) bool {
+		if !httpOkPredicate(response) {
+			return false
+		}
+		defer response.Body.Close()
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return false
+		}
+		actualContent := string(body)
+		return validateContentFunc(actualContent)
+	}
 }

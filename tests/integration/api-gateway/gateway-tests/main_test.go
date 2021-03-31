@@ -4,10 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -221,6 +224,56 @@ func TestApiGatewayIntegration(t *testing.T) {
 			batch.CreateResources(k8sClient, noAccessStrategyApiruleResource...)
 
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+
+			batch.DeleteResources(k8sClient, commonResources...)
+		})
+
+		t.Run("Forward client IP", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct {
+				Namespace string
+				TestID    string
+			}{
+				Namespace: namespace,
+				TestID:    testID,
+			})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			batch.CreateResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				Namespace        string
+				NamePrefix       string
+				TestID           string
+				Domain           string
+				GatewayName      string
+				GatewayNamespace string
+			}{Namespace: namespace, NamePrefix: "unsecured", TestID: testID, Domain: conf.Domain, GatewayName: conf.GatewayName,
+				GatewayNamespace: conf.GatewayNamespace})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			batch.CreateResources(k8sClient, noAccessStrategyApiruleResource...)
+
+			var clientIP string
+			clientIP, err = lookupIPOfTestPod()
+			if err != nil {
+				t.Fatalf("could not determine ip of running pod for test %s, details %s", t.Name(), err.Error())
+			}
+			verifyIP := func(receivedContent string) bool {
+				ipFound := strings.Contains(receivedContent, clientIP)
+				if !ipFound {
+					log.Printf("client ip not found in response (%s, %s)", clientIP, receivedContent)
+				}
+				return ipFound
+			}
+
+			assert.NoError(tester.TestUnsecuredEndpointContent(fmt.Sprintf("https://httpbin-%s.%s/ip", testID, conf.Domain), verifyIP))
 
 			batch.DeleteResources(k8sClient, commonResources...)
 		})
@@ -589,4 +642,22 @@ func getOAUTHToken(t *testing.T, oauth2Cfg clientcredentials.Config) (*oauth2.To
 		},
 		retry.Delay(500*time.Millisecond), retry.Attempts(3))
 	return tokenOAUTH, err
+}
+
+func lookupIPOfTestPod() (string, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "", err
+	}
+	var ips []net.IP
+	ips, err = net.LookupIP(hostname)
+	if err != nil {
+		return "", err
+	}
+
+	if len(ips) != 1 {
+		return "", errors.New("not exactly 1 ip address found for host")
+	}
+
+	return ips[0].String(), nil
 }
