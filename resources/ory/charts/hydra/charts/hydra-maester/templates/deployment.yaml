@@ -80,8 +80,8 @@ spec:
             - |
 {{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
-      {{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
@@ -99,6 +99,4 @@ spec:
         - name: hydra-dsn
           secret:
             secretName: {{ include "hydra-maester.hydraSecret" . }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
-    {{- end }}
+

@@ -16,10 +16,6 @@ nameOverride: ""
 # Full chart name override
 fullnameOverride: ""
 
-## Pod priority
-## https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
-# priorityClassName: ""
-
 # Configures the Kubernetes service
 service:
   # Configures the Kubernetes service for the proxy port.
