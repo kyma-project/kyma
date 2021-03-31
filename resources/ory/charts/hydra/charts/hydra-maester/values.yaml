@@ -59,9 +59,5 @@ deployment:
   annotations: {}
   podLabels: {}
 
-#TODO: Remove - job is removed
-#job:
-#  podLabels: {}
-
 # Configure node affinity
 affinity: {}
