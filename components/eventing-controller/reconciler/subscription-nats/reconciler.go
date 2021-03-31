@@ -27,7 +27,7 @@ import (
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	natsClient       handlers.MessagingBackendHandler
+	backend          handlers.MessagingBackend
 	Log              logr.Logger
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
@@ -51,7 +51,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 	return &Reconciler{
 		Client:           client,
 		Cache:            cache,
-		natsClient:       natsClient,
+		backend:          natsClient,
 		Log:              log,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
@@ -91,7 +91,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-			if err := r.natsClient.DeleteSubscription(desiredSubscription); err != nil {
+			if err := r.backend.DeleteSubscription(desiredSubscription); err != nil {
 				r.Log.Error(err, "failed to delete subscription")
 				// if failed to delete the external dependency here, return with error
 				// so that it can be retried
@@ -120,7 +120,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// Clean up the old subscriptions
-	err = r.natsClient.DeleteSubscription(desiredSubscription)
+	err = r.backend.DeleteSubscription(desiredSubscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return result, nil
 	}
 
-	_, err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, err = r.backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {

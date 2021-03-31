@@ -47,7 +47,7 @@ type Reconciler struct {
 	cache.Cache
 	Log              logr.Logger
 	recorder         record.EventRecorder
-	bebClient        handlers.MessagingBackendHandler
+	backend          handlers.MessagingBackend
 	Domain           string
 	eventTypeCleaner eventtype.Cleaner
 }
@@ -72,7 +72,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 		Cache:            cache,
 		Log:              log,
 		recorder:         recorder,
-		bebClient:        bebClient,
+		backend:          bebClient,
 		Domain:           cfg.Domain,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}
@@ -233,7 +233,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 
 	var statusChanged bool
 	var err error
-	if statusChanged, err = r.bebClient.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
+	if statusChanged, err = r.backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
@@ -277,7 +277,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 // deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events
 func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscription, logger logr.Logger, ctx context.Context) error {
 	logger.Info("Deleting BEB subscription")
-	if err := r.bebClient.DeleteSubscription(subscription); err != nil {
+	if err := r.backend.DeleteSubscription(subscription); err != nil {
 		return err
 	}
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")

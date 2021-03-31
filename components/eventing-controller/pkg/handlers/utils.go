@@ -20,10 +20,16 @@ import (
 	"github.com/mitchellh/hashstructure"
 )
 
-// MessagingBackendHandler exposes a common handler interface for different messaging backend systems
-type MessagingBackendHandler interface {
+// MessagingBackend exposes a common handler interface for different messaging backend systems
+type MessagingBackend interface {
+	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(cfg env.Config) error
+
+	// SyncSubscription should synchronize the Kyma eventing susbscription with the susbcriber infrastructure of messaging backend system.
+	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error)
+
+	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
 }
 

@@ -17,7 +17,7 @@ import (
 )
 
 // compile time check
-var _ MessagingBackendHandler = &Beb{}
+var _ MessagingBackend = &Beb{}
 
 type Beb struct {
 	Client      *client.Client
@@ -51,7 +51,7 @@ func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 	}
 }
 
-// SyncBebSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
+// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
 func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
 	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
 	if !ok {
@@ -117,7 +117,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	return statusChanged, nil
 }
 
-// DeleteBebSubscription deletes the corresponding EMS subscription
+// DeleteSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(subscription.Name)
 }

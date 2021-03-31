@@ -23,7 +23,7 @@ import (
 )
 
 // compile time check
-var _ MessagingBackendHandler = &Nats{}
+var _ MessagingBackend = &Nats{}
 
 type Nats struct {
 	config        env.NatsConfig
@@ -43,8 +43,9 @@ const (
 )
 
 // Initialize creates a connection to Nats
-func (n *Nats) Initialize(cfg env.Config) (err error) {
+func (n *Nats) Initialize(cfg env.Config) error {
 	n.log.Info("Initialize NATS connection")
+	var err error
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
 		n.connection, err = nats.Connect(n.config.Url,
 			nats.RetryOnFailedConnect(true),
