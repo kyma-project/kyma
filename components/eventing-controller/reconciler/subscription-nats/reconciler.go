@@ -27,7 +27,7 @@ import (
 type Reconciler struct {
 	client.Client
 	cache.Cache
-	natsClient       *handlers.Nats
+	natsClient       handlers.MessagingBackendHandler
 	Log              logr.Logger
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
@@ -43,7 +43,7 @@ const (
 
 func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
 	natsClient := handlers.NewNats(cfg, log)
-	err := natsClient.Initialize()
+	err := natsClient.Initialize(env.Config{})
 	if err != nil {
 		log.Error(err, "reconciler can't start")
 		panic(err)
@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return result, nil
 	}
 
-	err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {

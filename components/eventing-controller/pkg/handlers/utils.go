@@ -7,6 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	"github.com/pkg/errors"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -16,6 +19,13 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/mitchellh/hashstructure"
 )
+
+// MessagingBackendHandler exposes a common handler interface for different messaging backend systems
+type MessagingBackendHandler interface {
+	Initialize(cfg env.Config) error
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error)
+	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
+}
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
