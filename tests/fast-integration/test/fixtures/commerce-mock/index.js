@@ -349,9 +349,9 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
-  const mockHost = await provisionCommerceMockResources("commerce", mockNamespace, targetNamespace);
-
+  
   await k8sApply(applicationObjs);
+  const mockHost = await provisionCommerceMockResources("commerce", mockNamespace, targetNamespace);
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
