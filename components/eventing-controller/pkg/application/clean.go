@@ -37,8 +37,3 @@ func GetCleanTypeOrName(application *applicationv1alpha1.Application) string {
 func GetCleanName(name string) string {
 	return invalidApplicationNameSegment.ReplaceAllString(name, "")
 }
-
-// IsCleanName returns true if the name contains alphanumeric characters only, otherwise returns false
-func IsCleanName(name string) bool {
-	return !invalidApplicationNameSegment.MatchString(name)
-}
