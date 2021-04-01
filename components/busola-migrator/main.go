@@ -5,16 +5,29 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/busola-migrator/internal/app"
+	"github.com/pkg/errors"
 
+	"github.com/kyma-project/kyma/components/busola-migrator/internal/app"
+	"github.com/kyma-project/kyma/components/busola-migrator/internal/busola"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/config"
+	"github.com/kyma-project/kyma/components/busola-migrator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/router"
 )
 
 func main() {
 	cfg := config.LoadConfig()
 
-	application := app.New(cfg.BusolaURL)
+	kubeConfig, err := kubernetes.GetKubeConfig()
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "getting kubeconfig failed"))
+	}
+
+	busolaURL, err := busola.BuildInitURL(cfg, kubeConfig)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "building Busola init url failed"))
+	}
+
+	application := app.New(busolaURL, cfg.StaticFilesDIR)
 	appRouter := router.New(application)
 
 	log.Printf("Starting server :%d\n", cfg.Port)

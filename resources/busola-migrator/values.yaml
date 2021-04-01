@@ -1,58 +1,36 @@
-# Default values for busola-migrator.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+global:
+  ingress:
+    domainName: ""
+  istio:
+    gateway:
+      name: ""
 
-replicaCount: 1
-
-image:
-  repository: "eu.gcr.io/kyma-project/busola-migrator"
-  pullPolicy: IfNotPresent
-  tag: "latest"
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+deployment:
+  image:
+    repository: "tgorgol/busola-migrator" # TODO: Replace with gcr image
+    pullPolicy: Always # TODO: IfNotPresent
+    tag: "latest" # TODO: Replace with gcr tag
+  env:
+    busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
+    oidcIssuerURL: "https://kyma.accounts.ondemand.com/"
+    oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
+    oidcScope: "openid"
+    oidcUsePKCE: "false"
+  replicaCount: 1
+  imagePullSecrets: []
+  podAnnotations: { }
+  podSecurityContext: { } # TODO: Add required security context
+  securityContext: { }
+  resources: { }
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
 
 serviceAccount:
-  # Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
   name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
   type: ClusterIP
   port: 80
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}

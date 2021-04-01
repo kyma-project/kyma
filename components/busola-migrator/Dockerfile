@@ -7,7 +7,10 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /busola-migrator ./main.go
 
 FROM gcr.io/distroless/static
 
+ENV APP_STATIC_FILES_DIR=/app/static
+
 COPY --from=builder ./busola-migrator /app/busola-migrator
+COPY static /app/static
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
