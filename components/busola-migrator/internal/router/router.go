@@ -13,13 +13,12 @@ func New(app app.App) *chi.Mux {
 	// middlewares
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger) // TODO: Disable logging (at least for k8s probes)
 	r.Use(middleware.Recoverer)
 
 	// routes
-	r.Get("/*", app.HandleStaticWebsite)
-	r.Get("/busola-redirect", app.HandleRedirect)
-	r.Get("/xsuaa-migrate", app.HandleXSUAAMigrate)
+	r.With(middleware.Logger).Get("/*", app.HandleStaticWebsite)
+	r.With(middleware.Logger).Get("/busola-redirect", app.HandleRedirect)
+	r.With(middleware.Logger).Get("/xsuaa-migrate", app.HandleXSUAAMigrate)
 	r.Get("/healthz", app.HandleHealthy)
 
 	return r

@@ -4,44 +4,48 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"log"
 
+	"github.com/pkg/errors"
 	"github.com/ulikunitz/xz/lzma"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func encodeInitString(data string) string {
+func encodeInitString(data string) (string, error) {
 	// unmarshall to map[string]interface
 	jsonMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(data), &jsonMap)
-	if err != nil {
-		panic(err)
+	if err := json.Unmarshal([]byte(data), &jsonMap); err != nil {
+		return "", errors.Wrap(err, "while unmarshalling data to map[string]interface")
 	}
 
 	// pack
-	packed, _ := msgpack.Marshal(jsonMap)
+	packed, err := msgpack.Marshal(jsonMap)
+	if err != nil {
+		return "", errors.Wrap(err, "while marshalling data to msgpack")
+	}
 
 	// compress
-	lzmaString := lzmaEncode(packed)
+	lzmaString, err := lzmaEncode(packed)
+	if err != nil {
+		return "", errors.Wrap(err, "while compressing data using LZMA algorithm")
+	}
 
 	// encode
 	encoded := base64.RawURLEncoding.EncodeToString([]byte(lzmaString))
 
-	return encoded
+	return encoded, nil
 }
 
-// TODO: return error
-func lzmaEncode(data []byte) string {
-	b := &bytes.Buffer{}
+func lzmaEncode(data []byte) (string, error) {
+	b := new(bytes.Buffer)
 	w, err := lzma.NewWriter(b)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	if _, err = w.Write(data); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	if err = w.Close(); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return b.String()
+	return b.String(), nil
 }
