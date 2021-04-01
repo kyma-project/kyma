@@ -1,0 +1,596 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Kyma Connector Service API'
+  description: 'API for connecting Applications to Kyma'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+paths:
+  /v1/health:
+    get:
+      deprecated: true
+      summary: 'Returns health status'
+      tags:
+      - health API
+      responses:
+        '200':
+          description: 'The service is up.'
+  /v1/applications/tokens:
+    post:
+      deprecated: true
+      parameters:
+      - in: header
+        name: Group
+        schema:
+          type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
+      - in: header
+        name: Application
+        schema:
+          type: string
+        required: true
+      tags:
+      - applications internal API
+      summary: 'Creates a token used for certificate signing flow.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tokenResponse'
+        '400':
+          description: 'Required headers not specified.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/certificates/revocations:
+    post:
+      deprecated: true
+      tags:
+      - applications external API
+      summary: 'Marks certificate as revoked.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/signingRequests/info:
+    get:
+      deprecated: true
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      tags:
+      - applications external API
+      summary: 'Allows for fetching information for CSR.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrApplicationInfoResponse'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/management/info:
+    get:
+      deprecated: true
+      parameters:
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      tags:
+      - applications external API
+      summary: 'Returns information on available services.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationInfoResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/certificates:
+    post:
+      deprecated: true
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      tags:
+      - applications external API
+      summary: 'Signs CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values or lack of values in CSR.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/certificates/renewals:
+    post:
+      deprecated: true
+      tags:
+      - applications external API
+      summary: 'Renews certificate using CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values, lack of values in CSR or Group header not specified.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/tokens:
+    post:
+      deprecated: true
+      parameters:
+      - in: header
+        name: Group
+        schema:
+          type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
+      tags:
+      - runtimes internal API
+      summary: 'Creates a token used for certificate signing flow.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeTokenResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates/revocations:
+    post:
+      deprecated: true
+      tags:
+      - runtimes external API
+      summary: 'Marks certificate as revoked.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/signingRequests/info:
+    get:
+      deprecated: true
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      tags:
+      - runtimes external API
+      summary: 'Allows for fetching information for CSR.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrRuntimeInfoResponse'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/management/info:
+    get:
+      deprecated: true
+      tags:
+      - runtimes external API
+      summary: 'Returns information on available services.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeInfoResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates:
+    post:
+      deprecated: true
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      tags:
+      - runtimes external API
+      summary: 'Signs CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values, lack of values in CSR or Group header not specified.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates/renewals:
+    post:
+      deprecated: true
+      tags:
+      - runtimes external API
+      summary: 'Renews certificate using CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values or lack of values in CSR.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+components:
+  schemas:
+    tokenResponse:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/info?token=1edfc34g'
+        token:
+          type: 'string'
+          example: '1edfc34g'
+    runtimeTokenResponse:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/info?token=1edfc34g'
+        token:
+          type: 'string'
+          example: '1edfc34g'
+    cert:
+      type: 'object'
+      properties:
+        subject:
+          type: 'string'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}{APP_NAME}'
+        extensions:
+          type: 'string'
+        key-algorithm:
+          type: 'string'
+          example: 'rsa2048'
+    runtimeCert:
+      type: 'object'
+      properties:
+        subject:
+          type: 'string'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}'
+        extensions:
+          type: 'string'
+        key-algorithm:
+          type: 'string'
+          example: 'rsa2048'
+    csrAplicationApiURLs:
+      type: 'object'
+      properties:
+        metadataUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/metadata/services'
+        eventsUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/events'
+        certificatesUrl:
+          type: 'string'
+          example: 'https://certificate-service.kyma.cluster.cx/v1/applications'
+        infoUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/management/info'
+    csrApplicationInfoResponse:
+      type: 'object'
+      properties:
+        csrUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates?token=1edfc34g'
+        api:
+          $ref: '#/components/schemas/csrAplicationApiURLs'
+        certificate:
+          $ref: '#/components/schemas/cert'
+    applicationClientIdentity:
+      type: 'object'
+      properties:
+        application:
+          type: 'string'
+          example: 'example-application'
+        group:
+          type: 'string'
+          example: 'example-group'
+        tenant:
+          type: 'string'
+          example: 'example-tenant'
+    applicationInfoResponseUrls:
+      type: 'object'
+      properties:
+        metadataUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/metadata/services'
+        eventsUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/events'
+        renewCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewals'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
+    applicationInfoResponse:
+      type: 'object'
+      properties:
+        clientIdentity:
+          $ref: '#/components/schemas/applicationClientIdentity'
+        urls:
+          $ref: '#/components/schemas/applicationInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/cert'
+    runtimeClientIdentity:
+      type: 'object'
+      properties:
+        group:
+          type: 'string'
+          example: 'example-group'
+        tenant:
+          type: 'string'
+          example: 'example-tenant'
+    runtimeInfoResponseUrls:
+      type: 'object'
+      properties:
+        renewCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewals'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
+    runtimeInfoResponse:
+      type: 'object'
+      properties:
+        clientIdentity:
+          $ref: '#/components/schemas/runtimeClientIdentity'
+        urls:
+          $ref: '#/components/schemas/runtimeInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/runtimeCert'
+    csrRuntimeApiURLs:
+      type: 'object'
+      properties:
+        infoUrl:
+          type: 'string'
+          example: 'connector-service.test.cluster.kyma.cx/v1/runtimes/management/info'
+        certificatesUrl:
+          type: 'string'
+          example: 'https://certificate-service.kyma.cluster.cx/v1/applications'
+    csrRuntimeInfoResponse:
+      type: 'object'
+      properties:
+        csrUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/certificates?token=1edfc34g'
+        api:
+          $ref: '#/components/schemas/csrRuntimeApiURLs'
+        certificate:
+          $ref: '#/components/schemas/runtimeCert'
+    appError:
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+        error:
+          type: 'string'
+    csrRequest:
+      type: 'object'
+      properties:
+        csr:
+          type: 'string'
+          description: 'Base64 encoded certificate signing request file.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpBTllfQ0VSVElGSUNBVEVfRklMRV9USElTX0lTX0pVU1RfQU5fRVhBTVBMRQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K'
+    csrResponse:
+      type: 'object'
+      properties:
+        crt:
+          type: 'string'
+          description: 'Base64 encoded certificates chain.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
+        clientCrt:
+          type: 'string'
+          description: 'Base64 encoded client certificate.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
+        caCrt:
+          type: 'string'
+          description: 'Base64 encoded CA certificate.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
