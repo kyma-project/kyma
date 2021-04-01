@@ -16,13 +16,15 @@ The Eventing Controller component manages the internal infrastructure in order t
 
 Eventing supports both Cloud Events and legacy events. Kyma converts legacy events to Cloud Events and adds the `sap.kyma.custom` prefix.
 
-For a Subscription Custom Resource, the fully qualified event type takes the form of `sap.kyma.custom.commerce.order.created.v1`. The event type is composed of the following components:
+For a Subscription Custom Resource, the fully qualified event type takes the form of `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1`. The event type is composed of the following components:
 
 - Prefix: `sap.kyma.custom`
 - Application: `commerce`
-- Event: `order.created`
+- Event: can have two or more segments separated by `.` (For example, `order.created` or `Account.Root.Created`)
 - Version: `v1`
-​
+
 For publishers, the event type takes this form:
-- `order.created` for legacy events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.created.v1` for Cloud Events.
+- `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application 
+- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.AccountRoot.Created.v1` for Cloud Events.
+
+>**NOTE:** In case the event contains more than two segments, Kyma Eventing will combine them into two segments when creating the underlying Eventing infrastructure (For example, `Account.Root.Created` will become `AccountRoot.Created`).
