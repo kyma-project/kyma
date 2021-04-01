@@ -8,6 +8,7 @@ jobs:
 
 global:
   isLocalEnv: false
+  installCRDs: true
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false
