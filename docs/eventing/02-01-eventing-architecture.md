@@ -24,7 +24,7 @@ For a Subscription Custom Resource, the fully qualified event type takes the for
 - Version: `v1`
 
 For publishers, the event type takes this form:
-- `order.created` or `AccountRoot.Created` for legacy events coming from the `commerce` application 
+- `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application 
 - `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.AccountRoot.Created.v1` for Cloud Events.
 
 >**NOTE:** In case the event contains more than two segments the underlying Eventing infrastructure will combine them into two segments (For example, `Account.Root.Created` will become `AccountRoot.Created`).
