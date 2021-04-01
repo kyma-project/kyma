@@ -13,7 +13,7 @@ kyma:
     image: eu.gcr.io/kyma-project/incubator/k8s-tools
     tag: "20210310-c03fb8b6"
   proxyResetJob:
-    commonIstioProxyImagePrefix: "docker.io/istio/proxyv2"
+    commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
