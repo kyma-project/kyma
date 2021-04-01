@@ -7,6 +7,15 @@ event-publisher-nats:
       cpu: 400m
       memory: 256Mi
 
+nats-controller:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 400m
+      memory: 512Mi
+
 controller:
   resources:
     limits:
@@ -17,6 +26,7 @@ controller:
       memory: 512Mi
 
 nats:
+  clusterSize: 3
   resources:
     limits:
       cpu: 500m

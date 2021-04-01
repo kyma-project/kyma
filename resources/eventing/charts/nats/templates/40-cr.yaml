@@ -4,7 +4,7 @@ kind: NatsCluster
 metadata:
   name: {{ include "nats.fullname" . }}
 spec:
-  size: 1
+  size: {{ .Values.clusterSize }}
   version: "2.1.8"
   pod:
     annotations:
