@@ -92,7 +92,7 @@ images:
       tag: "ed2c688b"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "ed2c688b"
+      tag: "PR-11040"
 
 deployment:
   replicas: 1
