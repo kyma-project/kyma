@@ -56,18 +56,18 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		return nil, errors.Wrapf(err, "while creating python38 config")
 	}
 
-	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
-	cmEnvKey := "CM_ENV_KEY"
-	cmEnvValue := "Value taken as env from ConfigMap"
-	cmData := map[string]string{
-		cmEnvKey: cmEnvValue,
-	}
-	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs10Logger))
-	secEnvKey := "SECRET_ENV_KEY"
-	secEnvValue := "Value taken as env from Secret"
-	secretData := map[string]string{
-		secEnvKey: secEnvValue,
-	}
+	// cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
+	// cmEnvKey := "CM_ENV_KEY"
+	// cmEnvValue := "Value taken as env from ConfigMap"
+	// cmData := map[string]string{
+	// 	cmEnvKey: cmEnvValue,
+	// }
+	// sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs10Logger))
+	// secEnvKey := "SECRET_ENV_KEY"
+	// secEnvValue := "Value taken as env from Secret"
+	// secretData := map[string]string{
+	// 	secEnvKey: secEnvValue,
+	// }
 
 	pkgCfgSecret := secret.NewSecret(cfg.PackageRegistryConfigSecretName, genericContainer)
 	pkgCfgSecretData := map[string]string{
@@ -91,14 +91,6 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(python38Logger, "Python38 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
 				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python38 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python")),
 				teststep.NewHTTPCheck(python38Logger, "Python38 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
-			),
-			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
-				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
-				teststep.CreateSecret(nodejs10Logger, sec, "Create Test Secret", secretData),
-				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
-				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
 			),
 			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
