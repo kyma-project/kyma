@@ -11,7 +11,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
