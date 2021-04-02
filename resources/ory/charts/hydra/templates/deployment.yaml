@@ -40,6 +40,7 @@ spec:
     {{- end }}
     {{- if .Values.hydra.autoMigrate }}
       initContainers:
+        {{- if not .Values.global.ory.hydra.persistence.gcloud.enabled }} #Use only for in-cluster databases that may not be ready yet. External databases are made ready before installation.
         - name: wait-for-db
           image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
           command:
@@ -62,6 +63,7 @@ spec:
             runAsGroup: 65534
             runAsNonRoot: true
             runAsUser: 65534
+        {{- end }}
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
