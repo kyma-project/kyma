@@ -1,4 +1,4 @@
-FROM golang:1.13-alpine as builder
+FROM golang:1.15-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-gateway-legacy-tests
 
@@ -7,7 +7,7 @@ COPY . $SRC_DIR
 
 RUN CGO_ENABLED=0 go test -o proxytestsexecutor.test -c ./test/executor/proxy/tests
 
-FROM alpine:3.10
+FROM alpine:3.13
 
 LABEL source=git@github.com:kyma-project/kyma.git
 

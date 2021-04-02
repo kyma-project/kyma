@@ -52,7 +52,7 @@ global:
   application_gateway_tests:
     version: "PR-10955"
   application_gateway_legacy_tests:
-    version: "fc11d39b"
+    version: "PR-11037"
   application_registry:
     version: "PR-10955"
   application_registry_tests:
