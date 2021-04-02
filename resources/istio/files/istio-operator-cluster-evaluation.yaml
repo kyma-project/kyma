@@ -148,11 +148,6 @@ spec:
           timeoutSeconds: 5
         hpaSpec:
           maxReplicas: 1
-          metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
