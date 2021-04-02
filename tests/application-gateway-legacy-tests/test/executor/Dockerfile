@@ -11,8 +11,6 @@ FROM alpine:3.13
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-RUN apk add busybox --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
-
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/spec.json .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/scripts/executor-entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-legacy-tests/proxytestsexecutor.test .
