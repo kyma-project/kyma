@@ -28,11 +28,13 @@ resources:
 nats:
   config:
     port: 8080
+    portName: http
     requestTimeout: "5s"
     legacyNamespace: kyma
     legacyEventTypePrefix: sap.kyma.custom
 
 metrics:
-  service:
+  config:
     port: 9090
-    nameSuffix: "-metrics"
+    portName: http-metrics
+    interval: 10s

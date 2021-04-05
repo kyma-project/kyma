@@ -52,7 +52,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 kyma-project.io/dashboard: eventing
 {{- end }}
 
-
 {{/*
 Create the name of the service account to use
 */}}
