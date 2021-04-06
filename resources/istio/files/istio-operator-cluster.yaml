@@ -168,10 +168,10 @@ spec:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local
     defaultConfig:
-      proxyMetadata:
+      proxyMetadata: {}
         # Enable Istio agent to handle DNS requests for known hosts
         # Unknown hosts will automatically be resolved using upstream dns servers in resolv.conf
-        ISTIO_META_DNS_CAPTURE: "true"
+#        ISTIO_META_DNS_CAPTURE: "true"
       tracing:
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
