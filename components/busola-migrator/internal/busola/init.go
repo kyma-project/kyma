@@ -38,7 +38,7 @@ func BuildInitURL(appCfg config.Config, kubeConfig *rest.Config) (string, error)
 
 	host, err := url.Parse(kubeConfig.Host)
 	if err != nil {
-		return "", errors.Wrap(err, "couldn't parse apiserver host")
+		return "", errors.Wrap(err, "while parsing apiserver host")
 	}
 
 	initString := fmt.Sprintf(initTemplate,
@@ -56,7 +56,7 @@ func BuildInitURL(appCfg config.Config, kubeConfig *rest.Config) (string, error)
 
 	initURL, err := url.ParseRequestURI(fmt.Sprintf("%s/?init=%s", appCfg.BusolaURL, encodedInitString))
 	if err != nil {
-		return "", errors.Wrap(err, "Busola init url couldn't be parsed")
+		return "", errors.Wrap(err, "while parsing Busola init url")
 	}
 
 	return initURL.String(), nil

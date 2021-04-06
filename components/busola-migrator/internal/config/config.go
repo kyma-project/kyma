@@ -25,7 +25,7 @@ func LoadConfig() Config {
 	var cfg Config
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "failed to process environment variables"))
+		log.Fatal(errors.Wrap(err, "while processing environment variables"))
 	}
 
 	return cfg

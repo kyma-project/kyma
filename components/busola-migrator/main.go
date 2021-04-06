@@ -19,12 +19,12 @@ func main() {
 
 	kubeConfig, err := kubernetes.GetKubeConfig()
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "getting kubeconfig failed"))
+		log.Fatal(errors.Wrap(err, "while getting kubeconfig"))
 	}
 
 	busolaURL, err := busola.BuildInitURL(cfg, kubeConfig)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "building Busola init url failed"))
+		log.Fatal(errors.Wrap(err, "while building Busola init url"))
 	}
 
 	application := app.New(busolaURL, cfg.StaticFilesDIR)
