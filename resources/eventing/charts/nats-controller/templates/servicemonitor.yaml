@@ -1,0 +1,20 @@
+{{- if eq .Values.global.eventing.backend "nats" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "nats-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nats-controller.labels" . | nindent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels: {{- include "nats-controller.labels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  endpoints:
+    - port: {{ .Values.metrics.config.portName }}
+      interval: {{ .Values.metrics.config.interval }}
+---
+{{- end }}

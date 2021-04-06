@@ -19,6 +19,10 @@ podSecurityContext:
 metrics:
   service:
     nameSuffix: "-metrics"
+  config:
+    port: 8080
+    portName: http-metrics
+    interval: 10s
 
 resources:
   limits:

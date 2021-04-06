@@ -33,6 +33,10 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          ports:
+            - containerPort: {{ .Values.metrics.config.port }}
+              name: {{ .Values.metrics.config.portName }}
+              protocol: TCP
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
