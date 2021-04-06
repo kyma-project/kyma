@@ -43,10 +43,6 @@ global:
     version: "da84b1b3"
   connection_token_handler_tests:
     version: "9776cb81"
-  event_service:
-    version: "e6b97e48"
-  event_service_integration_tests:
-    version: "d6bbc47a"
   application_gateway:
     version: "PR-10955"
   application_gateway_tests:

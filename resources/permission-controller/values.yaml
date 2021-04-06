@@ -37,7 +37,6 @@ config:
   enableStaticUser: "true"
   namespaceBlacklist:
     - istio-system
-    - knative-eventing
     - kube-node-lease
     - kube-public
     - kube-system

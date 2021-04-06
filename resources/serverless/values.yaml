@@ -142,7 +142,7 @@ containers:
       roleBindingRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
