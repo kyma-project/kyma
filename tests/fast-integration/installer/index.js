@@ -173,9 +173,8 @@ async function chartList(options) {
   const gardernerDomain = await getGardenerDomain();
   const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
   const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
-  const isBEBEnabled = !!options.newEventing;
   const isCompassEnabled = !!options.withCompass;
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.isBEBEnabled=${isBEBEnabled},global.disableLegacyConnectivity=${isCompassEnabled}`;
+  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.isBEBEnabled=true,global.disableLegacyConnectivity=${isCompassEnabled}`;
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
   if (isGardener == "true") {
@@ -245,37 +244,14 @@ async function chartList(options) {
       values: `${overrides},pamela.enabled=false`,
     },
     {
-      release: "knative-eventing",
-      namespace: "knative-eventing",
-      values: `${overrides}`,
-      filter: !isBEBEnabled,
-    },
-    {
       release: "eventing",
       namespace: "kyma-system",
-      values: `${overrides}`,
-      filter: isBEBEnabled,
+      values: `${overrides}`
     },
     {
       release: "application-connector",
       namespace: "kyma-integration",
       values: `${overrides}`,
-    },
-    {
-      release: "knative-provisioner-natss",
-      namespace: "knative-eventing",
-      values: `${overrides}`,
-      filter: !isBEBEnabled,
-    },
-    {
-      release: "nats-streaming",
-      namespace: "natss",
-      filter: !isBEBEnabled,
-    },
-    {
-      release: "event-sources",
-      namespace: "kyma-system",
-      filter: !isBEBEnabled,
     },
     {
       release: "monitoring",
