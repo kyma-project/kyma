@@ -31,9 +31,12 @@ spec:
         paths:
         {{- range .paths }}
           - path: {{ . }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-api # TODO: change or leave?
-              servicePort: http # TODO: change or leave?
+              service:
+                name: {{ $fullName }}-api
+                port:
+                  name: http
         {{- end }}
   {{- end }}
 {{- end }}
