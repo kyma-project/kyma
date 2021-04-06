@@ -6,6 +6,8 @@ nats:
     client: 4222
     monitoring: 8222
 
+clusterSize: 1
+
 resources:
   limits:
     cpu: 20m
@@ -13,3 +15,8 @@ resources:
   requests:
     cpu: 5m
     memory: 16Mi
+
+image:
+  tag: "cd659a72"
+  name: "nats-operator"
+  pullPolicy: "IfNotPresent"

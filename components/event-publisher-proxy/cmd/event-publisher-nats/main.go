@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/kelseyhightower/envconfig"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/sirupsen/logrus"
+
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"github.com/kelseyhightower/envconfig"
-	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -35,6 +36,13 @@ func main() {
 
 	// assure uniqueness
 	ctx := signals.NewContext()
+
+	// metrics
+	metricsServer := metrics.NewServer(logger)
+	defer metricsServer.Stop()
+	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
+		logger.Infof("Metrics server failed to start with error: %v", err)
+	}
 
 	// connect to nats
 	connection, err := pkgnats.ConnectToNats(cfgNats.URL, cfgNats.RetryOnFailedConnect, cfgNats.MaxReconnects, cfgNats.ReconnectWait)

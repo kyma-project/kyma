@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/time/rate"
+
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
@@ -67,10 +71,16 @@ func New(emInformer cache.SharedIndexInformer,
 	log logrus.FieldLogger,
 	livenessCheckStatus *broker.LivenessCheckStatus) *Controller {
 
+	queue := workqueue.NewRateLimitingQueue(
+		workqueue.NewMaxOfRateLimiter(
+			workqueue.NewItemExponentialFailureRateLimiter(200*time.Millisecond, 120*time.Second),
+			// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+			&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+		))
 	c := &Controller{
 		log:                 log.WithField("service", "labeler:controller"),
 		emInformer:          emInformer,
-		queue:               workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		queue:               queue,
 		nsBrokerFacade:      nsBrokerFacade,
 		nsBrokerSyncer:      nsBrokerSyncer,
 		mappingSvc:          newMappingService(emInformer),
@@ -224,8 +234,10 @@ func (c *Controller) processItem(key string) error {
 		return nil
 	}
 	if !emExist {
+		c.log.Infof("Processing mapping DELETE %s", key)
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
 	}
+	c.log.Infof("Processing mapping ADD/UPDATE %s", key)
 
 	envMapping, ok := emObj.(*v1alpha1.ApplicationMapping)
 	if !ok {
@@ -240,16 +252,18 @@ func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.Appl
 		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", envMapping.Namespace)
 	}
 	if brokerExist {
-		if err = c.nsBrokerSyncer.SyncBroker(envMapping.Namespace); err != nil {
+		err := c.nsBrokerSyncer.SyncBroker(envMapping.Namespace)
+		switch {
+		case apiErrors.IsNotFound(errors.Cause(err)):
+		case err != nil:
 			return errors.Wrapf(err, "while syncing namespaced broker from namespace [%s]", envMapping.Namespace)
+		default:
+			return nil
 		}
-		return nil
 	}
-
-	if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
+	if err := c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
 		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
 	}
-
 	return nil
 }
 
@@ -265,7 +279,7 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 	if err != nil {
 		return errors.Wrapf(err, "while listing application mappings from namespace [%s]", namespace)
 	}
-	// delete broker only if there'app no application mappings left in the namespace
+	// delete broker only if there are no application mappings left in the namespace
 	if len(mappings) > 0 {
 		if err = c.nsBrokerSyncer.SyncBroker(namespace); err != nil {
 			return errors.Wrapf(err, "while syncing namespaced broker from namespace [%s]", namespace)
