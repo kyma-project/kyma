@@ -8,7 +8,12 @@ spec:
   type: ClusterIP
   selector: {{- include "nats-controller.selectorLabels" . | nindent 4 }}
   ports:
-    - protocol: TCP
+    - name: metrics
+      protocol: TCP
       port: 80
       targetPort: 8080
+    - name: proxy-status
+      protocol: TCP
+      port: {{ .Values.global.istio.proxy.statusPort }}
+      targetPort: {{ .Values.global.istio.proxy.statusPort }}
 {{- end }}
