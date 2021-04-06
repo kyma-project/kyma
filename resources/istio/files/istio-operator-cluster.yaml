@@ -11,13 +11,66 @@ spec:
       enabled: false
     egressGateways:
     - enabled: false
+      k8s:
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
+        hpaSpec:
+          maxReplicas: 5
+          metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
+          minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-egressgateway
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 120Mi
+        service:
+          ports:
+          - name: http2
+            port: 80
+            targetPort: 8080
+            protocol: TCP
+          - name: https
+            port: 443
+            targetPort: 8443
+            protocol: TCP
+          - name: tls
+            port: 15443
+            targetPort: 15443
+            protocol: TCP
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 25%
       name: istio-egressgateway
     ingressGateways:
     - enabled: true
       k8s:
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: sni-dnat
         hpaSpec:
           maxReplicas: 5
+          metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istio-ingressgateway
         resources:
           limits:
             cpu: 2000m
@@ -25,7 +78,39 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-         strategy:
+        service:
+          ports:
+          - name: status-port
+            port: 15021
+            targetPort: 15021
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
+          - name: http2
+            port: 80
+            targetPort: 8080
+          - name: https
+            port: 443
+            targetPort: 8443
+          - name: tcp
+            port: 31400
+            targetPort: 31400
+          - name: tls
+            port: 15443
+            targetPort: 15443
+          - port: 15029
+            targetPort: 15029
+            name: kiali
+          - port: 15030
+            targetPort: 15030
+            name: prometheus
+          - port: 15031
+            targetPort: 15031
+            name: grafana
+          - port: 15032
+            targetPort: 15032
+            name: tracing
+        strategy:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 0
@@ -37,9 +122,35 @@ spec:
     pilot:
       enabled: true
       k8s:
+        env:
+        - name: PILOT_TRACE_SAMPLING
+          value: "100"
+        - name: PILOT_HTTP10
+          value: "1"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 1
+          periodSeconds: 3
+          timeoutSeconds: 5
         hpaSpec:
           maxReplicas: 5
           minReplicas: 1
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: istiod
         resources:
           limits:
             cpu: 500m
@@ -57,10 +168,10 @@ spec:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local
     defaultConfig:
-      proxyMetadata: {}
+      proxyMetadata:
         # Enable Istio agent to handle DNS requests for known hosts
         # Unknown hosts will automatically be resolved using upstream dns servers in resolv.conf
-        # ISTIO_META_DNS_CAPTURE: "true"
+        ISTIO_META_DNS_CAPTURE: "true"
       tracing:
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
