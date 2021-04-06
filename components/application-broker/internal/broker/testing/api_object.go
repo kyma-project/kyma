@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	FakeChannelName      = "fake-chan"
+	FakeChannelName = "fake-chan"
 )
 
 // redefine here to avoid cyclic dependency
 const (
-	integrationNamespace                      = "kyma-integration"
-	applicationNameLabelKey                   = "application-name"
+	integrationNamespace    = "kyma-integration"
+	applicationNameLabelKey = "application-name"
 )
 
 func NewAppNamespace(name string) *corev1.Namespace {
