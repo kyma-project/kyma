@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"k8s.io/client-go/dynamic"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -35,6 +36,13 @@ func main() {
 	ctx := signals.NewContext()
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
+
+	// metrics
+	metricsServer := metrics.NewServer(logger)
+	defer metricsServer.Stop()
+	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
+		logger.Infof("Metrics server failed to start with error: %v", err)
+	}
 
 	// configure message sender
 	messageSender := sender.NewHttpMessageSender(cfg.EmsPublishURL, client)

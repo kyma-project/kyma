@@ -10,7 +10,9 @@ This section describes how to add a new core component. It also describes how to
 
 ### Add a new core component
 
-If you develop a new core component, add a new sub-chart to the `core` directory. Update the [`requirements.yaml`](requirements.yaml) file by adding the **name** and **condition** attributes for the created component. To learn more about the **condition** attribute, see the [tags and condition fields in helm charts](https://github.com/kubernetes/helm/blob/release-2.7/docs/charts.md#tags-and-condition-fields-in-requirementsyaml) documentation.
+If you develop a new core component, add a new sub-chart to the `core` directory. 
+Update the [`requirements.yaml`](requirements.yaml) file by adding the **name** and **condition** attributes for the created component. 
+To learn more about the **condition** attribute, see the [tags and condition fields in helm charts](https://github.com/kubernetes/helm/blob/release-2.7/docs/charts.md#tags-and-condition-fields-in-requirementsyaml) documentation.
 
 ### Inject sensitive data into a core component
 

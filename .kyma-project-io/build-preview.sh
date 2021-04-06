@@ -40,7 +40,7 @@ remove-cached-content() {
 }
 
 copy-website-repo() {
-  git clone -b "master" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "main" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {

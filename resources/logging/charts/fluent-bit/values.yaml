@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/kyma-project/incubator/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.5.7-0b18bf16
+  tag: 1.5.7-28daa71a
 
 imagePullSecrets: []
 nameOverride: ""
@@ -129,6 +129,11 @@ updateStrategy: {}
 
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
+
+## Custom configuration for Kyma alerting rules
+prometheusRules:
+  ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
+  fluentBitAlertFilter: ""
 
 # Fluentbit configuration section
 # https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
