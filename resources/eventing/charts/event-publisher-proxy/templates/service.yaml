@@ -24,10 +24,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: {{ .Values.metrics.service.port }}
-    - name: proxy-status
-      protocol: TCP
-      port: {{ .Values.global.istio.proxy.statusPort }}
-      targetPort: {{ .Values.global.istio.proxy.statusPort }}
 ---
 apiVersion: v1
 kind: Service
