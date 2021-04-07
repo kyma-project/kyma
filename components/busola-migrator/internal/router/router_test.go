@@ -43,6 +43,16 @@ func Test_New(t *testing.T) {
 			wantCode:   http.StatusMovedPermanently,
 			wantHeader: &[]string{"Location", "/some-url"},
 		},
+		{
+			name:   "html page",
+			router: New(app.New("some-url", "../../static")),
+			request: request{
+				method: http.MethodGet,
+				url:    "/not-declared-in-router",
+			},
+			wantCode:   http.StatusOK,
+			wantHeader: &[]string{"Content-Type", "text/html; charset=utf-8"},
+		},
 	}
 	for _, tt := range tests {
 		r, _ := http.NewRequest(tt.request.method, tt.request.url, nil)
