@@ -112,9 +112,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Check for valid sink
 	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
-		err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
-		if err != nil {
-			r.Log.Error(err, "failed to sync subscription status")
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		// No point in reconciling as the sink is invalid
@@ -125,7 +123,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.natsClient.DeleteSubscription(desiredSubscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -148,18 +148,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
 	log.Info("successfully created Nats subscriptions")
 
 	// Update status
-	err = r.syncSubscriptionStatus(ctx, actualSubscription, true, "")
-	if err != nil {
-		log.Error(err, "failed to update subscription status")
+	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+		return ctrl.Result{}, err
 	}
-	log.Info("successfully updated subscription status")
 
 	return result, nil
 }
@@ -197,9 +197,9 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
-			return errors.Wrapf(err, "failed to update Subscription status")
+			return errors.Wrapf(err, "failed to update subscription status")
 		}
-		r.Log.Info("successfully updated subscription")
+		r.Log.Info("successfully updated subscription status")
 	}
 	return nil
 }

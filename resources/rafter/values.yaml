@@ -210,8 +210,8 @@ controller-manager:
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-db711226
-      repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
+      tag: RELEASE.2020-09-21T22-31-59Z-1de56388
+      repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
       extraProperties:
@@ -367,8 +367,8 @@ upload-service:
         tag: "20210310-c03fb8b6"
         pullPolicy: IfNotPresent
       minioClient:
-        repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
+        repository: eu.gcr.io/kyma-project/tpi/minio/mc
+        tag: RELEASE.2019-04-03T17-59-57Z-1de56388
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
