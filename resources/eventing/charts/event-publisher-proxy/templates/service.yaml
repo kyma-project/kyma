@@ -21,10 +21,23 @@ spec:
   type: ClusterIP
   selector: {{- include "event-publisher-proxy.selectorLabels" . | nindent 4 }}
   ports:
-    - name: metrics
-      protocol: TCP
+    - protocol: TCP
       port: 80
       targetPort: {{ .Values.metrics.service.port }}
+    - name: proxy-status
+      protocol: TCP
+      port: {{ .Values.global.istio.proxy.statusPort }}
+      targetPort: {{ .Values.global.istio.proxy.statusPort }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "event-publisher-proxy.fullname" . }}-health
+  labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "event-publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
     - name: proxy-status
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
