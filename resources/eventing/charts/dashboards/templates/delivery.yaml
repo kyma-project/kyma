@@ -31,7 +31,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 49,
-      "iteration": 1617700743158,
+      "iteration": 1617797169364,
       "links": [],
       "panels": [
         {
@@ -206,27 +206,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"2.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"2.*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "2XX",
               "refId": "A"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"4.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"4.*\"}[5m]))",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "4XX",
               "refId": "B"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"5.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*publisher.*\", code=~\"5.*\"}[5m]))",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "5XX",
               "refId": "C"
             }
           ],
@@ -326,27 +326,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"2.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"2.*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "2XX",
               "refId": "A"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"4.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"4.*\"}[5m]))",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "4XX",
               "refId": "B"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"5.*\"}[5m])",
+              "expr": "sum(rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"eventing-nats.*\", code=~\"5.*\"}[5m]))",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "5XX",
               "refId": "C"
             }
           ],
@@ -354,7 +354,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "NATS ",
+          "title": "NATS  Requests",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -446,27 +446,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*controller.*\", code=~\"2.*\"}[5m])",
+              "expr": "sum (rate(istio_requests_total{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\", response_code=~\"2.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "{{destination_workload}} ({{response_code}}).",
               "refId": "A"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*controller.*\", code=~\"4.*\"}[5m])",
+              "expr": "sum (rate(istio_requests_total{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\", response_code=~\"4.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "{{destination_workload}} ({{response_code}}).",
               "refId": "B"
             },
             {
-              "expr": "rate(promhttp_metric_handler_requests_total{namespace=\"kyma-system\", pod=~\"event.*controller.*\", code=~\"5.*\"}[5m])",
+              "expr": "sum (rate(istio_requests_total{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\", response_code=~\"5.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)",
               "hide": false,
               "interval": "",
-              "legendFormat": " {{` {{pod}} `}}  ( {{` {{container}} `}} )( {{` {{code}} `}} )",
+              "legendFormat": "{{destination_workload}} ({{response_code}}).",
               "refId": "C"
             }
           ],
@@ -474,7 +474,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Controller",
+          "title": "Event Controller Requests",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -586,7 +586,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-3h",
+        "from": "now-2d",
         "to": "now"
       },
       "timepicker": {
@@ -617,5 +617,5 @@ data:
       "timezone": "",
       "title": "Kyma / Eventing / Delivery",
       "uid": "ab4f13a9892a76a4d21ce8c2444bf4e9",
-      "version": 5
+      "version": 6
     }
