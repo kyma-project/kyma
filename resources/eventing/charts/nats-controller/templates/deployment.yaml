@@ -33,6 +33,7 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          # TODO: probe on metrics endpoint is a temporary workaround, should be cleaned up by https://github.com/kyma-project/kyma/issues/9769
           livenessProbe:
             failureThreshold: 3
             httpGet:
