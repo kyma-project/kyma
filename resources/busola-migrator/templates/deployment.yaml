@@ -85,9 +85,6 @@ spec:
                   name: {{ .Values.config.secretName }}
                   key: oidcUsePKCE
                   optional: true
-
-
-
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -99,4 +96,7 @@ spec:
       {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}
