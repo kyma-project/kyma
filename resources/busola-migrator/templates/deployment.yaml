@@ -32,7 +32,7 @@ spec:
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -45,6 +45,8 @@ spec:
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
+            - name: APP_PORT
+              value: {{ .Values.service.targetPort | quote }}
             - name: APP_BUSOLA_URL
               value: {{ .Values.deployment.env.busolaURL | quote }}
             - name: APP_OIDC_ISSUER_URL

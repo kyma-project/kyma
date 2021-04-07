@@ -36,7 +36,8 @@ serviceAccount:
 
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
+  targetPort: 8080
 
 config:
   secretName: "busola-migrator-config"
