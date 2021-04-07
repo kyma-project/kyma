@@ -34,6 +34,7 @@ require (
 	github.com/vrischmann/envconfig v1.2.0
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0 // indirect
+	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0
 	gopkg.in/yaml.v2 v2.3.0
 	istio.io/api v0.0.0-20201113155354-fcf32ac5d223
 	istio.io/client-go v0.0.0-20201113160737-d4c1e2c0a42f
