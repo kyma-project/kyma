@@ -1,3 +1,4 @@
+{{ if .Values.global.installCRDs }}
 {{ $files := .Files.Glob "files/**.yaml" }}
 {{ $fileLen := len $files }}
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
@@ -60,3 +61,4 @@ spec:
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
+{{ end }}
