@@ -48,7 +48,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": null,
-          "description": "Data-plane entrypoint inside the cluster for legacy events.",
+          "description": "",
           "fieldConfig": {
             "defaults": {
               "custom": {},
@@ -59,8 +59,8 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 9,
+            "w": 24,
             "x": 0,
             "y": 1
           },
@@ -127,6 +127,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:388",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -156,108 +157,10 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 1
-          },
-          "hiddenSeries": false,
-          "id": 16,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.4.0",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-system\",source_workload=~\".*-event-publisher-nats\",destination_workload_namespace=\"kyma-system\",destination_workload=\"eventing-nats-1\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
-              "interval": "",
-              "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Event Publisher Nats -> Nats",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "ms",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": null,
-          "description": "Data-plane entrypoint inside the cluster for non-legacy events. Event-service is not required in this eventing flow.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 9,
+            "w": 24,
             "x": 0,
-            "y": 9
+            "y": 10
           },
           "hiddenSeries": false,
           "id": 18,
@@ -287,7 +190,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-system\",source_workload=~\"kyma-eventing-nats-*\",destination_workload_namespace=\"kyma-system\",destination_workload!~\".*-nats-controller\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "expr": "histogram_quantile(0.99, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace=\"kyma-system\"}[5m])) by (le,pod,namespace,service))",
               "hide": false,
               "interval": "",
               "legendFormat": "{{ `{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99) `}}",
@@ -298,7 +201,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Nats -> Event Controller",
+          "title": "Event Publisher -> Messaging Server",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -352,10 +255,10 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 9
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 19
           },
           "hiddenSeries": false,
           "id": 12,
@@ -396,7 +299,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Eventing Controller -> Function",
+          "title": "Event Dispatcher -> Subscribers",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -439,8 +342,8 @@ data:
       "schemaVersion": 27,
       "style": "dark",
       "tags": [
-        "kyma",
-        "eventing"
+          "kyma",
+          "eventing"
       ],
       "templating": {
         "list": []
@@ -451,14 +354,14 @@ data:
       },
       "timepicker": {
         "refresh_intervals": [
-          "30s",
-          "1m",
-          "5m",
-          "15m",
-          "30m",
-          "1h",
-          "2h",
-          "1d"
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
         ]
       },
       "timezone": "",
