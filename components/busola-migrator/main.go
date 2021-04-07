@@ -41,6 +41,6 @@ func main() {
 	}
 
 	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal("Server startup failed")
+		log.Fatal(errors.Wrap(err, "while starting server"))
 	}
 }
