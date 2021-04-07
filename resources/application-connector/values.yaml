@@ -58,7 +58,7 @@ global:
   application_registry_tests:
     version: "PR-10955"
   application_broker:
-    version: "pr-10924"
+    version: "PR-10924"
   application_connectivity_certs_setup_job:
     version: "184a7e4f"
   application_connectivity_validator:
