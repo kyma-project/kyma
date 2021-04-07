@@ -40,7 +40,7 @@ func Test_New(t *testing.T) {
 				method: http.MethodGet,
 				url:    "/busola-redirect",
 			},
-			wantCode:   http.StatusMovedPermanently,
+			wantCode:   http.StatusFound,
 			wantHeader: &[]string{"Location", "/some-url"},
 		},
 		{
