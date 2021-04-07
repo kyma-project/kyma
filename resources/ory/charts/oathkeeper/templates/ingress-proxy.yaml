@@ -29,11 +29,14 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-        {{- range .paths }}
+          {{- range .paths }}
           - path: {{ . }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-proxy # TODO: change or leave?
-              servicePort: http # TODO: change or leave?
-        {{- end }}
+              service:
+                name: {{ $fullName }}-proxy
+                port:
+                  name: http
+          {{- end }}
   {{- end }}
 {{- end }}
