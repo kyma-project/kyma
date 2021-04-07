@@ -9,7 +9,7 @@ deployment:
   image:
     repository: "eu.gcr.io/kyma-project/busola-migrator"
     tag: "PR-10987"
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   env:
     busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
     oidcIssuerURL: "https://kyma.accounts.ondemand.com"
@@ -23,7 +23,7 @@ deployment:
   securityContext:
     privileged: false
     allowPrivilegeEscalation: false
-    runAsUser: 1000
+    runAsNonRoot: true
   resources: { }
   nodeSelector: { }
   tolerations: [ ]

@@ -7,6 +7,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /busola-migrator ./main.go
 
 FROM gcr.io/distroless/static
 
+USER 1000
+
 ENV APP_STATIC_FILES_DIR=/app/static
 
 COPY --from=builder ./busola-migrator /app/busola-migrator
