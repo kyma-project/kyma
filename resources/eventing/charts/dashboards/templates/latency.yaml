@@ -193,7 +193,7 @@ data:
               "expr": "histogram_quantile(0.99, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace=\"kyma-system\"}[5m])) by (le,pod,namespace,service))",
               "hide": false,
               "interval": "",
-              "legendFormat": "{{ `{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99) `}}",
+              "legendFormat": "{{ `{{namespace}}/{{pod}} -> Messaging Server (p99)`}}",
               "refId": "A"
             }
           ],
@@ -291,7 +291,7 @@ data:
               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "hide": false,
               "interval": "",
-              "legendFormat": "{{ `{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99) `}}",
+              "legendFormat": "{{ `{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (p99)`}}",
               "refId": "A"
             }
           ],
