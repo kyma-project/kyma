@@ -12,7 +12,7 @@ deployment:
     tag: "latest" # TODO: Replace with gcr tag
   env:
     busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
-    oidcIssuerURL: "https://kyma.accounts.ondemand.com/"
+    oidcIssuerURL: "https://kyma.accounts.ondemand.com"
     oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
     oidcScope: "openid"
     oidcUsePKCE: "false"
@@ -34,3 +34,6 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 80
+
+config:
+  secretName: "busola-migrator-config"
