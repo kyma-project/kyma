@@ -13,10 +13,12 @@ hydra:
   hydra:
     autoMigrate: false
   deployment:
+    autoscaling:
+      enabled: false
     resources:
       requests:
         cpu: "10m"
-oathkeeper:  
+oathkeeper:
   replicaCount: 1
   deployment:
     resources:
@@ -25,5 +27,4 @@ oathkeeper:
 hpa:
   oathkeeper:
     enabled: false
-  hydra:
-    enabled: false
+
