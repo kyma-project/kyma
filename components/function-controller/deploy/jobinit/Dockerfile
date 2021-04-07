@@ -17,7 +17,7 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 && mv ./jobinit /app/jobinit
 
 # result container
-FROM eu.gcr.io/kyma-project/external/alpine:3.13.2 as certs
+FROM alpine:3.13.4 as certs
 
 RUN apk add --no-cache \
   ca-certificates
