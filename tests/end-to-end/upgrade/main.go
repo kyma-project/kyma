@@ -139,7 +139,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(aInjector, k8sCli, scCli, buCli),
 		"HelmBrokerConflictUpgradeTest":   servicecatalog.NewHelmBrokerConflictTest(aInjector, k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli, messagingCli),
+		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"GrafanaUpgradeTest":              monitoring.NewGrafanaUpgradeTest(k8sCli),
 		"TargetsAndRulesUpgradeTest":      monitoring.NewTargetsAndRulesTest(k8sCli, monitoringCli),
 		"MetricsUpgradeTest":              metricUpgradeTest,
