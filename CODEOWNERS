@@ -9,6 +9,9 @@
 
 /common/ @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
+# Logging library
+/common/logging @franpog859 @dbadura @janmedrek
+
 # Microfrontend k8s client
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
@@ -33,6 +36,9 @@
 
 # The `cluster-users` subchart
 /resources/cluster-users/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
+
+# The `certificates` chart
+/resources/certificates/ @strekm @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The `iam-kubeconfig-service` chart
 /resources/iam-kubeconfig-service/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
@@ -259,6 +265,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 # Eventing Controller
 /components/eventing-controller @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
 
+# NATS Operator
+/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan
+
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach @crabtree @kjaksik
@@ -327,9 +336,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
-
-# external-solution-integration test directory
-/tests/end-to-end/external-solution-integration/ @janmedrek @rakesh-garimella @sayanh @tgorgol @dbadura @akgalwas @Szymongib @k15r
 
 # Event Service Tests
 /tests/integration/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan

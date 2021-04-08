@@ -15,8 +15,6 @@ type OverridesData struct {
 	DomainName                            string `json:"domainName,omitempty"`
 	ApplicationGatewayImage               string `json:"applicationGatewayImage,omitempty"`
 	ApplicationGatewayTestsImage          string `json:"applicationGatewayTestsImage,omitempty"`
-	EventServiceImage                     string `json:"eventServiceImage,omitempty"`
-	EventServiceTestsImage                string `json:"eventServiceTestsImage,omitempty"`
 	ApplicationConnectivityValidatorImage string `json:"applicationConnectivityValidatorImage,omitempty"`
 	Tenant                                string `json:"tenant,omitempty"`
 	Group                                 string `json:"group,omitempty"`

@@ -2,7 +2,7 @@ const commerceMock = require('../test/fixtures/commerce-mock')
 const gettingStartedGuide = require('../test/fixtures/getting-started-guides')
 const installer = require('../installer')
 
-const kymaVersion = process.env.INSTALL_KYMA_VERSION || "1.19.1";
+const kymaVersion = process.env.INSTALL_KYMA_VERSION || "1.20.0";
 
 
 describe("Kyma end to end upgrade tests", function () {
@@ -18,7 +18,7 @@ describe("Kyma end to end upgrade tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await commerceMock.ensureCommerceMockTestFixture("mocks", testNamespace);
+    await commerceMock.ensureCommerceMockLocalTestFixture("mocks", testNamespace);
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
@@ -32,7 +32,7 @@ describe("Kyma end to end upgrade tests", function () {
   });
 
   it("Kyma should be upgraded to Kyma 2.0 (master branch)", async function () {
-    await installer.installKyma({isUpgrade: true, skipComponents, newEventing: true});    
+    await installer.installKyma({isUpgrade: true, skipComponents});    
   })
 
   it("function should reach Commerce mock API through app gateway after upgrade", async function () {

@@ -12,6 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cloudevents/sdk-go/v2/binding"
+	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -460,6 +463,21 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 
 func validateApplicationName(appName string) testingutils.Validator {
 	return func(r *http.Request) error {
+		if r.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
+			// CE structured mode
+			message := cev2http.NewMessageFromHttpRequest(r)
+			defer func() { _ = message.Finish(nil) }()
+			var event *cev2event.Event
+			var err error
+			if event, err = binding.ToEvent(context.Background(), message); err != nil {
+				return err
+			}
+			if strings.Contains(event.Type(), appName) {
+				return nil
+			}
+			return errors.New(fmt.Sprintf("expected the event-type [%s] to contain the application name [%s] for structured mode", event.Type(), appName))
+		}
+		// default CE binary mode
 		for k, v := range r.Header {
 			if strings.ToLower(k) != strings.ToLower(testingutils.CeTypeHeader) {
 				continue
@@ -467,7 +485,7 @@ func validateApplicationName(appName string) testingutils.Validator {
 			if strings.Contains(v[0], appName) {
 				return nil
 			}
-			return errors.New(fmt.Sprintf("expected the event-type [%s] to contain the application name [%s]", v[0], appName))
+			return errors.New(fmt.Sprintf("expected the event-type [%s] to contain the application name [%s] for binary mode", v[0], appName))
 		}
 		return errors.New("event-type header is not found")
 	}

@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/go-logr/logr"
-	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -43,11 +42,7 @@ const (
 )
 
 func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
-	natsClient := &handlers.Nats{
-		Log:           log,
-		Config:        cfg,
-		Subscriptions: make(map[string]*nats.Subscription),
-	}
+	natsClient := handlers.NewNats(cfg, log)
 	err := natsClient.Initialize()
 	if err != nil {
 		log.Error(err, "reconciler can't start")
@@ -59,7 +54,7 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 		natsClient:       natsClient,
 		Log:              log,
 		recorder:         recorder,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister),
+		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}
 }
 
@@ -117,9 +112,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Check for valid sink
 	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
-		err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
-		if err != nil {
-			r.Log.Error(err, "failed to sync subscription status")
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		// No point in reconciling as the sink is invalid
@@ -130,7 +123,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.natsClient.DeleteSubscription(desiredSubscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -153,18 +148,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.natsClient.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
-		err = r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error())
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
 	log.Info("successfully created Nats subscriptions")
 
 	// Update status
-	err = r.syncSubscriptionStatus(ctx, actualSubscription, true, "")
-	if err != nil {
-		log.Error(err, "failed to update subscription status")
+	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+		return ctrl.Result{}, err
 	}
-	log.Info("successfully updated subscription status")
 
 	return result, nil
 }
@@ -202,9 +197,9 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
-			return errors.Wrapf(err, "failed to update Subscription status")
+			return errors.Wrapf(err, "failed to update subscription status")
 		}
-		r.Log.Info("successfully updated subscription")
+		r.Log.Info("successfully updated subscription status")
 	}
 	return nil
 }

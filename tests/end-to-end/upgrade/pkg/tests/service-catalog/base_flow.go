@@ -283,6 +283,7 @@ func (f *baseFlow) waitForInstanceRemoved(name string) error {
 		instance, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			if errors.IsNotFound(err) {
+				f.log.Infof("Service instances in namespace %s not found - all deleted", f.namespace)
 				return true, nil
 			}
 			f.log.Warnf(err.Error())

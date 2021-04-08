@@ -3,7 +3,6 @@ module github.com/kyma-project/kyma/components/application-connectivity-validato
 go 1.15
 
 require (
-	github.com/go-logr/logr v0.3.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-cmp v0.4.1 // indirect
 	github.com/googleapis/gnostic v0.5.1 // indirect; indirect	github.com/gorilla/mux v1.7.4
@@ -11,7 +10,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kyma-project/kyma/common v0.0.0-20210210084346-763e0035ff35
+	github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -31,13 +30,13 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
-	
+
 	k8s.io/api => k8s.io/api v0.0.0-20201020200614-54bcc311e327
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20201020200440-554eef9dbf66
 	k8s.io/client-go => k8s.io/client-go v0.0.0-20201020200834-d1a4fe5f2d96

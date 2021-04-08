@@ -47,8 +47,8 @@ components:
     namespace: "istio-system"
   - name: "xip-patch"
     namespace: "kyma-installer"
-  - name: "knative-eventing"
-    namespace: "knative-eventing"
+  - name: "eventing"
+    namespace: "kyma-system"
 ```
 
 2. Follow the installation steps to [install Kyma locally from the release](#installation-install-kyma-locally) or [install Kyma on a cluster](#installation-install-kyma-on-a-cluster). While installing, provide the path to the component list file using the `-c` flag.

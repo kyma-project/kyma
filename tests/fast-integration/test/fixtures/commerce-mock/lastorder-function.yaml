@@ -15,12 +15,12 @@ spec:
     let lastEvent = {};
     const axios = require('axios');
     async function getOrder(code) {
-      let url = process.env.GATEWAY_URL + "/site/orders/" + code;
+      let url = findEnv("GATEWAY_URL") + "/site/orders/" + code;
       console.log("URL: %s", url);
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
         return e.response.data;
       })
-      console.log(response.data);
+      dump(response);
       return response.data;
     }
     function cloudEventHeaders(event) {
@@ -30,6 +30,17 @@ spec:
         }
         return accumulator;
       }, {});
+    }
+    function findEnv(keyPart) {
+      for(let key in process.env) {
+        if(key.indexOf(keyPart) !== -1) {
+          return process.env[key];
+        }
+      }
+      return;
+    }
+    function dump(obj) {
+      console.dir(obj, {depth: null});
     }
     module.exports = {
       main: async function (event, context) {
@@ -57,49 +68,3 @@ spec:
     host: lastorder
     name: lastorder
     port: 80
----
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce
----
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  labels:
-    function: lastorder
-  name: function-lastorder
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce
-      type: order.created
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: lastorder
----
-apiVersion: eventing.kyma-project.io/v1alpha1
-kind: Subscription
-metadata:
-  name: function-lastorder
-spec:
-  filter:
-    dialect: beb,
-    filters:
-    - eventSource:
-        property: source
-        type: exact
-        value: ""
-      eventType:
-        property: type
-        type: exact
-        value: sap.kyma.custom.commerce.order.created.v1
-  protocol: BEB
-  protocolsettings:
-    exemptHandshake: true
-    qos: AT-LEAST-ONCE
-  sink: http://lastorder.test.svc.cluster.local

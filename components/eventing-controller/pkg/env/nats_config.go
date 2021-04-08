@@ -17,6 +17,12 @@ type NatsConfig struct {
 	// EventTypePrefix prefix for the EventType
 	// note: eventType format is <prefix>.<application>.<event>.<version>
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" required:"true"`
+
+	// HTTP Transport config for the message dispatcher
+	MaxIdleConns        int           `envconfig:"MAX_IDLE_CONNS" default:"50"`
+	MaxConnsPerHost     int           `envconfig:"MAX_CONNS_PER_HOST" default:"50"`
+	MaxIdleConnsPerHost int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" default:"50"`
+	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 }
 
 func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {

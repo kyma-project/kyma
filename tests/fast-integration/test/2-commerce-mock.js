@@ -1,5 +1,5 @@
 const {
-  ensureCommerceMockTestFixture,
+  ensureCommerceMockLocalTestFixture,
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
@@ -7,14 +7,9 @@ const {
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
-  shouldRunSuite,
 } = require("../utils");
 
 describe("CommerceMock tests", function () {
-  if(!shouldRunSuite("commerce-mock")) {
-    return;
-  }
-
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";
@@ -25,9 +20,9 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockTestFixture("mocks", testNamespace).catch((err) => {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockTestFixture("mocks", testNamespace);
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
     });
   });
 

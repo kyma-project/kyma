@@ -49,28 +49,8 @@ func TestCleanName(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		if gotName := CleanName(tc.givenApplication); tc.wantName != gotName {
+		if gotName := GetCleanTypeOrName(tc.givenApplication); tc.wantName != gotName {
 			t.Errorf("Clean application name:[%s] failed, want:[%v] but got:[%v]", tc.givenApplication.Name, tc.wantName, gotName)
-		}
-	}
-}
-
-func TestIsCleanName(t *testing.T) {
-	testCases := []struct {
-		givenName string
-		wantClean bool
-	}{
-		{givenName: "with.dot", wantClean: false},
-		{givenName: "with-dash", wantClean: false},
-		{givenName: "with_underscore", wantClean: false},
-		{givenName: "with#special$characters", wantClean: false},
-		{givenName: "alphabetical", wantClean: true},
-		{givenName: "alphanumeric0123", wantClean: true},
-	}
-
-	for _, tc := range testCases {
-		if gotClean := IsCleanName(tc.givenName); tc.wantClean != gotClean {
-			t.Errorf("Is clean application name:[%s] failed, want:[%v] but got:[%v]", tc.givenName, tc.wantClean, gotClean)
 		}
 	}
 }

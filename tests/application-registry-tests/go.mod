@@ -12,6 +12,7 @@ require (
 )
 
 replace (
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/kyma-project/kyma/components/application-operator => github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610105106-1066324c83cd
 	k8s.io/api => k8s.io/api v0.17.14
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.14

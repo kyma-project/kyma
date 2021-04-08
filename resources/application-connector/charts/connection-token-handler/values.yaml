@@ -9,7 +9,6 @@ deployment:
       cpu: 10m
       memory: 32Mi
 tests:
-  central: false
   image:
     pullPolicy: IfNotPresent
   labels:

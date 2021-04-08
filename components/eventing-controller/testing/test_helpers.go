@@ -16,7 +16,7 @@ import (
 
 const (
 	ApplicationName         = "testapp1023"
-	ApplicationNameNotClean = "test.app_1-0+2=3"
+	ApplicationNameNotClean = "test-app_1-0+2=3"
 
 	// event properties
 	EventSource       = "/default/kyma/id"

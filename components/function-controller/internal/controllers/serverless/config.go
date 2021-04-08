@@ -7,6 +7,7 @@ import (
 type FunctionConfig struct {
 	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
+	PackageRegistryConfigSecretName             string        `envconfig:"default=serverless-package-registry-config"`
 	ImagePullAccountName                        string        `envconfig:"default=serverless-function"`
 	BuildServiceAccountName                     string        `envconfig:"default=serverless-build"`
 	TargetCPUUtilizationPercentage              int32         `envconfig:"default=50"`

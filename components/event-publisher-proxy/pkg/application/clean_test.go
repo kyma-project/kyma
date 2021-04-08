@@ -49,7 +49,7 @@ func TestCleanName(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		if gotName := CleanName(tc.givenApplication); tc.wantName != gotName {
+		if gotName := GetCleanTypeOrName(tc.givenApplication); tc.wantName != gotName {
 			t.Errorf("Clean application name:[%s] failed, want:[%v] but got:[%v]", tc.givenApplication.Name, tc.wantName, gotName)
 		}
 	}

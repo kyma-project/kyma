@@ -1402,6 +1402,7 @@
     "knative.dev/pkg/apis/duck/v1",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
+    "sigs.k8s.io/controller-runtime/pkg/scheme",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

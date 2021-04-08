@@ -17,9 +17,12 @@ var (
 	invalidApplicationNameSegment = regexp.MustCompile("\\W|_")
 )
 
-// CleanName cleans the application name form none-alphanumeric characters and returns it
+// GetCleanTypeOrName cleans the application name form none-alphanumeric characters and returns it
 // if the application type label exists, it will be cleaned and returned instead of the application name
-func CleanName(application *applicationv1alpha1.Application) string {
+func GetCleanTypeOrName(application *applicationv1alpha1.Application) string {
+	if application == nil {
+		return ""
+	}
 	applicationName := application.Name
 	for k, v := range application.Labels {
 		if strings.ToLower(k) == TypeLabel {
@@ -27,10 +30,10 @@ func CleanName(application *applicationv1alpha1.Application) string {
 			break
 		}
 	}
-	return invalidApplicationNameSegment.ReplaceAllString(applicationName, "")
+	return GetCleanName(applicationName)
 }
 
-// IsCleanName returns true if the name contains alphanumeric characters only, otherwise returns false
-func IsCleanName(name string) bool {
-	return !invalidApplicationNameSegment.MatchString(name)
+// GetCleanName cleans the name form none-alphanumeric characters and returns the clean name
+func GetCleanName(name string) string {
+	return invalidApplicationNameSegment.ReplaceAllString(name, "")
 }

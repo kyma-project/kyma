@@ -16,8 +16,6 @@ type args struct {
 	installationTimeout                   int64
 	applicationGatewayImage               string
 	applicationGatewayTestsImage          string
-	eventServiceImage                     string
-	eventServiceTestsImage                string
 	applicationConnectivityValidatorImage string
 	gatewayOncePerNamespace               bool
 	strictMode                            string
@@ -48,8 +46,6 @@ func parseOptions() (*options, error) {
 	helmDriver := flag.String("helmDriver", "secret", "Backend storage driver used by Helm 3 to store release data")
 	applicationGatewayImage := flag.String("applicationGatewayImage", "", "The image of the Application Gateway to use")
 	applicationGatewayTestsImage := flag.String("applicationGatewayTestsImage", "", "The image of the Application Gateway Tests to use")
-	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
-	eventServiceTestsImage := flag.String("eventServiceTestsImage", "", "The image of the Event Service Tests to use")
 	applicationConnectivityValidatorImage := flag.String("applicationConnectivityValidatorImage", "", "The image of the Application Connectivity Validator to use")
 	gatewayOncePerNamespace := flag.Bool("gatewayOncePerNamespace", false, "Specifies if Gateway should be deployed once per Namespace based on ServiceInstance or for every Application")
 	strictMode := flag.String("strictMode", "disabled", "Toggles Istio authorization policy for Validator and HTTP source adapter")
@@ -74,8 +70,6 @@ func parseOptions() (*options, error) {
 			installationTimeout:                   *installationTimeout,
 			applicationGatewayImage:               *applicationGatewayImage,
 			applicationGatewayTestsImage:          *applicationGatewayTestsImage,
-			eventServiceImage:                     *eventServiceImage,
-			eventServiceTestsImage:                *eventServiceTestsImage,
 			applicationConnectivityValidatorImage: *applicationConnectivityValidatorImage,
 			gatewayOncePerNamespace:               *gatewayOncePerNamespace,
 			strictMode:                            *strictMode,
@@ -92,12 +86,12 @@ func parseOptions() (*options, error) {
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s"+
 		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
-		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s"+
+		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s"+
 		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s"+
 		" APP_LOG_LEVEL=%s APP_LOG_FORMAT=%s --isBEBEnabled=%v --podSecurityPolicyEnabled=%v",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
-		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage,
+		o.applicationGatewayImage, o.applicationGatewayTestsImage,
 		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile,
 		o.LogLevel, o.LogFormat, o.isBEBEnabled, o.podSecurityPolicyEnabled)
 }
