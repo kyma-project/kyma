@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package contains various scripts that are used by Hydroform developers.
+This package contains various scripts that are used by Kyma developers.
 
 ### Purpose
 
