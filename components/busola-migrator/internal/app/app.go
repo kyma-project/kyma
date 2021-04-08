@@ -1,13 +1,14 @@
 package app
 
 import (
+	"net/http"
 	"os"
 	"path"
 )
 
 type App struct {
-	busolaURL      string
-	staticFilesDir string
+	busolaURL string
+	fsRoot    http.FileSystem
 }
 
 func New(busolaURL, staticFilesDir string) App {
@@ -18,7 +19,7 @@ func New(busolaURL, staticFilesDir string) App {
 	}
 
 	return App{
-		busolaURL:      busolaURL,
-		staticFilesDir: dir,
+		busolaURL: busolaURL,
+		fsRoot:    http.Dir(dir),
 	}
 }
