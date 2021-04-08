@@ -62,7 +62,7 @@ async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
 }
 
 async function removeApplicationFromScenario(client, appID, scenarioName) {
-    const application = client.getApplication(appID);
+    const application = await client.getApplication(appID);
     const scenarios = application.labels[SCENARIOS_DEFINITION_NAME];
     const idx = scenarios.indexOf(scenarioName);
     if(idx !== -1) {

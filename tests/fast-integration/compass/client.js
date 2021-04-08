@@ -249,6 +249,7 @@ class DirectorClient {
         const payload = gql.queryApplication(appID);
         try {
             const res = await this.callDirector(payload);
+            console.log(res);
             return res;
         } catch(err) {
             throw new Error(`Error when querying for the application with ID ${appID}`);

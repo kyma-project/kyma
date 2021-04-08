@@ -42,8 +42,8 @@ function queryApplicationsWithFilter(filter) {
 }
 
 function setRuntimeLabel(runtimeID, key, value) {
-    const labelValue = prepareLabelValue(value);
-    return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${labelValue}) { key value } }`;
+    const value = prepareLabelValue(value);
+    return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
 }
 
 function queryRuntime(runtimeID) {
@@ -55,8 +55,8 @@ function queryApplication(appID) {
 }
 
 function setApplicationLabel(appID, key, value) {
-    const labelValue = prepareLabelValue(value);
-    return `mutation { result: setApplicationLabel(appID: \\"${appID}\\" key: \\"${key}\\" value: ${labelValue}) { key value } }`;
+    const value = prepareLabelValue(value);
+    return `mutation { result: setApplicationLabel(appID: \\"${appID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
 }
 
 function escapeForGQL(str) {
