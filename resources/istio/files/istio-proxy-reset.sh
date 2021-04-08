@@ -41,7 +41,7 @@ do
 
     case "${parentObjectKind}" in
         ("null")
-            ;&
+            ;;
         ("")
             echo "Pod ${podName} in namespace ${namespace} has no parent object. Skipping..."
             continue
