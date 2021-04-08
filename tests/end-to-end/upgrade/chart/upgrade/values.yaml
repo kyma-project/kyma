@@ -27,7 +27,7 @@ authorizationPolicy:
 tests:
   HelmBrokerUpgradeTest: true
   HelmBrokerConflictUpgradeTest: true
-  ApplicationBrokerUpgradeTest: false
+  ApplicationBrokerUpgradeTest: true
   GrafanaUpgradeTest: true
   TargetsAndRulesUpgradeTest: true
   MetricsUpgradeTest: true
@@ -36,7 +36,6 @@ tests:
   ApiGatewayUpgradeTest: true
   ApplicationOperatorUpgradeTest: true
   RafterUpgradeTest: true
-  EventMeshUpgradeTest: false
   EventingUpgradeTest: false
   ServerlessUpgradeTest: true
   LoggingUpgradeTest: true
