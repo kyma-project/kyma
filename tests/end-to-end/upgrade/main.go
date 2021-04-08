@@ -136,7 +136,7 @@ func main() {
 		"ApiGatewayUpgradeTest":           apigateway.NewApiGatewayTest(k8sCli, dynamicCli, domainName, dexConfig.IdProviderConfig()),
 		"ApplicationOperatorUpgradeTest":  applicationoperator.NewApplicationOperatorUpgradeTest(appConnectorCli, *k8sCli),
 		"RafterUpgradeTest":               rafter.NewRafterUpgradeTest(dynamicCli),
-		"EventingUpgradeTest":             eventing.NewEventingUpgradeTest(k8sCli, dynamicCli),
+		"EventingUpgradeTest":             eventing.NewEventingUpgradeTest(k8sCli, appConnectorCli, appBrokerCli, scCli, dynamicCli, cfg.EventSubscriberImage),
 		"ServerlessUpgradeTest":           serverless.New(dynamicCli),
 		"LoggingUpgradeTest":              logging.NewLoggingTest(k8sCli, domainName, dexConfig.IdProviderConfig()),
 	}

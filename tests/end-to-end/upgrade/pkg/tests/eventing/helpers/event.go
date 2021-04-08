@@ -58,8 +58,6 @@ func CheckEvent(target string, statusCode int, retryOptions ...retry.Option) err
 
 		return nil
 	}, retryOptions...)
-
-	return nil
 }
 
 // Verify that the http response has the given status code and return an error if not

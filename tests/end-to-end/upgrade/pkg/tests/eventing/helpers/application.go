@@ -67,7 +67,7 @@ func WithEventService(id string) ApplicationOption {
 	}
 }
 
-func WaitForApplication(appConnector appconnectorclientset.Interface, name string, retryOptions ...retry.Option) error {
+func WaitForApplication(appConnector appconnectorclientset.Interface, name string) error {
 	_, err := appConnector.ApplicationconnectorV1alpha1().Applications().Get(name, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot get application: %v", err)
