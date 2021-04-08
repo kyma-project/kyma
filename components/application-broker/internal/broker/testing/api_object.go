@@ -7,16 +7,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	FakeChannelName = "fake-chan"
-)
-
-// redefine here to avoid cyclic dependency
-const (
-	integrationNamespace    = "kyma-integration"
-	applicationNameLabelKey = "application-name"
-)
-
 func NewAppNamespace(name string) *corev1.Namespace {
 	ns := &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
