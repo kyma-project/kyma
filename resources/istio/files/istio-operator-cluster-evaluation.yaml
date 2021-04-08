@@ -163,7 +163,7 @@ spec:
         resources:
           limits:
             cpu: 250m
-            memory: 256Mi
+            memory: 384Mi
           requests:
             cpu: 75m
             memory: 128Mi
@@ -171,14 +171,16 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
     #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
     accessLogFile: ""
     trustDomain: cluster.local
     defaultConfig:
       proxyMetadata: {}
-      tracing:  
-        zipkin: 
+      tracing:
+        zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
     enableTracing: {{ .Values.global.tracing.enabled }}
@@ -248,7 +250,7 @@ spec:
       oneNamespace: false
       operatorManageWebhooks: false
       pilotCertProvider: istiod
-      priorityClassName: ""
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         autoInject: enabled
         clusterDomain: cluster.local

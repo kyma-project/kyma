@@ -26,6 +26,10 @@ type HTTPCheck struct {
 
 var _ step.Step = HTTPCheck{}
 
+const (
+	publisherURL = "http://eventing-event-publisher-proxy.kyma-system/publish"
+)
+
 func NewHTTPCheck(log *logrus.Entry, name string, url *url.URL, poller poller.Poller, expectedMsg string) *HTTPCheck {
 	return &HTTPCheck{
 		name:        name,
@@ -46,8 +50,8 @@ func (h HTTPCheck) Run() error {
 	// the language specific server may not start yet
 	// there may also be some problems with istio sidecars etc
 	backoff := wait.Backoff{
-		Steps:    6,
-		Duration: 250 * time.Millisecond,
+		Steps:    10,
+		Duration: 500 * time.Millisecond,
 		Factor:   2.0,
 		Jitter:   0.1,
 	}
@@ -124,17 +128,17 @@ type E2EFunctionCheck struct {
 	name         string
 	inClusterURL string
 	fnGatewayURL string
-	brokerURL    string
+	publishURL   string
 	poller       poller.Poller
 }
 
-func NewE2EFunctionCheck(log *logrus.Entry, name string, inClusterURL, fnGatewayURL, brokerURL *url.URL, poller poller.Poller) E2EFunctionCheck {
+func NewE2EFunctionCheck(log *logrus.Entry, name, publishURL string, inClusterURL, fnGatewayURL *url.URL, poller poller.Poller) E2EFunctionCheck {
 	return E2EFunctionCheck{
 		log:          log.WithField(step.LogStepKey, name),
 		name:         name,
 		inClusterURL: inClusterURL.String(),
 		fnGatewayURL: fnGatewayURL.String(),
-		brokerURL:    brokerURL.String(),
+		publishURL:   publisherURL,
 		poller:       poller,
 	}
 }
@@ -157,11 +161,11 @@ func (c E2EFunctionCheck) Run() error {
 		return errors.Wrap(err, "while testing connection throight gateway")
 	}
 
-	c.log.Infof("Step: %s, Testing connection to event-mesh via Trigger", c.Name())
-	// https://knative.dev/v0.12-docs/eventing/broker-trigger/
-	err = testsuite.CreateEvent(c.brokerURL) // pinging the broker ingress sends an event to function via trigger
+	c.log.Infof("Step: %s, Sending an event to NATS publisher proxy", c.Name())
+
+	err = testsuite.CreateEvent(c.publishURL)
 	if err != nil {
-		return errors.Wrap(err, "while testing connection to event-mesh via Trigger")
+		return errors.Wrap(err, "while testing connection to event-mesh via NATS publisher proxy")
 	}
 
 	c.log.Infof("Step: %s, Check if event has come to the function through the service", c.Name())

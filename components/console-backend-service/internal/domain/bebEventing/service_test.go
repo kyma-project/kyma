@@ -241,11 +241,8 @@ func NewFakeGenericServiceFactory(addToScheme func(*runtime.Scheme) error, objec
 			APIVersion: "v1",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      "test",
-			Namespace: "kyma-installer",
-			Labels: map[string]string{
-				"component": "eventing",
-			},
+			Name:      "eventing",
+			Namespace: "kyma-system",
 		},
 		Data: map[string][]byte{
 			"authentication.bebNamespace": []byte("test-secret-data"),

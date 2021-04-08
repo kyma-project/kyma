@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"k8s.io/apimachinery/pkg/util/wait"
+
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scbeta "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
@@ -23,16 +25,6 @@ const (
 	// BrokerLabelValue value of the namespaced Service Broker label
 	BrokerLabelValue = "true"
 )
-
-//go:generate mockery -name=serviceNameProvider -output=automock -outpkg=automock -case=underscore
-type serviceNameProvider interface {
-	GetServiceNameForNsBroker(ns string) string
-}
-
-//go:generate mockery -name=serviceChecker -output=automock -outpkg=automock -case=underscore
-type serviceChecker interface {
-	WaitUntilIsAvailable(url string, timeout time.Duration)
-}
 
 //go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
 type brokerSyncer interface {
@@ -76,6 +68,7 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter,
 func (f *Facade) Create(destinationNs string) error {
 	var resultErr *multierror.Error
 
+	f.log.Infof("Creating ServiceBroker in %s namespace", destinationNs)
 	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceName, f.workingNamespace)
 	_, err := f.createServiceBroker(svcURL, destinationNs)
 	if err != nil {
@@ -128,15 +121,21 @@ func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.Service
 
 // Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *Facade) Delete(destinationNs string) error {
-	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, nil)
+	f.log.Infof("Deleting ServiceBroker from %s namespace", destinationNs)
+	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, &metav1.DeleteOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return nil
 	case err != nil:
 		f.log.Warnf("Deletion of namespaced-broker for namespace [%s] results in error: [%s].", destinationNs, err)
+		return err
 	}
+	err = wait.Poll(time.Second, time.Minute, func() (bool, error) {
+		f.log.Info("Waiting to remove ServiceBroker")
+		exist, err := f.Exist(destinationNs)
+		return !exist, err
+	})
 	return err
-
 }
 
 // Exist check if ServiceBroker exists.

@@ -18,12 +18,12 @@ type Logger struct {
 }
 
 func New(format Format, level Level, additionalCores ...zapcore.Core) (*Logger, error) {
-	filterLevel, err := level.toZapLevel()
+	filterLevel, err := level.ToZapLevel()
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting zap log level")
 	}
 
-	encoder, err := format.toZapEncoder()
+	encoder, err := format.ToZapEncoder()
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting encoding configuration  for %s format", format)
 	}
@@ -69,7 +69,7 @@ This function initialize klog which is used in k8s/go-client
 */
 func InitKlog(log *Logger, level Level) error {
 	zaprLogger := zapr.NewLogger(log.WithContext().Desugar())
-	lvl, err := level.toZapLevel()
+	lvl, err := level.ToZapLevel()
 	if err != nil {
 		return errors.Wrap(err, "while getting zap log level")
 	}

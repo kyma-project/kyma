@@ -30,6 +30,7 @@ spec:
           hostnames:
             - "oauth2.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"
+            - "loki.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       restartPolicy: Never
       containers:

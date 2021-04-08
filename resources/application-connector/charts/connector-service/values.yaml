@@ -22,7 +22,7 @@ deployment:
     runtimesInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
-    central: &central false
+    central: false
     revocationConfigMapName: "revocations-config"
     requestLogging: false
   envvars:
@@ -69,6 +69,20 @@ tests:
     after-upgrade: true
   enabled: true
   skipSslVerify: true
-  central: *central
   image:
     pullPolicy: IfNotPresent
+
+jobs:
+  image:
+    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
+  installer:
+    namespace: kyma-installer
+
+certs:
+  cert1:
+    name: connector-service-app-ca
+    namespace: kyma-integration
+  cert2:
+    name: app-connector-certs
+    namespace: istio-system

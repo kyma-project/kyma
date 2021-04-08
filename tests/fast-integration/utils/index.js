@@ -1,15 +1,36 @@
 const k8s = require("@kubernetes/client-node");
+const fs = require("fs");
+const { join } = require("path");
 const { expect } = require("chai");
-const _ = require("lodash");
 
 const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
+var k8sDynamicApi;
+var k8sAppsApi;
+var k8sCoreV1Api;
 
-const k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
-const k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
-const k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+var watch;
 
-const watch = new k8s.Watch(kc);
+function initializeK8sClient(opts) {
+  opts = opts || {};
+  try {
+    if(opts.kubeconfigPath) {
+      kc.loadFromFile(opts.kubeconfigPath);
+    } else if(opts.kubeconfig) {
+      kc.loadFromString(opts.kubeconfig);
+    } else {
+      kc.loadFromDefault();
+    }
+
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
+    k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    watch = new k8s.Watch(kc);
+  } catch(err) {
+    console.log(err.message);
+  }
+  
+}
+initializeK8sClient();
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
@@ -47,25 +68,10 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function expectNoK8sErr(err) {
-  if (!!err.body && !!err.body.message) {
-    expect(err.body.message).to.be.empty; // handle native k8s errors
-  }
-
-  expect(err).to.be.undefined; // handle rest of errors
-}
-
-function expectNoAxiosErr(err) {
-  if (err.reponse) {
-    // https://github.com/axios/axios#handling-errors
-    const { request, ...errorObject } = err.response; // request is too verbose
-    expect(errorObject).to.deep.eq({});
-  }
-
-  expect(err).to.be.undefined; // catch non-axios errors
-}
-
 function convertAxiosError(axiosError, message) {
+  if (!axiosError.response) {
+    return axiosError;
+  }
   if (axiosError.response && axiosError.response.status && axiosError.response.statusText) {
     message += `\n${axiosError.response.status}: ${axiosError.response.statusText}`;
   }
@@ -146,6 +152,81 @@ async function promiseAllSettled(promises) {
   );
 }
 
+/**
+ * 
+ * @param {string} dir path to the directory with yaml files 
+ */
+async function kubectlApplyDir(dir, namespace) {
+  const files = fs.readdirSync(dir);
+  for (let file of files) {
+    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+      await kubectlApply(join(dir, file), namespace).catch(console.error);
+    }
+  }
+}
+
+async function kubectlApply(file, namespace) {
+  const yaml = fs.readFileSync(file);
+  const resources = k8s.loadAllYaml(yaml);
+  await k8sApply(resources, namespace);
+}
+
+async function kubectlDeleteDir(dir, namespace) {
+  const files = fs.readdirSync(dir);
+  for (let file of files) {
+    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+      await kubectlDelete(join(dir, file), namespace).catch(console.error);
+    }
+  }
+}
+
+function kubectlDelete(file, namespace) {
+  const yaml = fs.readFileSync(file);
+  const listOfSpecs = k8s.loadAllYaml(yaml);
+  return k8sDelete(listOfSpecs, namespace);
+}
+
+async function k8sDelete(listOfSpecs, namespace) {
+  for (let res of listOfSpecs) {
+    if (namespace) {
+      res.metadata.namespace = namespace;
+    }
+    debug(`Delete ${res.metadata.name}`);
+    try {
+      if (res.kind) {
+        await k8sDynamicApi.delete(res)
+      } else if (res.metadata.selfLink) {
+        await k8sDynamicApi.requestPromise({
+          url: k8sDynamicApi.basePath + res.metadata.selfLink,
+          method: "DELETE",
+        });
+      } else {
+        throw Error("Object kind or metadata.selfLink is required to delete the resource")
+      }
+      if (res.kind == "CustomResourceDefinition") {
+        const version = res.spec.version || res.spec.versions[0].name;
+        const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`
+        await deleteAllK8sResources(path);
+      }        
+    } catch (err) {
+      if (err.response.statusCode!=404) {
+        throw err;
+      }
+    }
+  }
+}
+
+async function getAllCRDs() {
+  const path = '/apis/apiextensions.k8s.io/v1/customresourcedefinitions';
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const stat = {}
+  const body = JSON.parse(response.body);
+  body.items.forEach(crd => stat[crd.spec.group] = stat[crd.spec.group] ? stat[crd.spec.group] + 1 : 1)
+  return body.items
+
+}
 
 async function k8sApply(listOfSpecs, namespace, patch = true) {
   const options = {
@@ -190,7 +271,6 @@ async function k8sApply(listOfSpecs, namespace, patch = true) {
             );
           });
         } else {
-          //console.log(e.body)
           throw e;
         }
       }
@@ -217,7 +297,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
             resolve(watchObj.object);
           }
         },
-        () => {}
+        () => { }
       )
       .then((r) => {
         res = r;
@@ -336,6 +416,22 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   );
 }
 
+function waitForTokenRequest(name, namespace, timeout = 5000) {
+  const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
+  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name === name && watchObj.object.status && watchObj.object.status.state == "OK"
+        && watchObj.object.status.url;
+    }, timeout, "Wait for TokenRequest timeout");
+}
+
+function waitForCompassConnection(name, timeout = 90000) {
+  const path = `/apis/compass.kyma-project.io/v1alpha1/compassconnections`;
+  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
+    return watchObj.object.metadata.name === name && watchObj.object.status.connectionState
+      && ["Connected", "Synchronized"].indexOf(watchObj.object.status.connectionState) !== -1
+  }, timeout, `Wait for Compass connection ${name} timeout (${timeout} ms)`);
+}
+
 async function deleteNamespaces(namespaces, wait = true) {
   let result = await k8sCoreV1Api.listNamespace();
   let allNamespaces = result.body.items.map((i) => i.metadata.name);
@@ -369,6 +465,7 @@ async function deleteNamespaces(namespaces, wait = true) {
   }
   return waitForNamespacesResult;
 }
+
 async function listResources(path) {
   try {
     const listResponse = await k8sDynamicApi.requestPromise({
@@ -432,6 +529,7 @@ async function getAllResourceTypes() {
     }
   }
 }
+
 function ignore404(e) {
   if (e.statusCode != 404) {
     throw e;
@@ -444,9 +542,6 @@ async function deleteAllK8sResources(
   retries = 2,
   interval = 1000
 ) {
-  const options = {
-    headers: { "Content-type": "application/merge-patch+json" },
-  };
   try {
     let i = 0;
     while (i < retries) {
@@ -458,42 +553,42 @@ async function deleteAllK8sResources(
         qs: query,
       });
       const body = JSON.parse(response.body);
-      if (body.items.length == 0) {
-        break;
-      }
-      for (let o of body.items) {
-        if (o.metadata.finalizers && o.metadata.finalizers.length) {
-          const obj = {
-            kind: o.kind,
-            apiVersion: o.apiVersion,
-            metadata: {
-              name: o.metadata.name,
-              namespace: o.metadata.namespace,
-              finalizers: [],
-            },
-          };
-          debug("Removing finalizers from", obj);
-          await k8sDynamicApi
-            .patch(obj, undefined, undefined, undefined, undefined, options)
-            .catch(ignore404);
+      if(body.items && body.items.length) {
+        for(let o of body.items) {
+          deleteK8sResource(o);
         }
-        await k8sDynamicApi
-          .requestPromise({
-            url: k8sDynamicApi.basePath + o.metadata.selfLink,
-            method: "DELETE",
-          })
-          .catch(ignore404);
-        debug(
-          "Deleted resource:",
-          o.metadata.name,
-          "namespace:",
-          o.metadata.namespace
-        );
+      } else if (!body.items) {
+        deleteK8sResource(body);
       }
     }
   } catch (e) {
     debug("Error during delete ", path, String(e).substring(0, 1000));
   }
+}
+
+async function deleteK8sResource(o) {
+  if (o.metadata.finalizers && o.metadata.finalizers.length) {
+    const options = {	
+      headers: { "Content-type": "application/merge-patch+json" },	
+    };
+    
+    const obj = {
+      kind: o.kind || "Secret", // Secret list doesn't return kind and apiVersion
+      apiVersion: o.apiVersion || "v1",
+      metadata: { name: o.metadata.name, namespace: o.metadata.namespace, finalizers: [] },
+    };
+    
+    debug("Removing finalizers from", obj);
+    
+    await k8sDynamicApi
+      .patch(obj, undefined, undefined, undefined, undefined, options)
+      .catch(ignore404);
+  }
+
+  await k8sDynamicApi
+    .requestPromise({ url: k8sDynamicApi.basePath + o.metadata.selfLink, method: 'DELETE' })
+    .catch(ignore404);
+  debug("Deleted resource:", o.metadata.name, 'namespace:', o.metadata.namespace);
 }
 
 async function getContainerRestartsForAllNamespaces() {
@@ -570,12 +665,14 @@ ${k8s.dumpYaml(report)}
 
 function ignoreNotFound(e) {
   if (e.body && e.body.reason == "NotFound") {
+    return;
   } else {
     console.log(e.body);
     throw e;
   }
 }
-const DEBUG = process.env.DEBUG;
+
+let DEBUG = process.env.DEBUG;
 
 function debug() {
   if (DEBUG) {
@@ -583,16 +680,132 @@ function debug() {
   }
 }
 
+function switchDebug(on = true){
+  DEBUG=on;
+}
+
+function fromBase64(s) {
+  return Buffer
+    .from(s, "base64")
+    .toString("utf8");
+}
+
+function toBase64(s) {
+  return Buffer
+    .from(s)
+    .toString("base64");
+}
+
+function genRandom(len) {
+  let res = "";
+  const chrs = "abcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < len; i++ ) {
+    res += chrs.charAt(Math.floor(Math.random() * chrs.length));
+  }
+
+  return res;
+}
+
+function getEnvOrThrow(key) {
+  if(!process.env[key]) {
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
+function wait(fn, checkFn, timeout, interval) {
+  return new Promise((resolve, reject) => {
+      const th = setTimeout(function() {
+        debug("wait timeout");
+        done(reject, new Error("wait timeout"));
+      }, timeout);
+      const ih = setInterval(async function() {
+          let res;
+          try { res = await fn(); } 
+          catch(ex) { res = ex; }
+          checkFn(res) && done(resolve, res);
+      }, interval);
+      
+      function done(fn, arg) {
+          clearTimeout(th);
+          clearInterval(ih);
+          fn(arg);
+      }
+  });
+}
+
+async function ensureApplicationMapping(name, ns) {
+  const applicationMapping = {
+    apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
+    kind: "ApplicationMapping",
+    metadata: { name: name, namespace: ns }
+  };
+  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
+  return await k8sDynamicApi.create(applicationMapping).catch((ex) => {debug(ex); throw ex});
+}
+
+async function patchApplicationGateway(name, ns) {
+  const deployment = await retryPromise(
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment(name, ns);
+    },
+    12,
+    5000
+  ).catch((err) => {
+    throw new Error(`Timeout: ${name} is not ready`);
+  });
+  expect(
+    deployment.body.spec.template.spec.containers[0].args[6]
+  ).to.match(/^--skipVerify/);
+  
+  const patch = [
+    {
+      op: "replace",
+      path: "/spec/template/spec/containers/0/args/6",
+      value: "--skipVerify=true",
+    },
+  ];
+  const options = {
+    headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
+  };
+  await k8sDynamicApi
+    .requestPromise({
+      url:
+        k8sDynamicApi.basePath +
+        deployment.body.metadata.selfLink,
+      method: "PATCH",
+      body: patch,
+      json: true,
+      headers: options.headers,
+    });
+
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(
+    patchedDeployment.body.spec.template.spec.containers[0].args[6]
+  ).to.equal("--skipVerify=true");
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
+  
+  return patchedDeployment;
+}
+
 module.exports = {
+  initializeK8sClient,
   retryPromise,
-  expectNoK8sErr,
-  expectNoAxiosErr,
   convertAxiosError,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
   promiseAllSettled,
+  kubectlApplyDir,
+  kubectlApply,
+  kubectlDelete,
+  kubectlDeleteDir,
   k8sApply,
+  k8sDelete,
   waitForK8sObject,
   waitForServiceClass,
   waitForServiceInstance,
@@ -600,13 +813,26 @@ module.exports = {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForTokenRequest,
+  waitForCompassConnection,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
+  getAllCRDs,
   listResources,
   k8sDynamicApi,
   k8sAppsApi,
+  k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
   debug,
+  switchDebug,
   printRestartReport,
+  fromBase64,
+  toBase64,
+  genRandom,
+  getEnvOrThrow,
+  wait,
+  ensureApplicationMapping,
+  patchApplicationGateway,
 };
+

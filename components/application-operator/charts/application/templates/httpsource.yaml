@@ -1,9 +1,0 @@
-{{- if not .Values.global.isBEBEnabled }}
-apiVersion: sources.kyma-project.io/v1alpha1
-kind: HTTPSource
-metadata:
-  name: {{ .Release.Name }}
-  namespace: {{ .Release.Namespace }}
-spec:
-  source: {{ .Release.Name }}
-{{- end }}

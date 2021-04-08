@@ -205,13 +205,13 @@ controller-manager:
     ensureSecret:
       secretName: "rafter-minio-old-credentials"
       image:
-        repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
-        tag: "20210208-080d17ad"
+        repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+        tag: "20210407-86c769bd"
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-db711226
-      repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
+      tag: RELEASE.2020-09-21T22-31-59Z-1de56388
+      repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
       extraProperties:
@@ -251,7 +251,7 @@ controller-manager:
         memory: 32Mi
         cpu: 10m
       limits:
-        memory: 256Mi
+        memory: 320Mi
         cpu: 250m
 
     gcsgateway:
@@ -363,12 +363,12 @@ upload-service:
   migrator:
     images:
       alpineKubectl:
-        repository: eu.gcr.io/kyma-project/incubator/k8s-tools
-        tag: "20210208-080d17ad"
+        repository: eu.gcr.io/kyma-project/tpi/k8s-tools
+        tag: "20210407-86c769bd"
         pullPolicy: IfNotPresent
       minioClient:
-        repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
+        repository: eu.gcr.io/kyma-project/tpi/minio/mc
+        tag: RELEASE.2019-04-03T17-59-57Z-1de56388
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -419,7 +419,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: d999a403
+    tag: "49766840"
     pullPolicy: IfNotPresent
 
   deployment:

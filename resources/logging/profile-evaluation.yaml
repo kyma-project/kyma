@@ -8,15 +8,13 @@ loki:
       memory: 128Mi
   persistence:
     enabled: false
-  config:
-    server:
-      log_level: warn
+  extraArgs:
+    log.level: warn
 
 fluent-bit:
   resources:
     limits:
       cpu: 50m
-      memory: 128Mi
     requests:
       cpu: 20m
       memory: 40Mi

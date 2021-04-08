@@ -13,8 +13,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `testing` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
-| `knative-eventing` | ✅ | ✅ |
-| `knative-eventing-kafka` | ⛔️ | ⛔️ |
 | `dex` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
 | `api-gateway` | ✅ | ✅ |
@@ -22,15 +20,13 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
-| `nats-streaming` | ✅ | ✅ |
+| `eventing` | ✅ | ✅ |
 | `core` | ✅ | ✅ |
 | `cluster-users` | ✅ | ✅ |
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
 | `serverless` | ✅ | ✅ |
-| `knative-provisioner-natss` | ✅ | ✅ |
-| `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |
 | `application-connector-helper` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
@@ -52,7 +48,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 To install Kyma with any of the predefined profiles, follow the instructions described in the [cluster Kyma installation](#installation-install-kyma-on-a-cluster) document and set a profile with the `--profile` flag, as described in the [Install Kyma](#installation-install-kyma-on-a-cluster-install-kyma) section.
 
->**NOTE:** You can also set profiles during the [Kyma upgrade operation](#installation-upgrade-kyma).
+>**NOTE:** You can also set profiles on a running cluster during the [Kyma upgrade operation](#installation-upgrade-kyma).
 
 ## Installation guides
 

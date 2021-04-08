@@ -31,9 +31,6 @@ const (
 	csrInfoURLRetrievalTimeout     = 120 * time.Second
 	defaultCheckInterval           = time.Second * 2
 
-	testGroup  = "app-connector-test-group"
-	testTenant = "app-connector-test-tenant"
-
 	eventSourcesNamespace = "kyma-integration"
 )
 
@@ -44,10 +41,7 @@ type TestSuite struct {
 	connectorServiceClient         *connector.Client
 	httpSourceClient               sourcesclientv1alpha1.HTTPSourceInterface
 
-	isCentral     bool
 	skipSSLVerify bool
-	defaultGroup  string
-	defaultTenant string
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -72,28 +66,14 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	httpSourceClientset, err := sourcesclientv1alpha1.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	var defaultGroup, defaultTenant string
-
-	if config.IsCentral {
-		defaultGroup = testGroup
-		defaultTenant = testTenant
-	}
-
 	return &TestSuite{
 		applicationInstallationTimeout: applicationInstallationTimeout,
 		applicationClient:              applicationClientset.ApplicationconnectorV1alpha1().Applications(),
 		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests(config.Namespace),
 		connectorServiceClient:         connector.NewConnectorClient(config.SkipSSLVerify),
 		httpSourceClient:               httpSourceClientset.HTTPSources(eventSourcesNamespace),
-		isCentral:                      config.IsCentral,
 		skipSSLVerify:                  config.SkipSSLVerify,
-		defaultTenant:                  defaultTenant,
-		defaultGroup:                   defaultGroup,
 	}
-}
-
-func (ts *TestSuite) IsCentral() bool {
-	return ts.isCentral
 }
 
 func (ts *TestSuite) CleanupApplication(t *testing.T, applicationName string) {
@@ -119,8 +99,6 @@ func (ts *TestSuite) PrepareTestApplication(t *testing.T, namePrefix string) *ty
 		Spec: types.ApplicationSpec{
 			Services:    []types.Service{},
 			Description: "Application deployed by Application Connector Tests",
-			Group:       ts.defaultGroup,
-			Tenant:      ts.defaultTenant,
 		},
 	}
 
@@ -147,18 +125,6 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 			t.Logf("Application installation status %s does not equal %s",
 				app.Status.InstallationStatus.Status,
 				"deployed")
-			return false
-		}
-
-		httpSource, err := ts.httpSourceClient.Get(applicationName, metav1.GetOptions{})
-		if err != nil {
-			t.Logf("HTTPSource %s not found: %v", applicationName, err)
-			return false
-		}
-		if !httpSource.Status.IsReady() {
-			t.Logf("HTTPSource %s is not ready. Status: \n%+v",
-				httpSource.Name,
-				httpSource.Status)
 			return false
 		}
 
@@ -255,13 +221,4 @@ func (ts *TestSuite) ShouldFailToAccessApplication(t *testing.T, credentials con
 	_, errorResponse = applicationConnectorClient.SendEvent(t, eventId)
 	require.NotNil(t, errorResponse)
 	require.Equal(t, expectedStatus, errorResponse.Code)
-}
-
-func (ts *TestSuite) ModifyGroupAndTenant(application types.Application, group, tenant string) *types.Application {
-	modifiedApp := application.DeepCopy()
-
-	modifiedApp.Spec.Group = group
-	modifiedApp.Spec.Tenant = tenant
-
-	return modifiedApp
 }

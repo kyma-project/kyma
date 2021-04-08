@@ -28,6 +28,7 @@ spec:
           scaleTargetRef:
             apiVersion: apps/v1
             kind: Deployment
+
             name: istio-egressgateway
         resources:
           limits:
@@ -171,6 +172,8 @@ spec:
           rollingUpdate:
             maxSurge: 100%
             maxUnavailable: 25%
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
     #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
     accessLogFile: ""
@@ -248,7 +251,7 @@ spec:
       oneNamespace: false
       operatorManageWebhooks: false
       pilotCertProvider: istiod
-      priorityClassName: ""
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         autoInject: enabled
         clusterDomain: cluster.local

@@ -74,5 +74,8 @@ spec:
           hostnames:
             - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 {{- end }}

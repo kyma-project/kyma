@@ -74,7 +74,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-migrate-ac-certs
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           command:
             - /bin/sh
             - -c
@@ -97,6 +97,9 @@ spec:
         - name: cert
           secret:
             secretName: connector-service-app-ca
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

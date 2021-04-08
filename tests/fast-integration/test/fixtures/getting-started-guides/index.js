@@ -32,7 +32,6 @@ config.truncateThreshold = 0; // more verbose errors
 
 const {
   retryPromise,
-  expectNoAxiosErr,
   waitForK8sObject,
   waitForVirtualService,
   waitForServiceBinding,

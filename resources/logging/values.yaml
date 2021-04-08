@@ -42,3 +42,5 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  tracing:
+    enabled: true

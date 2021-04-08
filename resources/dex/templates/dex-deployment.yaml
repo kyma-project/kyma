@@ -84,3 +84,6 @@ spec:
       {{- with .Values.volumesExtra }}
       {{- tpl . $ | nindent 6 }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -177,8 +177,6 @@ func testTargetsAreHealthy() {
 func shouldIgnoreTarget(target prom.TargetLabels) bool {
 	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
-		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
-		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
 	podsToBeIgnored := []string{
@@ -305,8 +303,6 @@ func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 func shouldIgnorePodMonitor(podMonitorName string) bool {
 	var podMonitorsToBeIgnored = []string{
 		// The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
-		"knative-eventing-event-mesh-dashboard-broker",
-		"knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
 	for _, pm := range podMonitorsToBeIgnored {

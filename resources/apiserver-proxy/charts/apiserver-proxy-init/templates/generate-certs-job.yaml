@@ -43,3 +43,6 @@ spec:
         volumeMounts:
         - name: {{ template "name" . }}-tls-cert
           mountPath: /etc/apiserver-proxy-tls-cert/
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

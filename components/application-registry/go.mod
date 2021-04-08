@@ -22,9 +22,12 @@ require (
 
 replace (
 	github.com/asaskevich/govalidator => github.com/asaskevich/govalidator v0.0.0-20180315120708-ccb8e960c48f
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
+
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
+
 	k8s.io/client-go => k8s.io/client-go v0.18.8
 )

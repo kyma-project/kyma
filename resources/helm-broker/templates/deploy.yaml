@@ -155,3 +155,6 @@ spec:
           - key: tls.key
             path: tls.key
 {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

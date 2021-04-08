@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=0 \
@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o webhook-server cmd/webh
 && mkdir /app \
 && mv ./webhook-server /app/webhook-server
 
-FROM alpine:latest as certs
+FROM eu.gcr.io/kyma-project/external/alpine:3.13.2 as certs
 RUN apk --update add ca-certificates
 
 FROM scratch

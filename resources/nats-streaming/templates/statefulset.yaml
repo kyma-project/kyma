@@ -149,6 +149,9 @@ spec:
         configMap:
           name: {{ .Values.global.natsStreaming.fullname }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
   {{- if .Values.global.natsStreaming.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:

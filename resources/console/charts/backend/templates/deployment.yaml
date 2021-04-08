@@ -41,7 +41,7 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
-        resources: 
+        resources:
           {{- toYaml .Values.resources | nindent 10 }}
         env:
           - name: APP_PORT
@@ -98,3 +98,6 @@ spec:
           secret:
             secretName: ingress-tls-cert
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -1,3 +1,5 @@
+# Mode for oathkeeper controller
+# Two possible modes are: controller or sidecar
 global:
   ory:
     oathkeeper:
@@ -11,7 +13,7 @@ image:
   # ORY Oathkeeper image
   repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.38.2-beta.1-alpine
+  tag: v0.38.9-alpine
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -43,6 +45,16 @@ service:
     type: ClusterIP
     # The service port
     port: 4455
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    labels: {}
+    #      If you do want to specify additional labels, uncomment the following
+    #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+    #      e.g.  app: oathkeeper
+
   # Configures the Kubernetes service for the api port.
   api:
     # En-/disable the service
@@ -51,6 +63,16 @@ service:
     type: ClusterIP
     # The service port
     port: 4456
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    labels: {}
+    #      If you do want to specify additional labels, uncomment the following
+    #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+    #      e.g.  app: oathkeeper
+
 
 # Configure ingress
 ingress:
@@ -123,11 +145,47 @@ deployment:
   # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
   #   foo: bar
 
+  extraEnv: [ ]
+
+  # Configuration for tracing providers. Only datadog is currently supported through this block.
+  # If you need to use a different tracing provider, please manually set the configuration values
+  # via "oathkeeper.config" or via "deployment.extraEnv".
+  tracing:
+    datadog:
+      enabled: false
+
+      # Sets the datadog DD_ENV environment variable. This value indicates the environment where oathkeeper is running.
+      # Default value: "none".
+      # env: production
+
+      # Sets the datadog DD_VERSION environment variable. This value indicates the version that oathkeeper is running.
+      # Default value: .Values.image.tag (i.e. the tag used for the docker image).
+      # version: X.Y.Z
+
+      # Sets the datadog DD_SERVICE environment variable. This value indicates the name of the service running.
+      # Default value: "ory/oathkeeper".
+      # service: ory/oathkeeper
+
+      # Sets the datadog DD_AGENT_HOST environment variable. This value indicates the host address of the datadog agent.
+      # If set to true, this configuration will automatically set DD_AGENT_HOST to the field "status.hostIP" of the pod.
+      # Default value: false.
+      # useHostIP: true
+
+
   # Configure node tolerations.
   tolerations: []
 
-  # Annotations
+  labels: {}
+  #      If you do want to specify additional labels, uncomment the following
+  #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+  #      e.g.  type: app
+
   annotations: {}
+  #      If you do want to specify annotations, uncomment the following
+  #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+  #      e.g.  sidecar.istio.io/rewriteAppHTTPProbers: "true"
+
+
 # Configure node affinity
 affinity: {}
 

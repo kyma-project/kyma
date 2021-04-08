@@ -16,23 +16,35 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: 36f3be4c
+    tag: "02591619"
   service:
     externalPort: 80
     internalPort: 8080
     name: nginx
   statusPort: 6080
-  resources: {}
+  resources:
+    requests:
+      cpu: 2m
+      memory: 2Mi
+    limits:
+      cpu: 40m
+      memory: 64Mi
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "4f6246be"
+    tag: "02591619"
   service:
     externalPort: 80
     internalPort: 80
     name: nginx
   statusPort: 6081
-  resources: {}
+  resources:
+    requests:
+      cpu: 2m
+      memory: 16Mi
+    limits:
+      cpu: 40m
+      memory: 64Mi
 managementPlane: {}
 replicaCount: 1
 test:
@@ -57,4 +69,4 @@ test:
         enabled: true
 
 podSecurityPolicy:
-    enabled: true
+  enabled: true

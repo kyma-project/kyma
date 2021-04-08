@@ -1,18 +1,20 @@
 package main
 
 import (
-	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	"github.com/kelseyhightower/envconfig"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/sirupsen/logrus"
+
+	"k8s.io/client-go/dynamic"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -35,8 +37,22 @@ func main() {
 	// assure uniqueness
 	ctx := signals.NewContext()
 
+	// metrics
+	metricsServer := metrics.NewServer(logger)
+	defer metricsServer.Stop()
+	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
+		logger.Infof("Metrics server failed to start with error: %v", err)
+	}
+
+	// connect to nats
+	connection, err := pkgnats.ConnectToNats(cfgNats.URL, cfgNats.RetryOnFailedConnect, cfgNats.MaxReconnects, cfgNats.ReconnectWait)
+	if err != nil {
+		logger.Fatalf("Failed to connect to NATS server with error: %s", err)
+	}
+	defer connection.Close()
+
 	// configure message sender
-	messageSenderToNats := sender.NewNatsMessageSender(ctx, cfgNats.NatsPublishURL, logger)
+	messageSenderToNats := sender.NewNatsMessageSender(ctx, connection, logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

@@ -26,8 +26,8 @@ spec:
         app: {{ template "kube-prometheus-stack.name" $ }}-admission-patch
 {{- include "kube-prometheus-stack.labels" $ | indent 8 }}
     spec:
-      {{- if .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName }}
-      priorityClassName: {{ .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName }}
+      {{- if or .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName .Values.global.priorityClassName }}
       {{- end }}
       containers:
         - name: patch

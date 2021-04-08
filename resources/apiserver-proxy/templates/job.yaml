@@ -78,7 +78,7 @@ spec:
               done
               echo "Maximum retries exceeded"
               exit 1
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           name: gardener-annotate
           env:
             - name: HOME
@@ -88,3 +88,6 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ template "name" . }}-ssl-helper-service-account
 {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

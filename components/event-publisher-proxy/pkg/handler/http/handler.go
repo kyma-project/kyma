@@ -9,7 +9,7 @@ import (
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
 	"github.com/sirupsen/logrus"
 
@@ -129,14 +129,23 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
 	ctx, cancel := context.WithTimeout(request.Context(), h.RequestTimeout)
 	defer cancel()
 
-	message := cehttp.NewMessageFromHttpRequest(request)
+	message := cev2http.NewMessageFromHttpRequest(request)
 	defer func() { _ = message.Finish(nil) }()
 
 	event, err := binding.ToEvent(ctx, message)
@@ -152,11 +161,25 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		return
 	}
 
+	if request.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
+		ctx = binding.WithForceStructured(ctx)
+	} else {
+		ctx = binding.WithForceBinary(ctx)
+	}
+
 	h.receive(ctx, event)
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 // writeResponse writes the HTTP response given the status code and response body.

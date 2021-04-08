@@ -21,8 +21,8 @@ metadata:
 spec:
   displayName: Function
   resource:
-    group: serving.knative.dev
-    kind: service
+    group: eventing.kyma-project.io
+    kind: subscription
     version: v1
   labelsPath: spec.template.metadata.labels
 ```
@@ -71,15 +71,15 @@ The administrator who adds the UsageKind must take care of the RBAC settings. Th
 See the example of the RBAC Rule for the ServiceBindingUsage Controller:
 
 ```yaml
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
   verbs: ["get", "list", "watch", "patch", "update"]
 ```
 
 Here is the example for the Console Backend Service:
 
 ```yaml
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
   verbs: ["get", "list", "watch"]
 ```

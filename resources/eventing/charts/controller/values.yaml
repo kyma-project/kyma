@@ -24,9 +24,17 @@ podSecurityContext:
 bebSecret:
   nameSuffix: "-beb-oauth2"
 
+resources:
+  limits:
+    cpu: 100m
+    memory: 30Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi
+
 metrics:
   service:
     nameSuffix: "-metrics"
 
-#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/9984
+#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/10317
 clusterRoleBindingSuffix: "-crole-binding"

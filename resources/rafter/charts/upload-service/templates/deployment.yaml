@@ -82,3 +82,6 @@ spec:
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_ENABLED" "value" .Values.envs.configMap.enabled "context" . ) | nindent 12 }}
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_NAME" "value" .Values.envs.configMap.name "context" . ) | nindent 12 }}
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_NAMESPACE" "value" .Values.envs.configMap.namespace "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

@@ -6,14 +6,14 @@ fullnameOverride: "serverless"
 
 injectCerts:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
-    tag: "20210208-080d17ad"
+    repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+    tag: "20210407-86c769bd"
     pullPolicy: IfNotPresent
 
 migration:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
-    tag: "20210208-080d17ad"
+    repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+    tag: "20210407-86c769bd"
     pullPolicy: IfNotPresent
 
 tests:
@@ -33,15 +33,15 @@ tests:
         memory: 256Mi
         cpu: 200m
     image:
-      repository: "eu.gcr.io/kyma-project/incubator/k8s-tools"
-      tag: "20210208-080d17ad"
+      repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+      tag: "20210407-86c769bd"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "f3bfca27"
+    tag: "PR-10809"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -60,6 +60,10 @@ tests:
       image: "eu.gcr.io/kyma-project/gitserver"
       tag: "c0aa144a"
       repoName: "function"
+    pkgRegistryConfig:
+      secretName: "serverless-package-registry-config"
+      URLNode: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"
+      URLPython: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"
 
 global:
   commonLabels:
@@ -77,18 +81,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10641"
+    tag: "PR-10889"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "e7698eb5"
+      tag: "PR-10889"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "e7698eb5"
+      tag: "PR-10889"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "e7698eb5"
+      tag: "PR-10889"
 
 deployment:
   replicas: 1
@@ -117,7 +121,7 @@ containers:
     resources:
       limits:
         cpu: 100m
-        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi
@@ -143,6 +147,8 @@ containers:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config-default'
+      packageRegistryConfigSecretName:
+        value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
         value: '{{ template "fullname" . }}-function'
       buildServiceAccountName:
@@ -154,9 +160,9 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v1.3.0
+        value: gcr.io/kaniko-project/executor:v1.5.1
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:76ba4f03
+        value: eu.gcr.io/kyma-project/function-build-init:e4011316
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -237,7 +243,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "76ba4f03"
+    tag: "PR-10889"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

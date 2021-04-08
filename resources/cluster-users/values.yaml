@@ -4,8 +4,8 @@ tests:
     after-upgrade: true
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    version: 20210208-080d17ad
+    name: eu.gcr.io/kyma-project/tpi/k8s-tools
+    version: 20210407-86c769bd
   env:
     namespace: default
   securityContext:
@@ -107,4 +107,5 @@ global:
     domainName: "kyma.local"
 
 users:
+  adminName: "admin@kyma.cx"
   adminGroup:

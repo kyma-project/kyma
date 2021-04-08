@@ -25,8 +25,8 @@ securityContext:
 hostAliases:
 {{ toYaml .Values.hostAliases | indent 2 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
 {{- if ( or .Values.persistence.enabled .Values.dashboards .Values.sidecar.datasources.enabled .Values.sidecar.notifiers.enabled .Values.extraInitContainers) }}
 initContainers:

@@ -51,12 +51,13 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromSameSource),
 			expectedEvents:  []Event{},
 		}, {
-			name:            "should return 1 event(out of multiple) which matches one source(bebNamespace)",
+			name:            "should return 2 events(out of multiple) which matches two sources (bebNamespace and empty)",
 			appName:         "foovarkes",
 			eventTypePrefix: "foo.prefix.custom",
 			bebNs:           "foo-match",
 			filters:         NewBEBFilters(WithMultipleBEBFiltersFromDiffSource),
 			expectedEvents: []Event{
+				NewEvent("order.created", "v1"),
 				NewEvent("order.created", "v1"),
 			},
 		}, {
@@ -78,7 +79,6 @@ func TestFilterEventTypeVersions(t *testing.T) {
 			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
 				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
 			}
-
 		})
 	}
 }
@@ -218,11 +218,13 @@ func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BebFilter
 	evSource1 := "foo-match"
 	evSource2 := "/default/foo.different/kt1"
 	evSource3 := "/default/foo.different2/kt1"
+	evSource4 := ""
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
 	bebFilters.Filters = []*eventingv1alpha1.BebFilter{
 		NewBEBFilter(evSource1, evType),
 		NewBEBFilter(evSource2, evType),
 		NewBEBFilter(evSource3, evType),
+		NewBEBFilter(evSource4, evType),
 	}
 }
 

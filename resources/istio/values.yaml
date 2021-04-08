@@ -10,8 +10,8 @@ kyma:
     - istio-system
     - kube-system
   labelJob:
-    image: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210208-080d17ad"
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
   securityContext:
@@ -45,8 +45,8 @@ monitoring:
 
 test:
   istio_kyma_validate:
-    image: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210208-080d17ad"
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
     enabled: true
     labels:
       integration: true

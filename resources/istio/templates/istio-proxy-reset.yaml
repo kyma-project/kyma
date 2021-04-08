@@ -25,7 +25,7 @@ rules:
   - apiGroups: ["extensions","policy"]
     resources: ["podsecuritypolicies"]
     verbs: ["use"]
-    resourceNames: 
+    resourceNames:
       - {{ template "istio.fullname" . }}
 {{- end }}
 ---
@@ -62,7 +62,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: proxy-reset
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           env:
           - name: EXPECTED_ISTIO_PROXY_IMAGE
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}:{{ .Chart.Version }}
@@ -77,3 +77,6 @@ spec:
 {{.Files.Get "files/istio-proxy-reset.sh" | printf "%s" | indent 16}}
           securityContext:
 {{- toYaml .Values.kyma.securityContext | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

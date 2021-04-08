@@ -42,6 +42,15 @@ spec:
                 secretKeyRef:
                   name: {{ include "hydra.secretName" . }}
                   key: dsn
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
         - name: {{ .Chart.Name }}-automigrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -57,6 +66,15 @@ spec:
                 secretKeyRef:
                   name: {{ include "hydra.secretName" . }}
                   key: dsn
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
     {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
@@ -128,12 +146,24 @@ spec:
                 secretKeyRef:
                   name: {{ template "hydra.secretName" . }}
                   key: secretsCookie
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
     {{- with .Values.affinity }}
     affinity:
       {{- toYaml . | nindent 8 }}

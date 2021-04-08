@@ -13,8 +13,8 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 ### Installation
 
-- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [usage instructions](https://github.com/google/ko#usage).
- 
+- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup).
+
 - For `controller`, run:
 
     ```sh

@@ -3,7 +3,6 @@ ROOT :=  $(shell pwd)
 # Image URL to use all building/pushing image targets
 APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201113-a3e68400
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
@@ -19,12 +18,13 @@ pull-licenses-local:
 	@echo "Omitting licenses will not be pulled."	
 
 release:
-	$(MAKE) gomod-release
+	$(MAKE) gomod-release-local
 
 # Run tests
 test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local:
+	mkdir -p /tmp/artifacts
 	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
@@ -107,9 +107,3 @@ build-function-build-init:
 push-function-build-init:
 	docker tag $(JOBINIT_NAME) $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
 	docker push $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
-
-$(eval $(call buildpack-mount,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,controller-gen))
-$(eval $(call buildpack-mount,generate))
-$(eval $(call buildpack-mount,test))

@@ -19,7 +19,7 @@ When this process is complete, you can provision and bind your services.
 
 ## Provisioning and binding for an API ServicePlan
 
-This ServicePlan has a **bindable** parameter set to `true`, which means that you have to provision a ServiceInstance and bind it to the service or Function to connect to a given API. 
+This ServicePlan has a **bindable** parameter set to `true`, which means that you have to provision a ServiceInstance and bind it to the service or Function to connect to a given API.
 The provisioning and binding workflow for an API ServicePlan consists of the following steps:
 
 1. Select an API ServiceClass and choose an API ServicePlan from the Service Catalog.
@@ -58,7 +58,7 @@ This ServicePlan has a **bindable** parameter set to `false`, which means that a
 4. The Application sends an event to the Application Connector.
 5. When the Trigger receives the event, it triggers the Function based on the parameters defined for a Trigger.
 
-For more information, read about [event processing and delivery](/components/event-mesh/#details-event-processing-and-delivery).
+For more information, read about [event processing and delivery](/components/eventing/#details-event-processing-and-delivery).
 
 ![Event ServicePlan](./assets/006-AB-event-service-plan.svg)
 

@@ -86,7 +86,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Release.Name }}-cr-delete
-          image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           command:
             - "/bin/bash"
           args:
@@ -102,3 +102,6 @@ spec:
               memory: 128Mi
             limits:
               cpu: 200m
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

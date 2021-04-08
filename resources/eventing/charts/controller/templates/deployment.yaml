@@ -61,10 +61,13 @@ spec:
           - name: EVENT_TYPE_PREFIX
             value: {{ .Values.global.eventTypePrefix }}
           resources:
-            limits:
-              cpu: 100m
-              memory: 30Mi
             requests:
-              cpu: 100m
-              memory: 20Mi
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end }}

@@ -4,11 +4,14 @@ kind: NatsCluster
 metadata:
   name: {{ include "nats.fullname" . }}
 spec:
-  size: 1
+  size: {{ .Values.clusterSize }}
   version: "2.1.8"
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
+    {{- if .Values.resources }}
+    resources: {{- toYaml .Values.resources | nindent 6 }}
+    {{- end }}
   natsConfig:
     debug: true
     trace: true

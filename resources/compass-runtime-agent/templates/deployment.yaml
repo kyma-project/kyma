@@ -87,3 +87,6 @@ spec:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
             - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

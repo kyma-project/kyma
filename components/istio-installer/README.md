@@ -1,7 +1,7 @@
 # Istio installer
 
 ## Overview
-Base image used: `eu.gcr.io/kyma-project/incubator/k8s-tools:20210208-080d17ad`
+Base image used: `eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd`
 
 Alpine based docker image with additional software:
 - bash

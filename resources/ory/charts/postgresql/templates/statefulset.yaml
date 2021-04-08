@@ -66,6 +66,7 @@ spec:
       {{- if .Values.securityContext.enabled }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsNonRoot: true
       {{- end }}
       {{- if .Values.serviceAccount.enabled }}
       serviceAccountName: {{ default (include "postgresql.fullname" . ) .Values.serviceAccount.name }}
@@ -96,10 +97,14 @@ spec:
               {{- if and .Values.shmVolume.enabled .Values.shmVolume.chmod.enabled }}
               chmod -R 777 /dev/shm
               {{- end }}
-          {{- if eq ( toString ( .Values.volumePermissions.securityContext.runAsUser )) "auto" }}
           securityContext:
-          {{- else }}
-          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsNonRoot: true
+          {{- if ne ( toString ( .Values.volumePermissions.securityContext.runAsUser )) "auto" }}
             runAsUser: {{ .Values.volumePermissions.securityContext.runAsUser }}
           {{- end }}
           volumeMounts:
@@ -117,8 +122,8 @@ spec:
 {{ tpl .Values.master.extraInitContainers . | indent 8 }}
       {{- end }}
       {{- end }}
-      {{- if .Values.master.priorityClassName }}
-      priorityClassName: {{ .Values.master.priorityClassName }}
+      {{- if or .Values.master.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.master.priorityClassName .Values.global.priorityClassName }}
       {{- end }}
       containers:
         - name: {{ template "postgresql.fullname" . }}
@@ -129,6 +134,12 @@ spec:
           {{- end }}
           {{- if .Values.securityContext.enabled }}
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsNonRoot: true
             runAsUser: {{ .Values.securityContext.runAsUser }}
           {{- end }}
           env:
