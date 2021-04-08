@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh/subscription/api/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventing/subscription/api/v1alpha1"
 )
 
 func WaitForSubscriptionReady(dynamicClient dynamic.Interface, name, namespace string, retryOptions ...retry.Option) error {
