@@ -32,7 +32,6 @@ istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-pro
 dryRun="${DRY_RUN:-false}"
 
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
-# filteredNamespaces=$(${namespaces} | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
     if [[ "${dryRun}" == "false" ]]; then
