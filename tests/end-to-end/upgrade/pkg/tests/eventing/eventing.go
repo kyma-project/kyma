@@ -1,4 +1,4 @@
-package eventmesh
+package eventing
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventmesh/helpers"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/eventing/helpers"
 )
 
 const (
