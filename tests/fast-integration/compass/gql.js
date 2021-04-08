@@ -42,7 +42,7 @@ function queryApplicationsWithFilter(filter) {
 }
 
 function setRuntimeLabel(runtimeID, key, value) {
-    const value = prepareLabelValue(value);
+    value = prepareLabelValue(value);
     return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
 }
 
@@ -55,7 +55,7 @@ function queryApplication(appID) {
 }
 
 function setApplicationLabel(appID, key, value) {
-    const value = prepareLabelValue(value);
+    value = prepareLabelValue(value);
     return `mutation { result: setApplicationLabel(appID: \\"${appID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
 }
 
