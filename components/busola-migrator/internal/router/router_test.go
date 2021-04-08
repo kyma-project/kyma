@@ -34,21 +34,31 @@ func Test_New(t *testing.T) {
 			wantCode: http.StatusOK,
 		},
 		{
-			name:   "redirect",
+			name:   "redirect to busola",
 			router: New(app.New("some-url", ".")),
 			request: request{
 				method: http.MethodGet,
-				url:    "/busola-redirect",
+				url:    "/console-redirect",
 			},
 			wantCode:   http.StatusFound,
 			wantHeader: &[]string{"Location", "/some-url"},
 		},
 		{
-			name:   "html page",
-			router: New(app.New("some-url", "../../static")),
+			name:   "redirect to static page",
+			router: New(app.New("some-url", ".")),
 			request: request{
 				method: http.MethodGet,
 				url:    "/not-declared-in-router",
+			},
+			wantCode:   http.StatusFound,
+			wantHeader: &[]string{"Location", "/info/"},
+		},
+		{
+			name:   "static page",
+			router: New(app.New("some-url", "../../static")),
+			request: request{
+				method: http.MethodGet,
+				url:    "/info/",
 			},
 			wantCode:   http.StatusOK,
 			wantHeader: &[]string{"Content-Type", "text/html; charset=utf-8"},
