@@ -68,3 +68,10 @@ Create the name of the secret to use
 {{- define "eventing.secretName" -}}
 {{ default (include "eventing.fullname" .) .Values.global.secretName }}
 {{- end }}
+
+{{/*
+Create the name of the configmap to use
+*/}}
+{{- define "eventing.configMapName" -}}
+{{ default (include "eventing.fullname" .) .Values.global.secretName }}
+{{- end }}

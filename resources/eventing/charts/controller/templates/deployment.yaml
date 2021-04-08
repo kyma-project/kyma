@@ -59,7 +59,10 @@ spec:
           - name: DOMAIN
             value: {{ .Values.global.domainName }}
           - name: EVENT_TYPE_PREFIX
-            value: {{ .Values.global.eventTypePrefix }}
+            valueFrom:
+              configMapKeyRef:
+                key: "eventTypePrefix"
+                name: {{ template "eventing.configMapName" }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

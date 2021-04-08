@@ -88,7 +88,10 @@ spec:
             - name: RELEASE
               value: "{{  .Release.Name }}"
             - name: EVENT_TYPE_PREFIX
-              value: "{{ .Values.global.eventTypePrefix }}"
+              valueFrom:
+                configMapKeyRef:
+                  key: "eventTypePrefix"
+                  name: {{ template "eventing.configMapName" }}
             - name: EVENTING_BACKEND
               value: "{{  .Values.global.eventing.backend }}"
             - name: BEB_NAMESPACE

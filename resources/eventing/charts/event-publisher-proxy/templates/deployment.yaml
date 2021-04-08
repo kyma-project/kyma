@@ -45,7 +45,10 @@ spec:
                   name: {{ include "eventing.secretName" . }}
                   key: beb-namespace
             - name: EVENT_TYPE_PREFIX
-              value: {{ .Values.global.eventTypePrefix }}
+              valueFrom:
+                configMapKeyRef:
+                  key: "eventTypePrefix"
+                  name: {{ template "eventing.configMapName" }}
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: event-publisher-proxy

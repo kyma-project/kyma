@@ -25,7 +25,10 @@ spec:
           - name: NATS_URL
             value: {{ include "nats-controller.natsServer.url" . }}
           - name: EVENT_TYPE_PREFIX
-            value: {{ .Values.global.eventTypePrefix }}
+            valueFrom:
+              configMapKeyRef:
+                key: "eventTypePrefix"
+                name: {{ template "eventing.configMapName" }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

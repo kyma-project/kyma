@@ -26,7 +26,10 @@ spec:
             - name: LEGACY_NAMESPACE
               value: {{ .Values.nats.config.legacyNamespace }}
             - name: LEGACY_EVENT_TYPE_PREFIX
-              value: {{ .Values.global.eventTypePrefix }}
+              valueFrom:
+                configMapKeyRef:
+                  key: "eventTypePrefix"
+                  name: {{ template "eventing.configMapName" }}
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: {{ .Values.image.name }}
