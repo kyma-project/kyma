@@ -15,6 +15,9 @@
 # Microfrontend k8s client
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
+# developer tools: linting
+/hack @clebs @suleymanakbas91 @adamwalach
+
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @piotrmsc @adamwalach @colunira @mjakobczyk @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
 
