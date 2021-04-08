@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	scclientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 
@@ -14,9 +17,11 @@ import (
 )
 
 const (
-	kymaSystemNamespace           = "kyma-system"
-	publisherServiceName          = "eventing-event-publisher-proxy"
-	eventMeshUpgradeTestNamespace = "eventmeshupgradetest"
+	kymaSystemNamespace     = "kyma-system"
+	publisherServiceName    = "eventing-event-publisher-proxy"
+	defaultName             = "eventupgrade"
+	defaultEventType        = "order.created"
+	defaultEventTypeVersion = "v1"
 )
 
 var _ runner.UpgradeTest = &EventingUpgradeTest{}
@@ -24,8 +29,12 @@ var _ runner.UpgradeTest = &EventingUpgradeTest{}
 type step func() error
 
 type EventingUpgradeTest struct {
-	k8sClient     kubernetes.Interface
-	dynamicClient dynamic.Interface
+	k8sClient          kubernetes.Interface
+	dynamicClient      dynamic.Interface
+	appConnectorClient appconnectorclientset.Interface
+	appBrokerClient    appbrokerclientset.Interface
+	scClient           scclientset.Interface
+	subscriberImage    string
 
 	// test config
 	namespace           string
@@ -37,12 +46,14 @@ type EventingUpgradeTest struct {
 	serviceInstanceName string
 }
 
-func NewEventingUpgradeTest(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface) *EventingUpgradeTest {
+func NewEventingUpgradeTest(k8sClient kubernetes.Interface, appConnectorCli appconnectorclientset.Interface, appBrokerClient appbrokerclientset.Interface, scClient scclientset.Interface, dynamicClient dynamic.Interface, subscriberImage string) *EventingUpgradeTest {
 	return &EventingUpgradeTest{
-		k8sClient:     k8sClient,
-		dynamicClient: dynamicClient,
-
-		// test config same as the EventMesh test config
+		k8sClient:           k8sClient,
+		dynamicClient:       dynamicClient,
+		appConnectorClient:  appConnectorCli,
+		appBrokerClient:     appBrokerClient,
+		scClient:            scClient,
+		subscriberImage:     subscriberImage,
 		eventTypeVersion:    defaultEventTypeVersion,
 		eventType:           defaultEventType,
 		subscriberName:      defaultName,
@@ -53,14 +64,29 @@ func NewEventingUpgradeTest(k8sClient kubernetes.Interface, dynamicClient dynami
 }
 
 func (e *EventingUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	// TODO implement when Kyma is fully integrated with the new Eventing solution https://github.com/kyma-project/kyma/issues/10866
-	log.Info("CreateResources for EventingUpgradeTest is not implemented yet")
+	for _, fn := range []func() error{
+		e.createApplication,
+		e.createSubscriber,
+		e.waitForApplication,
+		e.waitForSubscriber,
+		e.createApplicationMapping,
+		e.createServiceInstance,
+		e.waitForServiceInstance,
+		e.createSubscription,
+		e.waitForSubscriptionReady,
+	} {
+		err := fn()
+		if err != nil {
+			log.WithField("error", err).Error("CreateResources() failed")
+			return err
+		}
+	}
 	return nil
 }
 
 func (e *EventingUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	// set the target namespace for the test with the same namespace that the EventMeshUpgradeTest used
-	e.withNamespace(eventMeshUpgradeTestNamespace)
+	e.withNamespace(namespace)
 
 	// prepare steps
 	steps := []step{
@@ -73,11 +99,46 @@ func (e *EventingUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	// execute steps
 	for _, s := range steps {
 		if err := s(); err != nil {
+			log.WithField("error", err).Error("TestResources() failed")
 			return err
 		}
 	}
 
 	return nil
+}
+
+func (e *EventingUpgradeTest) createApplication() error {
+	return helpers.CreateApplication(e.appConnectorClient, e.applicationName,
+		helpers.WithAccessLabel(e.applicationName),
+		helpers.WithEventService(e.serviceInstanceName),
+	)
+}
+
+func (e *EventingUpgradeTest) waitForApplication() error {
+	return helpers.WaitForApplication(e.appConnectorClient, e.applicationName)
+}
+
+func (e *EventingUpgradeTest) createSubscriber() error {
+	return helpers.CreateSubscriber(e.k8sClient, e.subscriberName, e.namespace, helpers.WithSubscriberImage(e.subscriberImage))
+}
+
+func (e *EventingUpgradeTest) createApplicationMapping() error {
+	return helpers.CreateApplicationMapping(e.appBrokerClient, e.applicationName, e.namespace)
+}
+
+func (e *EventingUpgradeTest) createServiceInstance() error {
+	return helpers.CreateServiceInstance(e.scClient, e.serviceInstanceName, e.namespace)
+}
+
+func (e *EventingUpgradeTest) waitForServiceInstance() error {
+	return helpers.WaitForServiceInstance(e.scClient, e.serviceInstanceName, e.namespace)
+}
+
+func (e *EventingUpgradeTest) createSubscription() error {
+	return helpers.CreateSubscription(e.dynamicClient, e.subscriptionName, e.namespace,
+		helpers.WithFilter(e.eventTypeVersion, e.eventType, e.applicationName),
+		helpers.WithSink(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce", e.subscriberName, e.namespace)))
+
 }
 
 func (e *EventingUpgradeTest) withNamespace(namespace string) {
@@ -98,8 +159,7 @@ func (e EventingUpgradeTest) publishTestEvent() error {
 
 func (e EventingUpgradeTest) checkEvent() error {
 	if err := helpers.CheckEvent(fmt.Sprintf("http://%s.%s.svc.cluster.local:9000/ce/%v/%v/%v",
-		e.subscriberName, e.namespace, e.applicationName, e.eventType, e.eventTypeVersion), http.StatusNoContent);
-		err != nil {
+		e.subscriberName, e.namespace, e.applicationName, e.eventType, e.eventTypeVersion), http.StatusNoContent); err != nil {
 		return err
 	}
 
