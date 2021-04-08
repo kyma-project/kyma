@@ -1,0 +1,20 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: function
+spec:
+  source: |
+    module.exports = {
+      main: function(event, context) {
+        return 'Hello World';
+      }
+    }
+  minReplicas: 1
+  maxReplicas: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi

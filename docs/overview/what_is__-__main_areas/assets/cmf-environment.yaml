@@ -1,0 +1,21 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: tractorsclustermicrofrontend
+  labels:
+    app:  tractorsclustermicrofrontend
+spec:
+  appName: tractors-overview
+  displayName: Tractors Overview
+  version: v1
+  category: Hardware
+  placement: namespace
+  viewBaseUrl: https://base_url_of_the_microfrontend
+  navigationNodes:
+    - label: Tractors Overview
+      navigationPath: tractors
+      viewUrl: /
+    - label: Tractor Details
+      navigationPath: tractors/:id
+      showInNavigation: false
+      viewUrl: /:id
