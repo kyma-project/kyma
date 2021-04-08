@@ -4,8 +4,8 @@ tests:
     after-upgrade: true
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    version: 20210310-c03fb8b6
+    name: eu.gcr.io/kyma-project/tpi/k8s-tools
+    version: 20210407-86c769bd
   env:
     namespace: default
   securityContext:
