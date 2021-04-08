@@ -86,8 +86,8 @@ application_connectivity_certs_sync:
       name: kyma-gateway-certs
       namespace: istio-system
   image:
-    repository: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210310-c03fb8b6"
+    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
 
 tests:
   application_connector_tests:
