@@ -27,7 +27,7 @@ authorizationPolicy:
 tests:
   HelmBrokerUpgradeTest: true
   HelmBrokerConflictUpgradeTest: true
-  ApplicationBrokerUpgradeTest: true
+  ApplicationBrokerUpgradeTest: false
   GrafanaUpgradeTest: true
   TargetsAndRulesUpgradeTest: true
   MetricsUpgradeTest: true
