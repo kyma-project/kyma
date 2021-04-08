@@ -184,6 +184,25 @@ func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
+func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    EventSource,
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    EventType,
+				},
+			},
+		},
+	}
+}
+
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
 	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
