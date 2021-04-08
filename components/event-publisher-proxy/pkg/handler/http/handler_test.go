@@ -30,6 +30,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/oauth"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
@@ -66,7 +68,9 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
 		)
 
-		cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, expectedApplicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+		cancel, mockServer, collector := setupTestResources(t, port, requestSize, applicationName,
+			expectedApplicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint,
+			requestTimeout, serverResponseTime)
 		defer cancel()
 		defer mockServer.Close()
 
@@ -80,6 +84,9 @@ func TestHandlerForCloudEvents(t *testing.T) {
 				_ = resp.Body.Close()
 				if testCase.WantStatusCode != resp.StatusCode {
 					tt.Fatalf("Test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
+				}
+				if testingutils.Is2XX(resp.StatusCode) {
+					metricstest.EnsureMetricLatency(t, collector)
 				}
 			})
 		}
@@ -106,7 +113,9 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/%s/v1/events", port, applicationName)
 		)
 
-		cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, expectedApplicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+		cancel, mockServer, collector := setupTestResources(t, port, requestSize, applicationName,
+			expectedApplicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint,
+			requestTimeout, serverResponseTime)
 		defer cancel()
 		defer mockServer.Close()
 
@@ -127,6 +136,10 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 					handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
 				} else {
 					handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
+				}
+
+				if testingutils.Is2XX(resp.StatusCode) {
+					metricstest.EnsureMetricLatency(t, collector)
 				}
 			})
 		}
@@ -154,7 +167,8 @@ func TestHandlerForBEBFailures(t *testing.T) {
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/%s/v1/events", port, applicationName)
 	)
 
-	cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, applicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+	cancel, mockServer, collector := setupTestResources(t, port, requestSize, applicationName, applicationName,
+		healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
 	defer cancel()
 	defer mockServer.Close()
 
@@ -205,6 +219,10 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			if testCase.endPoint == publishLegacyEndpoint {
 				handlertest.ValidateErrorResponse(t, *resp, &testCase.wantResponse)
 			}
+
+			if testingutils.Is2XX(resp.StatusCode) {
+				metricstest.EnsureMetricLatency(t, collector)
+			}
 		})
 	}
 }
@@ -225,7 +243,8 @@ func TestHandlerForHugeRequests(t *testing.T) {
 		publishLegacyEndpoint = fmt.Sprintf("http://localhost:%d/%s/v1/events", port, applicationName)
 	)
 
-	cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, applicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+	cancel, mockServer, collector := setupTestResources(t, port, requestSize, applicationName, applicationName,
+		healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
 	defer cancel()
 	defer mockServer.Close()
 
@@ -266,6 +285,10 @@ func TestHandlerForHugeRequests(t *testing.T) {
 			if testCase.wantStatusCode != resp.StatusCode {
 				t.Fatalf("test failed, want status code:%d but got:%d", testCase.wantStatusCode, resp.StatusCode)
 			}
+
+			if testingutils.Is2XX(resp.StatusCode) {
+				metricstest.EnsureMetricLatency(t, collector)
+			}
 		})
 	}
 }
@@ -286,7 +309,8 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 		subscribedEndpointFormat = "http://localhost:%d/%s/v1/events/subscribed"
 	)
 
-	cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, applicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+	cancel, mockServer, _ := setupTestResources(t, port, requestSize, applicationName, applicationName, healthEndpoint,
+		bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
 	defer cancel()
 	defer mockServer.Close()
 
@@ -334,7 +358,8 @@ func TestHandlerTimeout(t *testing.T) {
 		publishEndpoint    = fmt.Sprintf("http://localhost:%d/publish", port)
 	)
 
-	cancel, mockServer := setupTestResources(t, port, requestSize, applicationName, applicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
+	cancel, mockServer, collector := setupTestResources(t, port, requestSize, applicationName, applicationName,
+		healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime)
 	defer cancel()
 	defer mockServer.Close()
 
@@ -346,6 +371,8 @@ func TestHandlerTimeout(t *testing.T) {
 	_ = resp.Body.Close()
 	if http.StatusInternalServerError != resp.StatusCode {
 		t.Fatalf("Test failed, want status code:%d but got:%d", http.StatusInternalServerError, resp.StatusCode)
+	} else {
+		metricstest.EnsureMetricErrors(t, collector)
 	}
 }
 
@@ -380,7 +407,9 @@ func TestIsARequestWithLegacyEvent(t *testing.T) {
 	}
 }
 
-func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName, expectedApplicationName, healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint string, requestTimeout, serverResponseTime time.Duration) (context.CancelFunc, *testingutils.MockServer) {
+func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName, expectedApplicationName,
+	healthEndpoint, bebNs, eventTypePrefix, eventsEndpoint string, requestTimeout,
+	serverResponseTime time.Duration) (context.CancelFunc, *testingutils.MockServer, *metrics.Collector) {
 	validator := validateApplicationName(expectedApplicationName)
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime), testingutils.WithValidator(validator))
 	mockServer.Start(t, defaultTokenEndpoint, defaultEventsEndpoint, defaultEventsHTTP400Endpoint)
@@ -450,7 +479,8 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 		Logger:             logrus.New(),
 	}
 
-	msgHandler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logrus.New())
+	collector := metrics.NewCollector()
+	msgHandler := NewHandler(msgReceiver, msgSender, cfg.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logrus.New(), collector)
 	go func() {
 		if err := msgHandler.Start(ctx); err != nil {
 			t.Errorf("failed to start handler with error: %v", err)
@@ -458,7 +488,7 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 	}()
 	testingutils.WaitForHandlerToStart(t, healthEndpoint)
 
-	return cancel, mockServer
+	return cancel, mockServer, collector
 }
 
 func validateApplicationName(appName string) testingutils.Validator {
