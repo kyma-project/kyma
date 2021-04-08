@@ -73,5 +73,5 @@ Create the name of the secret to use
 Create the name of the configmap to use
 */}}
 {{- define "eventing.configMapName" -}}
-{{ default (include "eventing.fullname" .) .Values.global.secretName }}
+{{ default (include "eventing.fullname" .) .Values.global.configMapName }}
 {{- end }}

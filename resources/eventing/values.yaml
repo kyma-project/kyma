@@ -4,6 +4,9 @@ global:
     # repository is the container registry where the image for event-publisher-proxy is located in
     repository: "eu.gcr.io/kyma-project"
 
+  # configMapName defines optionally another name than the default configmap name
+  configMapName: ""
+
   # secretName defines optionally another name than the default secret name
   secretName: ""
 

@@ -62,7 +62,7 @@ spec:
             valueFrom:
               configMapKeyRef:
                 key: "eventTypePrefix"
-                name: {{ template "eventing.configMapName" }}
+                name: {{ template "eventing.configMapName" . }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

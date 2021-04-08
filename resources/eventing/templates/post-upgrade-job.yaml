@@ -91,7 +91,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: "eventTypePrefix"
-                  name: {{ template "eventing.configMapName" }}
+                  name: {{ template "eventing.configMapName" . }}
             - name: EVENTING_BACKEND
               value: "{{  .Values.global.eventing.backend }}"
             - name: BEB_NAMESPACE
