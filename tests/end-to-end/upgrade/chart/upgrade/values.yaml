@@ -7,7 +7,7 @@ subscriberimage:
 
 image:
   dir:
-  version: "PR-10949"
+  version: "PR-11066"
 
   pullPolicy: "IfNotPresent"
 
@@ -27,7 +27,7 @@ authorizationPolicy:
 tests:
   HelmBrokerUpgradeTest: true
   HelmBrokerConflictUpgradeTest: true
-  ApplicationBrokerUpgradeTest: true
+  ApplicationBrokerUpgradeTest: false
   GrafanaUpgradeTest: true
   TargetsAndRulesUpgradeTest: true
   MetricsUpgradeTest: true
@@ -36,7 +36,7 @@ tests:
   ApiGatewayUpgradeTest: true
   ApplicationOperatorUpgradeTest: true
   RafterUpgradeTest: true
-  EventMeshUpgradeTest: true
-  EventingUpgradeTest: true
+  EventMeshUpgradeTest: false
+  EventingUpgradeTest: false
   ServerlessUpgradeTest: true
   LoggingUpgradeTest: true
