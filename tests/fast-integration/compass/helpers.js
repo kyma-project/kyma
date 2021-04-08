@@ -68,8 +68,12 @@ async function removeApplicationFromScenario(client, appID, scenarioName) {
     if(idx !== -1) {
         scenarios.splice(idx, 1);
     }
-
-    return await client.setApplicationLabel(appID, SCENARIOS_DEFINITION_NAME, scenarios);
+    
+    if(scenarios.length > 0) {
+        return await client.setApplicationLabel(appID, SCENARIOS_DEFINITION_NAME, scenarios);
+    } else {
+        return await client.deleteApplicationLabel(appID, SCENARIOS_DEFINITION_NAME);
+    }
 }
 
 module.exports = {

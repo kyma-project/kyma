@@ -56,7 +56,11 @@ function queryApplication(appID) {
 
 function setApplicationLabel(appID, key, value) {
     value = prepareLabelValue(value);
-    return `mutation { result: setApplicationLabel(appID: \\"${appID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
+    return `mutation { result: setApplicationLabel(applicationID: \\"${appID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
+}
+
+function deleteApplicationLabel(appID, key) {
+    return `mutation { result: deleteApplicationLabel(applicationID: \\"${appID}\\", key: \\"${key}\\") { key value } }`;
 }
 
 function escapeForGQL(str) {
@@ -94,4 +98,5 @@ module.exports = {
     queryRuntime,
     queryApplication,
     setApplicationLabel,
+    deleteApplicationLabel,
 }

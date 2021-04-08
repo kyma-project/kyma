@@ -41,7 +41,7 @@ async function unregisterKymaFromCompass(client, scenarioName) {
   // Cleanup Compass
   const applications = await queryApplicationsForScenario(client, scenarioName);
   for(let application of applications) {
-    await removeApplicationFromScenario(client, application.id);
+    await removeApplicationFromScenario(client, application.id, scenarioName);
     await client.unregisterApplication(application.id);
   }
   
