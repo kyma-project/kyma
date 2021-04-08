@@ -20,6 +20,15 @@ metrics:
   service:
     nameSuffix: "-metrics"
 
+healthProbe:
+  port: 8081
+  liveness:
+    service:
+      path: "/healthz"
+  readyness:
+    service:
+      path: "/readyz"
+
 resources:
   limits:
     cpu: 100m
