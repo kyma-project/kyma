@@ -452,21 +452,21 @@ data:
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{destination_workload}}  ({{response_code}} ).",
+              "legendFormat": "{{ `{{destination_workload }} `}}  ({{` {{response_code}} `}} ).",
               "refId": "A"
             },
             {
               "expr": "sum (rate(istio_requests_total{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\", response_code=~\"4.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)",
               "hide": false,
               "interval": "",
-              "legendFormat": "{{destination_workload}}  ({{response_code}} ).",
+              "legendFormat": "{{ `{{destination_workload }} `}}  ({{` {{response_code}} `}} ).",
               "refId": "B"
             },
             {
               "expr": "sum (rate(istio_requests_total{source_workload=~\"eventing.*controller\",destination_workload!~\"istio-.+|dex|unknown|[a-z0-9-]+-dispatcher\", response_code=~\"5.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)",
               "hide": false,
               "interval": "",
-              "legendFormat": "{{destination_workload}}  ({{response_code}} ).",
+              "legendFormat": "{{ `{{destination_workload }} `}}  ({{` {{response_code}} `}} ).",
               "refId": "C"
             }
           ],
