@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+cleanup() {
+    if [[ -n "${REMOVE_PODS_FILE}" ]]; then
+        rm "${REMOVE_PODS_FILE}"
+    fi
+}
+
+trap cleanup EXIT SIGINT SIGTERM
+
 # Retries a command on failure.
 # $1 - the max number of attempts
 # $2... - the command to run
@@ -22,7 +30,7 @@ retry() {
 }
 
 #By default each command that requires retries will attempt at most 5 times
-RETRIES_COUNT=5
+RETRIES_COUNT=5 #TODO Configurable by env
 
 #We expect all sidecars to be in this version
 expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/external/istio/proxyv2:1.9.1-distroless}"
@@ -31,6 +39,7 @@ istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-pro
 
 dryRun="${DRY_RUN:-false}"
 
+#TODO: Is this really here? What the hell?
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
@@ -43,13 +52,22 @@ done
 
 declare -A objectsToRestart
 
+
+if [[ -z "${PODS_FILE}" ]]; then
+    PODS_FILE=mktemp
+    REMOVE_PODS_FILE=${PODS_FILE}
+fi
+
+allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
+echo "${allPods}" > ${PODS_FILE}
+echo "PROCESSING PODS DATA FROM: ${PODS_FILE}"
+
 #This query selects all pods that have containers with an istio-proxy image in a version other than expected.
 #Istio proxy image is detected by image name prefix, by default: "eu.gcr.io/kyma-project/external/istio/proxyv2"
 jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${istioProxyImageNamePrefix}"'") and (endswith("'"${expectedIstioProxyVersion}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
 
-pods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json | jq -rc "${jqQuery}" )
-
-podArray=($(echo $pods | tr " " "\n"))
+pods=$(jq -rc "${jqQuery}" < ${PODS_FILE})
+podArray=($(echo "${pods}" | tr " " "\n"))
 
 echo "NUMBER OF PODS MATCHED: ${#podArray[@]}"
 
