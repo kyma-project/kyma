@@ -55,7 +55,9 @@ func CreateSubscription(dynamicClient dynamic.Interface, name, namespace string,
 			Namespace: namespace,
 			Labels:    labelSelector,
 		},
-		Spec:   eventingv1alpha1.SubscriptionSpec{},
+		Spec:   eventingv1alpha1.SubscriptionSpec{
+			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{},
+		},
 		Status: eventingv1alpha1.SubscriptionStatus{},
 	}
 
