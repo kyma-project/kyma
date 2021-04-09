@@ -51,7 +51,7 @@ for NS in ${namespaces}; do
     fi
 done
 
-declare -A objectsToRestart
+declare -A objectsToRollout
 
 
 if [[ -z "${PODS_FILE}" ]]; then
@@ -94,18 +94,18 @@ do
         ("replicaset")
             parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
             echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
-            objectsToRestart["deployment/${namespace}/${parentDeploymentName}"]=""
+            objectsToRollout["deployment/${namespace}/${parentDeploymentName}"]=""
             ;;
         (*)
             echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
-            objectsToRestart["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
+            objectsToRollout["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
             ;;
     esac
 done
 
-echo "NUMBER OF OBJECTS TO RESTART: ${#objectsToRestart[@]}"
+echo "NUMBER OF OBJECTS TO ROLLOUT: ${#objectsToRollout[@]}"
 
-for key in "${!objectsToRestart[@]}"
+for key in "${!objectsToRollout[@]}"
 do
 
     attributes=($(echo "${key}" | tr "/" "\n"))
