@@ -30,15 +30,17 @@ retry() {
     done
 }
 
-if [ -z "$RETRIES_COUNT" ]; then
-  echo "RETRIES_COUNT value was not passed. Defaulting to 5."
-  RETRIES_COUNT=5
+if [ -z "$ISTIO_PROXY_IMAGE_PREFIX" ]; then
+  echo "Error: required ISTIO_PROXY_IMAGE_PREFIX value is missing. Exiting..."
+  exit 1
 fi
 
-#We expect all sidecars to be in this version
-expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/external/istio/proxyv2:1.9.1-distroless}"
-#We use this image prefix to detect if there's an istio proxy in the Pod. If you have different prefixes (shouldn't be the case), just define several jobs.
-istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-project/external/istio/proxyv2}"
+if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
+  echo "Error: required ISTIO_PROXY_IMAGE_VERSION value is missing. Exiting..."
+  exit 1
+fi
+
+RETRIES_COUNT="${$RETRIES_COUNT:5}"
 
 dryRun="${DRY_RUN:-false}"
 
@@ -65,9 +67,12 @@ allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
 echo "${allPods}" > ${PODS_FILE}
 echo "Processing pods data from: ${PODS_FILE}"
 
+istioProxyImage="${ISTIO_PROXY_IMAGE_PREFIX}:${ISTIO_PROXY_IMAGE_VERSION}"
+
 #This query selects all pods that have containers with an istio-proxy image in a version other than expected.
 #Istio proxy image is detected by image name prefix, by default: "eu.gcr.io/kyma-project/external/istio/proxyv2"
-jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${istioProxyImageNamePrefix}"'") and (endswith("'"${expectedIstioProxyVersion}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
+#Full image address is used to prevent from matching pods that are not connected with Istio but use the same version.
+jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${istioProxyImage}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
 
 pods=$(jq -rc "${jqQuery}" < ${PODS_FILE})
 podArray=($(echo "${pods}" | tr " " "\n"))
