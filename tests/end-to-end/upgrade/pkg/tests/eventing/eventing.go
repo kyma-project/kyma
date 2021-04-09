@@ -87,7 +87,8 @@ func (e *EventingUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 }
 
 func (e *EventingUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	// prepare steps
+	e.withNamespace(namespace)
+
 	steps := []step{
 		e.waitForSubscriptionReady,
 		e.waitForSubscriber,
