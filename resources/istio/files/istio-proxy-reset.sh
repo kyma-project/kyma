@@ -28,6 +28,7 @@ retry() {
     done
 }
 
+# Returns labels defined for ReplicationController selector in the format: "l1=v1 l2=v2 ..."
 getReplicationControllerSelector() {
     local namespace=$1
     local objectName=$2
@@ -35,18 +36,22 @@ getReplicationControllerSelector() {
     echo $(kubectl get -n "${namespace}" replicationcontroller "${objectName}" -o "${pattern}")
 }
 
+# Returns pods by labels.
+# Labels are provides as a string: "l1=v1 l2=v2 ..."
 getPodByLabels() {
     local namespace=$1
-    local labels=$2
-    echo $(kubectl get pods -n "${namespace}" -o jsonpath='{.items[*].metadata.name}' -l "${labels}")
+    local labels=${@:2}
+    local labelsWithCommas=$(echo "${labels}" | sed 's/ /,/g')
+    echo $(kubectl get pods -n "${namespace}" -o jsonpath='{.items[*].metadata.name}' -l "${labelsWithCommas}")
 }
 
+# Deletes pods controlled by given ReplicationController
+# Pods are deleted one by one to reduce downtimes.
 deletePodsForReplicationController() {
     local namespace=$1
     local objectName=$2
     local labels=$(retry "${RETRIES_COUNT}" getReplicationControllerSelector "${namespace}" "${objectName}")
-    local labelsWithCommas=$(echo -n "${labels}" | sed 's/ /,/g')
-    podsToDelete=$(retry "${RETRIES_COUNT}" getPodByLabels "${namespace}" "${labelsWithCommas}")
+    podsToDelete=$(retry "${RETRIES_COUNT}" getPodByLabels "${namespace}" "${labels}")
 
     echo
     echo "    Restarting $(echo "${podsToDelete}" | wc -w | sed 's/ //g') pods for ReplicationController: ${namespace}/${objectName}"
