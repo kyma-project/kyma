@@ -23,6 +23,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# We use this code to manually use newest alpine and nodejs.
+# Use official build when it will be available.
+
 FROM alpine:3.13.4
 
 ENV NODE_VERSION 12.22.1

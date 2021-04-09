@@ -5,10 +5,10 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
-ENTRYPOINT := ./cmd/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+ENTRYPOINT := ./cmd/main.go
 VERIFY_IGNORE := /vendor\|/mocks
 
 test-local:
@@ -24,7 +24,3 @@ ensure-local:
 dep-status-local:
 	@echo "Go modules present in component - omitting."
 
-# workaround for fixed ENTRYPOINT in common makefile
-build-local:
-	env CGO_ENABLED=0 go build -o $(APP_NAME) ./cmd/main.go
-	rm $(APP_NAME)

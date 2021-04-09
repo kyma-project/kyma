@@ -1,6 +1,6 @@
 # remember to deprecate this node version by april 2021 https://nodejs.org/en/about/releases/
 
-## Node 10 Alpine image from https://github.com/nodejs/docker-node/tree/main/10/alpine3.11
+# Node 10 Alpine image from https://github.com/nodejs/docker-node/tree/main/10/alpine3.11
 
 # The MIT License (MIT)
 #
@@ -24,6 +24,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# We use this code to manually use newest alpine and nodejs.
+# Use official build when it will be available.
 
 FROM alpine:3.13.4
 
