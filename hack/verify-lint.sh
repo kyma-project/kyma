@@ -24,7 +24,12 @@ golangci::verify_installation() {
   # if binary found check version
   if [ ! -z "$(command -v golangci-lint)" ]; then
     local CURRENT_VERSION="$(golangci-lint version --format short 2>&1)"
-    if [ "${GOLANGCI_LINT_VERSION}" \> "${CURRENT_VERSION}" ]; then
+    
+    # remove the optional "v" prefix to only compare numbers
+    EXPECTED_VERSION=${GOLANGCI_LINT_VERSION#"v"}
+    CURRENT_VERSION=${CURRENT_VERSION#"v"}
+
+    if [ "${EXPECTED_VERSION}" \> "${CURRENT_VERSION}" ]; then
       # Print instructions to update
       echo -e "${RED}x Installed golangci-lint version (${CURRENT_VERSION}) incorrect${NC}"
       echo -e "Please update to a version equal or greater than ${GOLANGCI_LINT_VERSION}"
