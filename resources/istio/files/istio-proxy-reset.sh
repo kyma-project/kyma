@@ -30,8 +30,10 @@ retry() {
     done
 }
 
-#By default each command that requires retries will attempt at most 5 times
-RETRIES_COUNT=5 #TODO Configurable by env
+if [ -z "$RETRIES_COUNT" ]; then
+  echo "RETRIES_COUNT value was not passed. Defaulting to 5."
+  RETRIES_COUNT=5
+fi
 
 #We expect all sidecars to be in this version
 expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/external/istio/proxyv2:1.9.1-distroless}"
