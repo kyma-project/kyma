@@ -20,7 +20,7 @@ retry() {
         if (( attempt_num == max_attempts ))
         then
             echo "Attempt $attempt_num failed and there are no more attempts left!"
-            return 1
+            exit 1
         else
             echo "Attempt $attempt_num failed! Trying again in $attempt_num seconds..."
             sleep $(( attempt_num++ ))
@@ -65,17 +65,21 @@ deletePodsForReplicationController() {
 
 trap cleanup EXIT SIGINT SIGTERM
 
-#By default each command that requires retries will attempt at most 5 times
-RETRIES_COUNT=5 #TODO Configurable by env
+if [ -z "$ISTIO_PROXY_IMAGE_PREFIX" ]; then
+  echo "Error: required ISTIO_PROXY_IMAGE_PREFIX value is missing. Exiting..."
+  exit 1
+fi
 
-#We expect all sidecars to be in this version
-expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/external/istio/proxyv2:1.9.1-distroless}"
-#We use this image prefix to detect if there's an istio proxy in the Pod. If you have different prefixes (shouldn't be the case), just define several jobs.
-istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-project/external/istio/proxyv2}"
+if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
+  echo "Error: required ISTIO_PROXY_IMAGE_VERSION value is missing. Exiting..."
+  exit 1
+fi
+
+RETRIES_COUNT="${RETRIES_COUNT:5}"
 
 dryRun="${DRY_RUN:-true}"
 
-#TODO: Is this is a cleanup? If so, it shouldn't be here
+# TODO: check if this logic is still applicable and move it elsewhere, see issue: https://github.com/kyma-project/kyma/issues/11078
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
@@ -86,7 +90,7 @@ for NS in ${namespaces}; do
     fi
 done
 
-declare -A objectsToRestart
+declare -a objectsToRollout
 declare -A replicationControllers
 
 
@@ -99,9 +103,12 @@ allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
 echo "${allPods}" > ${PODS_FILE}
 echo "Processing pods data from: ${PODS_FILE}"
 
+istioProxyImage="${ISTIO_PROXY_IMAGE_PREFIX}:${ISTIO_PROXY_IMAGE_VERSION}"
+
 #This query selects all pods that have containers with an istio-proxy image in a version other than expected.
 #Istio proxy image is detected by image name prefix, by default: "eu.gcr.io/kyma-project/external/istio/proxyv2"
-jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${istioProxyImageNamePrefix}"'") and (endswith("'"${expectedIstioProxyVersion}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
+#Full image address is used to prevent from matching pods that are not connected with Istio but use the same version.
+jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${istioProxyImage}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
 
 pods=$(jq -rc "${jqQuery}" < ${PODS_FILE})
 podArray=($(echo "${pods}" | tr " " "\n"))
@@ -117,6 +124,17 @@ do
 
     podJson=$(retry "${RETRIES_COUNT}" kubectl get pod "${podName}" -n "${namespace}" -o json)
 
+    #Skip pods in Terminating state
+    podPhase=$(jq -r '.status.phase' <<< "${podJson}")
+    case "${podPhase}" in
+        ("Terminating")
+            echo "Pod ${podName} in terminating state. Skipping..."
+            continue
+            ;;
+        (*)
+            ;;
+    esac
+
     parentObjectKind=$(jq -r '.metadata.ownerReferences[0].kind' <<< "${podJson}" | tr '[:upper:]' '[:lower:]')
     parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
 
@@ -130,14 +148,14 @@ do
         ("replicaset")
             parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
             echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
-            objectsToRestart["deployment/${namespace}/${parentDeploymentName}"]=""
+            objectsToRollout["deployment/${namespace}/${parentDeploymentName}"]=""
             ;;
         ("replicationcontroller")
             replicationControllers["${namespace}/${parentObjectName}"]=""
             ;;
         (*)
             echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
-            objectsToRestart["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
+            objectsToRollout["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
             ;;
     esac
 done
@@ -155,9 +173,9 @@ if [[ ${#replicationControllers[@]} -gt 0 ]]; then
     done
 fi
 
-echo "Number of objects to restart: ${#objectsToRestart[@]}"
+echo "Number of objects to rollout: ${#objectsToRollout[@]}"
 
-for key in "${!objectsToRestart[@]}"
+for key in "${!objectsToRollout[@]}"
 do
 
     attributes=($(echo "${key}" | tr "/" "\n"))
