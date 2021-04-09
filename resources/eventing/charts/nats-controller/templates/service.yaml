@@ -12,5 +12,9 @@ spec:
       protocol: TCP
       port: 80
       targetPort: {{ .Values.metrics.config.portName }}
+    - name: proxy-status
+      protocol: TCP
+      port: {{ .Values.global.istio.proxy.statusPort }}
+      targetPort: {{ .Values.global.istio.proxy.statusPort }}
 ---
 {{- end }}

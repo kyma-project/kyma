@@ -1,7 +1,7 @@
 {{ if .Values.globalAccess }}
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role-global
 rules:
@@ -10,7 +10,7 @@ rules:
     verbs: ["get", "list", "watch", "create"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role-binding-global
 subjects:

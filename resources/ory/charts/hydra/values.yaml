@@ -5,7 +5,7 @@ image:
   # ORY Hydra image
   repository: eu.gcr.io/kyma-project/external/oryd/hydra
   # ORY Hydra version
-  tag: v1.4.6
+  tag: v1.8.5
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -26,6 +26,11 @@ service:
     type: ClusterIP
     # The service port
     port: 4444
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
   # Configures the Kubernetes service for the api port.
   admin:
     # En-/disable the service
@@ -34,6 +39,11 @@ service:
     type: ClusterIP
     # The service port
     port: 4445
+    # If you do want to specify annotations, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
 
 # Configure ingress
 ingress:
@@ -69,7 +79,6 @@ ingress:
 #        - api.hydra.local
 #      - secretName: hydra-api-example-tls
 
-
 # Configure ORY Hydra itself
 hydra:
   # The ORY Hydra configuration. For a full list of available settings, check:
@@ -86,6 +95,12 @@ hydra:
           - 172.16.0.0/12
           - 192.168.0.0/16
     secrets: {}
+    secretAnnotations:
+    # Create the secret before installation, and only then. This saves the secret from regenerating during an upgrade
+      helm.sh/hook: "pre-install,pre-upgrade"
+      helm.sh/hook-delete-policy: "before-hook-creation"
+    # Use a pre-existing secret (see secret.yaml for required fields)
+    # existingSecret: my-preexisting-secret
     urls:
       self: {}
 
@@ -109,6 +124,11 @@ deployment:
   #    cpu: 100m
   #  memory: 128Mi
 
+  labels: {}
+  #      If you do want to specify additional labels, uncomment the following
+  #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+  #      e.g.  type: app
+
   annotations: {}
   #      If you do want to specify annotations, uncomment the following
   #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
@@ -120,15 +140,92 @@ deployment:
   # lines, adjust them as necessary, and remove the curly braces after 'nodeSelector:'.
   #   foo: bar
 
+  # If you want to use Jaeger with agents being deployed in a daemonset, you can
+  # use the following ENV vars to configure the right endpoints using the IP
+  # address of the node the pod has been deployed to.
+  #
+  # extraEnv:
+  #   - name: JAEGER_AGENT_HOST
+  #     valueFrom:
+  #       fieldRef:
+  #         fieldPath: status.hostIP
+  #   - name: TRACING_PROVIDERS_JAEGER_LOCAL_AGENT_ADDRESS
+  #     value: $(JAEGER_AGENT_HOST):6831
+  #   - name: TRACING_PROVIDERS_JAEGER_SAMPLING_SERVER_URL
+  #     value: http://$(JAEGER_AGENT_HOST):5778
+  extraEnv: []
+
+  # Configuration for tracing providers. Only datadog is currently supported through this block.
+  # If you need to use a different tracing provider, please manually set the configuration values
+  # via "hydra.config" or via "deployment.extraEnv".
+  tracing:
+    datadog:
+      enabled: false
+
+      # Sets the datadog DD_ENV environment variable. This value indicates the environment where hydra is running.
+      # Default value: "none".
+      # env: production
+
+      # Sets the datadog DD_VERSION environment variable. This value indicates the version that hydra is running.
+      # Default value: .Values.image.tag (i.e. the tag used for the docker image).
+      # version: X.Y.Z
+
+      # Sets the datadog DD_SERVICE environment variable. This value indicates the name of the service running.
+      # Default value: "ory/hydra".
+      # service: ory/hydra
+
+      # Sets the datadog DD_AGENT_HOST environment variable. This value indicates the host address of the datadog agent.
+      # If set to true, this configuration will automatically set DD_AGENT_HOST to the field "status.hostIP" of the pod.
+      # Default value: false.
+      # useHostIP: true
+
   # Configure node tolerations.
   tolerations: []
+
+  ## Specify the serviceAccountName value.
+  ## In some situations it is needed to provides specific permissions to Hydra deployments
+  ## Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
+  ## Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
+  # serviceAccountName:
+
+  extraVolumes: []
+  extraVolumeMounts: []
+  # If you want to mount external volume
+  # For example, mount a secret containing Certificate root CA to verify database
+  # TLS connection.
+  # extraVolumes:
+  #   - name: postgresql-tls
+  #     secret:
+  #       secretName: postgresql-root-ca
+  # extraVolumeMounts:
+  #   - name: postgresql-tls
+  #     mountPath: "/etc/postgresql-tls"
+  #     readOnly: true
+
+  # Configure HPA
+  autoscaling:
+    enabled: false
+  # minReplicas: 1
+  # maxReplicas: 3
+  # targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
 
 # Configure node affinity
 affinity: {}
 
+
 # Configures controller setup
 maester:
   enabled: true
+  # Values for the hydra admin service arguments to hydra-maester
+  adminService: {}
+    # The service name value may need to be set if you use
+    # `fullnameOverride` for the parent chart
+    # name:
+
+    # You only need to set this port if you change the value for
+    # `service.admin.port` in the parent chart
+    # port:
 
 busybox:
   repository: eu.gcr.io/kyma-project/external/busybox
