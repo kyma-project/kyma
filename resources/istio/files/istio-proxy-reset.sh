@@ -40,7 +40,7 @@ if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
   exit 1
 fi
 
-RETRIES_COUNT="${$RETRIES_COUNT:5}"
+RETRIES_COUNT="${RETRIES_COUNT:5}"
 
 dryRun="${DRY_RUN:-false}"
 
