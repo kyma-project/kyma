@@ -61,11 +61,27 @@ async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
     return await client.setRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME, scenarios);
 }
 
+async function removeApplicationFromScenario(client, appID, scenarioName) {
+    const application = await client.getApplication(appID);
+    const scenarios = application.labels[SCENARIOS_DEFINITION_NAME];
+    const idx = scenarios.indexOf(scenarioName);
+    if(idx !== -1) {
+        scenarios.splice(idx, 1);
+    }
+    
+    if(scenarios.length > 0) {
+        return await client.setApplicationLabel(appID, SCENARIOS_DEFINITION_NAME, scenarios);
+    } else {
+        return await client.deleteApplicationLabel(appID, SCENARIOS_DEFINITION_NAME);
+    }
+}
+
 module.exports = {
   removeScenarioFromCompass,
   addScenarioInCompass,
   queryRuntimesForScenario,
   queryApplicationsForScenario,
   registerOrReturnApplication,
-  assignRuntimeToScenario
+  assignRuntimeToScenario,
+  removeApplicationFromScenario
 };
