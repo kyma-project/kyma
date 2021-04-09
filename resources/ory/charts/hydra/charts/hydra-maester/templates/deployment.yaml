@@ -21,6 +21,9 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.deployment.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -33,10 +36,13 @@ spec:
           command:
             - /manager
           args:
-            - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
+            - --metrics-addr=127.0.0.1:{{ .Values.port.metrics }}
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
-            - --hydra-port=4445
+            - --hydra-port={{ .Values.adminService.port | default 4445 }}
             - --sync-period={{ .Values.config.syncPeriod }}
+            {{- if .Values.forwardedProto }}
+            - --forwarded-proto={{ .Values.forwardedProto }}
+            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
@@ -74,6 +80,9 @@ spec:
             - |
 {{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
@@ -90,6 +99,4 @@ spec:
         - name: hydra-dsn
           secret:
             secretName: {{ include "hydra-maester.hydraSecret" . }}
-    {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
-    {{- end }}
+

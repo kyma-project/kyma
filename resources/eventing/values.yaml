@@ -17,6 +17,10 @@ global:
     # backend defines the provisioned eventing backend, either NATS or BEB
     backend: nats
 
+  istio:
+    proxy:
+      statusPort: 15020
+
   # eventTypePrefix is the prefix of the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)

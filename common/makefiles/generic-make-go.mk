@@ -75,7 +75,7 @@ endef
 #
 #   verify:: errcheck
 #
-verify:: test check-imports check-fmt
+verify:: test check-imports check-fmt lint
 format:: imports fmt
 
 release:
@@ -119,7 +119,7 @@ dep-status-local:
 gomod-deps-local:: gomod-vendor-local gomod-verify-local
 $(eval $(call buildpack-mount,gomod-deps))
 
-gomod-check-local:: test-local check-imports-local check-fmt-local
+gomod-check-local:: test-local check-imports-local check-fmt-local lint
 $(eval $(call buildpack-cp-ro,gomod-check))
 
 gomod-component-check-local:: gomod-deps-local gomod-check-local
@@ -164,6 +164,10 @@ errcheck-local:
 
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
+
+# Lint goal is optional for now. remove the - at the beginning to make the goal fail if there are linting errors
+lint:
+	-SKIP_VERIFY="true" ../../hack/verify-lint.sh $(COMPONENT_DIR) 
 
 generate-local:
 	go generate ./...

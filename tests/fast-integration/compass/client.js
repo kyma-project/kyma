@@ -1,6 +1,6 @@
 const axios = require("axios");
 const gql = require("./gql");
-const { getEnvOrThrow } = require("../utils")
+const { getEnvOrThrow, debug } = require("../utils")
 
 /**
  * Class DirectorConfig represents configuration data for DirectorClient.
@@ -242,6 +242,36 @@ class DirectorClient {
             return res;
         } catch(err) {
             throw new Error(`Error whe querying for the runtime with ID ${runtimeID}`);
+        }
+    }
+
+    async getApplication(appID) {
+        const payload = gql.queryApplication(appID);
+        try {
+            const res = await this.callDirector(payload);
+            return res;
+        } catch(err) {
+            throw new Error(`Error when querying for the application with ID ${appID}`);
+        }
+    }
+
+    async setApplicationLabel(appID, key, value) {
+        const payload = gql.setApplicationLabel(appID, key, value);
+        try {
+            const res = await this.callDirector(payload);
+            return res.data;
+        } catch(err) {
+            throw new Error(`Error when setting application ${appID} label ${key} and value ${value}`);
+        }
+    }
+
+    async deleteApplicationLabel(appID, key) {
+        const payload = gql.deleteApplicationLabel(appID, key);
+        try {
+            const res = await this.callDirector(payload);
+            return res.data;
+        } catch(err) {
+            throw new Error(`Error when deleting label ${key} from application ${appID}`);
         }
     }
 }
