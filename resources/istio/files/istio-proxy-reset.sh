@@ -53,7 +53,7 @@ for NS in ${namespaces}; do
     fi
 done
 
-declare -A objectsToRollout
+declare -a objectsToRollout
 
 
 if [[ -z "${PODS_FILE}" ]]; then
@@ -82,6 +82,17 @@ do
     namespace="${namespacedName[1]}"
 
     podJson=$(retry "${RETRIES_COUNT}" kubectl get pod "${podName}" -n "${namespace}" -o json)
+
+    #Skip pods in Terminating state
+    podPhase=$(jq -r '.status.phase' <<< "${podJson}")
+    case "${podPhase}" in
+        ("Terminating")
+            echo "Pod ${podName} in terminating state. Skipping..."
+            continue
+            ;;
+        (*)
+            ;;
+    esac
 
     parentObjectKind=$(jq -r '.metadata.ownerReferences[0].kind' <<< "${podJson}" | tr '[:upper:]' '[:lower:]')
     parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
