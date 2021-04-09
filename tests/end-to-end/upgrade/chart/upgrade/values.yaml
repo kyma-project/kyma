@@ -36,6 +36,6 @@ tests:
   ApiGatewayUpgradeTest: true
   ApplicationOperatorUpgradeTest: true
   RafterUpgradeTest: true
-  EventingUpgradeTest: false
+  EventingUpgradeTest: true
   ServerlessUpgradeTest: true
   LoggingUpgradeTest: true
