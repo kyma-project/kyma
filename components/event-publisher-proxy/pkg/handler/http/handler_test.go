@@ -371,9 +371,8 @@ func TestHandlerTimeout(t *testing.T) {
 	_ = resp.Body.Close()
 	if http.StatusInternalServerError != resp.StatusCode {
 		t.Fatalf("Test failed, want status code:%d but got:%d", http.StatusInternalServerError, resp.StatusCode)
-	} else {
-		metricstest.EnsureMetricErrors(t, collector)
 	}
+	metricstest.EnsureMetricErrors(t, collector)
 }
 
 func TestIsARequestWithLegacyEvent(t *testing.T) {
