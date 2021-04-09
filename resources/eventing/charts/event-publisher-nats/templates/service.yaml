@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "event-publisher-nats.serviceName" . }}-metrics
+  name: {{ include "event-publisher-nats.serviceName" . }}
   labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
@@ -12,6 +12,16 @@ spec:
       protocol: TCP
       port: 80
       targetPort: {{ .Values.nats.config.portName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "event-publisher-nats.serviceName" . }}-metrics
+  labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "event-publisher-nats.selectorLabels" . | nindent 4 }}
+  ports:
     - name: {{ .Values.metrics.config.portName }}
       protocol: TCP
       port: 80
