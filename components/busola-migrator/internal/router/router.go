@@ -17,10 +17,10 @@ func New(app app.App) *chi.Mux {
 
 	// routes
 	r.With(middleware.Logger).Get("/*", app.HandleInfoRedirect)
+	r.With(middleware.Logger).Get("/info/*", app.HandleStaticWebsite)
 	r.With(middleware.Logger).Get("/console-redirect", app.HandleConsoleRedirect)
 	r.With(middleware.Logger).Get("/xsuaa-migrate", app.HandleXSUAAMigrate)
 	r.Get("/healthz", app.HandleHealthy)
-	r.With(middleware.Logger).Get("/info/*", app.HandleStaticWebsite)
 
 	return r
 }

@@ -2,7 +2,6 @@ package router
 
 import (
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -11,69 +10,63 @@ import (
 )
 
 func Test_New(t *testing.T) {
-	t.Parallel()
+	fixRouter := func() *chi.Mux {
+		return New(app.New("https://busola.url", "/static"))
+	}
+
 	type request struct {
 		method string
 		url    string
 	}
 
 	tests := []struct {
-		name       string
-		router     *chi.Mux
-		wantCode   int
-		wantHeader *[]string
-		request    request
+		name          string
+		request       request
+		expectedRoute string
 	}{
 		{
-			name:   "healthz",
-			router: New(app.New("some-url", ".")),
+			name: "healthz",
 			request: request{
 				method: http.MethodGet,
 				url:    "/healthz",
 			},
-			wantCode: http.StatusOK,
+			expectedRoute: "/healthz",
 		},
 		{
-			name:   "redirect to busola",
-			router: New(app.New("some-url", ".")),
+			name: "redirect to busola",
 			request: request{
 				method: http.MethodGet,
 				url:    "/console-redirect",
 			},
-			wantCode:   http.StatusFound,
-			wantHeader: &[]string{"Location", "/some-url"},
+			expectedRoute: "/console-redirect",
 		},
 		{
-			name:   "redirect to static page",
-			router: New(app.New("some-url", ".")),
+			name: "redirect to static page",
 			request: request{
 				method: http.MethodGet,
 				url:    "/not-declared-in-router",
 			},
-			wantCode:   http.StatusFound,
-			wantHeader: &[]string{"Location", "/info/"},
+			expectedRoute: "/*",
 		},
 		{
-			name:   "static page",
-			router: New(app.New("some-url", "../../static")),
+			name: "static page",
 			request: request{
 				method: http.MethodGet,
 				url:    "/info/",
 			},
-			wantCode:   http.StatusOK,
-			wantHeader: &[]string{"Content-Type", "text/html; charset=utf-8"},
+			expectedRoute: "/info/*",
 		},
 	}
+
 	for _, tt := range tests {
-		r, _ := http.NewRequest(tt.request.method, tt.request.url, nil)
-		w := httptest.NewRecorder()
-		tt.router.ServeHTTP(w, r)
+		// GIVEN
+		rctx := chi.NewRouteContext()
 
-		res := w.Result()
-		assert.Equal(t, tt.wantCode, res.StatusCode)
+		// WHEN
+		match := fixRouter().Match(rctx, tt.request.method, tt.request.url)
 
-		if tt.wantHeader != nil {
-			assert.Equal(t, (*tt.wantHeader)[1], res.Header.Get((*tt.wantHeader)[0]))
-		}
+		// THEN
+		assert.True(t, match)
+		assert.Contains(t, rctx.RoutePatterns, tt.expectedRoute)
 	}
 }

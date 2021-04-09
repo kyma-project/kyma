@@ -1,28 +1,58 @@
 package ptr
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestString(t *testing.T) {
+	// GIVEN
 	testStr := "test"
+	expected := &testStr
 
-	type args struct {
-		val string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *string
-	}{
-		{name: "Success", args: args{val: testStr}, want: &testStr},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := String(tt.args.val); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("String() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	// WHEN
+	result := String(testStr)
+
+	// THEN
+	assert.Equal(t, expected, result)
+}
+
+func TestBoolFromString(t *testing.T) {
+	t.Run("Valid value true", func(t *testing.T) {
+		// GIVEN
+		testStr := "true"
+		testBool := true
+		expected := &testBool
+
+		// WHEN
+		result := BoolFromString(testStr)
+
+		// THEN
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Valid value false", func(t *testing.T) {
+		// GIVEN
+		testStr := "False"
+		testBool := false
+		expected := &testBool
+
+		// WHEN
+		result := BoolFromString(testStr)
+
+		// THEN
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Invalid value", func(t *testing.T) {
+		// GIVEN
+		testStr := "invalid"
+
+		// WHEN
+		result := BoolFromString(testStr)
+
+		// THEN
+		assert.Nil(t, result)
+	})
 }
