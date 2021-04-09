@@ -7,8 +7,6 @@ cleanup() {
     fi
 }
 
-trap cleanup EXIT SIGINT SIGTERM
-
 # Retries a command on failure.
 # $1 - the max number of attempts
 # $2... - the command to run
@@ -30,6 +28,43 @@ retry() {
     done
 }
 
+getReplicationControllerSelector() {
+    local namespace=$1
+    local objectName=$2
+    local pattern='go-template={{range $key, $value := .spec.selector}}{{ $key }}{{ "=" }}{{ $value }}{{ "\n" }}{{end}}'
+    echo $(kubectl get -n "${namespace}" replicationcontroller "${objectName}" -o "${pattern}")
+}
+
+getPodByLabels() {
+    local namespace=$1
+    local labels=$2
+    echo $(kubectl get pods -n "${namespace}" -o jsonpath='{.items[*].metadata.name}' -l "${labels}")
+}
+
+deletePodsForReplicationController() {
+    local namespace=$1
+    local objectName=$2
+    local labels=$(retry "${RETRIES_COUNT}" getReplicationControllerSelector "${namespace}" "${objectName}")
+    local labelsWithCommas=$(echo -n "${labels}" | sed 's/ /,/g')
+    podsToDelete=$(retry "${RETRIES_COUNT}" getPodByLabels "${namespace}" "${labelsWithCommas}")
+
+    echo
+    echo "    Restarting $(echo "${podsToDelete}" | wc -w | sed 's/ //g') pods for ReplicationController: ${namespace}/${objectName}"
+
+    for pod in ${podsToDelete};
+    do
+        if [[ "${dryRun}" == "false" ]]; then
+            echo "        Deleting pod: ${namespace}/${pod}"
+            sleep 2
+            retry "${RETRIES_COUNT}" kubectl -n "${namespace}" delete pod "${pod}"
+        else
+            echo "        [dryrun]" kubectl -n "${namespace}" delete pod "${pod}"
+        fi
+    done
+}
+
+trap cleanup EXIT SIGINT SIGTERM
+
 #By default each command that requires retries will attempt at most 5 times
 RETRIES_COUNT=5 #TODO Configurable by env
 
@@ -38,8 +73,9 @@ expectedIstioProxyVersion="${EXPECTED_ISTIO_PROXY_IMAGE:-eu.gcr.io/kyma-project/
 #We use this image prefix to detect if there's an istio proxy in the Pod. If you have different prefixes (shouldn't be the case), just define several jobs.
 istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-project/external/istio/proxyv2}"
 
-dryRun="${DRY_RUN:-false}"
+dryRun="${DRY_RUN:-true}"
 
+#TODO: Is this is a cleanup? If so, it shouldn't be here
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
@@ -51,10 +87,11 @@ for NS in ${namespaces}; do
 done
 
 declare -A objectsToRestart
+declare -A replicationControllers
 
 
 if [[ -z "${PODS_FILE}" ]]; then
-    PODS_FILE=mktemp
+    PODS_FILE=$(mktemp)
     REMOVE_PODS_FILE=${PODS_FILE}
 fi
 
@@ -85,15 +122,18 @@ do
 
     case "${parentObjectKind}" in
         ("null")
-            ;;
+            ;&
         ("")
-            echo "Pod ${podName} in namespace ${namespace} has no parent object. Skipping..."
+            echo "Pod ${podName} in namespace ${namespace} has no parent object (standalone Pod). Skipping..."
             continue
             ;;
         ("replicaset")
             parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
             echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
             objectsToRestart["deployment/${namespace}/${parentDeploymentName}"]=""
+            ;;
+        ("replicationcontroller")
+            replicationControllers["${namespace}/${parentObjectName}"]=""
             ;;
         (*)
             echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
@@ -102,7 +142,20 @@ do
     esac
 done
 
-echo "NUMBER OF OBJECTS TO RESTART: ${#objectsToRestart[@]}"
+if [[ ${#replicationControllers[@]} -gt 0 ]]; then
+    echo "Processing ReplicationControllers"
+
+    for key in "${!replicationControllers[@]}"
+    do
+        attributes=($(echo "${key}" | tr "/" "\n"))
+        namespace="${attributes[0]}"
+        name="${attributes[1]}"
+
+        deletePodsForReplicationController "${namespace}" "${name}"
+    done
+fi
+
+echo "Number of objects to restart: ${#objectsToRestart[@]}"
 
 for key in "${!objectsToRestart[@]}"
 do
