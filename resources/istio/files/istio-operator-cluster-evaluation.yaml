@@ -4,8 +4,6 @@ spec:
   hub: eu.gcr.io/kyma-project/external/istio
   tag: {{ .Chart.Version }}
   addonComponents:
-    istiocoredns:
-      enabled: false
   components:
     base:
       enabled: true
@@ -150,11 +148,6 @@ spec:
           timeoutSeconds: 5
         hpaSpec:
           maxReplicas: 1
-          metrics:
-            - resource:
-                name: cpu
-                targetAverageUtilization: 80
-              type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -188,7 +181,6 @@ spec:
     base:
       enableCRDTemplates: false
       validationURL: ""
-    clusterResources: true
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
@@ -237,9 +229,6 @@ spec:
       logAsJson: false
       logging:
         level: all:warn
-      meshExpansion:
-        enabled: false
-        useILB: false
       meshNetworks: {}
       mountMtlsCerts: false
       multiCluster:
@@ -290,10 +279,6 @@ spec:
       sts:
         servicePort: 0
       useMCP: false
-    istiocoredns:
-      coreDNSImage: coredns/coredns
-      coreDNSPluginImage: istio/coredns-plugin:0.2-istio-1.1
-      coreDNSTag: 1.6.2
     istiodRemote:
       injectionURL: ""
     pilot:
