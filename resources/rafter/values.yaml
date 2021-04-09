@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "PR-11056"
+    tag: "90589f08"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -210,7 +210,7 @@ controller-manager:
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-PR-81
+      tag: RELEASE.2020-09-21T22-31-59Z-b4a98c9f
       repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
