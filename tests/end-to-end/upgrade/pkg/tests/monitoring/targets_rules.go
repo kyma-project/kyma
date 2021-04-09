@@ -227,7 +227,6 @@ func shouldIgnoreTarget(target prom.TargetLabels) bool {
 		"-testsuite-",
 		"test",
 		"nodejs12-",
-		"nodejs10-",
 		"upgrade",
 		// Ignore the pods created by jobs which are executed after installation of control-plane.
 		"compass-migration",
