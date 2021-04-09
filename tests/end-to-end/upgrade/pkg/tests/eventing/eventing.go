@@ -64,6 +64,8 @@ func NewEventingUpgradeTest(k8sClient kubernetes.Interface, appConnectorCli appc
 }
 
 func (e *EventingUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	e.withNamespace(namespace)
+
 	for _, fn := range []func() error{
 		e.createApplication,
 		e.createSubscriber,
@@ -85,9 +87,6 @@ func (e *EventingUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 }
 
 func (e *EventingUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	// set the target namespace for the test with the same namespace that the EventMeshUpgradeTest used
-	e.withNamespace(namespace)
-
 	// prepare steps
 	steps := []step{
 		e.waitForSubscriptionReady,
