@@ -51,11 +51,11 @@ required = [
   name = "github.com/avast/retry-go"
   version = "2.2.0"
 
-
-# Transitive dependencies of knative.dev/pkg
 [[override]]
 name = "knative.dev/eventing"
 version = "0.12.0"
+
+# Transitive dependencies of knative.dev/pkg
 [[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.15.3"

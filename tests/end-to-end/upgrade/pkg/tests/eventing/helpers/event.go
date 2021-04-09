@@ -12,8 +12,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-const timeout = time.Second * 30
+const (
+	timeout = time.Second * 30
+	applicationJSON = "application/json"
+)
 
+
+// SendEvent sends event to the application gateway
 func SendEvent(target, eventType, eventTypeVersion string) error {
 	log.Printf("Sending an event to target: %s with eventType: %s, eventTypeVersion: %s", target, eventType, eventTypeVersion)
 	payload := fmt.Sprintf(
@@ -25,7 +30,7 @@ func SendEvent(target, eventType, eventTypeVersion string) error {
 	}
 	client := http.Client{Transport: transport}
 	res, err := client.Post(target,
-		"application/json",
+		applicationJSON,
 		strings.NewReader(payload))
 	if err != nil {
 		return errors.Wrap(err, "HTTP POST request failed in SendEvent()")
@@ -38,6 +43,7 @@ func SendEvent(target, eventType, eventTypeVersion string) error {
 	return nil
 }
 
+// CheckEvent checks whether the subscriber has received the event or not
 func CheckEvent(target string, statusCode int, retryOptions ...retry.Option) error {
 	return retry.Do(func() error {
 		transport := &http.Transport{
