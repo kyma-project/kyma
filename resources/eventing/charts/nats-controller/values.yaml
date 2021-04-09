@@ -17,8 +17,6 @@ image:
 podSecurityContext:
 
 metrics:
-  service:
-    nameSuffix: "-metrics"
   config:
     port: 8080
     portName: http-metrics

@@ -1,3 +1,4 @@
+{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -16,3 +17,4 @@ spec:
     - port: metrics
       interval: 10s
 ---
+{{- end }}
