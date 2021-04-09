@@ -19,7 +19,7 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
-For more details, read about the [technical aspects](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) of the upgrade.
+For more details, read about the [technical aspects](https://github.com/kyma-project/kyma/blob/main/components/kyma-operator/README.md#upgrade-kyma) of the upgrade.
 
 ## Upgrade Kyma to a newer version
 

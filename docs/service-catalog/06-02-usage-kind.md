@@ -61,7 +61,7 @@ These components use this CR:
 
 | Component   |   Description |
 |----------|------|
-| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/master/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
+| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/main/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
 | [Console Backend Service](/components/console/#details-console-backend-service) |  Exposes the given CR to the Console UI. |
 
 ## RBAC settings

@@ -108,7 +108,7 @@ Content is the body of your document. Write content in [Markdown](https://daring
 
 In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
 
-1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/05-links.md) - link between documents in the same topic or in different topics using metadata.
+1. [Linking](https://github.com/kyma-project/community/blob/main/guidelines/content-guidelines/05-links.md) - link between documents in the same topic or in different topics using metadata.
 
     <div tabs>
       <details>
@@ -130,7 +130,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/03-documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
+2. [Documentation toggles](https://github.com/kyma-project/community/blob/main/guidelines/content-guidelines/03-documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
 
     <div tabs>
       <details>
@@ -166,7 +166,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/04-formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
+3. [Panels](https://github.com/kyma-project/community/blob/main/guidelines/content-guidelines/04-formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
 
     <div tabs>
       <details>
@@ -187,6 +187,6 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma.
+Read the [Content Guidelines](https://github.com/kyma-project/community/tree/main/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma.
 
 >**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.

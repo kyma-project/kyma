@@ -3,7 +3,7 @@ title: Create a Function from Git repository sources
 type: Tutorials
 ---
 
-This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/master/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
+This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/main/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
 
 > **NOTE:** This tutorial shows an alternative way of storing Function's code and dependencies. If you want to follow the whole end-to-end flow described for Functions in the Serverless tutorials, [create an inline Function](#tutorials-create-an-inline-function) instead. To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
 
@@ -98,12 +98,12 @@ Follows these steps:
       type: git
       runtime: nodejs12
       source: $GIT_FUNCTION
-      reference: master
+      reference: main
       baseDir: orders-service/function
     EOF
     ```
 
-    >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/master/orders-service/function).
+    >**NOTE:** See this [Function's code and dependencies](https://github.com/kyma-project/examples/tree/main/orders-service/function).
 
 5. Check if your Function was created and all conditions are set to `True`:
 
@@ -174,7 +174,7 @@ Follows these steps:
 
 5. Go to the **Functions** tab and select **Create Function**.
 
-6. In the pop-up box, change `Source Type` to `From Repository`. Select the created repository's name and fill in the `Reference` field with `master` and the `Base Directory` field with `orders-service/function`. Select **Create** to confirm changes.
+6. In the pop-up box, change `Source Type` to `From Repository`. Select the created repository's name and fill in the `Reference` field with `main` and the `Base Directory` field with `orders-service/function`. Select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
     Make sure that the new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
