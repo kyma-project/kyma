@@ -2,6 +2,7 @@
 
 cleanup() {
     if [[ -n "${REMOVE_PODS_FILE}" ]]; then
+        echo "Removing temporary file with pods data: ${REMOVE_PODS_FILE}"
         rm "${REMOVE_PODS_FILE}"
     fi
 }
@@ -39,12 +40,11 @@ istioProxyImageNamePrefix="${COMMON_ISTIO_PROXY_IMAGE_PREFIX:-eu.gcr.io/kyma-pro
 
 dryRun="${DRY_RUN:-false}"
 
-#TODO: Is this really here? What the hell?
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
     if [[ "${dryRun}" == "false" ]]; then
-        retry "${RETRIES_COUNT}" kubectl delete rs -n "${NS}" --all
+        retry "${RETRIES_COUNT}" kubectl delete replicasets -n "${NS}" --all
     else
         echo "[dryrun] kubectl delete rs -n ${NS}"
     fi
@@ -60,7 +60,7 @@ fi
 
 allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
 echo "${allPods}" > ${PODS_FILE}
-echo "PROCESSING PODS DATA FROM: ${PODS_FILE}"
+echo "Processing pods data from: ${PODS_FILE}"
 
 #This query selects all pods that have containers with an istio-proxy image in a version other than expected.
 #Istio proxy image is detected by image name prefix, by default: "eu.gcr.io/kyma-project/external/istio/proxyv2"
@@ -69,7 +69,7 @@ jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${istioP
 pods=$(jq -rc "${jqQuery}" < ${PODS_FILE})
 podArray=($(echo "${pods}" | tr " " "\n"))
 
-echo "NUMBER OF PODS MATCHED: ${#podArray[@]}"
+echo "Number of pods matched: ${#podArray[@]}"
 
 for i in "${podArray[@]}"
 do
