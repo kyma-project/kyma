@@ -22,7 +22,7 @@ func Test_New(t *testing.T) {
 	tests := []struct {
 		name          string
 		request       request
-		expectedRoute string
+		matchingRoute string
 	}{
 		{
 			name: "healthz",
@@ -30,7 +30,7 @@ func Test_New(t *testing.T) {
 				method: http.MethodGet,
 				url:    "/healthz",
 			},
-			expectedRoute: "/healthz",
+			matchingRoute: "/healthz",
 		},
 		{
 			name: "redirect to busola",
@@ -38,7 +38,15 @@ func Test_New(t *testing.T) {
 				method: http.MethodGet,
 				url:    "/console-redirect",
 			},
-			expectedRoute: "/console-redirect",
+			matchingRoute: "/console-redirect",
+		},
+		{
+			name: "migrate xsuaa",
+			request: request{
+				method: http.MethodGet,
+				url:    "/xsuaa-migrate",
+			},
+			matchingRoute: "/xsuaa-migrate",
 		},
 		{
 			name: "redirect to static page",
@@ -46,7 +54,7 @@ func Test_New(t *testing.T) {
 				method: http.MethodGet,
 				url:    "/not-declared-in-router",
 			},
-			expectedRoute: "/*",
+			matchingRoute: "/*",
 		},
 		{
 			name: "static page",
@@ -54,7 +62,7 @@ func Test_New(t *testing.T) {
 				method: http.MethodGet,
 				url:    "/info/",
 			},
-			expectedRoute: "/info/*",
+			matchingRoute: "/info/*",
 		},
 	}
 
@@ -67,6 +75,6 @@ func Test_New(t *testing.T) {
 
 		// THEN
 		assert.True(t, match)
-		assert.Contains(t, rctx.RoutePatterns, tt.expectedRoute)
+		assert.Contains(t, rctx.RoutePatterns, tt.matchingRoute)
 	}
 }
