@@ -474,7 +474,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Controller Requests",
+          "title": "Subscribers Requests",
           "tooltip": {
             "shared": true,
             "sort": 0,
