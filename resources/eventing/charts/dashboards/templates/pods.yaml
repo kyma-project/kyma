@@ -21,7 +21,7 @@ data:
             "name": "Restarts",
             "showIn": 0,
             "tags": [
-                "restart"
+              "restart"
             ],
             "type": "rows"
           }
@@ -32,20 +32,20 @@ data:
       "graphTooltip": 0,
       "id": 58,
       "iteration": 1616688454602,
-      "links": [ ],
+      "links": [],
       "panels": [
         {
-          "aliasColors": { },
+          "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
-              "custom": { },
-              "links": [ ]
+              "custom": {},
+              "links": []
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "fill": 1,
           "fillGradient": 0,
@@ -70,7 +70,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "links": [ ],
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
@@ -81,7 +81,7 @@ data:
           "points": false,
           "renderer": "flot",
           "repeat": null,
-          "seriesOverrides": [ ],
+          "seriesOverrides": [],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
@@ -91,7 +91,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "Current: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Current: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "A"
             },
             {
@@ -99,7 +99,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "Requested: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Requested: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "B"
             },
             {
@@ -107,7 +107,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "Limit: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Limit: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "C"
             },
             {
@@ -115,13 +115,13 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "Cache: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Cache: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "D"
             }
           ],
-          "thresholds": [ ],
+          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [ ],
+          "timeRegions": [],
           "timeShift": null,
           "title": "Memory Usage",
           "tooltip": {
@@ -135,7 +135,7 @@ data:
             "mode": "time",
             "name": null,
             "show": true,
-            "values": [ ]
+            "values": []
           },
           "yaxes": [
             {
@@ -161,17 +161,17 @@ data:
           }
         },
         {
-          "aliasColors": { },
+          "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
-              "custom": { },
-              "links": [ ]
+              "custom": {},
+              "links": []
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "fill": 1,
           "fillGradient": 0,
@@ -197,7 +197,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "links": [ ],
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
@@ -208,7 +208,7 @@ data:
           "points": false,
           "renderer": "flot",
           "repeat": null,
-          "seriesOverrides": [ ],
+          "seriesOverrides": [],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
@@ -217,7 +217,7 @@ data:
               "expr": "sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\") or sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\")",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "Current: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Current: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "A"
             },
             {
@@ -225,20 +225,20 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "Requested: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Requested: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "B"
             },
             {
               "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "Limit: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Limit: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "C"
             }
           ],
-          "thresholds": [ ],
+          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [ ],
+          "timeRegions": [],
           "timeShift": null,
           "title": "CPU Usage",
           "tooltip": {
@@ -252,7 +252,7 @@ data:
             "mode": "time",
             "name": null,
             "show": true,
-            "values": [ ]
+            "values": []
           },
           "yaxes": [
             {
@@ -278,17 +278,17 @@ data:
           }
         },
         {
-          "aliasColors": { },
+          "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
-              "custom": { },
-              "links": [ ]
+              "custom": {},
+              "links": []
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "fill": 1,
           "fillGradient": 0,
@@ -313,7 +313,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "links": [ ],
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
@@ -324,7 +324,7 @@ data:
           "points": false,
           "renderer": "flot",
           "repeat": null,
-          "seriesOverrides": [ ],
+          "seriesOverrides": [],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
@@ -344,9 +344,9 @@ data:
               "refId": "B"
             }
           ],
-          "thresholds": [ ],
+          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [ ],
+          "timeRegions": [],
           "timeShift": null,
           "title": "Network I/O",
           "tooltip": {
@@ -360,7 +360,7 @@ data:
             "mode": "time",
             "name": null,
             "show": true,
-            "values": [ ]
+            "values": []
           },
           "yaxes": [
             {
@@ -386,17 +386,17 @@ data:
           }
         },
         {
-          "aliasColors": { },
+          "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
-              "custom": { },
-              "links": [ ]
+              "custom": {},
+              "links": []
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "fill": 1,
           "fillGradient": 0,
@@ -421,7 +421,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "links": [ ],
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
@@ -432,7 +432,7 @@ data:
           "points": false,
           "renderer": "flot",
           "repeat": null,
-          "seriesOverrides": [ ],
+          "seriesOverrides": [],
           "spaceLength": 10,
           "stack": false,
           "steppedLine": false,
@@ -441,13 +441,13 @@ data:
               "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "Restarts: {{` {{ pod }} `}}({{` {{ container }} `}})",
+              "legendFormat": "Restarts: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "A"
             }
           ],
-          "thresholds": [ ],
+          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [ ],
+          "timeRegions": [],
           "timeShift": null,
           "title": "Total Restarts Per Container",
           "tooltip": {
@@ -461,7 +461,7 @@ data:
             "mode": "time",
             "name": null,
             "show": true,
-            "values": [ ]
+            "values": []
           },
           "yaxes": [
             {
@@ -512,7 +512,7 @@ data:
             "label": "Namespace",
             "multi": false,
             "name": "namespace",
-            "options": [ ],
+            "options": [],
             "query": {
               "query": "query_result(kube_pod_info{pod=~\"application-broker.*\"} or kube_pod_info{pod=~\"eventing.*\"} or kube_pod_info{pod=~\"autoscaler.*\"} or kube_pod_info{pod=~\"application-operator-*\"})",
               "refId": "StandardVariableQuery"
@@ -522,7 +522,7 @@ data:
             "skipUrlSync": false,
             "sort": 0,
             "tagValuesQuery": "",
-            "tags": [ ],
+            "tags": [],
             "tagsQuery": "",
             "type": "query",
             "useTags": false
@@ -544,7 +544,7 @@ data:
             "label": "Application",
             "multi": false,
             "name": "app",
-            "options": [ ],
+            "options": [],
             "query": {
               "query": "label_values(kube_pod_labels{label_app=~\".*connectivity-validator\", namespace=~\"$namespace\"}, label_release)",
               "refId": "Prometheus-app-Variable-Query"
@@ -554,7 +554,7 @@ data:
             "skipUrlSync": false,
             "sort": 1,
             "tagValuesQuery": "",
-            "tags": [ ],
+            "tags": [],
             "tagsQuery": "",
             "type": "query",
             "useTags": false
@@ -593,5 +593,5 @@ data:
       "timezone": "",
       "title": "Kyma / Eventing / Pods",
       "uid": "ab4f13a9892a76a4d21ce8c2444bf4asas9",
-      "version": 2
+      "version": 1
     }
