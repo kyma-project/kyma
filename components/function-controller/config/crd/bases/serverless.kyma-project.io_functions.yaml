@@ -212,7 +212,6 @@ spec:
             runtime:
               enum:
               - nodejs12
-              - nodejs10
               - python38
               type: string
             source:
@@ -254,8 +253,8 @@ spec:
               type: string
             runtime:
               enum:
-              - nodejs12
               - nodejs10
+              - nodejs12
               - python38
               type: string
             source:
