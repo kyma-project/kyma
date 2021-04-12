@@ -35,16 +35,6 @@ authentication:
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
 
-postUpgradeJob:
-  image:
-    name: event-sources-upgrade-job
-    tag: 36cfb063
-
-postInstallJob:
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210407-86c769bd"
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
