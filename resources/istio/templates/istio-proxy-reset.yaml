@@ -70,6 +70,10 @@ spec:
             value: {{ .Chart.Version }}
           - name: RETRIES_COUNT
             value: "5"
+          - name: DRY_RUN
+            value: "false"
+          - name: EXIT_CODE
+            value: "0"
           - name: HOME
             value: /tmp
           command:

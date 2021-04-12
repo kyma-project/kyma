@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+trap cleanup EXIT SIGTERM
+
 cleanup() {
     if [[ -n "${REMOVE_PODS_FILE}" ]]; then
+        echo
         echo "Removing temporary file with pods data: ${REMOVE_PODS_FILE}"
         rm "${REMOVE_PODS_FILE}"
     fi
@@ -20,7 +23,7 @@ retry() {
         if (( attempt_num == max_attempts ))
         then
             echo "Attempt $attempt_num failed and there are no more attempts left!"
-            exit 1
+            exit $exitCode
         else
             echo "Attempt $attempt_num failed! Trying again in $attempt_num seconds..."
             sleep $(( attempt_num++ ))
@@ -28,61 +31,67 @@ retry() {
     done
 }
 
-# Returns labels defined for ReplicationController selector in the format: "l1=v1 l2=v2 ..."
-getReplicationControllerSelector() {
+# Deletes a pod
+deletePod() {
     local namespace=$1
-    local objectName=$2
-    local pattern='go-template={{range $key, $value := .spec.selector}}{{ $key }}{{ "=" }}{{ $value }}{{ "\n" }}{{end}}'
-    echo $(kubectl get -n "${namespace}" replicationcontroller "${objectName}" -o "${pattern}")
+    local podName=$2
+
+    if [[ "${dryRun}" == "false" ]]; then
+        echo "    Deleting pod: ${namespace}/${podName}"
+        retry "${RETRIES_COUNT}" kubectl -n "${namespace}" delete pod "${podName}"
+        sleep 1
+    else
+        echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
+    fi
 }
 
-# Returns pods by labels.
-# Labels are provides as a string: "l1=v1 l2=v2 ..."
-getPodByLabels() {
+# Helper function to handle "replicasets" map values
+# Assign value if it does not already exist.
+# Append to value using "/" as a separator if it already exists.
+appendToMapValue() {
     local namespace=$1
-    local labels=${@:2}
-    local labelsWithCommas=$(echo "${labels}" | sed 's/ /,/g')
-    echo $(kubectl get pods -n "${namespace}" -o jsonpath='{.items[*].metadata.name}' -l "${labelsWithCommas}")
+    local parentObjectName=$2
+    local podName=$3
+
+    if [[ -z "${replicasets[${namespace}/${parentObjectName}]}" ]]
+    then
+        replicasets["${namespace}/${parentObjectName}"]="${podName}"
+    else
+        replicasets["${namespace}/${parentObjectName}"]="${replicasets[${namespace}/${parentObjectName}]}/${podName}"
+    fi
 }
 
-# Deletes pods controlled by given ReplicationController
-# Pods are deleted one by one to reduce downtimes.
-deletePodsForReplicationController() {
-    local namespace=$1
-    local objectName=$2
-    local labels=$(retry "${RETRIES_COUNT}" getReplicationControllerSelector "${namespace}" "${objectName}")
-    podsToDelete=$(retry "${RETRIES_COUNT}" getPodByLabels "${namespace}" "${labels}")
 
-    echo
-    echo "    Restarting $(echo "${podsToDelete}" | wc -w | sed 's/ //g') pods for ReplicationController: ${namespace}/${objectName}"
+########################################
+# Global variables
 
-    for pod in ${podsToDelete};
-    do
-        if [[ "${dryRun}" == "false" ]]; then
-            echo "        Deleting pod: ${namespace}/${pod}"
-            sleep 2
-            retry "${RETRIES_COUNT}" kubectl -n "${namespace}" delete pod "${pod}"
-        else
-            echo "        [dryrun]" kubectl -n "${namespace}" delete pod "${pod}"
-        fi
-    done
-}
+declare -A objectsToRollout
+declare -A replicasets
+declare -A podsToDelete
 
-trap cleanup EXIT SIGINT SIGTERM
+
+########################################
+# Configuration values check
 
 if [ -z "$ISTIO_PROXY_IMAGE_PREFIX" ]; then
   echo "Error: required ISTIO_PROXY_IMAGE_PREFIX value is missing. Exiting..."
-  exit 1
+  exit $exitCode
 fi
 
 if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
   echo "Error: required ISTIO_PROXY_IMAGE_VERSION value is missing. Exiting..."
-  exit 1
+  exit $exitCode
 fi
 
 RETRIES_COUNT="${RETRIES_COUNT:5}"
 
+# Dry Run mode only prints commands. True by default.
 dryRun="${DRY_RUN:-true}"
+# Exit code for entire script. Zero by default means the script will terminate on errors, but it will not fail the process.
+exitCode="${EXIT_CODE:-0}"
+
+########################################
+# Processing starts here
 
 # TODO: check if this logic is still applicable and move it elsewhere, see issue: https://github.com/kyma-project/kyma/issues/11078
 namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
@@ -95,19 +104,16 @@ for NS in ${namespaces}; do
     fi
 done
 
-declare -a objectsToRollout
-declare -A replicationControllers
-
-
 if [[ -z "${PODS_FILE}" ]]; then
     PODS_FILE=$(mktemp)
     REMOVE_PODS_FILE=${PODS_FILE}
+
+    echo "Getting pods data into file: ${PODS_FILE}"
+    allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
+    echo "${allPods}" > "${PODS_FILE}"
 fi
 
-allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
-echo "${allPods}" > ${PODS_FILE}
-echo "Processing pods data from: ${PODS_FILE}"
-
+echo "Processing pods data from file: ${PODS_FILE}"
 istioProxyImage="${ISTIO_PROXY_IMAGE_PREFIX}:${ISTIO_PROXY_IMAGE_VERSION}"
 
 #This query selects all pods that have containers with an istio-proxy image in a version other than expected.
@@ -115,14 +121,15 @@ istioProxyImage="${ISTIO_PROXY_IMAGE_PREFIX}:${ISTIO_PROXY_IMAGE_VERSION}"
 #Full image address is used to prevent from matching pods that are not connected with Istio but use the same version.
 jqQuery='.items | .[] | select(.spec.containers[].image | startswith("'"${ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${istioProxyImage}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
 
-pods=$(jq -rc "${jqQuery}" < ${PODS_FILE})
+pods=$(jq -rc "${jqQuery}" < "${PODS_FILE}")
 podArray=($(echo "${pods}" | tr " " "\n"))
 
-echo "Number of pods matched: ${#podArray[@]}"
+echo
+echo "Analyzing Pods - ${#podArray[@]} objects found."
 
 for i in "${podArray[@]}"
 do
-    namespacedName=($(echo $i | tr "/" "\n"))
+    namespacedName=($(echo "$i" | tr "/" "\n"))
 
     podName="${namespacedName[0]}"
     namespace="${namespacedName[1]}"
@@ -133,7 +140,7 @@ do
     podPhase=$(jq -r '.status.phase' <<< "${podJson}")
     case "${podPhase}" in
         ("Terminating")
-            echo "Pod ${podName} in terminating state. Skipping..."
+            echo "    Pod ${podName} in terminating state. Skipping..."
             continue
             ;;
         (*)
@@ -147,39 +154,73 @@ do
         ("null")
             ;&
         ("")
-            echo "Pod ${podName} in namespace ${namespace} has no parent object (standalone Pod). Skipping..."
+            echo "    Pod ${namespace}/${podName} has no parent object (standalone Pod). Skipping..."
             continue
             ;;
         ("replicaset")
-            parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
-            echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
-            objectsToRollout["deployment/${namespace}/${parentDeploymentName}"]=""
+            echo "    Pod \"${namespace}/${podName}\" is managed by the ReplicaSet \"${parentObjectName}\". Requires further processing."
+            appendToMapValue "${namespace}" "${parentObjectName}" "${podName}"
             ;;
         ("replicationcontroller")
-            replicationControllers["${namespace}/${parentObjectName}"]=""
+            echo "    Pod \"${namespace}/${podName}\" is managed by the ReplicationController \"${parentObjectName}\". Eligible for delete."
+            podsToDelete["${namespace}/${podName}"]=""
             ;;
         (*)
-            echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
+            echo "    Pod \"${namespace}/${podName}\" is managed by \"${parentObjectKind}\" \"${parentObjectName}\". Eligible for rollout. "
             objectsToRollout["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
             ;;
     esac
 done
 
-if [[ ${#replicationControllers[@]} -gt 0 ]]; then
-    echo "Processing ReplicationControllers"
 
-    for key in "${!replicationControllers[@]}"
+echo "Analyzing ReplicaSets - ${#replicasets[@]} objects found."
+if [[ ${#replicasets[@]} -gt 0 ]]; then
+
+   for key in "${!replicasets[@]}"
+   do
+        attributes=($(echo "${key}" | tr "/" "\n"))
+        namespace="${attributes[0]}"
+        replicasetName="${attributes[1]}"
+
+        parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl -n "${namespace}" get replicaset "${replicasetName}" -o jsonpath='{.metadata.ownerReferences[0].name}')
+
+        case "${parentDeploymentName}" in
+            ("null")
+                ;&
+            ("")
+                echo "    ReplicaSet ${namespace}/${replicasetName} has no parent object. It's pods must be deleted"
+                podsForReplicaset=$(echo "${replicasets[${key}]}" | tr "/" " ")
+                for pod in ${podsForReplicaset}
+                do
+                  podsToDelete["${namespace}/${pod}"]=""
+                done
+                ;;
+            (*)
+                echo "    ReplicaSet ${namespace}/${replicasetName} has a parent deployment: ${parentDeploymentName}. Assigned for rollout"
+                objectsToRollout["deployment/${namespace}/${parentDeploymentName}"]=""
+                ;;
+            esac
+    done
+fi
+
+echo ""
+echo "Processing objects..."
+echo ""
+
+echo "Number of pods to delete: ${#podsToDelete[@]}"
+if [[ ${#podsToDelete[@]} -gt 0 ]]; then
+
+    for key in "${!podsToDelete[@]}"
     do
         attributes=($(echo "${key}" | tr "/" "\n"))
         namespace="${attributes[0]}"
-        name="${attributes[1]}"
+        podName="${attributes[1]}"
 
-        deletePodsForReplicationController "${namespace}" "${name}"
+        deletePod "${namespace}" "${podName}"
     done
 fi
 
 echo "Number of objects to rollout: ${#objectsToRollout[@]}"
-
 for key in "${!objectsToRollout[@]}"
 do
 
@@ -192,7 +233,7 @@ do
     if [[ "${dryRun}" == "false" ]]; then
         retry "${RETRIES_COUNT}" kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
     else
-        echo "[dryrun] kubectl rollout restart ${kind} ${name} -n ${namespace}"
+        echo "    [dryrun] kubectl rollout restart ${kind} ${name} -n ${namespace}"
     fi
 
 done
