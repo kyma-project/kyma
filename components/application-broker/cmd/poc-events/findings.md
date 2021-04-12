@@ -20,7 +20,7 @@ Currently changing status of custom resource does not work. Probably will be rel
 
 #### Detailed description
 Currently changing status of custom resource does not work, but [proposal](https://github.com/kubernetes/community/pull/913) is already accepted.
-Implementation is also merged to the `main` branch and tagged with version: "v1.10.0-beta.4". See [Add subresources for custom resources](https://github.com/kubernetes/kubernetes/pull/55168/commits/6fbe8157e39f6bd7ad885a8a6f8614e2fe45dc5e)
+Implementation is also merged to the `master` branch and tagged with version: "v1.10.0-beta.4". See [Add subresources for custom resources](https://github.com/kubernetes/kubernetes/pull/55168/commits/6fbe8157e39f6bd7ad885a8a6f8614e2fe45dc5e)
 
 So currently we get following error when calling UpdateStatus method.
 ```text
