@@ -8,7 +8,7 @@ metadata:
     grafana_dashboard: "1"
 {{ include "dashboards.labels" . | indent 4 }}
 data:
-  nats.json: |-
+  eventing-nats.json: |-
     {
       "annotations": {
         "list": [
