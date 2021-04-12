@@ -38,7 +38,7 @@ deletePod() {
 
     if [[ "${dryRun}" == "false" ]]; then
         echo "    Deleting pod: ${namespace}/${podName}"
-        retry "${RETRIES_COUNT}" kubectl -n "${namespace}" delete pod "${podName}"
+        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}"
         sleep 1
     else
         echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
@@ -83,7 +83,7 @@ if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
   exit $exitCode
 fi
 
-RETRIES_COUNT="${RETRIES_COUNT:5}"
+retriesCount=${RETRIES_COUNT:-5}
 
 # Dry Run mode only prints commands. True by default.
 dryRun="${DRY_RUN:-true}"
@@ -94,11 +94,11 @@ exitCode="${EXIT_CODE:-0}"
 # Processing starts here
 
 # TODO: check if this logic is still applicable and move it elsewhere, see issue: https://github.com/kyma-project/kyma/issues/11078
-namespaces=$(retry "${RETRIES_COUNT}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
+namespaces=$(retry "${retriesCount}" kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2)
 
 for NS in ${namespaces}; do
     if [[ "${dryRun}" == "false" ]]; then
-        retry "${RETRIES_COUNT}" kubectl delete replicasets -n "${NS}" --all
+        retry "${retriesCount}" kubectl delete replicasets -n "${NS}" --all
     else
         echo "[dryrun] kubectl delete rs -n ${NS}"
     fi
@@ -109,7 +109,7 @@ if [[ -z "${PODS_FILE}" ]]; then
     REMOVE_PODS_FILE=${PODS_FILE}
 
     echo "Getting pods data into file: ${PODS_FILE}"
-    allPods=$(retry "${RETRIES_COUNT}" kubectl get po -A -o json)
+    allPods=$(retry "${retriesCount}" kubectl get po -A -o json)
     echo "${allPods}" > "${PODS_FILE}"
 fi
 
@@ -134,7 +134,7 @@ do
     podName="${namespacedName[0]}"
     namespace="${namespacedName[1]}"
 
-    podJson=$(retry "${RETRIES_COUNT}" kubectl get pod "${podName}" -n "${namespace}" -o json)
+    podJson=$(retry "${retriesCount}" kubectl get pod "${podName}" -n "${namespace}" -o json)
 
     #Skip pods in Terminating state
     podPhase=$(jq -r '.status.phase' <<< "${podJson}")
@@ -182,7 +182,7 @@ if [[ ${#replicasets[@]} -gt 0 ]]; then
         namespace="${attributes[0]}"
         replicasetName="${attributes[1]}"
 
-        parentDeploymentName=$(retry "${RETRIES_COUNT}" kubectl -n "${namespace}" get replicaset "${replicasetName}" -o jsonpath='{.metadata.ownerReferences[0].name}')
+        parentDeploymentName=$(retry "${retriesCount}" kubectl -n "${namespace}" get replicaset "${replicasetName}" -o jsonpath='{.metadata.ownerReferences[0].name}')
 
         case "${parentDeploymentName}" in
             ("null")
@@ -231,7 +231,7 @@ do
     name="${attributes[2]}"
 
     if [[ "${dryRun}" == "false" ]]; then
-        retry "${RETRIES_COUNT}" kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+        retry "${retriesCount}" kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
     else
         echo "    [dryrun] kubectl rollout restart ${kind} ${name} -n ${namespace}"
     fi
