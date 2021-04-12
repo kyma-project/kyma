@@ -69,11 +69,11 @@ spec:
           - name: ISTIO_PROXY_IMAGE_VERSION
             value: {{ .Chart.Version }}
           - name: RETRIES_COUNT
-            value: "5"
+            value: {{ .Values.kyma.proxyResetJob.retriesCount }}
           - name: DRY_RUN
-            value: "false"
+            value: {{ .Values.kyma.proxyResetJob.dryRun }}
           - name: EXIT_CODE
-            value: "0"
+            value: {{ .Values.kyma.proxyResetJob.exitCode }}
           - name: HOME
             value: /tmp
           command:
