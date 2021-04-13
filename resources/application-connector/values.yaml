@@ -65,6 +65,8 @@ global:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
+  application_broker:
+    version: "PR-10924"
 
 application_connectivity_certs_setup_job:
   secrets:

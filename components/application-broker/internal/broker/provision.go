@@ -18,46 +18,10 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/internal/istio"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-)
-
-const (
-	integrationNamespace = "kyma-integration"
-
-	// knativeEventingInjectionLabelKey used for enabling Knative eventing default broker for a given namespace
-	knativeEventingInjectionLabelKey          = "knative-eventing-injection"
-	knativeEventingInjectionLabelValueEnabled = "enabled"
-
-	// applicationNameLabelKey is used to select Knative channels and Subscriptions
-	applicationNameLabelKey = "application-name"
-
-	// applicationServiceIDLabelKey is used to select Knative Subscriptions
-	applicationServiceIDLabelKey = "application-service-id"
-
-	// brokerNamespaceLabelKey is used to select Knative Subscriptions
-	brokerNamespaceLabelKey = "broker-namespace"
-
-	// knSubscriptionNamePrefix is the prefix used for the generated Knative Subscription name
-	knSubscriptionNamePrefix = "brokersub"
-
-	// peerAuthKnativeBrokerLabelKey is the key of the label for all Knative broker pods
-	peerAuthKnativeBrokerLabelKey = "eventing.knative.dev/broker"
-
-	// peerAuthKnativeBrokerLabelValue is the value of the label for all Knative broker pods
-	peerAuthKnativeBrokerLabelValue = "default"
-
-	// knativeBrokerMetricsPort is the port of the broker where metrics are exposed
-	knativeBrokerMetricsPort = uint32(9090)
-
-	// peerAuthNameSuffix is the suffix added to the PeerAuthentication CR as it is meant for Knative brokers
-	peerAuthNameSuffix = "-broker"
 )
 
 type RestoreProvisionRequest struct {
@@ -72,7 +36,7 @@ type RestoreProvisionRequest struct {
 func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter,
 	operationInserter operationInserter, operationUpdater operationUpdater,
 	accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder,
-	eaClient v1client.ApplicationconnectorV1alpha1Interface, knClient knative.Client,
+	eaClient v1client.ApplicationconnectorV1alpha1Interface,
 	istioClient securityclientv1beta1.SecurityV1beta1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector appSvcIDSelector,
 	apiPkgCredsCreator apiPackageCredentialsCreator,
@@ -87,7 +51,6 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 		accessChecker:            accessChecker,
 		appSvcFinder:             appSvcFinder,
 		eaClient:                 eaClient,
-		knClient:                 knClient,
 		istioClient:              istioClient,
 		maxWaitTime:              time.Minute,
 		appSvcIDSelector:         selector,
@@ -109,7 +72,6 @@ type ProvisionService struct {
 	appSvcFinder             appSvcFinder
 	eaClient                 v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker            access.ProvisionChecker
-	knClient                 knative.Client
 	istioClient              securityclientv1beta1.PeerAuthenticationsGetter
 	appSvcIDSelector         appSvcIDSelector
 	apiPkgCredCreator        apiPackageCredentialsCreator
@@ -271,34 +233,6 @@ func (svc *ProvisionService) do(inputParams map[string]interface{}, iID internal
 		return
 	}
 
-	if !svc.newEventingFlow {
-
-		// persist Knative Subscription
-		if err := svc.persistKnativeSubscription(appName, appSvcID, ns); err != nil {
-			svc.log.Printf("Error persisting Knative Subscription: %v", err)
-			opDesc := fmt.Sprintf("provisioning failed while persisting Knative Subscription for application: %s namespace: %s on error: %s", appName, ns, err)
-			svc.updateStateFailed(iID, opID, opDesc)
-			return
-		}
-
-		// enable the namespace default Knative Broker
-		if err := svc.enableDefaultKnativeBroker(ns); err != nil {
-			opDesc := fmt.Sprintf("provisioning failed while enabling default Knative Broker for namespace: %s"+
-				" on error: %s", ns, err)
-			svc.updateStateFailed(iID, opID, opDesc)
-			return
-		}
-
-		// CreateOrUpdate Istio PeerAuthentication
-		if err := svc.createOrUpdatePeerAuthentication(ns); err != nil {
-			svc.log.Errorf("Error creating istio PeerAuthentication: %v", err)
-			opDesc := fmt.Sprintf("provisioning failed while creating an istio PeerAuthentication for application: %s"+
-				" namespace: %s on error: %s", appName, ns, err)
-			svc.updateStateFailed(iID, opID, opDesc)
-			return
-		}
-	}
-
 	svc.updateStateSuccess(iID, opID)
 }
 
@@ -364,118 +298,6 @@ func (svc *ProvisionService) ensureEaUpdate(appID, ns string, newEA *v1alpha1.Ev
 	_, err = svc.eaClient.EventActivations(ns).Update(toUpdate)
 	if err != nil {
 		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
-	}
-	return nil
-}
-
-// enableDefaultKnativeBroker enables the Knative Eventing default broker for the given namespace
-// by adding the proper label to the namespace.
-func (svc *ProvisionService) enableDefaultKnativeBroker(ns internal.Namespace) error {
-	// get the namespace
-	namespace, err := svc.knClient.GetNamespace(string(ns))
-	if err != nil {
-		return errors.Wrap(err, "namespace not found")
-	}
-
-	// check if the namespace has the injection label
-	if val, ok := namespace.Labels[knativeEventingInjectionLabelKey]; ok && val == knativeEventingInjectionLabelValueEnabled {
-		svc.log.Printf("the default Knative Eventing Broker is already enabled for the namespace: [%s]", namespace.Name)
-		return nil
-	}
-
-	// add the injection label to the namespace
-	if len(namespace.Labels) == 0 {
-		namespace.Labels = make(map[string]string, 1)
-	}
-	namespace.Labels[knativeEventingInjectionLabelKey] = knativeEventingInjectionLabelValueEnabled
-
-	// update the namespace
-	_, err = svc.knClient.UpdateNamespace(namespace)
-	if err != nil {
-		svc.log.Printf("error enabling the default Knative Eventing Broker for namespace: [%v] [%v]", namespace, err)
-	}
-	return err
-}
-
-// persistKnativeSubscription will get a Knative Subscription given application name and namespace and will
-// update and persist it. If there is no Knative Subscription found, a new one will be created.
-func (svc *ProvisionService) persistKnativeSubscription(applicationName internal.ApplicationName, applicationSvcID internal.ApplicationServiceID, ns internal.Namespace) error {
-	// construct the default broker URI using the given namespace.
-	defaultBrokerURI := knative.GetDefaultBrokerURI(ns)
-
-	// get the Knative channel for the application
-	channel, err := svc.channelForApp(applicationName)
-	if err != nil {
-		return errors.Wrapf(err, "getting the Knative channel for the application [%v]", applicationName)
-	}
-
-	// subscription selector labels
-	labels := map[string]string{
-		brokerNamespaceLabelKey:      string(ns),
-		applicationNameLabelKey:      string(applicationName),
-		applicationServiceIDLabelKey: string(applicationSvcID),
-	}
-
-	// get Knative subscription by labels
-	subscription, err := svc.knClient.GetSubscriptionByLabels(integrationNamespace, labels)
-	switch {
-	case apiErrors.IsNotFound(err):
-		// subscription not found, create a new one
-		newSubscription := knative.Subscription(knSubscriptionNamePrefix, integrationNamespace).Spec(channel, defaultBrokerURI).Labels(labels).Build()
-		createdSub, err := svc.knClient.CreateSubscription(newSubscription)
-		if err != nil {
-			return errors.Wrapf(err, "while creating Knative Subscription")
-		}
-		svc.log.Printf("Created Knative Subscription: [%v]", createdSub.Name)
-		return nil
-	case err != nil:
-		return errors.Wrapf(err, "getting Subscription by labels [%v]", labels)
-	}
-
-	// update Knative Subscription
-	subscription = knative.FromSubscription(subscription).Spec(channel, defaultBrokerURI).Labels(labels).Build()
-	subscription, err = svc.knClient.UpdateSubscription(subscription)
-	if err != nil {
-		return errors.Wrapf(err, "updating existing Knative Subscription with labels [%v] for channel: [%v]", labels, channel.Name)
-	}
-	svc.log.Printf("Updated Knative Subscription: [%v]", subscription.Name)
-	return nil
-}
-
-func (svc *ProvisionService) channelForApp(applicationName internal.ApplicationName) (*messagingv1alpha1.Channel, error) {
-	labels := map[string]string{
-		applicationNameLabelKey: string(applicationName),
-	}
-	return svc.knClient.GetChannelByLabels(integrationNamespace, labels)
-}
-
-// CreateOrUpdate PeerAuthentication to enable Prometheus scrape Knative brokers for metrics
-func (svc *ProvisionService) createOrUpdatePeerAuthentication(ns internal.Namespace) error {
-	peerAuthName := fmt.Sprintf("%s%s", ns, peerAuthNameSuffix)
-	namespace := string(ns)
-	labelSelectors := map[string]string{
-		peerAuthKnativeBrokerLabelKey: peerAuthKnativeBrokerLabelValue,
-	}
-
-	svc.log.Infof("Creating PeerAuthentication %s in namespace: %s", peerAuthName, namespace)
-	peerAuth := istio.NewPeerAuthentication(namespace, peerAuthName,
-		istio.WithLabel(peerAuthKnativeBrokerLabelKey, peerAuthKnativeBrokerLabelValue),
-		istio.WithSelectorSpec(labelSelectors),
-		istio.WithPermissiveMode(knativeBrokerMetricsPort),
-	)
-
-	objInfo := fmt.Sprintf("Istio PeerAuthentication: [%s], in namespace: [%s]", peerAuth.Name, peerAuth.Namespace)
-	_, err := svc.istioClient.PeerAuthentications(peerAuth.Namespace).Create(peerAuth)
-	switch {
-	case err == nil:
-		svc.log.Infof("Created %s", objInfo)
-	case apiErrors.IsAlreadyExists(err):
-		if err = svc.ensurePeerAuthentication(peerAuth); err != nil {
-			return errors.Wrapf(err, "while ensuring update on %s", objInfo)
-		}
-		svc.log.Infof("Updated %s", objInfo)
-	default:
-		return errors.Wrapf(err, "while creating %s", objInfo)
 	}
 	return nil
 }
