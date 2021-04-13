@@ -22,7 +22,7 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    ![Integration Settings](./assets/integration-settings.png)
 
-3. Override Alertmanager configuration. The configuration for notification receivers is located in the [template](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/templates/kyma-additions/alertmanager.config.yaml). By default, it contains settings for VictorOps and Slack. Define a Secret to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) default [values](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/prometheus-node-exporter/values.yaml) used by the chart.
+3. Override Alertmanager configuration. The configuration for notification receivers is located in the [template](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/templates/kyma-additions/alertmanager.config.yaml). By default, it contains settings for VictorOps and Slack. Define a Secret to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) default [values](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-node-exporter/values.yaml) used by the chart.
 
    ```yaml
    apiVersion: v1

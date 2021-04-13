@@ -7,7 +7,7 @@ This document presents the rules you must follow when you configure the Helm Bro
 
 ## Using HTTP URLs
 
-On your non-local clusters, you can use only servers with TLS enabled. All incorrect or unsecured URLs will be omitted. Find the information about the rejected URLs in the Helm Broker logs. You can use unsecured URLs only on your local cluster. To use URLs without TLS enabled, set the **global.isDevelopMode** environment variable in the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/values.yaml) file to `true`.
+On your non-local clusters, you can use only servers with TLS enabled. All incorrect or unsecured URLs will be omitted. Find the information about the rejected URLs in the Helm Broker logs. You can use unsecured URLs only on your local cluster. To use URLs without TLS enabled, set the **global.isDevelopMode** environment variable in the [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/helm-broker/values.yaml) file to `true`.
 
 ## Registering the same ID multiple times
 

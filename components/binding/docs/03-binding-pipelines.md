@@ -2,10 +2,10 @@
 
 Kyma Binding pipelines are based on GitHub Actions and use k3s that provides [the best infrastructure](https://github.com/kyma-incubator/local-kyma#i-see-k3s-k3d-kind-and-minikube---what-should-i-use) to run the CI on. The script to run k3s is based on [this script](https://github.com/kyma-incubator/local-kyma/blob/main/create-cluster-k3s.sh). As GitHub doesn't propagate the secrets created on the main repository to pull requests opened from forked repositories and the workflow in Kyma is based on using forks, we had to create a workaround based on [this solution](https://github.com/imjohnbo/ok-to-test). For this purpose, the following jobs were developed:
 
-- [`Is trusted dev`](https://github.com/kyma-project/kyma/blob/master/.github/workflows/trusted-dev.yaml)
-- [`Ok to test`](https://github.com/kyma-project/kyma/blob/master/.github/workflows/ok-to-test.yaml)
-- [`Pre-master binding k3s`](https://github.com/kyma-project/kyma/blob/master/.github/workflows/pre-master-binding-k3s.yml)
-- [`Post-master binding k3s`](https://github.com/kyma-project/kyma/blob/master/.github/workflows/post-master-binding-k3s.yml)
+- [`Is trusted dev`](https://github.com/kyma-project/kyma/blob/main/.github/workflows/trusted-dev.yaml)
+- [`Ok to test`](https://github.com/kyma-project/kyma/blob/main/.github/workflows/ok-to-test.yaml)
+- [`Pre-master binding k3s`](https://github.com/kyma-project/kyma/blob/main/.github/workflows/pre-master-binding-k3s.yml)
+- [`Post-master binding k3s`](https://github.com/kyma-project/kyma/blob/main/.github/workflows/post-master-binding-k3s.yml)
 
 ## `Is trusted dev` job
 

@@ -14,6 +14,6 @@ Use the following files to configure and manage Alertmanager:
 
 ## Alerting rules
 
-Kyma comes with a set of [alerting rules](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/templates/prometheus/rules-1.14) provided out of the box.
+Kyma comes with a set of [alerting rules](https://github.com/kyma-project/kyma/tree/main/resources/monitoring/templates/prometheus/rules-1.14) provided out of the box.
 These rules provide alerting configuration for logging, web apps, rest services, and custom Kyma rules.
 You can also define your own alerting rule. To learn how, see the [tutorial](/components/monitoring/#tutorials-define-alerting-rules).
