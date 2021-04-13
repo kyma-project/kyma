@@ -7,7 +7,7 @@ nats:
     monitoring: 8222
 
 clusterSize: 1
-enableMetrics: true
+enableMetrics: false
 
 resources:
   limits:
