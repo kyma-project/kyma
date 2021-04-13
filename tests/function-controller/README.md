@@ -18,7 +18,7 @@ Use the following tools to set up the project:
 
 To run integration tests, follow these instructions:
 
-1. [Install](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) Kyma.
+1. [Install](https://kyma-project.io/docs/#installation-install-kyma-locally) Kyma.
 2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
 
    ```bash
@@ -74,8 +74,8 @@ Use the following environment variables to configure the application:
 | **APP_TEST_INGRESS_HOST**               | No       | `kyma.local`                | The Ingress host address                                                                                                                              |
 | **APP_TEST_DOMAIN_PORT**                | No       | `80`                        | The port of the Service exposed by the API Rule in a given domain                                                                                     |
 | **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                      | The flag that controls whether tests use verification of the server's certificate and the host name to reach the Function                                       |
-| **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change | 
-| **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  | 
+| **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change |
+| **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  |
 
 Those can be supplied to [this](../../resources/serverless/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
 

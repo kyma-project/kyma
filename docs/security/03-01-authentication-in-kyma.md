@@ -5,13 +5,13 @@ type: Details
 
 ## User authentication
 
-The identity federation in Kyma is managed through [Dex](https://github.com/dexidp/dex), an open-source, [OpenID Connect](https://openid.net/connect/) identity provider. 
+The identity federation in Kyma is managed through [Dex](https://github.com/dexidp/dex), an open-source, [OpenID Connect](https://openid.net/connect/) identity provider.
 
 The diagram shows the user authentication flow, focusing on the role Dex plays in the process.
 
 ![Dex diagram](./assets/dex.svg)
 
-1. Access the client application, such as the Kyma Console, Grafana UI, or Jaeger UI. 
+1. Access the client application, such as the Kyma Console, Grafana UI, or Jaeger UI.
 2. If the application does not find a [JWT token](#ID-Tokens) in the browser session storage, it will redirect you to Dex to handle the authentication.
 3. Dex lists all the defined identity providers in your browser window.
 
@@ -50,7 +50,7 @@ Read the [tutorial](#tutorials-manage-static-users-in-dex) to learn how to manag
 }
 ```
 
->**NOTE:** You can customize the expiration settings of the tokens by creating [overrides](/root/kyma#configuration-helm-overrides-for-kyma-installation) to the [configuration](https://github.com/kyma-project/kyma/blob/master/resources/dex/values.yaml#L59) of the Dex component chart.
+>**NOTE:** You can customize the expiration settings of the tokens by creating [overrides](/root/kyma#configuration-helm-overrides-for-kyma-installation) to the [configuration](https://github.com/kyma-project/kyma/blob/main/resources/dex/values.yaml#L59) of the Dex component chart.
 
 ## Service-to-service authentication
 

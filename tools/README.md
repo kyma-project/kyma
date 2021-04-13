@@ -4,4 +4,4 @@ The `tools` directory contains sources for all tools that provide supporting fun
 
 ## Development
 
-Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md) development guide when you add a new tool to the `kyma` repository.
+Follow [this](https://github.com/kyma-project/kyma/blob/main/resources/README.md) development guide when you add a new tool to the `kyma` repository.

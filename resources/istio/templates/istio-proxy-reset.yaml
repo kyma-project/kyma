@@ -64,10 +64,16 @@ spec:
         - name: proxy-reset
           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           env:
-          - name: EXPECTED_ISTIO_PROXY_IMAGE
-            value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}:{{ .Chart.Version }}
-          - name: COMMON_ISTIO_PROXY_IMAGE_PREFIX
+          - name: ISTIO_PROXY_IMAGE_PREFIX
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}
+          - name: ISTIO_PROXY_IMAGE_VERSION
+            value: {{ .Chart.Version }}
+          - name: RETRIES_COUNT
+            value: "{{ .Values.kyma.proxyResetJob.retriesCount }}"
+          - name: DRY_RUN
+            value: "{{ .Values.kyma.proxyResetJob.dryRun }}"
+          - name: EXIT_CODE
+            value: "{{ .Values.kyma.proxyResetJob.exitCode }}"
           - name: HOME
             value: /tmp
           command:

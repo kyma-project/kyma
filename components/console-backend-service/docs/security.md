@@ -6,7 +6,7 @@ The application checks if the Authorization token passed by the user is signed b
 
 ## Overview
 
-The Console Backend Service uses a GraphQL implementation for authorization. Read [this](https://kyma-project.io/docs/master/components/security#details-graph-ql)) document for more details.
+The Console Backend Service uses a GraphQL implementation for authorization. Read [this](https://kyma-project.io/docs/components/security/#details-graph-ql) document for more details.
 
 ## How to secure a GraphQL action
 
@@ -28,7 +28,7 @@ Reference this table for details on the elements that make up a defined and secu
 | `: [LimitRange!]!` | Defines the type of object returned by the query. In this case, it's a list of LimitRanges resources. |
 | `@HasAccess(attributes:` | Defines the GraphQL directive that secures access to the resource. |
 | `resource: "limitranges"` | Defines the type of secured Kubernetes resource, in this case all `limitranges` resources. |
-| `verb: "list"` | Defines the secured interaction type. It is related to action type, which in this case is "query". Use the the table from [this paragraph](https://kyma-project.io/docs/master/components/security#details-graph-ql) to choose the right verb. |
+| `verb: "list"` | Defines the secured interaction type. It is related to action type, which in this case is "query". Use the the table from [this paragraph](https://kyma-project.io/docs/components/security/#details-graph-ql) to choose the right verb. |
 | `apiGroup: ""` | Defines the apiGroup to which the user must have access to get the result of this query. In this case it is empty because limitRanges is the resource built into Kubernetes, not some Custom Resource created by us. |
 | `apiVersion: "v1alpha1"` | Specifies the apiVersion of the query subject. |
 | `namespaceArg: "namespace"` | Specifies the name of the argument or field in the parent object from which the resource namespace is fetched. |
