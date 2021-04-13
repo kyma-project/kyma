@@ -14,9 +14,10 @@ kyma:
     tag: "20210407-86c769bd"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
-    retriesCount: "5"
-    dryRun: "false"
-    exitCode: "0"
+    retriesCount: 5
+    dryRun: false
+    sleepAfterPodDeleted: 1
+    exitCode: 0
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:

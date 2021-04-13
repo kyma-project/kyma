@@ -31,6 +31,27 @@ retry() {
     done
 }
 
+
+# A function that deletes the object and handles NotFound condition as a success.
+tryDelete() {
+    local namespace=$1
+    local kind=$2
+    local name=$3
+
+    local code
+    local result
+
+    result=$(kubectl -n "${namespace}" delete "${kind}" "${name}" 2>&1); code=$?
+
+    if [[ ${code} -eq 1 && ${result} == *"NotFound"* ]]
+    then
+        echo "        Delete operation failed with: \"${result}\". Handling as a success (the ${kind}/${name} is gone)"
+        return 0
+    fi
+
+    return ${code}
+}
+
 # Deletes a pod
 deletePod() {
     local namespace=$1
@@ -38,8 +59,8 @@ deletePod() {
 
     if [[ "${dryRun}" == "false" ]]; then
         echo "    Deleting pod: ${namespace}/${podName}"
-        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}"
-        sleep 1
+        retry "${retriesCount}" tryDelete "${namespace}" pod "${podName}"
+        sleep "${sleepAfterPodDeleted}"
     else
         echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
     fi
@@ -83,12 +104,14 @@ if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
   exit $exitCode
 fi
 
+# Retries count in case of an error
 retriesCount=${RETRIES_COUNT:-5}
-
 # Dry Run mode only prints commands. True by default.
 dryRun="${DRY_RUN:-true}"
 # Exit code for entire script. Zero by default means the script will terminate on errors, but it will not fail the process.
 exitCode="${EXIT_CODE:-0}"
+# Sleep time after pod is deleted
+sleepAfterPodDeleted="${SLEEP_AFTER_POD_DELETED}:-0"
 
 ########################################
 # Processing starts here
@@ -110,6 +133,7 @@ if [[ -z "${PODS_FILE}" ]]; then
 
     echo "Getting pods data into file: ${PODS_FILE}"
     allPods=$(retry "${retriesCount}" kubectl get po -A -o json)
+    allPods=$(retry "${retriesCount}" kubectl get po -n padu -o json)
     echo "${allPods}" > "${PODS_FILE}"
 fi
 
