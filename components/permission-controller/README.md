@@ -1,7 +1,7 @@
 # Permission Controller
 
 ## Overview
-The Permission Controller listens for new Namespaces and creates a RoleBinding for the users of the specified group to the **kyma-admin** role within these Namespaces. The Controller uses a blacklist mechanism, which defines the Namespaces in which the users of the defined group are not assigned the **kyma-admin** role. When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
+The Permission Controller listens for new Namespaces and creates a RoleBinding for the users of the specified group to the **kyma-admin** role within these Namespaces. The Controller uses a blocking mechanism which defines the Namespaces in which the users of the defined group are not assigned the **kyma-admin** role. When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
 
 Click [here](/resources/permission-controller) to access the Helm chart that defines the component's installation.
 
@@ -34,5 +34,5 @@ Use the `run` formula to run the controller using local sources:
   ```bash
   make run EXCLUDED_NAMESPACES={EXCLUDED_NAMESPACES} SUBJECT_GROUPS={SUBJECT_GROUPS} STATIC_CONNECTOR={STATIC_CONNECTOR}
   ```
-  
+
 See [this file](/resources/permission-controller/README.md#configuration) to learn how to use the environment variables.

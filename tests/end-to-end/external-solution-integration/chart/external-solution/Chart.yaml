@@ -1,4 +1,0 @@
-apiVersion: v1
-description: This chart populates sample data and executes the external solution test in the upgrade context
-name: external-solution
-version: 0.1.0

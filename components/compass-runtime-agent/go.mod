@@ -21,7 +21,7 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.1
+	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92

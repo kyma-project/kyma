@@ -180,11 +180,17 @@ if __name__ == '__main__':
         'function_failures_total', 'Number of exceptions in user function', ['method']
     )
 
-    loggedapp = requestlogger.WSGILogger(
-        app,
-        [logging.StreamHandler(stream=sys.stdout)],
-        requestlogger.ApacheFormatter(),
-    )
+    # added by Kyma team
+    if os.getenv('KYMA_INTERNAL_LOGGER_ENABLED'):
+        # default that has been used so far
+        loggedapp = requestlogger.WSGILogger(
+            app,
+            [logging.StreamHandler(stream=sys.stdout)],
+            requestlogger.ApacheFormatter(),
+        )
+    else:
+        loggedapp = app        
+    # end of modified section
 
     bottle.run(
         loggedapp,
@@ -194,5 +200,6 @@ if __name__ == '__main__':
         # Set this flag to True to auto-reload the server after any source files change
         reloader=os.getenv('CHERRYPY_RELOADED', False),
         # Number of requests that can be handled in parallel (default = 10).
-        numthreads=os.getenv('CHERRYPY_NUMTHREADS', 10),
+        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 10)),
+        quiet='KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ,
     )

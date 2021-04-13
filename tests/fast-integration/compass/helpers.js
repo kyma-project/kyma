@@ -1,29 +1,29 @@
-const scenariosDefinitionName = "scenarios";
+const SCENARIOS_DEFINITION_NAME = "scenarios";
 
 async function removeScenarioFromCompass(client, scenarioName) {
-    const scenariosDefinition = await client.queryLabelDefinition(scenariosDefinitionName);
+    const scenariosDefinition = await client.queryLabelDefinition(SCENARIOS_DEFINITION_NAME);
     const idx = scenariosDefinition.schema.items.enum.indexOf(scenarioName);
     if (idx === -1) {
         return;
     }
 
     scenariosDefinition.schema.items.enum.splice(idx, 1);
-    await client.updateLabelDefinition(scenariosDefinitionName, scenariosDefinition.schema);
+    await client.updateLabelDefinition(SCENARIOS_DEFINITION_NAME, scenariosDefinition.schema);
 }
 
 async function addScenarioInCompass(client, scenarioName) {
-    const scenariosDefinition = await client.queryLabelDefinition(scenariosDefinitionName);
+    const scenariosDefinition = await client.queryLabelDefinition(SCENARIOS_DEFINITION_NAME);
     if(scenariosDefinition.schema.items.enum.includes(scenarioName)) {
         return;
     }
 
     scenariosDefinition.schema.items.enum.push(scenarioName);
-    await client.updateLabelDefinition(scenariosDefinitionName, scenariosDefinition.schema);
+    await client.updateLabelDefinition(SCENARIOS_DEFINITION_NAME, scenariosDefinition.schema);
 }
 
 async function queryRuntimesForScenario(client, scenarioName) {
     const filter = {
-        key: scenariosDefinitionName,
+        key: SCENARIOS_DEFINITION_NAME,
         query: `$[*] ? (@ == "${scenarioName}" )`
     }
 
@@ -32,7 +32,7 @@ async function queryRuntimesForScenario(client, scenarioName) {
 
 async function queryApplicationsForScenario(client, scenarioName) {
     const filter = {
-        key: scenariosDefinitionName,
+        key: SCENARIOS_DEFINITION_NAME,
         query: `$[*] ? (@ == "${scenarioName}" )`
     }
 
@@ -49,10 +49,39 @@ async function registerOrReturnApplication(client, appName, scenarioName) {
     return await client.registerApplication(appName, scenarioName);
 }
 
+async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
+    const runtime = await client.getRuntime(runtimeID);
+    if(!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
+        runtime.labels[SCENARIOS_DEFINITION_NAME] = [];
+    }
+
+    const scenarios = runtime.labels[SCENARIOS_DEFINITION_NAME];
+    scenarios.push(scenarioName);
+
+    return await client.setRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME, scenarios);
+}
+
+async function removeApplicationFromScenario(client, appID, scenarioName) {
+    const application = await client.getApplication(appID);
+    const scenarios = application.labels[SCENARIOS_DEFINITION_NAME];
+    const idx = scenarios.indexOf(scenarioName);
+    if(idx !== -1) {
+        scenarios.splice(idx, 1);
+    }
+    
+    if(scenarios.length > 0) {
+        return await client.setApplicationLabel(appID, SCENARIOS_DEFINITION_NAME, scenarios);
+    } else {
+        return await client.deleteApplicationLabel(appID, SCENARIOS_DEFINITION_NAME);
+    }
+}
+
 module.exports = {
   removeScenarioFromCompass,
   addScenarioInCompass,
   queryRuntimesForScenario,
   queryApplicationsForScenario,
-  registerOrReturnApplication
+  registerOrReturnApplication,
+  assignRuntimeToScenario,
+  removeApplicationFromScenario
 };

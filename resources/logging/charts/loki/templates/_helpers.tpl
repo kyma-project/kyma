@@ -43,6 +43,26 @@ Create the name of the service account
 {{- end -}}
 
 {{/*
+Selector labels
+*/}}
+{{- define "loki.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "fluent-bit.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+Common labels
+*/}}
+{{- define "loki.labels" -}}
+helm.sh/chart: {{ include "loki.chart" . }}
+{{ include "loki.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
 Create the app name of loki clients. Defaults to the same logic as "loki.fullname", and default client expects "promtail".
 */}}
 {{- define "client.name" -}}

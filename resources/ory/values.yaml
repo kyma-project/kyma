@@ -21,8 +21,6 @@ global:
           enabled: true
         # user: "someUser"
         # password: "postgres"
-        secretName: "ory-hydra-credentials"
-        secretKey: "dbPassword"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"
@@ -45,26 +43,12 @@ hpa:
       resource:
         name: cpu
         targetAverageUtilization: 80
-  hydra:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 3
-    cpu: 80
-    metrics:
-    - type: Resource
-      resource:
-        name: memory
-        targetAverageUtilization: 75
-    - type: Resource
-      resource:
-        name: cpu
-        targetAverageUtilization: 80
 
 # Maintenance options
 maintenance:
   image:
-    name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210310-c03fb8b6"
+    name: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
   podSecurityPolicy:
     enabled: true
 
@@ -88,6 +72,12 @@ hydra:
       requests:
         cpu: 100m
         memory: 128Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetMemoryUtilizationPercentage: 75
+      targetCPUUtilizationPercentage: 80
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
     #   https://github.com/ory/hydra/blob/master/docs/config.yaml
@@ -114,12 +104,13 @@ hydra:
   hydra-maester:
     globalAccess: true
     config:
+      # Must be in-sync with hydra.hydra.config.existingSecret
       hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
   oathkeeper:
     config:
       authenticators:
@@ -239,6 +230,7 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
 
 # Remote persistance settings
@@ -250,5 +242,6 @@ gcloud-sqlproxy:
     term_timeout: 30s
   podAnnotations:
     sidecar.istio.io/inject: "false"
+  # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
   existingSecretKey: "gcp-sa.json"

@@ -94,7 +94,7 @@ See the [example](https://github.com/kyma-project/addons/tree/master/addons) of 
 
 You can specify a Git repository URL by adding a special `git::` prefix to the URL address. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can specify a branch, commit, or tag version. You can also add the `depth` query parameter with a number that specifies the last revision you want to clone from the repository.
 
->**NOTE:** If you use `depth` together with `ref`, make sure that `depth` number is big enough to clone a proper reference. For example, if you have `depth=1` and `ref` set to a commit from the distant past, the URL will not work as you clone only the first commit from the `master` branch and there is no option to do the checkout.
+>**NOTE:** If you use `depth` together with `ref`, make sure that `depth` number is big enough to clone a proper reference. For example, if you have `depth=1` and `ref` set to a commit from the distant past, the URL will not work as you clone only the first commit from the `main` branch and there is no option to do the checkout.
 
 These are the allowed addon repository URLs provided in CAC or AC custom resources for Git:
 ```yaml

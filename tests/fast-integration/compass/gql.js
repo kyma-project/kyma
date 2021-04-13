@@ -41,8 +41,46 @@ function queryApplicationsWithFilter(filter) {
     return `query { result: applications(filter: { key: \\"${filter.key}\\", query: \\"${querySerialized}\\" }) { data { id name } } }`;
 }
 
+function setRuntimeLabel(runtimeID, key, value) {
+    value = prepareLabelValue(value);
+    return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
+}
+
+function queryRuntime(runtimeID) {
+    return `query { result: runtime(id: \\"${runtimeID}\\") { id name labels status { condition } } }`;
+}
+
+function queryApplication(appID) {
+    return `query { result: application(id: \\"${appID}\\") { id name labels } }`;
+}
+
+function setApplicationLabel(appID, key, value) {
+    value = prepareLabelValue(value);
+    return `mutation { result: setApplicationLabel(applicationID: \\"${appID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
+}
+
+function deleteApplicationLabel(appID, key) {
+    return `mutation { result: deleteApplicationLabel(applicationID: \\"${appID}\\", key: \\"${key}\\") { key value } }`;
+}
+
 function escapeForGQL(str) {
     return str.split('"').join(`\\\\\\"`);
+}
+
+function escapeForGQLArray(str) {
+    return str.split('"').join(`\\\"`);
+}
+
+function prepareLabelValue(value) {
+    if (typeof value !== "string") {
+        value = Array.isArray(value) 
+            ? escapeForGQLArray(JSON.stringify(value))
+            : escapeForGQL(JSON.stringify(value));
+    } else {
+        value = `\\"${value}\\"`
+    }
+
+    return value;
 }
 
 module.exports = {
@@ -56,4 +94,9 @@ module.exports = {
     updateLabelDefinition,
     queryRuntimesWithFilter,
     queryApplicationsWithFilter,
+    setRuntimeLabel,
+    queryRuntime,
+    queryApplication,
+    setApplicationLabel,
+    deleteApplicationLabel,
 }

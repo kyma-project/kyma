@@ -10,7 +10,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Application Connector](./application-connector/)
 -   [Backup](./backup/)
 -   [Console](./console/)
--   [Event Mesh](./event-mesh/)
+-   [Eventing](./eventing/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Monitoring](./monitoring/)
@@ -30,7 +30,7 @@ The navigation order of the documentation page is based on the **rafter.kyma-pro
 
 Follow these basic rules when you add a new document to the official Kyma documentation:
 
-1. Get familiar with the [Content Strategy](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/01-content-strategy.md) to learn about the Kyma's official approach to content development.
-2. Follow the [Contribution Guide](https://github.com/kyma-project/community/blob/master/contributing/02-contributing.md) for the general contribution rules and process.
-3. Make use of the [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
-4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
+1. Get familiar with the [Content Strategy](https://github.com/kyma-project/community/blob/main/guidelines/content-guidelines/01-content-strategy.md) to learn about the Kyma's official approach to content development.
+2. Follow the [Contribution Guide](https://github.com/kyma-project/community/blob/main/contributing/02-contributing.md) for the general contribution rules and process.
+3. Make use of the [templates](https://github.com/kyma-project/community/tree/main/guidelines/templates) to structure your documents properly.
+4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/blob/main/guidelines/content-guidelines) to contribute high-quality and standardized content.

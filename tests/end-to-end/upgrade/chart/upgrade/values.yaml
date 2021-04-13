@@ -7,7 +7,7 @@ subscriberimage:
 
 image:
   dir:
-  version: 40007ec9
+  version: "791d6671"
 
   pullPolicy: "IfNotPresent"
 
@@ -36,6 +36,6 @@ tests:
   ApiGatewayUpgradeTest: true
   ApplicationOperatorUpgradeTest: true
   RafterUpgradeTest: true
-  EventMeshUpgradeTest: true
+  EventingUpgradeTest: true
   ServerlessUpgradeTest: true
   LoggingUpgradeTest: true

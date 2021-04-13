@@ -1,8 +1,8 @@
-FROM eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6
+FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV ISTIOCTL_VERSION 1.8.2
+ENV ISTIOCTL_VERSION 1.9.1
 ENV YQ_VERSION 3.1.1
 
 RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\

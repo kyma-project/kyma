@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ printf "%s-%s" (include "fluent-bit.fullname" .) "kyma-fluent-bit.rules" | trunc 63 | trimSuffix "-" }}
+  labels:
+    app: {{ template "fluent-bit.name" . }}
+{{ include "fluent-bit.labels" . | indent 4 }}
+spec:
+  groups:
+  - name: loki.rules
+    rules:
+    - alert: NoOutputBytesProcessed
+      expr: rate(fluentbit_output_proc_bytes_total{ {{ .Values.prometheusRules.fluentBitAlertFilter }} }[5m]) == 0
+      annotations:
+        description: Fluent Bit instance {{ `{{ $labels.instance }}` }}'s output plugin {{ `{{ $labels.name }}` }} has not processed any
+          bytes for at least 15 minutes.
+        summary: No Output Bytes Processed
+      for: 15m
+      labels:
+        severity: critical   
+

@@ -90,7 +90,7 @@ The following tables lists the configurable parameters of the PostgreSQL chart a
 | `replication.enabled`                         | Enable replication                                                                                                                                                        | `false`                                                       |
 | `replication.user`                            | Replication user                                                                                                                                                          | `repl_user`                                                   |
 | `replication.password`                        | Replication user password                                                                                                                                                 | `repl_password`                                               |
-| `replication.slaveReplicas`                   | Number of slaves replicas                                                                                                                                                 | `1`                                                           |
+| `replication.slaveReplicas`                   | Number of subordinate replicas                                                                                                                                                 | `1`                                                           |
 | `replication.synchronousCommit`               | Set synchronous commit mode. Allowed values: `on`, `remote_apply`, `remote_write`, `local` and `off`                                                                      | `off`                                                         |
 | `replication.numSynchronousReplicas`          | Number of replicas that will have synchronous replication. Note: Cannot be greater than `replication.slaveReplicas`.                                                      | `0`                                                           |
 | `replication.applicationName`                 | Cluster application name. Useful for advanced replication settings                                                                                                        | `my_application`                                              |
@@ -121,7 +121,7 @@ The following tables lists the configurable parameters of the PostgreSQL chart a
 | `service.loadBalancerIP`                      | loadBalancerIP if service type is `LoadBalancer`                                                                                                                          | `nil`                                                         |
 | `service.loadBalancerSourceRanges`            | Address that are allowed when svc is LoadBalancer                                                                                                                         | []                                                            |
 | `schedulerName`                               | Name of the k8s scheduler (other than default)                                                                                                                            | `nil`                                                         |
-| `shmVolume.enabled`                           | Enable emptyDir volume for /dev/shm for master and slave(s) Pod(s)                                                                                                        | `true`                                                        |
+| `shmVolume.enabled`                           | Enable emptyDir volume for /dev/shm for main and subordinate Pod(s)                                                                                                        | `true`                                                        |
 | `shmVolume.chmod.enabled`                     | Run at init chmod 777 of the /dev/shm (ignored if `volumePermissions.enabled` is `false`)                                                                                 | `true`                                                        |
 | `persistence.enabled`                         | Enable persistence using PVC                                                                                                                                              | `true`                                                        |
 | `persistence.existingClaim`                   | Provide an existing `PersistentVolumeClaim`, the value is evaluated as a template.                                                                                        | `nil`                                                         |
@@ -248,7 +248,7 @@ This chart includes a `values-production.yaml` file where you can find some para
 + replication.enabled: true
 ```
 
-- Number of slaves replicas:
+- Number of subordinate replicas:
 ```diff
 - replication.slaveReplicas: 1
 + replication.slaveReplicas: 2
@@ -494,7 +494,7 @@ In this case, you should migrate the data from the old chart to the new one foll
 
 ### 4.0.0
 
-This chart will use by default the Bitnami PostgreSQL container starting from version `10.7.0-r68`. This version moves the initialization logic from node.js to bash. This new version of the chart requires setting the `POSTGRES_PASSWORD` in the slaves as well, in order to properly configure the `pg_hba.conf` file. Users from previous versions of the chart are advised to upgrade immediately.
+This chart will use by default the Bitnami PostgreSQL container starting from version `10.7.0-r68`. This version moves the initialization logic from node.js to bash. This new version of the chart requires setting the `POSTGRES_PASSWORD` in the subordinates as well, in order to properly configure the `pg_hba.conf` file. Users from previous versions of the chart are advised to upgrade immediately.
 
 IMPORTANT: If you do not want to upgrade the chart version then make sure you use the `10.7.0-r68` version of the container. Otherwise, you will get this error
 
@@ -504,7 +504,7 @@ The POSTGRESQL_PASSWORD environment variable is empty or not set. Set the enviro
 
 ### 3.0.0
 
-This releases make it possible to specify different nodeSelector, affinity and tolerations for master and slave pods.
+This releases make it possible to specify different nodeSelector, affinity and tolerations for main and subordinate pods.
 It also fixes an issue with `postgresql.master.fullname` helper template not obeying fullnameOverride.
 
 #### Breaking changes
