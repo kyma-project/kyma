@@ -38,7 +38,7 @@ deletePod() {
 
     if [[ "${dryRun}" == "false" ]]; then
         echo "    Deleting pod: ${namespace}/${podName}"
-        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}"1 --ignore-not-found=true
+        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}" --ignore-not-found=true
         sleep "${sleepAfterPodDeleted}"
     else
         echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
