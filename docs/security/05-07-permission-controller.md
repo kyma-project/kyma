@@ -53,7 +53,7 @@ metadata:
     installer: overrides
     kyma-project.io/installation: ""
 data:
-  config.namespaceExludeList: "kyma-system, istio-system, default, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
+  config.namespaceExcludeList: "kyma-system, istio-system, default, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system, {USER-DEFINED-NAMESPACE-1}, {USER-DEFINED-NAMESPACE-2}"
   config.enableStaticUser: "{BOOLEAN-VALUE-FOR-NAMESPACE-ADMIN-STATIC-USER}"
 EOF
 ```
