@@ -1,0 +1,20 @@
+{{- if eq "enabled" "false" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "nats.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "nats.labels" . | nindent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels: {{ include "nats.labels.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: {{ .Values.metrics.config.portName }}
+      interval: {{ .Values.metrics.config.interval }}
+---
+{{- end }}
