@@ -5,13 +5,13 @@ go 1.15
 require (
 	github.com/avast/retry-go v2.6.0+incompatible
 	github.com/go-git/go-billy/v5 v5.0.0
-	github.com/go-git/go-git/v5 v5.1.0
+	github.com/go-git/go-git/v5 v5.2.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-project/helm-broker v1.1.0
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201201100156-840f2b1a3da8
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210413071758-6fd5e3242e1a
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
@@ -22,11 +22,13 @@ require (
 	k8s.io/api v0.19.3
 	k8s.io/apimachinery v0.19.3
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	sigs.k8s.io/controller-runtime v0.6.4
+	sigs.k8s.io/controller-runtime v0.6.5
 )
 
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
+	// TODO remove
+	github.com/kyma-project/kyma/components/function-controller => github.com/rJankowski93/kyma/components/function-controller v0.0.0-20210413071758-6fd5e3242e1a
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/text => golang.org/x/text v0.3.3
