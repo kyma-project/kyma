@@ -133,7 +133,6 @@ if [[ -z "${PODS_FILE}" ]]; then
 
     echo "Getting pods data into file: ${PODS_FILE}"
     allPods=$(retry "${retriesCount}" kubectl get po -A -o json)
-    allPods=$(retry "${retriesCount}" kubectl get po -n padu -o json)
     echo "${allPods}" > "${PODS_FILE}"
 fi
 
