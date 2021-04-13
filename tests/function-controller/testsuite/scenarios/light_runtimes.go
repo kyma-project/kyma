@@ -36,6 +36,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 
 	python38Logger := logf.WithField(scenarioKey, "python38")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
+	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -48,6 +49,11 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	nodejs12Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs12", genericContainer.WithLogger(nodejs12Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating nodejs12 config")
+	}
+
+	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating nodejs14 config")
 	}
 
 	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python38", genericContainer.WithLogger(python38Logger))
@@ -96,6 +102,12 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
 				teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs12", serverlessv1alpha1.Nodejs12)),
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From updated nodejs12"),
+			),
+			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
+				teststep.CreateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Create NodeJS14 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs14)),
+				teststep.NewDefaultedFunctionCheck("Check NodeJS14 function has correct default values", nodejs14Cfg.Fn),
+				teststep.UpdateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha1.Nodejs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
 			),
 		),
 	), nil

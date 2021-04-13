@@ -448,7 +448,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			},
 		},
 		{
-			Name:               "Success Node10",
+			Name:               "Success Node12",
 			Runtime:            serverlessv1alpha1.Nodejs12,
 			ExpectedVolumesLen: 4,
 			ExpectedVolumes: []expectedVolume{
