@@ -31,27 +31,6 @@ retry() {
     done
 }
 
-
-# A function that deletes the object and handles NotFound condition as a success.
-tryDelete() {
-    local namespace=$1
-    local kind=$2
-    local name=$3
-
-    local code
-    local result
-
-    result=$(kubectl -n "${namespace}" delete "${kind}" "${name}" 2>&1); code=$?
-
-    if [[ ${code} -eq 1 && ${result} == *"NotFound"* ]]
-    then
-        echo "        Delete operation failed with: \"${result}\". Handling as a success (the ${kind}/${name} is gone)"
-        return 0
-    fi
-
-    return ${code}
-}
-
 # Deletes a pod
 deletePod() {
     local namespace=$1
@@ -59,7 +38,7 @@ deletePod() {
 
     if [[ "${dryRun}" == "false" ]]; then
         echo "    Deleting pod: ${namespace}/${podName}"
-        retry "${retriesCount}" tryDelete "${namespace}" pod "${podName}"
+        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}"1 --ignore-not-found=true
         sleep "${sleepAfterPodDeleted}"
     else
         echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
