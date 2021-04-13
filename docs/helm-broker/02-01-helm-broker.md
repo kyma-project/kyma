@@ -3,7 +3,7 @@ title: Basic architecture
 type: Architecture
 ---
 
-The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [helm-repos-urls](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/templates/addons-cfg.yaml) ClusterAddonsConfiguration (CAC) custom resource (CR). It contains URLs from which Helm Broker fetches addons. You can also add your own addons with URLs that point to [your addons repository](#details-create-addons-repository).
+The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [helm-repos-urls](https://github.com/kyma-project/kyma/blob/main/resources/helm-broker/templates/addons-cfg.yaml) ClusterAddonsConfiguration (CAC) custom resource (CR). It contains URLs from which Helm Broker fetches addons. You can also add your own addons with URLs that point to [your addons repository](#details-create-addons-repository).
 
 If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) CR. In such a case, the Helm Broker creates a service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
 

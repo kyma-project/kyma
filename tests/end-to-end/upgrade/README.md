@@ -2,9 +2,9 @@
 
 ## Overview
 
-This project contains end-to-end upgrade tests run for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on CI. The tests are written in Go. The framework allows you to define two actions:
+This project contains end-to-end upgrade tests run for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/main/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on CI. The tests are written in Go. The framework allows you to define two actions:
 
-- Preparing the data 
+- Preparing the data
 - Running tests against the prepared data
 
 ## Prerequisites
@@ -17,10 +17,10 @@ To set up the project, use these tools:
 
 ## Usage
 
-Run end-to-end upgrade tests for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on Prow. The continuous integration flow looks as follows:
+Run end-to-end upgrade tests for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/main/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on Prow. The continuous integration flow looks as follows:
 
 1. Install Kyma from the [latest](https://github.com/kyma-project/kyma/releases/latest) release.
-2. Install the upgrade-test [helm chart](chart/upgrade). 
+2. Install the upgrade-test [helm chart](chart/upgrade).
 3. Execute all TestDefinitions with the label `kyma-project.io/test.before-upgrade`.
 4. Upgrade the Kyma cluster.
 5. Execute all TestDefinitions with the label `kyma-project.io/test.after-upgrade`.
@@ -56,7 +56,7 @@ go run main.go --action prepareData --verbose
 
 ## Development
 
->**NOTE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase, create a new TestDefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase, create a new TestDefinition with the label `kyma-project.io/after-upgrade=true` 
+>**NOTE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase, create a new TestDefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase, create a new TestDefinition with the label `kyma-project.io/after-upgrade=true`
 
 
 This section presents how to add and run a new test. It also describes how to verify the code and ensure that your test is correct.

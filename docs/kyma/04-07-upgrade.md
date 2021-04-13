@@ -15,11 +15,11 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 2. Upgrade from version 1.1 to version 1.2.
 3. Upgrade from version 1.2 to version 1.3.
 
->**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by creating a backup of your cluster before upgrade. Read the [tutorial](/components/backup/#tutorials-taking-backup-using-velero) to learn more about backups.
+>**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by creating a backup of your cluster before upgrade. Read about [backup in Kyma](#installation-back-up-kyma) to learn more.
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
-For more details, read about the [technical aspects](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) of the upgrade.
+For more details, read about the [technical aspects](https://github.com/kyma-project/kyma/blob/main/components/kyma-operator/README.md#upgrade-kyma) of the upgrade.
 
 ## Upgrade Kyma to a newer version
 

@@ -195,3 +195,7 @@ func generatePort() (int, error) {
 }
 
 var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
+
+func Is2XX(statusCode int) bool {
+	return statusCode/100 == 2
+}

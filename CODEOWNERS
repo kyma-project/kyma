@@ -15,6 +15,9 @@
 # Microfrontend k8s client
 /common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
+# developer tools: linting
+/hack @clebs @suleymanakbas91 @adamwalach
+
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @piotrmsc @adamwalach @colunira @mjakobczyk @Demonsthere @m00g3n @aerfio @pPrecel @magicmatatjahu
 
@@ -50,28 +53,28 @@
 /resources/cert-manager/ @Tomasz-Smelcerz-SAP @strekm @Demonsthere @colunira @mjakobczyk
 
 # The `application-connector` chart
-/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # The `values.yaml` file for `application-connector` chart
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # The `connection-token-handler` subchart
-/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # The `application-operator` subchart
-/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/application-connector-helper/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # The `console` subchart
 /resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -101,19 +104,19 @@
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
 # The `event-sources` chart
-/resources/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/event-sources/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `eventing` chart
-/resources/eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/nats-streaming/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @joek @abbi-gaurav @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/knative-provisioner-natss/@lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @crabtree @kjaksik
+/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @lilitgh @crabtree @kjaksik
 
 # The `service-catalog-addons` subchart
 /resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
@@ -140,7 +143,7 @@
 /resources/istio/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/knative-eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
@@ -158,7 +161,7 @@
 /resources/api-gateway/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/resources/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # The `kiali` chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash
@@ -172,8 +175,11 @@
 # The `permission-controller` chart
 /resources/permission-controller/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
+# The `busola-migrator` chart
+/resources/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
+
 # Kafka Channel for knative eventing
-/resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # Components
 
@@ -199,7 +205,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/istio-installer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
 # Application broker Component
-/components/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @anishj0shi @lilitgh @crabtree @kjaksik
+/components/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @lilitgh @crabtree @kjaksik
 
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -209,34 +215,34 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/console-backend-service/internal/domain/rafter @aerfio @pPrecel @magicmatatjahu
 
 # Connector Service Component
-/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Registry Component
-/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Application Operator Component
-/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Gateway Component
-/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Connectivity Validator Component
-/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Connectivity Certs Setup Job Component
-/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Event Sources Component
-/components/event-sources/ @joek  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/components/event-sources/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # Nats-init Component
-/components/nats-init/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/components/nats-init/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # Event Service Component
-/components/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/components/event-service/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # UAA Component
 /components/uaa-activator/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree @kjaksik
@@ -257,16 +263,19 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /components/function-runtimes/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/components/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Event Publisher Proxy
-/components/event-publisher-proxy @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
+/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
 
 # Eventing Controller
-/components/eventing-controller @anishj0shi @k15r @lilitgh @marcobebway @montaro @nachtmaar @radufa @sayanh @berkanercan
+/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
 
 # NATS Operator
-/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan
+/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
+
+# Busola Migrator Component
+/components/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
 
 # Tests
 # Service Catalog acceptance tests
@@ -297,28 +306,28 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/function-controller/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # Connector Service Tests
-/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Registry Tests
-/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Gateway Legacy Tests
-/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Application Operator Tests
-/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Connector Tests
-/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Connection Token Handler Tests
-/tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa
+/tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa
+/tests/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @kjaksik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Fast Integration Tests
 /tests/fast-integration/ @crabtree @pbochynski @adamwalach @aerfio
@@ -332,16 +341,16 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tools/kyma-installer/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 #
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
 
 # Event Service Tests
-/tests/integration/event-service/ @joek @abbi-gaurav  @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/tests/integration/event-service/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # Kafka Channel Integration Tests
-/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @berkanercan
+/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r @crabtree @kjaksik @suleymanakbas91
@@ -353,16 +362,16 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
 
 # All .md files
-*.md @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla
+*.md @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla @NHingerl
 
 # All files and subdirectories in /docs
-/docs/ @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla
+/docs/ @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla @NHingerl
 
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @m00g3n @aerfio @pPrecel @magicmatatjahu
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @aerfio @pPrecel @magicmatatjahu @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla
+milv.config.yaml @m00g3n @aerfio @pPrecel @magicmatatjahu @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @superojla @NHingerl
 
 # performance tests
 /tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella

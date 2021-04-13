@@ -21,7 +21,7 @@ To set up the project, download these tools:
 * [Dep](https://github.com/golang/dep) v0.5.0
 * [Docker](https://www.docker.com/)
 
-These Go and Dep versions are compliant with the `buildpack` used by Prow. For more details read [this](https://github.com/kyma-project/test-infra/blob/master/prow/images/buildpack-golang/README.md) document.
+These Go and Dep versions are compliant with the `buildpack` used by Prow. For more details read [this](https://github.com/kyma-project/test-infra/blob/main/prow/images/buildpack-golang/README.md) document.
 
 ## Development
 

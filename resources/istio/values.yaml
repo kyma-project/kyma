@@ -10,10 +10,14 @@ kyma:
     - istio-system
     - kube-system
   labelJob:
-    image: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210310-c03fb8b6"
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
+    retriesCount: 5
+    dryRun: false
+    sleepAfterPodDeleted: 1
+    exitCode: 0
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
@@ -29,7 +33,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "50773916"
+    tag: "61b73f65"
   securityContext:
     runAsUser: 65534
     runAsNonRoot: true
@@ -45,8 +49,8 @@ monitoring:
 
 test:
   istio_kyma_validate:
-    image: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210310-c03fb8b6"
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
     enabled: true
     labels:
       integration: true

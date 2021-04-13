@@ -3,8 +3,8 @@
 ## Overview
 
 This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controllers come with this container:
-- [`controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
-- [`nats-controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
+- [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
+- [`nats-controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
@@ -33,7 +33,7 @@ This component contains controllers for various CustomResourceDefinitions relate
     make deploy-eventing-controller-nats-local-dry-run
     ```
 
-## Usage 
+## Usage
 
 This section explains how to use the Eventing Controller.
 
@@ -106,12 +106,12 @@ Before running the component, execute the following command once to pull softwar
 ```sh
 make test
 ## To download dependencies only
-make resolve-local 
+make resolve-local
 ```
 
 ### Generate code during local development
 
-> More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md). 
+> More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
 
 - Add new APIs using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code by executing the following script:
 

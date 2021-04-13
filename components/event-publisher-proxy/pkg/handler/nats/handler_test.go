@@ -27,6 +27,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics/metricstest"
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
@@ -40,6 +42,7 @@ type Test struct {
 	logger         *logrus.Logger
 	natsConfig     *env.NatsConfig
 	natsServer     *server.Server
+	collector      *metrics.Collector
 	natsUrl        string
 	healthEndpoint string
 }
@@ -51,6 +54,7 @@ func (test *Test) init() {
 	test.logger = logrus.New()
 	test.natsConfig = newEnvConfig(port, natsPort)
 	test.natsServer = testingutils.StartNatsServer()
+	test.collector = metrics.NewCollector()
 	test.natsUrl = test.natsServer.ClientURL()
 	test.healthEndpoint = fmt.Sprintf("http://localhost:%d/healthz", port)
 }
@@ -121,7 +125,7 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 
 	// start handler which blocks until it receives a shutdown signal
 	opts := &options.Options{MaxRequestSize: 65536}
-	natsHandler := NewHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger)
+	natsHandler := NewHandler(messageReceiver, msgSender, test.natsConfig.RequestTimeout, legacyTransformer, opts, subscribedProcessor, test.logger, test.collector)
 	assert.NotNil(t, natsHandler)
 	go func() {
 		if err := natsHandler.Start(ctx); err != nil {
@@ -184,6 +188,9 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 				if testCase.WantStatusCode != resp.StatusCode {
 					t.Errorf("Test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
 				}
+				if testingutils.Is2XX(resp.StatusCode) {
+					metricstest.EnsureMetricLatency(t, test.collector)
+				}
 			})
 		}
 	}
@@ -235,6 +242,10 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 				} else {
 					handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
 				}
+
+				if testingutils.Is2XX(resp.StatusCode) {
+					metricstest.EnsureMetricLatency(t, test.collector)
+				}
 			})
 		}
 	}
@@ -277,6 +288,10 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 			}
 			if !reflect.DeepEqual(testCase.WantResponse, gotEventsResponse) {
 				t.Errorf("incorrect response, wanted: %v, got: %v", testCase.WantResponse, gotEventsResponse)
+			}
+
+			if testingutils.Is2XX(resp.StatusCode) {
+				metricstest.EnsureMetricLatency(t, test.collector)
 			}
 		})
 	}

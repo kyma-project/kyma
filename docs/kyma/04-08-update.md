@@ -34,7 +34,7 @@ In case of dependency conflicts or major changes between components versions, so
 
 ## Prepare the update
 
-- If you update an existing component, make all required changes to the Helm charts of the component located in the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
+- If you update an existing component, make all required changes to the Helm charts of the component located in the [`resources`](https://github.com/kyma-project/kyma/tree/main/resources) directory.
 
 - If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, download the current [Installation custom resource](#custom-resource-installation) from the cluster and add the new component to the components list:
 

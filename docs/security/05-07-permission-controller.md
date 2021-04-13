@@ -17,7 +17,7 @@ The following table lists the configurable parameters of the permission-controll
 | --------- | ----------- | ------------- |
 | `global.kymaRuntime.namespaceAdminGroup` | Determines the user group for which a RoleBinding to the **kyma-namespace-admin** role is created in all Namespaces except those specified in the `config.namespaceBlacklist` parameter. | `runtimeNamespaceAdmin` |
 | `config.namespaceBlacklist` | Comma-separated list of Namespaces in which a RoleBinding to the **kyma-namespace-admin** role is not created for the members of the group specified in the `global.kymaRuntime.namespaceAdminGroup` parameter.|`kyma-system, istio-system, default, kube-node-lease, kube-public, kube-system, kyma-installer, kyma-integration, natss, compass-system` |
-| `config.enableStaticUser`| Determines if a RoleBinding to the **kyma-namespace-admin** role for the static `namespace.admin@kyma.cx` user is created for every Namespace that is not blacklisted. | `true` |
+| `config.enableStaticUser`| Determines if a RoleBinding to the **kyma-namespace-admin** role for the static `namespace.admin@kyma.cx` user is created for every Namespace that is not blocked. | `true` |
 
 ## Customization examples
 You can adjust the default settings of the Permission Controller by applying these overrides to the cluster either before installation, or at runtime:
@@ -39,7 +39,7 @@ data:
 EOF
 ```
 
-2. To change the blacklisted Namespaces and decide whether the `namespace.admin@kyma.cx` static user should be assigned the **kyma-admin** role, run:
+2. To change the excluded Namespaces and decide whether the `namespace.admin@kyma.cx` static user should be assigned the **kyma-admin** role, run:
 
 ```bash
 cat <<EOF | kubectl apply -f -
