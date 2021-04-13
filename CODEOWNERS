@@ -175,6 +175,9 @@
 # The `permission-controller` chart
 /resources/permission-controller/ @piotrmsc @strekm @Tomasz-Smelcerz-SAP @Demonsthere @colunira @mjakobczyk
 
+# The `busola-migrator` chart
+/resources/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
+
 # Kafka Channel for knative eventing
 /resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
@@ -270,6 +273,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 
 # NATS Operator
 /components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
+
+# Busola Migrator Component
+/components/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
 
 # Tests
 # Service Catalog acceptance tests
