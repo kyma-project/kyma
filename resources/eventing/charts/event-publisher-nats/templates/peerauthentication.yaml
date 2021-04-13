@@ -2,7 +2,7 @@
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ include "event-publisher-nats.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
 spec:

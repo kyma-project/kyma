@@ -12,7 +12,7 @@ spec:
     matchLabels: {{- include "event-publisher-nats.labels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace | quote }}
+      - {{ .Release.Namespace }}
   endpoints:
     - port: {{ .Values.metrics.config.portName }}
       interval: {{ .Values.metrics.config.interval }}

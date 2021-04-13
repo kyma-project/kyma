@@ -20,7 +20,8 @@ metrics:
   config:
     port: 8080
     portName: http-metrics
-    interval: 10s
+    nameSuffix: "-metrics"
+    interval: 30s
 
 resources:
   limits:

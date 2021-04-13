@@ -12,9 +12,9 @@ spec:
     matchLabels: {{ include "nats.labels.selectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace | quote }}
+      - {{ .Release.Namespace }}
   endpoints:
-    - port: metrics
-      interval: 10s
+    - port: {{ .Values.metrics.config.portName }}
+      interval: {{ .Values.metrics.config.interval }}
 ---
 {{- end }}

@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "event-publisher-nats.serviceName" . }}-metrics
+  name: {{ include "event-publisher-nats.serviceName" . }}{{ .Values.metrics.config.nameSuffix }}
   labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
