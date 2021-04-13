@@ -87,7 +87,7 @@ kubectl delete ns $namespace
 
 ### Use bindings on a Function
 
-To use bindings on a Function, follow [this](https://kyma-project.io/docs/master/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial.
+To use bindings on a Function, follow [this](https://kyma-project.io/docs/components/serverless/#tutorials-bind-a-service-instance-to-a-function) tutorial.
 
 ## Pluggable SBU
 

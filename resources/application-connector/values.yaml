@@ -31,40 +31,42 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  application_broker:
+    version: "371f20ae"
+  application_broker_eventing_migration:
+    version: "a8a6bca9"
+  application_connectivity_certs_setup_job:
+    version: "184a7e4f"
+  application_connectivity_validator:
+    version: "68baa911"
   application_operator:
-    version: "PR-10955"
+    version: "2a494ded"
   application_operator_tests:
-    version: "PR-10955"
-  connector_service:
-    version: "34011b0f"
-  connector_service_tests:
-    version: "9776cb81"
+    version: "68baa911"
+  application_gateway:
+    version: "68baa911"
+  application_gateway_tests:
+    version: "68baa911"
+  application_gateway_legacy_tests:
+    version: "68baa911"
+  application_registry:
+    version: "68baa911"
+  application_registry_tests:
+    version: "68baa911"
   connection_token_handler:
     version: "da84b1b3"
   connection_token_handler_tests:
+    version: "9776cb81"
+  connector_service:
+    version: "34011b0f"
+  connector_service_tests:
     version: "9776cb81"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
-  application_gateway:
-    version: "PR-10955"
-  application_gateway_tests:
-    version: "PR-10955"
-  application_gateway_legacy_tests:
-    version: "PR-11037"
-  application_registry:
-    version: "PR-10955"
-  application_registry_tests:
-    version: "PR-10955"
   application_broker:
-    version: "371f20ae"
-  application_connectivity_certs_setup_job:
-    version: "184a7e4f"
-  application_connectivity_validator:
-    version: "PR-10971"
-  application_broker_eventing_migration:
-    version: "a8a6bca9"
+    version: "PR-10924"
 
 application_connectivity_certs_setup_job:
   secrets:

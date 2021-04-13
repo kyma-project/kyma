@@ -24,4 +24,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **kiali.spec.deployment.resources.limits.memory** | Maximum amount of memory available for the Kiali Deployment to use. | `100Mi` |
 | **kiali.spec.kubernetes_config.qps** | Defines the allowed queries per second to adjust the API server's throttling rate. | `50` |
 
-For more details on Kiali configuration and customization, see the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml) file.
+For more details on Kiali configuration and customization, see the [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/kiali/values.yaml) file.

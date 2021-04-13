@@ -1,0 +1,78 @@
+@font-face {
+  font-family: "72";
+  src: url("72-Regular-full.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "72";
+  src: url("72-Bold-full.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "72";
+  src: url("72-Light-full.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SAP-icons";
+  src: url("SAP-icons.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(247, 247, 247);
+}
+
+.fd-page {
+  height: 100vh;
+}
+
+.fd-page__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.fd-has-text-align-center {
+  text-align: center;
+}
+
+.info,
+.hint {
+  text-align: center;
+  margin: 0;
+}
+
+.info {
+  padding-bottom: 30px;
+  font-size: 36px;
+}
+
+.hint {
+  font-size: 18px;
+  color: #6f7275;
+  padding-bottom: 30px;
+}
+
+.fd-button {
+  margin: 0px 20px 20px 20px;
+}
+
+a {
+  text-decoration: none;
+}

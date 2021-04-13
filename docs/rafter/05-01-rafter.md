@@ -30,8 +30,8 @@ This table lists the configurable parameters, their descriptions, and default va
 | **controller-manager.pod.resources.requests.memory** | Requests for memory resources. | `32Mi` |
 | **controller-manager.envs.clusterAssetGroup.relistInterval** | Time intervals in which the Rafter Controller Manager verifies the ClusterAssetGroup for changes. | `5m` |
 | **controller-manager.envs.assetGroup.relistInterval** | Time intervals in which the Rafter Controller Manager verifies the AssetGroup for changes. | `5m` |
-| **controller-manager.envs.clusterBucket.region** | Regional location of the ClusterBucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/files/clusterbuckets.rafter.crd.yaml#L53). | `us-east-1` |
-| **controller-manager.envs.bucket.region** | Regional location of the bucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/files/buckets.rafter.crd.yaml#L53). | `us-east-1` |
+| **controller-manager.envs.clusterBucket.region** | Regional location of the ClusterBucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/main/resources/cluster-essentials/files/clusterbuckets.rafter.crd.yaml#L53). | `us-east-1` |
+| **controller-manager.envs.bucket.region** | Regional location of the bucket in a given cloud storage. Use one of the available [regions](https://github.com/kyma-project/kyma/blob/main/resources/cluster-essentials/files/buckets.rafter.crd.yaml#L53). | `us-east-1` |
 | **controller-manager.envs.clusterBucket.maxConcurrentReconciles** | Maximum number of cluster bucket concurrent reconciles which will run. | `1` |
 | **controller-manager.envs.bucket.maxConcurrentReconciles** | Maximum number of bucket concurrent reconciles which will run. | `1` |
 | **controller-manager.envs.clusterAsset.maxConcurrentReconciles** | Maximum number of cluster asset concurrent reconciles which will run. | `1` |
