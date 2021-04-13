@@ -48,6 +48,7 @@ Selector labels
 {{- define "nats-controller.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "nats-controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+kyma-project.io/dashboard: eventing
 {{- end }}
 
 {{/*

@@ -40,6 +40,7 @@ helm.sh/chart: {{ include "nats.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+kyma-project.io/dashboard: eventing
 {{- end }}
 
 {{- /*

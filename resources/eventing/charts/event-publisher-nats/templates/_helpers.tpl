@@ -49,8 +49,8 @@ Selector labels
 {{- define "event-publisher-nats.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "event-publisher-nats.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+kyma-project.io/dashboard: eventing
 {{- end }}
-
 
 {{/*
 Create the name of the service account to use

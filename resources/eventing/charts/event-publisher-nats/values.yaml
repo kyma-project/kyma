@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-nats
   name: "event-publisher-nats"
   # tag is the container tag of the event-publisher-nats image
-  tag: "81e3637e"
+  tag: "bcb37681"
   # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 
@@ -28,11 +28,14 @@ resources:
 nats:
   config:
     port: 8080
+    portName: http
     requestTimeout: "5s"
     legacyNamespace: kyma
     legacyEventTypePrefix: sap.kyma.custom
 
 metrics:
-  service:
+  config:
     port: 9090
+    portName: http-metrics
     nameSuffix: "-metrics"
+    interval: 30s

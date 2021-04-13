@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "controller.name" -}}
+{{- define "dashboards.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "controller.fullname" -}}
+{{- define "dashboards.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "controller.chart" -}}
+{{- define "dashboards.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "controller.labels" -}}
-helm.sh/chart: {{ include "controller.chart" . }}
-{{ include "controller.selectorLabels" . }}
+{{- define "dashboards.labels" -}}
+helm.sh/chart: {{ include "dashboards.chart" . }}
+{{ include "dashboards.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,8 +45,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "controller.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "controller.name" . }}
+{{- define "dashboards.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "dashboards.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-kyma-project.io/dashboard: eventing
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "dashboards.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "dashboards.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
 {{- end }}
