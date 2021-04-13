@@ -7,10 +7,12 @@ spec:
   size: {{ .Values.clusterSize }}
   version: "2.1.8"
   pod:
+    {{- if .Values.enableMetrics }}
     enableMetrics: {{ .Values.enableMetrics }}
     metricsImage: "natsio/prometheus-nats-exporter"
     metricsImageTag: "0.7.0"
     metricsImagePullPolicy: IfNotPresent
+    {{- end }}
     annotations:
       sidecar.istio.io/inject: "false"
     labels: {{- include "nats.labels" . | nindent 6 }}

@@ -1,4 +1,4 @@
-{{- if eq .Values.global.eventing.backend "nats" }}
+{{- if eq "enabled" "false" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
