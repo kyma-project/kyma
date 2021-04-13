@@ -16,7 +16,6 @@ spec:
     spec:
       serviceAccountName: {{ include "nats-controller.fullname" . }}
       terminationGracePeriodSeconds: 10
-      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
@@ -44,6 +43,9 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 3
+          {{- if .Values.global.securityContext }}
+          securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
+          {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

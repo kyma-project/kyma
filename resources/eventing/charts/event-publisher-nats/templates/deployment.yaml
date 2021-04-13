@@ -30,9 +30,6 @@ spec:
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: {{ .Values.image.name }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            privileged: false
           ports:
             - containerPort: {{ .Values.nats.config.port }}
               name: http
@@ -60,6 +57,9 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          {{- if .Values.global.securityContext }}
+          securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
+          {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
