@@ -1,9 +1,9 @@
 SHELL=bash
 
-.PHONY: ci-pr ci-main ci-release resolve build-and-test generate-mocks
+.PHONY: ci-pr ci-master ci-release resolve build-and-test generate-mocks
 
 ci-pr: resolve generate-mocks build-and-test
-ci-main: resolve generate-mocks build-and-test
+ci-master: resolve generate-mocks build-and-test
 ci-release: resolve generate-mocks build-and-test
 
 resolve:
