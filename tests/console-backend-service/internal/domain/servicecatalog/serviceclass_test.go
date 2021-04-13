@@ -231,7 +231,7 @@ func fixServiceClassRequest(resourceDetailsQuery string, expectedResource shared
 				serviceClass(name: $name, namespace: $namespace) {
 					%s
 				}
-			}	
+			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
@@ -246,7 +246,7 @@ func fixServiceClassesRequest(resourceDetailsQuery string, expectedResource shar
 				serviceClasses(namespace: $namespace) {
 					%s
 				}
-			}	
+			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", expectedResource.Namespace)
@@ -269,7 +269,7 @@ func fixCommonAssetGroupSpec() v1beta1.CommonAssetGroupSpec {
 				Type: "markdown",
 				Name: "markdown",
 				Mode: v1beta1.AssetGroupSingle,
-				URL:  "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md",
+				URL:  "https://raw.githubusercontent.com/kyma-project/kyma/main/README.md",
 			},
 		},
 	}

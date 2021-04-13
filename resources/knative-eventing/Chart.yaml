@@ -3,7 +3,7 @@ description: Kyma component 'knative-eventing'
 name: knative-eventing
 version: 1.0.0
 home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
+icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
 dependencies:
   - name: knative-eventing
     version: 0.12.0

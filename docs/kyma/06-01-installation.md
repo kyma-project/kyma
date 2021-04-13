@@ -49,7 +49,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.labels.action** | Yes | Defines the behavior of the Kyma Installer. Available options are `install` and `uninstall`. |
 | **spec.version** | No | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string.|
-| **spec.url** | No | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/main.tar.gz`. **This attribute is deprecated.** |
+| **spec.url** | No | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `main` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/main.tar.gz`. **This attribute is deprecated.** |
 | **spec.profile** | No | Specifies the profile which will be used for installation or upgrade. Available options are `evaluation` and `production`. |
 | **spec.components** | Yes | Lists which components of Helm chart components to install, update or uninstall. |
 | **spec.components.name** | Yes | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
