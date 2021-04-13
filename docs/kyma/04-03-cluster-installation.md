@@ -73,7 +73,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   GKE
   </summary>
 
-1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
+1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/main/provision/examples/gcp/README.md#configure-gcp).
 
 2. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 
@@ -177,14 +177,14 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
    ```
    kyma provision gardener gcp -n {cluster_name} -p {project_name} -s {kyma_gardener_gcp_secret_name} -c {path_to_gardener_kubeconfig}
    ```
-   See the complete [list of flags and their descriptions](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener_gcp.md).
+   See the complete [list of flags and their descriptions](https://github.com/kyma-project/cli/blob/main/docs/gen-docs/kyma_provision_gardener_gcp.md).
 
    To provision a Gardener cluster on Azure, run:
 
    ```
    kyma provision gardener az -n {cluster_name} -p {project_name} -s {kyma_gardener_azure_secret_name} -c {path_to_gardener_kubeconfig}
    ```
-   See the complete [list of flags and their descriptions](https://github.com/kyma-project/cli/blob/master/docs/gen-docs/kyma_provision_gardener_az.md).
+   See the complete [list of flags and their descriptions](https://github.com/kyma-project/cli/blob/main/docs/gen-docs/kyma_provision_gardener_az.md).
 
 3. After you provision the cluster, its `kubeconfig` file will be downloaded and automatically set as the current context.
 
@@ -205,7 +205,7 @@ To install Kyma with one of the predefined [profiles](#installation-overview-pro
 kyma install -s $KYMA_VERSION --profile {evaluation|production}
 ```
 
->**NOTE:** If you don't specify `$KYMA_VERSION`, the version from the latest commit on the `master` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
+>**NOTE:** If you don't specify `$KYMA_VERSION`, the version from the latest commit on the `main` branch is installed. If you don't specify the profile, the default version of Kyma is installed.
 
 ## Post-installation steps
 

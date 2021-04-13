@@ -14,10 +14,18 @@ import (
 
 	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
+	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+	"github.com/sirupsen/logrus"
+	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
+	v1 "k8s.io/client-go/informers/core/v1"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
@@ -27,15 +35,6 @@ import (
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
-	"github.com/sirupsen/logrus"
-	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
-	v1 "k8s.io/client-go/informers/core/v1"
-	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
-	eventingCli "knative.dev/eventing/pkg/client/clientset/versioned"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
@@ -71,14 +70,11 @@ func main() {
 	fatalOnError(err)
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
-	eventingClient, err := eventingCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	knClient := knative.NewClient(eventingClient, k8sClient)
 	istioClient, err := securityclientv1beta1.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient,
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient,
 		istioClient, &livenessCheckStatus)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
@@ -90,7 +86,6 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
-	knClient knative.Client,
 	istioClient securityclientv1beta1.SecurityV1beta1Interface,
 	livenessCheckStatus *broker.LivenessCheckStatus,
 ) *broker.Server {
@@ -141,7 +136,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(),
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
-		&mClient, knClient, &istioClient, log, livenessCheckStatus,
+		&mClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
 		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, cfg.NewEventingFlow)
 

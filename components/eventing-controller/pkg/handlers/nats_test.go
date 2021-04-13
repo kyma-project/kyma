@@ -102,7 +102,7 @@ func TestSubscription(t *testing.T) {
 		},
 		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
 	}
-	err := natsClient.Initialize()
+	err := natsClient.Initialize(env.Config{})
 	if err != nil {
 		t.Fatalf("failed to connect to Nats Server: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestSubscription(t *testing.T) {
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
 	sub.Spec.Sink = subscriberReceiveURL
-	err = natsClient.SyncSubscription(sub, cleaner)
+	_, err = natsClient.SyncSubscription(sub, cleaner)
 	if err != nil {
 		t.Fatalf("failed to Sync subscription: %v", err)
 	}

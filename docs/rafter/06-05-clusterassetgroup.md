@@ -34,7 +34,7 @@ spec:
       mode: package
       parameters:
         disableRelativeLinks: "true"
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/main.zip
       filter: /docs/service-mesh/docs/
 status:
   lastHeartbeatTime: "2019-03-18T13:42:55Z"

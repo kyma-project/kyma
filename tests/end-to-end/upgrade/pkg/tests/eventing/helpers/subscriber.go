@@ -11,8 +11,6 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const subscriberImage = "eu.gcr.io/kyma-project/event-subscriber-tools:f766b186"
-
 type SubscriberOption func(deployment *appsv1.Deployment)
 
 func WithSubscriberImage(image string) SubscriberOption {
@@ -47,7 +45,7 @@ func CreateSubscriber(k8s k8s.Interface, name, namespace string, subscriberOptio
 					Containers: []corev1.Container{
 						{
 							Name:            name,
-							Image:           subscriberImage,
+							Image:           "",
 							ImagePullPolicy: "IfNotPresent",
 							Ports: []corev1.ContainerPort{
 								{

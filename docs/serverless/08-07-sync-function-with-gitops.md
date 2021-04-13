@@ -41,10 +41,10 @@ These sections will lead you through the whole installation, configuration, and 
   kubectl cluster-info
   ```
 
-3. Apply the `functions.serverless.kyma-project.io` CRD from sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/master/resources/cluster-essentials/files) repository. You will need it to create the Function CR on the cluster.
+3. Apply the `functions.serverless.kyma-project.io` CRD from sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/main/resources/cluster-essentials/files) repository. You will need it to create the Function CR on the cluster.
 
   ```bash
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/resources/cluster-essentials/files/functions.serverless.crd.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/resources/cluster-essentials/files/functions.serverless.crd.yaml
   ```
 4. Run this command to make sure the CRs are applied:
 
@@ -101,7 +101,7 @@ You can now install the Flux operator, connect it with a specific Git repository
   kubectl create namespace flux
   ```
 
-3. Export details of your GitHub repository - its name, the account name, and related e-mail address. You must also specify the name of the folder in your GitHub repository to which you will push the Function CR built from local sources. If you don't have this folder in your repository yet, you will create it in further steps. Flux will synchronize the cluster with the content of this folder on the `main` (`master`) branch.
+3. Export details of your GitHub repository - its name, the account name, and related e-mail address. You must also specify the name of the folder in your GitHub repository to which you will push the Function CR built from local sources. If you don't have this folder in your repository yet, you will create it in further steps. Flux will synchronize the cluster with the content of this folder on the `main` branch.
 
   ```bash
   export GH_USER="{USERNAME}"
@@ -205,7 +205,7 @@ In this section, you will create a sample inline Function.
   ```bash
   git add .                        # Stage changes for the commit
   git commit -m 'Add my-function'  # Add a commit message
-  git push origin main             # Push changes to the "main" branch of your Git repository. If you have a repository with the "master" branch, use this command instead: git push origin master
+  git push origin main             # Push changes to the "main" branch of your Git repository. If you have a repository with the "main" branch, use this command instead: git push origin main
   ```
 
 6. Go to the GitHub repository to check that the changes were pushed.
@@ -225,4 +225,4 @@ You can see that Flux synchronized the resource and the new Function CR was adde
 
 ## Reverting feature
 
-Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back to its version on the `main` (`master`) branch of the Git repository.  
+Once you set it up, Flux will keep monitoring the given Git repository folder for any changes. If you modify the existing resources directly on the cluster, Flux will automatically revert these changes and update the given resource back to its version on the `main` branch of the Git repository.  

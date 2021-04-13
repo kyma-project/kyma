@@ -3,8 +3,8 @@
 ## Overview
 
 The `tests` directory contains the sources for all Kyma tests.
-A Kyma test is Pod, container, or image referenced in a Kyma module or chart test section. It provides the module's test functionality. 
-A Kyma test runs against a running Kyma cluster. It ensures the integrity and functional correctness of the cluster with all installed modules. 
+A Kyma test is Pod, container, or image referenced in a Kyma module or chart test section. It provides the module's test functionality.
+A Kyma test runs against a running Kyma cluster. It ensures the integrity and functional correctness of the cluster with all installed modules.
 Each subdirectory in the tests directory defines sources for one test suite, usually focusing on one component. The resulting Docker images are then referenced by the related Kyma modules or charts.
 
 ## Details
@@ -24,4 +24,4 @@ Bundle performance tests into one `perf` subfolder.
 
 ## Development
 
-Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md) development guide when you add a new test to the `kyma` repository.
+Follow [this](https://github.com/kyma-project/kyma/blob/main/resources/README.md) development guide when you add a new test to the `kyma` repository.
