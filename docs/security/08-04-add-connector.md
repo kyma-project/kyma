@@ -128,7 +128,7 @@ Register the connector by creating a [Helm override](/docs/root/#configuration-h
 
 ## Configure authorization rules for the GitHub connector
 
-To bind Github groups to the default Kyma roles, edit the **bindings** section in the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cluster-users/values.yaml) file. Follow this template:
+To bind Github groups to the default Kyma roles, edit the **bindings** section in the [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/cluster-users/values.yaml) file. Follow this template:
 
 ```
 bindings:

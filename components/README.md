@@ -26,4 +26,4 @@ This table lists the available types:
 
 ## Development
 
-Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md) development guide when you add a new component to the `kyma` repository.
+Follow [this](https://github.com/kyma-project/kyma/blob/main/resources/README.md) development guide when you add a new component to the `kyma` repository.

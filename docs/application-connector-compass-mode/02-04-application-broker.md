@@ -25,7 +25,7 @@ The provisioning and binding workflow for an API ServicePlan consists of the fol
 1. Select an API ServiceClass and choose an API ServicePlan from the Service Catalog.
 2. Provision the ServiceClass with the chosen API ServicePlan by creating its ServiceInstance in a Namespace.
 3. Bind your ServiceInstance to the service or Function. During the binding process, ServiceBinding and ServiceBindingUsage resources are created.
-  * ServiceBinding contains a Secret with the Gateway URL required to connect to the given API. The Gateway URL is specified under the **sanitized({API\_NAME}_{API_ID})_GATEWAY_URL** field. To learn more about sanitization, refer to the [sanitization function](https://github.com/kyma-project/kyma/blob/master/components/application-broker/internal/broker/bind_creds_renderer.go#L109).
+  * ServiceBinding contains a Secret with the Gateway URL required to connect to the given API. The Gateway URL is specified under the **sanitized({API\_NAME}_{API_ID})_GATEWAY_URL** field. To learn more about sanitization, refer to the [sanitization function](https://github.com/kyma-project/kyma/blob/main/components/application-broker/internal/broker/bind_creds_renderer.go#L109).
 >**NOTE:** If you want to call the Application directly and skip the Application Gateway component, use **sanitized({API\_NAME}_{API_ID})_TARGET_URL** with corresponding **CONFIGURATION** and **CREDENTIALS_TYPE**. For more information, read the document about [proxy configuration](https://kyma-project.io/docs/components/application-connector#details-application-gateway-proxy-configuration).
   * ServiceBindingUsage injects the Secret, together with the label given during the registration process, to the Function or service.
 4. The service or Function calls the API through the Application Gateway, allowing you to access the Application API.
@@ -40,7 +40,7 @@ This section describes in detail how the API credentials are generated.
 1. User creates a ServiceInstance.
 2. Service Catalog sends a provisioning request to the Application Broker.
 3. Application Broker requests credentials for a ServiceInstance. The request is processed through the Director proxy exposed by Runtime Agent to Director.
-    >**NOTE:** The Director proxy is secured by [Istio RBAC](https://github.com/kyma-project/kyma/blob/master/resources/compass-runtime-agent/templates/istio-rbac.yaml) and only Application Broker can access it.
+    >**NOTE:** The Director proxy is secured by [Istio RBAC](https://github.com/kyma-project/kyma/blob/main/resources/compass-runtime-agent/templates/istio-rbac.yaml) and only Application Broker can access it.
 
 4. Application Broker polls credential status with a 20 minute timeout. The polling is completed when the credential status is either `SUCCEEDED` or `FAILED`.
 

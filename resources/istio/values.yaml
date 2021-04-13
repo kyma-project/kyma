@@ -14,6 +14,9 @@ kyma:
     tag: "20210407-86c769bd"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
+    retriesCount: "5"
+    dryRun: "false"
+    exitCode: "0"
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
@@ -29,7 +32,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "50773916"
+    tag: "61b73f65"
   securityContext:
     runAsUser: 65534
     runAsNonRoot: true

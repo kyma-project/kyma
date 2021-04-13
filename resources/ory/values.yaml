@@ -21,8 +21,6 @@ global:
           enabled: true
         # user: "someUser"
         # password: "postgres"
-        secretName: "ory-hydra-credentials"
-        secretKey: "dbPassword"
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"
@@ -32,20 +30,6 @@ headerRewrite:
   workloadLabel: oathkeeper
 hpa:
   oathkeeper:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 3
-    cpu: 80
-    metrics:
-    - type: Resource
-      resource:
-        name: memory
-        targetAverageUtilization: 75
-    - type: Resource
-      resource:
-        name: cpu
-        targetAverageUtilization: 80
-  hydra:
     enabled: true
     minReplicas: 1
     maxReplicas: 3
@@ -88,6 +72,12 @@ hydra:
       requests:
         cpu: 100m
         memory: 128Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetMemoryUtilizationPercentage: 75
+      targetCPUUtilizationPercentage: 80
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
     #   https://github.com/ory/hydra/blob/master/docs/config.yaml
@@ -114,6 +104,7 @@ hydra:
   hydra-maester:
     globalAccess: true
     config:
+      # Must be in-sync with hydra.hydra.config.existingSecret
       hydraSecret: "ory-hydra-credentials"
 
 # Overrides for the Oathkeeper chart
@@ -239,6 +230,7 @@ postgresql:
   master:
     podAnnotations:
       sidecar.istio.io/inject: "false"
+  # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
 
 # Remote persistance settings
@@ -250,5 +242,6 @@ gcloud-sqlproxy:
     term_timeout: 30s
   podAnnotations:
     sidecar.istio.io/inject: "false"
+  # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
   existingSecretKey: "gcp-sa.json"
