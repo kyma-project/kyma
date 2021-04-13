@@ -6,6 +6,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
@@ -13,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
@@ -35,6 +37,17 @@ func main() {
 
 	// assure uniqueness
 	ctx := signals.NewContext()
+
+	// metrics server
+	metricsServer := metrics.NewServer(logger)
+	defer metricsServer.Stop()
+	if err := metricsServer.Start(opts.MetricsAddress); err != nil {
+		logger.Infof("Metrics server failed to start with error: %v", err)
+	}
+
+	// metrics collector
+	metricsCollector := metrics.NewCollector()
+	prometheus.MustRegister(metricsCollector)
 
 	// connect to nats
 	connection, err := pkgnats.ConnectToNats(cfgNats.URL, cfgNats.RetryOnFailedConnect, cfgNats.MaxReconnects, cfgNats.ReconnectWait)
@@ -75,7 +88,8 @@ func main() {
 	logger.Info("Informers are synced successfully")
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := nats.NewHandler(messageReceiver, messageSenderToNats, cfgNats.RequestTimeout, legacyTransformer, opts, subscribedProcessor, logger).Start(ctx); err != nil {
+	if err := nats.NewHandler(messageReceiver, messageSenderToNats, cfgNats.RequestTimeout, legacyTransformer, opts,
+		subscribedProcessor, logger, metricsCollector).Start(ctx); err != nil {
 		logger.Fatalf("Start handler failed with error: %s", err)
 	}
 

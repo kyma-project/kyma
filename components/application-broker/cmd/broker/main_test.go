@@ -8,13 +8,16 @@ import (
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	scfake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appfake "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
+	appCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
@@ -23,9 +26,6 @@ import (
 	abfake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	abCS "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
-	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	appfake "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
-	appCS "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -39,8 +39,6 @@ const (
 
 	serviceOneID = "001"
 	serviceTwoID = "002"
-
-	newEventingFlow = false
 )
 
 type testSuite struct {
@@ -88,7 +86,7 @@ func TestRegisterAndUnregisterServiceBroker(t *testing.T) {
 	// when
 	suite.disableApplication()
 
-	//then
+	// then
 	suite.AssertServiceBrokerNotRegistered()
 }
 
@@ -153,8 +151,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	k8sClientSet := k8sfake.NewSimpleClientset()
 	scClientSet := scfake.NewSimpleClientset()
 	appClient := appfake.NewSimpleClientset()
-	knCli, k8sCli, istioClient, _ := bt.NewFakeClients()
-	knClient := knative.NewClient(knCli, k8sCli)
+	istioClient, _ := bt.NewFakeClients()
 
 	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -165,7 +162,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 	srv := SetupServerAndRunControllers(&cfg, log.Logger, stopCh, k8sClientSet, scClientSet, appClient, abClientSet,
-		knClient, istioClient.SecurityV1beta1(), &livenessCheckStatus)
+		istioClient.SecurityV1beta1(), &livenessCheckStatus)
 	server := httptest.NewServer(srv.CreateHandler())
 
 	osbClient, err := newOSBClient(fmt.Sprintf("%s/%s", server.URL, namespace))

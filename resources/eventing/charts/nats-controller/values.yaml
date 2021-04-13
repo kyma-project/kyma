@@ -10,7 +10,7 @@ image:
   # name is the name of the container image for the nats-eventing-controller
   name: "eventing-controller-nats"
   # tag is the container tag of the eventing-controller image
-  tag: "e2185713"
+  tag: "PR-11026"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -19,3 +19,11 @@ podSecurityContext:
 metrics:
   service:
     nameSuffix: "-metrics"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 30Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi

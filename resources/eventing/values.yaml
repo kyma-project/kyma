@@ -14,6 +14,10 @@ global:
     # backend defines the provisioned eventing backend, either NATS or BEB
     backend: nats
 
+  istio:
+    proxy:
+      statusPort: 15020
+
   # eventTypePrefix is the prefix of the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
@@ -34,12 +38,12 @@ authentication:
 postUpgradeJob:
   image:
     name: event-sources-upgrade-job
-    tag: PR-10733
+    tag: 36cfb063
 
-preUpgradeJob:
+postInstallJob:
   image:
-    name: eu.gcr.io/kyma-project/incubator/k8s-tools
-    tag: "20210208-080d17ad"
+    name: eu.gcr.io/kyma-project/tpi/k8s-tools
+    tag: "20210407-86c769bd"
 
 securityContext:
   allowPrivilegeEscalation: false

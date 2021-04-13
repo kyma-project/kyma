@@ -18,6 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -57,10 +58,14 @@ type Handler struct {
 	Logger *logrus.Logger
 	// Options configures HTTP server
 	Options *options.Options
+	// collector collects metrics
+	collector *metrics.Collector
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration, legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor, logger *logrus.Logger) *Handler {
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration,
+	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
+	logger *logrus.Logger, collector *metrics.Collector) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -69,6 +74,7 @@ func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessa
 		SubscribedProcessor: subscribedProcessor,
 		Logger:              logger,
 		Options:             opts,
+		collector:           collector,
 	}
 }
 
@@ -129,7 +135,16 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.Request) {
@@ -162,7 +177,15 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 
-	h.Logger.Infof("Event dispatched id:[%s] statusCode:[%d] duration:[%s] responseBody:[%s]", event.ID(), statusCode, dispatchTime, respBody)
+	h.Logger.WithFields(
+		logrus.Fields{
+			"id":           event.ID(),
+			"source":       event.Source(),
+			"type":         event.Type(),
+			"statusCode":   statusCode,
+			"duration":     dispatchTime,
+			"responseBody": respBody,
+		}).Info("Event dispatched")
 }
 
 // writeResponse writes the HTTP response given the status code and response body.
@@ -207,9 +230,11 @@ func (h *Handler) send(ctx context.Context, event *cev2event.Event) (int, time.D
 	resp, dispatchTime, err := h.sendAndRecordDispatchTime(request)
 	if err != nil {
 		h.Logger.Errorf("failed to send event and record dispatch time with error: %s", err)
+		h.collector.RecordError()
 		return http.StatusInternalServerError, dispatchTime, []byte{}
 	}
 	defer func() { _ = resp.Body.Close() }()
+	h.collector.RecordLatency(dispatchTime)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

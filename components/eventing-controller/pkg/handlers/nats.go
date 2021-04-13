@@ -23,13 +23,7 @@ import (
 )
 
 // compile time check
-var _ NatsInterface = &Nats{}
-
-type NatsInterface interface {
-	Initialize() error
-	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error
-	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
-}
+var _ MessagingBackend = &Nats{}
 
 type Nats struct {
 	config        env.NatsConfig
@@ -49,8 +43,9 @@ const (
 )
 
 // Initialize creates a connection to Nats
-func (n *Nats) Initialize() (err error) {
+func (n *Nats) Initialize(cfg env.Config) error {
 	n.log.Info("Initialize NATS connection")
+	var err error
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
 		n.connection, err = nats.Connect(n.config.Url,
 			nats.RetryOnFailedConnect(true),
@@ -92,7 +87,8 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
 }
 
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {
+// The returned bool should be ignored now. It's a marker for changed subscription status
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
 	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
@@ -107,34 +103,34 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		if len(eventType) == 0 {
 			err := nats.ErrBadSubject
 			n.log.Error(err, "failed to create a Nats subscription")
-			return err
+			return false, err
 		}
 
 		callback := n.getCallback(sub.Spec.Sink)
 
 		if n.connection.Status() != nats.CONNECTED {
 			n.log.Info("connection to Nats", "status", fmt.Sprintf("%v", n.connection.Status()))
-			initializeErr := n.Initialize()
+			initializeErr := n.Initialize(env.Config{})
 			if initializeErr != nil {
 				n.log.Error(initializeErr, "failed to reset NATS connection")
-				return initializeErr
+				return false, initializeErr
 			}
 		}
 
 		// clean the application name segment in the event-type from none-alphanumeric characters
 		eventType, err := cleaner.Clean(eventType)
 		if err != nil {
-			return err
+			return false, err
 		}
 
 		sub, subscribeErr := n.connection.Subscribe(eventType, callback)
 		if subscribeErr != nil {
 			n.log.Error(subscribeErr, "failed to create a Nats subscription")
-			return subscribeErr
+			return false, subscribeErr
 		}
 		n.subscriptions[fmt.Sprintf("%s.%s", namespacedName.String(), filter.EventType.Value)] = sub
 	}
-	return nil
+	return false, nil
 }
 
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
@@ -147,7 +143,7 @@ func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) e
 			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
-				initializeErr := n.Initialize()
+				initializeErr := n.Initialize(env.Config{})
 				if initializeErr != nil {
 					return errors.Wrapf(initializeErr, "can't connect to Nats server")
 				}

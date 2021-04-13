@@ -17,13 +17,7 @@ import (
 )
 
 // compile time check
-var _ Interface = &Beb{}
-
-type Interface interface {
-	Initialize(cfg env.Config)
-	SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, cleaner eventtype.Cleaner) (bool, error)
-	DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error
-}
+var _ MessagingBackend = &Beb{}
 
 type Beb struct {
 	Client      *client.Client
@@ -36,12 +30,13 @@ type BebResponse struct {
 	Error      error
 }
 
-func (b *Beb) Initialize(cfg env.Config) {
+func (b *Beb) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
 		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg)
 	}
+	return nil
 }
 
 // getWebHookAuth returns the webhook auth config from the given env config
@@ -56,8 +51,14 @@ func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 	}
 }
 
-// SyncBebSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, cleaner eventtype.Cleaner) (bool, error) {
+// SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
+func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
+	if !ok {
+		err := fmt.Errorf("failed to get apiRule from params[0]: %v", params[0])
+		b.Log.Error(err, "wrong parameter for subscription", "name:", subscription.Name)
+	}
+
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
 	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth)
@@ -116,8 +117,8 @@ func (b *Beb) SyncBebSubscription(subscription *eventingv1alpha1.Subscription, a
 	return statusChanged, nil
 }
 
-// DeleteBebSubscription deletes the corresponding EMS subscription
-func (b *Beb) DeleteBebSubscription(subscription *eventingv1alpha1.Subscription) error {
+// DeleteSubscription deletes the corresponding EMS subscription
+func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(subscription.Name)
 }
 

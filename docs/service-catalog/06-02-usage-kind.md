@@ -21,8 +21,8 @@ metadata:
 spec:
   displayName: Function
   resource:
-    group: serving.knative.dev
-    kind: service
+    group: eventing.kyma-project.io
+    kind: subscription
     version: v1
   labelsPath: spec.template.metadata.labels
 ```
@@ -61,7 +61,7 @@ These components use this CR:
 
 | Component   |   Description |
 |----------|------|
-| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/master/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
+| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/main/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
 | [Console Backend Service](/components/console/#details-console-backend-service) |  Exposes the given CR to the Console UI. |
 
 ## RBAC settings
@@ -71,15 +71,15 @@ The administrator who adds the UsageKind must take care of the RBAC settings. Th
 See the example of the RBAC Rule for the ServiceBindingUsage Controller:
 
 ```yaml
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
   verbs: ["get", "list", "watch", "patch", "update"]
 ```
 
 Here is the example for the Console Backend Service:
 
 ```yaml
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
   verbs: ["get", "list", "watch"]
 ```

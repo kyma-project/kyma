@@ -10,25 +10,16 @@ import (
 )
 
 const (
-	isCentralEnv     = "CENTRAL"
 	skipSSLVerifyEnv = "SKIP_SSL_VERIFY"
 	namespaceEnv     = "NAMESPACE"
 )
 
 type TestConfig struct {
-	IsCentral     bool
 	SkipSSLVerify bool
 	Namespace     string
 }
 
 func ReadConfig() (TestConfig, error) {
-
-	central := false
-	c, found := os.LookupEnv(isCentralEnv)
-	if found {
-		central, _ = strconv.ParseBool(c)
-	}
-
 	skipVerify := false
 	sv, found := os.LookupEnv(skipSSLVerifyEnv)
 	if found {
@@ -41,7 +32,6 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		IsCentral:     central,
 		SkipSSLVerify: skipVerify,
 		Namespace:     namespace,
 	}

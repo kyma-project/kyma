@@ -18,71 +18,32 @@ func TestConnector(t *testing.T) {
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
 		appName := "test-app"
-		appTokenRequest := createApplicationTokenRequest(t, config, appName, config.Central)
+		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.Central, config.GatewayUrl, appName)
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 		appCsrInfoEndpointSuite(t, appTokenRequest, config, appName)
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
-
-		appTokenRequestWithTenantAndGroup := createApplicationTokenRequest(t, config, appName, true)
-		subjectGenerationSuite(t, appTokenRequestWithTenantAndGroup, config, appName)
+		subjectGenerationSuite(t, appTokenRequest, config, appName)
 
 		internalRevocationUrl := createApplicationRevocationUrl(config)
 		certificateRevocationSuite(t, appTokenRequest, config.SkipSslVerify, internalRevocationUrl)
 	})
-
-	if config.Central {
-		t.Run("Connector Service flow for Runtime", func(t *testing.T) {
-			runtimeTokenRequest := createRuntimeTokenRequest(t, config)
-			certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-			runtimeCsrInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-			runtimeMgmInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-
-			certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-
-			internalRevocationUrl := createRuntimeRevocationUrl(config)
-			certificateRevocationSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
-		})
-	}
 }
 
-func createApplicationTokenRequest(t *testing.T, config testkit.TestConfig, appName string, withGroupAndTenant bool) *http.Request {
+func createApplicationTokenRequest(t *testing.T, config testkit.TestConfig, appName string) *http.Request {
 	tokenURL := config.InternalAPIUrl + "/v1/applications/tokens"
 
-	request := createTokenRequest(t, tokenURL, withGroupAndTenant)
-	request.Header.Set(testkit.ApplicationHeader, appName)
-
-	return request
-}
-
-func createRuntimeTokenRequest(t *testing.T, config testkit.TestConfig) *http.Request {
-	tokenURL := config.InternalAPIUrl + "/v1/runtimes/tokens"
-
-	request := createTokenRequest(t, tokenURL, true)
-
-	return request
-}
-
-func createTokenRequest(t *testing.T, tokenURL string, withGroupAndTenant bool) *http.Request {
 	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
 	require.NoError(t, err)
 
 	request.Close = true
-
-	if withGroupAndTenant {
-		request.Header.Set(testkit.GroupHeader, testkit.Group)
-		request.Header.Set(testkit.TenantHeader, testkit.Tenant)
-	}
+	request.Header.Set(testkit.ApplicationHeader, appName)
 
 	return request
 }
 
 func createApplicationRevocationUrl(config testkit.TestConfig) string {
 	return config.InternalAPIUrl + "/v1/applications/certificates/revocations"
-}
-
-func createRuntimeRevocationUrl(config testkit.TestConfig) string {
-	return config.InternalAPIUrl + "/v1/runtimes/certificates/revocations"
 }
 
 func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
@@ -313,46 +274,9 @@ func subjectGenerationSuite(t *testing.T, tokenRequest *http.Request, config tes
 	subject := testkit.ParseSubject(infoResponse.Certificate.Subject)
 	require.NotEmpty(t, subject.Organization[0])
 	require.NotEmpty(t, subject.OrganizationalUnit[0])
-
-	if !config.Central {
-		t.Run("should ignore tenant and group if not central", func(t *testing.T) {
-			assert.NotEqual(t, testkit.Tenant, subject.Organization[0])
-			assert.NotEqual(t, testkit.Group, subject.OrganizationalUnit[0])
-		})
-	} else {
-		t.Run("should set Organization as Tenant and OrganizationalUnit as Group", func(t *testing.T) {
-			assert.Equal(t, testkit.Tenant, subject.Organization[0])
-			assert.Equal(t, testkit.Group, subject.OrganizationalUnit[0])
-		})
-	}
-
 }
 
-func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
-
-	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
-
-	t.Run("should provide not empty CSR info response", func(t *testing.T) {
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
-
-		// then
-		require.Nil(t, errorResponse)
-		assert.NotEmpty(t, infoResponse.CertUrl)
-		assert.NotEmpty(t, infoResponse.Api)
-		assert.NotEmpty(t, infoResponse.Certificate)
-		assert.Nil(t, infoResponse.Api.RuntimeURLs)
-	})
-}
-
-func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, central bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -389,47 +313,7 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
 		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
 		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
-
-		if central {
-			assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
-			assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
-		} else {
-			assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
-			assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
-		}
 	})
-}
-
-func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
-
-	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
-
-	clientKey := testkit.CreateKey(t)
-
-	t.Run("should provide not empty management info response", func(t *testing.T) {
-		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
-
-		// then
-		require.NotEmpty(t, crtResponse.CRTChain)
-		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
-		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
-		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
-		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
-		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
-		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
-	})
-
 }
 
 func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {

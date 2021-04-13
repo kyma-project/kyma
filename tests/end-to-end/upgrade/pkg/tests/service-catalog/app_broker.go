@@ -18,8 +18,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
-	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 )
 
 const (
@@ -40,7 +38,6 @@ type AppBrokerUpgradeTest struct {
 	BUInterface             bu.Interface
 	AppBrokerInterface      appBroker.Interface
 	AppConnectorInterface   appConnector.Interface
-	MessagingInterface      messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 // NewAppBrokerUpgradeTest returns new instance of the AppBrokerUpgradeTest
@@ -48,15 +45,13 @@ func NewAppBrokerUpgradeTest(scCli clientset.Interface,
 	k8sCli kubernetes.Interface,
 	buCli bu.Interface,
 	abCli appBroker.Interface,
-	acCli appConnector.Interface,
-	msgCli messagingclientv1alpha1.MessagingV1alpha1Interface) *AppBrokerUpgradeTest {
+	acCli appConnector.Interface) *AppBrokerUpgradeTest {
 	return &AppBrokerUpgradeTest{
 		ServiceCatalogInterface: scCli,
 		K8sInterface:            k8sCli,
 		BUInterface:             buCli,
 		AppBrokerInterface:      abCli,
 		AppConnectorInterface:   acCli,
-		MessagingInterface:      msgCli,
 	}
 }
 
@@ -68,7 +63,6 @@ type appBrokerFlow struct {
 	buInterface           bu.Interface
 	appBrokerInterface    appBroker.Interface
 	appConnectorInterface appConnector.Interface
-	messagingInterface    messagingclientv1alpha1.MessagingV1alpha1Interface
 }
 
 // CreateResources creates resources needed for e2e upgrade test
@@ -96,7 +90,6 @@ func (ut *AppBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLo
 		appBrokerInterface:    ut.AppBrokerInterface,
 		appConnectorInterface: ut.AppConnectorInterface,
 		scInterface:           ut.ServiceCatalogInterface,
-		messagingInterface:    ut.MessagingInterface,
 		k8sInterface:          ut.K8sInterface,
 	}
 }
@@ -104,7 +97,6 @@ func (ut *AppBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLo
 func (f *appBrokerFlow) CreateResources() error {
 	// iterate over steps
 	for _, fn := range []func() error{
-		f.createChannel,
 		f.createApplication,
 		f.createApplicationMapping,
 		f.deployEnvTester,
@@ -139,8 +131,6 @@ func (f *appBrokerFlow) TestResources() error {
 		f.waitForInstancesDeleted,
 		f.deleteApplicationMapping,
 		f.deleteApplication,
-		f.deleteChannel,
-		f.waitForClassesRemoved,
 		f.undeployEnvTester,
 	} {
 		err := fn()
@@ -159,36 +149,14 @@ func (f *appBrokerFlow) logReport() {
 	f.logK8SReport(report)
 	f.logServiceCatalogAndBindingUsageReport(report)
 	f.logApplicationReport(report)
-	f.logChannels(report)
 	f.reportLogs(report)
 
 	report.Print()
 }
 
 func (f *appBrokerFlow) deleteApplication() error {
+	f.log.Infof("Removing Application %s", applicationName)
 	return f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
-}
-
-func (f *appBrokerFlow) createChannel() error {
-	channel := &messagingv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Channel",
-			APIVersion: "messaging.knative.dev/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: applicationName,
-			Labels: map[string]string{
-				"application-name": applicationName,
-			},
-		},
-	}
-
-	_, err := f.messagingInterface.Channels(integrationNamespace).Create(channel)
-	return err
-}
-
-func (f *appBrokerFlow) deleteChannel() error {
-	return f.messagingInterface.Channels(integrationNamespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) createApplication() error {
@@ -350,6 +318,7 @@ func (f *appBrokerFlow) deleteEventsServiceInstance() error {
 }
 
 func (f *appBrokerFlow) deleteApplicationMapping() error {
+	f.log.Infof("Removing Application Mapping %s", applicationName)
 	return f.appBrokerInterface.ApplicationconnectorV1alpha1().ApplicationMappings(f.namespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
@@ -362,19 +331,6 @@ func (f *appBrokerFlow) waitForInstances() error {
 	err = f.waitForInstance(eventsServiceID)
 
 	return err
-}
-
-func (f *appBrokerFlow) waitForClassesRemoved() error {
-	return f.wait(5*time.Second, func() (bool, error) {
-		classes, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
-		if err != nil {
-			return false, err
-		}
-		if len(classes.Items) == 0 {
-			return true, nil
-		}
-		return false, nil
-	})
 }
 
 func (f *appBrokerFlow) waitForClassAndPlans() error {
@@ -454,7 +410,7 @@ func (f *appBrokerFlow) waitForEnvTester() error {
 }
 
 func (f *appBrokerFlow) undeployEnvTester() error {
-	f.log.Info("Removing deployment environment variable tester")
+	f.log.Infof("Removing deployment %s", appEnvTester)
 	return f.deleteDeployment(appEnvTester)
 }
 
@@ -467,11 +423,6 @@ func (f *appBrokerFlow) logApplicationReport(report *Report) {
 
 	applications, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
 	report.AddApplications(applications, err)
-}
-
-func (f *appBrokerFlow) logChannels(report *Report) {
-	channels, err := f.messagingInterface.Channels(integrationNamespace).List(metav1.ListOptions{})
-	report.AddChannels(channels, err)
 }
 
 func (f *appBrokerFlow) logFromPod(namespace, labelSelector, container string) ([]string, error) {

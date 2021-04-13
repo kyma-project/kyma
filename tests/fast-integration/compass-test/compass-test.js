@@ -35,7 +35,7 @@ describe("Kyma with Compass test", async function() {
   this.slow(5000);
 
   it("Install Kyma", async function() {
-    await installer.installKyma({withCompass: true, skipComponents});
+    await installer.installKyma({newEventing: true, withCompass: true, skipComponents});
   });
 
   it("Register Kyma instance in Compass", async function() {

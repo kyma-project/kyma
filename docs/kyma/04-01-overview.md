@@ -13,8 +13,6 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `testing` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `xip-patch` | ✅ | ✅ |
-| `knative-eventing` | ✅ | ✅ |
-| `knative-eventing-kafka` | ⛔️ | ⛔️ |
 | `dex` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
 | `api-gateway` | ✅ | ✅ |
@@ -22,15 +20,13 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
-| `nats-streaming` | ✅ | ✅ |
+| `eventing` | ✅ | ✅ |
 | `core` | ✅ | ✅ |
 | `cluster-users` | ✅ | ✅ |
 | `permission-controller` | ✅ | ✅ |
 | `apiserver-proxy` | ✅ | ✅ |
 | `iam-kubeconfig-service` | ✅ | ✅ |
 | `serverless` | ✅ | ✅ |
-| `knative-provisioner-natss` | ✅ | ✅ |
-| `event-sources` | ✅ | ✅ |
 | `application-connector-ingress` | ✅ | ✅ |
 | `application-connector-helper` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
@@ -46,7 +42,7 @@ By default, Kyma is installed with the default chart values defined in the `valu
 - Evaluation - a profile with limited resources that you can use for trial purposes
 - Production - a profile configured for high availability and scalability. It requires more resources than the evaluation profile but is a better choice for production workload.
 
-You can check the values used for each component in respective folders of the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory. The `profile-evaluation.yaml` file contains values used for the evaluation profile, and the `profile-production.yaml` file contains values for the production profile. If the component doesn't have files for respective profiles, the profile values are the same as default chart values defined in the `values.yaml` file.
+You can check the values used for each component in respective folders of the [`resources`](https://github.com/kyma-project/kyma/tree/main/resources) directory. The `profile-evaluation.yaml` file contains values used for the evaluation profile, and the `profile-production.yaml` file contains values for the production profile. If the component doesn't have files for respective profiles, the profile values are the same as default chart values defined in the `values.yaml` file.
 
 A profile is defined globally for the whole Kyma installation. It's not possible to install a profile only for the selected components. However, you can set [overrides](#configuration-helm-overrides-for-kyma-installation) to override values set for the profile. The profile values have precedence over the default chart values, and overrides have precedence over the applied profile.
 

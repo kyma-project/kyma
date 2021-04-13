@@ -55,8 +55,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/grafana
-  tag: 7.4.0-9b4f06c3
+  repository: eu.gcr.io/kyma-project/tpi/grafana
+  tag: 7.4.0-1de56388
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -579,8 +579,8 @@ smtp:
 ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
 sidecar:
   image:
-    repository: eu.gcr.io/kyma-project/incubator/k8s-sidecar
-    tag: 1.10.6-e8ecdc26
+    repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
+    tag: 1.10.6-1de56388
   imagePullPolicy: IfNotPresent
   resources:
     limits:

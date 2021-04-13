@@ -19,10 +19,6 @@ spec:
       namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
-    - name: "knative-eventing"
-      namespace: "knative-eventing"
-    - name: "knative-eventing-kafka"
-      namespace: knative-eventing
     - name: "dex"
       namespace: "kyma-system"
     - name: "ory"
@@ -37,6 +33,8 @@ spec:
       namespace: "kyma-system"
     - name: "helm-broker"
       namespace: "kyma-system"
+    - name: "eventing"
+      namespace: kyma-system
     - name: "core"
       namespace: "kyma-system"
     - name: "cluster-users"
@@ -51,8 +49,6 @@ spec:
       namespace: "kyma-system"
     - name: "serverless"
       namespace: "kyma-system"    
-    - name: "event-sources"
-      namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "tracing"

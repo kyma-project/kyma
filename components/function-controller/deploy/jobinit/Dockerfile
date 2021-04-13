@@ -17,11 +17,12 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 && mv ./jobinit /app/jobinit
 
 # result container
-FROM eu.gcr.io/kyma-project/external/alpine:3.13.2 as certs
+FROM alpine:3.13.4 as certs
 
 RUN apk add --no-cache \
-  openssh-client \
   ca-certificates
+
+RUN apk --no-cache add --update openssh-client --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

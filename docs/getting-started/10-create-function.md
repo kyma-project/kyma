@@ -7,7 +7,7 @@ Let's now repeat the microservice flow for the Function. This guide shows how yo
 
 ## Reference
 
-This guide demonstrates how [Serverless](/components/event-mesh/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe business events from external solutions to them, and trigger the Function's logic upon receiving a given event type.
+This guide demonstrates how [Serverless](/components/serverless/) works in Kyma. It allows you to build, run, and manage serverless applications called Functions. You can bind them to other services, subscribe business events from external solutions to them, and trigger the Function's logic upon receiving a given event type.
 
 ## Steps
 
@@ -22,7 +22,7 @@ Follows these steps:
 1. Apply a [Function CR](/components/serverless/#custom-resource-function) that specifies the Function's logic:
 
   ```bash
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/deployment/orders-function.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/orders-service/deployment/orders-function.yaml
   ```
 
 2. Check that the Function was created and all its conditions are set to `True`:
@@ -54,7 +54,7 @@ Follows these steps:
 
   The pop-up box will close and a message on the screen will confirm that the Function was created.
 
-4. In the **Source** tab of the automatically opened Function details view, enter the Function's code from the [`handler.js`](https://raw.githubusercontent.com/kyma-project/examples/master/orders-service/function/handler.js) file.
+4. In the **Source** tab of the automatically opened Function details view, enter the Function's code from the [`handler.js`](https://raw.githubusercontent.com/kyma-project/examples/main/orders-service/function/handler.js) file.
 
 5. In the **Dependencies** tab, enter:
 

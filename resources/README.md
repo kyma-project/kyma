@@ -26,9 +26,9 @@ The version of the actual component image is located under the **global.{name_of
 
 ### Add monitoring to components
 
-Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component. 
+Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component.
 
-For an example of such a component, see [Service Catalog](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates) that contains the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
+For an example of such a component, see [Service Catalog](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates) that contains the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
 
 
 When creating a ServiceMonitor resource, follow this naming convention:

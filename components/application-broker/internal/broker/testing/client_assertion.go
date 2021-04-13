@@ -8,27 +8,24 @@ import (
 	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
 
 	"github.com/google/go-cmp/cmp"
-	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	istiofake "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-	eventingfake "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	rt "knative.dev/pkg/reconciler/testing"
+
+	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
 
 const knBrokerMetricPort = uint32(9090)
 
 // NewFakeClients initializes fake Clientsets with an optional list of API objects.
-func NewFakeClients(objs ...runtime.Object) (*eventingfake.Clientset, *k8sfake.Clientset, *istiofake.Clientset, *eaFake.Clientset) {
+func NewFakeClients(objs ...runtime.Object) (*istiofake.Clientset, *eaFake.Clientset) {
 	ls := NewListers(objs)
 
 	eaCli := eaFake.NewSimpleClientset(ls.GetEAObjects()...)
-	evCli := eventingfake.NewSimpleClientset(ls.GetEventingObjects()...)
-	k8sCli := k8sfake.NewSimpleClientset(ls.GetKubeObjects()...)
 	istioCli := istiofake.NewSimpleClientset(ls.GetIstioObjects()...)
 
-	return evCli, k8sCli, istioCli, eaCli
+	return istioCli, eaCli
 }
 
 type ActionsAsserter struct {
@@ -137,11 +134,11 @@ func peerAuthenticationEqual() cmp.Option {
 			mtlsP2 = mP2
 		}
 		if mtlsP1 == nil || mtlsP2 == nil {
-			//t.Logf("Invalid PortLevelMtls for PeerAuthentications: want:%v got:%v", mtlsP1, mtlsP2)
+			// t.Logf("Invalid PortLevelMtls for PeerAuthentications: want:%v got:%v", mtlsP1, mtlsP2)
 			return false
 		}
 		if mtlsP1.Mode.String() != mtlsP2.Mode.String() {
-			//t.Logf("Invalid PeerAuthentication (-want, +got): -%s +%s", mtlsP1.Mode.String(), mtlsP2.Mode.String())
+			// t.Logf("Invalid PeerAuthentication (-want, +got): -%s +%s", mtlsP1.Mode.String(), mtlsP2.Mode.String())
 			return false
 		}
 		return true

@@ -10,7 +10,7 @@ The Connector Service exposes two separate APIs:
 - An internal API available in the Kyma cluster used to initiate certificate generation
 - An external API exposed through Ingress used to finalize certificate generation
 
-Generating a new client certificate is the first step in the process of configuring an Application. Kyma stores the root certificate and serves as the Certificate Authority when you configure a new Application. When you generate a new client certificate, the Connector Service returns it along with the root certificate to allow validation.  
+Generating a new client certificate is the first step in the process of configuring an Application. Kyma stores the root certificate and serves as the Certificate Authority when you configure a new Application. When you generate a new client certificate, the Connector Service returns it along with the root certificate to allow validation.
 
 This diagram illustrates the client certificate generation flow in details:
 ![Client certificate generation operation flow](./assets/002-automatic-configuration.svg)
@@ -23,11 +23,11 @@ This diagram illustrates the client certificate generation flow in details:
 3. The external system generates a CSR based on the information provided by Kyma and sends the CSR to the designated URL. In the response, the external system receives a signed certificate. It can use the certificate to authenticate and safely communicate with Kyma.
 4. The external system calls the `metadata` endpoint that contains the following information:
     - the URL of the Application Registry API
-    - the URL of the Event Service API
+    - the URL of the Event Publisher API
     - the certificate renewal URL used to rotate certificates
     - the certificate revocation URL used to revoke compromised certificates
     - information uniquely identifying a certificate, such as the Application name
-    - information required to generate a CSR  
+    - information required to generate a CSR
 
 >**NOTE:** The external Application should not hardcode any URLs. The information returned from the `metadata` endpoint should be stored by the external Application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility.
 
