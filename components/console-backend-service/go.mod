@@ -63,4 +63,7 @@ replace (
 	k8s.io/apiserver => k8s.io/apiserver v0.17.9
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
+
+//	TODO remove
+github.com/kyma-project/kyma/components/function-controller => github.com/rJankowski93/kyma/components/function-controller v0.0.0-20210413071758-6fd5e3242e1a
 )
