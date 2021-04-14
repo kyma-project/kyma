@@ -31,8 +31,8 @@ describe("Kyma end to end upgrade tests", function () {
     await commerceMock.sendEventAndCheckResponse();
   });
 
-  it("Kyma should be upgraded to Kyma 2.0 (master branch)", async function () {
-    await installer.installKyma({isUpgrade: true, skipComponents});    
+  it("Kyma should be upgraded to Kyma 2.0 (main branch)", async function () {
+    await installer.installKyma({isUpgrade: true, skipComponents});
   })
 
   it("function should reach Commerce mock API through app gateway after upgrade", async function () {

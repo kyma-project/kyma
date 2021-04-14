@@ -25,7 +25,7 @@ type args struct {
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
 	kubeConfig               string
-	masterURL                string
+	apiServerURL             string
 	syncPeriod               time.Duration
 }
 
@@ -56,7 +56,7 @@ func parseOptions() (*options, error) {
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	masterURL := flag.String("masterURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	syncPeriod := flag.Duration("syncPeriod", 120*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
@@ -84,7 +84,7 @@ func parseOptions() (*options, error) {
 			cacheExpirationMinutes:   *cacheExpirationMinutes,
 			cacheCleanupMinutes:      *cacheCleanupMinutes,
 			kubeConfig:               *kubeConfig,
-			masterURL:                *masterURL,
+			apiServerURL:             *apiServerURL,
 			syncPeriod:               *syncPeriod,
 		},
 		config: c,
@@ -98,13 +98,13 @@ func (o *options) String() string {
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
-		"--kubeConfig=%s --masterURL=%s --syncPeriod=%d "+
+		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
-		o.kubeConfig, o.masterURL, o.syncPeriod,
+		o.kubeConfig, o.apiServerURL, o.syncPeriod,
 		o.LogFormat, o.LogLevel)
 }

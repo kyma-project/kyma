@@ -8,7 +8,7 @@ GOARCH=amd64
 WORKDIR ${BASE_APP_DIR}
 
 #
-# copy files whitelisted in .dockerignore
+# copy files allowed in .dockerignore
 #
 COPY . ${BASE_APP_DIR}/
 
