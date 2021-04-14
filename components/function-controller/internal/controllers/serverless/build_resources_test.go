@@ -50,7 +50,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs12))
+			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs14))
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -448,8 +448,8 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			},
 		},
 		{
-			Name:               "Success Node12",
-			Runtime:            serverlessv1alpha1.Nodejs12,
+			Name:               "Success Node14",
+			Runtime:            serverlessv1alpha1.Nodejs14,
 			ExpectedVolumesLen: 4,
 			ExpectedVolumes: []expectedVolume{
 				{name: "sources", localObjectReference: cmName},

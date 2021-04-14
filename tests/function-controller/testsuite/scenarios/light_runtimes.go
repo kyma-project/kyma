@@ -2,6 +2,7 @@ package scenarios
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -51,28 +52,28 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		return nil, errors.Wrapf(err, "while creating nodejs12 config")
 	}
 
-	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs14 config")
-	}
-
 	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python38", genericContainer.WithLogger(python38Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating python38 config")
 	}
 
-	// cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
-	// cmEnvKey := "CM_ENV_KEY"
-	// cmEnvValue := "Value taken as env from ConfigMap"
-	// cmData := map[string]string{
-	// 	cmEnvKey: cmEnvValue,
-	// }
-	// sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs10Logger))
-	// secEnvKey := "SECRET_ENV_KEY"
-	// secEnvValue := "Value taken as env from Secret"
-	// secretData := map[string]string{
-	// 	secEnvKey: secEnvValue,
-	// }
+	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating nodejs14 config")
+	}
+
+	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
+	cmEnvKey := "CM_ENV_KEY"
+	cmEnvValue := "Value taken as env from ConfigMap"
+	cmData := map[string]string{
+		cmEnvKey: cmEnvValue,
+	}
+	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs14Logger))
+	secEnvKey := "SECRET_ENV_KEY"
+	secEnvValue := "Value taken as env from Secret"
+	secretData := map[string]string{
+		secEnvKey: secEnvValue,
+	}
 
 	pkgCfgSecret := secret.NewSecret(cfg.PackageRegistryConfigSecretName, genericContainer)
 	pkgCfgSecretData := map[string]string{
@@ -104,10 +105,12 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From updated nodejs12"),
 			),
 			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
-				teststep.CreateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Create NodeJS14 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs14)),
-				teststep.NewDefaultedFunctionCheck("Check NodeJS14 function has correct default values", nodejs14Cfg.Fn),
+				teststep.CreateConfigMap(nodejs14Logger, cm, "Create Test ConfigMap", cmData),
+				teststep.CreateSecret(nodejs14Logger, sec, "Create Test Secret", secretData),
+				teststep.CreateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Create NodeJS14 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
 				teststep.UpdateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha1.Nodejs14)),
-				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
 			),
 		),
 	), nil

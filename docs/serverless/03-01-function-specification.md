@@ -122,7 +122,7 @@ See sample context details:
 ...
 { "function-name": "main",
   "timeout": 180,
-  "runtime": "nodejs12",
+  "runtime": "nodejs14",
   "memory-limit": 200Mi }
 ```
 
