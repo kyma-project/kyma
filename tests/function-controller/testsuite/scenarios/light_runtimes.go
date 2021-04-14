@@ -2,8 +2,9 @@ package scenarios
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
