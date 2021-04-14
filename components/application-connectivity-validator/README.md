@@ -17,7 +17,7 @@ A single instance of the component is deployed for an Application and uses these
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
 - **kubeConfig** is the path to a cluster kubeconfig. Used for running the service outside of the cluster.
-- **mainURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
+- **apiServerURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
 - **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `120 seconds`.
 
 ## Details

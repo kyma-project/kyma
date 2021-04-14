@@ -11,12 +11,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func Start(log *logger.Logger, kubeConfig string, mainURL string, syncPeriod time.Duration, appName string, cache *gocache.Cache) {
+func Start(log *logger.Logger, kubeConfig string, apiServerURL string, syncPeriod time.Duration, appName string, cache *gocache.Cache) {
 	stopCh := signals.SetupSignalHandler()
 
-	cfg, err := clientcmd.BuildConfigFromFlags(mainURL, kubeConfig)
+	cfg, err := clientcmd.BuildConfigFromFlags(apiServerURL, kubeConfig)
 	if err != nil {
-		log.WithContext().With("mainURL", mainURL).With("kubeConfig", kubeConfig).Fatalf("Failed to build kubeConfig: %s", err.Error())
+		log.WithContext().With("apiServerURL", apiServerURL).With("kubeConfig", kubeConfig).Fatalf("Failed to build kubeConfig: %s", err.Error())
 	}
 
 	applicationClient, err := clientset.NewForConfig(cfg)
