@@ -1,4 +1,4 @@
-FROM node:14.16.1-alpine3.12
+FROM node:14.16.1-alpine3.13
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
