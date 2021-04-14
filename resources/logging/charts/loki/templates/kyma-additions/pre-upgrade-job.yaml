@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name }}-upg-hook
+  name: {{ template "loki.name" . }}-upg-hook
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "loki.name" . }}
@@ -14,7 +14,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Name }}-upg-hook
+  name: {{ template "loki.name" . }}-upg-hook
   labels:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
@@ -25,12 +25,12 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["statefulset", "persistentvolumes"]
-    verbs: ["delete","get"]
+    verbs: ["delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ .Release.Name }}-upg-hook
+  name: {{ template "loki.name" . }}-upg-hook
   labels:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
@@ -50,7 +50,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-upgrade-job
+  name: {{ template "loki.name" . }}-pre-upgrade-job
   labels:
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
@@ -70,11 +70,11 @@ spec:
         chart: {{ template "loki.chart" . }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Release.Name }}-upg-hook
+      serviceAccountName: {{ template "loki.name" . }}-upg-hook
       restartPolicy: Never
       terminationGracePeriodSeconds: 0
       containers:
-        - name: {{ .Release.Name }}-pre-upgrade
+        - name: {{ template "loki.name" . }}-pre-upgrade
           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           imagePullPolicy: IfNotPresent
 
@@ -83,5 +83,6 @@ spec:
           args:
             - "-c"
             - |
+              set -x
               kubectl delete statefulsets.apps -n kyma-system logging-loki --ignore-not-found
               kubectl delete persistentvolumeclaims -n kyma-system storage-logging-loki-0 --ignore-not-found
