@@ -7,7 +7,7 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs12;nodejs10;python38
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38
 
 type Runtime string
 
@@ -17,7 +17,7 @@ const (
 
 const (
 	Nodejs12 Runtime = "nodejs12"
-	Nodejs10 Runtime = "nodejs10"
+	Nodejs14 Runtime = "nodejs14"
 	Python38 Runtime = "python38"
 )
 

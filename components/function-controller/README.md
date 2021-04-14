@@ -62,4 +62,4 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_DEFAULTING_LIMITS_MEMORY**      | Value of the limits memory which webhook should set if origin equals null                 | `128Mi`              |
 | **WEBHOOK_DEFAULTING_MINREPLICAS**        | Value of the minReplicas which webhook should set if origin equals null                   | `1`                  |
 | **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                   | `1`                  |
-| **WEBHOOK_DEFAULTING_RUNTIME**            | Value of the runtime which webhook should set if origin equals null                       | `nodejs12`           |
+| **WEBHOOK_DEFAULTING_RUNTIME**            | Value of the runtime which webhook should set if origin equals null                       | `nodejs14`           |
