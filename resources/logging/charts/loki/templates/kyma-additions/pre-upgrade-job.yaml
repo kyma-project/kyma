@@ -24,10 +24,10 @@ metadata:
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
 rules:
   - apiGroups: [""]
-    resources: ["persistentvolumes"]
+    resources: ["persistentvolumeclaims"]
     verbs: ["delete"]
   - apiGroups: ["apps"]
-    resources: ["statefulset"]
+    resources: ["statefulsets"]
     verbs: ["delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
