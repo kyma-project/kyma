@@ -23,6 +23,10 @@ import (
 
 const (
 	KymaIntegrationNamespace = "kyma-integration"
+	LabelKey                 = "preserve"
+	LabelValue               = "true"
+	DashboardsLabelKey       = "kyma-project.io/dashboard"
+	DashboardsLabelValue     = "eventing"
 )
 
 func NewApp(name string) applicationconnectorv1alpha1.Application {
@@ -83,6 +87,12 @@ func NewValidator(appName string) appsv1.Deployment {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						LabelKey:           LabelValue,
+						DashboardsLabelKey: DashboardsLabelValue,
+					},
+				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{

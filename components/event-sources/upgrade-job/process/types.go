@@ -21,8 +21,9 @@ import (
 )
 
 type PatchDeploymentSpec struct {
-	Spec Spec `json:"spec"`
+	Spec appsv1.DeploymentSpec `json:"spec"`
 }
+
 type Spec struct {
 	Template Template `json:"template"`
 }
@@ -68,3 +69,5 @@ type Data struct {
 	EventServices          runtime.RawExtension
 	Namespaces             runtime.RawExtension
 }
+
+type Labels map[string]string
