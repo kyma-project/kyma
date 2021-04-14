@@ -141,7 +141,7 @@ kiali:
     # The currently allowed values for this setting are:
     #   "default", "v1.0", "v1.12"
     #
-    # Refer to this file to see where these values are defined in the master branch:
+    # Refer to this file to see where these values are defined in the main branch:
     # https://github.com/kiali/kiali-operator/tree/master/playbooks/default-supported-images.yml
     #
     # See the Kiali documentation to determine which of these versions support
@@ -670,7 +670,7 @@ kiali:
     # url: External URL that will be used to generate links to Jaeger. It must be accessible to clients external to
     #      the cluster (e.g: browser) in order to generate valid links.
     #      If tracing service is deployed in a QUERY_BASE_PATH set this in the url like https://<hostname>/<QUERY_BASE_PATH> . EX: https://tracing-service:8080/jaeger
-    # whitelist_istio_system: Set whitelist services in istio-system to check their traces
+    # allowlist_istio_system: Set allowed services in istio-system to check their traces
     #    ---
       tracing:
     #      auth:
@@ -690,7 +690,7 @@ kiali:
         in_cluster_url: "http://tracing-jaeger-query.kyma-system:16686"
     #      namespace_selector: true
         url: "https://jaeger.{{ .Values.global.ingress.domainName }}"
-    #      whitelist_istio_system: ["jaeger-query", "istio-ingressgateway"]
+    #      allowlist_istio_system: ["jaeger-query", "istio-ingressgateway"]
     ##########
     #  ---
     #  health_config:
