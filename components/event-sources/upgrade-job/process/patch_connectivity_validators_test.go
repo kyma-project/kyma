@@ -2,8 +2,9 @@ package process
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-sources/upgrade-job/processtest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/event-sources/upgrade-job/processtest"
 
 	corev1 "k8s.io/api/core/v1"
 
