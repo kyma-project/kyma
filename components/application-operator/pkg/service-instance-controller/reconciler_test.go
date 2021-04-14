@@ -35,6 +35,8 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 
 	logger := logrus.WithField("controller", "Service Instance Tests")
 
+	ctx := context.Background()
+
 	t.Run("should deploy Gateway when first Service Instance is created in namespace", func(t *testing.T) {
 		//given
 		gatewayDeployer := &mocks2.GatewayManager{}
@@ -58,7 +60,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 			}}
 
 		//when
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 
 		//then
 		require.NoError(t, err)
@@ -83,7 +85,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 		}
 
 		//when
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 
 		//then
 		require.NoError(t, err)
@@ -110,7 +112,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 		}
 
 		//when
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 
 		//then
 		require.NoError(t, err)
@@ -132,7 +134,7 @@ func TestServiceInstanceReconciler_Reconcile(t *testing.T) {
 			}}
 
 		//when
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 
 		//then
 		require.NoError(t, err)
