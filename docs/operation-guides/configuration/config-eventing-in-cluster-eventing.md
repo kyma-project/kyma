@@ -1,6 +1,6 @@
 ---
-title: In-cluster eventing
-type: Details
+title: Publishing events without Kyma Application
+type: Configuration
 ---
 
 In-cluster Eventing allows publishers to send messages and subscribers to receive them without the need for a Kyma Application. This means that instead of the usual event flow where Application Connector publishes events to the Event Publisher Proxy, events can be published from within the cluster directly to the Event Publisher Proxy.

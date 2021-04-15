@@ -1,6 +1,6 @@
 ---
-title: Storage configuration examples
-type: Details
+title: Logging storage with boltDB and GCS
+type: Configuration
 ---
 
 ## Storage

@@ -1,6 +1,6 @@
 ---
 title: Access logs
-type: Details
+type: Task
 ---
 
 To access the logs, follow these steps:

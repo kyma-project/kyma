@@ -1,6 +1,6 @@
 ---
 title: Sidecar Proxy Injection
-type: Details
+type: Configuration
 ---
 
 By default, `istiod` watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.

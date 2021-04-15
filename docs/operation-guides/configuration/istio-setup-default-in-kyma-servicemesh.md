@@ -1,6 +1,6 @@
 ---
 title: Istio setup in Kyma
-type: Details
+type: Configuration
 ---
 
 Istio in Kyma is installed with the help of the `istioctl` tool.

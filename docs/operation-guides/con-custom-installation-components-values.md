@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: Custom installation with components or value overrides
 type: Configuration
 ---
 
