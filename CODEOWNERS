@@ -83,7 +83,7 @@
 /resources/dex/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The 'gateway' subchart
-/resources/core/charts/gateway/ @strekm @werdes72 @PhillipAmend@Tomasz-Smelcerz-SAP @colunira @mjakobczyk
+/resources/core/charts/gateway/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @crabtree @kjaksik
