@@ -38,7 +38,7 @@ authentication:
 postUpgradeJob:
   image:
     name: event-sources-upgrade-job
-    tag: PR-11116
+    tag: 36cfb063
 
 postInstallJob:
   image:
