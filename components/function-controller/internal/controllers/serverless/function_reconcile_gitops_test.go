@@ -82,7 +82,7 @@ var _ = ginkgo.Describe("Function", func() {
 				Runtime: serverlessv1alpha1.Nodejs12,
 				Repository: serverlessv1alpha1.Repository{
 					BaseDir:   "/",
-					Reference: "master",
+					Reference: "main",
 				},
 				Env: []corev1.EnvVar{
 					{
@@ -133,7 +133,7 @@ var _ = ginkgo.Describe("Function", func() {
 	var newMockedGitOperator = func(secretName string, credentials map[string]string, auth *string) *automock.GitOperator {
 		options := git.Options{
 			URL:       "https://mock.repo/kyma/test",
-			Reference: "master",
+			Reference: "main",
 		}
 
 		if auth != nil {
