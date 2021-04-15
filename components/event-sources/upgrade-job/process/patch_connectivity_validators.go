@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
-
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/pkg/errors"
@@ -14,7 +12,9 @@ import (
 var _ Step = &PatchConnectivityValidators{}
 
 const (
-	appReleaseNameKey = "meta.helm.sh/release-name"
+	appReleaseNameKey    = "meta.helm.sh/release-name"
+	dashboardsLabelKey   = "kyma-project.io/dashboard"
+	dashboardsLabelValue = "eventing"
 )
 
 type PatchConnectivityValidators struct {
@@ -69,17 +69,11 @@ func getNewContainerArgs(appName string) []string {
 func getDeploymentPatchData(oldDeployment appsv1.Deployment) ([]byte, error) {
 	appName := oldDeployment.Annotations[appReleaseNameKey]
 
-	// It is safe as connectivity validator has only one container
-	oldContainer := oldDeployment.Spec.Template.Spec.Containers[0]
-
-	desiredContainer := oldContainer.DeepCopy()
-	desiredContainer.Args = getNewContainerArgs(appName)
-
-	targetPatch := PatchDeploymentSpec{Spec: Spec{Template: Template{Spec: TemplateSpec{
-		Containers: []corev1.Container{
-			*desiredContainer,
-		},
-	}}}}
+	desiredSpec := oldDeployment.Spec.DeepCopy()
+	desiredSpec.Template.Spec.Containers[0].Args = getNewContainerArgs(appName) // validator has one container only
+	desiredSpec.Template.ObjectMeta.Labels = withLabels(desiredSpec.Template.ObjectMeta.Labels)
+	desiredSpec.Template.ObjectMeta.Labels[dashboardsLabelKey] = dashboardsLabelValue
+	targetPatch := PatchDeploymentSpec{Spec: *desiredSpec}
 
 	containerData, err := json.Marshal(targetPatch)
 	if err != nil {
@@ -90,4 +84,11 @@ func getDeploymentPatchData(oldDeployment appsv1.Deployment) ([]byte, error) {
 
 func (s PatchConnectivityValidators) ToString() string {
 	return s.name
+}
+
+func withLabels(labels Labels) Labels {
+	if len(labels) == 0 {
+		return make(Labels)
+	}
+	return labels
 }

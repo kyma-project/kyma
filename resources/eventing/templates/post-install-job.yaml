@@ -21,6 +21,15 @@ rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
     verbs: ["get", "list", "create", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["delete"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["delete"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["podmonitors"]
+    verbs: ["delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -79,6 +88,12 @@ spec:
             EOF
             fi
             fi
+            kubectl delete configmap -n kyma-system knative-eventing-event-mesh-dashboard-delivery --ignore-not-found=true
+            kubectl delete configmap -n kyma-system knative-eventing-event-mesh-dashboard-latency --ignore-not-found=true
+            kubectl delete configmap -n kyma-system knative-eventing-event-mesh-dashboard-pods --ignore-not-found=true
+            kubectl delete configmap -n kyma-system eventing-brokers-dashboard --ignore-not-found=true
+            kubectl delete podmonitor -n knative-eventing knative-eventing-event-mesh-dashboard-broker --ignore-not-found=true
+            kubectl delete podmonitor -n knative-eventing knative-eventing-event-mesh-dashboard-httpsource --ignore-not-found=true
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
         env:

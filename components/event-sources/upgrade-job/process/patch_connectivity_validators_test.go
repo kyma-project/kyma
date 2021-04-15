@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/event-sources/upgrade-job/processtest"
+
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/onsi/gomega"
@@ -46,6 +48,8 @@ func TestPatchConnectivityValidators(t *testing.T) {
 				}
 			}
 			g.Expect(container.Args).To(gomega.Equal(expectedDeploymentArgs))
+			g.Expect(gotDeploy.Spec.Template.Labels[processtest.LabelKey]).To(gomega.Equal(processtest.LabelValue))
+			g.Expect(gotDeploy.Spec.Template.Labels[dashboardsLabelKey]).To(gomega.Equal(dashboardsLabelValue))
 		}
 	})
 }
