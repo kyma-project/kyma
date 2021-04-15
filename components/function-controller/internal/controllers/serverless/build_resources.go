@@ -31,7 +31,7 @@ var (
 	istioSidecarInjectFalse = map[string]string{
 		"sidecar.istio.io/inject": "false",
 	}
-	svcTargetPort = intstr.FromInt(8080) //  // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
+	svcTargetPort = intstr.FromInt(8080) // https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js#L28
 )
 
 func boolPtr(b bool) *bool {
