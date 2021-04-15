@@ -408,7 +408,7 @@ data:
               "value": "kyma-integration"
             },
             "datasource": "Prometheus",
-            "definition": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"})",
+            "definition": "kube_pod_labels{label_app=~\".*connectivity-validator\"}",
             "description": null,
             "error": null,
             "hide": 0,
@@ -418,7 +418,7 @@ data:
             "name": "namespace",
             "options": [],
             "query": {
-              "query": "query_result(kube_pod_info{pod=~\"default-broker-ingress.*\"} or kube_pod_info{pod=~\"application-broker.*\"})",
+              "query": "kube_pod_labels{label_app=~\".*connectivity-validator\"}",
               "refId": "Prometheus-namespace-Variable-Query"
             },
             "refresh": 2,
