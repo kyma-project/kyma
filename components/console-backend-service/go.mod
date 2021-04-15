@@ -19,7 +19,7 @@ require (
 	github.com/kyma-project/helm-broker v0.0.0-20190906085923-d07feb2d365a
 	github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20201127140131-ec965cad1047
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201012150043-858bc2c23ef5
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210415084126-ed2c688b52ab
 	github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150
 	github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
 	github.com/opentracing-contrib/go-observer v0.0.0-20170622124052-a52f23424492 // indirect
@@ -51,12 +51,12 @@ require (
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20201012150043-858bc2c23ef5 => github.com/rJankowski93/kyma/components/function-controller v0.0.0-20210414074037-5c378af42262
 	golang.org/x/text => golang.org/x/text v0.3.3
 	k8s.io/api => k8s.io/api v0.17.11
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.11
 	k8s.io/apiserver => k8s.io/apiserver v0.17.9
 	k8s.io/client-go => k8s.io/client-go v0.17.4
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
+	// kyma/components/function-controller uses new version knative.dev, with another impelmntations functions.
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
 )

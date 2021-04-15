@@ -327,6 +327,8 @@ github.com/kyma-project/kyma v0.5.1-0.20200609051543-f5997d4a36d6/go.mod h1:cfj5
 github.com/kyma-project/kyma/components/event-publisher-proxy v0.0.0-20201014135541-82b304ab245a/go.mod h1:SzxIlsqx8zJXNhqyUabWs8NzYcfEv1SleJ1U0+Gp6Ms=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20201127140131-ec965cad1047 h1:P2B3a+rCwhNf+BNh733brMFXEGuIRSWVKoi+0OqZutE=
 github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20201127140131-ec965cad1047/go.mod h1:Cz8yeshikD5eL83zV/QoclJv+nQb8TlZn3kIP7rVe0A=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20210415084126-ed2c688b52ab h1:rxHeojGxxUKrn1zm1jvTB6cVJbNMBp5f6gB9cWEss9s=
+github.com/kyma-project/kyma/components/function-controller v0.0.0-20210415084126-ed2c688b52ab/go.mod h1:UN+SgGO1+s7B8IPiPGy0ui+AOp0JMUe/anR92PIMENM=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150 h1:UYawXgUZBPBe+wcSDsjpyy+mDM9Q7CugfLXix3bwbWE=
 github.com/kyma-project/rafter v0.0.0-20200402080904-a0157e52e150/go.mod h1:zlQEXkFdCYTii7GGjd0jLOudgPtxgZLJy2VDXW7j54I=
 github.com/lightstep/tracecontext.go v0.0.0-20181129014701-1757c391b1ac/go.mod h1:Frd2bnT3w5FB5q49ENTfVlztJES+1k/7lyWX2+9gq/M=
@@ -450,8 +452,6 @@ github.com/prometheus/procfs v0.0.2/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsT
 github.com/prometheus/procfs v0.0.5/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDaekg4FpcdQ=
 github.com/prometheus/procfs v0.0.11 h1:DhHlBtkHWPYi8O2y31JkK0TF+DGM+51OopZjH/Ia5qI=
 github.com/prometheus/procfs v0.0.11/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4OA4YeYWdaU=
-github.com/rJankowski93/kyma/components/function-controller v0.0.0-20210414074037-5c378af42262 h1:EFPj3W9O4WypMXiqZmqP2WtbLaxZGP7ZeKFzFMhvkcY=
-github.com/rJankowski93/kyma/components/function-controller v0.0.0-20210414074037-5c378af42262/go.mod h1:UN+SgGO1+s7B8IPiPGy0ui+AOp0JMUe/anR92PIMENM=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563 h1:dY6ETXrvDG7Sa4vE8ZQG4yqWg6UnOcbqTAahkV813vQ=
 github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
