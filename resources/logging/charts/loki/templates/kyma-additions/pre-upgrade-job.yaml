@@ -25,7 +25,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["delete", "patch"]
+    verbs: ["get", "patch"]
   - apiGroups: ["apps"]
     resources: ["statefulsets"]
     verbs: ["delete"]
@@ -88,4 +88,4 @@ spec:
             - |
               set -x
               kubectl delete statefulsets.apps -n kyma-system logging-loki --ignore-not-found
-              kubectl patch persistenvolumeclaim -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "30Gi"}}}}'
+              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "30Gi"}}}}'
