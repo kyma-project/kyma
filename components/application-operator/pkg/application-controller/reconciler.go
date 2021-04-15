@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -25,13 +24,13 @@ type updateApplicationFunc func(application *v1alpha1.Application)
 
 //go:generate mockery -name ApplicationManagerClient
 type ApplicationManagerClient interface {
-	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
+	Get(ctx context.Context, key client.ObjectKey, obj client.Object) error
+	Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error
 }
 
 //go:generate mockery -name ApplicationReconciler
 type ApplicationReconciler interface {
-	Reconcile(request reconcile.Request) (reconcile.Result, error)
+	Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error)
 }
 
 type applicationReconciler struct {
@@ -48,7 +47,7 @@ func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appRele
 	}
 }
 
-func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *applicationReconciler) Reconcile(_ context.Context, request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.Application{}
 
 	r.log.Infof("Processing %s Application...", request.Name)

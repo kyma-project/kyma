@@ -45,10 +45,10 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
-List of namespaces to be blacklisted
+List of namespaces to be excluded
 */}}
-{{- define "namespace-permission-controller.blacklist" -}}
-{{- range $i:= .Values.config.namespaceBlacklist -}}
+{{- define "namespace-permission-controller.excludelist" -}}
+{{- range $i:= .Values.config.namespaceExcludeList -}}
 {{ printf "%s, " $i -}}
 {{- end }}
 {{- end -}}

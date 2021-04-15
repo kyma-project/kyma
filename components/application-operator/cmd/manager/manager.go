@@ -23,9 +23,9 @@ import (
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
 	runtimeConfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 func main() {
@@ -128,7 +128,7 @@ func main() {
 	go healthz.StartHealthCheckServer(log.StandardLogger(), options.healthPort)
 
 	log.Printf("Starting the Cmd.")
-	log.Info(mgr.Start(signals.SetupSignalHandler()))
+	log.Info(mgr.Start(ctrl.SetupSignalHandler()))
 }
 
 func newGatewayManager(options *options, cfg *rest.Config, helmClient kymahelm.HelmClient) (gateway.GatewayManager, error) {

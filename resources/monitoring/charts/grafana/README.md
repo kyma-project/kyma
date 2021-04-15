@@ -40,7 +40,7 @@ To add a dashboard to Kyma:
 
 1. Create or modify the dashboard using the Grafana UI.
 2. Export the dashboard to a JSON format file. Create a ConfigMap file having this JSON in the `data` field. Name the file following this convention: `{dashboard_name}.yaml`.
-3. Clone the Kyma [master branch](https://github.com/kyma-project/kyma).
+3. Clone the Kyma [`main` branch](https://github.com/kyma-project/kyma).
 4. Copy the YAML file to the directory **[kyma-dashboards](../../templates/grafana/kyma-dashboards/)** of your local installation.
 5. Install Kyma locally and open it in a browser at https://console.kyma.local.
 6. Access the Grafana console from Kyma by clicking **Administration > Diagnostics > Status & Metrics** in the left navigation.  

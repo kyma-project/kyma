@@ -72,7 +72,7 @@ spec:
             {{- else }}
             - --prometheus-config-reloader={{ .Values.prometheusOperator.prometheusConfigReloaderImage.repository }}:{{ .Values.prometheusOperator.prometheusConfigReloaderImage.tag }}
             {{- end }}
-            # Empty if statement to catch non-semver master tags that do not need the --config-reloader-image flag
+            # Empty if statement to catch non-semver main tags that do not need the --config-reloader-image flag
             {{- if regexMatch "master.*" .Values.prometheusOperator.image.tag -}}
             {{- else if (semverCompare "< v0.43.0" .Values.prometheusOperator.image.tag) -}}
             {{- if .Values.prometheusOperator.configmapReloadImage.sha }}
