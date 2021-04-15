@@ -576,7 +576,7 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 
 func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha1.Nodejs10, serverlessv1alpha1.Nodejs12:
+	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14:
 		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/.npmrc"), SubPath: ".npmrc"}}
 	case serverlessv1alpha1.Python38:
 		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/pip.conf"), SubPath: "pip.conf"}}

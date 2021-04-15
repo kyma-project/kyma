@@ -47,7 +47,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should do nothing": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -73,7 +73,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 			expectedFunc: Function{Spec: FunctionSpec{
-				Runtime: Nodejs12,
+				Runtime: Nodejs14,
 				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -155,7 +155,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should change empty runtime type to default nodejs12": {
+		"Should change empty runtime type to default Nodejs14": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
@@ -184,7 +184,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -213,7 +213,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -259,7 +259,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -305,7 +305,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
@@ -375,7 +375,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
@@ -398,7 +398,7 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "slow",
 				},
 			}, Spec: FunctionSpec{
-				Runtime: Nodejs12,
+				Runtime: Nodejs14,
 				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("50m"),
@@ -434,7 +434,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 				},
 			},
 			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
@@ -444,7 +444,7 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "fast",
 				},
 			}, Spec: FunctionSpec{
-				Runtime: Nodejs12,
+				Runtime: Nodejs14,
 				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("200m"),
