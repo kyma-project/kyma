@@ -245,22 +245,3 @@ spec:
   parameters:
     envPrefix:
       name: "REDIS_"
----
-apiVersion: eventing.knative.dev/v1alpha1
-kind: Trigger
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  broker: default
-  filter:
-    attributes:
-      eventtypeversion: v1
-      source: commerce-mock
-      type: order.deliverysent
-  subscriber:
-    ref:
-      apiVersion: v1
-      kind: Service
-      name: orders-function
-      namespace: orders-service
