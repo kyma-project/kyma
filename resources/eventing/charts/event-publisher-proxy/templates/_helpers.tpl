@@ -49,6 +49,7 @@ Selector labels
 {{- define "event-publisher-proxy.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "event-publisher-proxy.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+kyma-project.io/dashboard: eventing
 {{- end }}
 
 
