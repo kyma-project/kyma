@@ -22,13 +22,13 @@ async function downloadFile(url, filename) {
  * Downloads Kyma sources into temporary folder as zip, extracts charts, and returns full path to resources folder
  * @param {Object} options Optional parameters
  * @param {string} options.repo Github repository with Kyma charts, default: kyma-project/kyma
- * @param {string} options.source Source branch that should be downloaded from repository, default: master
+ * @param {string} options.source Source branch that should be downloaded from repository, default: main
  * @return {string} Path to the resources folder
  */
 async function downloadCharts(options) {
   const {
     repo = 'kyma-project/kyma',
-    source = 'master'
+    source = 'main'
   } = options;
   const dir = 'tmp-' + source;
   const resourcesPath = join(dir, 'resources')

@@ -1,7 +1,5 @@
-# remember to deprecate this node version by april 2021 https://nodejs.org/en/about/releases/
-
-# Node 10 Alpine image from https://github.com/nodejs/docker-node/tree/main/10/alpine3.11
-
+# Node 14 Alpine image from https://github.com/nodejs/docker-node/tree/main/14/alpine3.13
+#
 # The MIT License (MIT)
 #
 # Copyright (c) 2015 Joyent, Inc.
@@ -30,7 +28,7 @@
 
 FROM alpine:3.13.4
 
-ENV NODE_VERSION 10.24.1
+ENV NODE_VERSION 14.16.1
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
@@ -42,7 +40,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="138eed35daca02bbc01cae161e13604b1b71139e9552d4cb9fe3aad742ce94ec" \
+          CHECKSUM="39fbbd09668472f1105bdb5a7c20675bd91649543d2bc25b6edc1293835661f1" \
           ;; \
         *) ;; \
       esac \
@@ -127,7 +125,7 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-## SERVERLESS
+# Serverless
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

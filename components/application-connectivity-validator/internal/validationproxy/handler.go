@@ -19,7 +19,7 @@ import (
 
 const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
-	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy(https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy#send-events)
+	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy (https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy#send-events)
 	BEBEnabledPublishEndpoint = "/publish"
 
 	handlerName = "validation_proxy_handler"

@@ -1,0 +1,14 @@
+{{- if eq .Values.global.eventing.backend "nats" }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "nats-controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "nats-controller.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "nats-controller.selectorLabels" . | nindent 6 }}
+  mtls:
+    mode: "PERMISSIVE"
+---
+{{- end }}
