@@ -384,10 +384,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
   await k8sApply([
-    eventingKnativeTrigger(
-      appName, 
-      "lastorder", 
-      targetNamespace),
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
