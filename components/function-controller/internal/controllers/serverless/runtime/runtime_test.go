@@ -39,28 +39,28 @@ func TestGetRuntimeConfig(t *testing.T) {
 					{Name: "FUNC_RUNTIME", Value: "python38"}},
 			},
 		},
-		"nodej10": {
-			name:    "nodejs10 config",
-			runtime: serverlessv1alpha1.Nodejs10,
+		"nodej14": {
+			name:    "nodejs14 config",
+			runtime: serverlessv1alpha1.Nodejs14,
 			want: runtime.Config{
-				Runtime:                 serverlessv1alpha1.Nodejs10,
+				Runtime:                 serverlessv1alpha1.Nodejs14,
 				DependencyFile:          "package.json",
 				FunctionFile:            "handler.js",
-				DockerfileConfigMapName: "dockerfile-nodejs-10",
+				DockerfileConfigMapName: "dockerfile-nodejs-14",
 				RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-					{Name: "FUNC_RUNTIME", Value: "nodejs10"}},
+					{Name: "FUNC_RUNTIME", Value: "nodejs14"}},
 			},
 		},
 		"default": {
-			name:    "nodejs12",
-			runtime: serverlessv1alpha1.Nodejs12,
+			name:    "nodejs14",
+			runtime: serverlessv1alpha1.Nodejs14,
 			want: runtime.Config{
-				Runtime:                 serverlessv1alpha1.Nodejs12,
+				Runtime:                 serverlessv1alpha1.Nodejs14,
 				DependencyFile:          "package.json",
 				FunctionFile:            "handler.js",
-				DockerfileConfigMapName: "dockerfile-nodejs-12",
+				DockerfileConfigMapName: "dockerfile-nodejs-14",
 				RuntimeEnvs: []corev1.EnvVar{{Name: "NODE_PATH", Value: "$(KUBELESS_INSTALL_VOLUME)/node_modules"},
-					{Name: "FUNC_RUNTIME", Value: "nodejs12"}},
+					{Name: "FUNC_RUNTIME", Value: "nodejs14"}},
 			},
 		}} {
 		t.Run(testName, func(t *testing.T) {

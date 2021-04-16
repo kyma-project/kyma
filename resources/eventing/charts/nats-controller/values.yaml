@@ -15,8 +15,11 @@ image:
   pullPolicy: "IfNotPresent"
 
 metrics:
-  service:
+  config:
+    port: 8080
+    portName: http-metrics
     nameSuffix: "-metrics"
+    interval: 30s
 
 resources:
   limits:

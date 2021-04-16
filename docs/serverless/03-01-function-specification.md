@@ -122,7 +122,7 @@ See sample context details:
 ...
 { "function-name": "main",
   "timeout": 180,
-  "runtime": "nodejs10",
+  "runtime": "nodejs14",
   "memory-limit": 200Mi }
 ```
 
@@ -132,7 +132,7 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **function-name** | Name of the invoked Function |
 | **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs10`, `nodejs10`, or `python3.8`. |
+| **runtime** | Environment used to run the Function. You can use `nodejs12`, `nodejs14`, or `python3.8`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |  
 
 ## HTTP requests

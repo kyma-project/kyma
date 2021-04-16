@@ -32,7 +32,10 @@ spec:
           name: {{ .Values.image.name }}
           ports:
             - containerPort: {{ .Values.nats.config.port }}
-              name: http
+              name: {{ .Values.nats.config.portName }}
+              protocol: TCP
+            - containerPort: {{ .Values.metrics.config.port }}
+              name: {{ .Values.metrics.config.portName }}
               protocol: TCP
           livenessProbe:
             failureThreshold: 3
