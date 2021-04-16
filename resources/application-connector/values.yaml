@@ -40,7 +40,7 @@ global:
   application_connectivity_validator:
     version: "68baa911"
   application_operator:
-    version: "PR-11106"
+    version: "PR-10925"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
