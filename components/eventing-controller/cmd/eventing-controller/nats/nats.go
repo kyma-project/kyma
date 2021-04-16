@@ -1,4 +1,4 @@
-package beb
+package nats
 
 import (
 	"context"
@@ -13,33 +13,30 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
 )
 
 // Commander implementes the Commander interface.
 type Commander struct {
 	scheme          *runtime.Scheme
-	envCfg          env.Config
+	envCfg          env.NatsConfig
 	restCfg         *rest.Config
 	enableDebugLogs bool
 	metricsAddr     string
-	resyncPeriod    time.Duration
 	mgr             manager.Manager
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
+func NewCommander(enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
 	return &Commander{
 		scheme:          runtime.NewScheme(),
-		envCfg:          env.GetConfig(), // TODO Hamonization.
+		envCfg:          env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
 		enableDebugLogs: enableDebugLogs,
 		metricsAddr:     metricsAddr,
-		resyncPeriod:    resyncPeriod,
 	}
 }
 
@@ -52,12 +49,9 @@ func (c *Commander) Init() error {
 	if err := eventingv1alpha1.AddToScheme(c.scheme); err != nil {
 		return err
 	}
-	if err := apigatewayv1alpha1.AddToScheme(c.scheme); err != nil {
-		return err
-	}
 	// Check config.
-	if len(c.envCfg.Domain) == 0 {
-		return fmt.Errorf("env var DOMAIN must be a non-empty value")
+	if len(c.envCfg.Url) == 0 {
+		return fmt.Errorf("env var URL must be a non-empty value")
 	}
 	c.restCfg = ctrl.GetConfigOrDie()
 	ctrl.SetLogger(zap.New(zap.UseDevMode(c.enableDebugLogs)))
@@ -66,7 +60,6 @@ func (c *Commander) Init() error {
 		Scheme:             c.scheme,
 		MetricsBindAddress: c.metricsAddr,
 		Port:               9443,
-		SyncPeriod:         &c.resyncPeriod,
 	})
 	if err != nil {
 		return err
@@ -83,15 +76,16 @@ func (c *Commander) Start() error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
+	// TODO Harmonization. Not subscription and subscription-nats.
 	if err := subscription.NewReconciler(
 		c.mgr.GetClient(),
 		applicationLister,
 		c.mgr.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		c.mgr.GetEventRecorderFor("eventing-controller"), // TODO Harmonization? Add "-beb"?
+		c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
 		c.envCfg,
 	).SetupWithManager(c.mgr); err != nil {
-		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
+		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
 
 	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {
