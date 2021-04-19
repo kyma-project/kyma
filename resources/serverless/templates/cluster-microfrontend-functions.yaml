@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 {{- if .Values.clusterMicroFrontend.enabled }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
@@ -29,4 +30,5 @@ spec:
       viewUrl: '/lambda/:lambda'
       showInNavigation: false
       viewGroup: "_core_ui_"
+{{ end }}
 {{- end }}

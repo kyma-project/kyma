@@ -1,0 +1,141 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  annotations:
+    "helm.sh/resource-policy": keep
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: clustertestsuites.testing.kyma-project.io
+spec:
+  group: testing.kyma-project.io
+  names:
+    kind: ClusterTestSuite
+    plural: clustertestsuites
+    shortNames:
+    - cts
+  scope: Cluster
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            concurrency:
+              description: How many tests we want to execute at the same time. Depends
+                on cluster size and it's load. Default value is 1
+              format: int64
+              type: integer
+            count:
+              description: How many times should I run every test? Default value is
+                1.
+              format: int64
+              type: integer
+            maxRetries:
+              description: In case of a failed test, how many times it will be retried.
+                If test failed and on retry it succeeded, Test Suite should be marked
+                as a succeeded. Default value is 0 - no retries. MaxRetries and Count
+                cannot be used mutually.
+              format: int64
+              type: integer
+            selectors:
+              description: Decide which tests to execute. If not provided execute
+                all tests
+              properties:
+                matchLabelExpressions:
+                  description: 'Find test definitions by their labels. TestDefinition
+                    must match AT LEAST one expression listed here to be executed.
+                    For the complete grammar see: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels'
+                  items:
+                    type: string
+                  type: array
+                matchNames:
+                  description: Find test definitions by it's name
+                  items:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
+              type: object
+          type: object
+        status:
+          properties:
+            conditions:
+              items:
+                properties:
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - type
+                - status
+                type: object
+              type: array
+            results:
+              items:
+                properties:
+                  disabledConcurrency:
+                    type: boolean
+                  executions:
+                    items:
+                      properties:
+                        id:
+                          description: ID is equivalent to a testing Pod name
+                          type: string
+                        message:
+                          type: string
+                        podPhase:
+                          type: string
+                        reason:
+                          type: string
+                      required:
+                      - id
+                      - podPhase
+                      type: object
+                    type: array
+                  name:
+                    description: Test name
+                    type: string
+                  namespace:
+                    type: string
+                  status:
+                    type: string
+                required:
+                - name
+                - namespace
+                - status
+                - executions
+                type: object
+              type: array
+          type: object
+  version: v1alpha1
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
