@@ -39,6 +39,10 @@ func New(name, usageKind string, c shared.Container) *ServiceBindingUsage {
 	}
 }
 
+func (s ServiceBindingUsage) GetName() string {
+	return s.name
+}
+
 func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix string) error {
 	servicebindingusage := &v1alpha1.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
