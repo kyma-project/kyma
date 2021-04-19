@@ -49,7 +49,7 @@ func (c *Commander) Init() error {
 
 // Start implements the Commander interface and starts the publisher.
 func (c *Commander) Start() error {
-	// TODO add log message
+	c.logger.Infof("Starting Event Publisher to NATS: %v", c)
 
 	// assure uniqueness
 	ctx := signals.NewContext()
