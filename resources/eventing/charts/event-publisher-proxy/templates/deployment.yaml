@@ -17,6 +17,8 @@ spec:
       serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
       containers:
         - env:
+            - name: BACKEND
+              value: {{ .Values.global.eventing.backend }}
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:

@@ -18,6 +18,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: BACKEND
+              value: "nats"
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:

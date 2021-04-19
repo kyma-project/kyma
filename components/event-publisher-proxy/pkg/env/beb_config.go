@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// Config represents the environment config for the Event Publisher Proxy.
-type Config struct {
+// BebConfig represents the environment config for the Event Publisher to BEB.
+type BebConfig struct {
 	Port                int           `envconfig:"INGRESS_PORT" default:"8080"`
 	ClientID            string        `envconfig:"CLIENT_ID" required:"true"`
 	ClientSecret        string        `envconfig:"CLIENT_SECRET" required:"true"`
@@ -23,7 +23,7 @@ type Config struct {
 }
 
 // ConfigureTransport receives an HTTP transport and configure its max idle connection properties.
-func (c *Config) ConfigureTransport(transport *http.Transport) {
+func (c *BebConfig) ConfigureTransport(transport *http.Transport) {
 	transport.MaxIdleConns = c.MaxIdleConns
 	transport.MaxIdleConnsPerHost = c.MaxIdleConnsPerHost
 }

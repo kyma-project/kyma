@@ -2,7 +2,7 @@ package env
 
 import "time"
 
-// Config represents the environment config for the Event Publisher NATS.
+// NatsConfig represents the environment config for the Event Publisher to NATS.
 type NatsConfig struct {
 	Port                 int           `envconfig:"INGRESS_PORT" default:"8080"`
 	URL                  string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
@@ -18,9 +18,9 @@ type NatsConfig struct {
 	LegacyEventTypePrefix string `envconfig:"LEGACY_EVENT_TYPE_PREFIX" default:"kyma"`
 }
 
-// Convert to a default BEB Config
-func (c *NatsConfig) ToConfig() *Config {
-	cfg := &Config{
+// Convert to a default BEB BebConfig
+func (c *NatsConfig) ToConfig() *BebConfig {
+	cfg := &BebConfig{
 		BEBNamespace:    c.LegacyNamespace,
 		EventTypePrefix: c.LegacyEventTypePrefix,
 	}
