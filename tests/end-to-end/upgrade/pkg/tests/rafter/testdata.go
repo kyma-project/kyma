@@ -9,11 +9,11 @@ import (
 const (
 	assetPrefix   string = "e2eupgrade"
 	assetDataName string = "petstore.json"
-	assetDataURL  string = "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md"
+	assetDataURL  string = "https://raw.githubusercontent.com/kyma-project/kyma/main/README.md"
 
 	sourceType v1beta1.AssetGroupSourceType = "openapi"
 	sourceName v1beta1.AssetGroupSourceName = "openapi"
-	sourceURL  string                       = "https://raw.githubusercontent.com/kyma-project/kyma/master/README.md"
+	sourceURL  string                       = "https://raw.githubusercontent.com/kyma-project/kyma/main/README.md"
 )
 
 type assetData struct {

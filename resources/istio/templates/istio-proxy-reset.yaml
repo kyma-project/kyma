@@ -65,17 +65,19 @@ spec:
           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           env:
           - name: ISTIO_PROXY_IMAGE_PREFIX
-            value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix }}
+            value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix | quote }}
           - name: ISTIO_PROXY_IMAGE_VERSION
-            value: {{ .Chart.Version }}
+            value: {{ .Chart.Version | quote }}
           - name: RETRIES_COUNT
-            value: "{{ .Values.kyma.proxyResetJob.retriesCount }}"
+            value: {{ .Values.kyma.proxyResetJob.retriesCount | quote }}
           - name: DRY_RUN
-            value: "{{ .Values.kyma.proxyResetJob.dryRun }}"
+            value: {{ .Values.kyma.proxyResetJob.dryRun | quote }}
           - name: EXIT_CODE
-            value: "{{ .Values.kyma.proxyResetJob.exitCode }}"
+            value: {{ .Values.kyma.proxyResetJob.exitCode | quote }}
+          - name: SLEEP_AFTER_POD_DELETED
+            value: {{ .Values.kyma.proxyResetJob.sleepAfterPodDeleted | quote }}
           - name: HOME
-            value: /tmp
+            value: "/tmp"
           command:
             - /bin/bash
             - -c

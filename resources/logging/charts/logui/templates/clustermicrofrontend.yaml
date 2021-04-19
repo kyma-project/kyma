@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: ClusterMicroFrontend
 metadata:
@@ -13,3 +14,4 @@ spec:
       viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}&container_name={nodeParams.container_name}"
       navigationPath: logs
       showInNavigation: false
+{{ end }}

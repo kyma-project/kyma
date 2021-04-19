@@ -38,8 +38,8 @@ deletePod() {
 
     if [[ "${dryRun}" == "false" ]]; then
         echo "    Deleting pod: ${namespace}/${podName}"
-        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}"
-        sleep 1
+        retry "${retriesCount}" kubectl -n "${namespace}" delete pod "${podName}" --ignore-not-found=true
+        sleep "${sleepAfterPodDeleted}"
     else
         echo "    [dryrun]" kubectl -n "${namespace}" delete pod "${podName}"
     fi
@@ -83,12 +83,14 @@ if [ -z "$ISTIO_PROXY_IMAGE_VERSION" ]; then
   exit $exitCode
 fi
 
+# Retries count in case of an error
 retriesCount=${RETRIES_COUNT:-5}
-
 # Dry Run mode only prints commands. True by default.
 dryRun="${DRY_RUN:-true}"
 # Exit code for entire script. Zero by default means the script will terminate on errors, but it will not fail the process.
 exitCode="${EXIT_CODE:-0}"
+# Sleep time after pod is deleted
+sleepAfterPodDeleted="${SLEEP_AFTER_POD_DELETED}:-0"
 
 ########################################
 # Processing starts here
