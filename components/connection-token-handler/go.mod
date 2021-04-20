@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/connection-token-handler
 
-go 1.14
+go 1.16
 
 require (
 	cloud.google.com/go v0.44.3 // indirect
