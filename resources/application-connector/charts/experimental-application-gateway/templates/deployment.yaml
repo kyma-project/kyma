@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Release.Name }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{.Release.Name }}
+      containers:
+      - name: {{ .Release.Name }}-application-gateway
+        image: {{ .Values.deployment.image.path }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/applicationgateway"
+          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--namespace={{ .Release.Namespace }}"
+          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
+          - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
+          - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
+          - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
+          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
+        ports:
+          - containerPort: {{ .Values.deployment.args.proxyPort }}
+            name: http-proxy
+          - containerPort: {{ .Values.deployment.args.externalAPIPort }}
+            name: http-api-port
