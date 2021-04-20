@@ -1,11 +1,13 @@
 ---
 title: Custom installation with components or value overrides
-type: Configuration
+type: Obsolete?
 ---
+
+<!-- I believe this might be obsolete with Kyma 2.0 -->
 
 You can configure the Kyma installation by:
   - Customizing the list of the components to install.
-  - Providing overrides that change the configuration values used by one or more components.
+  - Overriding the default configuration values used by one or more components.
 
 The list of components to install is defined in the [Installation](#custom-resource-installation) custom resource (CR).
 The overrides are delivered as ConfigMaps or Secrets defined by the user before triggering the installation.

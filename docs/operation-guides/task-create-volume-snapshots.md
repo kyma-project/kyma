@@ -3,15 +3,19 @@ title: Create on-demand volume snapshots
 type: Tutorials
 ---
 
-This tutorial shows how to create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) you can use to provision a new volume or restore the existing one.
+You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
+
+If you want to create volume snapshots for cloud providers, see [Create on-demand snapshots for cloud providers](task-create-volume-snapshots-providers).
+
+## Prerequisites
+
+As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which you have created using a CSI-enabled StorageClass.
+
+>**NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
 
 ## Steps
 
-Perform the steps:
-
-1. Assume that you have the `pvc-to-backup` PersistentVolumeClaim which you have created using a CSI-enabled StorageClass. Trigger a snapshot by creating a VolumeSnapshot object:
-
->**NOTE:** You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
+1. Trigger a snapshot by creating a VolumeSnapshot object:
 
 ```yaml
 apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -44,9 +48,11 @@ spec:
     apiGroup: snapshot.storage.k8s.io
 ```
 
-This will create a new `pvc-restored` PVC with pre-populated data from the snapshot.
+This creates a new `pvc-restored` PVC with pre-populated data from the snapshot.
 
-You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition which includes the required ServiceAccount and roles looks as follows:
+## Periodic snapshot job
+
+You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
 
 ```yaml
 ---

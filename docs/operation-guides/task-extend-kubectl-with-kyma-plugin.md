@@ -1,13 +1,17 @@
 ---
 title: Use Kyma CLI as kubectl plugin
-type: Tutorials
+type: Tasks
 ---
 
-This short tutorial shows how to extend kubectl to support Kyma CLI and its commands. 
+You can extend kubectl to support Kyma CLI and its commands. 
+
+## Prerequisites
+
+You are using Kubernetes version 1.12.0 or higher.
+
+## Steps
 
 To use Kyma CLI as the [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/), perform the following steps:
-
->**NOTE**: To use Kyma CLI as a kubectl plugin, use Kubernetes version 1.12.0 or higher.
 
 1. Rename the `kyma` binary to `kubectl-kyma` and place it anywhere in your **{PATH}**:
 

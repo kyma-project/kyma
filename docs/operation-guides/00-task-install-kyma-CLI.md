@@ -1,7 +1,9 @@
 ---
 title: Install Kyma CLI
-type: Installation
+type: Tasks
 ---
+
+<!-- Installing the Kyma CLI is a "basic task"; users need the CLI to get started -->
 
 You can easily install Kyma CLI on macOS, Linux, or Windows. To do so, perform the instructions described in the following sections.
 

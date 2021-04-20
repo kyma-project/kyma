@@ -3,6 +3,8 @@ title: Install components from user-defined URLs
 type: Configuration
 ---
 
+<!-- I believe this might be obsolete with Kyma 2.0 -->
+
 The Kyma Operator allows you to use external URLs as sources for the components you decide to install Kyma with. Using this mechanism, you can install Kyma with a customized component, which you store in GitHub or as a `.zip` or `.tgz` archive on a server, and use the officially released sources for other components.
 
 To install a component using an external URL as the source, you must add the **source.url** attribute to the entry of a component in the [Installation custom resource](#custom-resource-installation) (CR).

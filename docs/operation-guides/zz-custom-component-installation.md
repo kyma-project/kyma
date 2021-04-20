@@ -3,6 +3,8 @@ title: Custom component installation
 type: Configuration
 ---
 
+<!-- I believe this might be obsolete with Kyma 2.0 -->
+
 By default, you install Kyma with a set of components provided in the [**Kyma Lite**](#installation-overview) package.
 
 During installation, the Kyma Installer applies the content of the [local](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl#L14) or [cluster](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl#L14) installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
@@ -18,7 +20,7 @@ You can modify the component list as follows:
 - Add components to the installation file after the installation
 - Remove components from the installation file before the installation
 
->**NOTE:** Currently, it is not possible to remove a component that is already installed. If you remove it from the installation file or precede its entries with a hash character (#) when Kyma is already installed, the Kyma Installer simply does not update this component during the update process but the component is not removed.
+>**NOTE:** Currently, you can't to remove a component that is already installed. If you remove it from the installation file or precede its entries with a hash character (#) when Kyma is already installed, the Kyma Installer simply does not update this component during the update process, but the component is not removed.
 
 Each modification requires an action from the Kyma Installer for the changes to take place:
 

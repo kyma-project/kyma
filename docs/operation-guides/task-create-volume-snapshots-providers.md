@@ -1,21 +1,27 @@
 ---
 title: Create on-demand volume snapshots for cloud providers
-type: Tutorials
+type: Tasks
 ---
 
 These tutorials show how to create on-demand volume snapshots for cloud providers. Before you proceed with the tutorial, read the general instructions on [creating volume snapshots](/#tutorials-create-on-demand-volume-snapshots).
 
+<!-- why do I have to read those instructions first? -->
+
+<!-- it's completely unclear to me why Gardener providers are under a new headline. Why not put all five providers as tabs into the same div?? And then maybe even integrate this file with the other snapshot instruction -->
+
+## Create a volume snapshot for AKS or GKE
+
 <div tabs name="backup-providers">
   <details>
   <summary label="AKS">
-  Create a volume snapshot for AKS
+  AKS
   </summary>
 
-## Prerequisites
+### Prerequisites
 
 The minimum supported Kubernetes version is 1.17.
 
-## Steps
+### Steps
 
 1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
 2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
@@ -23,14 +29,14 @@ The minimum supported Kubernetes version is 1.17.
   </details>
   <details>
   <summary label="GKE">
-  Create a volume snapshot for GKE
+  GKE
   </summary>
 
-## Prerequisites
+### Prerequisites
 
 The minimum supported Kubernetes version is 1.14.
 
-## Steps
+### Steps
 
 1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
 2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.

@@ -1,13 +1,15 @@
 ---
-title: Use Kyma CLI to manage Functions
-type: Tutorials
+title: Manage Functions with Kyma CLI
+type: Tasks
 ---
 
-This tutorial shows how to use the available CLI commands to manage Functions in Kyma. You will see how to:
+<!-- is it the admin/operator who manages a function, or rather the function's dev? I believe this should go into "Advanced Tasks" -->
 
-1. Create local files that contain the basic configuration for a sample "Hello World" Python Function (`kyma init function`).
-2. Generate a Function custom resource (CR) from these files and apply it on your cluster (`kyma apply function`).
-3. Fetch the current state of your Function's cluster configuration after it was modified (`kyma sync function`).
+This tutorial shows how to use the available CLI commands to manage Functions in Kyma:
+
+- To create local files that contain the basic configuration for a sample "Hello World" Python Function, you run `kyma init function`.
+- To generate a Function custom resource (CR) from these files and apply it on your cluster, you use `kyma apply function`.
+- To fetch the current state of your Function's cluster configuration after it was modified, you use `kyma sync function`.
 
 This tutorial is based on a sample Python Function run on a lightweight [k3d](https://k3d.io/) cluster.
 
@@ -22,9 +24,7 @@ Before you start, make sure you have the following tools installed:
 
 ## Steps
 
-Follow these steps:
-
-1. Run the `init` Kyma CLI command to create local files with the default configuration for a Python Function. Go to the folder in which you want to initiate the workspace content and run this command:
+1. To create local files with the default configuration for a Python Function, go to the folder in which you want to initiate the workspace content and run this command:
 
   ```bash
   kyma init function --runtime python38 --name {FUNCTION_NAME}
@@ -36,9 +36,9 @@ Follow these steps:
 
   The `init` command creates the following files in your workspace folder:
 
-  - `config.yaml`	with the Function's configuration
-  - `handler.py` with the Function's code and the simple "Hello World" logic
-  - `requirements.txt` with an empty file for your Function's custom dependencies
+    - `config.yaml`	with the Function's configuration
+    - `handler.py` with the Function's code and the simple "Hello World" logic
+    - `requirements.txt` with an empty file for your Function's custom dependencies
 
   This command also sets **sourcePath** in the `config.yaml` file to the full path of the workspace folder:
 
@@ -51,7 +51,7 @@ Follow these steps:
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
   ```
 
-2. Run the `apply` Kyma CLI command to create a Function CR in the YAML format on your cluster:
+2. To create a Function CR in the YAML format on your cluster, run the `apply` Kyma CLI command:
 
   ```bash
   kyma apply function

@@ -1,6 +1,6 @@
 ---
 title: Access logs
-type: Task
+type: Tasks
 ---
 
 To access the logs, follow these steps:
@@ -11,7 +11,7 @@ To access the logs, follow these steps:
    kubectl get pods -l app=loki -n kyma-system
    ```
 
-2. Run the following command to configure port forwarding, replace **{pod_name}** with output of the previous command:
+2. Configure port forwarding with the following command, replacing **{pod_name}** with the output of the previous command:
 
    ```bash
    kubectl port-forward -n kyma-system <pod_name> 3100:3100

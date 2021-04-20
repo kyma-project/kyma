@@ -1,19 +1,17 @@
 ---
-title: Restore resources using Velero
-type: Tutorials
+title: Backup resources using Velero
+type: Tasks
 ---
 
-This tutorial shows how to use Velero to perform a partial restore of individual applications running on Kyma. Follow the guidelines to back up your Kubernetes resources and volumes so that you can restore them on a different cluster.
+Use Velero to back up individual applications running on Kyma and to restore Kubernetes resources and volumes, so that you can restore them on a different cluster.
 
-> **NOTE:** Be aware that a full restore of a Kyma cluster is not supported. Start with the existing Kyma installation and restore specific resources individually.
+> **NOTE:** Be aware that a full backup of a Kyma cluster is not supported. Start with the existing Kyma installation and restore specific resources individually.
 
 ## Prerequisites
 
 Download and install [Velero CLI](https://github.com/vmware-tanzu/velero/releases).
 
 ## Steps
-
-Follow these steps to install Velero and back up your Kyma cluster.
 
 1. Install the Velero server.
 

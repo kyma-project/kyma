@@ -1,12 +1,13 @@
 ---
-title: Debug a Function
-type: Tutorials
+title: Debug a Function with an external IDE
+type: Tasks
 ---
 
-This tutorial shows how to use an external IDE to debug a Function in Kyma CLI.
+<!-- is it the admin/operator who debugs a function, or rather the function's dev? I believe this should go into "Advanced Tasks" -->
+
+You can use an external IDE to debug a Function in Kyma CLI.
 
 ## Steps
-Follows these steps:
 
 <div tabs name="steps" group="debug-function">
   <details>
