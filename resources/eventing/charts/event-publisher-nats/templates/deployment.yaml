@@ -17,6 +17,8 @@ spec:
       serviceAccountName: {{ include "event-publisher-nats.serviceAccountName" . }}
       containers:
         - env:
+            - name: BACKEND
+              value: {{ .Values.global.eventing.backend }}
             - name: PORT
               value: {{ .Values.nats.config.port | quote }}
             - name: NATS_URL
