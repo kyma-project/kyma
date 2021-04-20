@@ -67,6 +67,8 @@ global:
     version: "d6bbc47a"
   application_broker:
     version: "PR-10924"
+  central_application_gateway:
+    version: "TODO"
 
 application_connectivity_certs_setup_job:
   secrets:

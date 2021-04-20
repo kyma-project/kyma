@@ -31,7 +31,7 @@ spec:
       serviceAccountName: {{.Release.Name }}
       containers:
       - name: {{ .Release.Name }}-application-gateway
-        image: {{ .Values.deployment.image.path }}
+        image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"
