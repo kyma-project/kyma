@@ -28,7 +28,7 @@ type Commander struct {
 	opts             *options.Options
 }
 
-// NewCommander creates the Commander for publisher to EB.
+// NewCommander creates the Commander for publisher to BEB.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logrus.Logger) *Commander {
 	return &Commander{
 		metricsCollector: metricsCollector,
