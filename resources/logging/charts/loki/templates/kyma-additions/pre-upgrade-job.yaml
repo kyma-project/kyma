@@ -23,9 +23,6 @@ metadata:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
 rules:
-  - apiGroups: [""]
-    resources: ["persistentvolumeclaims"]
-    verbs: ["get", "patch","delete"]
   - apiGroups: ["apps"]
     resources: ["statefulsets"]
     verbs: ["delete"]
