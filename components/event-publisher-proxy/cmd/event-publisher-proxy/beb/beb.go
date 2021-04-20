@@ -22,9 +22,9 @@ import (
 
 // Commander implements the Commander interface.
 type Commander struct {
-	metricsCollector *metrics.Collector
-	logger           *logrus.Logger
 	envCfg           *env.BebConfig
+	logger           *logrus.Logger
+	metricsCollector *metrics.Collector
 	opts             *options.Options
 }
 
@@ -40,11 +40,10 @@ func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, lo
 
 // Init implements the Commander interface and initializes the publisher to BEB.
 func (c *Commander) Init() error {
-
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.logger.Fatalf("Read BEB configuration failed with error: %s", err)
+		c.logger.Errorf("Read BEB configuration failed with error: %s", err)
+		return err
 	}
-
 	return nil
 }
 
@@ -95,7 +94,8 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := http.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
-		c.logger.Fatalf("Start handler failed with error: %s", err)
+		c.logger.Errorf("Start handler failed with error: %s", err)
+		return err
 	}
 	c.logger.Info("Shutdown the Event Publisher Proxy")
 	return nil

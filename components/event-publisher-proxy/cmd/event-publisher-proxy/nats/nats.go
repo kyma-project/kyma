@@ -31,18 +31,18 @@ type Commander struct {
 // NewCommander creates the Commander for publisher to NATS.
 func NewCommander(opts *options.Options, metricsCollector *metrics.Collector, logger *logrus.Logger) *Commander {
 	return &Commander{
-		metricsCollector: metricsCollector,
-		logger:           logger,
 		envCfg:           new(env.NatsConfig),
+		logger:           logger,
+		metricsCollector: metricsCollector,
 		opts:             opts,
 	}
 }
 
 // Init implements the Commander interface and initializes the publisher to NATS.
 func (c *Commander) Init() error {
-
 	if err := envconfig.Process("", c.envCfg); err != nil {
-		c.logger.Fatalf("Read NATS configuration failed with error: %s", err)
+		c.logger.Errorf("Read NATS configuration failed with error: %s", err)
+		return err
 	}
 	return nil
 }
@@ -60,7 +60,8 @@ func (c *Commander) Start() error {
 	// connect to nats
 	connection, err := pkgnats.ConnectToNats(c.envCfg.URL, c.envCfg.RetryOnFailedConnect, c.envCfg.MaxReconnects, c.envCfg.ReconnectWait)
 	if err != nil {
-		c.logger.Fatalf("Failed to connect to NATS server with error: %s", err)
+		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
+		return err
 	}
 	defer connection.Close()
 
@@ -98,7 +99,8 @@ func (c *Commander) Start() error {
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
-		c.logger.Fatalf("Start handler failed with error: %s", err)
+		c.logger.Errorf("Start handler failed with error: %s", err)
+		return err
 	}
 
 	c.logger.Info("Event Publisher NATS shutdown")
