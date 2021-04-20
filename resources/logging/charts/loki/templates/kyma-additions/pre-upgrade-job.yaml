@@ -80,7 +80,9 @@ spec:
         - name: {{ template "loki.name" . }}-pre-upgrade
           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
           imagePullPolicy: IfNotPresent
-
+          env:
+          - name: PVC_SIZE
+            value: {{ .Values.persistence.size }}
           command:
             - "/bin/bash"
           args:
@@ -88,4 +90,4 @@ spec:
             - |
               set -x
               kubectl delete statefulsets.apps -n kyma-system logging-loki --ignore-not-found
-              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": ".Values.persistence.size"}}}}'
+              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "$(PVC_SIZE)"}}}}' || true
