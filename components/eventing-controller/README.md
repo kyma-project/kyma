@@ -7,6 +7,7 @@ This component contains controllers for various CustomResourceDefinitions relate
 - [`nats-controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
+
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
 - Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
@@ -20,7 +21,7 @@ This component contains controllers for various CustomResourceDefinitions relate
     ```sh
     make deploy-local
 
-    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-local-dry-run    
+    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-local-dry-run
     make deploy-local-dry-run
     ```
 
@@ -29,7 +30,7 @@ This component contains controllers for various CustomResourceDefinitions relate
     ```sh
     make deploy-eventing-controller-nats-local
 
-    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".    
+    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".
     make deploy-eventing-controller-nats-local-dry-run
     ```
 
@@ -37,27 +38,27 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 This section explains how to use the Eventing Controller. It expects the following environment variables:
 
-    | Environment Variable       | Description                                                                     | Backend |
-    | -------------------------- | ------------------------------------------------------------------------------- |-------- |
-    | **BACKEND**                | Switch between BEB and NATS, default is NATS.                                   |         |
-    | **CLIENT_ID**              | The Client ID used to acquire Access Tokens from the Authentication server.     | BEB     |
-    | **CLIENT_SECRET**          | The Client Secret used to acquire Access Tokens from the Authentication server. | BEB     |
-    | **TOKEN_ENDPOINT**         | The Authentication Server Endpoint to provide Access Tokens.                    | BEB     |
-    | **WEBHOOK_CLIENT_ID**      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              | BEB     |
-    | **WEBHOOK_CLIENT_SECRET**  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          | BEB     |
-    | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              | BEB     |
-    | **DOMAIN**                 | The Kyma cluster public domain.                                                 | BEB     |
-    | **NATS_URL**               | The URL for the NATS server.                                                    | NATS    |
+    | Environment Variable   | Description                                                                     | Backend |
+    | ---------------------- | ------------------------------------------------------------------------------- |-------- |
+    | BACKEND                | Switch between BEB and NATS, default is NATS.                                   |         |
+    | CLIENT_ID              | The Client ID used to acquire Access Tokens from the Authentication server.     | BEB     |
+    | CLIENT_SECRET          | The Client Secret used to acquire Access Tokens from the Authentication server. | BEB     |
+    | TOKEN_ENDPOINT         | The Authentication Server Endpoint to provide Access Tokens.                    | BEB     |
+    | WEBHOOK_CLIENT_ID      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              | BEB     |
+    | WEBHOOK_CLIENT_SECRET  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          | BEB     |
+    | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              | BEB     |
+    | DOMAIN                 | The Kyma cluster public domain.                                                 | BEB     |
+    | NATS_URL               | The URL for the NATS server.                                                    | NATS    |
 
 The additional command line arguments are:
 
-    | Flag                    | Description                                               | Default Value   | Backend |
-    | ----------------------- | --------------------------------------------------------- | --------------- | ------- |
-    | `metrics-addr`          | The address the metric endpoint binds to.                 | `:8080`         | both    |
-    | `enable-debug-logs`     | Enable debug logs.                                        | `false`         | both    |
-    | `reconcile-period`      | The period between triggering of reconciling calls (BEB). | `10 minutes`    | BEB     |
-    | `max-reconnects`        | The maximum number of reconnection attempts (NATS).       | `10 `           | NATS    |
-    | `reconnect-wait`        | Wait time between reconnection attempts (NATS).           | `1 second`      | NATS    |
+    | Flag                  | Description                                               | Default Value | Backend |
+    | --------------------- | --------------------------------------------------------- | ------------- | ------- |
+    | metrics-addr          | The address the metric endpoint binds to.                 | :8080         | both    |
+    | enable-debug-logs     | Enable debug logs.                                        | false         | both    |
+    | reconcile-period      | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
+    | max-reconnects        | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
+    | reconnect-wait        | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
