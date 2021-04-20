@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -34,6 +35,9 @@ func main() {
 
 	// parse the config for main:
 	cfg := new(Config)
+	if err := envconfig.Process("", cfg); err != nil {
+		logger.Fatalf("Read configuration failed with error: %s", err)
+	}
 
 	// metrics server
 	metricsServer := metrics.NewServer(logger)
