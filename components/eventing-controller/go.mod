@@ -13,8 +13,8 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nats-io/nats-server/v2 v2.1.9
 	github.com/nats-io/nats.go v1.10.1-0.20201204000952-090c71e95cd0
-	github.com/onsi/ginkgo v1.14.0
-	github.com/onsi/gomega v1.10.2
+	github.com/onsi/ginkgo v1.15.0
+	github.com/onsi/gomega v1.10.5
 	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
