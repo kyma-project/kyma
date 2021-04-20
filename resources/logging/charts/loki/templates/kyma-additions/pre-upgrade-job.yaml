@@ -90,4 +90,4 @@ spec:
             - |
               set -x
               kubectl delete statefulsets.apps -n kyma-system logging-loki --ignore-not-found
-              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "$(PVC_SIZE)"}}}}' || true
+              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "$(PVC_SIZE)"}}}}' || echo "true"
