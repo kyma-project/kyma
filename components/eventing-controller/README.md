@@ -2,9 +2,9 @@
 
 ## Overview
 
-This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controllers come with this container:
-- [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
-- [`nats-controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
+This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controller come with this container:
+
+- [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
 
