@@ -15,8 +15,10 @@ import (
 )
 
 const (
-	BEBBackend  = "BEB"
-	NATSBackend = "NATS"
+	ENV_BACKEND = "BACKEND"
+
+	ENV_BACKEND_VALUE_BEB  = "BEB"
+	ENV_BACKEND_VALUE_NATS = "NATS"
 )
 
 // Commander defines the interface of different implementations
@@ -32,14 +34,12 @@ func main() {
 	logger := ctrl.Log.WithName("setup")
 
 	// Parse flags.
-	var backend string
 	var enableDebugLogs bool
 	var metricsAddr string
 	var resyncPeriod time.Duration
 	var maxReconnects int
 	var reconnectWait time.Duration
 
-	flag.StringVar(&backend, "backend", "nats", "The controller eventing backend NATS or BEB.")
 	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls (BEB).")
@@ -50,15 +50,15 @@ func main() {
 	// Instantiate configured commander.
 	var commander Commander
 
-	backend = strings.ToUpper(backend)
+	backend := strings.ToUpper(os.Getenv(ENV_BACKEND))
 
 	switch backend {
-	case BEBBackend:
+	case ENV_BACKEND_VALUE_BEB:
 		commander = beb.NewCommander(enableDebugLogs, metricsAddr, resyncPeriod)
-	case NATSBackend:
+	case ENV_BACKEND_VALUE_NATS:
 		commander = nats.NewCommander(enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
 	default:
-		logger.Error(fmt.Errorf("specified invalid eventing controller backend: %v", backend), "unable to start manager")
+		logger.Error(fmt.Errorf("specified invalid eventing controller backend: '%s'", backend), "unable to start manager")
 		os.Exit(1)
 	}
 

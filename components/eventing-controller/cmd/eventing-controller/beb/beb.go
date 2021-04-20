@@ -36,7 +36,7 @@ type Commander struct {
 func NewCommander(enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
 	return &Commander{
 		scheme:          runtime.NewScheme(),
-		envCfg:          env.GetConfig(), // TODO Hamonization.
+		envCfg:          env.GetConfig(),
 		enableDebugLogs: enableDebugLogs,
 		metricsAddr:     metricsAddr,
 		resyncPeriod:    resyncPeriod,
