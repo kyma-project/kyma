@@ -22,6 +22,8 @@ spec:
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: nats-controller
           env:
+          - name: BACKEND
+            value: {{ .Values.global.eventing.backend }}
           - name: NATS_URL
             value: {{ include "nats-controller.natsServer.url" . }}
           - name: EVENT_TYPE_PREFIX
