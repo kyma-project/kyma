@@ -1,0 +1,71 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  labels:
+    serverless.kyma-project.io/build-resources-preset: local-dev
+    serverless.kyma-project.io/function-resources-preset: S
+    serverless.kyma-project.io/replicas-preset: S
+  name: lastorder
+spec:
+  deps: '{ "name": "orders", "version": "1.0.0", "dependencies": {"axios": "^0.19.2"}}'
+  maxReplicas: 1
+  minReplicas: 1
+  # TODO: Check if the `let url = findEnv(...` is correctly created
+  source: |
+    let lastOrder = {};
+    let lastEvent = {};
+    const axios = require('axios');
+    async function getOrder(code) {
+      let url = findEnv("GATEWAY_URL") + "commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code;
+      console.log("URL: %s", url);
+      let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
+        return e.response.data;
+      })
+      dump(response);
+      return response.data;
+    }
+    function cloudEventHeaders(event) {
+      return Object.keys(event).reduce((accumulator, current) => {
+        if (current.startsWith('ce-')) {
+          accumulator[current] = event[current]
+        }
+        return accumulator;
+      }, {});
+    }
+    function findEnv(keyPart) {
+      for(let key in process.env) {
+        if(key.indexOf(keyPart) !== -1) {
+          return process.env[key];
+        }
+      }
+      return;
+    }
+    function dump(obj) {
+      console.dir(obj, {depth: null});
+    }
+    module.exports = {
+      main: async function (event, context) {
+        if (event.data && event.data.orderCode) {
+          lastEvent = { ...cloudEventHeaders(event), data: event.data };
+          lastOrder = await getOrder(event.data.orderCode);
+        }
+        return {order:lastOrder, event:lastEvent};
+      }
+    }
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: lastorder
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - accessStrategies:
+        - config: {}
+          handler: allow
+      methods: ["*"]
+      path: /.*
+  service:
+    host: lastorder
+    name: lastorder
+    port: 80

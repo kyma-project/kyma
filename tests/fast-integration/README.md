@@ -67,7 +67,7 @@ Here you have sample development tasks you can execute on your local machine wor
 
 3. Install Kyma without some modules and with the new eventing instead of Knative:
     ```
-    kyma-js install -v --skip-modules=monitoring,tracing,logging,kiali --new-eventing
+    kyma-js install -v --skip-components=monitoring,tracing,logging,kiali --new-eventing
     ```
 
 4. Execute the Commerce Mock test with `DEBUG` enabled:
