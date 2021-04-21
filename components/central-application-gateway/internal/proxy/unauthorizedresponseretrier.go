@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -3,11 +3,11 @@ package metadata
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
-	applicationmocks "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
-	serviceapimocks "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/serviceapi/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
+	applicationmocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
+	serviceapimocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/serviceapi/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

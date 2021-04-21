@@ -1,8 +1,8 @@
 package proxyconfig
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 )
 
 //go:generate mockery --name=TargetConfigProvider

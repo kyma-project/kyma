@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"

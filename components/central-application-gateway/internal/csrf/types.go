@@ -3,8 +3,8 @@ package csrf
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 )
 
 //CSRF Client is an HTTP client responsible for fetching and caching CSRF Tokens.

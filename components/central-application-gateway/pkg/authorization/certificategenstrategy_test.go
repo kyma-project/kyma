@@ -9,7 +9,7 @@ import (
 	"net/http/httputil"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/testconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

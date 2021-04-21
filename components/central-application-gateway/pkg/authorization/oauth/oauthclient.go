@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/util"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 )
 
 type oauthResponse struct {

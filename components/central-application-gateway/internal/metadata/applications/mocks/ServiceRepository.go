@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	applications "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
-	apperrors "github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	applications "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
+	apperrors "github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -3,10 +3,10 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	authorization "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	apperrors "github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	authorization "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 
-	csrf "github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrf "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	oauthMocks "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	oauthMocks "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
