@@ -36,29 +36,29 @@ global:
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "PR-11149"
+    version: "1683d7cf"
   application_connectivity_validator:
-    version: "PR-11149"
+    version: "1683d7cf"
   application_operator:
-    version: "PR-11149"
+    version: "1683d7cf"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
-    version: "PR-11149"
+    version: "1683d7cf"
   application_gateway_tests:
     version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "PR-11149"
+    version: "1683d7cf"
   application_registry_tests:
     version: "68baa911"
   connection_token_handler:
-    version: "PR-11149"
+    version: "1683d7cf"
   connection_token_handler_tests:
     version: "9776cb81"
   connector_service:
-    version: "PR-11149"
+    version: "1683d7cf"
   connector_service_tests:
     version: "9776cb81"
   event_service:
