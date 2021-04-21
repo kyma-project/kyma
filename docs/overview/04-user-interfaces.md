@@ -1,5 +1,6 @@
 ---
 title: Kyma User Interfaces
+type: Overview
 ---
 
 The Console is a web-based administrative UI for Kyma. It allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
@@ -12,4 +13,4 @@ Use the following CRs to modify the Console UI:
 - The ClusterMicroFrontend custom resource allows you to plug in micro frontends for the entire Cluster.
 - The BackendModule custom resource allows you to enable Console Backend Service modules.
 
-Additionally, you can use the CLI to execute various Kyma tasks, such as installing or upgrading Kyma. For more information, see [LINK TO CLI DOCU](). 
+Additionally, you can use the CLI to execute various Kyma tasks, such as installing or upgrading Kyma. For more information, see [LINK TO CLI DOCU]().
