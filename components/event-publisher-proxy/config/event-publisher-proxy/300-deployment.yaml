@@ -19,7 +19,7 @@ spec:
       containers:
         - env:
             - name: BACKEND
-              value: "nats"
+              value: "beb"
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
