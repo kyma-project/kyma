@@ -191,7 +191,7 @@ func (f ConfigureFunction) Cleanup() error {
 
 	for i := len(f.createdObjects) - 1; i >= 0; i-- {
 		if err := f.createdObjects[i].Delete(); err != nil {
-			errAll = multierror.Append(err, errors.Wrapf(err, "while deleting %s", f.createdObjects[i].GetName()))
+			errAll = multierror.Append(errAll, errors.Wrapf(err, "while deleting %s", f.createdObjects[i].GetName()))
 		}
 	}
 
