@@ -55,7 +55,7 @@ func New(name string, c shared.Container) *Subscription {
 	}
 }
 
-func (s Subscription) GetName() string {
+func (s *Subscription) GetName() string {
 	return s.name
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/tests/function-controller/testsuite"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/apirule"
@@ -174,21 +175,25 @@ func (f ConfigureFunction) createSubscription() error {
 }
 
 func (f ConfigureFunction) OnError() error {
+	var errAll *multierror.Error
+
 	for _, object := range f.createdObjects {
 		if err := object.LogResource(); err != nil {
-			return errors.Wrapf(err, "while getting %s", object.GetName())
+			errAll = multierror.Append(errAll, errors.Wrapf(err, "while getting %s", object.GetName()))
 		}
 	}
 
-	return nil
+	return errAll.ErrorOrNil()
 }
 
 func (f ConfigureFunction) Cleanup() error {
+	var errAll *multierror.Error
+
 	for i := len(f.createdObjects) - 1; i >= 0; i-- {
 		if err := f.createdObjects[i].Delete(); err != nil {
-			return errors.Wrapf(err, "while deleting %s", f.createdObjects[i].GetName())
+			errAll = multierror.Append(err, errors.Wrapf(err, "while deleting %s", f.createdObjects[i].GetName()))
 		}
 	}
 
-	return nil
+	return errAll.ErrorOrNil()
 }

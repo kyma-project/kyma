@@ -44,8 +44,8 @@ func New(name string, c shared.Container) *APIRule {
 	}
 }
 
-func (s APIRule) GetName() string {
-	return s.name
+func (a *APIRule) GetName() string {
+	return a.name
 }
 
 func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) {

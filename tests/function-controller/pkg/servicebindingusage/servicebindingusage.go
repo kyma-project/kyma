@@ -39,8 +39,8 @@ func New(name, usageKind string, c shared.Container) *ServiceBindingUsage {
 	}
 }
 
-func (s ServiceBindingUsage) GetName() string {
-	return s.name
+func (sbu *ServiceBindingUsage) GetName() string {
+	return sbu.name
 }
 
 func (sbu *ServiceBindingUsage) Create(serviceBindingName, fnKsvcName, envPrefix string) error {
