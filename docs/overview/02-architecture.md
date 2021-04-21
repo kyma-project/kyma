@@ -3,14 +3,6 @@ title: High-level architecture
 type: Overview
 ---
 
-new architecture diagram:
+Kyma consists of these main areas and components:
 
-![architecture](./assets/kyma-2.0-architecture.svg)
-
-old architecture diagram:
-
-![old-architecture](./assets/ac-s-sc.svg)
-
-## See also
-
-- Kyma components
+![architecture](./assets/kyma-architecture.svg)
