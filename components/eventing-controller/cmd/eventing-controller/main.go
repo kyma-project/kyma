@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -12,13 +11,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller/nats"
-)
-
-const (
-	ENV_BACKEND = "BACKEND"
-
-	ENV_BACKEND_VALUE_BEB  = "BEB"
-	ENV_BACKEND_VALUE_NATS = "NATS"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 // Commander defines the interface of different implementations
@@ -50,16 +43,17 @@ func main() {
 	// Instantiate configured commander.
 	var commander Commander
 
-	backend := strings.ToUpper(os.Getenv(ENV_BACKEND))
+	backend, err := env.Backend()
+	if err != nil {
+		logger.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
 
 	switch backend {
-	case ENV_BACKEND_VALUE_BEB:
+	case env.BACKEND_VALUE_BEB:
 		commander = beb.NewCommander(enableDebugLogs, metricsAddr, resyncPeriod)
-	case ENV_BACKEND_VALUE_NATS:
+	case env.BACKEND_VALUE_NATS:
 		commander = nats.NewCommander(enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
-	default:
-		logger.Error(fmt.Errorf("specified invalid eventing controller backend: '%s'", backend), "unable to start manager")
-		os.Exit(1)
 	}
 
 	// Init and start the commander.
@@ -68,7 +62,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info(fmt.Sprintf("starting %v subscription controller and manager", commander))
+	logger.Info(fmt.Sprintf("starting %s subscription controller and manager", backend))
 
 	if err := commander.Start(); err != nil {
 		logger.Error(err, "unable to start manager")

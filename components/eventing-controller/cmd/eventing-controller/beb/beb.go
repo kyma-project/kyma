@@ -20,7 +20,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 )
 
-// Commander implementes the Commander interface.
+// Commander implements the Commander interface.
 type Commander struct {
 	scheme          *runtime.Scheme
 	envCfg          env.Config

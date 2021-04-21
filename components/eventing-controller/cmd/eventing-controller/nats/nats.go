@@ -19,7 +19,7 @@ import (
 	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
 )
 
-// Commander implementes the Commander interface.
+// Commander implements the Commander interface.
 type Commander struct {
 	scheme          *runtime.Scheme
 	envCfg          env.NatsConfig
