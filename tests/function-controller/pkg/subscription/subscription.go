@@ -55,6 +55,10 @@ func New(name string, c shared.Container) *Subscription {
 	}
 }
 
+func (s *Subscription) GetName() string {
+	return s.name
+}
+
 func (s *Subscription) Create(sinkUrl *url.URL) (subscription *kymaeventingv1alpha1.Subscription, err error) {
 	eventSource := &kymaeventingv1alpha1.Filter{
 		Type:     "exact",
