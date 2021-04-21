@@ -1,8 +1,6 @@
 {{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
-{{- if not (lookup "ui.kyma-project.io/v1alpha1" "BackendModule" "" "eventing") }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
   name: eventing
-{{- end }}
 {{ end }}
