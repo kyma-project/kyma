@@ -126,23 +126,6 @@ func (p *proxy) createCacheEntry(appName, id string) (*CacheEntry, apperrors.App
 	return p.cache.Put(appName, id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
-func (p *proxy) cacheEntryFromProxyConfig(appName, id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
-	proxy, err := makeProxy(config.TargetURL, config.Configuration.RequestParameters, id, p.skipVerify)
-	if err != nil {
-		return nil, err
-	}
-
-	var credentials *authorization.Credentials
-	if config.Configuration.Credentials != nil {
-		credentials = config.Configuration.Credentials.ToCredentials()
-	}
-
-	authorizationStrategy := p.newAuthorizationStrategy(credentials)
-	csrfTokenStrategy := p.newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy, config.Configuration.CSRFConfig)
-
-	return p.cache.Put(appName, id, proxy, authorizationStrategy, csrfTokenStrategy), nil
-}
-
 func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
 	return p.authorizationStrategyFactory.Create(credentials)
 }

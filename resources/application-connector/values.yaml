@@ -4,6 +4,9 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+central_application_gateway:
+  enabled: true
+
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false

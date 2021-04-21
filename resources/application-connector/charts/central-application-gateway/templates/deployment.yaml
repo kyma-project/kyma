@@ -30,7 +30,7 @@ spec:
     spec:
       serviceAccountName: {{.Release.Name }}
       containers:
-      - name: {{ .Release.Name }}-application-gateway
+      - name: {{ .Release.Name }}-central-application-gateway
         image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
