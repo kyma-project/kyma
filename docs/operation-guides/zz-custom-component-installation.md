@@ -1,6 +1,6 @@
 ---
 title: Custom component installation
-type: Configuration
+type: obsolete?
 ---
 
 <!-- I believe this might be obsolete with Kyma 2.0 -->

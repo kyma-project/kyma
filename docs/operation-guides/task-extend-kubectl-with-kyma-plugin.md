@@ -1,6 +1,6 @@
 ---
 title: Use Kyma CLI as kubectl plugin
-type: Tasks
+type: Configuration
 ---
 
 You can extend kubectl to support Kyma CLI and its commands. 

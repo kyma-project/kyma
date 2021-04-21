@@ -1,6 +1,6 @@
 ---
 title: Upgrade Kyma
-type: Tasks
+type: Configuration
 ---
 
 The `alpha deploy` command not only installs Kyma, you also use it to upgrade the Kyma version on the cluster. For example, you can specify the sources, components, and configuration values you want to use. For code examples, see [Custom Kyma Installation](#install-kyma-custom).

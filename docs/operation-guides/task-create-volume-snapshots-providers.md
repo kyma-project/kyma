@@ -1,6 +1,6 @@
 ---
 title: Create on-demand volume snapshots for cloud providers
-type: Tasks
+type: Operations
 ---
 
 These tutorials show how to create on-demand volume snapshots for cloud providers. Before you proceed with the tutorial, read the general instructions on [creating volume snapshots](/#tutorials-create-on-demand-volume-snapshots).

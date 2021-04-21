@@ -1,6 +1,6 @@
 ---
 title: Create on-demand volume snapshots
-type: Tutorials
+type: Operations
 ---
 
 You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
