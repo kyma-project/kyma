@@ -1,6 +1,6 @@
 ---
 title: Cannot create a volume snapshot
-type: Troubleshooting
+type: Operations
 ---
 
 If a PersistentVolumeClaim is not bound to a PersistentVolume, the attempt to create a volume snapshot from that PersistentVolumeClaim will fail with no retries. An event will be logged to indicate no binding between the PersistentVolumeClaim and the PersistentVolume.
