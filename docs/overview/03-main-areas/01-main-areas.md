@@ -13,8 +13,6 @@ Kyma provides you with these main functionalities:
 - Manages secure access to external systems
 - Provides monitoring and tracing capabilities to facilitate operational aspects
 
-![connectivity](../assets/app-connectivity.svg)
-
 ### Service consumption
 
 - Connects services from external sources
@@ -33,14 +31,9 @@ Kyma provides you with these main functionalities:
 
 Serverless in Kyma allows you to reduce the implementation and operation effort of an application to the absolute minimum. It provides a platform to run lightweight Functions in a cost-efficient and scalable way using JavaScript and Node.js. Serverless in Kyma relies on Kubernetes resources like [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), [Services](https://kubernetes.io/docs/concepts/services-networking/service/) and [HorizontalPodAutoscalers](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for deploying and managing Functions and [Kubernetes Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) for creating Docker images.
 
-![serverless](../assets/serverless.svg)
-
 ### Eventing
 
 Eventing allows you to easily integrate external applications with Kyma. Under the hood, it implements [NATS](https://docs.nats.io/) to ensure Kyma receives business events from external sources and is able to trigger business flows using Functions or services.
-
-![eventing](../assets/eventing.svg)
-
 
 ### Observability
 
@@ -49,14 +42,13 @@ Kyma comes bundled with tools that give you the most accurate and up-to-date mon
 - The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distributed tracing system. Use it to analyze performance by scrutinizing the path of the requests sent to and from your service. This information helps you optimize the latency and performance of your solution.
 - Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 
-
 ### Service Mesh
 
 The Service Mesh is an infrastructure layer that handles service-to-service communication, proxying, service discovery, traceability, and security, independently of the code of the services. Kyma uses the [Istio](https://istio.io/) Service Mesh that is customized for the specific needs of the implementation.
 
 ### API exposure
 
-The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller which exposes services in Kyma.
+The API exposure in Kyma is based on the API Gateway component that aims to provide a set of functionalities which allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller which exposes services in Kyma.
 
 ### UI
 
