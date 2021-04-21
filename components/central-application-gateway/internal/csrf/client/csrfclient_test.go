@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/testconsts"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

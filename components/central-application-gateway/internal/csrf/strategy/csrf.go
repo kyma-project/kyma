@@ -3,11 +3,11 @@ package strategy
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	log "github.com/sirupsen/logrus"
 )
 

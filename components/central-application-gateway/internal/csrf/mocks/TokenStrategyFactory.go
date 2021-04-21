@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	csrf "github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
-	authorization "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	csrf "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
+	authorization "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 
 	mock "github.com/stretchr/testify/mock"
 )

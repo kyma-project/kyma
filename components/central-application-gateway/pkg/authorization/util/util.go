@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 )
 
 func AddBasicAuthHeader(request *http.Request, clientId, clientSecret string) {

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	apperrors "github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 
 	http "net/http"
 
