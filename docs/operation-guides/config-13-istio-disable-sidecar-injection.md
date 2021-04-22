@@ -13,4 +13,4 @@ You can disable sidecar proxy injection for either an entire Namespace or a sing
 
 Read the [Istio documentation](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) to learn more about sidecar proxy injection.
 
-For any issues with the Istio sidecar injection, check whether there is an [issue with the sidecar injection](troubleshoot-istio-no-sidecar) or [mismatching Istio version](troubleshoot-istio-sidecar-version).
+If there are issues with the Istio sidecar, you can check whether there is an [issue with the sidecar injection](troubleshoot-istio-no-sidecar) or a [mismatching Istio version](troubleshoot-istio-sidecar-version).

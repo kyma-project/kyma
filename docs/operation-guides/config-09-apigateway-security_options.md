@@ -1,5 +1,5 @@
 ---
-title: Configure Authorization with OAuth2 and JWT
+title: Configure Authorization (OAuth2, JWT)
 type: Configuration
 ---
 

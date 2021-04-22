@@ -4,7 +4,7 @@ type: Configuration
 ---
 <!-- the default variant is surely mentioned in Basic Tasks/Get Started, too -->
 
-There are several ways to install Kyma:
+Besides the default installation, there are several ways to install Kyma:
 
 ## Default Installation
 
@@ -84,4 +84,4 @@ To deploy Kyma with only specific components, run:
 
 ## Installation with specific configuration values
 
-- You can also install Kyma with different configuration values than the default settings. For details, see [Change Kyma settings](#change-kyma-settings).
+- You can also install Kyma with different configuration values than the default settings. To do this, you use the `--values-file` and the `--value` flag. For details, see [Change Kyma settings](#change-kyma-settings).

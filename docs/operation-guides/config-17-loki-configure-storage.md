@@ -3,9 +3,9 @@ title: Logging storage with boltDB and GCS
 type: Configuration
 ---
 
-## Storage
-
 By default, Loki comes with the [boltDB](https://github.com/boltdb/bolt) storage configuration. It includes label and index storage, and the filesystem for object storage. Additionally, Loki supports other object stores, such as S3 or GCS.
+
+## boltDB example
 
 First, here's an example for a Loki configuration using boltDB and filesystem storage:
 
@@ -44,6 +44,8 @@ data:
         directory: /tmp/loki/chunks
 
 ```
+
+## GCS example
 
 A sample configuration for GCS looks as follows:
 

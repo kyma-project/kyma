@@ -1,6 +1,6 @@
 ---
 title: Custom installation with components or value overrides
-type: Obsolete?
+type: obsolete?
 ---
 
 <!-- I believe this might be obsolete with Kyma 2.0 -->
