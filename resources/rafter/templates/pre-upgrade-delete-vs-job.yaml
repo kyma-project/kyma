@@ -12,9 +12,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    networking.knative.dev/certificate-provider: cert-manager
-    serving.knative.dev/controller: "true"
   name: pre-upgrade-delete-vs-rafter-minio
   annotations:
     helm.sh/hook: "pre-upgrade"
