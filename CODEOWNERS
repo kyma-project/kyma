@@ -100,17 +100,8 @@
 # The `logui` subchart
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
-# The `event-sources` chart
-/resources/event-sources/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
 # The `eventing` chart
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
-# The `nats-streaming` chart
-/resources/nats-streaming/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
-# The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/@lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @lilitgh @crabtree @kjaksik
@@ -138,9 +129,6 @@
 
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
-
-# The `knative-eventing` chart
-/resources/knative-eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
@@ -174,9 +162,6 @@
 
 # The `busola-migrator` chart
 /resources/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
-
-# Kafka Channel for knative eventing
-/resources/knative-eventing-kafka/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # Components
 
@@ -231,15 +216,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 
 # Application Connectivity Certs Setup Job Component
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
-
-# Event Sources Component
-/components/event-sources/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
-# Nats-init Component
-/components/nats-init/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
-# Event Service Component
-/components/event-service/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # UAA Component
 /components/uaa-activator/ @polskikiel @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree @kjaksik
@@ -342,12 +318,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
-
-# Event Service Tests
-/tests/integration/event-service/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
-
-# Kafka Channel Integration Tests
-/tests/contract/knative-channel-kafka/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @polskikiel @ksputo @jasiu001 @adamwalach @k15r @crabtree @kjaksik @suleymanakbas91
