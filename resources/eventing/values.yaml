@@ -18,6 +18,10 @@ global:
     proxy:
       statusPort: 15020
 
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # eventTypePrefix is the prefix of the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
@@ -35,27 +39,7 @@ authentication:
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
 
-postUpgradeJob:
-  image:
-    name: event-sources-upgrade-job
-    tag: 36cfb063
-
-postInstallJob:
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210407-86c769bd"
-
 preUpgradeJob:
   image:
     name: eu.gcr.io/kyma-project/incubator/k8s-tools
     tag: "20210310-c03fb8b6"
-
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-    - ALL
-  privileged: false
-  runAsGroup: 65534
-  runAsNonRoot: true
-  runAsUser: 65534

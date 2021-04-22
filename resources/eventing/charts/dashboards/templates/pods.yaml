@@ -503,7 +503,7 @@ data:
               "value": "kyma-system"
             },
             "datasource": "Prometheus",
-            "definition": "query_result(kube_pod_info{pod=~\"application-broker.*\"} or kube_pod_info{pod=~\"eventing.*\"} or kube_pod_info{pod=~\"autoscaler.*\"} or kube_pod_info{pod=~\"application-operator-*\"})",
+            "definition": "query_result(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\"})",
             "description": null,
             "error": null,
             "hide": 0,
@@ -513,7 +513,7 @@ data:
             "name": "namespace",
             "options": [],
             "query": {
-              "query": "query_result(kube_pod_info{pod=~\"application-broker.*\"} or kube_pod_info{pod=~\"eventing.*\"} or kube_pod_info{pod=~\"autoscaler.*\"} or kube_pod_info{pod=~\"application-operator-*\"})",
+              "query": "query_result(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\"})",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,

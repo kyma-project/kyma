@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -36,4 +37,4 @@ spec:
       viewUrl: '/home/settings/apps/:name'
       settings:
         readOnly: {{ .Values.global.disableLegacyConnectivity }}
-        
+{{ end }}

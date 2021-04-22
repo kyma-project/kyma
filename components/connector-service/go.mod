@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/connector-service
 
-go 1.15
+go 1.16
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
