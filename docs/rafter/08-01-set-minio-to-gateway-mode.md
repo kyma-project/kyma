@@ -29,7 +29,7 @@ By default, you install Kyma with Rafter in MinIO stand-alone mode. This tutoria
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
-- [Microsoft Azure](https://azure.com) subscription
+- [Microsoft Azure](http://azure.com) subscription
 
   </details>
   <details>

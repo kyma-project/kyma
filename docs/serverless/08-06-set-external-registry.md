@@ -39,7 +39,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
-- [Microsoft Azure](https://azure.com) subscription
+- [Microsoft Azure](http://azure.com) subscription
 
   </details>
 </div>
