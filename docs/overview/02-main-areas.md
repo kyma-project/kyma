@@ -3,7 +3,9 @@ title: Main areas
 type: Overview
 ---
 
-Kyma provides you with these main functionalities:
+Kyma consists of these main areas and components:
+
+![architecture](./assets/kyma-areas.svg)
 
 ### Application connectivity
 
@@ -52,4 +54,7 @@ The API exposure in Kyma is based on the API Gateway component that aims to prov
 
 ### UI
 
-The Console is a web-based administrative UI for Kyma. It uses the [Luigi](https://github.com/SAP/luigi) framework to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated Console Backend Service which provides a tailor-made API for each view of the Console UI.
+Kyma provides you with two interfaces that you can use for interactions:
+
+- [Console UI](link) - a web-based administrative UI that allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
+- [Kyma CLI](link) - a CLI to execute various Kyma tasks, such as installing or upgrading Kyma.

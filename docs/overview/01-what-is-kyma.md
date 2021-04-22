@@ -18,7 +18,7 @@ Out of the box, Kyma offers various functionalities, such as:
 - In-cluster observability
 - CLI supported by the intuitive Console UI
 
-Read about [Kyma main areas](./03-main-areas/01-main-areas.md) to learn more.
+Read about [Kyma main areas](#overview-main-areas) to learn more.
 
 Kyma is built upon leading cloud-native, open-source projects, such as Istio, NATS, Serverless, and Prometheus. The features developed by Kyma are the unique “glue” that holds them together, so you can connect and extend your applications easily and intuitively. To learn how to do that, head over to the [Get Started](../get-started) section where you can find step-by-step instructions to get your environment up and running.
 
