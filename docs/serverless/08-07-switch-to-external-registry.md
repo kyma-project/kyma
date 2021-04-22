@@ -41,7 +41,7 @@ After this change, any Function deployed in the `default` Namespace will store i
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
-- [Microsoft Azure](http://azure.com) subscription
+- [Microsoft Azure](https://azure.com) subscription
 
   </details>
 </div>
