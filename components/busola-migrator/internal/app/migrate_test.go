@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/icza/session"
+
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/app/automock"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/model"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/uaa"
@@ -34,7 +36,7 @@ func TestApp_HandleXSUAAMigrate(t *testing.T) {
 			ExpectedLocation:       testAuthorizationURLWithParams,
 			FixUAAClient: func() *automock.UAAClient {
 				mockClient := &automock.UAAClient{}
-				mockClient.On("GetAuthorizationEndpointWithParams", testAuthorizationURL).
+				mockClient.On("GetAuthorizationEndpointWithParams", testAuthorizationURL, mock.Anything).
 					Return(testAuthorizationURLWithParams, nil).Once()
 				return mockClient
 			},
@@ -44,7 +46,7 @@ func TestApp_HandleXSUAAMigrate(t *testing.T) {
 			ExpectedResponseStatus: http.StatusInternalServerError,
 			FixUAAClient: func() *automock.UAAClient {
 				mockClient := &automock.UAAClient{}
-				mockClient.On("GetAuthorizationEndpointWithParams", testAuthorizationURL).
+				mockClient.On("GetAuthorizationEndpointWithParams", testAuthorizationURL, mock.Anything).
 					Return(testAuthorizationURLWithParams, testError).Once()
 				return mockClient
 			},
@@ -77,11 +79,12 @@ func TestApp_HandleXSUAAMigrate(t *testing.T) {
 	}
 }
 
-func TestHandleXSUAACallback2(t *testing.T) {
+func TestHandleXSUAACallback(t *testing.T) {
 	// GIVEN
 	testDomain := "test.domain"
 	testTokenEndpoint := "https://token.endpoint"
 	testQueryCode := "code"
+	testOAuthState := "state"
 	testAccessToken := "token"
 	testJWKSURI := "https://jwks.uri"
 	testParsedToken := jwt.New()
@@ -226,8 +229,18 @@ func TestHandleXSUAACallback2(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			r, _ := http.NewRequest("GET", fmt.Sprintf("https://dex.%s/callback?code=%s", testDomain, testQueryCode), nil)
+			r, _ := http.NewRequest("GET", fmt.Sprintf("https://console.%s/callback?code=%s&state=%s", testDomain, testQueryCode, testOAuthState), nil)
 			w := httptest.NewRecorder()
+			sess := session.NewSessionOptions(&session.SessOptions{
+				Attrs: map[string]interface{}{
+					oauthStateSessionAttribute: testOAuthState,
+				},
+			})
+			session.Add(sess, w)
+			r.AddCookie(&http.Cookie{
+				Name:  "sessid",
+				Value: sess.ID(),
+			})
 
 			app := App{
 				uaaOIDConfig: uaa.OpenIDConfiguration{
@@ -253,4 +266,23 @@ func TestHandleXSUAACallback2(t *testing.T) {
 			mock.AssertExpectationsForObjects(t, mockUAAClient, mockJWTService, mockK8SClient)
 		})
 	}
+
+	t.Run("Success when accessing dex subdomain", func(t *testing.T) {
+		// GIVEN
+		testRequestURL := fmt.Sprintf("https://dex.%s/callback?code=%s", testDomain, testQueryCode)
+		testExpectedURL := fmt.Sprintf("https://console.%s/callback?code=%s", testDomain, testQueryCode)
+		r, _ := http.NewRequest("GET", testRequestURL, nil)
+		w := httptest.NewRecorder()
+
+		app := App{}
+		handler := http.HandlerFunc(app.HandleXSUAACallback)
+
+		// WHEN
+		handler.ServeHTTP(w, r)
+		res := w.Result()
+
+		// THEN
+		assert.Equal(t, http.StatusFound, res.StatusCode)
+		assert.Equal(t, testExpectedURL, res.Header.Get("Location"))
+	})
 }

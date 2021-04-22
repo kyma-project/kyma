@@ -3,11 +3,15 @@ package router
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/icza/session"
 
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/app"
 )
 
 func New(app app.App) *chi.Mux {
+	// disable session middleware logging
+	session.Global = session.NewCookieManager(session.NewInMemStoreOptions(&session.InMemStoreOptions{Logger: session.NoopLogger}))
+
 	r := chi.NewRouter()
 
 	// middlewares

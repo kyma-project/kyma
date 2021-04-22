@@ -39,7 +39,7 @@ spec:
   http:
     - match:
         - uri:
-            regex: /.*
+            regex: /callback.*
       route:
         - destination:
             port:

@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	github.com/go-chi/chi/v5 v5.0.2
+	github.com/icza/mighty v0.0.0-20200205104645-c377cb773678 // indirect
+	github.com/icza/session v1.2.0
 	github.com/lestrrat-go/jwx v1.1.7
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

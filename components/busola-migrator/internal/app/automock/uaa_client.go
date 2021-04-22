@@ -12,20 +12,20 @@ type UAAClient struct {
 	mock.Mock
 }
 
-// GetAuthorizationEndpointWithParams provides a mock function with given fields: authzEndpoint
-func (_m *UAAClient) GetAuthorizationEndpointWithParams(authzEndpoint string) (string, error) {
-	ret := _m.Called(authzEndpoint)
+// GetAuthorizationEndpointWithParams provides a mock function with given fields: authzEndpoint, oauthState
+func (_m *UAAClient) GetAuthorizationEndpointWithParams(authzEndpoint string, oauthState string) (string, error) {
+	ret := _m.Called(authzEndpoint, oauthState)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(authzEndpoint)
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(authzEndpoint, oauthState)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(authzEndpoint)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(authzEndpoint, oauthState)
 	} else {
 		r1 = ret.Error(1)
 	}

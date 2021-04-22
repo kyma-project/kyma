@@ -20,7 +20,7 @@ import (
 //go:generate mockery --name=UAAClient --output=automock --outpkg=automock --case=underscore
 type UAAClient interface {
 	GetOpenIDConfiguration() (uaa.OpenIDConfiguration, error)
-	GetAuthorizationEndpointWithParams(authzEndpoint string) (string, error)
+	GetAuthorizationEndpointWithParams(authzEndpoint, oauthState string) (string, error)
 	GetToken(tokenEndpoint string, authCode string) (map[string]interface{}, error)
 }
 

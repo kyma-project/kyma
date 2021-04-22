@@ -59,7 +59,7 @@ func (c Client) GetOpenIDConfiguration() (OpenIDConfiguration, error) {
 	return oidcConfig, nil
 }
 
-func (c Client) GetAuthorizationEndpointWithParams(authzEndpoint string) (string, error) {
+func (c Client) GetAuthorizationEndpointWithParams(authzEndpoint, oauthState string) (string, error) {
 	authURL, err := url.Parse(authzEndpoint)
 	if err != nil {
 		return "", err
@@ -69,7 +69,7 @@ func (c Client) GetAuthorizationEndpointWithParams(authzEndpoint string) (string
 	params.Add("client_id", c.uaaConfig.ClientID)
 	params.Add("redirect_uri", c.uaaConfig.RedirectURI)
 	params.Add("response_type", "code")
-	params.Add("state", "state")
+	params.Add("state", oauthState)
 
 	authURL.RawQuery = params.Encode()
 
