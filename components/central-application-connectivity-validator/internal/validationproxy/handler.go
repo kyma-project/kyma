@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,6 +41,7 @@ type Cache interface {
 }
 
 type proxyHandler struct {
+	appNamePlaceholder       string
 	group                    string
 	tenant                   string
 	eventServicePathPrefixV1 string
@@ -62,6 +63,7 @@ type proxyHandler struct {
 }
 
 func NewProxyHandler(
+	appNamePlaceholder string,
 	group string,
 	tenant string,
 	eventServicePathPrefixV1 string,
@@ -79,6 +81,7 @@ func NewProxyHandler(
 		isBEBEnabled = true
 	}
 	return &proxyHandler{
+		appNamePlaceholder:       appNamePlaceholder,
 		group:                    group,
 		tenant:                   tenant,
 		eventServicePathPrefixV1: eventServicePathPrefixV1,
@@ -127,7 +130,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
-	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path)
+	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path, applicationName)
 	if err != nil {
 		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, err)
 		return
@@ -154,16 +157,16 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 	return clientIDs.([]string), found
 }
 
-func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
+func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
 	switch {
 	// For a cluster which is BEB enabled, events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
 	// For a cluster which is not BEB enabled, events reaching with prefix /{application}/events will be routed to /{application}/v1/events endpoint of event-service
-	case strings.HasPrefix(path, ph.eventServicePathPrefixV1):
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV1, applicationName)):
 		return ph.eventsProxy, nil
 
 	// For a cluster which is BEB enabled, events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
 	// For a cluster which is not BEB enabled, events reaching /{application}/v2/events will be routed to /{application}/v2/events endpoint of event-service
-	case strings.HasPrefix(path, ph.eventServicePathPrefixV2):
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV2, applicationName)):
 		if ph.isBEBEnabled {
 			return ph.eventMeshProxy, nil
 		}
@@ -171,14 +174,21 @@ func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, 
 
 	// For a cluster which is BEB enabled, events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
 	// For a cluster which is not BEB enabled, events reaching /{application}/events will be routed to / endpoint of http-source-adapter
-	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventMeshPathPrefix, applicationName)):
 		return ph.eventMeshProxy, nil
 
-	case strings.HasPrefix(path, ph.appRegistryPathPrefix):
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.appRegistryPathPrefix, applicationName)):
 		return ph.appRegistryProxy, nil
 	}
 
 	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")
+}
+
+func (ph *proxyHandler) getApplicationPrefix(path string, applicationName string) string {
+	if ph.appNamePlaceholder != "" {
+		return strings.ReplaceAll(path, ph.appNamePlaceholder, applicationName)
+	}
+	return path
 }
 
 func hasValidSubject(subjects, applicationClientIDs []string, appName, group, tenant string) bool {

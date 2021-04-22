@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/vrischmann/envconfig"
@@ -21,7 +22,7 @@ type args struct {
 	eventMeshDestinationPath string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
-	appName                  string
+	appNamePlaceholder       string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
 	kubeConfig               string
@@ -44,15 +45,15 @@ func parseOptions() (*options, error) {
 	externalAPIPort := flag.Int("externalAPIPort", 8080, "External API port.")
 	tenant := flag.String("tenant", "", "Name of the application tenant")
 	group := flag.String("group", "", "Name of the application group")
-	eventServicePathPrefixV1 := flag.String("eventServicePathPrefixV1", "/v1/events", "Prefix of paths that will be directed to the Event Service V1")
-	eventServicePathPrefixV2 := flag.String("eventServicePathPrefixV2", "/v2/events", "Prefix of paths that will be directed to the Event Service V2")
+	eventServicePathPrefixV1 := flag.String("eventServicePathPrefixV1", "/%%APP_NAME%%/v1/events", "Prefix of paths that will be directed to the Event Service V1")
+	eventServicePathPrefixV2 := flag.String("eventServicePathPrefixV2", "/%%APP_NAME%%/v2/events", "Prefix of paths that will be directed to the Event Service V2")
 	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host (and port) of the Event Service")
-	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/events", "Prefix of paths that will be directed to the Event Mesh")
+	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/%%APP_NAME%%/events", "Prefix of paths that will be directed to the Event Mesh")
 	eventMeshHost := flag.String("eventMeshHost", "events-adapter:8080", "Host (and port) of the Event Mesh adapter")
 	eventMeshDestinationPath := flag.String("eventMeshDestinationPath", "/", "Path of the destination of the requests to the Event Mesh")
-	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
+	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/%%APP_NAME%%/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
-	appName := flag.String("appName", "", "Name of the application CR the validator is created for")
+	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
@@ -80,7 +81,7 @@ func parseOptions() (*options, error) {
 			eventMeshDestinationPath: *eventMeshDestinationPath,
 			appRegistryPathPrefix:    *appRegistryPathPrefix,
 			appRegistryHost:          *appRegistryHost,
-			appName:                  *appName,
+			appNamePlaceholder:       *appNamePlaceholder,
 			cacheExpirationMinutes:   *cacheExpirationMinutes,
 			cacheCleanupMinutes:      *cacheCleanupMinutes,
 			kubeConfig:               *kubeConfig,
@@ -96,15 +97,34 @@ func (o *options) String() string {
 		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s --eventServiceHost=%s "+
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
-		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
+		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appNamePlaceholder=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
-		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
+		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
 		o.kubeConfig, o.apiServerURL, o.syncPeriod,
 		o.LogFormat, o.LogLevel)
+}
+
+func (o *options) validate() error {
+	if o.appNamePlaceholder == "" {
+		return nil
+	}
+	if !strings.Contains(o.eventServicePathPrefixV1, o.appNamePlaceholder) {
+		return fmt.Errorf("eventServicePathPrefixV1 '%s' should contain appNamePlaceholder '%s'", o.eventServicePathPrefixV1, o.appNamePlaceholder)
+	}
+	if !strings.Contains(o.eventServicePathPrefixV2, o.appNamePlaceholder) {
+		return fmt.Errorf("eventServicePathPrefixV2 '%s' should contain appNamePlaceholder '%s'", o.eventServicePathPrefixV2, o.appNamePlaceholder)
+	}
+	if !strings.Contains(o.eventMeshPathPrefix, o.appNamePlaceholder) {
+		return fmt.Errorf("eventMeshPathPrefix '%s' should contain appNamePlaceholder '%s'", o.eventMeshPathPrefix, o.appNamePlaceholder)
+	}
+	if !strings.Contains(o.appRegistryPathPrefix, o.appNamePlaceholder) {
+		return fmt.Errorf("appRegistryPathPrefix '%s' should contain appNamePlaceholder '%s'", o.appRegistryPathPrefix, o.appNamePlaceholder)
+	}
+	return nil
 }

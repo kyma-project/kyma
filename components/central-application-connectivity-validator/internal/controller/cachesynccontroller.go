@@ -24,7 +24,6 @@ type Controller struct {
 	applicationLister listers.ApplicationLister
 	applicationSynced cache.InformerSynced
 	workqueue         workqueue.RateLimitingInterface
-	appName           string
 	appCache          *gocache.Cache
 	log               *logger.Logger
 }
@@ -33,7 +32,6 @@ func NewController(
 	log *logger.Logger,
 	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
-	appName string,
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
@@ -42,7 +40,6 @@ func NewController(
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Applications"),
-		appName:           appName,
 		appCache:          appCache,
 	}
 
@@ -65,15 +62,13 @@ func (c *Controller) enqueueApplication(obj interface{}) {
 		return
 	}
 
-	if key == c.appName {
-		c.workqueue.Add(key)
-	}
+	c.workqueue.Add(key)
 }
 
 func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
-	c.log.WithContext().With("applicationName", c.appName).With("controller", controllerName).Info("Starting Application Cache controller...")
+	c.log.WithContext().With("controller", controllerName).Info("Starting Application Cache controller...")
 
 	c.log.WithContext().With("controller", controllerName).Info("Waiting for informer caches to sync...")
 	if ok := cache.WaitForCacheSync(stopCh, c.applicationSynced); !ok {

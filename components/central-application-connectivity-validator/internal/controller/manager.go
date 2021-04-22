@@ -4,14 +4,14 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller/signals"
 	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller/signals"
 	gocache "github.com/patrickmn/go-cache"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func Start(log *logger.Logger, kubeConfig string, apiServerURL string, syncPeriod time.Duration, appName string, cache *gocache.Cache) {
+func Start(log *logger.Logger, kubeConfig string, apiServerURL string, syncPeriod time.Duration, cache *gocache.Cache) {
 	stopCh := signals.SetupSignalHandler()
 
 	cfg, err := clientcmd.BuildConfigFromFlags(apiServerURL, kubeConfig)
@@ -26,10 +26,10 @@ func Start(log *logger.Logger, kubeConfig string, apiServerURL string, syncPerio
 
 	applicationInformerFactory := informers.NewSharedInformerFactory(applicationClient, syncPeriod)
 
-	controller := NewController(log, applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), appName, cache)
+	controller := NewController(log, applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), cache)
 	applicationInformerFactory.Start(stopCh)
 
 	if err = controller.Run(2, stopCh); err != nil {
-		log.WithContext().With("applicationName", appName).With("controller", controllerName).Fatalf("While running controller: %s", err.Error())
+		log.WithContext().With("controller", controllerName).Fatalf("While running controller: %s", err.Error())
 	}
 }

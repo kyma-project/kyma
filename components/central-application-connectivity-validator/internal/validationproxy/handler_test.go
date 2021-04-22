@@ -30,10 +30,11 @@ const (
 	group  = "group"
 	tenant = "tenant"
 
-	eventServicePathPrefixV1               = "/test-application/v1/events"
-	eventServicePathPrefixV2               = "/test-application/v2/events"
-	eventMeshPathPrefix                    = "/test-application/events"
-	appRegistryPathPrefix                  = "/test-application/v1/metadata"
+	appNamePlaceholder                     = "%%APP_NAME%%"
+	eventServicePathPrefixV1               = "/%%APP_NAME%%/v1/events"
+	eventServicePathPrefixV2               = "/%%APP_NAME%%/v2/events"
+	eventMeshPathPrefix                    = "/%%APP_NAME%%/events"
+	appRegistryPathPrefix                  = "/%%APP_NAME%%/v1/metadata"
 	eventMeshDestinationPath               = "/"
 	eventMeshDestinationPathWhenBEBEnabled = "/publish"
 )
@@ -239,11 +240,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
-			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
+				appNamePlaceholder,
 				testCase.group,
 				testCase.tenant,
 				eventServicePathPrefixV1,
@@ -404,11 +402,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
-			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
+				appNamePlaceholder,
 				testCase.group,
 				testCase.tenant,
 				eventServicePathPrefixV1,
@@ -461,11 +456,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
-			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
+				appNamePlaceholder,
 				testCase.group,
 				testCase.tenant,
 				eventServicePathPrefixV1,
@@ -513,6 +505,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		idCache.Set(applicationName, []string{}, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
+			appNamePlaceholder,
 			group,
 			tenant,
 			eventServicePathPrefixV1,
@@ -562,6 +555,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		idCache.Set(applicationMetaName, []string{applicationID}, cache.NoExpiration)
 
 		proxyHandler := NewProxyHandler(
+			appNamePlaceholder,
 			"",
 			"",
 			eventServicePathPrefixV1,
@@ -606,14 +600,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
-			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
-
 			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
+					appNamePlaceholder,
 					testCase.group,
 					testCase.tenant,
 					eventServicePathPrefixV1,
@@ -666,6 +656,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 				proxyHandlerBEB := NewProxyHandler(
+					appNamePlaceholder,
 					testCase.group,
 					testCase.tenant,
 					eventServicePathPrefixV1,
@@ -714,6 +705,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 				proxyHandlerBEB := NewProxyHandler(
+					appNamePlaceholder,
 					testCase.group,
 					testCase.tenant,
 					eventServicePathPrefixV1,
@@ -761,4 +753,32 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		}
 	})
 
+}
+
+func TestProxyHandler_ReplaceAppNamePlaceholder(t *testing.T) {
+	log, err := logger.New(logger.TEXT, logger.ERROR)
+	if err != nil {
+		t.Error(err)
+	}
+	idCache := cache.New(time.Minute, time.Minute)
+
+	ph := NewProxyHandler(
+		appNamePlaceholder,
+		"",
+		"",
+		eventServicePathPrefixV1,
+		eventServicePathPrefixV2,
+		"",
+		eventMeshPathPrefix,
+		"",
+		eventMeshDestinationPath,
+		appRegistryPathPrefix,
+		"",
+		idCache,
+		log)
+
+	assert.Equal(t, "/commerce-mock/v1/events", ph.getApplicationPrefix(ph.eventServicePathPrefixV1, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/v2/events", ph.getApplicationPrefix(ph.eventServicePathPrefixV2, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/events", ph.getApplicationPrefix(ph.eventMeshPathPrefix, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/v1/metadata", ph.getApplicationPrefix(ph.appRegistryPathPrefix, "commerce-mock"))
 }

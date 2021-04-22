@@ -23,7 +23,12 @@ func main() {
 		}
 		os.Exit(1)
 	}
-
+	if err = options.validate(); err != nil {
+		if logErr := logger.LogFatalError("Failed to validate options: %s", err.Error()); logErr != nil {
+			fmt.Printf("Failed to initializie default fatal error logger: %s,Failed to validate options: %s", logErr, err)
+		}
+		os.Exit(1)
+	}
 	level, err := logger.MapLevel(options.LogLevel)
 	if err != nil {
 		if logErr := logger.LogFatalError("Failed to map log level from options: %s", err.Error()); logErr != nil {
@@ -59,6 +64,7 @@ func main() {
 	)
 
 	proxyHandler := validationproxy.NewProxyHandler(
+		options.appNamePlaceholder,
 		options.group,
 		options.tenant,
 		options.eventServicePathPrefixV1,
@@ -89,7 +95,7 @@ func main() {
 
 	go func() {
 		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(log, options.kubeConfig, options.apiServerURL, options.syncPeriod, options.appName, idCache)
+		controller.Start(log, options.kubeConfig, options.apiServerURL, options.syncPeriod, idCache)
 	}()
 
 	go func() {
