@@ -1,9 +1,13 @@
 package env
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
+
+// compile time check
+var _ fmt.Stringer = &BebConfig{}
 
 // BebConfig represents the environment config for the Event Publisher to BEB.
 type BebConfig struct {
@@ -26,4 +30,11 @@ type BebConfig struct {
 func (c *BebConfig) ConfigureTransport(transport *http.Transport) {
 	transport.MaxIdleConns = c.MaxIdleConns
 	transport.MaxIdleConnsPerHost = c.MaxIdleConnsPerHost
+}
+
+// String implements the fmt.Stringer interface
+func (c *BebConfig) String() string {
+	return fmt.Sprintf("BebConfig{ Port: %v; TokenEndPoint: %v; EmsPublishURL: %v; "+
+		"MaxIdleConns: %v; MaxIdleConnsPerHost: %v; RequestTimeout: %v; BEBNamespace: %v; EventTypePrefix: %v }",
+		c.Port, c.TokenEndpoint, c.EmsPublishURL, c.MaxIdleConns, c.MaxIdleConnsPerHost, c.RequestTimeout, c.BEBNamespace, c.EventTypePrefix)
 }

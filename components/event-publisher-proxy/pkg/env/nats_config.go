@@ -1,6 +1,12 @@
 package env
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
+
+// compile time check
+var _ fmt.Stringer = &NatsConfig{}
 
 // NatsConfig represents the environment config for the Event Publisher to NATS.
 type NatsConfig struct {
@@ -25,4 +31,9 @@ func (c *NatsConfig) ToConfig() *BebConfig {
 		EventTypePrefix: c.LegacyEventTypePrefix,
 	}
 	return cfg
+}
+
+// String implements the fmt.Stringer interface
+func (c *NatsConfig) String() string {
+	return fmt.Sprintf("%#v", c)
 }
