@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
@@ -18,19 +18,19 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: {{ .Chart.Name }}
       release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ .Release.Name }}
+        app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{.Release.Name }}
+      serviceAccountName: {{.Chart.Name }}
       containers:
-      - name: {{ .Release.Name }}-central-application-gateway
+      - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:

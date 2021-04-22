@@ -7,3 +7,4 @@ dependencies:
 - name: connector-service
   condition: connector_service.enabled
 - name: central-application-gateway
+  condition: central_application_gateway.enabled

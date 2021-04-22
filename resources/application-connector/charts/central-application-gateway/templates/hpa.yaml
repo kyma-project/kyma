@@ -2,13 +2,13 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
@@ -17,6 +17,6 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}
+    name: {{ .Chart.Name }}
   targetCPUUtilizationPercentage: {{ .Values.autoscaling.cpuUsagePercent }}
 {{- end }}
