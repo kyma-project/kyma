@@ -20,7 +20,9 @@ spec:
         - env:
             - name: BACKEND
               value: "nats"
-          image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
+            - name: NATS_URL
+              value: eventing-nats.kyma-system.svc.cluster.local
+          image: ko://github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
           name: event-publisher-nats
           ports:

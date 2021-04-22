@@ -24,7 +24,7 @@ type NatsConfig struct {
 	LegacyEventTypePrefix string `envconfig:"LEGACY_EVENT_TYPE_PREFIX" default:"kyma"`
 }
 
-// Convert to a default BEB BebConfig
+// ToConfig converts to a default BEB BebConfig
 func (c *NatsConfig) ToConfig() *BebConfig {
 	cfg := &BebConfig{
 		BEBNamespace:    c.LegacyNamespace,
