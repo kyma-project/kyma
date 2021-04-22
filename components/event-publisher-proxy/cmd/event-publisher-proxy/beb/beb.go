@@ -49,7 +49,7 @@ func (c *Commander) Init() error {
 
 // Start implements the Commander interface and starts the publisher.
 func (c *Commander) Start() error {
-	c.logger.Infof("Starting Event Publisher to BEB, envCfg: %v; opts: %v", c.envCfg, c.opts)
+	c.logger.Infof("Starting Event Publisher to BEB, envCfg: %#v; opts: %#v", c.envCfg, c.opts)
 
 	// configure message receiver
 	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)

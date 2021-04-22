@@ -66,7 +66,7 @@ func main() {
 		logger.Infof("Metrics server failed to start with error: %v", err)
 	}
 
-	logger.Infof("Starting publisher: %v", commander)
+	logger.Infof("Starting publisher to: %v", cfg.Backend)
 
 	// Start the commander.
 	if err := commander.Start(); err != nil {
