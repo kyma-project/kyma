@@ -1,6 +1,6 @@
 ---
 title: Tracing chart
-type: Configuration
+type: Configuration Parameters
 ---
 
 To configure the Tracing chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.

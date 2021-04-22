@@ -1,6 +1,6 @@
 ---
 title: Environment variables
-type: Configuration
+type: Configuration Parameters
 ---
 
 You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a ConfigMap.

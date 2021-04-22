@@ -1,6 +1,6 @@
 ---
 title: Prometheus sub-chart
-type: Configuration
+type: Overrides
 ---
 
 To configure the Prometheus sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can set.
