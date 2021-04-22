@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
@@ -53,3 +54,4 @@ spec:
       navigationPath: brokers
       order: 3
       viewUrl: /brokers
+{{ end }}

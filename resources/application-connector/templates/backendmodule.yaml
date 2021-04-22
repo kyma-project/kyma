@@ -1,3 +1,4 @@
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
@@ -8,3 +9,4 @@ metadata:
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+{{ end }}

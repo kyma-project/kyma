@@ -96,3 +96,6 @@ files:
   - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
     config:
       external-links-to-ignore: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+  - path: "./kyma/components/busola-migrator/README.md"
+    config:
+      external-links-to-ignore: ["https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"]
