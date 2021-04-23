@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/compass-runtime-agent
 
-go 1.14
+go 1.16
 
 require (
 	github.com/gorilla/mux v1.7.4

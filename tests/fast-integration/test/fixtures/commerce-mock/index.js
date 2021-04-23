@@ -82,34 +82,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
-function eventingKnativeTrigger(source, fnName, ns) {
-  return {
-    apiVersion: "eventing.knative.dev/v1alpha1",
-    kind: "Trigger",
-    metadata: {
-      labels: { function: fnName },
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      broker: "default",
-      filter: {
-        attributes: {
-          eventtypeversion: "v1",
-          source: source,//commerce,
-          type: "order.created",
-        }
-      },
-      subscriber: {
-        ref: {
-          apiVersion: "v1",
-          kind: "Service",
-          name: fnName,
-        }
-      }
-    }
-  }
-}
 
 function eventingSubscription(eventType, sink, fnName, ns) {
   return {
@@ -412,10 +384,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
   await k8sApply([
-    eventingKnativeTrigger(
-      appName, 
-      "lastorder", 
-      targetNamespace),
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,

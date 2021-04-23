@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -61,6 +62,7 @@ var (
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
 	var namespaceName string
+	var ctx context.Context
 
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
@@ -70,6 +72,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		namespaceName = getUniqueNamespaceName()
 		// we need to reset the http requests which the mock captured
 		beb.Reset()
+
+		// Context
+		ctx = context.Background()
 	})
 
 	AfterEach(func() {
@@ -89,77 +94,182 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		}
 	})
 
-	When("Creating a Subscription with invalid Sink", func() {
-		It("Should set the Subscription APIRule status to not ready", func() {
-			ctx := context.Background()
-			subscriptionName := "sub-create-with-invalid-sink"
+	When("Creating a Subscription with invalid Sink and fixing it", func() {
+		It("Should update the Subscription APIRule status from not ready to ready", func() {
 			// Ensuring subscriber svc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
-
-			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
+			// Create subscription with invalid sink
+			subscriptionName := "sub-create-with-invalid-sink"
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
 			givenSubscription.Spec.Sink = "invalid"
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
 			By("Setting APIRule status to False")
-			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady, v1.ConditionFalse, "")
+			subscriptionAPIReadyFalseCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionAPIRuleStatus,
+				eventingv1alpha1.ConditionReasonAPIRuleStatusNotReady,
+				v1.ConditionFalse,
+				"",
+			)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionAPIReadyFalseCondition),
 			))
 
-			By("Deleting the object to not provoke more reconciliation requests")
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			By("Fixing the Subscription with a valid Sink")
+			path := "/path1"
+			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, path)
+			givenSubscription.Spec.Sink = validSink
+			updateSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionSink(validSink))
 
-			By("Emitting a Subscription deleted event")
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+			apiRuleUpdated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			getAPIRule(&apiRuleUpdated, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, path),
+				reconcilertesting.HaveAPIRuleOwnersRefs(givenSubscription.UID),
+			))
+
+			By("Updating the APIRule status to be Ready")
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleUpdated, ctx).Should(BeNil())
+
+			By("Setting a Subscription active condition")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonSubscriptionActive,
+				v1.ConditionTrue,
+				"",
+			)
+
+			By("Setting APIRule status in Subscription to Ready")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionAPIRuleStatus,
+				eventingv1alpha1.ConditionReasonAPIRuleStatusReady,
+				v1.ConditionTrue,
+				"",
+			)
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionActiveCondition),
+				reconcilertesting.HaveAPIRuleName(apiRuleUpdated.Name),
+				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
+				reconcilertesting.HaveSubscriptionReady(),
+			))
+
+			By("Sending at least one creation requests for the Subscription")
+			_, postRequests, _ := countBebRequests(subscriptionName)
+			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+		})
+	})
+
+	When("Two Subscriptions using different Sinks are made to use the same Sink and then both are deleted", func() {
+		It("Should update the APIRule accordingly and then remove the APIRule", func() {
+			// Service
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
+
+			// Subscriptions
+			subscription1Path := "/path1"
+			subscription1Name := "test-delete-valid-subscription-1"
+			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
+			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription1Path)
+			ensureSubscriptionCreated(subscription1, ctx)
+
+			subscription2Path := "/path2"
+			subscription2Name := "test-delete-valid-subscription-2"
+			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
+			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription2Path)
+			ensureSubscriptionCreated(subscription2, ctx)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx)
+
+			By("Using the same APIRule for both Subscriptions")
+			getSubscription(subscription1, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
+			getSubscription(subscription2, ctx).Should(reconcilertesting.HaveAPIRuleName(apiRuleCreated.Name))
+
+			By("Ensuring the APIRule has 2 OwnerReferences and 2 paths")
+			getAPIRule(&apiRuleCreated, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID, subscription2.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
+			))
+
+			By("Deleting the first Subscription")
+			Expect(k8sClient.Delete(ctx, subscription1)).Should(BeNil())
+
+			By("Removing the Subscription")
+			getSubscription(subscription1, ctx).Should(reconcilertesting.IsAnEmptySubscription())
+
+			By("Emitting a k8s Subscription deleted event")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionDeletedEvent := v1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
+			getK8sEvents(&subscriptionEvents, subscription1.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(BeZero())
-			Expect(invalidRequests).Should(BeZero())
-		})
-	})
+			By("Ensuring the APIRule has 1 OwnerReference and 1 path")
+			getAPIRule(&apiRuleCreated, ctx).Should(And(
+				reconcilertesting.HaveNotEmptyHost(),
+				reconcilertesting.HaveNotEmptyAPIRule(),
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription2.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription2Path),
+			))
 
-	// TODO: https://github.com/kyma-project/kyma/issues/9950
-	PWhen("Fixing an invalid Subscription (related to APIRule)", func() {
-		It("Should finally mark the subscription as ready", func() {})
-	})
+			By("Ensuring the deleted Subscription is removed as Owner from the APIRule")
+			getAPIRule(&apiRuleCreated, ctx).ShouldNot(And(
+				reconcilertesting.HaveAPIRuleOwnersRefs(subscription1.UID),
+				reconcilertesting.HaveAPIRuleSpecRules(acceptableMethods, object.OAuthHandlerName, subscription1Path),
+			))
 
-	PWhen("Two Subscriptions using the same sink but different path", func() {
-		It("Should update the APIRule accordingly ", func() {})
-		// check APIRule has two owner refs and two paths
-		// delete one subscription
-		// check APIRule has one owner ref and one path
-		// delete last subscription
-		// check APIRule is gone
-	})
+			By("Deleting the second Subscription")
+			Expect(k8sClient.Delete(ctx, subscription2)).Should(BeNil())
 
-	PWhen("Creating two Subscriptions using different sinks", func() {
-		It("Should mark both Subscriptions as ready and create two different APIRules", func() {})
-		When("Unifying both Subscription sinks", func() {
-			It("Should mark both Subscriptions as ready and end up with only one APIRule", func() {})
+			By("Removing the Subscription")
+			getSubscription(subscription2, ctx).Should(reconcilertesting.IsAnEmptySubscription())
+
+			By("Emitting a k8s Subscription deleted event")
+			subscriptionDeletedEvent = v1.Event{
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
+				Message: "",
+				Type:    v1.EventTypeWarning,
+			}
+			getK8sEvents(&subscriptionEvents, subscription2.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
+
+			By("Removing the APIRule")
+			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
+
+			By("Sending at least one creation and one deletion request for each subscription")
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(subscription1Name)
+			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(subscription2Name)
+			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("Creating a valid Subscription", func() {
 		It("Should mark the Subscription as ready", func() {
 			subscriptionName := "test-valid-subscription-1"
-			ctx := context.Background()
 
 			// Ensuring subscriber svc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -250,21 +360,19 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Marking it as ready")
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("Subscription sink name is changed", func() {
 		It("Should update the BEB subscription webhookURL by creating a new APIRule", func() {
 			subscriptionName := "test-subscription-sink-name-changed"
-			ctx := context.Background()
 
 			// prepare objects
 			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			reconcilertesting.WithValidSink(serviceOld.Namespace, serviceOld.Name, givenSubscription)
 
 			// create them and wait for Subscription to be ready
@@ -298,27 +406,24 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Cleanup not used APIRule")
 			getAPIRule(apiRule, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation request")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("Subscription1 sink is changed to reuse Subscription2 APIRule", func() {
 		It("Should delete APIRule for Subscription1 and use APIRule2 from Subscription2 instead", func() {
-			ctx := context.Background()
-
 			// prepare objects
 			// create them and wait for Subscription to be ready
 			subscriptionName1 := "test-subscription-1"
 			service1 := reconcilertesting.NewSubscriberSvc("webhook-1", namespaceName)
-			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			subscription1.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)
 			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(subscription1, service1, ctx)
 			subscriptionName2 := "test-subscription-2"
 			service2 := reconcilertesting.NewSubscriberSvc("webhook-2", namespaceName)
-			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			subscription2.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service2.Name, service2.Namespace)
 			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(subscription2, service2, ctx)
 
@@ -347,24 +452,26 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Deleting APIRule from Subscription 1")
 			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(2))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation request for Subscription 1")
+			_, creationRequests, _ := countBebRequests(subscriptionName1)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+
+			By("Sending at least one creation request for Subscription 2")
+			_, creationRequests, _ = countBebRequests(subscriptionName2)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("BEB subscription creation failed", func() {
 		It("Should not mark the subscription as ready", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready"
-			ctx := context.Background()
 
 			// Ensuring subscriber svc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 			ensureSubscriptionCreated(givenSubscription, ctx)
 
@@ -404,23 +511,21 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("BEB subscription is set to paused after creation", func() {
 		It("Should not mark the subscription as active", func() {
 			subscriptionName := "test-subscription-beb-not-status-not-ready-2"
-			ctx := context.Background()
 
 			// Ensuring subscriber subscriberSvc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(subscriberSvc, ctx)
 
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 
 			isBebSubscriptionCreated := false
@@ -481,18 +586,16 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
-			ctx := context.Background()
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithNotCleanEventTypeFilter)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			processedBebRequests := 0
 
 			// Create service
@@ -558,8 +661,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}).Should(BeTrue())
 
 			By("Removing the APIRule")
-			// TODO: Check for disappearing of APIRule which does not work in kubebuilder suite
-			//getAPIRule(apiRule, ctx).Should(IsAnEmptyAPIRule())
+			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
@@ -570,16 +672,15 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
-			By("Sending valid webhook requests only")
-			validRequests, invalidRequests := countRequestsForWebhooks(reconcilertesting.EventType, reconcilertesting.EventTypeNotClean)
-			Expect(validRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
-			Expect(invalidRequests).Should(BeZero())
+			By("Sending at least one creation and one deletion request for the Subscription")
+			_, creationRequests, deletionRequests := countBebRequests(subscriptionName)
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
 
 	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
 		func(subscription *eventingv1alpha1.Subscription) {
-			ctx := context.Background()
 			subscription.Namespace = namespaceName
 
 			By("Letting the APIServer reject the custom resource")
@@ -601,8 +702,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 	DescribeTable("Schema tests: ensuring optional fields are not treated as required",
 		func(subscription *eventingv1alpha1.Subscription) {
-			ctx := context.Background()
-			namespaceName := getUniqueNamespaceName()
 			subscription.Namespace = namespaceName
 
 			By("Letting the APIServer reject the custom resource")
@@ -924,7 +1023,7 @@ var _ = BeforeSuite(func(done Done) {
 	}
 
 	// prepare application-lister
-	app := applicationtest.NewApplication(reconcilertesting.ApplicationNameNotClean, nil)
+	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	err = NewReconciler(
@@ -996,20 +1095,29 @@ func createSubscriptionObjectsAndWaitForReadiness(givenSubscription *eventingv1a
 	return subscription, apiRule
 }
 
-// countRequestsForWebhooks returns how many webhook requests are sent for each given event-type
-func countRequestsForWebhooks(eventType1, eventType2 string) (int, int) {
-	count1, count2 := 0, 0
-	for _, v := range beb.Requests {
-		subscription, ok := v.(bebtypes.Subscription)
-		if ok && len(subscription.Events) > 0 {
-			for _, event := range subscription.Events {
-				if event.Type == eventType1 {
-					count1++
-				} else if event.Type == eventType2 {
-					count2++
+// countBebRequests returns how many requests for a given subscription are sent for each HTTP method
+func countBebRequests(subscriptionName string) (countGet int, countPost int, countDelete int) {
+	countGet, countPost, countDelete = 0, 0, 0
+	for req, v := range beb.Requests {
+		switch method := req.Method; method {
+		case http.MethodGet:
+			if strings.Contains(req.URL.Path, subscriptionName) {
+				countGet++
+			}
+		case http.MethodPost:
+			subscription, ok := v.(bebtypes.Subscription)
+			if ok && len(subscription.Events) > 0 {
+				for _, event := range subscription.Events {
+					if event.Type == reconcilertesting.EventType && subscription.Name == subscriptionName {
+						countPost++
+					}
 				}
+			}
+		case http.MethodDelete:
+			if strings.Contains(req.URL.Path, subscriptionName) {
+				countDelete++
 			}
 		}
 	}
-	return count1, count2
+	return countGet, countPost, countDelete
 }

@@ -1,6 +1,0 @@
-apiVersion: v1
-description: NATSS Knative Provisioner Helm chart.
-name: knative-provisioner-natss
-version: 0.0.1
-appVersion: 0.12.0
-
