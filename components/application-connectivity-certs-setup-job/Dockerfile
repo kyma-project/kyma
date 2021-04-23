@@ -7,7 +7,6 @@ COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
 
 RUN echo "1000:x:65534:65534:1000:/:" > /etc_passwd
-
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o appconnectivitycertssetupjob .
 
 
