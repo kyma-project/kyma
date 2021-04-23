@@ -56,5 +56,5 @@ The API exposure in Kyma is based on the API Gateway component that aims to prov
 
 Kyma provides you with two interfaces that you can use for interactions:
 
-- [Console UI](link) - a web-based administrative UI that allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
-- [Kyma CLI](link) - a CLI to execute various Kyma tasks, such as installing or upgrading Kyma.
+- [Console UI](./02-main-areas/ui/02-console-overview.md) - a web-based administrative UI that allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
+- [Kyma CLI](./02-main-areas/ui/01-CLI-overview.md) - a CLI to execute various Kyma tasks, such as installing or upgrading Kyma.
