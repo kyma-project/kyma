@@ -78,7 +78,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:default
+  name: system:serviceaccount:{{ .Release.Namespace }}:central-application-gateway
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
