@@ -84,6 +84,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 		}
 
 		apiEntry := v1alpha1.Entry{
+			Name:                        service.Name,
 			Type:                        specAPIType,
 			GatewayUrl:                  service.API.GatewayURL,
 			AccessLabel:                 service.API.AccessLabel,
