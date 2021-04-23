@@ -21,6 +21,7 @@ Before running the program, make sure your active Kubeconfig is pointing at the 
 | Variable | Description | Default value |
 | --- | --- | --- |
 | **APP_PORT** | Port on which the server is listening | `80` |
+| **APP_DOMAIN** | Domain on which the server is running  | `localhost` |
 | **APP_TIMEOUT_READ** | Maximum amount of time allowed for the client to read the entire request, including the body, before timing out | `30s` |
 | **APP_TIMEOUT_WRITE** | Maximum amount of time allowed for the server to send a response before timing out | `30s` |
 | **APP_TIMEOUT_IDLE** | Maximum amount of time allowed for the client to wait for the next request before timing out (with keep-alives enabled) | `120s` |
@@ -35,3 +36,6 @@ Before running the program, make sure your active Kubeconfig is pointing at the 
 | **OVERRIDE_OIDC_CLIENT_ID** | Optional override for the OIDC client ID | None |
 | **OVERRIDE_OIDC_SCOPE** | Optional override for the OIDC scope | None |
 | **OVERRIDE_OIDC_USE_PKCE** | Optional override for the use of PKCE in OIDC  | None |
+| **APP_UAA_URL** | User Account and Authentication (UAA) server URL | None |
+| **APP_UAA_CLIENT_ID** | UAA client ID  | None |
+| **APP_UAA_CLIENT_SECRET** | UAA client secret | None |

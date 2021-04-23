@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "busola-migrator.fullname" . }}
+  name: {{ template "busola-migrator.fullname" . }}-console
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "busola-migrator.name" . }}
@@ -22,3 +22,33 @@ spec:
         port:
           number: {{ .Values.service.port }}
         host: {{ include "busola-migrator.fullname" . }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-dex
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "busola-migrator.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  hosts:
+    - "dex.{{ .Values.global.ingress.domainName }}"
+  gateways:
+    - {{ .Values.global.istio.gateway.name }}
+  http:
+    - match:
+        - uri:
+            regex: /callback.*
+      route:
+        - destination:
+            port:
+              number: {{ .Values.service.port }}
+            host: {{ include "busola-migrator.fullname" . }}
+          headers:
+            response:
+              add:
+                "Vary": "Origin"
+      corsPolicy:
+        allowOrigins:
+          - regex: ".*"

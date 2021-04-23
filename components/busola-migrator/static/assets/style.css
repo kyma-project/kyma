@@ -76,3 +76,8 @@ body {
 a {
   text-decoration: none;
 }
+
+.sap-icon {
+  font-size: 3rem;
+  color: #0b74de;
+}

@@ -27,33 +27,23 @@
   </head>
   <body>
     <script>
-      if (localStorage.getItem("migrated") === "true") {
-        window.location.href = "/console-redirect";
-      }
+      localStorage.setItem("migrated", "true");
     </script>
     <div class="fd-page">
       <div class="fd-page__content">
         <section class="fd-section">
           <p class="fd-has-text-align-center">
             <span
-              class="sap-icon sap-icon--message-information"
+              class="sap-icon sap-icon--message-success"
             ></span>
           </p>
-          <div class="info" id="headline">Console is now hosted centrally</div>
+          <div class="info" id="headline">Migration successful</div>
           <div class="hint" id="message">
-            Kyma Console is no longer deployed to your cluster. It is now hosted
-            as a central UI service. To access the central Console, you need to
-            migrate your existing permissions from the current SAP User Account
-            and Authentication Service (SAP UAA). To do so, select the
-            <b>Migrate permissions</b> button. After that, follow the dedicated
-            initialization link under the <b>Access Console</b> button to open
-            the central Console.
+            Your account permissions have been successfully migrated from SAP User Account and Authentication Service.<br>
+            You can now access the central Console by selecting the <b>Access Console</b> button.
           </div>
           <p></p>
           <p class="fd-has-text-align-center">
-            <a href="/xsuaa-migrate" rel="nofollow noopener noreferrer"
-              ><button class="fd-button">Migrate permissions</button></a
-            >
             <a href="/console-redirect" rel="nofollow noopener noreferrer"
               ><button class="fd-button fd-button--emphasized">
                 Access Console

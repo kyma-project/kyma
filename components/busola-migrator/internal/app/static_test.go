@@ -15,7 +15,11 @@ func TestApp_HandleStaticWebsite(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/info/", nil)
 	r = r.WithContext(context.WithValue(context.Background(), chi.RouteCtxKey, &chi.Context{RoutePatterns: []string{"/info/*"}}))
 	w := httptest.NewRecorder()
-	app := New(testBusolaURL, testStaticFilesDir)
+
+	testStaticFilesDir := "../../static"
+	app := App{
+		fsRoot: http.Dir(testStaticFilesDir),
+	}
 	handler := http.HandlerFunc(app.HandleStaticWebsite)
 
 	// WHEN

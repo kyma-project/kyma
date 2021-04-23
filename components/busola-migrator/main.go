@@ -27,7 +27,10 @@ func main() {
 		log.Fatal(errors.Wrap(err, "while building Busola init url"))
 	}
 
-	application := app.New(busolaURL, cfg.StaticFilesDIR)
+	application, err := app.New(cfg, busolaURL, kubeConfig)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "while creating new application"))
+	}
 	appRouter := router.New(application)
 
 	log.Printf("Starting server :%d\n", cfg.Port)
