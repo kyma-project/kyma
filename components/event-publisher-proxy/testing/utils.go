@@ -179,7 +179,7 @@ func GeneratePortOrDie() int {
 					break
 				}
 
-				if err := check(port); err != nil {
+				if !isPortAvailable(port) {
 					break
 				}
 
@@ -223,17 +223,17 @@ func Is2XX(statusCode int) bool {
 	return statusCode/100 == 2
 }
 
-// check returns an error if the port is already in use, otherwise returns nil
-func check(port int) error {
+// isPortAvailable returns true if the port is available for use, otherwise returns false
+func isPortAvailable(port int) bool {
 	address := fmt.Sprintf(":%d", port)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		return err
+		return false
 	}
 
 	if err := listener.Close(); err != nil {
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
