@@ -14,7 +14,7 @@ func TestConfigureTransport(t *testing.T) {
 	)
 
 	transport := &http.Transport{}
-	cfg := Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
+	cfg := BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost}
 	cfg.ConfigureTransport(transport)
 
 	if transport.MaxIdleConns != maxIdleConns {

@@ -18,6 +18,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: BACKEND
+              value: "beb"
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -38,7 +40,7 @@ spec:
                 secretKeyRef:
                   name: event-publisher-proxy
                   key: ems-publish-url
-          image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
+          image: ko://github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
           name: event-publisher-proxy
           ports:

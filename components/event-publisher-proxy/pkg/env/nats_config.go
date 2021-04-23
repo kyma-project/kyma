@@ -1,8 +1,14 @@
 package env
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
-// Config represents the environment config for the Event Publisher NATS.
+// compile time check
+var _ fmt.Stringer = &NatsConfig{}
+
+// NatsConfig represents the environment config for the Event Publisher to NATS.
 type NatsConfig struct {
 	Port                 int           `envconfig:"INGRESS_PORT" default:"8080"`
 	URL                  string        `envconfig:"NATS_URL" default:"nats.nats.svc.cluster.local"`
@@ -18,11 +24,16 @@ type NatsConfig struct {
 	LegacyEventTypePrefix string `envconfig:"LEGACY_EVENT_TYPE_PREFIX" default:"kyma"`
 }
 
-// Convert to a default BEB Config
-func (c *NatsConfig) ToConfig() *Config {
-	cfg := &Config{
+// ToConfig converts to a default BEB BebConfig
+func (c *NatsConfig) ToConfig() *BebConfig {
+	cfg := &BebConfig{
 		BEBNamespace:    c.LegacyNamespace,
 		EventTypePrefix: c.LegacyEventTypePrefix,
 	}
 	return cfg
+}
+
+// String implements the fmt.Stringer interface
+func (c *NatsConfig) String() string {
+	return fmt.Sprintf("%#v", c)
 }
