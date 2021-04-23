@@ -1,5 +1,5 @@
 # Build the controller binary
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/eventing-controller
 WORKDIR $DOCK_PKG_DIR
 
@@ -14,8 +14,7 @@ COPY testing/ testing/
 COPY utils/ utils/
 
 # Build
-RUN GOOS=linux GO111MODULE=on go mod vendor && \
-    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o eventing-controller-nats ./cmd/eventing-controller-nats
+RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o eventing-controller-nats ./cmd/eventing-controller-nats
 
 FROM gcr.io/distroless/static:nonroot
 LABEL source = git@github.com:kyma-project/kyma.git
