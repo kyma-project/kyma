@@ -44,3 +44,12 @@ connection-token-handler:
       requests:
         cpu: 1m
         memory: 16Mi
+central-application-connectivity-validator:
+  deployment:
+    resources:
+      limits:
+        cpu: 10m
+        memory: 64Mi
+      requests:
+        cpu: 1m
+        memory: 16Mi

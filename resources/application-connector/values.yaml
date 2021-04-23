@@ -4,6 +4,9 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+central_application_connectivity_validator:
+  enabled: true
+
 global:
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -65,6 +68,8 @@ global:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
+  central_application_connectivity_validator:
+    version: "PR-11173"
 
 application_connectivity_certs_setup_job:
   secrets:

@@ -64,8 +64,6 @@ type proxyHandler struct {
 
 func NewProxyHandler(
 	appNamePlaceholder string,
-	group string,
-	tenant string,
 	eventServicePathPrefixV1 string,
 	eventServicePathPrefixV2 string,
 	eventServiceHost string,
@@ -82,8 +80,6 @@ func NewProxyHandler(
 	}
 	return &proxyHandler{
 		appNamePlaceholder:       appNamePlaceholder,
-		group:                    group,
-		tenant:                   tenant,
 		eventServicePathPrefixV1: eventServicePathPrefixV1,
 		eventServicePathPrefixV2: eventServicePathPrefixV2,
 		eventServiceHost:         eventServiceHost,

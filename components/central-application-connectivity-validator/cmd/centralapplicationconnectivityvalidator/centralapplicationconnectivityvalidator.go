@@ -65,8 +65,6 @@ func main() {
 
 	proxyHandler := validationproxy.NewProxyHandler(
 		options.appNamePlaceholder,
-		options.group,
-		options.tenant,
 		options.eventServicePathPrefixV1,
 		options.eventServicePathPrefixV2,
 		options.eventServiceHost,

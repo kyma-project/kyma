@@ -1,0 +1,32 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  hosts:
+    - gateway.{{ .Values.global.ingress.domainName }}
+  gateways:
+    - {{ .Values.istio.gateway.nameMtls }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            regex: ^/[^/]+/v1/metadata
+        - uri:
+            regex: ^/[^/]+/v1/events
+        - uri:
+            regex: ^/[^/]+/v2/events
+        - uri:
+            regex: ^/[^/]+/events
+      route:
+        - destination:
+            port:
+              number: {{ .Values.deployment.args.proxyPort }}
+            host: {{ .Chart.Name }}
