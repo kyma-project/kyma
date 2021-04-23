@@ -6,8 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig/provider"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/client"
@@ -56,7 +54,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(coreClientset, serviceDefinitionService, options)
+	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -92,20 +90,18 @@ func main() {
 	wg.Wait()
 }
 
-func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
 	if serviceDefinitionService != nil {
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		csrfCl := newCSRFClient(options.proxyTimeout)
 		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
-
-		proxyConfigRepository := provider.NewSecretsProxyTargetConfigProvider(coreClientset.CoreV1().Secrets(options.namespace))
 
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
 			ProxyTimeout:  options.proxyTimeout,
 			ProxyCacheTTL: options.proxyCacheTTL,
 		}
-		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig, proxyConfigRepository)
+		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
 
 		return proxyHandler
 	}

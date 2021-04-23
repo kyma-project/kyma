@@ -30,8 +30,6 @@ type proxy struct {
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
-
-	configRepository proxyconfig.TargetConfigProvider
 }
 
 // Handler serves as a Reverse Proxy
@@ -52,8 +50,7 @@ func New(
 	serviceDefService metadata.ServiceDefinitionService,
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
-	config Config,
-	configRepository proxyconfig.TargetConfigProvider) Handler {
+	config Config) Handler {
 	return &proxy{
 		serviceDefService:            serviceDefService,
 		cache:                        NewCache(config.ProxyCacheTTL),
@@ -61,7 +58,6 @@ func New(
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
-		configRepository:             configRepository,
 	}
 }
 
