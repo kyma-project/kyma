@@ -16,6 +16,7 @@ spec:
       labels:
         app: event-publisher-nats
     spec:
+      serviceAccountName: eventing-event-publisher-nats
       containers:
         - env:
             - name: BACKEND
