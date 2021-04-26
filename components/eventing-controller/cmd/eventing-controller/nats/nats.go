@@ -76,7 +76,6 @@ func (c *Commander) Start() error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
-	// TODO Harmonization. Not subscription and subscription-nats.
 	if err := subscription.NewReconciler(
 		c.mgr.GetClient(),
 		applicationLister,
