@@ -14,11 +14,12 @@ image:
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
-podSecurityContext:
-
 metrics:
-  service:
+  config:
+    port: 8080
+    portName: http-metrics
     nameSuffix: "-metrics"
+    interval: 30s
 
 resources:
   limits:

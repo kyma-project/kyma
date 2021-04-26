@@ -151,8 +151,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
@@ -209,8 +207,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-edit: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   - matchLabels:
@@ -270,8 +266,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-addons-admin: "true"
@@ -319,8 +313,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
   - matchLabels:

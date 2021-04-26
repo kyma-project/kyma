@@ -44,10 +44,10 @@ func BuildInitURL(appCfg config.Config, kubeConfig *rest.Config) (string, error)
 	initString := fmt.Sprintf(initTemplate,
 		fmt.Sprintf("https://%s", host.Hostname()),
 		base64.StdEncoding.EncodeToString(kubeConfig.CAData),
-		appCfg.OIDCIssuerURL,
-		appCfg.OIDCClientID,
-		appCfg.OIDCScope,
-		appCfg.OIDCUsePKCE,
+		appCfg.OIDC.IssuerURL,
+		appCfg.OIDC.ClientID,
+		appCfg.OIDC.Scope,
+		appCfg.OIDC.UsePKCE,
 	)
 	encodedInitString, err := encodeInitString(initString)
 	if err != nil {

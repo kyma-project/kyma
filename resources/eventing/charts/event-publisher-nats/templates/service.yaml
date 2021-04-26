@@ -8,22 +8,24 @@ spec:
   type: ClusterIP
   selector: {{- include "event-publisher-nats.selectorLabels" . | nindent 4 }}
   ports:
-    - protocol: TCP
+    - name: {{ .Values.nats.config.portName }}
+      protocol: TCP
       port: 80
-      targetPort: {{ .Values.nats.config.port }}
+      targetPort: {{ .Values.nats.config.portName }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "event-publisher-nats.serviceName" . }}{{ .Values.metrics.service.nameSuffix }}
+  name: {{ include "event-publisher-nats.serviceName" . }}{{ .Values.metrics.config.nameSuffix }}
   labels: {{- include "event-publisher-nats.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector: {{- include "event-publisher-nats.selectorLabels" . | nindent 4 }}
   ports:
-    - protocol: TCP
+    - name: {{ .Values.metrics.config.portName }}
+      protocol: TCP
       port: 80
-      targetPort: {{ .Values.metrics.service.port }}
+      targetPort: {{ .Values.metrics.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -38,4 +40,5 @@ spec:
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}
+---
 {{- end }}

@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -20,13 +19,13 @@ import (
 
 //go:generate mockery -name ServiceInstanceReconciler
 type ServiceInstanceReconciler interface {
-	Reconcile(request reconcile.Request) (reconcile.Result, error)
+	Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error)
 }
 
 //go:generate mockery -name ServiceInstanceManagerClient
 type ServiceInstanceManagerClient interface {
-	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	List(ctx context.Context, list runtime.Object, opts ...client.ListOption) error
+	Get(ctx context.Context, key client.ObjectKey, obj client.Object) error
+	List(ctx context.Context, out client.ObjectList, opts ...client.ListOption) error
 }
 
 type serviceInstanceReconciler struct {
@@ -43,7 +42,7 @@ func NewReconciler(appConnClient ServiceInstanceManagerClient, gatewayDeployer g
 	}
 }
 
-func (r *serviceInstanceReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *serviceInstanceReconciler) Reconcile(_ context.Context, request reconcile.Request) (reconcile.Result, error) {
 	log := r.logger.WithField("service-instance", request.NamespacedName)
 	// Gateway should not be deployed in system namespaces
 	if utils.IsSystemNamespace(request.Namespace) {

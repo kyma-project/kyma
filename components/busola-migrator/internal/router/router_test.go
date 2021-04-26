@@ -11,7 +11,7 @@ import (
 
 func Test_New(t *testing.T) {
 	fixRouter := func() *chi.Mux {
-		return New(app.New("https://busola.url", "/static"))
+		return New(app.App{})
 	}
 
 	type request struct {
@@ -47,6 +47,14 @@ func Test_New(t *testing.T) {
 				url:    "/xsuaa-migrate",
 			},
 			matchingRoute: "/xsuaa-migrate",
+		},
+		{
+			name: "xsuaa callback",
+			request: request{
+				method: http.MethodGet,
+				url:    "/callback",
+			},
+			matchingRoute: "/callback",
 		},
 		{
 			name: "redirect to static page",

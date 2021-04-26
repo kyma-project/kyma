@@ -3,4 +3,4 @@ description: Kyma component 'service-manager-proxy'
 name: service-broker-proxy-k8s
 version: 1.0.0
 home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
+icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

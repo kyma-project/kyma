@@ -54,6 +54,8 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 	logger := logrus.WithField("controller", "Application Tests")
 
+	ctx := context.Background()
+
 	t.Run("should install chart when new application is created", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
@@ -78,7 +80,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := applicationReconciler.Reconcile(request)
+		result, err := applicationReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -116,7 +118,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -149,7 +151,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -182,7 +184,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -212,7 +214,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -249,7 +251,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -283,7 +285,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -317,7 +319,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -346,7 +348,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.Error(t, err)
@@ -376,7 +378,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.Error(t, err)
@@ -407,7 +409,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.Error(t, err)
@@ -439,7 +441,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.Error(t, err)
@@ -474,7 +476,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -507,7 +509,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.NoError(t, err)
@@ -539,7 +541,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		}
 
 		// when
-		result, err := reReconciler.Reconcile(request)
+		result, err := reReconciler.Reconcile(ctx, request)
 
 		// then
 		assert.Error(t, err)

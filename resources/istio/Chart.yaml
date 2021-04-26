@@ -15,4 +15,4 @@ sources:
   - http://github.com/istio/istio
 engine: gotpl
 home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
+icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

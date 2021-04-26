@@ -86,10 +86,10 @@ config:
     filesystem:
       directory: /data/loki/chunks
   chunk_store_config:
-    max_look_back_period: 24h
+    max_look_back_period: 120h
   table_manager:
     retention_deletes_enabled: true
-    retention_period: 24h
+    retention_period: 120h
   compactor:
     working_directory: /data/loki/boltdb-shipper-compactor
     shared_store: filesystem
@@ -130,13 +130,13 @@ nodeSelector: {}
 
 ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 ## If you set enabled as "True", you need :
-## - create a pv which above 10Gi and has same namespace with loki
+## - create a pv which above 30Gi and has same namespace with loki
 ## - keep storageClassName same with below setting
 persistence:
   enabled: true
   accessModes:
   - ReadWriteOnce
-  size: 10Gi
+  size: 30Gi
   annotations: {}
   # selector:
   #   matchLabels:

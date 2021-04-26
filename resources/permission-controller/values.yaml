@@ -35,9 +35,8 @@ global:
 
 config:
   enableStaticUser: "true"
-  namespaceBlacklist:
+  namespaceExcludeList:
     - istio-system
-    - knative-eventing
     - kube-node-lease
     - kube-public
     - kube-system

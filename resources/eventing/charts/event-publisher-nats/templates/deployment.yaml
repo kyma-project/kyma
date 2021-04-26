@@ -17,6 +17,8 @@ spec:
       serviceAccountName: {{ include "event-publisher-nats.serviceAccountName" . }}
       containers:
         - env:
+            - name: BACKEND
+              value: {{ .Values.global.eventing.backend }}
             - name: PORT
               value: {{ .Values.nats.config.port | quote }}
             - name: NATS_URL
@@ -30,12 +32,12 @@ spec:
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: {{ .Values.image.name }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            privileged: false
           ports:
             - containerPort: {{ .Values.nats.config.port }}
-              name: http
+              name: {{ .Values.nats.config.portName }}
+              protocol: TCP
+            - containerPort: {{ .Values.metrics.config.port }}
+              name: {{ .Values.metrics.config.portName }}
               protocol: TCP
           livenessProbe:
             failureThreshold: 3
@@ -60,6 +62,9 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
+          {{- if .Values.global.securityContext }}
+          securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
+          {{- end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

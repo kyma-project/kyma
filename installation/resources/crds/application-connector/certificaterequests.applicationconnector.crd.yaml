@@ -1,0 +1,25 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: certificaterequests.applicationconnector.kyma-project.io
+spec:
+  group: applicationconnector.kyma-project.io
+  version: v1alpha1
+  names:
+    kind: CertificateRequest
+    singular: certificaterequest
+    plural: certificaterequests
+  scope: Cluster
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            csrInfoUrl:
+              type: string
+          required:
+          - csrInfoUrl
+          type: object
+

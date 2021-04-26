@@ -3,4 +3,4 @@ name: eventing
 description: Kyma Component 'eventing'
 version: 0.1.0
 home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/master/logo.png?raw=true
+icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

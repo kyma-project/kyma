@@ -33,11 +33,11 @@ func TestLastCommit(t *testing.T) {
 	}{
 		"should be ok": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  nil,
 			mockRefs: []*plumbing.Reference{
-				plumbing.NewHashReference("refs/heads/master", exampleHash),
+				plumbing.NewHashReference("refs/heads/main", exampleHash),
 			},
 
 			expectedCommit: gomega.Equal(exampleHash.String()),
@@ -45,7 +45,7 @@ func TestLastCommit(t *testing.T) {
 		},
 		"should be ok with auth": {
 			repoUrl: "https://github.com/kyma-project/kyma",
-			repoRef: "master",
+			repoRef: "main",
 			repoAuth: &AuthOptions{
 				Type: "basic",
 				Credentials: map[string]string{
@@ -55,7 +55,7 @@ func TestLastCommit(t *testing.T) {
 			},
 			mockErr: nil,
 			mockRefs: []*plumbing.Reference{
-				plumbing.NewHashReference("refs/heads/master", exampleHash),
+				plumbing.NewHashReference("refs/heads/main", exampleHash),
 			},
 
 			expectedCommit: gomega.Equal(exampleHash.String()),
@@ -63,13 +63,13 @@ func TestLastCommit(t *testing.T) {
 		},
 		"ok with many refs in repo": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  nil,
 			mockRefs: []*plumbing.Reference{
 				plumbing.NewHashReference("refs/heads/test1", plumbing.NewHash("")),
 				plumbing.NewHashReference("refs/heads/test2", plumbing.NewHash("")),
-				plumbing.NewHashReference("refs/heads/master", exampleHash),
+				plumbing.NewHashReference("refs/heads/main", exampleHash),
 				plumbing.NewHashReference("refs/heads/test3", plumbing.NewHash("")),
 			},
 
@@ -78,11 +78,11 @@ func TestLastCommit(t *testing.T) {
 		},
 		"ok when ref don't provide commit hash": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  nil,
 			mockRefs: []*plumbing.Reference{
-				plumbing.NewHashReference("refs/heads/master", plumbing.NewHash("")),
+				plumbing.NewHashReference("refs/heads/main", plumbing.NewHash("")),
 			},
 
 			expectedCommit: gomega.Equal(plumbing.NewHash("").String()),
@@ -111,7 +111,7 @@ func TestLastCommit(t *testing.T) {
 		},
 		"error on no permissions to repo": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  errors.New("test error"),
 			mockRefs: nil,
@@ -121,7 +121,7 @@ func TestLastCommit(t *testing.T) {
 		},
 		"error on no refs in repository": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  nil,
 			mockRefs: nil,
@@ -131,7 +131,7 @@ func TestLastCommit(t *testing.T) {
 		},
 		"error on no expected ref in repository": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: nil,
 			mockErr:  nil,
 			mockRefs: []*plumbing.Reference{
@@ -145,11 +145,11 @@ func TestLastCommit(t *testing.T) {
 		},
 		"error when on invalid auth": {
 			repoUrl:  "https://github.com/kyma-project/kyma",
-			repoRef:  "master",
+			repoRef:  "main",
 			repoAuth: &AuthOptions{},
 			mockErr:  nil,
 			mockRefs: []*plumbing.Reference{
-				plumbing.NewHashReference("refs/heads/master", exampleHash),
+				plumbing.NewHashReference("refs/heads/main", exampleHash),
 			},
 
 			expectedCommit: gomega.HaveLen(0),

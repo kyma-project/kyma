@@ -132,9 +132,6 @@ rules:
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get", "list", "watch"]
-- apiGroups: ["eventing.knative.dev"]
-  resources: ["triggers"]
-  verbs: ["get", "list", "watch"]
 {{- if .Values.global.podSecurityPolicyEnabled }}
 - apiGroups: ["extensions","policy"]
   resources: ["podsecuritypolicies"]

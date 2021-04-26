@@ -439,7 +439,7 @@ spec:
                 type: string
               type: array
             audience:
-              description: Audience is a whitelist defining the audiences this client is allowed to request tokens for
+              description: Audience is an allowlist defining the audiences this client is allowed to request tokens for
               items:
                 type: string
               type: array

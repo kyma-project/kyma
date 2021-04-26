@@ -44,8 +44,8 @@ EOF
 
   </details>
   <details>
-  <summary label="nodejs10">
-  Node.js 10 (Deprecated)
+  <summary label="nodejs14">
+  Node.js 14
   </summary>
 
 ```yaml
@@ -53,20 +53,20 @@ cat <<EOF | kubectl apply -f -
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
-  name: test-function-nodejs10
+  name: test-function-nodejs14
 spec:
-  runtime: nodejs10
+  runtime: nodejs14
   source: |
     const _ = require('lodash')
 
     module.exports = {
       main: function(event, context) {
-        return _.kebabCase('Hello World from Node.js 10 Function');
+        return _.kebabCase('Hello World from Node.js 14 Function');
       }
     }
   deps: |
     {
-      "name": "test-function-nodejs10",
+      "name": "test-function-nodejs14",
       "version": "1.0.0",
       "dependencies": {
         "lodash":"^4.17.20"

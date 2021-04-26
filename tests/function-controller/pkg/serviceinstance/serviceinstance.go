@@ -27,8 +27,8 @@ type ServiceInstance struct {
 	verbose     bool
 }
 
-func (s ServiceInstance) GetName() string {
-	return s.name
+func (si *ServiceInstance) GetName() string {
+	return si.name
 }
 
 func New(name string, c shared.Container) *ServiceInstance {
