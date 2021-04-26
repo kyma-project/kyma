@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"testing"
@@ -163,11 +164,33 @@ func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 
 // GeneratePortOrDie generates a random 5 digit port or fail
 func GeneratePortOrDie() int {
-	port, err := generatePort()
-	if err != nil {
-		log.Fatalf("Failed to generate port with error: %v", err)
+	tick := time.NewTicker(time.Second / 2)
+	defer tick.Stop()
+
+	timeout := time.NewTimer(time.Minute)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-tick.C:
+			{
+				port, err := generatePort()
+				if err != nil {
+					break
+				}
+
+				if !isPortAvailable(port) {
+					break
+				}
+
+				return port
+			}
+		case <-timeout.C:
+			{
+				log.Fatal("Failed to generate port")
+			}
+		}
 	}
-	return port
 }
 
 func generatePort() (int, error) {
@@ -198,4 +221,19 @@ var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9'}
 
 func Is2XX(statusCode int) bool {
 	return statusCode/100 == 2
+}
+
+// isPortAvailable returns true if the port is available for use, otherwise returns false
+func isPortAvailable(port int) bool {
+	address := fmt.Sprintf(":%d", port)
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return false
+	}
+
+	if err := listener.Close(); err != nil {
+		return false
+	}
+
+	return true
 }

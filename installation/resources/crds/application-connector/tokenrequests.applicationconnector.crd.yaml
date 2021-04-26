@@ -1,0 +1,43 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: tokenrequests.applicationconnector.kyma-project.io
+spec:
+  group: applicationconnector.kyma-project.io
+  version: v1alpha1
+  names:
+    kind: TokenRequest
+    plural: tokenrequests
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        status:
+          properties:
+            expireAfter:
+              format: date-time
+              type: string
+            application:
+              type: string
+            state:
+              type: string
+            token:
+              type: string
+            url:
+              type: string
+          required:
+          - token
+          - url
+          - expireAfter
+          - application
+          - state
+          type: object
+

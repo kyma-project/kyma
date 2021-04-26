@@ -29,8 +29,8 @@ type ServiceBinding struct {
 	verbose     bool
 }
 
-func (s ServiceBinding) GetName() string {
-	return s.name
+func (sb *ServiceBinding) GetName() string {
+	return sb.name
 }
 
 func New(name string, c shared.Container) *ServiceBinding {

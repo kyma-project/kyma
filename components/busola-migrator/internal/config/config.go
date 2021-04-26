@@ -12,16 +12,30 @@ import (
 )
 
 type Config struct {
+	Domain         string        `envconfig:"default=localhost"`
 	Port           int           `envconfig:"default=80"`
 	TimeoutRead    time.Duration `envconfig:"default=30s"`
 	TimeoutWrite   time.Duration `envconfig:"default=30s"`
 	TimeoutIdle    time.Duration `envconfig:"default=120s"`
 	BusolaURL      string        `envconfig:"default=https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"`
-	OIDCIssuerURL  string        `envconfig:"default=https://kyma.accounts.ondemand.com"`
-	OIDCClientID   string        `envconfig:"default=6667a34d-2ea0-43fa-9b13-5ada316e5393"`
-	OIDCScope      string        `envconfig:"default=openid"`
-	OIDCUsePKCE    bool          `envconfig:"default=false"`
 	StaticFilesDIR string        `envconfig:"optional"`
+
+	OIDC OIDCConfig
+	UAA  UAAConfig
+}
+
+type OIDCConfig struct {
+	IssuerURL string `envconfig:"default=https://kyma.accounts.ondemand.com"`
+	ClientID  string `envconfig:"default=6667a34d-2ea0-43fa-9b13-5ada316e5393"`
+	Scope     string `envconfig:"default=openid"`
+	UsePKCE   bool   `envconfig:"default=false"`
+}
+
+type UAAConfig struct {
+	URL          string
+	ClientID     string
+	ClientSecret string
+	RedirectURI  string `envconfig:"-"`
 }
 
 type configOverrides struct {
@@ -75,16 +89,16 @@ func applyOverrides(oldCfg Config, overrides configOverrides) Config {
 		newCfg.BusolaURL = *overrides.BusolaURL
 	}
 	if overrides.OIDCIssuerURL != nil {
-		newCfg.OIDCIssuerURL = *overrides.OIDCIssuerURL
+		newCfg.OIDC.IssuerURL = *overrides.OIDCIssuerURL
 	}
 	if overrides.OIDCClientID != nil {
-		newCfg.OIDCClientID = *overrides.OIDCClientID
+		newCfg.OIDC.ClientID = *overrides.OIDCClientID
 	}
 	if overrides.OIDCScope != nil {
-		newCfg.OIDCScope = *overrides.OIDCScope
+		newCfg.OIDC.Scope = *overrides.OIDCScope
 	}
 	if overrides.OIDCUsePKCE != nil {
-		newCfg.OIDCUsePKCE = *overrides.OIDCUsePKCE
+		newCfg.OIDC.UsePKCE = *overrides.OIDCUsePKCE
 	}
 
 	return newCfg

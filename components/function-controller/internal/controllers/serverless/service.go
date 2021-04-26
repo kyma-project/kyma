@@ -93,7 +93,7 @@ func (r *FunctionReconciler) deleteExcessServices(ctx context.Context, instance 
 
 	log.Info("Deleting excess Services")
 
-	for i, _ := range services {
+	for i := range services {
 		svc := services[i]
 		if svc.GetName() == instance.GetName() {
 			continue
