@@ -18,13 +18,13 @@ spec:
   http:
     - match:
         - uri:
-            regex: ^/[^/]+/v1/metadata
+            regex: ^/[^/]+/v1/metadata.*
         - uri:
-            regex: ^/[^/]+/v1/events
+            regex: ^/[^/]+/v1/events.*
         - uri:
-            regex: ^/[^/]+/v2/events
+            regex: ^/[^/]+/v2/events.*
         - uri:
-            regex: ^/[^/]+/events
+            regex: ^/[^/]+/events.*
       route:
         - destination:
             port:
