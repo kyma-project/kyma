@@ -129,10 +129,8 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 func (c *Controller) syncHandler(key string) error {
-
 	application, err := c.applicationLister.Get(key)
 	if err != nil {
-
 		if errors.IsNotFound(err) {
 			c.appCache.Delete(key)
 			c.log.WithContext().
@@ -145,8 +143,17 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
+	if !application.ObjectMeta.DeletionTimestamp.IsZero() {
+		c.appCache.Delete(key)
+		c.log.WithContext().
+			With("controller", controllerName).
+			With("name", application.Name).
+			Infof("Deleted the application from the cache on graceful deletion.")
+		return nil
+	}
+
 	applicationClientIDs := c.getClientIDsFromResource(application)
-	c.appCache.Set(key, applicationClientIDs, gocache.NoExpiration)
+	c.appCache.Set(key, applicationClientIDs, gocache.DefaultExpiration)
 	c.log.WithContext().
 		With("controller", controllerName).
 		With("name", application.Name).

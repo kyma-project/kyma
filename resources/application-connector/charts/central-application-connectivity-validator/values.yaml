@@ -5,8 +5,8 @@ deployment:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
     appRegistryHost: application-registry-external-api:8081
-    cacheExpirationMinutes: 1
-    cacheCleanupMinutes: 2
+    cacheExpirationSeconds: 90
+    cacheCleanupIntervalSeconds: 15
   resources:
     limits:
       cpu: 100m

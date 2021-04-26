@@ -10,22 +10,22 @@ import (
 )
 
 type args struct {
-	proxyPort                int
-	externalAPIPort          int
-	eventServicePathPrefixV1 string
-	eventServicePathPrefixV2 string
-	eventServiceHost         string
-	eventMeshPathPrefix      string
-	eventMeshHost            string
-	eventMeshDestinationPath string
-	appRegistryPathPrefix    string
-	appRegistryHost          string
-	appNamePlaceholder       string
-	cacheExpirationMinutes   int
-	cacheCleanupMinutes      int
-	kubeConfig               string
-	apiServerURL             string
-	syncPeriod               time.Duration
+	proxyPort                   int
+	externalAPIPort             int
+	eventServicePathPrefixV1    string
+	eventServicePathPrefixV2    string
+	eventServiceHost            string
+	eventMeshPathPrefix         string
+	eventMeshHost               string
+	eventMeshDestinationPath    string
+	appRegistryPathPrefix       string
+	appRegistryHost             string
+	appNamePlaceholder          string
+	cacheExpirationSeconds      int
+	cacheCleanupIntervalSeconds int
+	kubeConfig                  string
+	apiServerURL                string
+	syncPeriod                  time.Duration
 }
 
 type config struct {
@@ -50,11 +50,11 @@ func parseOptions() (*options, error) {
 	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/%%APP_NAME%%/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
-	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
-	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
+	cacheExpirationSeconds := flag.Int("cacheExpirationSeconds", 90, "Expiration time for client IDs stored in cache expressed in seconds")
+	cacheCleanupIntervalSeconds := flag.Int("cacheCleanupIntervalSeconds", 15, "Clean up interval controls how often the client IDs stored in cache are removed")
 	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	syncPeriod := flag.Duration("syncPeriod", 120*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
+	syncPeriod := flag.Duration("syncPeriod", 60*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
 
@@ -65,22 +65,22 @@ func parseOptions() (*options, error) {
 
 	return &options{
 		args: args{
-			proxyPort:                *proxyPort,
-			externalAPIPort:          *externalAPIPort,
-			eventServicePathPrefixV1: *eventServicePathPrefixV1,
-			eventServicePathPrefixV2: *eventServicePathPrefixV2,
-			eventServiceHost:         *eventServiceHost,
-			eventMeshPathPrefix:      *eventMeshPathPrefix,
-			eventMeshHost:            *eventMeshHost,
-			eventMeshDestinationPath: *eventMeshDestinationPath,
-			appRegistryPathPrefix:    *appRegistryPathPrefix,
-			appRegistryHost:          *appRegistryHost,
-			appNamePlaceholder:       *appNamePlaceholder,
-			cacheExpirationMinutes:   *cacheExpirationMinutes,
-			cacheCleanupMinutes:      *cacheCleanupMinutes,
-			kubeConfig:               *kubeConfig,
-			apiServerURL:             *apiServerURL,
-			syncPeriod:               *syncPeriod,
+			proxyPort:                   *proxyPort,
+			externalAPIPort:             *externalAPIPort,
+			eventServicePathPrefixV1:    *eventServicePathPrefixV1,
+			eventServicePathPrefixV2:    *eventServicePathPrefixV2,
+			eventServiceHost:            *eventServiceHost,
+			eventMeshPathPrefix:         *eventMeshPathPrefix,
+			eventMeshHost:               *eventMeshHost,
+			eventMeshDestinationPath:    *eventMeshDestinationPath,
+			appRegistryPathPrefix:       *appRegistryPathPrefix,
+			appRegistryHost:             *appRegistryHost,
+			appNamePlaceholder:          *appNamePlaceholder,
+			cacheExpirationSeconds:      *cacheExpirationSeconds,
+			cacheCleanupIntervalSeconds: *cacheCleanupIntervalSeconds,
+			kubeConfig:                  *kubeConfig,
+			apiServerURL:                *apiServerURL,
+			syncPeriod:                  *syncPeriod,
 		},
 		config: c,
 	}, nil
@@ -92,14 +92,14 @@ func (o *options) String() string {
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appNamePlaceholder=%s "+
-		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
+		"--cacheExpirationSeconds=%d --cacheCleanupIntervalSeconds=%d "+
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,
-		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
+		o.cacheExpirationSeconds, o.cacheCleanupIntervalSeconds,
 		o.kubeConfig, o.apiServerURL, o.syncPeriod,
 		o.LogFormat, o.LogLevel)
 }

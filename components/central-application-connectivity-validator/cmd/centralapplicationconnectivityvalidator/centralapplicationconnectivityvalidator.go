@@ -59,9 +59,15 @@ func main() {
 	log.WithContext().With("options", options).Info("Starting Validation Proxy.")
 
 	idCache := cache.New(
-		time.Duration(options.cacheExpirationMinutes)*time.Minute,
-		time.Duration(options.cacheCleanupMinutes)*time.Minute,
+		time.Duration(options.cacheExpirationSeconds)*time.Second,
+		time.Duration(options.cacheCleanupIntervalSeconds)*time.Second,
 	)
+	idCache.OnEvicted(func(key string, i interface{}) {
+		log.WithContext().
+			With("controller", "cache_janitor").
+			With("name", key).
+			Infof("Deleted the application from the cache on cache eviction.")
+	})
 
 	proxyHandler := validationproxy.NewProxyHandler(
 		options.appNamePlaceholder,

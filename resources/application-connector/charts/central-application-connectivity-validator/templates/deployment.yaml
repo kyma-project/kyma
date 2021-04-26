@@ -46,8 +46,8 @@ spec:
           - "--appRegistryPathPrefix=//%%APP_NAME%%/v1/metadata"
           - "--appRegistryHost={{ .Values.deployment.args.appRegistryHost }}"
           - "--appNamePlaceholder=%%APP_NAME%%"
-          - "--cacheExpirationMinutes={{ .Values.deployment.args.cacheExpirationMinutes }}"
-          - "--cacheCleanupMinutes={{ .Values.deployment.args.cacheCleanupMinutes }}"
+          - "--cacheExpirationSeconds={{ .Values.deployment.args.cacheExpirationSeconds }}"
+          - "--cacheCleanupIntervalSeconds={{ .Values.deployment.args.cacheCleanupIntervalSeconds }}"
         env:
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
