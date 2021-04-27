@@ -66,7 +66,7 @@ func main() {
 		log.WithContext().
 			With("controller", "cache_janitor").
 			With("name", key).
-			Infof("Deleted the application from the cache on cache eviction.")
+			Warnf("Deleted the application from the cache on cache eviction.")
 	})
 
 	proxyHandler := validationproxy.NewProxyHandler(
@@ -98,16 +98,15 @@ func main() {
 	wg.Add(1)
 
 	go func() {
-		// TODO: go routine should inform other go routines that it initially updated the cache
 		controller.Start(log, options.kubeConfig, options.apiServerURL, options.syncPeriod, idCache)
 	}()
 
 	go func() {
-		log.WithContext().With("server", "proxy").With("port", options.proxyPort).Error(proxyServer.ListenAndServe())
+		log.WithContext().With("server", "proxy").With("port", options.proxyPort).Fatal(proxyServer.ListenAndServe())
 	}()
 
 	go func() {
-		log.WithContext().With("server", "external").With("port", options.externalAPIPort).Error(externalServer.ListenAndServe())
+		log.WithContext().With("server", "external").With("port", options.externalAPIPort).Fatal(externalServer.ListenAndServe())
 	}()
 
 	wg.Wait()
