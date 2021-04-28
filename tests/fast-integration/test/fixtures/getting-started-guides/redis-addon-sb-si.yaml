@@ -12,6 +12,7 @@ kind: ServiceInstance
 metadata:
   name: redis-service
   namespace: orders-service
+  # annotations should be set because of the Service Catalog issue: https://github.com/kubernetes-sigs/service-catalog/issues/2825
   annotations:
     app: "test"
 spec:
@@ -25,6 +26,7 @@ kind: ServiceBinding
 metadata:
   name: orders-service
   namespace: orders-service
+  # annotations should be set because of the Service Catalog issue: https://github.com/kubernetes-sigs/service-catalog/issues/2825
   annotations:
     app: "test"
 spec:
