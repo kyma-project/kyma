@@ -210,9 +210,9 @@ spec:
               type: object
             runtime:
               enum:
-              - nodejs12
-              - nodejs10
-              - python38
+                - nodejs12
+                - nodejs14
+                - python38
               type: string
             source:
               description: Source defines the source code of a function
@@ -253,9 +253,10 @@ spec:
               type: string
             runtime:
               enum:
-              - nodejs12
-              - nodejs10
-              - python38
+                - nodejs12
+                - nodejs14
+                - nodejs10
+                - python38
               type: string
             source:
               type: string
