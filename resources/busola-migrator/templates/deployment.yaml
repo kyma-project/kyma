@@ -47,6 +47,8 @@ spec:
           env:
             - name: APP_PORT
               value: {{ .Values.service.targetPort | quote }}
+            - name: APP_DOMAIN
+              value: {{ .Values.global.ingress.domainName | quote }}
             - name: APP_BUSOLA_URL
               value: {{ .Values.deployment.env.busolaURL | quote }}
             - name: APP_OIDC_ISSUER_URL
@@ -87,6 +89,21 @@ spec:
                   name: {{ .Values.config.secretName }}
                   key: oidcUsePKCE
                   optional: true
+            - name: APP_UAA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: url
+            - name: APP_UAA_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: clientid
+            - name: APP_UAA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: clientsecret
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

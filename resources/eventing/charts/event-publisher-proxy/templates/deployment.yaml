@@ -17,6 +17,8 @@ spec:
       serviceAccountName: {{ include "event-publisher-proxy.serviceAccountName" . }}
       containers:
         - env:
+            - name: BACKEND
+              value: {{ .Values.global.eventing.backend }}
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -39,11 +41,13 @@ spec:
                   key: ems-publish-url
             - name: EMS_PUBLISH_URL
               value: $(EMS_URL)/{{ .Values.beb.config.emsPublisherUrlSuffix }}
-            - name: BEB_NAMESPACE
+            - name: BEB_NAMESPACE_VALUE
               valueFrom:
                 secretKeyRef:
                   name: {{ include "eventing.secretName" . }}
                   key: beb-namespace
+            - name: BEB_NAMESPACE
+              value: /$(BEB_NAMESPACE_VALUE)
             - name: EVENT_TYPE_PREFIX
               value: {{ .Values.global.eventTypePrefix }}
           image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"

@@ -7,9 +7,9 @@ replicaCount: 1
 
 image:
   # name is the name of the container image for the event-publisher-nats
-  name: "event-publisher-nats"
+  name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-nats image
-  tag: "bcb37681"
+  tag: "88360eed"
   # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 

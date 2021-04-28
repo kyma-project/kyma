@@ -12,7 +12,7 @@ func TestApp_HandleHealthy(t *testing.T) {
 	// GIVEN
 	r, _ := http.NewRequest("GET", "/healthz", nil)
 	w := httptest.NewRecorder()
-	app := New(testBusolaURL, testStaticFilesDir)
+	app := App{}
 	handler := http.HandlerFunc(app.HandleHealthy)
 
 	// WHEN

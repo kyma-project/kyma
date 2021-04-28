@@ -26,13 +26,17 @@
     <link rel="stylesheet" type="text/css" href="./assets/style.css" />
   </head>
   <body>
+    <script>
+      if (localStorage.getItem("migrated") === "true") {
+        window.location.href = "/console-redirect";
+      }
+    </script>
     <div class="fd-page">
       <div class="fd-page__content">
         <section class="fd-section">
           <p class="fd-has-text-align-center">
             <span
               class="sap-icon sap-icon--message-information"
-              style="font-size: 3.5rem"
             ></span>
           </p>
           <div class="info" id="headline">Console is now hosted centrally</div>

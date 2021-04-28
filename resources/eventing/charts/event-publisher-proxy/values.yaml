@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-proxy
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-proxy image
-  tag: "bcb37681"
+  tag: "88360eed"
   # pullPolicy is the pullPolicy for the event-publisher-proxy image
   pullPolicy: "IfNotPresent"
 

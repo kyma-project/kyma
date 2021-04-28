@@ -142,8 +142,8 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 func TestFunctionResolver_CreateFunction(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs10)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs10", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs14)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs14", labels)
 		mutationInput := fixGQLMutationInput("content", "dependencies", "dupa", labels)
 
 		svc := automock.NewFunctionService()
@@ -188,9 +188,9 @@ func TestFunctionResolver_CreateFunction(t *testing.T) {
 func TestFunctionResolver_UpdateFunction(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		labels := map[string]string{"foo": "bar"}
-		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs10)
-		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs10", labels)
-		mutationInput := fixGQLMutationInput("content", "dependencies", "nodejs10", labels)
+		function := fixFunction("1", "a", "1", "content", "dependencies", labels, v1alpha1.Nodejs14)
+		gqlFunction := fixGQLFunction("1", "a", "1", "content", "dependencies", "nodejs14", labels)
+		mutationInput := fixGQLMutationInput("content", "dependencies", "nodejs14", labels)
 
 		svc := automock.NewFunctionService()
 		svc.On("Update", function).Return(function, nil).Once()
