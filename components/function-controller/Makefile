@@ -12,7 +12,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 # Image URL to use all building/pushing image targets
 IMG ?= $(APP_NAME):latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS ?= "crd:trivialVersions=true,crdVersions=v1"
 
 pull-licenses-local:
 	@echo "Omitting licenses will not be pulled."	
@@ -31,7 +31,7 @@ test-local:
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
-manifests: controller-gen-local generate-local
+manifests: generate-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
 		object:headerFile=hack/boilerplate.go.txt \
 		output:crd:artifacts:config=config/crd/bases \
@@ -42,7 +42,7 @@ CONTROLLER_GEN := $(shell which controller-gen)
 
 # Generate code
 .PHONY: generate-local
-generate-local: controller-gen-local
+generate-local:
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 .PHONY: build-image 
