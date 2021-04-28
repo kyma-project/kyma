@@ -1,6 +1,6 @@
 ---
 title: Kyma CLI
-type: Concept
+type: Overview
 ---
 <!-- Must go into the Overview tab; users need the CLI to get started -->
 
