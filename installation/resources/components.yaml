@@ -23,3 +23,4 @@ components:
   - name: "serverless"
   - name: "application-connector"
     namespace: "kyma-integration"
+
