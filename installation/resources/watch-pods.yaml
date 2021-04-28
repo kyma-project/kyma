@@ -8,7 +8,7 @@ metadata:
     kyma-project.io/installation: ""
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: watch-pods
   labels:
@@ -20,7 +20,7 @@ rules:
   verbs: ["get", "watch", "list"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: watch-pods
   labels:
