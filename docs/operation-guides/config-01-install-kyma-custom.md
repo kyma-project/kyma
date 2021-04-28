@@ -1,6 +1,6 @@
 ---
 title: Custom Kyma Installation
-type: Configuration
+type: Configuration-ToBeReviewed
 ---
 <!-- the default variant is surely mentioned in Basic Tasks/Get Started, too -->
 
