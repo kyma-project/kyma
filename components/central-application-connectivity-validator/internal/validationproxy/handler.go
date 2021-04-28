@@ -19,8 +19,6 @@ import (
 
 const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
-	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy (https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy#send-events)
-	BEBEnabledPublishEndpoint = "/publish"
 
 	handlerName = "validation_proxy_handler"
 )
@@ -49,7 +47,6 @@ type proxyHandler struct {
 	eventServiceHost         string
 	eventMeshPathPrefix      string
 	eventMeshHost            string
-	isBEBEnabled             bool
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 
@@ -68,7 +65,6 @@ func NewProxyHandler(
 	tenant string,
 	eventServicePathPrefixV1 string,
 	eventServicePathPrefixV2 string,
-	eventServiceHost string,
 	eventMeshPathPrefix string,
 	eventMeshHost string,
 	eventMeshDestinationPath string,
@@ -76,24 +72,18 @@ func NewProxyHandler(
 	appRegistryHost string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
-	isBEBEnabled := false
-	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
-		isBEBEnabled = true
-	}
 	return &proxyHandler{
 		appNamePlaceholder:       appNamePlaceholder,
 		group:                    group,
 		tenant:                   tenant,
 		eventServicePathPrefixV1: eventServicePathPrefixV1,
 		eventServicePathPrefixV2: eventServicePathPrefixV2,
-		eventServiceHost:         eventServiceHost,
 		eventMeshPathPrefix:      eventMeshPathPrefix,
 		eventMeshHost:            eventMeshHost,
-		isBEBEnabled:             isBEBEnabled,
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(log, eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		eventsProxy:      createReverseProxy(log, eventMeshHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		eventMeshProxy:   createReverseProxy(log, eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		appRegistryProxy: createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
@@ -158,22 +148,17 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
+	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy (https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy#send-events)
 	switch {
-	// For a cluster which is BEB enabled, events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching with prefix /{application}/events will be routed to /{application}/v1/events endpoint of event-service
+	// Events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV1, applicationName)):
 		return ph.eventsProxy, nil
 
-	// For a cluster which is BEB enabled, events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching /{application}/v2/events will be routed to /{application}/v2/events endpoint of event-service
+	// Events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV2, applicationName)):
-		if ph.isBEBEnabled {
-			return ph.eventMeshProxy, nil
-		}
-		return ph.eventsProxy, nil
+		return ph.eventMeshProxy, nil
 
-	// For a cluster which is BEB enabled, events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching /{application}/events will be routed to / endpoint of http-source-adapter
+	// Events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventMeshPathPrefix, applicationName)):
 		return ph.eventMeshProxy, nil
 

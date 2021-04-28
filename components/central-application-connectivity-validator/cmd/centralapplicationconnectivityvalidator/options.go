@@ -16,7 +16,6 @@ type args struct {
 	group                       string
 	eventServicePathPrefixV1    string
 	eventServicePathPrefixV2    string
-	eventServiceHost            string
 	eventMeshPathPrefix         string
 	eventMeshHost               string
 	eventMeshDestinationPath    string
@@ -47,10 +46,9 @@ func parseOptions() (*options, error) {
 	group := flag.String("group", "", "Name of the application group")
 	eventServicePathPrefixV1 := flag.String("eventServicePathPrefixV1", "/%%APP_NAME%%/v1/events", "Prefix of paths that will be directed to the Event Service V1")
 	eventServicePathPrefixV2 := flag.String("eventServicePathPrefixV2", "/%%APP_NAME%%/v2/events", "Prefix of paths that will be directed to the Event Service V2")
-	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host (and port) of the Event Service")
 	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/%%APP_NAME%%/events", "Prefix of paths that will be directed to the Event Mesh")
-	eventMeshHost := flag.String("eventMeshHost", "events-adapter:8080", "Host (and port) of the Event Mesh adapter")
-	eventMeshDestinationPath := flag.String("eventMeshDestinationPath", "/", "Path of the destination of the requests to the Event Mesh")
+	eventMeshHost := flag.String("eventMeshHost", "eventing-event-publisher-proxy.kyma-system", "Host (and port) of the Event Mesh adapter")
+	eventMeshDestinationPath := flag.String("eventMeshDestinationPath", "/publish", "Path of the destination of the requests to the Event Mesh")
 	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/%%APP_NAME%%/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
@@ -75,7 +73,6 @@ func parseOptions() (*options, error) {
 			group:                       *group,
 			eventServicePathPrefixV1:    *eventServicePathPrefixV1,
 			eventServicePathPrefixV2:    *eventServicePathPrefixV2,
-			eventServiceHost:            *eventServiceHost,
 			eventMeshPathPrefix:         *eventMeshPathPrefix,
 			eventMeshHost:               *eventMeshHost,
 			eventMeshDestinationPath:    *eventMeshDestinationPath,
@@ -94,7 +91,7 @@ func parseOptions() (*options, error) {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
-		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s --eventServiceHost=%s "+
+		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s "+
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appNamePlaceholder=%s "+
@@ -102,7 +99,7 @@ func (o *options) String() string {
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
-		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
+		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,
 		o.cacheExpirationSeconds, o.cacheCleanupIntervalSeconds,

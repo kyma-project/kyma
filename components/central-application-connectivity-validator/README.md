@@ -12,14 +12,28 @@ The Central Application Connectivity Validator has the following parameters:
 - **group** is the group of the Application for which the proxy is deployed. Omitted if empty.
 - **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/%%APP_NAME%%/v1/events`.
 - **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/%%APP_NAME%%/v2/events`.
-- **eventServiceHost** is the host and the port of the Event Service. The default value is `events-api:8080`.
-- **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/`.
+- **eventMeshHost** is the host and the port of the Event Mesh adapter. The default value is `eventing-event-publisher-proxy.kyma-system`.
+- **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/publish`.
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/%%APP_NAME%%/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
+- **appNamePlaceholder**  is the path URL placeholder used for an application name. The default value is `%%APP_NAME%%`.
+- **cacheExpirationSeconds** is the expiration time for client IDs stored in cache expressed in seconds. The default value is `90`.
+- **cacheCleanupIntervalSeconds** is the clean up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.
 - **kubeConfig** is the path to a cluster kubeconfig. Used for running the service outside of the cluster.
 - **apiServerURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
-- **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `120 seconds`.
-- **appNamePlaceholder**  is the path URL placeholder used for an application name. The default value is `%%APP_NAME%%`.
+- **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `60 seconds`.
+
+### Application name placeholder
+
+If parameter `appNamePlaceholder` is not empty, it defines a placeholder for an application name in the parameters
+`eventServicePathPrefixV1`, `eventServicePathPrefixV2`, `eventMeshPathPrefix` and `appRegistryPathPrefix`. This placeholder will be replaced on every proxy request,
+with the value from the certificate CN.
+
+### Local cache refresh
+
+The application `clientIDs` are read from Application resources and cached locally with TTL defined by the `cacheExpirationSeconds` parameter.
+The cache refresh will be performed by the controller during reconciliation in intervals defined by the `syncPeriod`.
+To prevent cache entries eviction, the duration of the `syncPeriod` should be less than `cacheExpirationSeconds`.
 
 ## Details
 

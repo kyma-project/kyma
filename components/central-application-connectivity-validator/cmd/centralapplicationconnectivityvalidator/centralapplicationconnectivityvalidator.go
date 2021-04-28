@@ -75,7 +75,6 @@ func main() {
 		options.tenant,
 		options.eventServicePathPrefixV1,
 		options.eventServicePathPrefixV2,
-		options.eventServiceHost,
 		options.eventMeshPathPrefix,
 		options.eventMeshHost,
 		options.eventMeshDestinationPath,
