@@ -7,11 +7,12 @@ override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# DEV images used during development workflow only
-DEV_IMG_DEFAULT = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
-DEV_IMG_NATS = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller-nats
+# DEV image is used during development workflow only
+DEV_IMGAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+
 NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 
@@ -26,90 +27,116 @@ endif
 
 all: manager
 
+
 # Build controller binary
 manager: generate-local fmt-local vet-local
 	go build -o bin/controller main.go
+
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate-local fmt-local vet-local manifests
 	go run ./main.go
 
+
 # Install CRDs into a cluster
 install: manifests
 	kustomize build config/crd | ko apply -f -
+
 
 # Install sample CRs into a cluster
 install-samples: manifests
 	ko apply -f config/samples
 
+
 # Uninstall sample CRs into a cluster
 uninstall-samples: manifests
 	ko delete -f config/samples
+
 
 # Uninstall CRDs from a cluster
 uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests deploy-local-dry-run
+
+# Deploy eventing-controller for BEB in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-beb-local: manifests deploy-beb-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
-# Deploy eventing-controller-nats in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-eventing-controller-nats-local: manifests deploy-eventing-controller-nats-local-dry-run
+
+# Deploy eventing-controller for NATS in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-nats-local: manifests deploy-nats-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/nats | ko apply -f -
 
-undeploy-local: manifests
+
+# Undeploy the eventing-controller for BEB
+undeploy-beb-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
-undeploy-eventing-controller-nats-local: manifests
+
+# Undeploy the eventing-controller for BEB
+undeploy-nats-local: manifests
 	kustomize build config/nats | kubectl delete -f -
 
-# Dry run for deploying controller for local development
-deploy-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMG_DEFAULT} && kustomize edit set namespace ${NAMESPACE}
+
+# Dry run for deploying eventing-controller BEB for local development
+deploy-beb-local-dry-run: manifests
+	cd config/manager && kustomize edit set image controller=${DEV_IMGAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
 
-# Dry run for deploying eventing-controller-nats for local development
-deploy-eventing-controller-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMG_NATS} && kustomize edit set namespace ${NAMESPACE}
+
+# Dry run for deploying eventing-controller NATS for local development
+deploy-nats-local-dry-run: manifests
+	cd config/manager-nats && kustomize edit set image controller=${DEV_IMGAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/nats
+
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+
 # Generate code
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
+
 verify:: mod-verify
+
 
 resolve-local:
 	GO111MODULE=on go mod vendor -v
 
+
 ensure-local:
 	@echo "Go modules present in component - omitting."
+
 
 dep-status:
 	@echo "Go modules present in component - omitting."
 
+
 dep-status-local:
 	@echo "Go modules present in component - omitting."
+
 
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
+
 release: resolve verify build-image push-image
+
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
+
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -149,21 +176,28 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 MOUNT_TARGETS = $(cmds)
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
+
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
+
 
 $(cmds_clean): %.clean:
 	rm -f $*
 
+
 resolve_clean:
 	rm -rf vendor
+
 
 licenses_clean:
 	rm -rf licenses
 
+
 build-local: $(cmds) test-local ;
 
+
 .PHONY: $(cmds_images) $(cmds_images_push)
+
 
 # override image goals from common Makefile because we need to build several images
 build-image: $(cmds_images) ;
@@ -179,12 +213,14 @@ $(cmds): %: resolve-local
 		$(GOBUILD_FLAGS) \
 		$(PKG)/cmd/$*
 
+
 # Example:
 #   make eventing-controller.image
 $(cmds_images): %.image: build pull-licenses
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
+
 
 # Example:
 #   make eventing-controller.image.push
