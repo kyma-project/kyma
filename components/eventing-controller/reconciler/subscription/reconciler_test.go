@@ -692,12 +692,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				subscription.Spec.Filter = nil
 				return subscription
 			}()),
-		Entry("protocolsettings missing",
-			func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
-				subscription.Spec.ProtocolSettings = nil
-				return subscription
-			}()),
 	)
 
 	DescribeTable("Schema tests: ensuring optional fields are not treated as required",
@@ -1020,6 +1014,8 @@ var _ = BeforeSuite(func(done Done) {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
+		DefaultNamespace:         "/default/ns",
+		Qos:                      "AT_LEAST_ONCE",
 	}
 
 	// prepare application-lister

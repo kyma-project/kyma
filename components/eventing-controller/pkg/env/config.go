@@ -46,6 +46,14 @@ type Config struct {
 	WebhookClientSecret      string        `envconfig:"WEBHOOK_CLIENT_SECRET" required:"true"`
 	WebhookTokenEndpoint     string        `envconfig:"WEBHOOK_TOKEN_ENDPOINT" required:"true"`
 
+	// Default protocol setting for BEB
+	ExemptHandshake bool   `envconfig:"EXEMPT_HANDSHAKE" default:"true"`
+	Qos             string `envconfig:"QOS" default:"AT_LEAST_ONCE"`
+	ContentMode     string `envconfig:"CONTENT_MODE" default:""`
+
+	// Default namespace for BEB
+	DefaultNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
+
 	// Domain holds the Kyma domain
 	Domain string `envconfig:"DOMAIN" required:"true"`
 
