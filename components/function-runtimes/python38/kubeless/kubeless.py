@@ -9,8 +9,7 @@ import sys
 import bottle
 import prometheus_client as prom
 
-import multiprocessing.pool
-import functools
+from pebble import concurrent
 
 # The reason this file has an underscore prefix in its name is to avoid a
 # name collision with the user-defined module.
@@ -68,21 +67,7 @@ class PicklableBottleRequest(bottle.BaseRequest):
     def __setstate__(self, env):
         setattr(self, 'environ', env)
 
-def timeout(max_timeout):
-    """Timeout decorator, parameter in seconds."""
-    def timeout_decorator(item):
-        """Wrap the original function."""
-        @functools.wraps(item)
-        def func_wrapper(*args, **kwargs):
-            """Closure for function."""
-            pool = multiprocessing.pool.ThreadPool(processes=1)
-            async_result = pool.apply_async(item, args, kwargs)
-            # raises a TimeoutError if execution exceeds max_timeout
-            return async_result.get(max_timeout)
-        return func_wrapper
-    return timeout_decorator
-
-@timeout(10.0)
+@concurrent.process(timeout=10)
 def funcWrap(event, c):
     return func(event, c)
 
@@ -126,8 +111,8 @@ def handler():
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
             try:
-                result = funcWrap(event, function_context)
-                return result
+                future = funcWrap(event, function_context)
+                return future.result()
             except:
                 return bottle.HTTPError(408, "Timeout while processing the function")
 
