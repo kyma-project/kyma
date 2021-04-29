@@ -41,7 +41,7 @@ The Application Operator has the following parameters:
  - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
  - **healthPort** is the number of the TCP port used to perform health checking of the Application Operator.
  - **isBEBEnabled** is a toggle used to enable or disable eventing based on BEB. The default value is `false`.
- 
+ - **centralApplicationConnectivityValidatorEnabled** is a toggle used to determine if the Central Application Connectivity Validator is used. If enabled, separate instances of application connectivity validator will not be provisioned. The default value is `false`.
 ## Testing on a local deployment
 
 When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.
