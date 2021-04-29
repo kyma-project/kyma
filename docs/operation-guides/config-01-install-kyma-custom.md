@@ -2,12 +2,12 @@
 title: Custom Kyma Installation
 type: Configuration
 ---
-<!-- the default variant is surely mentioned in Basic Tasks/Get Started, too -->
+<!-- to be reviewed by ...?  -->
 
 Besides the default installation, there are several ways to install Kyma:
 
 ## Default Installation
-
+<!-- the default variant is surely mentioned in Basic Tasks/Get Started, too -->
 You can simply use the `deploy` command without any flags, and Kyma provides a default domain. 
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
