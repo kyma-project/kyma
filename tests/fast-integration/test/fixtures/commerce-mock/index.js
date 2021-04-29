@@ -74,9 +74,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     kind: "ServiceInstance",
     metadata: {
       name: name,
-      annotations: {
-        "app": "test",
-      },
     },
     spec: { serviceClassExternalName },
   };
@@ -353,9 +350,6 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     kind: "ServiceBinding",
     metadata: {
       name: "commerce-binding",
-      annotations: {
-        "app": "test",
-      },
     },
     spec: {
       instanceRef: { name: "commerce-webservices" },
