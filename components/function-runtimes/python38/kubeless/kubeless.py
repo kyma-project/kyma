@@ -3,13 +3,12 @@
 import importlib
 import io
 import os
-import queue
 import sys
 
 import bottle
 import prometheus_client as prom
-
-from pebble import concurrent
+from queue import Queue
+from threading import Thread
 
 # The reason this file has an underscore prefix in its name is to avoid a
 # name collision with the user-defined module.
@@ -67,15 +66,9 @@ class PicklableBottleRequest(bottle.BaseRequest):
     def __setstate__(self, env):
         setattr(self, 'environ', env)
 
-@concurrent.process(timeout=10)
-def funcWrap(event, c):
-    return func(event, c)
 
-# def funcWrap(q, event, c):
-#     try:
-#         q.put(func(event, c))
-#     except Exception as inst:
-#         q.put(inst)
+def funcWrap(event):
+    return func(event, function_context)
 
 
 @app.get('/healthz')
@@ -110,11 +103,16 @@ def handler():
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
+            que = Queue()
+            t = Thread(target=lambda q, arg1: q.put(funcWrap(arg1)), args=(que, event))
+            t.start()
             try:
-                future = funcWrap(event, function_context)
-                return future.result()
-            except:
+                res = que.get(block=True, timeout=timeout)
+            except queue.Empty:
                 return bottle.HTTPError(408, "Timeout while processing the function")
+            else:
+                t.join()
+                return res
 
 
 def preload():
@@ -182,8 +180,8 @@ if __name__ == '__main__':
             requestlogger.ApacheFormatter(),
         )
     else:
-        loggedapp = app        
-    # end of modified section
+        loggedapp = app
+        # end of modified section
 
     bottle.run(
         loggedapp,
