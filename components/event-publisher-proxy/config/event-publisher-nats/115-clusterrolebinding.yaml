@@ -11,4 +11,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: eventing-event-publisher-nats
-    namespace: kyma-system
+    namespace: kyma-system # Note: use the same namespace used by ko apply
