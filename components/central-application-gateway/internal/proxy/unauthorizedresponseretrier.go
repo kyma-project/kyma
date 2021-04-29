@@ -11,7 +11,8 @@ import (
 )
 
 type retrier struct {
-	id                       string
+	serviceName              string
+	apiName                  string
 	appName                  string
 	request                  *http.Request
 	requestBodyCopy          io.ReadCloser
@@ -20,10 +21,10 @@ type retrier struct {
 	updateCacheEntryFunction updateCacheEntryFunction
 }
 
-type updateCacheEntryFunction = func(string, string) (*CacheEntry, apperrors.AppError)
+type updateCacheEntryFunction = func(string, string, string) (*CacheEntry, apperrors.AppError)
 
-func newUnauthorizedResponseRetrier(appName, id string, request *http.Request, requestBodyCopy io.ReadCloser, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
-	return &retrier{appName: appName, id: id, request: request, requestBodyCopy: requestBodyCopy, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
+func newUnauthorizedResponseRetrier(appName, serviceName, apiName string, request *http.Request, requestBodyCopy io.ReadCloser, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
+	return &retrier{appName: appName, serviceName: serviceName, apiName: apiName, request: request, requestBodyCopy: requestBodyCopy, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
 }
 
 func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
@@ -34,7 +35,7 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 	rr.retried = true
 
 	if r.StatusCode == http.StatusForbidden || r.StatusCode == http.StatusUnauthorized {
-		log.Infof("Request from service with id %s failed with %d status, invalidating proxy and retrying.", rr.id, r.StatusCode)
+		log.Infof("Request from service with name id %s failed with %d status, invalidating proxy and retrying.", rr.serviceName, r.StatusCode)
 
 		retryRes, err := rr.retry()
 		if err != nil {
@@ -58,7 +59,7 @@ func (rr *retrier) retry() (*http.Response, error) {
 
 	request.Body = rr.requestBodyCopy
 
-	cacheEntry, err := rr.updateCacheEntryFunction(rr.appName, rr.id)
+	cacheEntry, err := rr.updateCacheEntryFunction(rr.appName, rr.serviceName, rr.apiName)
 	if err != nil {
 		return nil, err
 	}

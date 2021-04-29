@@ -61,7 +61,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -83,7 +83,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/Xyz('123')", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/serviceName-1/apiName-1/Xyz('123')", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -106,7 +106,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -151,7 +151,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -209,7 +209,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -267,7 +267,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -319,7 +319,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -365,7 +365,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -435,7 +435,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -487,7 +487,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -539,7 +539,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -566,7 +566,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").
 			Return(&metadatamodel.API{}, apperrors.Internal("Failed to read services"))
 
-		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout))
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -616,7 +616,7 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
 		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout), nil)
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when

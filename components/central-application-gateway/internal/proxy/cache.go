@@ -41,9 +41,9 @@ func (ce *authorizationStrategyWrapper) Invalidate() {
 // Cache is an interface for caching Proxies
 type Cache interface {
 	// Get returns entry from the cache
-	Get(appName, id string) (*CacheEntry, bool)
+	Get(appName, serviceName, apiName string) (*CacheEntry, bool)
 	// Put adds entry to the cache
-	Put(appName, id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry
+	Put(appName, serviceName, apiName string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry
 }
 
 type cache struct {
@@ -57,8 +57,8 @@ func NewCache(proxyCacheTTL int) Cache {
 	}
 }
 
-func (p *cache) Get(appName, id string) (*CacheEntry, bool) {
-	key := appName + id
+func (p *cache) Get(appName, serviceName, apiName string) (*CacheEntry, bool) {
+	key := appName + serviceName + apiName
 	proxy, found := p.proxyCache.Get(key)
 	if !found {
 		return nil, false
@@ -67,8 +67,8 @@ func (p *cache) Get(appName, id string) (*CacheEntry, bool) {
 	return proxy.(*CacheEntry), found
 }
 
-func (p *cache) Put(appName, id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry {
-	key := appName + id
+func (p *cache) Put(appName, serviceName, apiName string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry {
+	key := appName + serviceName + apiName
 	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: &authorizationStrategyWrapper{authorizationStrategy, reverseProxy}, CSRFTokenStrategy: csrfTokenStrategy}
 	p.proxyCache.Set(key, proxy, gocache.DefaultExpiration)
 

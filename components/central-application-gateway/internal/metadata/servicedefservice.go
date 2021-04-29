@@ -12,7 +12,7 @@ import (
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
 	// GetAPI gets API of a service with given ID
-	GetAPI(appName, serviceID string) (*model.API, apperrors.AppError)
+	GetAPI(appName, serviceName, apiName string) (*model.API, apperrors.AppError)
 }
 
 type serviceDefinitionService struct {
@@ -29,24 +29,26 @@ func NewServiceDefinitionService(serviceAPIService serviceapi.Service, applicati
 }
 
 // GetAPI gets API of a service with given ID
-func (sds *serviceDefinitionService) GetAPI(appName, serviceID string) (*model.API, apperrors.AppError) {
-	service, err := sds.applicationRepository.Get(appName, serviceID)
+func (sds *serviceDefinitionService) GetAPI(appName, serviceName, apiName string) (*model.API, apperrors.AppError) {
+	service, err := sds.applicationRepository.Get(appName, serviceName, apiName)
+
+	// will not happen err is always nil
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return nil, apperrors.NotFound("service with ID %s not found", serviceID)
+			return nil, apperrors.NotFound("service with name %s not found", serviceName)
 		}
-		log.Errorf("failed to get service with id '%s': %s", serviceID, err.Error())
-		return nil, apperrors.Internal("failed to read %s service, %s", serviceID, err)
+		log.Errorf("failed to get service with name '%s': %s", serviceName, err.Error())
+		return nil, apperrors.Internal("failed to read %s service, %s", serviceName, err)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceID)
+		return nil, apperrors.WrongInput("service with name '%s' and api '%s' has no API", serviceName, apiName)
 	}
 
 	api, err := sds.serviceAPIService.Read(service.API)
 	if err != nil {
-		log.Errorf("failed to read api for serviceId '%s': %s", serviceID, err.Error())
-		return nil, apperrors.Internal("failed to read API for %s service, %s", serviceID, err)
+		log.Errorf("failed to read api for serviceId '%s': %s", serviceName, err.Error())
+		return nil, apperrors.Internal("failed to read API for %s service, %s", serviceName, err)
 	}
 	return api, nil
 }

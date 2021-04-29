@@ -47,6 +47,8 @@ type ServiceAPI struct {
 type Service struct {
 	// Mapped to id in Application CRD
 	ID string
+	// Mapped to name in Application CRD
+	Name string
 	// Mapped to displayName in Application CRD
 	DisplayName string
 	// Mapped to longDescription in Application CRD
@@ -63,7 +65,7 @@ type Service struct {
 
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
-	Get(appName, id string) (Service, apperrors.AppError)
+	Get(appName, serviceName, apiName string) (Service, apperrors.AppError)
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
@@ -71,20 +73,20 @@ func NewServiceRepository(appManager Manager) ServiceRepository {
 	return &repository{appManager: appManager}
 }
 
-// Get reads Service from Application by service id
-func (r *repository) Get(appName, id string) (Service, apperrors.AppError) {
+// Get reads Service from Application by service name (bundle SKR mode) and apiName (entry
+func (r *repository) Get(appName, serviceName, apiName string) (Service, apperrors.AppError) {
 	app, err := r.getApplication(appName)
 	if err != nil {
 		return Service{}, err
 	}
 
 	for _, service := range app.Spec.Services {
-		if service.ID == id {
-			return convertFromK8sType(service)
+		if service.Name == serviceName {
+			return convertFromK8sType(service, apiName)
 		}
 	}
 
-	message := fmt.Sprintf("Service with ID %s not found", id)
+	message := fmt.Sprintf("Service with name %s not found", serviceName)
 	log.Warn(message)
 
 	return Service{}, apperrors.NotFound(message)
@@ -107,12 +109,13 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	return app, nil
 }
 
-func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
+func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, apperrors.AppError) {
 	var api *ServiceAPI
 	var events bool
+	// dlaczego obsluguje sie tutaj tylko jeden wpis?
 	{
 		for _, entry := range service.Entries {
-			if entry.Type == specAPIType {
+			if entry.Type == specAPIType && entry.Name == apiName {
 				api = &ServiceAPI{
 					GatewayURL:                  entry.GatewayUrl,
 					TargetURL:                   entry.TargetUrl,
@@ -129,13 +132,16 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		}
 	}
 
+	// a bedzie co jesli nie znajdzie?
+
 	return Service{
 		ID:                  service.ID,
+		Name:                service.Name,
 		DisplayName:         service.DisplayName,
 		LongDescription:     service.LongDescription,
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,
-		API:                 api,
+		API:                 api, // nil!!!
 		Events:              events,
 	}, nil
 }

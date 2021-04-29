@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetURL)
 	if err != nil {
 		log.Errorf("failed to parse target url '%s': '%s'", targetURL, err.Error())
@@ -25,7 +25,7 @@ func makeProxy(targetURL string, requestParameters *authorization.RequestParamet
 
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
-		log.Infof("Proxy call for service '%s' to '%s'", id, targetURL)
+		log.Infof("Proxy call for service '%s' to '%s'", serviceName, targetURL)
 
 		strippedPath := stripSecretFromPath(req.URL.Path)
 		log.Infof("Striped strippedPath: %s", strippedPath)

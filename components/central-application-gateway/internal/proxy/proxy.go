@@ -68,11 +68,16 @@ func NewInvalidStateHandler(message string) http.Handler {
 	})
 }
 
+// wcześniej tutaj braliśmy wartość z naglowka http
+// teraz bedziemy patrzyc tylko na sciezke
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	appName, id, path := extractAppInfo(r.URL.Path)
-	r.URL.Path = path
+	//appName, id, path := extractAppInfo(r.URL.Path)
+	// just first approach MPS
+	appName, serviceName, apiName, path := extractAppInfoX(r.URL.Path)
 
-	cacheEntry, err := p.getOrCreateCacheEntry(appName, id)
+	r.URL.Path = path // tutaj nowa scieżka
+
+	cacheEntry, err := p.getOrCreateCacheEntry(appName, serviceName, apiName)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -87,7 +92,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, appName, id, cacheEntry, p.createCacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, appName, serviceName, apiName, cacheEntry, p.createCacheEntry); err != nil {
 		handleErrors(w, err)
 		return
 	}
@@ -95,23 +100,25 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) getOrCreateCacheEntry(appName, id string) (*CacheEntry, apperrors.AppError) {
-	cacheObj, found := p.cache.Get(appName, id)
+func (p *proxy) getOrCreateCacheEntry(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
+	cacheObj, found := p.cache.Get(appName, serviceName, apiName)
 
 	if found {
 		return cacheObj, nil
 	}
 
-	return p.createCacheEntry(appName, id)
+	return p.createCacheEntry(appName, serviceName, apiName)
 }
 
-func (p *proxy) createCacheEntry(appName, id string) (*CacheEntry, apperrors.AppError) {
-	serviceAPI, err := p.serviceDefService.GetAPI(appName, id)
+// OK wszedzie wszedzie wszedzie zmiana serviceId na serviceName
+// God help us and make this name unique!!!
+func (p *proxy) createCacheEntry(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
+	serviceAPI, err := p.serviceDefService.GetAPI(appName, serviceName, apiName)
 	if err != nil {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, id, p.skipVerify)
+	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, serviceName, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +126,7 @@ func (p *proxy) createCacheEntry(appName, id string) (*CacheEntry, apperrors.App
 	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
 
-	return p.cache.Put(appName, id, proxy, authorizationStrategy, csrfTokenStrategy), nil
+	return p.cache.Put(appName, serviceName, apiName, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
@@ -160,7 +167,7 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, appName, id string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
+func (p *proxy) addModifyResponseHandler(r *http.Request, appName, serviceName, apiName string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	secondRequestBody, err := copyRequestBody(r)
 	if err != nil {
@@ -168,7 +175,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, appName, id string, ca
 	}
 
 	modifyResponseFunction := func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(appName, id, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
+		retrier := newUnauthorizedResponseRetrier(appName, serviceName, apiName, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
 
@@ -228,3 +235,66 @@ func extractAppInfo(path string) (appName, serviceID, finalPath string) {
 	serviceID = split[2]
 	return string(appName), string(serviceID), strings.Join(split[3:], "/")
 }
+
+// {SERVICE-NAME} OS
+// {BUNDLE-NAME}/{API-NAME} SKR
+//
+//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
+//- `{APP-NAME}/{BUNDLE-NAME}/{API-NAME}/{TARGET-PATH}`
+//               service-name/ entry / path
+
+//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
+//- `{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}`
+
+// W OS bierzemy pierwszy entry
+// W SKR by wyszukać entry musimy użyć nazwy apiName jako klucza
+
+func extractAppInfoOS(path string) (appName, serviceName, finalPath string) {
+	split := strings.Split(path, "/")
+
+	appName = split[1]
+	serviceName = split[2]
+	return string(appName), string(serviceName), strings.Join(split[3:], "/")
+}
+
+func extractAppInfoX(path string) (appName, serviceName, apiName, finalPath string) {
+	split := strings.Split(path, "/")
+
+	appName = split[1]
+	serviceName = split[2]
+	apiName = split[3]
+	return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
+}
+
+// Service represents part of the remote environment, which is mapped 1 to 1 in the service-catalog to:
+// - service class in V1
+// - service plans in V2 (since api-packages support)
+
+//SKR
+//service     apiBundle  (apiPackage)
+//  entry1      apiDefinition
+//  entry2      apiDefinition
+//  entry3      apiDefinition
+
+// Kyma OS
+// serviceName - wcześniej było sobie serviceID to będzie nasze API name
+
+//service     (apiPackage)
+//  entry1      apiDefinition
+
+//service2
+//  entry1      apiDefinition
+
+// W SKR Service reprzentuje bundle a entry reprezentuje API definition
+// W OS Entry jest target URL/ typ API i credentiale
+
+// application-gateway.kyma-integration/{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
+// there will be following URL {APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
+//The API contains two endpoints:
+//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
+//- `{APP-NAME}/{BUNDLE-NAME}/{API-NAME}/{TARGET-PATH}`
+
+//APP-NAME}/{SERVICE-ID}/{TARGET-PATH}
+
+// the Application Gateway caches the OAuth tokens and CSRF tokens it obtains.
+//If the service doesn't find valid tokens for the call it makes, it gets new tokens from the OAuth server and the CSRF token endpoint.
