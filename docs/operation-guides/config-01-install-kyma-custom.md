@@ -1,6 +1,6 @@
 ---
 title: Custom Kyma Installation
-type: Configuration-TBR
+type: Configuration
 ---
 <!-- to be reviewed by ...?  -->
 
