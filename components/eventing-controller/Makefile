@@ -8,7 +8,7 @@ override ENTRYPOINT = main.go
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # DEV image is used during development workflow only
-DEV_IMGAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+DEV_IMAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
 
 NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
@@ -71,13 +71,13 @@ undeploy-nats-local: manifests
 
 # Dry run for deploying eventing-controller BEB for local development
 deploy-beb-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMGAGE} && kustomize edit set namespace ${NAMESPACE}
+	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
 
 # Dry run for deploying eventing-controller NATS for local development
 deploy-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMGAGE} && kustomize edit set namespace ${NAMESPACE}
+	cd config/manager-nats && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/nats
 
