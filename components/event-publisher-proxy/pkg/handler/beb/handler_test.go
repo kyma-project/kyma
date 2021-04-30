@@ -1,4 +1,4 @@
-package http
+package beb
 
 import (
 	"context"
@@ -428,7 +428,7 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 	client := oauth.NewClient(ctx, cfg)
 	defer client.CloseIdleConnections()
 
-	msgSender := sender.NewHttpMessageSender(emsCEURL, client)
+	msgSender := sender.NewBebMessageSender(emsCEURL, client)
 	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
 	opts := &options.Options{MaxRequestSize: int64(maxRequestSize)}
 	appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)

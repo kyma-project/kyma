@@ -4,7 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/http"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -62,7 +62,7 @@ func (c *Commander) Start() error {
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewHttpMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := sender.NewBebMessageSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -92,7 +92,7 @@ func (c *Commander) Start() error {
 	c.logger.Info("Informers are synced successfully")
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := http.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
 		c.logger.Errorf("Start handler failed with error: %s", err)
 		return err
