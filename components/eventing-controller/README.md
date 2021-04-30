@@ -16,21 +16,27 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup).
 
-- For `controller`, run:
+- For **BEB** run:
 
     ```sh
-    make deploy-local
-
-    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-local-dry-run
-    make deploy-local-dry-run
+    make deploy-beb-local
     ```
 
-- For `nats-controller`, run:
+    To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-beb-local-dry-run`.
+    
+    ```sh
+    make deploy-beb-local-dry-run
+    ```
+
+- For **NATS** run:
 
     ```sh
-    make deploy-eventing-controller-nats-local
+    make deploy-nats-local
+    ```
 
-    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".
+    To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target `deploy-nats-local-dry-run`.
+
+	```sh
     make deploy-eventing-controller-nats-local-dry-run
     ```
 
