@@ -1,6 +1,8 @@
 package beb
 
 import (
+	"context"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -22,6 +24,7 @@ import (
 
 // Commander implements the Commander interface.
 type Commander struct {
+	cancel           context.CancelFunc
 	envCfg           *env.BebConfig
 	logger           *logrus.Logger
 	metricsCollector *metrics.Collector
@@ -55,7 +58,8 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)
 
 	// assure uniqueness
-	ctx := signals.NewContext()
+	var ctx context.Context
+	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
 	// configure auth client
 	client := oauth.NewClient(ctx, c.envCfg)
@@ -98,5 +102,11 @@ func (c *Commander) Start() error {
 		return err
 	}
 	c.logger.Info("Shutdown the Event Publisher Proxy")
+	return nil
+}
+
+// Stop implements the Commander interface and stops the publisher.
+func (c *Commander) Stop() error {
+	c.cancel()
 	return nil
 }
