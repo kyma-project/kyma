@@ -35,7 +35,8 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"
-          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--proxyOSPort={{ .Values.deployment.args.proxyOSPort }}"
+          - "--proxyMPSPort={{ .Values.deployment.args.proxyMPSPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--namespace={{ .Release.Namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
@@ -63,7 +64,9 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
-          - containerPort: {{ .Values.deployment.args.proxyPort }}
-            name: http-proxy
+          - containerPort: {{ .Values.deployment.args.proxyOSPort }}
+            name: http-proxy-os
+          - containerPort: {{ .Values.deployment.args.proxyMPSPort }}
+            name: http-proxy-mps
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
