@@ -3,6 +3,7 @@ package beb
 import (
 	"context"
 	"fmt"
+	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -92,6 +93,16 @@ func (c *Commander) Start() error {
 		c.envCfg,
 	).SetupWithManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
+	}
+
+	// TODO(PS): probably we should move manager out of commander, and setup backend reconciler with
+	//  BEB or NATS commander using the same manager.
+	backendReconciler := &controllers.BackendReconciler{
+		Client: c.mgr.GetClient(),
+		Log:    ctrl.Log.WithName("reconciler").WithName("backend"),
+	}
+	if err := backendReconciler.SetupWithManager(c.mgr); err != nil {
+		return fmt.Errorf("unable to setup the Backend Controller: %v", err)
 	}
 
 	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {
