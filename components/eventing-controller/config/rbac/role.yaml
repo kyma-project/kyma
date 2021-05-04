@@ -14,6 +14,36 @@ rules:
   - create
   - patch
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - eventingbackends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - eventingbackends/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - eventing.kyma-project.io
   resources:
   - subscriptions
