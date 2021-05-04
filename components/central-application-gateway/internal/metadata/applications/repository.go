@@ -112,10 +112,10 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, apperrors.AppError) {
 	var api *ServiceAPI
 	var events bool
-	// dlaczego obsluguje sie tutaj tylko jeden wpis?
-	{
+	// Kyma OS mode - find first
+	if len (apiName) == 0 {
 		for _, entry := range service.Entries {
-			if entry.Type == specAPIType && entry.Name == apiName {
+			if entry.Type == specAPIType{
 				api = &ServiceAPI{
 					GatewayURL:                  entry.GatewayUrl,
 					TargetURL:                   entry.TargetUrl,
@@ -130,9 +130,29 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 				return Service{}, apperrors.Internal(message)
 			}
 		}
+	} else {
+		// Management Plane mode
+		for _, entry := range service.Entries {
+			if entry.Name == apiName {
+				if entry.Type == specAPIType{
+					api = &ServiceAPI{
+						GatewayURL:                  entry.GatewayUrl,
+						TargetURL:                   entry.TargetUrl,
+						Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
+						RequestParametersSecretName: entry.RequestParametersSecretName,
+					}
+				} else if entry.Type == specEventsType {
+					events = true
+				} else {
+					message := fmt.Sprintf("incorrect type of entry '%s' in Application Service definition", entry.Type)
+					log.Error(message)
+					return Service{}, apperrors.Internal(message)
+				}
+			}
+		}
 	}
 
-	// a bedzie co jesli nie znajdzie?
+	// r bedzie co jesli nie znajdzie?
 
 	return Service{
 		ID:                  service.ID,

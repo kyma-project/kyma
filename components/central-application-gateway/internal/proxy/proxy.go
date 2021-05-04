@@ -30,6 +30,7 @@ type proxy struct {
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
+	splitPathFunc                func(string) (string, string, string, string)
 }
 
 // Handler serves as a Reverse Proxy
@@ -39,10 +40,11 @@ type Handler interface {
 
 // Config stores Proxy config
 type Config struct {
-	SkipVerify    bool
-	ProxyTimeout  int
-	Application   string
-	ProxyCacheTTL int
+	SkipVerify          bool
+	ProxyTimeout        int
+	Application         string
+	ProxyCacheTTL       int
+	ManagementPlaneMode bool
 }
 
 // New creates proxy for handling user's services calls
@@ -58,6 +60,7 @@ func New(
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
+		splitPathFunc:                getSplitPathFunc(config.ManagementPlaneMode),
 	}
 }
 
@@ -71,9 +74,9 @@ func NewInvalidStateHandler(message string) http.Handler {
 // wcześniej tutaj braliśmy wartość z naglowka http
 // teraz bedziemy patrzyc tylko na sciezke
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//appName, id, path := extractAppInfo(r.URL.Path)
-	// just first approach MPS
-	appName, serviceName, apiName, path := extractAppInfoX(r.URL.Path)
+	//old code appName, id, path := extractAppInfo(r.URL.Path)
+
+	appName, serviceName, apiName, path := p.splitPathFunc(r.URL.Path)
 
 	r.URL.Path = path // tutaj nowa scieżka
 
@@ -249,22 +252,31 @@ func extractAppInfo(path string) (appName, serviceID, finalPath string) {
 // W OS bierzemy pierwszy entry
 // W SKR by wyszukać entry musimy użyć nazwy apiName jako klucza
 
-func extractAppInfoOS(path string) (appName, serviceName, finalPath string) {
-	split := strings.Split(path, "/")
+func getSplitPathFunc(managementPlaneMode bool) func(path string) (appName, serviceName, apiName, finalPath string) {
 
-	appName = split[1]
-	serviceName = split[2]
-	return string(appName), string(serviceName), strings.Join(split[3:], "/")
+	// error handling is missing here
+	if managementPlaneMode == true {
+		//{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}
+		return func(path string) (appName, serviceName, apiName, finalPath string) {
+			split := strings.Split(path, "/")
+
+			appName = split[1]
+			serviceName = split[2]
+			apiName = split[3]
+			return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
+		}
+	} else {
+		//{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
+		return func(path string) (appName, serviceName, apiName, finalPath string) {
+			split := strings.Split(path, "/")
+
+			appName = split[1]
+			serviceName = split[2]
+			return string(appName), string(serviceName), string(""), strings.Join(split[3:], "/")
+		}
+	}
 }
 
-func extractAppInfoX(path string) (appName, serviceName, apiName, finalPath string) {
-	split := strings.Split(path, "/")
-
-	appName = split[1]
-	serviceName = split[2]
-	apiName = split[3]
-	return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
-}
 
 // Service represents part of the remote environment, which is mapped 1 to 1 in the service-catalog to:
 // - service class in V1

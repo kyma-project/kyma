@@ -28,7 +28,7 @@ func NewServiceDefinitionService(serviceAPIService serviceapi.Service, applicati
 	}
 }
 
-// GetAPI gets API of a service with given ID
+// GetAPI gets API of a service with given name
 func (sds *serviceDefinitionService) GetAPI(appName, serviceName, apiName string) (*model.API, apperrors.AppError) {
 	service, err := sds.applicationRepository.Get(appName, serviceName, apiName)
 

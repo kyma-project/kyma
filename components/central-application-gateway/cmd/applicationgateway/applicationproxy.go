@@ -97,9 +97,10 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
 
 		proxyConfig := proxy.Config{
-			SkipVerify:    options.skipVerify,
-			ProxyTimeout:  options.proxyTimeout,
-			ProxyCacheTTL: options.proxyCacheTTL,
+			SkipVerify:          options.skipVerify,
+			ProxyTimeout:        options.proxyTimeout,
+			ProxyCacheTTL:       options.proxyCacheTTL,
+			ManagementPlaneMode: options.managementPlaneMode,
 		}
 
 		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig /* tutaj funkcja do dzielenia tego stringa*/)
