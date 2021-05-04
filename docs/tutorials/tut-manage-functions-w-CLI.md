@@ -1,9 +1,7 @@
 ---
 title: Manage Functions with Kyma CLI
-type: Tasks
+type: Tutorial
 ---
-
-<!-- is it the admin/operator who manages a function, or rather the function's dev? I believe this should go into "Advanced Tasks" -->
 
 This tutorial shows how to use the available CLI commands to manage Functions in Kyma:
 
