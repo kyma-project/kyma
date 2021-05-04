@@ -1,6 +1,6 @@
 ---
 title: Search for traces
-type: Details
+type: Tutorials
 ---
 
 You can search traces using tags. Tags are key-value pairs configured for each service.
