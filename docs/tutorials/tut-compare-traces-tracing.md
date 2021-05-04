@@ -1,11 +1,11 @@
 ---
 title: Compare traces
-type: Details
+type: Tutorials
 ---
 
 Trace comparison allows you to compare the structure of two traces, rendered as a tree of connected services and operations. The colors help you to distinguish the differences between two traces.
 
-Compare the traces using the **Jaeger** user interface.
+Compare the traces with the **Jaeger** user interface.
 
 1. In the search page for traces, select the traces to compare and click **Compare Traces**.
 
