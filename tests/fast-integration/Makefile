@@ -24,7 +24,7 @@ ci-pre-upgrade:
 	npm run test-commerce-mock-tests
 
 .PHONY: ci-post-upgrade
-ci-pre-upgrade:
+ci-post-upgrade:
 	npm install
 	npm run test-commerce-mock-tests
 	npm run test-commerce-mock-cleanup
