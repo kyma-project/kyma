@@ -125,8 +125,8 @@ We have several pipelines that use fast-integration tests. See the list of pipel
 
 Pipeline | Description | Infrastructure
 --|--|--|
-[pre-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=pre-master-kyma-integration-k3s) | Job that runs on every PR before the merge to the `main` branch. | k3s
-[post-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=post-master-kyma-integration-k3s) | Job that runs on every PR after it is merged to the `main` branch. | k3s
+[pre-main-kyma-integration-k3s](https://status.build.kyma-project.io/?job=pre-main-kyma-integration-k3s) | Job that runs on every PR before the merge to the `main` branch. | k3s
+[post-main-kyma-integration-k3s](https://status.build.kyma-project.io/?job=post-main-kyma-integration-k3s) | Job that runs on every PR after it is merged to the `main` branch. | k3s
 [kyma-integration-k3s](https://status.build.kyma-project.io/?job=kyma-integration-k3s) | Job that periodicially runs the fast-integration tests. | k3s
 [kyma-integration-production-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-production-gardener-azure) | Periodic job that tests the production profile in Kyma. | Gardener, Azure
 [kyma-integration-evaluation-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-evaluation-gardener-azure) | Periodic job that tests the evaluation profile in Kyma. | Gardener, Azure
