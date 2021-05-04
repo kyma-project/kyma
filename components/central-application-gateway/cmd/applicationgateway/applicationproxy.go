@@ -54,11 +54,13 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, options)
+	internalHandlerForOS := newInternalHandler(serviceDefinitionService, options, false)
+	internalHandlerForMPS := newInternalHandler(serviceDefinitionService, options, true)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
-		internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
+		internalHandlerForOS = httptools.RequestLogger("Internal handler: ", internalHandlerForOS)
+		internalHandlerForMPS = httptools.RequestLogger("Internal handler: ", internalHandlerForMPS)
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 	}
 
@@ -69,28 +71,40 @@ func main() {
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	internalSrv := &http.Server{
-		Addr:         ":" + strconv.Itoa(options.proxyPort),
-		Handler:      internalHandler,
+	internalSrvKymaOS := &http.Server{
+		Addr:         ":" + strconv.Itoa(options.proxyOSPort),
+		Handler:      internalHandlerForOS,
 		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
+	internalSrvKymaMPS := &http.Server{
+		Addr:         ":" + strconv.Itoa(options.proxyMPSPort),
+		Handler:      internalHandlerForMPS,
+		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
+		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
+	}
+
+
 	wg := &sync.WaitGroup{}
 
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		log.Info(externalSrv.ListenAndServe())
 	}()
 
 	go func() {
-		log.Info(internalSrv.ListenAndServe())
+		log.Info(internalSrvKymaOS.ListenAndServe())
+	}()
+
+	go func() {
+		log.Info(internalSrvKymaMPS.ListenAndServe())
 	}()
 
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options, managementPlaneMode bool) http.Handler {
 	if serviceDefinitionService != nil {
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		csrfCl := newCSRFClient(options.proxyTimeout)
@@ -100,10 +114,10 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 			SkipVerify:          options.skipVerify,
 			ProxyTimeout:        options.proxyTimeout,
 			ProxyCacheTTL:       options.proxyCacheTTL,
-			ManagementPlaneMode: options.managementPlaneMode,
+			ManagementPlaneMode: managementPlaneMode,
 		}
 
-		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig /* tutaj funkcja do dzielenia tego stringa*/)
+		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
 
 		return proxyHandler
 	}
@@ -147,7 +161,7 @@ Przyklad service:
       type: API
     id: 077d45d1-6539-483c-8e37-f272f039e94f
     identifier: ""
-    name: personalization-webservices-v1-3b0c4
+    name: personalization-webservices-v1-3b0c4  /personalization-webservices-v1/api-1/dest-path
     providerDisplayName: ""
 */
 

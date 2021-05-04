@@ -3,7 +3,12 @@ package applications
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
+	"regexp"
+	"strings"
+	"unicode"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -81,7 +86,17 @@ func (r *repository) Get(appName, serviceName, apiName string) (Service, apperro
 	}
 
 	for _, service := range app.Spec.Services {
-		if service.Name == serviceName {
+
+		// service.Name personalization-webservices-v1-3b0c4
+		// service.displayName Personalization Webservices v1 (oryginalny
+		// serviceName personalization-webservices-v1 (to przychodzi z API)
+
+		usedServiceName := serviceName
+		if len(apiName) == 0 {
+			usedServiceName = createServiceName(serviceName, service.ID)
+		}
+
+		if service.Name == usedServiceName {
 			return convertFromK8sType(service, apiName)
 		}
 	}
@@ -131,7 +146,8 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 			}
 		}
 	} else {
-		// Management Plane mode
+		// TODO Rozwiazac problem z ID
+		// Management Plane mode to nie zadziała 1) get name + and Id odkleic sufix blebleble jesli nazwa jest jest postaci string_hash
 		for _, entry := range service.Entries {
 			if entry.Name == apiName {
 				if entry.Type == specAPIType{
@@ -164,6 +180,30 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 		API:                 api, // nil!!!
 		Events:              events,
 	}, nil
+}
+
+var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
+
+
+func createServiceName(serviceDisplayName, id string) string {
+	// generate 5 characters suffix from the id
+	sha := sha1.New()
+	sha.Write([]byte(id))
+	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
+	// remove all characters, which is not alpha numeric
+	serviceDisplayName = nonAlphaNumeric.ReplaceAllString(serviceDisplayName, "-")
+	// to lower
+	serviceDisplayName = strings.Map(unicode.ToLower, serviceDisplayName)
+	// trim dashes if exists
+	serviceDisplayName = strings.TrimSuffix(serviceDisplayName, "-")
+	if len(serviceDisplayName) > 57 {
+		serviceDisplayName = serviceDisplayName[:57]
+	}
+	// add suffix
+	serviceDisplayName = fmt.Sprintf("%s-%s", serviceDisplayName, suffix)
+	// remove dash pre3 empty or had dash prefix
+	serviceDisplayName = strings.TrimPrefix(serviceDisplayName, "-")
+	return serviceDisplayName
 }
 
 func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credentials {

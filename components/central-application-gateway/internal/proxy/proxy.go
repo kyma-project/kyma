@@ -53,6 +53,13 @@ func New(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config) Handler {
+
+	splitPathFunc := extractAppInfoForKymaOS
+
+	if config.ManagementPlaneMode == true {
+		splitPathFunc = extractAppInfoForKymaMPS
+	}
+
 	return &proxy{
 		serviceDefService:            serviceDefService,
 		cache:                        NewCache(config.ProxyCacheTTL),
@@ -60,7 +67,7 @@ func New(
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
-		splitPathFunc:                getSplitPathFunc(config.ManagementPlaneMode),
+		splitPathFunc:                splitPathFunc,
 	}
 }
 
@@ -71,14 +78,12 @@ func NewInvalidStateHandler(message string) http.Handler {
 	})
 }
 
-// wcześniej tutaj braliśmy wartość z naglowka http
-// teraz bedziemy patrzyc tylko na sciezke
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//old code appName, id, path := extractAppInfo(r.URL.Path)
 
 	appName, serviceName, apiName, path := p.splitPathFunc(r.URL.Path)
 
-	r.URL.Path = path // tutaj nowa scieżka
+	r.URL.Path = path
 
 	cacheEntry, err := p.getOrCreateCacheEntry(appName, serviceName, apiName)
 	if err != nil {
@@ -113,8 +118,6 @@ func (p *proxy) getOrCreateCacheEntry(appName, serviceName, apiName string) (*Ca
 	return p.createCacheEntry(appName, serviceName, apiName)
 }
 
-// OK wszedzie wszedzie wszedzie zmiana serviceId na serviceName
-// God help us and make this name unique!!!
 func (p *proxy) createCacheEntry(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 	serviceAPI, err := p.serviceDefService.GetAPI(appName, serviceName, apiName)
 	if err != nil {
@@ -252,30 +255,25 @@ func extractAppInfo(path string) (appName, serviceID, finalPath string) {
 // W OS bierzemy pierwszy entry
 // W SKR by wyszukać entry musimy użyć nazwy apiName jako klucza
 
-func getSplitPathFunc(managementPlaneMode bool) func(path string) (appName, serviceName, apiName, finalPath string) {
+//{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}
+func extractAppInfoForKymaMPS(path string) (appName, serviceName, apiName, finalPath string) {
+	split := strings.Split(path, "/")
 
-	// error handling is missing here
-	if managementPlaneMode == true {
-		//{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}
-		return func(path string) (appName, serviceName, apiName, finalPath string) {
-			split := strings.Split(path, "/")
-
-			appName = split[1]
-			serviceName = split[2]
-			apiName = split[3]
-			return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
-		}
-	} else {
-		//{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
-		return func(path string) (appName, serviceName, apiName, finalPath string) {
-			split := strings.Split(path, "/")
-
-			appName = split[1]
-			serviceName = split[2]
-			return string(appName), string(serviceName), string(""), strings.Join(split[3:], "/")
-		}
-	}
+	appName = split[1]
+	serviceName = split[2]
+	apiName = split[3]
+	return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
 }
+
+//{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
+func extractAppInfoForKymaOS(path string) (appName, serviceName, apiName, finalPath string) {
+	split := strings.Split(path, "/")
+
+	appName = split[1]
+	serviceName = split[2]
+	return string(appName), string(serviceName), string(""), strings.Join(split[3:], "/")
+}
+
 
 
 // Service represents part of the remote environment, which is mapped 1 to 1 in the service-catalog to:
