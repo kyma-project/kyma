@@ -1,5 +1,6 @@
 ---
 title: Loki (Logging)
+type: What is...
 ---
 
 Logging in Kyma uses [Loki](https://github.com/grafana/loki) which is a Prometheus-like log management system. This lightweight solution, integrated with Grafana, is easy to understand and operate. The main elements of the logging stack include:

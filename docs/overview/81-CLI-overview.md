@@ -1,8 +1,7 @@
 ---
 title: Kyma CLI
-type: Overview
+type: UI
 ---
-<!-- Must go into the Overview tab; users need the CLI to get started -->
 
 Kyma CLI is a command-line tool that supports Kyma developers. It provides a set of commands and flags you can use to: 
 

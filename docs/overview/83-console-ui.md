@@ -1,6 +1,6 @@
 ---
 title: Console UI
-type: Overview
+type: UI
 ---
 
 The Console is a web-based administrative UI for Kyma. It uses the [Luigi](https://github.com/SAP/luigi) framework to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated Console Backend Service which provides a tailor-made API for each view of the Console UI.
