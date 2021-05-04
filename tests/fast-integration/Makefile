@@ -21,7 +21,6 @@ ci-skr:
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
 	npm install
-	npm run test-commerce-mock-preparation
 	npm run test-commerce-mock-tests
 
 .PHONY: ci-post-upgrade
