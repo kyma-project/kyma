@@ -10,7 +10,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -20,9 +19,22 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
 )
 
+// AddToScheme adds the own schemes to the runtime scheme.
+func AddToScheme(scheme *runtime.Scheme) error {
+	if err := clientgoscheme.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Commander implements the Commander interface.
 type Commander struct {
-	scheme          *runtime.Scheme
 	envCfg          env.Config
 	restCfg         *rest.Config
 	enableDebugLogs bool
@@ -33,52 +45,25 @@ type Commander struct {
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
 	return &Commander{
-		scheme:          runtime.NewScheme(),
 		envCfg:          env.GetConfig(),
+		restCfg:         restCfg,
 		enableDebugLogs: enableDebugLogs,
 		metricsAddr:     metricsAddr,
 		resyncPeriod:    resyncPeriod,
 	}
 }
 
-// Init implements the Commander interface and initializes the BEB command.
-func (c *Commander) Init() error {
-	// Adding schemas.
-	if err := clientgoscheme.AddToScheme(c.scheme); err != nil {
-		return err
-	}
-	if err := eventingv1alpha1.AddToScheme(c.scheme); err != nil {
-		return err
-	}
-	if err := apigatewayv1alpha1.AddToScheme(c.scheme); err != nil {
-		return err
-	}
-	// Check config.
+// Start implements the Commander interface and starts the manager.
+func (c *Commander) Start(mgr manager.Manager) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	if len(c.envCfg.Domain) == 0 {
 		return fmt.Errorf("env var DOMAIN must be a non-empty value")
 	}
-	c.restCfg = ctrl.GetConfigOrDie()
-	ctrl.SetLogger(zap.New(zap.UseDevMode(c.enableDebugLogs)))
-	// Create the manager.
-	mgr, err := ctrl.NewManager(c.restCfg, ctrl.Options{
-		Scheme:             c.scheme,
-		MetricsBindAddress: c.metricsAddr,
-		Port:               9443,
-		SyncPeriod:         &c.resyncPeriod,
-	})
-	if err != nil {
-		return err
-	}
 	c.mgr = mgr
-	return nil
-}
-
-// Start implements the Commander interface and starts the manager.
-func (c *Commander) Start() error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
@@ -98,4 +83,9 @@ func (c *Commander) Start() error {
 		return err
 	}
 	return nil
+}
+
+// Stop implements the Commander interface and stops the commander.
+func (c *Commander) Stop() error {
+	return nil // TODO Stopping and cleanup.
 }
