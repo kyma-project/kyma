@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	clientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-operator/pkg/client/listers/applicationconnector/v1alpha1"
 	gocache "github.com/patrickmn/go-cache"
@@ -20,7 +19,6 @@ import (
 const controllerName = "cache_sync_controller"
 
 type Controller struct {
-	clientset         clientset.Interface
 	applicationLister listers.ApplicationLister
 	applicationSynced cache.InformerSynced
 	workqueue         workqueue.RateLimitingInterface
@@ -30,13 +28,11 @@ type Controller struct {
 
 func NewController(
 	log *logger.Logger,
-	clientset clientset.Interface,
 	applicationInformer informers.ApplicationInformer,
 	appCache *gocache.Cache) *Controller {
 
 	controller := &Controller{
 		log:               log,
-		clientset:         clientset,
 		applicationLister: applicationInformer.Lister(),
 		applicationSynced: applicationInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Applications"),

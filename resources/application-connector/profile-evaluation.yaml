@@ -45,6 +45,8 @@ connection-token-handler:
         cpu: 1m
         memory: 16Mi
 central-application-connectivity-validator:
+  autoscaling:
+    enable: false
   deployment:
     resources:
       limits:

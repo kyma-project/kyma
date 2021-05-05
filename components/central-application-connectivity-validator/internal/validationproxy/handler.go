@@ -1,7 +1,6 @@
 package validationproxy
 
 import (
-	"context"
 	"crypto/x509/pkix"
 	"net/http"
 	"net/http/httputil"
@@ -11,10 +10,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httptools"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -27,12 +24,6 @@ type ProxyHandler interface {
 	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
 }
 
-//go:generate mockery --name=ApplicationGetter
-type ApplicationGetter interface {
-	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1alpha1.Application, error)
-}
-
-//go:generate mockery --name=Cache
 type Cache interface {
 	Get(k string) (interface{}, bool)
 	Set(k string, x interface{}, d time.Duration)
@@ -132,7 +123,6 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
 	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
-		// TODO: retry logic should be implemented here
 		err := apperrors.Internal("application with name %s is not found in the cache. Please retry", applicationName)
 		return nil, err
 	}

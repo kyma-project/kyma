@@ -26,7 +26,7 @@ func Start(log *logger.Logger, kubeConfig string, apiServerURL string, syncPerio
 
 	applicationInformerFactory := informers.NewSharedInformerFactory(applicationClient, syncPeriod)
 
-	controller := NewController(log, applicationClient, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), cache)
+	controller := NewController(log, applicationInformerFactory.Applicationconnector().V1alpha1().Applications(), cache)
 	applicationInformerFactory.Start(stopCh)
 
 	if err = controller.Run(2, stopCh); err != nil {
