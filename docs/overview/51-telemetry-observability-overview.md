@@ -24,12 +24,12 @@ We recommend that you also implement an observability solution of your choice ou
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
-- Prometheus
-- Grafana
-- Jaeger
-- Loki
+- [Prometheus](con-tbd)
+- [Grafana](con-tbd)
+- [Jaeger](con-tracing)
+- [Loki](con-logging)
 
-Learn how to configure them for your needs under [Configuring In-Cluster Observability](link_to_topic).
+See how to configure them for your needs under [Configuring In-Cluster Observability](link_tbd.
 
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
@@ -47,3 +47,9 @@ You can integrate various frameworks and libraries, such as:
 - *option 1*
 - *option 2*
 - *option 3*
+
+Learn how to integrate Kyma with your preferred observability solution under [this tutorial](link-to-topic).
+
+## Learn more
+
+Interested in the architecture details? Check out the [logging architecture](arch-logging) and the [end-to-end monitoring flow](arch-monitoring).
