@@ -97,7 +97,7 @@ func (c *Commander) Stop() error {
 	return c.cleanup()
 }
 
-// cleanup removes all created BEB artefacts.
+// cleanup removes all created BEB artifacts.
 func (c *Commander) cleanup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

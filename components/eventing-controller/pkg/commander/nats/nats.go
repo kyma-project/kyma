@@ -91,7 +91,7 @@ func (c *Commander) Stop() error {
 	return c.cleanup()
 }
 
-// clean removes all NATS artefacts.
+// clean removes all NATS artifacts.
 func (c *Commander) cleanup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
