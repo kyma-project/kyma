@@ -1014,7 +1014,7 @@ var _ = BeforeSuite(func(done Done) {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
-		DefaultNamespace:         "/default/ns",
+		BEBNamespace:             "/default/ns",
 		Qos:                      "AT_LEAST_ONCE",
 	}
 

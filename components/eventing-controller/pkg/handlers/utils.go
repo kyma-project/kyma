@@ -60,11 +60,13 @@ func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings)
 }
 
 func getQos(qosStr string) (types.Qos, error) {
-	if qosStr == string(types.QosAtLeastOnce) {
+	qosStr = strings.ReplaceAll(qosStr, "-", "_")
+	switch qosStr {
+	case string(types.QosAtLeastOnce):
 		return types.QosAtLeastOnce, nil
-	} else if qosStr == string(types.QosAtMostOnce) {
+	case string(types.QosAtMostOnce):
 		return types.QosAtMostOnce, nil
-	} else {
+	default:
 		return "", fmt.Errorf("invalid Qos: %s", qosStr)
 	}
 }
@@ -88,8 +90,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		}
 		// Qos
 		if subscription.Spec.ProtocolSettings.Qos != nil {
-			qosStr := strings.ReplaceAll(*subscription.Spec.ProtocolSettings.Qos, "-", "_")
-			qos, err := getQos(qosStr)
+			qos, err := getQos(*subscription.Spec.ProtocolSettings.Qos)
 			if err != nil {
 				return nil, err
 			}

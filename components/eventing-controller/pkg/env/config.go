@@ -52,7 +52,7 @@ type Config struct {
 	ContentMode     string `envconfig:"CONTENT_MODE" default:""`
 
 	// Default namespace for BEB
-	DefaultNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
+	BEBNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
 
 	// Domain holds the Kyma domain
 	Domain string `envconfig:"DOMAIN" required:"true"`

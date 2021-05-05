@@ -23,7 +23,7 @@ type Beb struct {
 	Client           *client.Client
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
-	DefaultNamespace string
+	Namespace        string
 	Log              logr.Logger
 }
 
@@ -42,7 +42,7 @@ func (b *Beb) Initialize(cfg env.Config) error {
 			ExemptHandshake: &cfg.ExemptHandshake,
 			Qos:             &cfg.Qos,
 		}
-		b.DefaultNamespace = cfg.DefaultNamespace
+		b.Namespace = cfg.BEBNamespace
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.DefaultNamespace)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err

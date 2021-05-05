@@ -46,7 +46,7 @@ func Test_GetConfig(t *testing.T) {
 	g.Expect(config.WebhookTokenEndpoint).To(Equal(envs["WEBHOOK_TOKEN_ENDPOINT"]))
 	g.Expect(config.Domain).To(Equal(envs["DOMAIN"]))
 	g.Expect(config.EventTypePrefix).To(Equal(envs["EVENT_TYPE_PREFIX"]))
-	g.Expect(config.DefaultNamespace).To(Equal(envs["BEB_NAMESPACE"]))
+	g.Expect(config.BEBNamespace).To(Equal(envs["BEB_NAMESPACE"]))
 	// Ensure optional variables can be set
 	g.Expect(config.BebApiUrl).To(Equal(envs["BEB_API_URL"]))
 
