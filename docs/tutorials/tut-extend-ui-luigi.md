@@ -1,6 +1,6 @@
 ---
-title:  UI extensibility
-type: UI
+title:  Extend the Console UI
+type: Tutorials
 ---
 
 The Kyma Console UI uses the [Luigi framework](https://github.com/kyma-project/luigi) to allow you to seamlessly extend the UI content with custom micro frontends.
