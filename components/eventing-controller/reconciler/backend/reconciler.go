@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -109,9 +110,13 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Stop subscription controller (Radu/Frank)
 	// Start the other subscription controller (Radu/Frank)
 	// CreateOrUpdate deployment for publisher proxy
-	publisher, err = r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.NatsBackendType)
+	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.NatsBackendType)
 	if err != nil {
 		// Update status if bad
+		return ctrl.Result{}, err
+	}
+	if err := r.Create(ctx, publisher); err != nil {
+		r.Log.Error(err, "cannot create eventing publisher proxy deployment")
 		return ctrl.Result{}, err
 	}
 
@@ -199,7 +204,30 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 									ContainerPort: PublisherMetricsPortNum,
 								},
 							},
-							Env: nil,
+							Env: []v1.EnvVar{
+								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+								{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
+								{Name: "REQUEST_TIMEOUT", Value: "5s"},
+								{Name: "LEGACY_NAMESPACE", Value: "kyma"},
+								{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+								{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+								{
+									Name: "CLIENT_ID",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key: "client-id",
+										}},
+								},
+								{
+									Name: "CLIENT_SECRET",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key: "client-secret",
+										}},
+								},
+							},
 							LivenessProbe: &v1.Probe{
 								Handler: v1.Handler{
 									HTTPGet: &v1.HTTPGetAction{
