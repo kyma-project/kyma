@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
 
 func main() {
@@ -57,6 +58,16 @@ func main() {
 	})
 	if err != nil {
 		logger.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	// Start the backend manager.
+	backendReconciler := &backend.BackendReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("reconciler").WithName("backend"),
+	}
+	if err := backendReconciler.SetupWithManager(mgr); err != nil {
+		logger.Error(err, "unable to start the backend controller")
 		os.Exit(1)
 	}
 
