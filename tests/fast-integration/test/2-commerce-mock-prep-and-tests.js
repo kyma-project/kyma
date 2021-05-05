@@ -1,4 +1,5 @@
 const {
+  ensureCommerceMockLocalTestFixture,
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
 } = require("./fixtures/commerce-mock");
@@ -15,6 +16,13 @@ describe("CommerceMock tests", function () {
 
   it("Listing all pods in cluster", async function () {
     initialRestarts = await getContainerRestartsForAllNamespaces();
+  });
+
+  it("CommerceMock test fixture should be ready", async function () {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
+      console.dir(err); // first error is logged
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
+    });
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
