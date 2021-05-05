@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -15,6 +18,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
 )
 
@@ -31,6 +35,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
+	cancel          context.CancelFunc
 	envCfg          env.NatsConfig
 	restCfg         *rest.Config
 	enableDebugLogs bool
@@ -61,8 +66,8 @@ func (c *Commander) Init(mgr manager.Manager) error {
 // Start implements the Commander interface and starts the commander.
 func (c *Commander) Start() error {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
+	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
@@ -81,5 +86,55 @@ func (c *Commander) Start() error {
 
 // Stop implements the Commander interface and stops the commander.
 func (c *Commander) Stop() error {
-	return nil // TODO Stopping and cleanup.
+	c.cancel()
+
+	return c.cleanup()
+}
+
+// clean removes all NATS artefacts.
+func (c *Commander) cleanup() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
+	natsHandler := handlers.NewNats(c.envCfg, logger)
+	err := natsHandler.Initialize(env.Config{})
+	if err != nil {
+		logger.Error(err, "can't initialize connection with NATS")
+		return err
+	}
+
+	// Fetch all subscriptions.
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	if err != nil {
+		return err
+	}
+
+	statusDeletionResult := make(map[string]error)
+	subDeletionResult := make(map[string]error)
+
+	for _, sub := range subs.Items {
+		// Clean statuses.
+		key := types.NamespacedName{
+			Namespace: sub.Namespace,
+			Name:      sub.Name,
+		}
+		desiredSub := handlers.RemoveStatus(sub)
+		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		if err != nil {
+			statusDeletionResult[key.String()] = err
+		}
+
+		// Clean subscriptions from NATS.
+		err = natsHandler.DeleteSubscription(&sub)
+		if err != nil {
+			subDeletionResult[key.String()] = err
+		}
+	}
+	return nil
 }

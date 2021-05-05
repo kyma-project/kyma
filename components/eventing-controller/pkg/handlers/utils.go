@@ -1,23 +1,29 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-
+	"github.com/mitchellh/hashstructure"
 	"github.com/pkg/errors"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/mitchellh/hashstructure"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
 // MessagingBackend exposes a common handler interface for different messaging backend systems
@@ -152,4 +158,60 @@ func GetRandString(l int) string {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
+	desiredSub := sub.DeepCopy()
+	desiredSub.Status = eventingv1alpha1.SubscriptionStatus{}
+	return desiredSub
+}
+
+func UpdateSubscription(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
+	unstructuredObj, err := toUnstructuredSub(sub)
+	if err != nil {
+		return errors.Wrap(err, "failed to convert subscription to unstructured")
+	}
+	_, err = dClient.
+		Resource(GroupVersionResource()).
+		Namespace(sub.Namespace).
+		Update(ctx, unstructuredObj, metav1.UpdateOptions{})
+
+	return err
+}
+
+func ToSubscriptionList(unstructuredList *unstructured.UnstructuredList) (*eventingv1alpha1.SubscriptionList, error) {
+	subscriptionList := new(eventingv1alpha1.SubscriptionList)
+	subscriptionListBytes, err := unstructuredList.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(subscriptionListBytes, subscriptionList)
+	if err != nil {
+		return nil, err
+	}
+	return subscriptionList, nil
+}
+
+func toUnstructuredSub(sub *eventingv1alpha1.Subscription) (*unstructured.Unstructured, error) {
+	object, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(&sub)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: object}, nil
+}
+
+func GroupVersionResource() schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Resource: "subscriptions",
+	}
+}
+
+func APIRuleGroupVersionResource() schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Version:  apigatewayv1alpha1.GroupVersion.Version,
+		Group:    apigatewayv1alpha1.GroupVersion.Group,
+		Resource: "apirules",
+	}
 }
