@@ -3,8 +3,9 @@ package nats
 import (
 	"context"
 	"fmt"
-	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 	"time"
+
+	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
@@ -92,6 +93,7 @@ func (c *Commander) Start() error {
 	//  BEB or NATS commander using the same manager.
 	backendReconciler := &controllers.BackendReconciler{
 		Client: c.mgr.GetClient(),
+		Cache:  c.mgr.GetCache(),
 		Log:    ctrl.Log.WithName("reconciler").WithName("backend"),
 	}
 	if err := backendReconciler.SetupWithManager(c.mgr); err != nil {
