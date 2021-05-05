@@ -29,7 +29,7 @@ You can use the following in-cluster components to observe your applications' te
 - [Jaeger](con-tracing)
 - [Loki](con-logging)
 
-See how to configure them for your needs under [Configuring In-Cluster Observability](link_tbd.
+See how to configure them for your needs under [Configuring In-Cluster Observability](link_tbd).
 
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
