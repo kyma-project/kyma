@@ -82,10 +82,6 @@ func (c *Commander) Start() error {
 	).SetupWithManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
 	}
-
-	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		return err
-	}
 	return nil
 }
 

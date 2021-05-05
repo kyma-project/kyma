@@ -76,10 +76,6 @@ func (c *Commander) Start() error {
 	).SetupWithManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
-
-	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		return err
-	}
 	return nil
 }
 

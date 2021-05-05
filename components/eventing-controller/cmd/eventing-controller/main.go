@@ -77,15 +77,23 @@ func main() {
 	}
 
 	if err := commander.Init(mgr); err != nil {
-		logger.Error(err, "unable to start manager")
+		logger.Error(err, "unable to init commander")
 		os.Exit(1)
 	}
 
 	// Start the commander.
 	// TODO Has to be done by backand management controller later.
-	logger.Info(fmt.Sprintf("starting %s subscription controller and manager", backend))
+	logger.Info(fmt.Sprintf("starting %s commander", backend))
 
 	if err := commander.Start(); err != nil {
+		logger.Error(err, "unable to start commander")
+		os.Exit(1)
+	}
+
+	// Start the manager.
+	logger.Info("starting manager")
+
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		logger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
