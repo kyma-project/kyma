@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -96,6 +100,65 @@ func (c *Commander) Start() error {
 
 	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (c *Commander) Cleanup() error {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
+
+	bebHandler := &handlers.Beb{Log: logger}
+	err := bebHandler.Initialize(c.envCfg)
+	if err != nil {
+		return err
+	}
+
+	// Fetch all subscriptions
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	if err != nil {
+		return err
+	}
+
+	statusDeletionResult := make(map[string]error)
+	subDeletionResult := make(map[string]error)
+	apiRuleDeletionResult := make(map[string]error)
+	for _, sub := range subs.Items {
+
+		// Clean APIRules
+		apiRule := sub.Status.APIRuleName
+		keyAPIRule := types.NamespacedName{
+			Namespace: sub.Namespace,
+			Name:      apiRule,
+		}
+		if apiRule != "" {
+			err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).Delete(ctx, apiRule, metav1.DeleteOptions{})
+			apiRuleDeletionResult[keyAPIRule.String()] = err
+		}
+
+		// Clean statuses
+		key := types.NamespacedName{
+			Namespace: sub.Namespace,
+			Name:      sub.Name,
+		}
+		desiredSub := handlers.RemoveStatus(sub)
+		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		if err != nil {
+			statusDeletionResult[key.String()] = err
+		}
+
+		// Clean subscriptions from NATS
+		err = bebHandler.DeleteSubscription(&sub)
+		if err != nil {
+			subDeletionResult[key.String()] = err
+		}
 	}
 	return nil
 }

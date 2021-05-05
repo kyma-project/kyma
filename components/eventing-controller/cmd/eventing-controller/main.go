@@ -21,6 +21,9 @@ type Commander interface {
 
 	// Start runs the initialized commander instance.
 	Start() error
+
+	// Cleanup
+	Cleanup() error
 }
 
 func main() {
