@@ -71,7 +71,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var secretList v1.SecretList
 	var backend *eventingv1alpha1.EventingBackend
 
-	err := r.List(ctx, &secretList, client.MatchingLabels{
+	err := r.Cache.List(ctx, &secretList, client.MatchingLabels{
 		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 	})
 	if err != nil {
@@ -158,6 +158,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create
+			return desiredPublisher, r.Create(ctx, desiredPublisher)
 		}
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 
 	// Update if necessary
 
-	return nil, nil
+	return desiredPublisher, nil
 }
 
 func newNATSPublisherDeployment() *appsv1.Deployment {
@@ -216,7 +217,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
 											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
-											Key: "client-id",
+											Key:                  "client-id",
 										}},
 								},
 								{
@@ -224,7 +225,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
 											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
-											Key: "client-secret",
+											Key:                  "client-secret",
 										}},
 								},
 							},
