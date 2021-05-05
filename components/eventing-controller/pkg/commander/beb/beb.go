@@ -55,15 +55,19 @@ func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string
 	}
 }
 
-// Start implements the Commander interface and starts the manager.
-func (c *Commander) Start(mgr manager.Manager) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+// Init implements the Commander interface.
+func (c *Commander) Init(mgr manager.Manager) error {
 	if len(c.envCfg.Domain) == 0 {
 		return fmt.Errorf("env var DOMAIN must be a non-empty value")
 	}
 	c.mgr = mgr
+	return nil
+}
+
+// Start implements the Commander interface and starts the manager.
+func (c *Commander) Start() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)

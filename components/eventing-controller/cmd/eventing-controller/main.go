@@ -60,7 +60,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Instantiate configured commander.
+	// Instantiate and initialize configured commander.
 	var commander commander.Commander
 
 	backend, err := env.Backend()
@@ -76,11 +76,16 @@ func main() {
 		commander = nats.NewCommander(restCfg, enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
 	}
 
+	if err := commander.Init(mgr); err != nil {
+		logger.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
 	// Start the commander.
 	// TODO Has to be done by backand management controller later.
 	logger.Info(fmt.Sprintf("starting %s subscription controller and manager", backend))
 
-	if err := commander.Start(mgr); err != nil {
+	if err := commander.Start(); err != nil {
 		logger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
