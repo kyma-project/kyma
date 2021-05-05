@@ -127,4 +127,4 @@ securityContext: { runAsUser: 1001 }
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229 
+  alpineKcImage: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
