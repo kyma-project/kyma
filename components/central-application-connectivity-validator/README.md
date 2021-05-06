@@ -25,9 +25,8 @@ The Central Application Connectivity Validator has the following parameters:
 
 ### Application name placeholder
 
-If parameter `appNamePlaceholder` is not empty, it defines a placeholder for an application name in the parameters
-`eventServicePathPrefixV1`, `eventServicePathPrefixV2`, `eventMeshPathPrefix` and `appRegistryPathPrefix`. This placeholder will be replaced on every proxy request,
-with the value from the certificate CN.
+If the `appNamePlaceholder` parameter is not empty, it defines a placeholder for the application name in the parameters `eventServicePathPrefixV1`, `eventServicePathPrefixV2`, `eventMeshPathPrefix` and `appRegistryPathPrefix`. This placeholder is replaced on every proxy request
+with the value from the certificate Common Name (CN).
 
 ### Local cache refresh
 
