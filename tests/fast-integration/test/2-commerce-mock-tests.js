@@ -10,7 +10,6 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  const testNamespace = "test";
   let initialRestarts = null;
 
   it("Listing all pods in cluster", async function () {

@@ -4,7 +4,7 @@ const {
 const {
 } = require("../utils");
 
-describe("CommerceMock tests", function () {
+describe("CommerceMock preparation", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";
