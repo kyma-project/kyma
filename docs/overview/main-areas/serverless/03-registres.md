@@ -1,5 +1,5 @@
 ---
-title: Available runtimes
+title: Internal and external registries
 type: Overview
 ---
 
