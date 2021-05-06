@@ -9,8 +9,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
@@ -32,7 +30,8 @@ const (
 
 	PublisherNamespace       = "kyma-system"
 	PublisherName            = "eventing-publisher-proxy"
-	ServiceAccountName       = "eventing-publisher-proxy"
+	// TODO: changing name to reuse existing service account. Need another one for BEB?
+	ServiceAccountName       = "eventing-event-publisher-nats"
 	BackendCRLabelKey        = "kyma-project.io/eventing"
 	BackendCRLabelValue      = "backend"
 	AppLabelKey              = "app.kubernetes.io/name"
@@ -65,18 +64,17 @@ type BackendReconciler struct {
 }
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
 
 func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	var secretList v1.SecretList
-	var backend *eventingv1alpha1.EventingBackend
 
-	err := r.Cache.List(ctx, &secretList, client.MatchingLabels{
+	if err := r.Cache.List(ctx, &secretList, client.MatchingLabels{
 		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
-	})
-	if err != nil {
+	}); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -84,14 +82,17 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if len(secretList.Items) > 1 {
 		// Break the system
+		// For now ignore...
+		return ctrl.Result{}, nil
 	}
 
 	// If the label is removed what to do? first check if the removed secret is mentioned in the backend CR?
 	// Don't we need a finalizer for that?
 	if len(secretList.Items) == 1 {
+		r.Log.Info("***** Going with the BEB flow ***")
 		// BEB flow
 		// CreateOrUpdate CR with BEB
-		backend, err = r.CreateOrUpdateBackendCR(ctx)
+		_, err := r.CreateOrUpdateBackendCR(ctx)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -117,36 +118,43 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// NATS flow
 	// CreateOrUpdate CR with NATS
 	r.Log.Info("***** Going with the NATS flow ***")
-	backend, err = r.CreateOrUpdateBackendCR(ctx)
+	backend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
 		// Update status if bad
 		return ctrl.Result{}, err
 	}
+	r.Log.Info("Created/updated backend CR")
 	// Stop subscription controller (Radu/Frank)
 	// Start the other subscription controller (Radu/Frank)
 	// CreateOrUpdate deployment for publisher proxy
-	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.NatsBackendType)
-	if err != nil {
+	r.Log.Info("trying to create/update eventing publisher proxy...")
+	if _, err = r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.NatsBackendType); err != nil {
 		// Update status if bad
+		r.Log.Error(err, "cannot create/update eventing publisher proxy deployment")
 		return ctrl.Result{}, err
 	}
-	if err := r.Create(ctx, publisher); err != nil {
-		r.Log.Error(err, "cannot create eventing publisher proxy deployment")
-		return ctrl.Result{}, err
-	}
+	r.Log.Info("Created/updated publisher proxy")
 
 	// CreateOrUpdate status of the CR
+	// Get publisher proxy ready status
 
-	if err != nil {
+	if err := r.Client.Get(ctx, types.NamespacedName{
+		Namespace: DefaultEventingBackendNamespace,
+		Name:      DefaultEventingBackendName,
+	}, backend); err != nil {
+		r.Log.Info("cannot get backend CR to update")
 		return ctrl.Result{}, err
 	}
+
 	backend.Status = eventingv1alpha1.EventingBackendStatus{
-		Backend:         BEBBackendSecretLabelKey,
+		Backend:         eventingv1alpha1.NatsBackendType,
 		ControllerReady: boolPtr(false),
 		EventingReady:   boolPtr(false),
 		PublisherReady:  boolPtr(false),
 	}
-	if err := r.Status().Update(ctx, backend); err != nil {
+	r.Log.Info("Updating backend CR status")
+	if err := r.Update(ctx, backend); err != nil {
+		r.Log.Error(err, "error updating EventingBackend CR")
 		return ctrl.Result{}, err
 	}
 
@@ -163,7 +171,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		Namespace: PublisherNamespace,
 		Name:      PublisherName,
 	}
-	var currentPublisher *appsv1.Deployment
+	var currentPublisher appsv1.Deployment
 
 	var desiredPublisher *appsv1.Deployment
 
@@ -174,23 +182,25 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		desiredPublisher = newBEBPublisherDeployment()
 	}
 
-	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
+	err := r.Cache.Get(ctx, publisherNamespacedName, &currentPublisher)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create
+			r.Log.Info("creating nats publisher")
 			return desiredPublisher, r.Create(ctx, desiredPublisher)
 		}
+		r.Log.Info("error is not NotFound!", "err", err)
 		return nil, err
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
-	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
-		return currentPublisher, nil
+	if publisherProxyDeploymentEqual(&currentPublisher, desiredPublisher) {
+		return &currentPublisher, nil
 	}
 
 	// Update if necessary
 	if err := r.Update(ctx, desiredPublisher); err != nil {
-		r.Log.Error(err, "Cannot update an EventingBackend CR")
+		r.Log.Error(err, "Cannot update publisher proxy")
 		return nil, err
 	}
 	err = r.CreateOrUpdateBackendStatus(ctx, desiredPublisher)
@@ -378,6 +388,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 								},
 							},
 							Env: []v1.EnvVar{
+								{Name: "BACKEND", Value: "nats"},
 								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
 								{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
 								{Name: "REQUEST_TIMEOUT", Value: "5s"},
@@ -405,7 +416,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 								Handler: v1.Handler{
 									HTTPGet: &v1.HTTPGetAction{
 										Path:   "/healthz",
-										Port:   intstr.FromString("8080"),
+										Port:   intstr.FromInt(8080),
 										Scheme: v1.URISchemeHTTP,
 									},
 								},
@@ -419,7 +430,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 								Handler: v1.Handler{
 									HTTPGet: &v1.HTTPGetAction{
 										Path:   "/readyz",
-										Port:   intstr.FromString("8080"),
+										Port:   intstr.FromInt(8080),
 										Scheme: v1.URISchemeHTTP,
 									},
 								},
@@ -461,7 +472,7 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*event
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
 		Status: eventingv1alpha1.EventingBackendStatus{
-			Backend:            "NATS",
+			Backend:            eventingv1alpha1.NatsBackendType,
 			EventingReady:      boolPtr(false),
 			ControllerReady:    boolPtr(false),
 			PublisherReady:     boolPtr(false),
@@ -473,19 +484,25 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*event
 	err := r.Cache.Get(ctx, defaultEventingBackend, &currentBackend)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			r.Log.Info("trying to create backend CR...")
 			if err := r.Create(ctx, &desiredBackend); err != nil {
 				r.Log.Error(err, "Cannot create an EventingBackend CR")
 				return nil, err
 			}
-			return &currentBackend, nil
+			r.Log.Info("created backend CR")
+			return &desiredBackend, nil
 		}
+		r.Log.Info("error is not NotFound!", "err", err)
 		return nil, err
 	}
+	r.Log.Info("Found existing backend CR")
 
 	desiredBackend.ResourceVersion = currentBackend.ResourceVersion
-	if object.Semantic.DeepEqual(currentBackend, desiredBackend) {
+	if eventingBackendEqual(&currentBackend, &desiredBackend) {
+		r.Log.Info("No need to update existing backend CR")
 		return &currentBackend, nil
 	}
+	r.Log.Info("Update exiting backend CR")
 	if err := r.Update(ctx, &desiredBackend); err != nil {
 		r.Log.Error(err, "Cannot update an EventingBackend CR")
 		return nil, err
