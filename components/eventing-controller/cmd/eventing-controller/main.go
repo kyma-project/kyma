@@ -57,9 +57,9 @@ func main() {
 
 	switch backend {
 	case env.BACKEND_VALUE_BEB:
-		commander = beb.NewCommander(enableDebugLogs, metricsAddr, resyncPeriod)
+		commander = beb.NewCommander(enableDebugLogs, metricsAddr, probeAddr, readyEndpoint, healthEndpoint, resyncPeriod)
 	case env.BACKEND_VALUE_NATS:
-		commander = nats.NewCommander(enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
+		commander = nats.NewCommander(enableDebugLogs, metricsAddr, probeAddr, readyEndpoint, healthEndpoint, maxReconnects, reconnectWait)
 	}
 
 	// Init and start the commander.

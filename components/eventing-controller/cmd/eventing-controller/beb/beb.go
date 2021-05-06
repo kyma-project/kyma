@@ -10,6 +10,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -27,18 +28,24 @@ type Commander struct {
 	restCfg         *rest.Config
 	enableDebugLogs bool
 	metricsAddr     string
+	probeAddr       string
+	readyEndpoint   string
+	healthEndpoint  string
 	resyncPeriod    time.Duration
 	mgr             manager.Manager
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
+func NewCommander(enableDebugLogs bool, metricsAddr, probeAddr, readyEndpoint, healthEndpoint string, resyncPeriod time.Duration) *Commander {
 	return &Commander{
 		scheme:          runtime.NewScheme(),
 		envCfg:          env.GetConfig(),
 		enableDebugLogs: enableDebugLogs,
 		metricsAddr:     metricsAddr,
+		probeAddr:       probeAddr,
+		readyEndpoint:   readyEndpoint,
+		healthEndpoint:  healthEndpoint,
 		resyncPeriod:    resyncPeriod,
 	}
 }
@@ -63,10 +70,11 @@ func (c *Commander) Init() error {
 	ctrl.SetLogger(zap.New(zap.UseDevMode(c.enableDebugLogs)))
 	// Create the manager.
 	mgr, err := ctrl.NewManager(c.restCfg, ctrl.Options{
-		Scheme:             c.scheme,
-		MetricsBindAddress: c.metricsAddr,
-		Port:               9443,
-		SyncPeriod:         &c.resyncPeriod,
+		Scheme:                 c.scheme,
+		MetricsBindAddress:     c.metricsAddr,
+		HealthProbeBindAddress: c.probeAddr,
+		Port:                   9443,
+		SyncPeriod:             &c.resyncPeriod,
 	})
 	if err != nil {
 		return err
@@ -92,6 +100,13 @@ func (c *Commander) Start() error {
 		c.envCfg,
 	).SetupWithManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
+	}
+
+	if err := c.mgr.AddHealthzCheck(c.healthEndpoint, healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up health check: %v", err)
+	}
+	if err := c.mgr.AddReadyzCheck(c.readyEndpoint, healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up ready check: %v", err)
 	}
 
 	if err := c.mgr.Start(ctrl.SetupSignalHandler()); err != nil {

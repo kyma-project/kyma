@@ -35,25 +35,25 @@ spec:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: {{ .Values.healthProbe.liveness.failureThreshold }}
             httpGet:
               path: {{ .Values.healthProbe.liveness.service.path }}
               port: {{ .Values.healthProbe.port }}
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 2
+              scheme: {{ .Values.healthProbe.scheme }}
+            initialDelaySeconds: {{ .Values.healthProbe.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthProbe.liveness.periodSeconds }}
+            successThreshold: {{ .Values.healthProbe.liveness.successThreshold }}
+            timeoutSeconds: {{ .Values.healthProbe.liveness.timeoutSeconds }}
           readinessProbe:
-            failureThreshold: 3
+            failureThreshold: {{ .Values.healthProbe.readiness.failureThreshold }}
             httpGet:
-              path: {{ .Values.healthProbe.readyness.service.path }}
+              path: {{ .Values.healthProbe.readiness.service.path }}
               port: {{ .Values.healthProbe.port }}
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 3
-            successThreshold: 1
-            timeoutSeconds: 2
+              scheme: {{ .Values.healthProbe.scheme }}
+            initialDelaySeconds: {{ .Values.healthProbe.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthProbe.readiness.periodSeconds }}
+            successThreshold: {{ .Values.healthProbe.readiness.successThreshold }}
+            timeoutSeconds: {{ .Values.healthProbe.readiness.timeoutSeconds }}
           {{- if .Values.global.securityContext }}
           securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
           {{- end }}

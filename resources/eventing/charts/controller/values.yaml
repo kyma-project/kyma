@@ -37,13 +37,24 @@ metrics:
     nameSuffix: "-metrics"
 
 healthProbe:
-  port: 8081
-  liveness:
-    service:
-      path: "/healthz"
-  readyness:
-    service:
-      path: "/readyz"
+   port: 8081
+   scheme: HTTP
+   liveness:
+     service:
+       path: "/healthz"
+     failureThreshold: 3
+     initialDelaySeconds: 5
+     periodSeconds: 10
+     successThreshold: 1
+     timeoutSeconds: 2
+   readiness:
+     service:
+       path: "/readyz"
+     failureThreshold: 3
+     initialDelaySeconds: 10
+     periodSeconds: 3
+     successThreshold: 1
+     timeoutSeconds: 2
 
 #TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/10317
 clusterRoleBindingSuffix: "-crole-binding"
