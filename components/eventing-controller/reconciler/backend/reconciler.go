@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -50,6 +51,7 @@ const (
 	LivenessInitialDelaySecs = int32(5)
 	LivenessTimeoutSecs      = int32(1)
 	LivenessPeriodSecs       = int32(2)
+	BEBNamespacePrefix       = "/"
 )
 
 var (
@@ -94,8 +96,18 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Stop subscription controller (Radu/Frank)
 		// Start the other subscription controller (Radu/Frank)
 		// CreateOrUpdate deployment for publisher proxy
-
+		publisher, err := r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.BebBackendType)
+		if err != nil {
+			// Update status if bad
+			r.Log.Error(err, "failed to create or update publisher proxy", "backend", eventingv1alpha1.BebBackendType)
+			return ctrl.Result{}, err
+		}
 		// CreateOrUpdate status of the CR
+		err = r.CreateOrUpdateBackendStatus(ctx, publisher)
+		if err != nil {
+			r.Log.Error(err, "failed to create or update backend status", "backend", eventingv1alpha1.BebBackendType)
+			return ctrl.Result{}, err
+		}
 
 		return ctrl.Result{}, nil
 	}
@@ -138,6 +150,10 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+func (r *BackendReconciler) CreateOrUpdateBackendStatus(ctx context.Context, publisherDeploy *appsv1.Deployment) error {
+	return nil
+}
+
 func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
 
 	publisherNamespacedName := types.NamespacedName{
@@ -152,8 +168,9 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 	case eventingv1alpha1.NatsBackendType:
 		desiredPublisher = newNATSPublisherDeployment()
 	case eventingv1alpha1.BebBackendType:
-
+		desiredPublisher = newBEBPublisherDeployment()
 	}
+
 	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -163,11 +180,163 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		return nil, err
 	}
 
-	// Diff
+	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
+	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
+		return currentPublisher, nil
+	}
 
 	// Update if necessary
+	if err := r.Update(ctx, desiredPublisher); err != nil {
+		r.Log.Error(err, "Cannot update an EventingBackend CR")
+		return nil, err
+	}
+	err = r.CreateOrUpdateBackendStatus(ctx, desiredPublisher)
+	if err != nil {
+		r.Log.Error(err, "Cannot update the status for EventingBackend CR")
+		return nil, err
+	}
 
 	return desiredPublisher, nil
+}
+
+func newBEBPublisherDeployment() *appsv1.Deployment {
+	labels := map[string]string{
+		AppLabelKey:       PublisherName,
+		InstanceLabelKey:  InstanceLabelValue,
+		DashboardLabelKey: DashboardLabelValue,
+	}
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      PublisherName,
+			Namespace: PublisherNamespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: intPtr(PublisherReplicas),
+			Selector: metav1.SetAsLabelSelector(labels),
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:   PublisherName,
+					Labels: labels,
+				},
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name:  PublisherName,
+							Image: PublisherImage,
+							Ports: []v1.ContainerPort{
+								{
+									Name:          PublisherPortName,
+									ContainerPort: PublisherPortNum,
+								},
+								{
+									Name:          PublisherMetricsPortName,
+									ContainerPort: PublisherMetricsPortNum,
+								},
+							},
+							Env: []v1.EnvVar{
+								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+								{Name: "REQUEST_TIMEOUT", Value: "5s"},
+								{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+								{
+									Name: "CLIENT_ID",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key:                  "client-id",
+										}},
+								},
+								{
+									Name: "CLIENT_SECRET",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key:                  "client-secret",
+										}},
+								},
+								{
+									Name: "TOKEN_ENDPOINT",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key:                  "token-endpoint",
+										}},
+								},
+								{
+									Name: "EMS_PUBLISH_URL",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key:                  "ems-publish-url",
+										}},
+								},
+								{
+									Name: "BEB_NAMESPACE_VALUE",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											Key:                  "beb-namespace",
+										}},
+								},
+								{
+									Name:  "BEB_NAMESPACE",
+									Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", BEBNamespacePrefix),
+								},
+								{
+									Name: "WEBHOOK_CLIENT_ID",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing-controller-beb-oauth2"},
+											Key:                  "client_id",
+										}},
+								},
+								{
+									Name: "WEBHOOK_CLIENT_SECRET",
+									ValueFrom: &v1.EnvVarSource{
+										SecretKeyRef: &v1.SecretKeySelector{
+											LocalObjectReference: v1.LocalObjectReference{Name: "eventing-controller-beb-oauth2"},
+											Key:                  "client_secret",
+										}},
+								},
+							},
+							LivenessProbe: &v1.Probe{
+								Handler: v1.Handler{
+									HTTPGet: &v1.HTTPGetAction{
+										Path:   "/healthz",
+										Port:   intstr.FromString("8080"),
+										Scheme: v1.URISchemeHTTP,
+									},
+								},
+								InitialDelaySeconds: LivenessInitialDelaySecs,
+								TimeoutSeconds:      LivenessTimeoutSecs,
+								PeriodSeconds:       LivenessPeriodSecs,
+								SuccessThreshold:    1,
+								FailureThreshold:    3,
+							},
+							ReadinessProbe: &v1.Probe{
+								Handler: v1.Handler{
+									HTTPGet: &v1.HTTPGetAction{
+										Path:   "/readyz",
+										Port:   intstr.FromString("8080"),
+										Scheme: v1.URISchemeHTTP,
+									},
+								},
+								FailureThreshold: 3,
+							},
+							ImagePullPolicy: v1.PullIfNotPresent,
+							SecurityContext: &v1.SecurityContext{
+								Privileged:               boolPtr(false),
+								AllowPrivilegeEscalation: boolPtr(false),
+							},
+						},
+					},
+					RestartPolicy:                 v1.RestartPolicyAlways,
+					ServiceAccountName:            ServiceAccountName,
+					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
+				},
+			},
+		},
+	}
 }
 
 func newNATSPublisherDeployment() *appsv1.Deployment {
@@ -312,15 +481,6 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*event
 	}
 
 	return &desiredBackend, nil
-}
-
-func isSecretLabeledAsBebBackend(s *v1.Secret) bool {
-	for k, v := range s.Labels {
-		if k == BEBBackendSecretLabelKey && v == "true" {
-			return true
-		}
-	}
-	return false
 }
 
 func boolPtr(b bool) *bool {
