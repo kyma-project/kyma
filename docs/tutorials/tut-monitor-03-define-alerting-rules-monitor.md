@@ -3,7 +3,7 @@ title: Define alerting rules
 type: Tutorials
 ---
 
-This tutorial shows you how to define alerting rules to monitor the health status of your resources. In this example, you will write an alerting rule based on the `cpu_temperature_celsius` metric. The alert defined in the rule will fire whenever the CPU temperature is equal to or greater than 75 degrees Celsius.
+To monitor the health status of your resources, you can define alerting rules. In the following example, you will write an alerting rule based on the `cpu_temperature_celsius` metric. The alert defined in the rule will fire whenever the CPU temperature is equal to or greater than 75 degrees Celsius.
 
 ## Prerequisites
 

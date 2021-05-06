@@ -1,5 +1,6 @@
 ---
 title: Security Concept and Roles
+type: Configuration
 ---
 
 To ensure a stable and secure work environment, the Kyma security component uses the following tools:

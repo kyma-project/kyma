@@ -1,6 +1,6 @@
 ---
 title: Exposing Functions
-type: Details
+type: Tutorials
 ---
 
 To access a Function within the cluster, use the `{function-name}.{namespace}.svc.cluster.local` endpoint, such as `test-function.default.svc.cluster.local`. To expose a Function outside the cluster, you must create an [APIRule custom resource (CR)](/components/api-gateway#custom-resource-api-rule):

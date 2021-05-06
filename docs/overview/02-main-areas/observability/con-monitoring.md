@@ -1,5 +1,6 @@
 ---
 title: Monitoring
+type: Overview
 ---
 
 Kyma comes bundled with third-party applications like Prometheus, Alertmanager, and Grafana, that offer a monitoring functionality for all Kyma resources. These applications are deployed during the Kyma cluster installation, along with a set of pre-defined alerting rules, Grafana dashboards, and Prometheus configuration.

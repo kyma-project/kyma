@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: Configure the Monitoring Flow
 type: Tutorials
 ---
 
