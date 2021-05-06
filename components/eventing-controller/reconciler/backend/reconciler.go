@@ -3,6 +3,9 @@ package backend
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -527,6 +530,29 @@ func intPtr(i int32) *int32 {
 	return &i
 }
 
+func getDeploymentMapper() handler.EventHandler {
+	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
+		var reqs []reconcile.Request
+		// Ignore deployments other than publisher-proxy
+		if mo.Meta.GetName() == PublisherName && mo.Meta.GetNamespace() == PublisherNamespace {
+			reqs = append(reqs, reconcile.Request{NamespacedName: types.NamespacedName{Namespace: "any", Name: "any"}})
+		}
+		return reqs
+	}
+	return &handler.EnqueueRequestsFromMapFunc{ToRequests: &mapper}
+}
+
+func getEventingBackendCRMapper() handler.EventHandler {
+	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
+		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: "any", Namespace: "any"}}}
+	}
+	return &handler.EnqueueRequestsFromMapFunc{ToRequests: &mapper}
+}
+
 func (r *BackendReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).For(&v1.Secret{}).Complete(r)
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&v1.Secret{}).
+		Watches(&source.Kind{Type: &eventingv1alpha1.EventingBackend{}}, getEventingBackendCRMapper()).
+		Watches(&source.Kind{Type: &appsv1.Deployment{}}, getDeploymentMapper()).
+		Complete(r)
 }
