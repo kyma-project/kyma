@@ -24,6 +24,8 @@ spec:
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: controller
           env:
+          - name: BACKEND
+            value: {{ .Values.global.eventing.backend }}
           - name: CLIENT_ID
             valueFrom:
               secretKeyRef:

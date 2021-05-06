@@ -23,19 +23,18 @@ require (
 	github.com/kyma-project/kyma/components/application-gateway v0.0.0-20201110134855-a03ec1689c4e
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20201110134855-a03ec1689c4e
 	github.com/matryer/is v1.4.0
-	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mcuadros/go-defaults v1.1.0
 	github.com/meatballhat/negroni-logrus v1.1.1-0.20191208165538-6f72cade44a3
 	github.com/oklog/ulid v1.3.1
 	github.com/openzipkin/zipkin-go v0.2.5 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/negroni v1.0.0
 	github.com/vrischmann/envconfig v1.2.0
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0 // indirect
+	golang.org/x/time v0.0.0-20190921001708-c4c64cad1fd0
 	gopkg.in/yaml.v2 v2.3.0
 	istio.io/api v0.0.0-20201113155354-fcf32ac5d223
 	istio.io/client-go v0.0.0-20201113160737-d4c1e2c0a42f
@@ -43,7 +42,6 @@ require (
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v0.18.8
-	knative.dev/eventing v0.12.0
 	knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
 	launchpad.net/gocheck v0.0.0-20140225173054-000000000087 // indirect
 )

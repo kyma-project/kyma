@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 		maxIdleConnsPerHost = 200
 	)
 
-	client := NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := NewClient(context.Background(), &env.BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	ocTransport, ok := client.Transport.(*ochttp.Transport)

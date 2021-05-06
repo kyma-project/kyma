@@ -1,0 +1,45 @@
+global:
+  ingress:
+    domainName: ""
+  istio:
+    gateway:
+      name: ""
+
+deployment:
+  image:
+    repository: "eu.gcr.io/kyma-project/busola-migrator"
+    tag: "PR-11125"
+    pullPolicy: IfNotPresent
+  env:
+    busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
+    oidcIssuerURL: "https://kyma.accounts.ondemand.com"
+    oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
+    oidcScope: "openid"
+    oidcUsePKCE: "false"
+  replicaCount: 1
+  imagePullSecrets: []
+  podAnnotations:
+    "proxy.istio.io/config": '{ "holdApplicationUntilProxyStarts": true }'
+  podSecurityContext: { }
+  securityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+  resources: { }
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+config:
+  secretName: "busola-migrator-config"
+  uaaSecretName: "uaa-issuer-secret"

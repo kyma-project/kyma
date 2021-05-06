@@ -48,4 +48,5 @@ Selector labels
 {{- define "controller.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+kyma-project.io/dashboard: eventing
 {{- end }}

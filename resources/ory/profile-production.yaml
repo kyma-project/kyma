@@ -21,4 +21,4 @@ hpa:
   oathkeeper:
     minReplicas: 3
     maxReplicas: 10
-  
+

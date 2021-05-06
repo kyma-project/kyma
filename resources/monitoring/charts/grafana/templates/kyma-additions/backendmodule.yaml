@@ -1,6 +1,7 @@
 {{- /*
   Customization: This file is added for UI.
 */ -}}
+{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
 {{- if .Values.kyma.console.enabled }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
@@ -8,4 +9,5 @@ metadata:
   name: {{ template "grafana.fullname" . }}
   labels:
     {{- include "grafana.labels" . | nindent 4 }}
+{{ end }}
 {{- end }}

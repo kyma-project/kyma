@@ -1,4 +1,4 @@
-external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
+external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com"]
 files-to-ignore: ["/vendor/", "/testdata/"]
 files-to-ignore-internal-links-in: ["./kyma/docs/"]
 timeout: 60
@@ -96,3 +96,6 @@ files:
   - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
     config:
       external-links-to-ignore: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+  - path: "./kyma/components/busola-migrator/README.md"
+    config:
+      external-links-to-ignore: ["https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"]

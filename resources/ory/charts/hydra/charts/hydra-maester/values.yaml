@@ -3,7 +3,7 @@ replicaCount: 1
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: 20210407-86c769bd
+    tag: 20210504-12243229
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
@@ -14,14 +14,21 @@ config:
   # hydraSecret: secret
 
 globalAccess: false
+
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
 
 image:
   repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
-  tag: v0.0.15
+  tag: v0.0.19
   # Image pull policy
   pullPolicy: IfNotPresent
+
+adminService:
+  name:
+  port:
+
+forwardedProto:
 
 port:
   metrics: 8080
@@ -50,6 +57,7 @@ deployment:
   # Configure node tolerations.
   tolerations: []
   annotations: {}
+  podLabels: {}
 
 # Configure node affinity
 affinity: {}

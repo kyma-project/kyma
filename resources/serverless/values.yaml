@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210407-86c769bd"
+    tag: "20210504-12243229"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210407-86c769bd"
+    tag: "20210504-12243229"
     pullPolicy: IfNotPresent
 
 tests:
@@ -34,14 +34,14 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210407-86c769bd"
+      tag: "20210504-12243229"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-10809"
+    tag: "PR-11121"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -81,18 +81,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-10889"
+    tag: "PR-11121"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-10889"
-    nodejs10:
-      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "PR-10889"
+      tag: "ed2c688b"
+    nodejs14:
+      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
+      tag: "ed2c688b"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "PR-10889"
+      tag: "ed2c688b"
 
 deployment:
   replicas: 1
@@ -142,7 +142,7 @@ containers:
       roleBindingRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryExternalDockerConfigSecretName:
         value: '{{ template "fullname" . }}-registry-config'
       imageRegistryDefaultDockerConfigSecretName:
@@ -162,7 +162,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.5.1
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:e4011316
+        value: eu.gcr.io/kyma-project/function-build-init:ed2c688b
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -243,7 +243,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "PR-10889"
+    tag: "ed2c688b"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

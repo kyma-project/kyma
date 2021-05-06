@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/application-registry
 
-go 1.14
+go 1.16
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535

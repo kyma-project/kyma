@@ -310,7 +310,7 @@ Get the TLS certificate:
   GKE
   </summary>
 
-1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/master/provision/examples/gcp/README.md#configure-gcp).
+1. Create a service account and a service account key as JSON following [these steps](https://github.com/kyma-incubator/hydroform/blob/main/provision/examples/gcp/README.md#configure-gcp).
 
 2. Export the cluster name, the name of your GCP project, and the [zone](https://cloud.google.com/compute/docs/regions-zones/) you want to deploy to as environment variables:
 

@@ -1,4 +1,4 @@
-// Copied from: https://github.com/kyma-project/kyma/tree/master/tests/console-backend-service/pkg/injector
+// Copied from: https://github.com/kyma-project/kyma/tree/main/tests/console-backend-service/pkg/injector
 // because right now it cannot be vendored because controller-runtime and kubernetes version does not match
 // we need to wait until the Helm Broker and CBS will we both at the same k8s and controller-runtime version
 package injector

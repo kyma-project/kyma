@@ -10,12 +10,13 @@ import (
 	"time"
 
 	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring/prom"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring/prom"
 )
 
 const prometheusURL = "http://monitoring-prometheus.kyma-system:9090"
@@ -218,8 +219,6 @@ func (t TargetsAndRulesTest) testTargetsAreHealthy() error {
 func shouldIgnoreTarget(target prom.TargetLabels) bool {
 	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
-		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
-		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
 	podsToBeIgnored := []string{
@@ -227,7 +226,7 @@ func shouldIgnoreTarget(target prom.TargetLabels) bool {
 		"-testsuite-",
 		"test",
 		"nodejs12-",
-		"nodejs10-",
+		"nodejs14-",
 		"upgrade",
 		// Ignore the pods created by jobs which are executed after installation of control-plane.
 		"compass-migration",
@@ -358,8 +357,6 @@ func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
 func shouldIgnorePodMonitor(podMonitorName string) bool {
 	var podMonitorsToBeIgnored = []string{
 		// The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
-		"knative-eventing-event-mesh-dashboard-broker",
-		"knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
 	for _, pm := range podMonitorsToBeIgnored {

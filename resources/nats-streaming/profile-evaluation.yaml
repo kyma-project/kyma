@@ -1,6 +1,0 @@
-global:
-  natsStreaming:
-    resources:
-      requests:
-        memory: 32M
-        cpu: 10m

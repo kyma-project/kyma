@@ -290,7 +290,7 @@ function testKymaEventing() {
 	fi
 	readonly editPermissionText viewAccessText
 
-	local -r resources=( "httpsources.sources.kyma-project.io" "triggers.eventing.knative.dev" "brokers.eventing.knative.dev" "channels.messaging.knative.dev" "kafkachannels.knativekafka.kyma-project.io" )
+	local -r resources=( )
 
 	# View
 	for resource in "${resources[@]}"; do

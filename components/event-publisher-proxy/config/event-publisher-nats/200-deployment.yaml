@@ -1,28 +1,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: eventing-event-publisher-nats
   labels:
-    app: event-publisher-nats
-  name: event-publisher-nats
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: event-publisher-nats
+    kyma-project.io/dashboard: eventing
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: event-publisher-nats
+      app.kubernetes.io/instance: eventing
+      app.kubernetes.io/name: event-publisher-nats
+      kyma-project.io/dashboard: eventing
   strategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: event-publisher-nats
+        app.kubernetes.io/instance: eventing
+        app.kubernetes.io/name: event-publisher-nats
+        kyma-project.io/dashboard: eventing
     spec:
+      serviceAccountName: eventing-event-publisher-nats
       containers:
-        - image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-nats
+        - env:
+            - name: BACKEND
+              value: "nats"
+            - name: PORT
+              value: "8080"
+            - name: NATS_URL
+              value: eventing-nats.kyma-system.svc.cluster.local
+            - name: REQUEST_TIMEOUT
+              value: 5s
+            - name: LEGACY_NAMESPACE
+              value: kyma
+            - name: LEGACY_EVENT_TYPE_PREFIX
+              value: sap.kyma.custom
+          image: ko://github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
           imagePullPolicy: IfNotPresent
-          name: event-publisher-nats
+          name: event-publisher-proxy
           ports:
             - containerPort: 8080
               name: http
+              protocol: TCP
+            - containerPort: 9090
+              name: http-metrics
               protocol: TCP
           livenessProbe:
             failureThreshold: 3
@@ -40,3 +63,4 @@ spec:
               path: /readyz
               port: 8080
               scheme: HTTP
+---

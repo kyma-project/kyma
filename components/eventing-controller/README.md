@@ -2,11 +2,12 @@
 
 ## Overview
 
-This component contains controllers for various CustomResourceDefinitions related to eventing in Kyma. The following controllers come with this container:
-- [`controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the eventing infrastructure in Business Event Bus (BEB).
-- [`nats-controller`](https://github.com/kyma-project/kyma/blob/master/components/eventing-controller/cmd/eventing-controller-nats/main.go) which lays down the eventing infrastructure in [NATS](https://docs.nats.io/nats-concepts/intro).
+This component contains controllers for various CustomResourceDefinitions related to Eventing in Kyma. The following controller comes with this container:
+
+- [`controller`](https://github.com/kyma-project/kyma/blob/main/components/eventing-controller/cmd/eventing-controller/main.go) which lays down the Eventing infrastructure in Business Event Bus (BEB) or [NATS](https://docs.nats.io/nats-concepts/intro).
 
 ## Prerequisites
+
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
 - Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
@@ -15,70 +16,55 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup).
 
-- For `controller`, run:
+- For **BEB** run:
 
     ```sh
-    make deploy-local
-
-    ## To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target deploy-local-dry-run    
-    make deploy-local-dry-run
+    make deploy-beb-local
     ```
 
-- For `nats-controller`, run:
+    To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-beb-local-dry-run`.
+    
+    ```sh
+    make deploy-beb-local-dry-run
+    ```
+
+- For **NATS** run:
 
     ```sh
-    make deploy-eventing-controller-nats-local
+    make deploy-nats-local
+    ```
 
-    ## To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target called "deploy-eventing-controller-nats-local-dry-run".    
+    To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target `deploy-nats-local-dry-run`.
+
+	```sh
     make deploy-eventing-controller-nats-local-dry-run
     ```
 
-## Usage 
+## Usage
 
-This section explains how to use the Eventing Controller.
+This section explains how to use the Eventing Controller. It expects the following environment variables:
 
-- `controller` comes with the following command line argument flags:
+    | Environment Variable   | Description                                                                     | Backend |
+    | ---------------------- | ------------------------------------------------------------------------------- |-------- |
+    | BACKEND                | Switch between BEB and NATS, default is NATS.                                   |         |
+    | CLIENT_ID              | The Client ID used to acquire Access Tokens from the Authentication server.     | BEB     |
+    | CLIENT_SECRET          | The Client Secret used to acquire Access Tokens from the Authentication server. | BEB     |
+    | TOKEN_ENDPOINT         | The Authentication Server Endpoint to provide Access Tokens.                    | BEB     |
+    | WEBHOOK_CLIENT_ID      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              | BEB     |
+    | WEBHOOK_CLIENT_SECRET  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          | BEB     |
+    | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              | BEB     |
+    | DOMAIN                 | The Kyma cluster public domain.                                                 | BEB     |
+    | NATS_URL               | The URL for the NATS server.                                                    | NATS    |
 
-    | Flag                         | Description                                                                          | Default Value  |
-    | ---------------------------- | ------------------------------------------------------------------------------------ | -------------- |
-    | `metrics-address`            | The TCP address that the controller should bind to for serving prometheus metrics.   | `:8080`        |
-    | `health-probe-bind-address`  | The TCP address that the controller should bind to for serving health probes.        | `:8081`        |
-    | `ready-check-endpoint`       | The endpoint of the readiness probe.                                                 | `readyz`       |
-    | `health-check-endpoint`      | The endpoint of the health probe.                                                    | `healthz`      |
-    | `reconcile-period`           | The period between triggering of reconciling calls.                                  | `10 minutes`   |
-    | `enable-debug-logs`          | Enable debug logs.                                                                   | `false`        |
+The additional command line arguments are:
 
-- `nats-controller` comes with the following command line argument flags:
-
-    | Flag                         | Description                                                                          | Default Value |
-    | ---------------------------- | ------------------------------------------------------------------------------------ | ------------- |
-    | `metrics-address`            | The TCP address that the controller should bind to for serving prometheus metrics.   | `:8080`       |
-    | `health-probe-bind-address`  | The TCP address that the controller should bind to for serving health probes.        | `:8081`       |
-    | `ready-check-endpoint`       | The endpoint of the readiness probe.                                                 | `readyz`      |
-    | `health-check-endpoint`      | The endpoint of the health probe.                                                    | `healthz`     |
-    | `enable-debug-logs`          | The parameter that enables debug logs.                                               | `false`       |
-    | `max-reconnects`             | The maximum number of reconnection attempts.                                         | `10 `         |
-    | `reconnect-wait`             | Wait time between reconnection attempts.                                             | `1 second`    |
-
-- `controller` expects the following environment variables:
-
-    | Environment variable       | Description                                                                     |
-    | -------------------------- | ------------------------------------------------------------------------------- |
-    | **CLIENT_ID**              | The Client ID used to acquire Access Tokens from the Authentication server.     |
-    | **CLIENT_SECRET**          | The Client Secret used to acquire Access Tokens from the Authentication server. |
-    | **TOKEN_ENDPOINT**         | The Authentication Server Endpoint to provide Access Tokens.                    |
-    | **WEBHOOK_CLIENT_ID**      | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
-    | **WEBHOOK_CLIENT_SECRET**  | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
-    | **WEBHOOK_TOKEN_ENDPOINT** | The Kyma public endpoint to provide Access Tokens.                              |
-    | **DOMAIN**                 | The Kyma cluster public domain.                                                 |
-    | **EVENT_TYPE_PREFIX**      | The prefix for the EventType.                                                   |
-
-- `nats-controller` expects the following environment variables:
-
-    | Environment variable   | Description                      |
-    | ---------------------- | -------------------------------- |
-    | **NATS_URL**           | The URL for the NATS server.     |
-    | **EVENT_TYPE_PREFIX**  | The prefix for the EventType.    |
+    | Flag                  | Description                                               | Default Value | Backend |
+    | --------------------- | --------------------------------------------------------- | ------------- | ------- |
+    | metrics-addr          | The address the metric endpoint binds to.                 | :8080         | both    |
+    | enable-debug-logs     | Enable debug logs.                                        | false         | both    |
+    | reconcile-period      | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
+    | max-reconnects        | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
+    | reconnect-wait        | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
@@ -113,12 +99,12 @@ Before running the component, execute the following command once to pull softwar
 ```sh
 make test
 ## To download dependencies only
-make resolve-local 
+make resolve-local
 ```
 
 ### Generate code during local development
 
-> More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md). 
+> More details on scaffolding code using kubebuilder can be found [here](https://github.com/kubernetes-sigs/kubebuilder/blob/master/designs/simplified-scaffolding.md).
 
 - Add new APIs using [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) CLI followed by generating boilerplate code by executing the following script:
 

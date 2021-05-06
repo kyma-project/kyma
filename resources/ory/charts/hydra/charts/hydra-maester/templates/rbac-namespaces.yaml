@@ -1,7 +1,7 @@
 {{ if not .Values.globalAccess }}
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role-{{ .Release.Namespace }}
   namespace:  {{ .Release.Namespace }}
@@ -11,7 +11,7 @@ rules:
     verbs: ["get", "list", "watch", "create"]
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role-binding-{{ .Release.Namespace }}
   namespace:  {{ .Release.Namespace }}
@@ -23,14 +23,13 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ include "hydra-maester.name" . }}-role-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
 
 {{- $name := include "hydra-maester.name" . -}}
 {{- $namespace := .Release.Namespace -}}
 {{- range .Values.enabledNamespaces }}
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ $name }}-role-{{ . }}
   namespace:  {{ . }}
@@ -40,7 +39,7 @@ rules:
     verbs: ["get", "list", "watch", "create", "update"]
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ $name }}-role-binding-{{ . }}
   namespace:  {{ . }}
@@ -52,6 +51,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ $name }}-role-{{ . }}
-  namespace: {{ . }}
 {{- end }}
 {{ end }}

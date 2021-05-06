@@ -71,10 +71,10 @@ const argv = require('yargs/yargs')(process.argv.slice(2))
   .command('deprovision', 'Deprovision kubernetes cluster', deprovisionCommand)
   .demandCommand(1, 1, 'Command is missing')
   .example('Install kyma from local sources:\n  $0 install --skip-modules=monitoring,tracing,kiali')
-  .example('Install kyma from kyma-project/kyma master branch:\n  $0 install -s master')
+  .example('Install kyma from kyma-project/kyma main branch:\n  $0 install -s main')
   .example('Install kyma 1.19.1:\n  $0 install -s 1.19.1')
-  .example('Upgrade kyma to the current master and use new eventing:\n  $0 install -s master --upgrade --new-eventing')
-  .example('Upgrade application-connector and eventing modules to the current master and use new eventing:\n  $0 install --components=application-connector,eventing -s master --upgrade --new-eventing')
+  .example('Upgrade kyma to the current main and use new eventing:\n  $0 install -s main --upgrade --new-eventing')
+  .example('Upgrade application-connector and eventing modules to the current main and use new eventing:\n  $0 install --components=application-connector,eventing -s main --upgrade --new-eventing')
   .example('Uninstall kyma:\n  $0 uninstall')
   .example('Uninstall kyma, but keep istio and CRDs:\n  $0 uninstall --skip-istio --skip-crd')
   .strict()
@@ -94,13 +94,13 @@ async function install(argv) {
   const newEventing = argv.newEventing;
   const withCompass = argv.withCompass;
 
-  await installer.installKyma({ 
-    resourcesPath: src, 
-    components, 
-    skipComponents, 
-    isUpgrade: !!argv.upgrade, 
-    newEventing, 
-    withCompass 
+  await installer.installKyma({
+    resourcesPath: src,
+    components,
+    skipComponents,
+    isUpgrade: !!argv.upgrade,
+    newEventing,
+    withCompass
   });
   console.log('Kyma installed');
 }
@@ -110,4 +110,3 @@ async function uninstall(argv) {
   await installer.uninstallKyma(argv);
   console.log('Kyma uninstalled')
 }
-

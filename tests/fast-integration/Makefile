@@ -17,3 +17,15 @@ ci-compass:
 ci-skr:
 	npm install
 	npm run test-skr
+
+.PHONY: ci-pre-upgrade
+ci-pre-upgrade:
+	npm install
+	npm run test-commerce-mock-prep
+	npm run test-commerce-mock-tests
+
+.PHONY: ci-post-upgrade
+ci-post-upgrade:
+	npm install
+	npm run test-commerce-mock-tests
+	npm run test-commerce-mock-cleanup

@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "busola-migrator.fullname" . }}
+  labels:
+    {{- include "busola-migrator.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "busola-migrator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.deployment.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "busola-migrator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "busola-migrator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+          image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          env:
+            - name: APP_PORT
+              value: {{ .Values.service.targetPort | quote }}
+            - name: APP_DOMAIN
+              value: {{ .Values.global.ingress.domainName | quote }}
+            - name: APP_BUSOLA_URL
+              value: {{ .Values.deployment.env.busolaURL | quote }}
+            - name: APP_OIDC_ISSUER_URL
+              value: {{ .Values.deployment.env.oidcIssuerURL | quote }}
+            - name: APP_OIDC_CLIENT_ID
+              value: {{ .Values.deployment.env.oidcClientURL | quote }}
+            - name: APP_OIDC_SCOPE
+              value: {{ .Values.deployment.env.oidcScope | quote }}
+            - name: APP_OIDC_USE_PKCE
+              value: {{ .Values.deployment.env.oidcUsePKCE | quote }}
+            - name: OVERRIDE_BUSOLA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.secretName }}
+                  key: busolaURL
+                  optional: true
+            - name: OVERRIDE_OIDC_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.secretName }}
+                  key: oidcIssuerURL
+                  optional: true
+            - name: OVERRIDE_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.secretName }}
+                  key: oidcClientID
+                  optional: true
+            - name: OVERRIDE_OIDC_SCOPE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.secretName }}
+                  key: oidcScope
+                  optional: true
+            - name: OVERRIDE_OIDC_USE_PKCE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.secretName }}
+                  key: oidcUsePKCE
+                  optional: true
+            - name: APP_UAA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: url
+            - name: APP_UAA_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: clientid
+            - name: APP_UAA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.uaaSecretName }}
+                  key: clientsecret
+      {{- with .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}

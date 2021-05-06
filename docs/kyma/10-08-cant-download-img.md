@@ -6,7 +6,7 @@ type: Troubleshooting
 When you try to install Kyma locally on Minikube, the installation may fail at a very early stage logging this error:
 
 ``` bash
-ERROR: Failed to pull image "eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd": rpc error: code = Unknown desc = Error response from daemon: Get https://eu.gcr.io/v2/: dial tcp: lookup eu.gcr.io on 192.168.64.1:53: read udp 192.168.64.5:55778->192.168.64.1:53: read: connection refused
+ERROR: Failed to pull image "eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229": rpc error: code = Unknown desc = Error response from daemon: Get https://eu.gcr.io/v2/: dial tcp: lookup eu.gcr.io on 192.168.64.1:53: read udp 192.168.64.5:55778->192.168.64.1:53: read: connection refused
 ```
 
 This message shows that the installation fails because the required Docker image can't be downloaded from a Google Container Registry address. Minikube can't download the image because its DNS server can't resolve the image's address.

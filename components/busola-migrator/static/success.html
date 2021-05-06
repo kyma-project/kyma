@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Kyma</title>
+    <meta name="description" content="Kyma Console migrator" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://kyma-project.io/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="https://kyma-project.io/favicon-16x16.png"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="./assets/fundamental-styles.css"
+    />
+    <link rel="stylesheet" type="text/css" href="./assets/style.css" />
+  </head>
+  <body>
+    <script>
+      localStorage.setItem("migrated", "true");
+    </script>
+    <div class="fd-page">
+      <div class="fd-page__content">
+        <section class="fd-section">
+          <p class="fd-has-text-align-center">
+            <span
+              class="sap-icon sap-icon--message-success"
+            ></span>
+          </p>
+          <div class="info" id="headline">Migration successful</div>
+          <div class="hint" id="message">
+            Your account permissions have been successfully migrated from SAP User Account and Authentication Service.<br>
+            You can now access the central Console by selecting the <b>Access Console</b> button.
+          </div>
+          <p></p>
+          <p class="fd-has-text-align-center">
+            <a href="/console-redirect" rel="nofollow noopener noreferrer"
+              ><button class="fd-button fd-button--emphasized">
+                Access Console
+              </button></a
+            >
+          </p>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

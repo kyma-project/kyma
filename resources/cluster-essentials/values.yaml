@@ -2,7 +2,7 @@ jobs:
   crdsInConfigMap: 20
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210407-86c769bd"
+    tag: "20210504-12243229"
   installer:
     namespace: kyma-installer
 

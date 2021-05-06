@@ -2,7 +2,10 @@ package scenarios
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
@@ -11,7 +14,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/configmap"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -23,7 +25,7 @@ import (
 
 func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
+	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-simple", currentDate.Hour(), currentDate.Minute(), rand.Int())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
@@ -36,8 +38,8 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 
 	python38Logger := logf.WithField(scenarioKey, "python38")
-	nodejs10Logger := logf.WithField(scenarioKey, "nodejs10")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
+	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 
 	genericContainer := shared.Container{
 		DynamicCli:  dynamicCli,
@@ -57,18 +59,18 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		return nil, errors.Wrapf(err, "while creating python38 config")
 	}
 
-	nodejs10Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs10", genericContainer.WithLogger(nodejs10Logger))
+	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while creating nodejs10 config")
+		return nil, errors.Wrapf(err, "while creating nodejs14 config")
 	}
 
-	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs10Logger))
+	cm := configmap.NewConfigMap("test-serverless-configmap", genericContainer.WithLogger(nodejs14Logger))
 	cmEnvKey := "CM_ENV_KEY"
 	cmEnvValue := "Value taken as env from ConfigMap"
 	cmData := map[string]string{
 		cmEnvKey: cmEnvValue,
 	}
-	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs10Logger))
+	sec := secret.NewSecret("test-serverless-secret", genericContainer.WithLogger(nodejs14Logger))
 	secEnvKey := "SECRET_ENV_KEY"
 	secEnvValue := "Value taken as env from Secret"
 	secretData := map[string]string{
@@ -98,19 +100,19 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python38 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python")),
 				teststep.NewHTTPCheck(python38Logger, "Python38 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
 			),
-			step.NewSerialTestRunner(nodejs10Logger, "NodeJS10 test",
-				teststep.CreateConfigMap(nodejs10Logger, cm, "Create Test ConfigMap", cmData),
-				teststep.CreateSecret(nodejs10Logger, sec, "Create Test Secret", secretData),
-				teststep.CreateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Create NodeJS10 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 pre update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
-				teststep.UpdateFunction(nodejs10Logger, nodejs10Cfg.Fn, "Update NodeJS10 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs10", serverlessv1alpha1.Nodejs10)),
-				teststep.NewHTTPCheck(nodejs10Logger, "NodeJS10 post update simple check through service", nodejs10Cfg.InClusterURL, poll.WithLogger(nodejs10Logger), "Hello From updated nodejs10"),
-			),
 			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
 				teststep.NewDefaultedFunctionCheck("Check NodeJS12 function has correct default values", nodejs12Cfg.Fn),
 				teststep.UpdateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Update NodeJS12 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs12", serverlessv1alpha1.Nodejs12)),
 				teststep.NewHTTPCheck(nodejs12Logger, "NodeJS12 pre update simple check through service", nodejs12Cfg.InClusterURL, poll.WithLogger(nodejs12Logger), "Hello From updated nodejs12"),
+			),
+			step.NewSerialTestRunner(nodejs14Logger, "NodeJS14 test",
+				teststep.CreateConfigMap(nodejs14Logger, cm, "Create Test ConfigMap", cmData),
+				teststep.CreateSecret(nodejs14Logger, sec, "Create Test Secret", secretData),
+				teststep.CreateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Create NodeJS14 Function", runtimes.NodeJSFunctionWithEnvFromConfigMapAndSecret(cm.Name(), cmEnvKey, sec.Name(), secEnvKey, serverlessv1alpha1.Nodejs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 pre update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), fmt.Sprintf("%s-%s", cmEnvValue, secEnvValue)),
+				teststep.UpdateFunction(nodejs14Logger, nodejs14Cfg.Fn, "Update NodeJS14 Function", runtimes.BasicNodeJSFunctionWithCustomDependency("Hello From updated nodejs14", serverlessv1alpha1.Nodejs14)),
+				teststep.NewHTTPCheck(nodejs14Logger, "NodeJS14 post update simple check through service", nodejs14Cfg.InClusterURL, poll.WithLogger(nodejs14Logger), "Hello From updated nodejs14"),
 			),
 		),
 	), nil

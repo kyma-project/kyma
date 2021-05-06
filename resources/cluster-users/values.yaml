@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210407-86c769bd
+    version: 20210504-12243229
   env:
     namespace: default
   securityContext:
@@ -66,11 +66,7 @@ clusterRoles:
       - "hydra.ory.sh"
     rafter:
       - "rafter.kyma-project.io"
-    kymaEventing:
-      - "knativekafka.kyma-project.io"
-      - "sources.kyma-project.io"
-      - "messaging.knative.dev"
-      - "eventing.knative.dev"
+    kymaEventing: []
     svcat:
       - "settings.svcat.k8s.io"
     ui:

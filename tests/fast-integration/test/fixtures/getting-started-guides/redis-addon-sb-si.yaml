@@ -12,8 +12,6 @@ kind: ServiceInstance
 metadata:
   name: redis-service
   namespace: orders-service
-  annotations:
-    app: "test"
 spec:
   serviceClassExternalName: redis
   servicePlanExternalName: micro
@@ -25,8 +23,6 @@ kind: ServiceBinding
 metadata:
   name: orders-service
   namespace: orders-service
-  annotations:
-    app: "test"
 spec:
   instanceRef:
     name: redis-service

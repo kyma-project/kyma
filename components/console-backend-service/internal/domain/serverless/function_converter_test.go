@@ -81,8 +81,8 @@ func TestFunctionConverter_ToGQLs(t *testing.T) {
 		expectedSource := "expectedSource"
 		expectedDependencies := "expectedDependencies"
 		expectedLabels := map[string]string{"foo": "bar"}
-		expectedRuntime := v1alpha1.Nodejs10
-		expectedRuntimeString := "nodejs10"
+		expectedRuntime := v1alpha1.Nodejs14
+		expectedRuntimeString := "nodejs14"
 
 		function1 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)
 		function2 := fixFunction(expectedName, expectedNamespace, expectedUID, expectedSource, expectedDependencies, expectedLabels, expectedRuntime)

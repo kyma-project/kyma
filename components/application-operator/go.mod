@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/application-operator
 
-go 1.14
+go 1.16
 
 require (
 	cloud.google.com/go v0.65.0 // indirect
@@ -12,19 +12,19 @@ require (
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/vrischmann/envconfig v1.1.0
-	helm.sh/helm/v3 v3.3.4
-	k8s.io/apimachinery v0.18.15
-	k8s.io/cli-runtime v0.18.15
-	k8s.io/client-go v0.18.15
+	helm.sh/helm/v3 v3.5.2
+	k8s.io/apimachinery v0.20.2
+	k8s.io/cli-runtime v0.20.2
+	k8s.io/client-go v0.20.2
 	k8s.io/klog v1.0.0
-	rsc.io/letsencrypt v0.0.3 // indirect
-	sigs.k8s.io/controller-runtime v0.6.2
+	sigs.k8s.io/controller-runtime v0.8.3
 )
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
+	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
 
