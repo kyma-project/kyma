@@ -46,10 +46,10 @@ Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="C
 
 The header contains information about multiple certificates because of the client certificate used in mTLS-secure communication between sidecars of a service.
 
-The Central Application Connectivity Validator forwards only the requests with the `X-Forwarded-Client-Cert` header that contains `Subject` with the following fields corresponding to the Application custom resource:
+The Central Application Connectivity Validator forwards only the requests with the `X-Forwarded-Client-Cert` header that contains **Subject** with the following fields corresponding to the Application custom resource:
 - **CommonName** is the name of the Application custom resource.
-- (Optional) **Organization** is the tenant.
-- (Optional) **OrganizationalUnit** is the group.
+- **Organization** (optional) is the tenant.
+- **OrganizationalUnit** (optional) is the group.
 
 ## Development
 
