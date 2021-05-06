@@ -1,10 +1,14 @@
 package nats
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
+	"k8s.io/client-go/dynamic"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -68,22 +72,22 @@ func (c *Commander) Init() error {
 
 // Start implements the Commander interface and starts the manager.
 func (c *Commander) Start() error {
-	//ctx, cancel := context.WithCancel(context.Background())
-	//defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	//dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	//applicationLister := application.NewLister(ctx, dynamicClient)
-	//
-	//if err := subscription.NewReconciler(
-	//	c.mgr.GetClient(),
-	//	applicationLister,
-	//	c.mgr.GetCache(),
-	//	ctrl.Log.WithName("reconciler").WithName("Subscription"),
-	//	c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
-	//	c.envCfg,
-	//).SetupWithManager(c.mgr); err != nil {
-	//	return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
-	//}
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	applicationLister := application.NewLister(ctx, dynamicClient)
+
+	if err := subscription.NewReconciler(
+		c.mgr.GetClient(),
+		applicationLister,
+		c.mgr.GetCache(),
+		ctrl.Log.WithName("reconciler").WithName("Subscription"),
+		c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
+		c.envCfg,
+	).SetupWithManager(c.mgr); err != nil {
+		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
+	}
 
 	// TODO(PS): probably we should move manager out of commander, and setup backend reconciler with
 	//  BEB or NATS commander using the same manager.
