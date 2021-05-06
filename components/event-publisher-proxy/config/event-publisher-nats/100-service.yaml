@@ -1,12 +1,40 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: event-publisher-nats
+  name: eventing-event-publisher-proxy
+  labels:
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: event-publisher-nats
+    kyma-project.io/dashboard: eventing
 spec:
   type: ClusterIP
   selector:
-    app: event-publisher-nats
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: event-publisher-nats
+    kyma-project.io/dashboard: eventing
   ports:
-    - protocol: TCP
+    - name: http
       port: 80
-      targetPort: 8080
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventing-event-publisher-proxy-metrics
+  labels:
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: event-publisher-nats
+    kyma-project.io/dashboard: eventing
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: event-publisher-nats
+    kyma-project.io/dashboard: eventing
+  ports:
+    - name: http-metrics
+      port: 80
+      protocol: TCP
+      targetPort: http-metrics
+---

@@ -3,7 +3,7 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210407-86c769bd"
+    tag: "20210504-12243229"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller

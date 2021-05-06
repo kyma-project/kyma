@@ -74,7 +74,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ .Chart.Name }}-migrate-ac-certs
-          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
           command:
             - /bin/sh
             - -c
