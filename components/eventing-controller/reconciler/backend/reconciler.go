@@ -80,6 +80,8 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
+	r.Log.Info("Found secrets with label", "count", len(secretList.Items))
+
 	if len(secretList.Items) > 1 {
 		// Break the system
 	}
@@ -114,6 +116,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// NATS flow
 	// CreateOrUpdate CR with NATS
+	r.Log.Info("***** Going with the NATS flow ***")
 	backend, err = r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
 		// Update status if bad
@@ -457,10 +460,18 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*event
 			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
+		Status: eventingv1alpha1.EventingBackendStatus{
+			Backend:            "NATS",
+			EventingReady:      boolPtr(false),
+			ControllerReady:    boolPtr(false),
+			PublisherReady:     boolPtr(false),
+			BebSecretName:      "",
+			BebSecretNamespace: "",
+		},
 	}
 
 	err := r.Cache.Get(ctx, defaultEventingBackend, &currentBackend)
-	if err != nil && !errors.IsNotFound(err) {
+	if err != nil {
 		if errors.IsNotFound(err) {
 			if err := r.Create(ctx, &desiredBackend); err != nil {
 				r.Log.Error(err, "Cannot create an EventingBackend CR")
