@@ -32,7 +32,7 @@ with the value from the certificate Common Name (CN).
 
 The application `clientIDs` are read from Application resources and cached locally with TTL defined by the `cacheExpirationSeconds` parameter.
 The cache refresh is performed by the controller during reconciliation in intervals defined by the `syncPeriod`.
-To prevent cache entries eviction, the duration of the `syncPeriod` should be less than `cacheExpirationSeconds`.
+To prevent cache entries eviction, the value of the `syncPeriod` should be smaller than that of `cacheExpirationSeconds`.
 
 ## Details
 
