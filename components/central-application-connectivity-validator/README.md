@@ -8,8 +8,8 @@ It proxies the requests to the Event Service and the Application Registry.
 The Central Application Connectivity Validator has the following parameters:
 - **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
 - **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
-- **tenant** the name of the tenant (subject field `OrganizationalUnit`) for which client certificate should be generated. When empty, the tenant validation is skipped.
-- **group** the name of the group (subject field `Organization`) for which client certificate should be generated. When empty, the group validation is skipped.
+- **tenant** is the name of the tenant (subject field `OrganizationalUnit`) for which the client certificate should be generated. When empty, the tenant validation is skipped.
+- **group** is the name of the group (subject field `Organization`) for which the client certificate should be generated. When empty, the group validation is skipped.
 - **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/%%APP_NAME%%/v1/events`.
 - **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/%%APP_NAME%%/v2/events`.
 - **eventMeshHost** is the host and the port of the Event Mesh adapter. The default value is `eventing-event-publisher-proxy.kyma-system`.
