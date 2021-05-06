@@ -1,6 +1,0 @@
-apiVersion: applicationconnector.kyma-project.io
-kind: ApplicationMapping
-metadata:
-  # Application "user-app" is enabled in "production" Namespace
-  name: user-app
-  namespace: production
