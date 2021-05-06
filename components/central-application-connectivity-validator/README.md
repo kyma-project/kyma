@@ -20,7 +20,7 @@ The Central Application Connectivity Validator has the following parameters:
 - **cacheExpirationSeconds** is the expiration time for client IDs stored in cache expressed in seconds. The default value is `90`.
 - **cacheCleanupIntervalSeconds** is the clean-up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.
 - **kubeConfig** is the path to the cluster kubeconfig. Used for running the service outside of the cluster.
-- **apiServerURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
+- **apiServerURL** is the address of the Kubernetes API server. Overrides any value in the kubeconfig. Used for running the service outside of the cluster.
 - **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `60 seconds`.
 
 ### Application name placeholder
