@@ -17,6 +17,7 @@ Environment parameters used by the tests:
 | **HELM_DRIVER** | Yes | `secret` | Backend storage driver used by Helm 3 to store release data. | `configmap`, `secret`, `memory` |
 | **INSTALLATION_TIMEOUT_SECONDS** | No | 180 | Timeout for the release installation, provided in seconds. |  |
 | **GATEWAY_DEPLOYED_PER_NAMESPACE** | No | `false` | Flag that specifies whether Application Gateway should be deployed once per Namespace basing on ServiceInstance or for every Application. | `true`, `false` |
+| **CENTRAL_APPLICATION_CONNECTIVITY_VALIDATOR** | No | `true` | Flag that specifies whether Central Application Connectivity Validator is used i.e. Validator is not deployed for every Application. | `true`, `false` |
 
 ### Configuring Kyma
 

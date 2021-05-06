@@ -67,13 +67,15 @@ func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string)
 	}
 }
 
-func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool) *K8sResourceChecker {
+func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool, checkValidator bool) *K8sResourceChecker {
 	ctxBackground := context.Background()
 
-	resources := []k8sResource{
-		newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
+	resources := []k8sResource{}
+	if checkValidator {
+		resources = append(resources,
+			newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
+			newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
+			newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService))
 	}
 
 	if checkGateway {
