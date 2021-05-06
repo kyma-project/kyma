@@ -4,3 +4,8 @@ description: Kyma Component 'eventing'
 version: 0.1.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
+dependencies:
+  # TODO(marcobebway) do we need to put all sub-chart here
+  - name: k3s-tests
+    version: 0.1.0
+    condition: k3s-tests.enabled # this chart is installed manually

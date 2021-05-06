@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.jobName | quote }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.jobName | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin # yeah, cluster admin - we do NOT run those tests in cluster, only in k3s, so it's the easiest way
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.jobName | quote }}
+    namespace: default
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jobName | quote }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: {{ .Values.jobName | quote }}
+      restartPolicy: Never
+      containers:
+        - name: test
+          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          args: [ "eventing-integration" ]
+          env:
+            - name: APP_TEST_WAIT_TIMEOUT
+              value: {{ .Values.config.appTestWaitTimeout | quote }}
+            - name: APP_TEST_VERBOSE
+              value: {{ .Values.config.appTestVerbose | quote }}
+            - name: APP_TEST_CLEANUP
+              value: {{ .Values.config.appTestCleanup | quote }}
+            - name: APP_TEST_ISTIO_ENABLED
+              value: {{ .Values.config.appTestIstioEnabled | quote }}

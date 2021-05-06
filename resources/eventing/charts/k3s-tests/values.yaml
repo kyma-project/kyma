@@ -1,0 +1,12 @@
+jobName: k3s-eventing-test # overridden in kyma-integration-eventing-k3s.sh in test-infra
+
+tests:
+  image:
+    repository: "overridden-during-installation"
+    tag: "overridden-during-installation"
+
+config:
+  appTestWaitTimeout: 5m
+  appTestVerbose: false
+  appTestCleanup: no  # do not clean, kubectl get resources after job completion/fail
+  appTestIstioEnabled: false
