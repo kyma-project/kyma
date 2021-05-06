@@ -1,14 +1,12 @@
 package nats
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,9 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
 )
 
 // Commander implements the Commander interface.
@@ -72,22 +68,22 @@ func (c *Commander) Init() error {
 
 // Start implements the Commander interface and starts the manager.
 func (c *Commander) Start() error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	//ctx, cancel := context.WithCancel(context.Background())
+	//defer cancel()
 
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	applicationLister := application.NewLister(ctx, dynamicClient)
-
-	if err := subscription.NewReconciler(
-		c.mgr.GetClient(),
-		applicationLister,
-		c.mgr.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
-		c.envCfg,
-	).SetupWithManager(c.mgr); err != nil {
-		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
-	}
+	//dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	//applicationLister := application.NewLister(ctx, dynamicClient)
+	//
+	//if err := subscription.NewReconciler(
+	//	c.mgr.GetClient(),
+	//	applicationLister,
+	//	c.mgr.GetCache(),
+	//	ctrl.Log.WithName("reconciler").WithName("Subscription"),
+	//	c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
+	//	c.envCfg,
+	//).SetupWithManager(c.mgr); err != nil {
+	//	return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
+	//}
 
 	// TODO(PS): probably we should move manager out of commander, and setup backend reconciler with
 	//  BEB or NATS commander using the same manager.

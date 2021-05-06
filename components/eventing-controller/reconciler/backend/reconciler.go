@@ -2,11 +2,15 @@ package backend
 
 import (
 	"context"
+	b64 "encoding/base64"
+	"encoding/json"
 	"fmt"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -15,7 +19,7 @@ import (
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +37,6 @@ const (
 
 	PublisherNamespace       = "kyma-system"
 	PublisherName            = "eventing-publisher-proxy"
-	// TODO: Use a more generic name, once added to the helm chart!
 	ServiceAccountName       = "eventing-event-publisher-nats"
 	BackendCRLabelKey        = "kyma-project.io/eventing"
 	BackendCRLabelValue      = "backend"
@@ -54,6 +57,8 @@ const (
 	LivenessTimeoutSecs      = int32(1)
 	LivenessPeriodSecs       = int32(2)
 	BEBNamespacePrefix       = "/"
+
+	TokenEndpointFormat = "%s?grant_type=%s&response_type=token"
 )
 
 var (
@@ -102,6 +107,13 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		// Stop subscription controller (Radu/Frank)
 		// Start the other subscription controller (Radu/Frank)
+		// CreateOrUpdate deployment for publisher proxy secret
+		_, err = r.SyncPublisherProxySecret(ctx, &secretList.Items[0])
+		if err != nil {
+			// Update status if bad
+			r.Log.Error(err, "failed to sync publisher proxy secret", "backend", eventingv1alpha1.BebBackendType)
+			return ctrl.Result{}, err
+		}
 		// CreateOrUpdate deployment for publisher proxy
 		publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
 		if err != nil {
@@ -130,6 +142,10 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("Created/updated backend CR")
 	// Stop subscription controller (Radu/Frank)
 	// Start the other subscription controller (Radu/Frank)
+
+	// Delete secret for publisher proxy if it exists
+	// publisher, err := r.DeletePublisherProxySecret(ctx, secretList.Items[0])
+
 	// CreateOrUpdate deployment for publisher proxy
 	r.Log.Info("trying to create/update eventing publisher proxy...")
 	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
@@ -176,6 +192,117 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 	return nil
 }
 
+func (r *BackendReconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: PublisherNamespace,
+		Name:      PublisherName,
+	}
+	currentSecret := new(v1.Secret)
+
+	desiredSecret, err := computeSecretForPublisher(secret)
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid secret for publisher")
+	}
+	err = r.Cache.Get(ctx, secretNamespacedName, currentSecret)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			// Create
+			r.Log.Info("creating nats publisher")
+			err := r.Create(ctx, desiredSecret)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to create secret for publisher proxy")
+			}
+		}
+		r.Log.Info("error is not NotFound!", "err", err)
+		return nil, err
+	}
+
+	if secretEqual(currentSecret, desiredSecret) {
+		return currentSecret, nil
+	}
+
+	// Update
+	desiredSecret.ResourceVersion = currentSecret.ResourceVersion
+	if err := r.Update(ctx, desiredSecret); err != nil {
+		r.Log.Error(err, "Cannot update publisher proxy secret")
+		return nil, err
+	}
+
+	return desiredSecret, nil
+}
+
+func computeSecretForPublisher(secret *v1.Secret) (*v1.Secret, error) {
+	result := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      PublisherName,
+			Namespace: PublisherNamespace,
+			Labels: map[string]string{
+				AppLabelKey: PublisherName,
+			},
+		},
+	}
+
+	if secret.Data["messaging"] == nil {
+		return nil, errors.New("message is missing from BEB secret")
+	}
+
+	if secret.Data["namespace"] == nil {
+		return nil, errors.New("namespace is missing from BEB secret")
+	}
+	messagingBytes, err := b64.StdEncoding.DecodeString(string(secret.Data["messaging"]))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to decode messaging")
+	}
+
+	namespaceBytes, err := b64.StdEncoding.DecodeString(string(secret.Data["namespace"]))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to decode namespace")
+	}
+
+	var messages []Message
+	err = json.Unmarshal(messagingBytes, &messages)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, m := range messages {
+		if m.Broker.BrokerType == "saprestmgw" {
+			if len(m.OA2.ClientID) == 0 {
+				return nil, errors.New("client ID is missing")
+			}
+			if len(m.OA2.ClientSecret) == 0 {
+				return nil, errors.New("client secret is missing")
+			}
+			if len(m.OA2.TokenEndpoint) == 0 {
+				return nil, errors.New("tokenendpoint is missing")
+			}
+			if len(m.OA2.GrantType) == 0 {
+				return nil, errors.New("granttype is missing")
+			}
+			if len(m.URI) == 0 {
+				return nil, errors.New("publish URL is missing")
+			}
+
+			clientID := m.OA2.ClientID
+			clientSecret := m.OA2.ClientSecret
+			tokenEndpoint := m.OA2.TokenEndpoint
+			grantType := m.OA2.GrantType
+			publishURL := m.URI
+
+			result.StringData = map[string]string{
+				"client-id":       clientID,
+				"client-secret":   clientSecret,
+				"token-endpoint":  fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
+				"ems-publish-url": publishURL,
+				"beb-namespace":   string(namespaceBytes),
+			}
+			break
+		}
+	}
+
+	return result, nil
+}
+
 func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
 	publisherNamespacedName := types.NamespacedName{
 		Namespace: PublisherNamespace,
@@ -195,7 +322,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 
 	err := r.Cache.Get(ctx, publisherNamespacedName, &currentPublisher)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			// Create
 			r.Log.Info("creating publisher proxy")
 			return desiredPublisher, r.Create(ctx, desiredPublisher)
@@ -494,7 +621,7 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend
 
 	err := r.Cache.Get(ctx, defaultEventingBackend, &currentBackend)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			r.Log.Info("trying to create backend CR...")
 			if err := r.Create(ctx, &desiredBackend); err != nil {
 				r.Log.Error(err, "Cannot create an EventingBackend CR")
