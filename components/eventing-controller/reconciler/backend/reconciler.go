@@ -30,7 +30,7 @@ const (
 
 	PublisherNamespace       = "kyma-system"
 	PublisherName            = "eventing-publisher-proxy"
-	// TODO: changing name to reuse existing service account. Need another one for BEB?
+	// TODO: Use a more generic name, once added to the helm chart!
 	ServiceAccountName       = "eventing-event-publisher-nats"
 	BackendCRLabelKey        = "kyma-project.io/eventing"
 	BackendCRLabelValue      = "backend"
@@ -86,29 +86,30 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	backendType := eventingv1alpha1.NatsBackendType
 	// If the label is removed what to do? first check if the removed secret is mentioned in the backend CR?
 	// Don't we need a finalizer for that?
 	if len(secretList.Items) == 1 {
 		r.Log.Info("***** Going with the BEB flow ***")
-		// BEB flow
+		backendType = eventingv1alpha1.BebBackendType
 		// CreateOrUpdate CR with BEB
-		_, err := r.CreateOrUpdateBackendCR(ctx)
+		_, err := r.CreateOrUpdateBackendCR(ctx, backendType)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 		// Stop subscription controller (Radu/Frank)
 		// Start the other subscription controller (Radu/Frank)
 		// CreateOrUpdate deployment for publisher proxy
-		publisher, err := r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.BebBackendType)
+		publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
 		if err != nil {
 			// Update status if bad
-			r.Log.Error(err, "failed to create or update publisher proxy", "backend", eventingv1alpha1.BebBackendType)
+			r.Log.Error(err, "failed to create or update publisher proxy", "backend", backendType)
 			return ctrl.Result{}, err
 		}
 		// CreateOrUpdate status of the CR
-		err = r.CreateOrUpdateBackendStatus(ctx, publisher)
+		err = r.UpdateBackendStatus(ctx, backendType, publisher)
 		if err != nil {
-			r.Log.Error(err, "failed to create or update backend status", "backend", eventingv1alpha1.BebBackendType)
+			r.Log.Error(err, "failed to create or update backend status", "backend", backendType)
 			return ctrl.Result{}, err
 		}
 
@@ -118,7 +119,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// NATS flow
 	// CreateOrUpdate CR with NATS
 	r.Log.Info("***** Going with the NATS flow ***")
-	backend, err := r.CreateOrUpdateBackendCR(ctx)
+	_, err := r.CreateOrUpdateBackendCR(ctx, backendType)
 	if err != nil {
 		// Update status if bad
 		return ctrl.Result{}, err
@@ -128,7 +129,8 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Start the other subscription controller (Radu/Frank)
 	// CreateOrUpdate deployment for publisher proxy
 	r.Log.Info("trying to create/update eventing publisher proxy...")
-	if _, err = r.CreateOrUpdatePublisherProxy(ctx, eventingv1alpha1.NatsBackendType); err != nil {
+	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
+	if err != nil {
 		// Update status if bad
 		r.Log.Error(err, "cannot create/update eventing publisher proxy deployment")
 		return ctrl.Result{}, err
@@ -137,42 +139,46 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
+	err = r.UpdateBackendStatus(ctx, backendType, publisher)
+	return ctrl.Result{}, err
+}
 
+func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment) error {
+	var backend eventingv1alpha1.EventingBackend
+	// TODO: cache?
 	if err := r.Client.Get(ctx, types.NamespacedName{
 		Namespace: DefaultEventingBackendNamespace,
 		Name:      DefaultEventingBackendName,
-	}, backend); err != nil {
+	}, &backend); err != nil {
 		r.Log.Info("cannot get backend CR to update")
-		return ctrl.Result{}, err
+		return err
 	}
+
+	// TODO: in case a publisher already exists, to make sure during the switch the status of publisherReady is false,
+	//  do we need to make sure first we take the existing publisher down, then patch the existing deployment? Otherwise,
+	//  during the transition from nats<->beb, there are two replicas available.
+	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 
 	backend.Status = eventingv1alpha1.EventingBackendStatus{
-		Backend:         eventingv1alpha1.NatsBackendType,
+		Backend:         backendType,
 		ControllerReady: boolPtr(false),
 		EventingReady:   boolPtr(false),
-		PublisherReady:  boolPtr(false),
+		PublisherReady:  boolPtr(publisherReady),
 	}
 	r.Log.Info("Updating backend CR status")
-	if err := r.Update(ctx, backend); err != nil {
+	if err := r.Update(ctx, &backend); err != nil {
 		r.Log.Error(err, "error updating EventingBackend CR")
-		return ctrl.Result{}, err
+		return err
 	}
-
-	return ctrl.Result{}, nil
-}
-
-func (r *BackendReconciler) CreateOrUpdateBackendStatus(ctx context.Context, publisherDeploy *appsv1.Deployment) error {
 	return nil
 }
 
 func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
-
 	publisherNamespacedName := types.NamespacedName{
 		Namespace: PublisherNamespace,
 		Name:      PublisherName,
 	}
 	var currentPublisher appsv1.Deployment
-
 	var desiredPublisher *appsv1.Deployment
 
 	switch backend {
@@ -180,16 +186,17 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		desiredPublisher = newNATSPublisherDeployment()
 	case eventingv1alpha1.BebBackendType:
 		desiredPublisher = newBEBPublisherDeployment()
+	default:
+		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
 
 	err := r.Cache.Get(ctx, publisherNamespacedName, &currentPublisher)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Create
-			r.Log.Info("creating nats publisher")
+			r.Log.Info("creating publisher proxy")
 			return desiredPublisher, r.Create(ctx, desiredPublisher)
 		}
-		r.Log.Info("error is not NotFound!", "err", err)
 		return nil, err
 	}
 
@@ -203,7 +210,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		r.Log.Error(err, "Cannot update publisher proxy")
 		return nil, err
 	}
-	err = r.CreateOrUpdateBackendStatus(ctx, desiredPublisher)
+	err = r.UpdateBackendStatus(ctx, backend, desiredPublisher)
 	if err != nil {
 		r.Log.Error(err, "Cannot update the status for EventingBackend CR")
 		return nil, err
@@ -248,6 +255,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 								},
 							},
 							Env: []v1.EnvVar{
+								{Name: "BACKEND", Value: "beb"},
 								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
 								{Name: "REQUEST_TIMEOUT", Value: "5s"},
 								{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
@@ -316,7 +324,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 								Handler: v1.Handler{
 									HTTPGet: &v1.HTTPGetAction{
 										Path:   "/healthz",
-										Port:   intstr.FromString("8080"),
+										Port:   intstr.FromInt(8080),
 										Scheme: v1.URISchemeHTTP,
 									},
 								},
@@ -330,7 +338,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 								Handler: v1.Handler{
 									HTTPGet: &v1.HTTPGetAction{
 										Path:   "/readyz",
-										Port:   intstr.FromString("8080"),
+										Port:   intstr.FromInt(8080),
 										Scheme: v1.URISchemeHTTP,
 									},
 								},
@@ -454,7 +462,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 	}
 }
 
-func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1alpha1.EventingBackend, error) {
+func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend eventingv1alpha1.BackendType) (*eventingv1alpha1.EventingBackend, error) {
 	var currentBackend eventingv1alpha1.EventingBackend
 	defaultEventingBackend := types.NamespacedName{
 		Namespace: DefaultEventingBackendNamespace,
@@ -472,7 +480,7 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context) (*event
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
 		Status: eventingv1alpha1.EventingBackendStatus{
-			Backend:            eventingv1alpha1.NatsBackendType,
+			Backend:            backend,
 			EventingReady:      boolPtr(false),
 			ControllerReady:    boolPtr(false),
 			PublisherReady:     boolPtr(false),
