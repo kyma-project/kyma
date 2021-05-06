@@ -1,4 +1,0 @@
----
-title: Observability
-type: Overview
----
