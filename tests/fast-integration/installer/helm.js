@@ -64,9 +64,37 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile) {
   await execa("helm", args);
 }
 
+async function helmTemplate(release, chart, namespace, values, profile) {
+  const args = [
+    "template",
+    "-n",
+    namespace,
+    release,
+    chart,
+  ];
+
+  if (!!profile) {
+    try {
+      const profilePath = join(chart, `profile-${profile}.yaml`);
+      if (fs.existsSync(profilePath)) {
+        args.push("-f", profilePath);
+      }
+    } catch (err) {
+      console.error(`profile-${profile}.yaml file not found in ${chart} - switching to default profile instead`)
+    }
+  }
+
+  if (!!values) {
+    args.push("--set", values);
+  }
+
+  return execa("helm", args);
+}
+
 module.exports = {
   helmInstallUpgrade,
   helmList,
   helmStatus,
-  helmUninstall
+  helmUninstall,
+  helmTemplate
 }

@@ -161,6 +161,8 @@ async function kubectlApplyDir(dir, namespace) {
   for (let file of files) {
     if (file.endsWith('.yaml') || file.endsWith('.yml')) {
       await kubectlApply(join(dir, file), namespace).catch(console.error);
+    } else {
+       await kubectlApplyDir(join(dir, file), namespace); 
     }
   }
 }
@@ -228,54 +230,38 @@ async function getAllCRDs() {
 
 }
 
-async function k8sApply(listOfSpecs, namespace, patch = true) {
-  const options = {
-    headers: { "Content-type": "application/merge-patch+json" },
-  };
-
-  return Promise.all(
-    listOfSpecs.map(async (obj) => {
-      try {
-        if (namespace) {
-          obj.metadata.namespace = namespace;
-        }
-        debug(
-          "k8sApply:",
-          obj.metadata.name,
-          ", kind:",
-          obj.kind,
-          ", apiVersion:",
-          obj.apiVersion,
-          ", namespace:",
-          obj.metadata.namespace
-        );
-        const existing = await k8sDynamicApi.read(obj);
-
-        if (patch) {
-          obj.metadata.resourceVersion = existing.body.metadata.resourceVersion;
-          return await k8sDynamicApi.patch(
-            obj,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            options
-          );
-        }
-        return existing;
-      } catch (e) {
-        if (e.body && e.body.reason == "NotFound") {
-          return await k8sDynamicApi.create(obj).catch((e) => {
-            throw new Error(
-              "k8sApply error, cannot create: " + JSON.stringify(obj)
-            );
-          });
+async function k8sApply(resources, namespace, patch = true) {
+  const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
+  for (let resource of resources) {
+    if (!resource || !resource.kind || !resource.metadata.name) {
+      debug("Skipping invalid resource:", resource);
+      continue;
+    }
+    if (!resource.metadata.namespace) {
+      resource.metadata.namespace = namespace
+    }
+    try {
+      const existing = await k8sDynamicApi.read(resource)
+      await k8sDynamicApi.patch(resource, undefined, undefined, undefined, undefined, options);
+      debug(resource.kind, resource.metadata.name, "reconfigured")
+    } catch (e) {
+      {
+        if (e.body && e.body.reason == 'NotFound') {
+          try {
+            await k8sDynamicApi.create(resource);
+            debug(resource.kind, resource.metadata.name, "created")
+          } catch (createError) {
+            debug(resource.kind, resource.metadata.name, "failed to create");
+            console.log(createError)
+            throw createError;
+          }
         } else {
-          throw e;
+          throw e
         }
       }
-    })
-  );
+    }
+
+  }
 }
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
@@ -308,6 +294,42 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
       });
   });
   return result;
+}
+
+function waitForFunction(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+          (c) => c.type == "Running" && c.status == "True"
+        )
+      );
+    },
+    timeout,
+    `Waiting for ${name} function timeout (${timeout} ms)`
+  );
+}
+
+function waitForSubscription(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
+        watchObj.object.status.conditions &&
+        watchObj.object.status.conditions.some(
+          (c) => c.type == "Subscription active" && c.status == "True"
+        )
+      );
+    },
+    timeout,
+    `Waiting for ${name} function timeout (${timeout} ms)`
+  );
 }
 
 function waitForServiceClass(name, namespace = "default", timeout = 90000) {
@@ -815,6 +837,8 @@ module.exports = {
   waitForDeployment,
   waitForTokenRequest,
   waitForCompassConnection,
+  waitForFunction,
+  waitForSubscription,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,

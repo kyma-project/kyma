@@ -3,15 +3,18 @@ const {
   helmInstallUpgrade,
   helmStatus,
   helmUninstall,
-  helmList
+  helmList,
+  helmTemplate
 } = require("./helm");
 const execa = require("execa");
 const { join } = require("path");
 const { installIstio, upgradeIstio } = require("./istioctl");
 const pRetry = require("p-retry");
+const k8s = require("@kubernetes/client-node");
 const {
   debug,
   k8sCoreV1Api,
+  k8sDynamicApi,
   kubectlDelete,
   kubectlApplyDir,
   kubectlApply,
@@ -118,6 +121,20 @@ async function removeKymaGatewayCertsYaml(pathToResources) {
   } catch (err) {
     console.log("kyma-gateway-certs.yaml already deleted");
   }
+}
+
+async function applyRelease(
+  release,
+  namespace = "kyma-system",
+  chart,
+  values,
+  profile,
+  isUpgrade
+) {
+  const { stdout } = await helmTemplate(release, chart, namespace, values, profile);
+  const yamls = k8s.loadAllYaml(stdout);
+
+  await k8sApply(yamls, namespace);
 }
 
 async function installRelease(
@@ -314,11 +331,23 @@ async function uninstallIstio() {
  * 
  * Uninstalls Kyma
  * @param {Object} options Uninstallation options
- * @param {string} options.skipCrd Do not delete CRDs
- * @param {string} options.skipIstio Do not ininstall istio
+ * @param {boolean} options.skipCrd Do not delete CRDs
+ * @param {Array<string>} options.skipComponents List of components that should not be uninstalled
+ * @param {Array<string>} options.components List of components to uninstall
+ * @param {boolean} options.deleteNamespaces
  */
 async function uninstallKyma(options) {
-  const releases = await helmList();
+  let releases = await helmList();
+  debug("Releases in the cluster:", releases);
+  const components = options.components;
+  const skipComponents = options.skipComponents;
+  if (components) {
+    releases = releases.filter(r => components.includes(r.name))
+  }
+  if (skipComponents) {
+    releases = releases.filter(r => !skipComponents.includes(r.name))
+  }
+  debug("Releases to uninstall:", releases);
 
   await Promise.allSettled(releases.map((r) => helmUninstall(r.name, r.namespace).catch(() => {
     // ignore errors during uninstall ()
@@ -329,7 +358,11 @@ async function uninstallKyma(options) {
     const crds = await getAllCRDs();
     await k8sDelete(crds.filter(crd => kymaCrds.includes(crd.metadata.name)));
   }
-  await kubectlDelete(join(__dirname, "system-namespaces.yaml"));
+  if (options.deleteNamespaces) {
+    debug("Deleting kyma namespaces");
+    await kubectlDelete(join(__dirname, "system-namespaces.yaml"));
+  }
+
   const usualLeftovers = [
     '/api/v1/namespaces/kyma-system/secrets',
     '/apis/oathkeeper.ory.sh/v1alpha1/namespaces/kyma-system/rules',
@@ -337,7 +370,10 @@ async function uninstallKyma(options) {
     '/apis/rafter.kyma-project.io/v1beta1/clusterbuckets',
   ]
   await Promise.allSettled(usualLeftovers.map(path => deleteAllK8sResources(path)));
-  if (!options.skipIstio) {
+  const skipIstio = (skipComponents && skipComponents.includes("istio")) || (components && !components.includes("istio"));
+
+  if (!skipIstio) {
+    debug("Uninstalling istio");
     await uninstallIstio();
   }
 
@@ -353,10 +389,12 @@ async function uninstallKyma(options) {
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install
  * @param {boolean} options.isCompassEnabled
+ * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
   options = options || {};
   const installLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "resources");
+  const crdLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "installation", "resources", "crds");
   const istioVersion = options.istioVersion || defaultIstioVersion;
   const isUpgrade = options.isUpgrade || false;
   const skipComponents = options.skipComponents || [];
@@ -366,26 +404,23 @@ async function installKyma(options) {
   await waitForNodesToBeReady();
   const crdsBefore = await getAllCRDs();
   const skipIstio = skipComponents.includes("istio") || (components && !components.includes("istio"));
-  
+
   if (!skipIstio) {
     if (options.isUpgrade) {
       await upgradeIstio(istioVersion);
     } else {
       await updateCoreDNSConfigMap();
       await installIstio(istioVersion);
-    }  
+    }
   }
-  console.timeLog('Installation','Istio installed');
+  console.timeLog('Installation', 'Istio installed');
   await removeKymaGatewayCertsYaml(installLocation);
   await kubectlApply(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlApply(join(__dirname, "system-namespaces.yaml"));
   if (options.withCompass) {
     await kubectlApply(join(__dirname, "compass-namespace.yaml"));
   }
-  await kubectlApplyDir(
-    join(installLocation, "cluster-essentials/files"),
-    "kyma-system"
-  );
+  await kubectlApplyDir(crdLocation, "kyma-system");
   if (options.newEventing) {
     await k8sApply([eventingSecret]);
   }
@@ -396,22 +431,25 @@ async function installKyma(options) {
   if (skipComponents) {
     kymaCharts = kymaCharts.filter(c => !skipComponents.includes(c.release))
   }
+  const installFn = options.useHelmTemplate ? applyRelease : installRelease;
   await Promise.all(
     kymaCharts.map(({ release, namespace, values, customPath, profile }) => {
       const chartLocation = !!customPath
         ? customPath(installLocation)
         : join(installLocation, release);
-      return pRetry(
-        async () =>
-          installRelease(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
-        {
-          retries: 10,
-          onFailedAttempt: async (err) => {
-            console.log(`retrying install of ${release}`);
-            console.log(err);
-          },
-        }
-      );
+
+      return installFn(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade)
+      // return pRetry(
+      //   async () =>
+      //     installFn(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
+      //   {
+      //     retries: 10,
+      //     onFailedAttempt: async (err) => {
+      //       console.log(`retrying install of ${release}`);
+      //       console.log(err);
+      //     },
+      //   }
+      // );
     })
   );
   const crdsAfter = await getAllCRDs();
