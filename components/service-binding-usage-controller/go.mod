@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/service-binding-usage-controller
 
-go 1.13
+go 1.16
 
 require (
 	github.com/kubernetes-sigs/service-catalog v0.3.0
