@@ -5,6 +5,8 @@
 The Central Application Connectivity Validator validates client certificate subjects.
 It proxies the requests to the Event Service and the Application Registry.
 
+## Usage
+
 The Central Application Connectivity Validator has the following parameters:
 - **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
 - **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
