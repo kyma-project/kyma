@@ -44,7 +44,6 @@ This is an example `X-Forwarded-Client-Cert` header:
 Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
 ```
 
-The header contains information about multiple certificates because of the client certificate used in mTLS-secure communication between sidecars of a service.
 
 The Central Application Connectivity Validator forwards only the requests with the `X-Forwarded-Client-Cert` header that contains **Subject** with the following fields corresponding to the Application custom resource:
 - **CommonName** is the name of the Application custom resource.
