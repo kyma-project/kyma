@@ -10,13 +10,13 @@ The Central Application Connectivity Validator has the following parameters:
 - **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
 - **tenant** is the name of the tenant (subject field `OrganizationalUnit`) for which the client certificate should be generated. When empty, the tenant validation is skipped.
 - **group** is the name of the group (subject field `Organization`) for which the client certificate should be generated. When empty, the group validation is skipped.
-- **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/%%APP_NAME%%/v1/events`.
-- **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/%%APP_NAME%%/v2/events`.
+- **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/{APP_NAME}/v1/events`.
+- **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/{APP_NAME}/v2/events`.
 - **eventMeshHost** is the host and the port of the Event Mesh adapter. The default value is `eventing-event-publisher-proxy.kyma-system`.
 - **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/publish`.
-- **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/%%APP_NAME%%/v1/metadata`.
+- **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/{APP_NAME}/v1/metadata`.
 - **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
-- **appNamePlaceholder**  is the path URL placeholder used for an application name. The default value is `%%APP_NAME%%`.
+- **appNamePlaceholder**  is the path URL placeholder used for the application name. The default value is `%%APP_NAME%%`.
 - **cacheExpirationSeconds** is the expiration time for client IDs stored in cache expressed in seconds. The default value is `90`.
 - **cacheCleanupIntervalSeconds** is the clean-up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.
 - **kubeConfig** is the path to the cluster kubeconfig. Used for running the service outside of the cluster.
