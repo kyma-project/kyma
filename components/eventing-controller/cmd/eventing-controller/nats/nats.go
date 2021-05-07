@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	controllers "github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
+	"k8s.io/client-go/dynamic"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,9 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
 )
 
 // Commander implements the Commander interface.
