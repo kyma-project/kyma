@@ -68,6 +68,7 @@ type Service struct {
 	Events bool
 }
 
+//go:generate mockery --name=ServiceRepository
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
 	Get(appName, serviceName, apiName string) (Service, apperrors.AppError)
@@ -92,9 +93,9 @@ func (r *repository) Get(appName, serviceName, apiName string) (Service, apperro
 		// serviceName personalization-webservices-v1 (to przychodzi z API)
 
 		usedServiceName := serviceName
-		if len(apiName) == 0 {
-			usedServiceName = createServiceName(serviceName, service.ID)
-		}
+		//if len(apiName) == 0 {
+		//	usedServiceName = createServiceName(serviceName, service.ID)
+		//}
 
 		if service.Name == usedServiceName {
 			return convertFromK8sType(service, apiName)
@@ -128,9 +129,9 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 	var api *ServiceAPI
 	var events bool
 	// Kyma OS mode - find first
-	if len (apiName) == 0 {
+	if len(apiName) == 0 {
 		for _, entry := range service.Entries {
-			if entry.Type == specAPIType{
+			if entry.Type == specAPIType {
 				api = &ServiceAPI{
 					GatewayURL:                  entry.GatewayUrl,
 					TargetURL:                   entry.TargetUrl,
@@ -150,7 +151,7 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 		// Management Plane mode to nie zadziała 1) get name + and Id odkleic sufix blebleble jesli nazwa jest jest postaci string_hash
 		for _, entry := range service.Entries {
 			if entry.Name == apiName {
-				if entry.Type == specAPIType{
+				if entry.Type == specAPIType {
 					api = &ServiceAPI{
 						GatewayURL:                  entry.GatewayUrl,
 						TargetURL:                   entry.TargetUrl,
@@ -183,7 +184,6 @@ func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, appe
 }
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
 
 func createServiceName(serviceDisplayName, id string) string {
 	// generate 5 characters suffix from the id

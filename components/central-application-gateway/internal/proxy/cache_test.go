@@ -18,7 +18,7 @@ func TestCache(t *testing.T) {
 		cache := NewCache(60)
 
 		// when
-		cacheEntry, found := cache.Get("app1", "id1")
+		cacheEntry, found := cache.Get("app1", "service1", "api1")
 
 		// then
 		assert.Nil(t, cacheEntry)
@@ -35,7 +35,7 @@ func TestCache(t *testing.T) {
 		url := net.FormatURL("http", "www.example.com", 8080, "")
 		proxy := httputil.NewSingleHostReverseProxy(url)
 
-		cacheEntry := cache.Put("app1", "id1", proxy, authorizationStrategyMock, csrfTokenStrategy)
+		cacheEntry := cache.Put("app1", "service1", "api1", proxy, authorizationStrategyMock, csrfTokenStrategy)
 
 		// then
 		require.NotNil(t, cacheEntry)
@@ -44,7 +44,7 @@ func TestCache(t *testing.T) {
 		assert.Equal(t, csrfTokenStrategy, cacheEntry.CSRFTokenStrategy)
 
 		// when
-		cacheEntry, found := cache.Get("app1", "id1")
+		cacheEntry, found := cache.Get("app1", "service1", "api1")
 
 		// then
 		require.NotNil(t, cacheEntry)

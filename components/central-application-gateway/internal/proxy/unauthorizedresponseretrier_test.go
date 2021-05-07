@@ -17,10 +17,10 @@ import (
 func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 	t.Run("should return response if code is different than 401 and 403", func(t *testing.T) {
 		// given
-		updateCacheEntryFunction := func(appName, id string) (*CacheEntry, apperrors.AppError) {
+		updateCacheEntryFunction := func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", "", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 500}
 
 		// when
@@ -55,7 +55,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 401}
 
 		// when
@@ -104,7 +104,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -117,10 +117,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 	t.Run("should not retry if 401 occurred and flag is already set", func(t *testing.T) {
 		// given
-		updateCacheEntryFunction := func(appName, id string) (*CacheEntry, apperrors.AppError) {
+		updateCacheEntryFunction := func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", "", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
@@ -134,10 +134,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 	t.Run("should not retry if 403 occurred and flag is already set", func(t *testing.T) {
 		// given
-		updateCacheEntryFunction := func(appName, id string) (*CacheEntry, apperrors.AppError) {
+		updateCacheEntryFunction := func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", "", "", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
@@ -173,7 +173,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -208,7 +208,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -221,14 +221,14 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 	t.Run("should return error if failed to update entry cache", func(t *testing.T) {
 		// given
-		updateCacheEntryFunction := func(appName, id string) (*CacheEntry, apperrors.AppError) {
+		updateCacheEntryFunction := func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 			return nil, apperrors.Internal("failed")
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -257,7 +257,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("app1", "id1", req, nil, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("app1", "service1", "api1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -269,10 +269,11 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 	})
 }
 
-func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) func(appName, id string) (*CacheEntry, apperrors.AppError) {
-	return func(appName, id string) (*CacheEntry, apperrors.AppError) {
+func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
+	return func(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
 		assert.Equal(t, "app1", appName)
-		assert.Equal(t, "id1", id)
+		assert.Equal(t, "service1", serviceName)
+		assert.Equal(t, "api1", apiName)
 
 		proxy, err := makeProxy(url, nil, "id1", true)
 		require.NoError(t, err)

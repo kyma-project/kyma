@@ -38,7 +38,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/somepath/Xyz('123')", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/somepath/Xyz('123')", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -56,12 +56,12 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   ts.URL,
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -83,7 +83,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/serviceName-1/apiName-1/Xyz('123')", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/Xyz('123')", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -101,12 +101,12 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   ts.URL + "/somepath",
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -128,7 +128,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1?$search=XXX", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1?$search=XXX", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -146,12 +146,12 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   ts.URL + "/somepath/Xyz('123')",
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -178,7 +178,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -203,13 +203,13 @@ func TestProxy(t *testing.T) {
 		}
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:         ts.URL,
 			Credentials:       credentials,
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -236,7 +236,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -261,13 +261,13 @@ func TestProxy(t *testing.T) {
 		}
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:         ts.URL,
 			Credentials:       credentials,
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -292,7 +292,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -314,12 +314,12 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   ts.URL,
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -342,7 +342,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -360,12 +360,12 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledTwice)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   ts.URL,
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -376,7 +376,7 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 
 		// given
-		nextReq, _ := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		nextReq, _ := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		nextReq.Host = "test-uuid-1.namespace.svc.cluster.local"
 		rr = httptest.NewRecorder()
 
@@ -406,7 +406,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -424,7 +424,7 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &authorization.Credentials{
 				OAuth: &authorization.OAuth{
@@ -435,7 +435,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -459,7 +459,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -477,7 +477,7 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &authorization.Credentials{
 				BasicAuth: &authorization.BasicAuth{
@@ -487,7 +487,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -511,7 +511,7 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", nil)
 		require.NoError(t, err)
 
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
@@ -528,7 +528,7 @@ func TestProxy(t *testing.T) {
 		csrfFactoryMock, csrfStrategyMock := neverCalledCSRFStrategy(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &authorization.Credentials{
 				OAuth: &authorization.OAuth{
@@ -539,7 +539,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -557,16 +557,16 @@ func TestProxy(t *testing.T) {
 
 	t.Run("should return 500 if failed to get service definition", func(t *testing.T) {
 		// given
-		req, err := http.NewRequest(http.MethodGet, "/appName/uuid-1/", nil)
+		req, err := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/", nil)
 		require.NoError(t, err)
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		rr := httptest.NewRecorder()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").
 			Return(&metadatamodel.API{}, apperrors.Internal("Failed to read services"))
 
-		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout, true))
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -590,12 +590,12 @@ func TestProxy(t *testing.T) {
 		})
 		defer tsf.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/appName/uuid-1/orders/123", requestBody)
+		req, _ := http.NewRequest(http.MethodGet, "/appName/service-1/api-1/orders/123", requestBody)
 		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		req.AddCookie(&http.Cookie{Name: "user-cookie", Value: "user-cookie-value"})
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "appName", "uuid-1").Return(&metadatamodel.API{
+		serviceDefServiceMock.On("GetAPI", "appName", "service-1", "api-1").Return(&metadatamodel.API{
 			TargetUrl:   tsf.URL,
 			Credentials: &authorization.Credentials{},
 		}, nil).Twice()
@@ -616,7 +616,7 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
 		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout, true))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -714,12 +714,13 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httpt
 	}))
 }
 
-func createProxyConfig(proxyTimeout int) Config {
+func createProxyConfig(proxyTimeout int, managementPlaneMode bool) Config {
 	return Config{
-		SkipVerify:    true,
-		ProxyTimeout:  proxyTimeout,
-		Application:   "test",
-		ProxyCacheTTL: proxyTimeout,
+		SkipVerify:          true,
+		ProxyTimeout:        proxyTimeout,
+		Application:         "test",
+		ProxyCacheTTL:       proxyTimeout,
+		ManagementPlaneMode: managementPlaneMode,
 	}
 }
 

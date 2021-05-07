@@ -15,7 +15,7 @@ import (
 
 func TestGetServices(t *testing.T) {
 
-	t.Run("should get service by id", func(t *testing.T) {
+	t.Run("should get service by name", func(t *testing.T) {
 		// given
 		app := createApplication("production")
 		managerMock := &mocks.Manager{}
@@ -26,7 +26,7 @@ func TestGetServices(t *testing.T) {
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("production", "id1")
+		service, err := repository.Get("production", "service-1", "api-1")
 
 		// then
 		require.NotNil(t, service)
@@ -57,7 +57,7 @@ func TestGetServices(t *testing.T) {
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("production", "not-id")
+		service, err := repository.Get("production", "not-name", "api-1")
 
 		// then
 		assert.Equal(t, applications.Service{}, service)
@@ -69,6 +69,7 @@ func createApplication(name string) *v1alpha1.Application {
 
 	reService1Entry := v1alpha1.Entry{
 		Type:        "API",
+		Name:        "api-1",
 		GatewayUrl:  "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 		AccessLabel: "access-label-1",
 		TargetUrl:   "https://192.168.1.2",
@@ -80,6 +81,7 @@ func createApplication(name string) *v1alpha1.Application {
 	}
 	reService1 := v1alpha1.Service{
 		ID:                  "id1",
+		Name:                "service-1",
 		DisplayName:         "Orders API",
 		LongDescription:     "This is Orders API",
 		ProviderDisplayName: "SAP Hybris",
