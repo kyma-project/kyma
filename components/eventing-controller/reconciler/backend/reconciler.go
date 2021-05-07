@@ -9,6 +9,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"strconv"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+
 	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -200,7 +202,7 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 		desiredStatus.BebSecretNamespace = ""
 	}
 
-	if eventingBackendStatusEqual(&desiredStatus, &currentStatus) {
+	if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
 		r.Log.Info("No need to update backend CR status")
 		return nil
 	}
@@ -261,7 +263,7 @@ func (r *BackendReconciler) SyncPublisherProxySecret(ctx context.Context, secret
 		return nil, errors.Wrapf(err, "failed to get eventing publisher proxy secret")
 	}
 
-	if secretEqual(currentSecret, desiredSecret) {
+	if object.Semantic.DeepEqual(currentSecret, desiredSecret) {
 		return currentSecret, nil
 	}
 
@@ -368,7 +370,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
-	if publisherProxyDeploymentEqual(currentPublisher, desiredPublisher) {
+	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
 		return currentPublisher, nil
 	}
 
@@ -652,7 +654,7 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend
 	r.Log.Info("Found existing backend CR")
 
 	desiredBackend.ResourceVersion = currentBackend.ResourceVersion
-	if eventingBackendEqual(&currentBackend, &desiredBackend) {
+	if object.Semantic.DeepEqual(&currentBackend, &desiredBackend) {
 		r.Log.Info("No need to update existing backend CR")
 		return &currentBackend, nil
 	}
