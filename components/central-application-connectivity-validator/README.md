@@ -30,7 +30,7 @@ with the value from the certificate Common Name (CN).
 
 ### Local cache refresh
 
-The application `clientIDs` are read from Application resources and cached locally with TTL defined by the `cacheExpirationSeconds` parameter.
+The application `clientIDs` are read from Application resources and cached locally with the TTL (Time to live) defined by the `cacheExpirationSeconds` parameter.
 The cache refresh is performed by the controller during reconciliation in intervals defined by the `syncPeriod`.
 To prevent cache entries eviction, the value of the `syncPeriod` should be smaller than that of `cacheExpirationSeconds`.
 
