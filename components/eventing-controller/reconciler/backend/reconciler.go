@@ -2,7 +2,6 @@ package backend
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -100,6 +99,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if len(secretList.Items) == 1 {
 		r.Log.Info("***** Going with the BEB flow ***")
 		backendType = eventingv1alpha1.BebBackendType
+		bebSecret := secretList.Items[0]
 		// CreateOrUpdate CR with BEB
 		_, err := r.CreateOrUpdateBackendCR(ctx, backendType)
 		if err != nil {
@@ -108,7 +108,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Stop subscription controller (Radu/Frank)
 		// Start the other subscription controller (Radu/Frank)
 		// CreateOrUpdate deployment for publisher proxy secret
-		_, err = r.SyncPublisherProxySecret(ctx, &secretList.Items[0])
+		_, err = r.SyncPublisherProxySecret(ctx, &bebSecret)
 		if err != nil {
 			// Update status if bad
 			r.Log.Error(err, "failed to sync publisher proxy secret", "backend", eventingv1alpha1.BebBackendType)
@@ -122,7 +122,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 		// CreateOrUpdate status of the CR
-		err = r.UpdateBackendStatus(ctx, backendType, publisher)
+		err = r.UpdateBackendStatus(ctx, backendType, publisher, &bebSecret)
 		if err != nil {
 			r.Log.Error(err, "failed to create or update backend status", "backend", backendType)
 			return ctrl.Result{}, err
@@ -144,7 +144,12 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// Start the other subscription controller (Radu/Frank)
 
 	// Delete secret for publisher proxy if it exists
-	// publisher, err := r.DeletePublisherProxySecret(ctx, secretList.Items[0])
+	err = r.DeletePublisherProxySecret(ctx)
+	if err != nil {
+		// Update status if bad
+		r.Log.Error(err, "cannot delete eventing publisher proxy secret")
+		return ctrl.Result{}, err
+	}
 
 	// CreateOrUpdate deployment for publisher proxy
 	r.Log.Info("trying to create/update eventing publisher proxy...")
@@ -158,36 +163,75 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
-	err = r.UpdateBackendStatus(ctx, backendType, publisher)
+	err = r.UpdateBackendStatus(ctx, backendType, publisher, nil)
 	return ctrl.Result{}, err
 }
 
-func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment) error {
-	var backend eventingv1alpha1.EventingBackend
+func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment, bebSecret *v1.Secret) error {
+	currentBackend := new(eventingv1alpha1.EventingBackend)
 	// TODO: cache?
-	if err := r.Client.Get(ctx, types.NamespacedName{
+	if err := r.Cache.Get(ctx, types.NamespacedName{
 		Namespace: DefaultEventingBackendNamespace,
 		Name:      DefaultEventingBackendName,
-	}, &backend); err != nil {
+	}, currentBackend); err != nil {
 		r.Log.Info("cannot get backend CR to update")
 		return err
 	}
+	currentStatus := currentBackend.Status
 
 	// TODO: in case a publisher already exists, to make sure during the switch the status of publisherReady is false,
 	//  do we need to make sure first we take the existing publisher down, then patch the existing deployment? Otherwise,
 	//  during the transition from nats<->beb, there are two replicas available.
 	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 
-	backend.Status = eventingv1alpha1.EventingBackendStatus{
+	desiredStatus := eventingv1alpha1.EventingBackendStatus{
 		Backend:         backendType,
 		ControllerReady: boolPtr(false),
 		EventingReady:   boolPtr(false),
 		PublisherReady:  boolPtr(publisherReady),
 	}
+
+	switch backendType {
+	case eventingv1alpha1.BebBackendType:
+		desiredStatus.BebSecretName = bebSecret.Name
+		desiredStatus.BebSecretNamespace = bebSecret.Namespace
+	case eventingv1alpha1.NatsBackendType:
+		desiredStatus.BebSecretName = ""
+		desiredStatus.BebSecretNamespace = ""
+	}
+
+	if eventingBackendStatusEqual(&desiredStatus, &currentStatus) {
+		r.Log.Info("No need to update backend CR status")
+		return nil
+	}
 	r.Log.Info("Updating backend CR status")
-	if err := r.Update(ctx, &backend); err != nil {
+	desiredBackend := currentBackend.DeepCopy()
+	desiredBackend.Status = desiredStatus
+	// TODO: why status update gives not found
+	if err := r.Client.Update(ctx, desiredBackend); err != nil {
 		r.Log.Error(err, "error updating EventingBackend CR")
 		return err
+	}
+	return nil
+}
+
+func (r *BackendReconciler) DeletePublisherProxySecret(ctx context.Context) error {
+	secretNamespacedName := types.NamespacedName{
+		Namespace: PublisherNamespace,
+		Name:      PublisherName,
+	}
+	currentSecret := new(v1.Secret)
+	err := r.Cache.Get(ctx, secretNamespacedName, currentSecret)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			// Nothing needs to be done
+			return nil
+		}
+		return err
+	}
+
+	if err := r.Client.Delete(ctx, currentSecret); err != nil {
+		return errors.Wrapf(err, "failed to delete eventing publisher proxy secret")
 	}
 	return nil
 }
@@ -199,7 +243,7 @@ func (r *BackendReconciler) SyncPublisherProxySecret(ctx context.Context, secret
 	}
 	currentSecret := new(v1.Secret)
 
-	desiredSecret, err := computeSecretForPublisher(secret)
+	desiredSecret, err := getSecretForPublisher(secret)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid secret for publisher")
 	}
@@ -210,11 +254,11 @@ func (r *BackendReconciler) SyncPublisherProxySecret(ctx context.Context, secret
 			r.Log.Info("creating nats publisher")
 			err := r.Create(ctx, desiredSecret)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to create secret for publisher proxy")
+				return nil, errors.Wrapf(err, "failed to create secret for eventing publisher proxy")
 			}
+			return desiredSecret, nil
 		}
-		r.Log.Info("error is not NotFound!", "err", err)
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to get eventing publisher proxy secret")
 	}
 
 	if secretEqual(currentSecret, desiredSecret) {
@@ -231,7 +275,7 @@ func (r *BackendReconciler) SyncPublisherProxySecret(ctx context.Context, secret
 	return desiredSecret, nil
 }
 
-func computeSecretForPublisher(secret *v1.Secret) (*v1.Secret, error) {
+func getSecretForPublisher(secret *v1.Secret) (*v1.Secret, error) {
 	result := &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      PublisherName,
@@ -242,25 +286,18 @@ func computeSecretForPublisher(secret *v1.Secret) (*v1.Secret, error) {
 		},
 	}
 
-	if secret.Data["messaging"] == nil {
+	if _, ok := secret.Data["messaging"]; !ok {
 		return nil, errors.New("message is missing from BEB secret")
 	}
+	messagingBytes := secret.Data["messaging"]
 
-	if secret.Data["namespace"] == nil {
+	if _, ok := secret.Data["namespace"]; !ok {
 		return nil, errors.New("namespace is missing from BEB secret")
 	}
-	messagingBytes, err := b64.StdEncoding.DecodeString(string(secret.Data["messaging"]))
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to decode messaging")
-	}
-
-	namespaceBytes, err := b64.StdEncoding.DecodeString(string(secret.Data["namespace"]))
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to decode namespace")
-	}
+	namespaceBytes := secret.Data["namespace"]
 
 	var messages []Message
-	err = json.Unmarshal(messagingBytes, &messages)
+	err := json.Unmarshal(messagingBytes, &messages)
 	if err != nil {
 		return nil, err
 	}
@@ -308,8 +345,8 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		Namespace: PublisherNamespace,
 		Name:      PublisherName,
 	}
-	var currentPublisher appsv1.Deployment
 	var desiredPublisher *appsv1.Deployment
+	currentPublisher := new(appsv1.Deployment)
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
@@ -320,7 +357,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
 
-	err := r.Cache.Get(ctx, publisherNamespacedName, &currentPublisher)
+	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create
@@ -331,18 +368,13 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
-	if publisherProxyDeploymentEqual(&currentPublisher, desiredPublisher) {
-		return &currentPublisher, nil
+	if publisherProxyDeploymentEqual(currentPublisher, desiredPublisher) {
+		return currentPublisher, nil
 	}
 
 	// Update if necessary
 	if err := r.Update(ctx, desiredPublisher); err != nil {
 		r.Log.Error(err, "Cannot update publisher proxy")
-		return nil, err
-	}
-	err = r.UpdateBackendStatus(ctx, backend, desiredPublisher)
-	if err != nil {
-		r.Log.Error(err, "Cannot update the status for EventingBackend CR")
 		return nil, err
 	}
 
@@ -393,7 +425,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 									Name: "CLIENT_ID",
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
 											Key:                  "client-id",
 										}},
 								},
@@ -401,7 +433,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 									Name: "CLIENT_SECRET",
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
 											Key:                  "client-secret",
 										}},
 								},
@@ -409,7 +441,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 									Name: "TOKEN_ENDPOINT",
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
 											Key:                  "token-endpoint",
 										}},
 								},
@@ -417,7 +449,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 									Name: "EMS_PUBLISH_URL",
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
 											Key:                  "ems-publish-url",
 										}},
 								},
@@ -425,29 +457,13 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 									Name: "BEB_NAMESPACE_VALUE",
 									ValueFrom: &v1.EnvVarSource{
 										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
+											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
 											Key:                  "beb-namespace",
 										}},
 								},
 								{
 									Name:  "BEB_NAMESPACE",
 									Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", BEBNamespacePrefix),
-								},
-								{
-									Name: "WEBHOOK_CLIENT_ID",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing-controller-beb-oauth2"},
-											Key:                  "client_id",
-										}},
-								},
-								{
-									Name: "WEBHOOK_CLIENT_SECRET",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing-controller-beb-oauth2"},
-											Key:                  "client_secret",
-										}},
 								},
 							},
 							LivenessProbe: &v1.Probe{
