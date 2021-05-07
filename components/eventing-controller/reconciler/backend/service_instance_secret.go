@@ -1,9 +1,5 @@
 package backend
 
-type Messaging struct {
-	Messages []Message
-}
-
 type Message struct {
 	Broker Broker           `json:"broker,omitempty"`
 	OA2    OAuthCredentials `json:"oa2,omitempty"`

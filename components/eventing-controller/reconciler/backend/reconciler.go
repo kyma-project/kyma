@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
+
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"strconv"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 
@@ -347,8 +348,8 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		Namespace: PublisherNamespace,
 		Name:      PublisherName,
 	}
-	var desiredPublisher *appsv1.Deployment
 	currentPublisher := new(appsv1.Deployment)
+	var desiredPublisher *appsv1.Deployment
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
@@ -406,97 +407,14 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name:  PublisherName,
-							Image: PublisherImage,
-							Ports: []v1.ContainerPort{
-								{
-									Name:          PublisherPortName,
-									ContainerPort: PublisherPortNum,
-								},
-								{
-									Name:          PublisherMetricsPortName,
-									ContainerPort: PublisherMetricsPortNum,
-								},
-							},
-							Env: []v1.EnvVar{
-								{Name: "BACKEND", Value: "beb"},
-								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
-								{Name: "REQUEST_TIMEOUT", Value: "5s"},
-								{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
-								{
-									Name: "CLIENT_ID",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-											Key:                  "client-id",
-										}},
-								},
-								{
-									Name: "CLIENT_SECRET",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-											Key:                  "client-secret",
-										}},
-								},
-								{
-									Name: "TOKEN_ENDPOINT",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-											Key:                  "token-endpoint",
-										}},
-								},
-								{
-									Name: "EMS_PUBLISH_URL",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-											Key:                  "ems-publish-url",
-										}},
-								},
-								{
-									Name: "BEB_NAMESPACE_VALUE",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-											Key:                  "beb-namespace",
-										}},
-								},
-								{
-									Name:  "BEB_NAMESPACE",
-									Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", BEBNamespacePrefix),
-								},
-							},
-							LivenessProbe: &v1.Probe{
-								Handler: v1.Handler{
-									HTTPGet: &v1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt(8080),
-										Scheme: v1.URISchemeHTTP,
-									},
-								},
-								InitialDelaySeconds: LivenessInitialDelaySecs,
-								TimeoutSeconds:      LivenessTimeoutSecs,
-								PeriodSeconds:       LivenessPeriodSecs,
-								SuccessThreshold:    1,
-								FailureThreshold:    3,
-							},
-							ReadinessProbe: &v1.Probe{
-								Handler: v1.Handler{
-									HTTPGet: &v1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt(8080),
-										Scheme: v1.URISchemeHTTP,
-									},
-								},
-								FailureThreshold: 3,
-							},
+							Name:            PublisherName,
+							Image:           PublisherImage,
+							Ports:           getContainerPorts(),
+							Env:             getBEBEnvVars(),
+							LivenessProbe:   getLivenessProbe(),
+							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: v1.PullIfNotPresent,
-							SecurityContext: &v1.SecurityContext{
-								Privileged:               boolPtr(false),
-								AllowPrivilegeEscalation: boolPtr(false),
-							},
+							SecurityContext: getSecurityContext(),
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
@@ -531,72 +449,14 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 				Spec: v1.PodSpec{
 					Containers: []v1.Container{
 						{
-							Name:  PublisherName,
-							Image: PublisherImage,
-							Ports: []v1.ContainerPort{
-								{
-									Name:          PublisherPortName,
-									ContainerPort: PublisherPortNum,
-								},
-								{
-									Name:          PublisherMetricsPortName,
-									ContainerPort: PublisherMetricsPortNum,
-								},
-							},
-							Env: []v1.EnvVar{
-								{Name: "BACKEND", Value: "nats"},
-								{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
-								{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
-								{Name: "REQUEST_TIMEOUT", Value: "5s"},
-								{Name: "LEGACY_NAMESPACE", Value: "kyma"},
-								{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
-								{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
-								{
-									Name: "CLIENT_ID",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
-											Key:                  "client-id",
-										}},
-								},
-								{
-									Name: "CLIENT_SECRET",
-									ValueFrom: &v1.EnvVarSource{
-										SecretKeyRef: &v1.SecretKeySelector{
-											LocalObjectReference: v1.LocalObjectReference{Name: "eventing"},
-											Key:                  "client-secret",
-										}},
-								},
-							},
-							LivenessProbe: &v1.Probe{
-								Handler: v1.Handler{
-									HTTPGet: &v1.HTTPGetAction{
-										Path:   "/healthz",
-										Port:   intstr.FromInt(8080),
-										Scheme: v1.URISchemeHTTP,
-									},
-								},
-								InitialDelaySeconds: LivenessInitialDelaySecs,
-								TimeoutSeconds:      LivenessTimeoutSecs,
-								PeriodSeconds:       LivenessPeriodSecs,
-								SuccessThreshold:    1,
-								FailureThreshold:    3,
-							},
-							ReadinessProbe: &v1.Probe{
-								Handler: v1.Handler{
-									HTTPGet: &v1.HTTPGetAction{
-										Path:   "/readyz",
-										Port:   intstr.FromInt(8080),
-										Scheme: v1.URISchemeHTTP,
-									},
-								},
-								FailureThreshold: 3,
-							},
+							Name:            PublisherName,
+							Image:           PublisherImage,
+							Ports:           getContainerPorts(),
+							Env:             getNATSEnvVars(),
+							LivenessProbe:   getLivenessProbe(),
+							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: v1.PullIfNotPresent,
-							SecurityContext: &v1.SecurityContext{
-								Privileged:               boolPtr(false),
-								AllowPrivilegeEscalation: boolPtr(false),
-							},
+							SecurityContext: getSecurityContext(),
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
@@ -604,9 +464,123 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 				},
 			},
-			Strategy: appsv1.DeploymentStrategy{},
 		},
 		Status: appsv1.DeploymentStatus{},
+	}
+}
+
+func getSecurityContext() *v1.SecurityContext {
+	return &v1.SecurityContext{
+		Privileged:               boolPtr(false),
+		AllowPrivilegeEscalation: boolPtr(false),
+	}
+}
+
+func getReadinessProbe() *v1.Probe {
+	return &v1.Probe{
+		Handler: v1.Handler{
+			HTTPGet: &v1.HTTPGetAction{
+				Path:   "/readyz",
+				Port:   intstr.FromInt(8080),
+				Scheme: v1.URISchemeHTTP,
+			},
+		},
+		FailureThreshold: 3,
+	}
+}
+
+func getLivenessProbe() *v1.Probe {
+	return &v1.Probe{
+		Handler: v1.Handler{
+			HTTPGet: &v1.HTTPGetAction{
+				Path:   "/healthz",
+				Port:   intstr.FromInt(8080),
+				Scheme: v1.URISchemeHTTP,
+			},
+		},
+		InitialDelaySeconds: LivenessInitialDelaySecs,
+		TimeoutSeconds:      LivenessTimeoutSecs,
+		PeriodSeconds:       LivenessPeriodSecs,
+		SuccessThreshold:    1,
+		FailureThreshold:    3,
+	}
+}
+
+func getContainerPorts() []v1.ContainerPort {
+	return []v1.ContainerPort{
+		{
+			Name:          PublisherPortName,
+			ContainerPort: PublisherPortNum,
+		},
+		{
+			Name:          PublisherMetricsPortName,
+			ContainerPort: PublisherMetricsPortNum,
+		},
+	}
+}
+
+func getBEBEnvVars() []v1.EnvVar {
+	return []v1.EnvVar{
+		{Name: "BACKEND", Value: "beb"},
+		{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+		{Name: "REQUEST_TIMEOUT", Value: "5s"},
+		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{
+			Name: "CLIENT_ID",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
+					Key:                  "client-id",
+				}},
+		},
+		{
+			Name: "CLIENT_SECRET",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
+					Key:                  "client-secret",
+				}},
+		},
+		{
+			Name: "TOKEN_ENDPOINT",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
+					Key:                  "token-endpoint",
+				}},
+		},
+		{
+			Name: "EMS_PUBLISH_URL",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
+					Key:                  "ems-publish-url",
+				}},
+		},
+		{
+			Name: "BEB_NAMESPACE_VALUE",
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
+					Key:                  "beb-namespace",
+				}},
+		},
+		{
+			Name:  "BEB_NAMESPACE",
+			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", BEBNamespacePrefix),
+		},
+	}
+}
+
+func getNATSEnvVars() []v1.EnvVar {
+	return []v1.EnvVar{
+		{Name: "BACKEND", Value: "nats"},
+		{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+		{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
+		{Name: "REQUEST_TIMEOUT", Value: "5s"},
+		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
+		{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
 	}
 }
 

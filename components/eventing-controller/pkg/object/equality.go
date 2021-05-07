@@ -3,14 +3,13 @@ package object
 import (
 	"reflect"
 
-	corev1 "k8s.io/api/core/v1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/conversion"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/conversion"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
