@@ -50,6 +50,8 @@ rules:
   - patch
   - update
   - watch
+  - create
+  - delete
 - apiGroups:
   - eventing.kyma-project.io
   resources:

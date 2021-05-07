@@ -30,7 +30,6 @@ import (
 )
 
 const (
-	// This probably deserves a better name...
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
 	DefaultEventingBackendName = "eventing-backend"
@@ -73,7 +72,7 @@ type BackendReconciler struct {
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update;patch
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
@@ -100,7 +99,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// If the label is removed what to do? first check if the removed secret is mentioned in the backend CR?
 	// Don't we need a finalizer for that?
 	if len(secretList.Items) == 1 {
-		r.Log.Info("***** Going with the BEB flow ***")
+		r.Log.Info("Reconciling with backend as BEB")
 		backendType = eventingv1alpha1.BebBackendType
 		bebSecret := secretList.Items[0]
 		// CreateOrUpdate CR with BEB
@@ -134,9 +133,8 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	// NATS flow
 	// CreateOrUpdate CR with NATS
-	r.Log.Info("***** Going with the NATS flow ***")
+	r.Log.Info("Reconciling with backend as NATS")
 	_, err := r.CreateOrUpdateBackendCR(ctx, backendType)
 	if err != nil {
 		// Update status if bad
@@ -172,7 +170,6 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment, bebSecret *v1.Secret) error {
 	currentBackend := new(eventingv1alpha1.EventingBackend)
-	// TODO: cache?
 	if err := r.Cache.Get(ctx, types.NamespacedName{
 		Namespace: DefaultEventingBackendNamespace,
 		Name:      DefaultEventingBackendName,
@@ -182,15 +179,14 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 	}
 	currentStatus := currentBackend.Status
 
-	// TODO: in case a publisher already exists, to make sure during the switch the status of publisherReady is false,
-	//  do we need to make sure first we take the existing publisher down, then patch the existing deployment? Otherwise,
-	//  during the transition from nats<->beb, there are two replicas available.
-	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
+	// In case a publisher already exists, make sure during the switch the status of publisherReady is false
+	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas && *publisher.Spec.Replicas == publisher.Status.AvailableReplicas
+	eventingReady := *currentStatus.ControllerReady && publisherReady
 
 	desiredStatus := eventingv1alpha1.EventingBackendStatus{
 		Backend:         backendType,
-		ControllerReady: boolPtr(false),
-		EventingReady:   boolPtr(false),
+		ControllerReady: currentStatus.ControllerReady,
+		EventingReady:   boolPtr(eventingReady),
 		PublisherReady:  boolPtr(publisherReady),
 	}
 
@@ -654,7 +650,9 @@ func getDeploymentMapper() handler.EventHandler {
 		var reqs []reconcile.Request
 		// Ignore deployments other than publisher-proxy
 		if mo.Meta.GetName() == PublisherName && mo.Meta.GetNamespace() == PublisherNamespace {
-			reqs = append(reqs, reconcile.Request{NamespacedName: types.NamespacedName{Namespace: "any", Name: "any"}})
+			reqs = append(reqs, reconcile.Request{
+				NamespacedName: types.NamespacedName{Namespace: mo.Meta.GetNamespace(), Name: "any"},
+			})
 		}
 		return reqs
 	}
@@ -663,7 +661,9 @@ func getDeploymentMapper() handler.EventHandler {
 
 func getEventingBackendCRMapper() handler.EventHandler {
 	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
-		return []reconcile.Request{{NamespacedName: types.NamespacedName{Name: "any", Namespace: "any"}}}
+		return []reconcile.Request{
+			{NamespacedName: types.NamespacedName{Namespace: mo.Meta.GetNamespace(), Name: "any"}},
+		}
 	}
 	return &handler.EnqueueRequestsFromMapFunc{ToRequests: &mapper}
 }

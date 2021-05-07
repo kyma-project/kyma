@@ -16,7 +16,20 @@ spec:
     singular: eventingbackend
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.backendType
+      name: Backend
+      type: string
+    - jsonPath: .status.eventingReady
+      name: EventingReady
+      type: boolean
+    - jsonPath: .status.controllerReady
+      name: ControllerReady
+      type: boolean
+    - jsonPath: .status.publisherReady
+      name: PublisherReady
+      type: boolean
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: EventingBackend is the Schema for the eventingbackends API
@@ -66,6 +79,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

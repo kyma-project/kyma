@@ -41,7 +41,10 @@ type EventingBackendStatus struct {
 }
 
 // +kubebuilder:object:root=true
-
+// +kubebuilder:printcolumn:name="Backend",type=string,JSONPath=`.status.backendType`
+// +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
+// +kubebuilder:printcolumn:name="ControllerReady",type=boolean,JSONPath=`.status.controllerReady`
+// +kubebuilder:printcolumn:name="PublisherReady",type=boolean,JSONPath=`.status.publisherReady`
 // EventingBackend is the Schema for the eventingbackends API
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`
