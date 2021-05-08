@@ -103,6 +103,158 @@ func TestApplication_ToApplication(t *testing.T) {
 			},
 		},
 		{
+			description: "convert Compass App using API Packages to internal model with default instance auth",
+			compassApp: Application{
+				ID:           appId,
+				Name:         appName,
+				ProviderName: &providerName,
+				Description:  &appDesc,
+				Labels:       Labels(appLabels),
+				Packages: &graphql.PackagePageExt{
+					Data: []*graphql.PackageExt{
+						fixCompassPackageWithDefaultInstanceAuth("1", nil),
+						fixCompassPackageWithDefaultInstanceAuth("2", &graphql.Auth{
+							Credential: &graphql.BasicCredentialData{
+								Username: "my-user",
+								Password: "my-password",
+							},
+							AdditionalHeaders:     &graphql.HttpHeaders{"h1": {"v1"}},
+							AdditionalQueryParams: &graphql.QueryParams{"q1": {"p1"}},
+						}),
+						fixCompassPackageWithDefaultInstanceAuth("3", &graphql.Auth{
+							Credential: &graphql.OAuthCredentialData{
+								ClientID:     "my-client-id",
+								ClientSecret: "my-client-secret",
+								URL:          "https://test-oauth.com",
+							},
+							AdditionalHeaders:     &graphql.HttpHeaders{"h1": {"v1"}},
+							AdditionalQueryParams: &graphql.QueryParams{"q1": {"p1"}},
+						}),
+						fixCompassPackageWithDefaultInstanceAuth("4", &graphql.Auth{
+							Credential: &graphql.BasicCredentialData{
+								Username: "my-user2",
+								Password: "my-password2",
+							},
+							RequestAuth: &graphql.CredentialRequestAuth{
+								Csrf: &graphql.CSRFTokenCredentialRequestAuth{
+									TokenEndpointURL: "https://csrf.basic.example.com",
+								},
+							},
+						}),
+						fixCompassPackageWithDefaultInstanceAuth("5", &graphql.Auth{
+							Credential: &graphql.OAuthCredentialData{
+								ClientID:     "my-client-id2",
+								ClientSecret: "my-client-secret2",
+								URL:          "https://test2-oauth.com",
+							},
+							RequestAuth: &graphql.CredentialRequestAuth{
+								Csrf: &graphql.CSRFTokenCredentialRequestAuth{
+									TokenEndpointURL: "https://csrf.oauth.example.com",
+								},
+							},
+						}),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:                  appId,
+				Name:                appName,
+				ProviderDisplayName: providerName,
+				Description:         appDesc,
+				Labels:              appLabels,
+				SystemAuthsIDs:      make([]string, 0),
+				APIPackages: []kymamodel.APIPackage{
+					fixInternalAPIPackageWithInstanceAuth("1", nil),
+					fixInternalAPIPackageWithInstanceAuth("2", &kymamodel.Auth{
+						Credentials: &kymamodel.Credentials{
+							Basic: &kymamodel.Basic{
+								Username: "my-user",
+								Password: "my-password",
+							},
+							RequestParameters: &kymamodel.RequestParameters{
+								Headers: &map[string][]string{
+									"h1": {"v1"},
+								},
+								QueryParameters: &map[string][]string{
+									"q1": {"p1"},
+								},
+							},
+						},
+					}),
+					fixInternalAPIPackageWithInstanceAuth("3", &kymamodel.Auth{
+						Credentials: &kymamodel.Credentials{
+							Oauth: &kymamodel.Oauth{
+								ClientID:     "my-client-id",
+								ClientSecret: "my-client-secret",
+								URL:          "https://test-oauth.com",
+							},
+							RequestParameters: &kymamodel.RequestParameters{
+								Headers: &map[string][]string{
+									"h1": {"v1"},
+								},
+								QueryParameters: &map[string][]string{
+									"q1": {"p1"},
+								},
+							},
+						},
+					}),
+					fixInternalAPIPackageWithInstanceAuth("4", &kymamodel.Auth{
+						Credentials: &kymamodel.Credentials{
+							Basic: &kymamodel.Basic{
+								Username: "my-user2",
+								Password: "my-password2",
+							},
+							CSRFInfo: &kymamodel.CSRFInfo{
+								TokenEndpointURL: "https://csrf.basic.example.com",
+							},
+						},
+					}),
+					fixInternalAPIPackageWithInstanceAuth("5", &kymamodel.Auth{
+						Credentials: &kymamodel.Credentials{
+							Oauth: &kymamodel.Oauth{
+								ClientID:     "my-client-id2",
+								ClientSecret: "my-client-secret2",
+								URL:          "https://test2-oauth.com",
+							},
+							CSRFInfo: &kymamodel.CSRFInfo{
+								TokenEndpointURL: "https://csrf.oauth.example.com",
+							},
+						},
+					}),
+				},
+			},
+		},
+		{
+			description: "convert Compass App using API Packages with instance auths to internal model",
+			compassApp: Application{
+				ID:           appId,
+				Name:         appName,
+				ProviderName: &providerName,
+				Description:  &appDesc,
+				Labels:       Labels(appLabels),
+				Packages: &graphql.PackagePageExt{
+					Data: []*graphql.PackageExt{
+						fixCompassPackageExt("1"),
+						fixCompassPackageExt("2"),
+						fixCompassPackageExt("3"),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:                  appId,
+				Name:                appName,
+				ProviderDisplayName: providerName,
+				Description:         appDesc,
+				Labels:              appLabels,
+				SystemAuthsIDs:      make([]string, 0),
+				APIPackages: []kymamodel.APIPackage{
+					fixInternalAPIPackage("1"),
+					fixInternalAPIPackage("2"),
+					fixInternalAPIPackage("3"),
+				},
+			},
+		},
+		{
 			description: "convert Compass App with empty Package pages",
 			compassApp: Application{
 				ID:           appId,
@@ -181,6 +333,7 @@ func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
 			fixInternalDocument("1", fixInternalDocumentContent()),
 			fixInternalDocument("2", fixInternalDocumentContent()),
 		},
+		//InstanceAuths: []kymamodel.InstanceAuth{},
 	}
 }
 
@@ -205,6 +358,7 @@ func fixInternalAPIPackageEmptySpecs(suffix string) kymamodel.APIPackage {
 			fixInternalDocument("2", nil),
 			fixInternalDocument("3", nil),
 		},
+		//InstanceAuths: []kymamodel.InstanceAuth{},
 	}
 }
 
@@ -270,10 +424,43 @@ func fixInternalDocumentContent() []byte {
 	return []byte(`# Md content`)
 }
 
+func fixCompassPackageWithDefaultInstanceAuth(suffix string, defaultInstanceAuth *graphql.Auth) *graphql.PackageExt {
+	return &graphql.PackageExt{
+		Package:          fixCompassPackage(suffix, defaultInstanceAuth),
+		APIDefinitions:   fixAPIDefinitionPageExt(),
+		EventDefinitions: fixEventAPIDefinitionPageExt(),
+		Documents:        fixDocumentPageExt(),
+	}
+}
+
+func fixInternalAPIPackageWithInstanceAuth(suffix string, defaultInstanceAuth *kymamodel.Auth) kymamodel.APIPackage {
+	return kymamodel.APIPackage{
+		ID:                             basePackageId + suffix,
+		Name:                           basePackageName + suffix,
+		Description:                    stringPtr(basePackageDesc + suffix),
+		InstanceAuthRequestInputSchema: stringPtr(basePackageInputSchema + suffix),
+		APIDefinitions: []kymamodel.APIDefinition{
+			fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
+			fixInternalAPIDefinition("2", nil, fixInternalOpenAPISpec()),
+			fixInternalAPIDefinition("3", nil, fixInternalODataSpec()),
+			fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
+		},
+		EventDefinitions: []kymamodel.EventAPIDefinition{
+			fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
+			fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
+		},
+		Documents: []kymamodel.Document{
+			fixInternalDocument("1", fixInternalDocumentContent()),
+			fixInternalDocument("2", fixInternalDocumentContent()),
+		},
+		DefaultInstanceAuth: defaultInstanceAuth,
+	}
+}
+
 func fixCompassPackageExt(suffix string) *graphql.PackageExt {
 
 	return &graphql.PackageExt{
-		Package:          fixCompassPackage(suffix),
+		Package:          fixCompassPackage(suffix, nil),
 		APIDefinitions:   fixAPIDefinitionPageExt(),
 		EventDefinitions: fixEventAPIDefinitionPageExt(),
 		Documents:        fixDocumentPageExt(),
@@ -282,21 +469,21 @@ func fixCompassPackageExt(suffix string) *graphql.PackageExt {
 
 func fixCompassPackageExtWithEmptySpecs(suffix string) *graphql.PackageExt {
 	return &graphql.PackageExt{
-		Package:          fixCompassPackage(suffix),
+		Package:          fixCompassPackage(suffix, nil),
 		APIDefinitions:   fixAPIDefinitionPageExtWithEmptyApiSpecs(),
 		EventDefinitions: fixEventAPIDefinitionPageExtWithEmptySpecs(),
 		Documents:        fixDocumentPageExtWithEmptyDocs(),
 	}
 }
 
-func fixCompassPackage(suffix string) graphql.Package {
+func fixCompassPackage(suffix string, defaultInstanceAuth *graphql.Auth) graphql.Package {
 
 	return graphql.Package{
 		ID:                             basePackageId + suffix,
 		Name:                           basePackageName + suffix,
 		Description:                    stringPtr(basePackageDesc + suffix),
 		InstanceAuthRequestInputSchema: (*graphql.JSONSchema)(stringPtr(basePackageInputSchema + suffix)),
-		DefaultInstanceAuth:            nil,
+		DefaultInstanceAuth:            defaultInstanceAuth,
 	}
 }
 

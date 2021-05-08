@@ -15,6 +15,7 @@ import (
 	rafterMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	appSecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,7 +27,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
-
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
 
 		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{}, []model.EventAPIDefinition{})
@@ -36,7 +38,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -52,6 +54,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
+		credentialsService := &appSecrets.CredentialsService{}
+		requestParametersService := &appSecrets.RequestParametersService{}
 
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
@@ -103,7 +107,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsService, requestParametersService)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -119,6 +123,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
 		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec(), nil)
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
@@ -179,7 +185,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -195,6 +201,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
 		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
@@ -219,7 +227,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -235,6 +243,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
 		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		notManagedRuntimeService := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
@@ -263,7 +273,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -279,6 +289,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		rafterServiceMock := &rafterMocks.Service{}
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
 		newRuntimeService1 := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		newRuntimeService2 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
@@ -334,7 +346,7 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then

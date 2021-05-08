@@ -48,13 +48,13 @@ func convertAPIPackage(apiPackage *graphql.PackageExt) kymamodel.APIPackage {
 	apis := convertAPIsExt(apiPackage.APIDefinitions.Data)
 	eventAPIs := convertEventAPIsExt(apiPackage.EventDefinitions.Data)
 	documents := convertDocumentsExt(apiPackage.Documents.Data)
+	defaultInstanceAuth := convertAuth(apiPackage.DefaultInstanceAuth)
 
 	var authRequestInputSchema *string
 	if apiPackage.InstanceAuthRequestInputSchema != nil {
 		s := string(*apiPackage.InstanceAuthRequestInputSchema)
 		authRequestInputSchema = &s
 	}
-
 	return kymamodel.APIPackage{
 		ID:                             apiPackage.ID,
 		Name:                           apiPackage.Name,
@@ -63,6 +63,7 @@ func convertAPIPackage(apiPackage *graphql.PackageExt) kymamodel.APIPackage {
 		APIDefinitions:                 apis,
 		EventDefinitions:               eventAPIs,
 		Documents:                      documents,
+		DefaultInstanceAuth:            defaultInstanceAuth,
 	}
 }
 
@@ -179,4 +180,69 @@ func convertDocument(compassDoc *graphql.Document) kymamodel.Document {
 		Kind:        compassDoc.Kind,
 		Data:        data,
 	}
+}
+func convertAuth(compassAuth *graphql.Auth) *kymamodel.Auth {
+	if compassAuth == nil {
+		return nil
+	}
+	return &kymamodel.Auth{
+		Credentials: convertCredentials(compassAuth),
+	}
+}
+
+func convertCredentials(compassAuth *graphql.Auth) *kymamodel.Credentials {
+	if compassAuth == nil {
+		return nil
+	}
+	result := &kymamodel.Credentials{}
+	var credential = compassAuth.Credential
+	switch credential.(type) {
+	case *graphql.OAuthCredentialData:
+		v := credential.(*graphql.OAuthCredentialData)
+		if v != nil {
+			result.Oauth = &kymamodel.Oauth{
+				URL:          v.URL,
+				ClientID:     v.ClientID,
+				ClientSecret: v.ClientSecret,
+			}
+			result.CSRFInfo = convertCSRFInfo(compassAuth)
+			result.RequestParameters = convertRequestParameters(compassAuth)
+		}
+	case *graphql.BasicCredentialData:
+		v := credential.(*graphql.BasicCredentialData)
+		if v != nil {
+			result.Basic = &kymamodel.Basic{
+				Username: v.Username,
+				Password: v.Password,
+			}
+			result.CSRFInfo = convertCSRFInfo(compassAuth)
+			result.RequestParameters = convertRequestParameters(compassAuth)
+		}
+	}
+	return result
+}
+
+func convertRequestParameters(compassAuth *graphql.Auth) *kymamodel.RequestParameters {
+	if compassAuth.AdditionalHeaders != nil || compassAuth.AdditionalQueryParams != nil {
+		result := &kymamodel.RequestParameters{}
+		if compassAuth.AdditionalHeaders != nil {
+			v := map[string][]string(*compassAuth.AdditionalHeaders)
+			result.Headers = &v
+		}
+		if compassAuth.AdditionalQueryParams != nil {
+			v := map[string][]string(*compassAuth.AdditionalQueryParams)
+			result.QueryParameters = &v
+		}
+		return result
+	}
+	return nil
+}
+
+func convertCSRFInfo(compassAuth *graphql.Auth) *kymamodel.CSRFInfo {
+	if compassAuth.RequestAuth != nil && compassAuth.RequestAuth.Csrf != nil {
+		return &kymamodel.CSRFInfo{
+			TokenEndpointURL: compassAuth.RequestAuth.Csrf.TokenEndpointURL,
+		}
+	}
+	return nil
 }

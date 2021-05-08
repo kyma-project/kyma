@@ -1,5 +1,10 @@
 package applications
 
+const (
+	CredentialsOAuthType          = "OAuth"
+	CredentialsBasicType          = "Basic"
+)
+
 type Credentials struct {
 	Type              string
 	SecretName        string

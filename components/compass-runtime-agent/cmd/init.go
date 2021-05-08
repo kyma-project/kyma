@@ -1,6 +1,10 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+	appsecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/strategy"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 	"time"
 
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -47,13 +51,20 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string) (kyma.Service, error) {
-	converter := applications.NewConverter()
+func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string, integrationNamespace string) (kyma.Service, error) {
+	nameResolver := k8sconsts.NewNameResolver()
+	secretsManagerConstructor := func(namespace string) secrets.Manager {
+		return k8sResourceClients.core.CoreV1().Secrets(namespace)
+	}
+	repository := appsecrets.NewRepository(secretsManagerConstructor(integrationNamespace))
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
+	converter := applications.NewConverter(nameResolver)
 	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
+	credentialsService := appsecrets.NewCredentialsService(repository, strategy.NewSecretsStrategyFactory(), nameResolver)
+	requestParametersService := appsecrets.NewRequestParametersService(repository, nameResolver)
 
-	return kyma.NewService(applicationManager, converter, rafterService), nil
+	return kyma.NewService(applicationManager, converter, rafterService, credentialsService, requestParametersService), nil
 }
 
 func newRafter(dynamicClient dynamic.Interface, uploadServiceURL string) rafter.Service {

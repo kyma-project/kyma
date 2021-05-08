@@ -88,6 +88,26 @@ const (
 		hasNextPage}
 	totalCount
 	}
+		defaultInstanceAuth {
+		credential {
+		... on BasicCredentialData {
+		username
+		password
+	}
+		... on OAuthCredentialData {
+		clientId
+		clientSecret
+		url
+	}
+	}
+		additionalHeaders
+		additionalQueryParams
+		requestAuth {
+		csrf {
+		tokenEndpointURL
+		}
+		}
+		}
 		
 	}
 	pageInfo {startCursor

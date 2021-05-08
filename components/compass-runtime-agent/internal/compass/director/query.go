@@ -9,7 +9,7 @@ func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
 	result: applicationsForRuntime(runtimeID: "%s") {
 		%s
 	}
-}`, runtimeID, applicationsQueryData(runtimeID))
+}`, runtimeID, applicationsQueryData())
 }
 
 func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
@@ -25,8 +25,8 @@ func labelData() string {
 			value`
 }
 
-func applicationsQueryData(runtimeID string) string {
-	return pageData(applicationData(runtimeID))
+func applicationsQueryData() string {
+	return pageData(applicationData())
 }
 
 func pageData(item string) string {
@@ -44,7 +44,7 @@ func pageInfoData() string {
 		hasNextPage`
 }
 
-func applicationData(runtimeID string) string {
+func applicationData() string {
 	return fmt.Sprintf(`id
 		name
 		providerName
@@ -67,7 +67,8 @@ func packagesData() string {
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
-		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
+		defaultInstanceAuth {%s}
+		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()), authData())
 }
 
 func packageApiDefinitions() string {
@@ -119,4 +120,47 @@ func documentData() string {
 		format
 		kind
 		data`)
+}
+
+func authData() string {
+	return fmt.Sprintf(`
+		credential {%s}
+		additionalHeaders
+		additionalQueryParams
+		requestAuth {%s}
+		`, credentialData(), requestAuthData())
+}
+
+func credentialData() string {
+	return fmt.Sprintf(`
+		... on BasicCredentialData {%s}
+		... on OAuthCredentialData {%s}
+	`, basicCredentialData(), oauthCredentialData())
+}
+
+func basicCredentialData() string {
+	return fmt.Sprintf(`
+		username
+		password
+	`)
+}
+
+func oauthCredentialData() string {
+	return fmt.Sprintf(`
+		clientId
+		clientSecret
+		url
+	`)
+}
+
+func requestAuthData() string {
+	return fmt.Sprintf(`
+		csrf {%s}
+		`, csrfData())
+}
+
+func csrfData() string {
+	return fmt.Sprintf(`
+		tokenEndpointURL
+		`)
 }

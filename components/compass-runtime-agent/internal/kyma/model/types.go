@@ -48,6 +48,7 @@ type APIPackage struct {
 	APIDefinitions                 []APIDefinition
 	EventDefinitions               []EventAPIDefinition
 	Documents                      []Document
+	DefaultInstanceAuth            *Auth
 }
 
 // APIDefinition contains API data such as URL, credentials and spec
@@ -101,7 +102,8 @@ type Credentials struct {
 	Oauth *Oauth
 	// BasicAuth configuration
 	Basic *Basic
-
+	// Additional request parameters
+	RequestParameters *RequestParameters
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
@@ -135,4 +137,14 @@ type RequestParameters struct {
 	Headers *map[string][]string `json:"headers"`
 	// Additional query parameters
 	QueryParameters *map[string][]string `json:"queryParameters"`
+}
+
+// IsEmpty returns true if additional headers and query parameters contain no data, otherwise false
+func (r RequestParameters) IsEmpty() bool {
+	return (r.Headers == nil || len(*r.Headers) == 0) && (r.QueryParameters == nil || len(*r.QueryParameters) == 0)
+}
+
+// Auth contains authentication data
+type Auth struct {
+	Credentials *Credentials
 }

@@ -1,6 +1,7 @@
 package applications
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -13,7 +14,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver())
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -54,7 +55,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver())
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -84,6 +85,18 @@ func TestConverter(t *testing.T) {
 							TargetUrl:   "www.example.com/2",
 						},
 					},
+					DefaultInstanceAuth: &model.Auth{
+						Credentials: &model.Credentials{
+							Oauth: &model.Oauth{
+								URL:          "https://oauth.example.com",
+								ClientID:     "test-client",
+								ClientSecret: "test-secret",
+							},
+							CSRFInfo: &model.CSRFInfo{
+								TokenEndpointURL: "https://tokern.example.com",
+							},
+						},
+					},
 				},
 				{
 					ID:          "package2",
@@ -95,6 +108,18 @@ func TestConverter(t *testing.T) {
 							Name:        "serviceName3",
 							Description: "",
 							TargetUrl:   "www.example.com/3",
+						},
+					},
+					DefaultInstanceAuth: &model.Auth{
+						Credentials: &model.Credentials{
+							Basic: &model.Basic{
+								Username: "my-username",
+								Password: "my-password",
+							},
+							RequestParameters: &model.RequestParameters{
+								Headers:         &map[string][]string{"header": {"header-value"}},
+								QueryParameters: &map[string][]string{"query-param": {"query-param-value"}},
+							},
 						},
 					},
 				},
@@ -137,12 +162,28 @@ func TestConverter(t *testing.T) {
 								Name:      "serviceName1",
 								Type:      SpecAPIType,
 								TargetUrl: "www.example.com/1",
+								Credentials: v1alpha1.Credentials{
+									Type:              "OAuth",
+									SecretName:        "Appname1-credentials-package1",
+									AuthenticationUrl: "https://oauth.example.com",
+									CSRFInfo: &v1alpha1.CSRFInfo{
+										TokenEndpointURL: "https://tokern.example.com",
+									},
+								},
 							},
 							{
 								ID:        "serviceId2",
 								Name:      "serviceName2",
 								Type:      SpecAPIType,
 								TargetUrl: "www.example.com/2",
+								Credentials: v1alpha1.Credentials{
+									Type:              "OAuth",
+									SecretName:        "Appname1-credentials-package1",
+									AuthenticationUrl: "https://oauth.example.com",
+									CSRFInfo: &v1alpha1.CSRFInfo{
+										TokenEndpointURL: "https://tokern.example.com",
+									},
+								},
 							},
 						},
 					},
@@ -158,6 +199,11 @@ func TestConverter(t *testing.T) {
 								Name:      "serviceName3",
 								Type:      SpecAPIType,
 								TargetUrl: "www.example.com/3",
+								Credentials: v1alpha1.Credentials{
+									Type:       "Basic",
+									SecretName: "Appname1-credentials-package2",
+								},
+								RequestParametersSecretName: "Appname1-params-package2",
 							},
 						},
 					},
@@ -182,7 +228,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver())
 
 		directorApp := model.Application{
 			ID:                  "App1",
