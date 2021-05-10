@@ -1,5 +1,5 @@
 ---
-title: [TBR] Security
+title: "[TBR] Security"
 type: Details
 ---
 
