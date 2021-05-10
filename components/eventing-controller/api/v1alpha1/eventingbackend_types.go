@@ -26,10 +26,10 @@ type EventingBackendStatus struct {
 	EventingReady *bool `json:"eventingReady"`
 
 	// +optional
-	ControllerReady *bool `json:"controllerReady"`
+	SubscriptionControllerReady *bool `json:"subscriptionControllerReady"`
 
 	// +optional
-	PublisherReady *bool `json:"publisherReady"`
+	PublisherProxyReady *bool `json:"publisherProxyReady"`
 
 	// The name of the secret containing BEB access tokens, required only for BEB
 	// +optional
@@ -41,10 +41,11 @@ type EventingBackendStatus struct {
 }
 
 // +kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Backend",type=string,JSONPath=`.status.backendType`
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
-// +kubebuilder:printcolumn:name="ControllerReady",type=boolean,JSONPath=`.status.controllerReady`
-// +kubebuilder:printcolumn:name="PublisherReady",type=boolean,JSONPath=`.status.publisherReady`
+// +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=boolean,JSONPath=`.status.subscriptionControllerReady`
+// +kubebuilder:printcolumn:name="PublisherProxyReady",type=boolean,JSONPath=`.status.publisherProxyReady`
 // EventingBackend is the Schema for the eventingbackends API
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`

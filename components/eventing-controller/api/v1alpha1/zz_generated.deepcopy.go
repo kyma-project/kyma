@@ -172,13 +172,13 @@ func (in *EventingBackendStatus) DeepCopyInto(out *EventingBackendStatus) {
 		*out = new(bool)
 		**out = **in
 	}
-	if in.ControllerReady != nil {
-		in, out := &in.ControllerReady, &out.ControllerReady
+	if in.SubscriptionControllerReady != nil {
+		in, out := &in.SubscriptionControllerReady, &out.SubscriptionControllerReady
 		*out = new(bool)
 		**out = **in
 	}
-	if in.PublisherReady != nil {
-		in, out := &in.PublisherReady, &out.PublisherReady
+	if in.PublisherProxyReady != nil {
+		in, out := &in.PublisherProxyReady, &out.PublisherProxyReady
 		*out = new(bool)
 		**out = **in
 	}

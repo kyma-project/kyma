@@ -23,11 +23,11 @@ spec:
     - jsonPath: .status.eventingReady
       name: EventingReady
       type: boolean
-    - jsonPath: .status.controllerReady
-      name: ControllerReady
+    - jsonPath: .status.subscriptionControllerReady
+      name: SubscriptionControllerReady
       type: boolean
-    - jsonPath: .status.publisherReady
-      name: PublisherReady
+    - jsonPath: .status.publisherProxyReady
+      name: PublisherProxyReady
       type: boolean
     name: v1alpha1
     schema:
@@ -67,11 +67,11 @@ spec:
                 description: The namespace of the secret containing BEB access tokens,
                   required only for BEB
                 type: string
-              controllerReady:
-                type: boolean
               eventingReady:
                 type: boolean
-              publisherReady:
+              publisherProxyReady:
+                type: boolean
+              subscriptionControllerReady:
                 type: boolean
             required:
             - backendType
@@ -79,7 +79,8 @@ spec:
         type: object
     served: true
     storage: true
-    subresources: {}
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

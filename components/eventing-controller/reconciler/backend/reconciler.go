@@ -92,7 +92,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 	currentBackend, err := r.getCurrentBackendCR(ctx)
 	if err == nil && currentBackend.Status.Backend != backendType {
 		r.Log.Info("switching eventing backend from BEB to NATS")
-		currentBackend.Status.ControllerReady = boolPtr(false)
+		currentBackend.Status.SubscriptionControllerReady = boolPtr(false)
 		if err := r.Status().Update(ctx, currentBackend); err != nil {
 			r.Log.Error(err, "cannot update subscription controller status in backend CR")
 			return ctrl.Result{}, err
@@ -141,7 +141,7 @@ func (r *BackendReconciler) reconcileBEBBackend(ctx context.Context, bebSecret *
 	currentBackend, err := r.getCurrentBackendCR(ctx)
 	if err == nil && currentBackend.Status.Backend != backendType {
 		r.Log.Info("switching eventing backend from NATS to BEB")
-		currentBackend.Status.ControllerReady = boolPtr(false)
+		currentBackend.Status.SubscriptionControllerReady = boolPtr(false)
 		if err := r.Status().Update(ctx, currentBackend); err != nil {
 			r.Log.Error(err, "cannot update subscription controller status in backend CR")
 			return ctrl.Result{}, err
@@ -195,13 +195,13 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 
 	// In case a publisher already exists, make sure during the switch the status of publisherReady is false
 	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas && *publisher.Spec.Replicas == publisher.Status.AvailableReplicas
-	eventingReady := *currentStatus.ControllerReady && publisherReady
+	eventingReady := *currentStatus.SubscriptionControllerReady && publisherReady
 
 	desiredStatus := eventingv1alpha1.EventingBackendStatus{
-		Backend:         backendType,
-		ControllerReady: currentStatus.ControllerReady,
-		EventingReady:   boolPtr(eventingReady),
-		PublisherReady:  boolPtr(publisherReady),
+		Backend:                     backendType,
+		SubscriptionControllerReady: currentStatus.SubscriptionControllerReady,
+		EventingReady:               boolPtr(eventingReady),
+		PublisherProxyReady:         boolPtr(publisherReady),
 	}
 
 	switch backendType {
@@ -221,7 +221,7 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 	desiredBackend := currentBackend.DeepCopy()
 	desiredBackend.Status = desiredStatus
 	// TODO: why status update gives not found
-	if err := r.Client.Update(ctx, desiredBackend); err != nil {
+	if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
 		r.Log.Error(err, "error updating EventingBackend CR")
 		return err
 	}
@@ -392,7 +392,7 @@ func (r *BackendReconciler) CreateOrUpdatePublisherProxy(ctx context.Context, ba
 		r.Log.Error(err, "cannot get current backend CR")
 		return nil, err
 	}
-	currBackend.Status.PublisherReady = boolPtr(false)
+	currBackend.Status.PublisherProxyReady = boolPtr(false)
 	if err := r.Status().Update(ctx, currBackend); err != nil {
 		r.Log.Error(err, "cannot update publisher proxy status in backend CR")
 		return nil, err
@@ -417,12 +417,12 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
 		Status: eventingv1alpha1.EventingBackendStatus{
-			Backend:            backend,
-			EventingReady:      boolPtr(false),
-			ControllerReady:    boolPtr(false),
-			PublisherReady:     boolPtr(false),
-			BebSecretName:      "",
-			BebSecretNamespace: "",
+			Backend:                     backend,
+			EventingReady:               boolPtr(false),
+			SubscriptionControllerReady: boolPtr(false),
+			PublisherProxyReady:         boolPtr(false),
+			BebSecretName:               "",
+			BebSecretNamespace:          "",
 		},
 	}
 
@@ -457,11 +457,12 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend
 }
 
 func (r *BackendReconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1.EventingBackend, error) {
-	var backend *eventingv1alpha1.EventingBackend
+	backend := new(eventingv1alpha1.EventingBackend)
 	err := r.Cache.Get(ctx, types.NamespacedName{
 		Namespace: DefaultEventingBackendNamespace,
 		Name:      DefaultEventingBackendName,
 	}, backend)
+	r.Log.Info(fmt.Sprintf("***** getCurrentBackendCR: Err: %q, Backend: %v", err, backend))
 	return backend, err
 }
 

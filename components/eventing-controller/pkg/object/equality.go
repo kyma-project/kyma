@@ -281,11 +281,11 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 		return false
 	}
 
-	if *s1.ControllerReady != *s2.ControllerReady {
+	if *s1.SubscriptionControllerReady != *s2.SubscriptionControllerReady {
 		return false
 	}
 
-	if *s1.PublisherReady != *s2.PublisherReady {
+	if *s1.PublisherProxyReady != *s2.PublisherProxyReady {
 		return false
 	}
 
