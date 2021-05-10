@@ -16,9 +16,9 @@ type WebhookAuth struct {
 
 // ProtocolSettings defines the CE protocol setting specification implementation
 type ProtocolSettings struct {
-	ContentMode     string       `json:"contentMode,omitempty"`
-	ExemptHandshake bool         `json:"exemptHandshake,omitempty"`
-	Qos             string       `json:"qos,omitempty"`
+	ContentMode     *string      `json:"contentMode,omitempty"`
+	ExemptHandshake *bool        `json:"exemptHandshake,omitempty"`
+	Qos             *string      `json:"qos,omitempty"`
 	WebhookAuth     *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 

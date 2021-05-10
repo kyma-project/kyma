@@ -47,22 +47,55 @@ func getHash(subscription *types.Subscription) (int64, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth) (*types.Subscription, error) {
+func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
 	emsSubscription := &types.Subscription{}
+	emsSubscription.ContentMode = *protocolSettings.ContentMode
+	emsSubscription.ExemptHandshake = *protocolSettings.ExemptHandshake
+	qos, err := getQos(*protocolSettings.Qos)
+	if err != nil {
+		return nil, err
+	}
+	emsSubscription.Qos = qos
+	return emsSubscription, nil
+}
 
+func getQos(qosStr string) (types.Qos, error) {
+	qosStr = strings.ReplaceAll(qosStr, "-", "_")
+	switch qosStr {
+	case string(types.QosAtLeastOnce):
+		return types.QosAtLeastOnce, nil
+	case string(types.QosAtMostOnce):
+		return types.QosAtMostOnce, nil
+	default:
+		return "", fmt.Errorf("invalid Qos: %s", qosStr)
+	}
+}
+
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings, defaultNamespace string) (*types.Subscription, error) {
+	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to apply default protocol settings")
+	}
 	// Name
 	emsSubscription.Name = subscription.Name
-	emsSubscription.ContentMode = subscription.Spec.ProtocolSettings.ContentMode
-	emsSubscription.ExemptHandshake = subscription.Spec.ProtocolSettings.ExemptHandshake
 
-	// Qos
-	qos := strings.ReplaceAll(subscription.Spec.ProtocolSettings.Qos, "-", "_")
-	if qos == string(types.QosAtLeastOnce) {
-		emsSubscription.Qos = types.QosAtLeastOnce
-	} else if qos == string(types.QosAtMostOnce) {
-		emsSubscription.Qos = types.QosAtMostOnce
-	} else {
-		return nil, fmt.Errorf("invalid Qos: %v", subscription.Spec.ProtocolSettings.Qos)
+	// Applying protocol settings if provided in subscription CR
+	if subscription.Spec.ProtocolSettings != nil {
+		if subscription.Spec.ProtocolSettings.ContentMode != nil {
+			emsSubscription.ContentMode = *subscription.Spec.ProtocolSettings.ContentMode
+		}
+		// ExemptHandshake
+		if subscription.Spec.ProtocolSettings.ExemptHandshake != nil {
+			emsSubscription.ExemptHandshake = *subscription.Spec.ProtocolSettings.ExemptHandshake
+		}
+		// Qos
+		if subscription.Spec.ProtocolSettings.Qos != nil {
+			qos, err := getQos(*subscription.Spec.ProtocolSettings.Qos)
+			if err != nil {
+				return nil, err
+			}
+			emsSubscription.Qos = qos
+		}
 	}
 
 	// WebhookUrl
@@ -74,14 +107,17 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 
 	// Events
 	for _, e := range subscription.Spec.Filter.Filters {
-		s := e.EventSource.Value
+		s := defaultNamespace
+		if e.EventSource.Value != "" {
+			s = e.EventSource.Value
+		}
 		t := e.EventType.Value
 		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
 	// Using default webhook auth unless specified in Subscription CR
 	auth := defaultWebhookAuth
-	if subscription.Spec.ProtocolSettings.WebhookAuth != nil {
+	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
