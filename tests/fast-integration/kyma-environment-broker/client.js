@@ -15,7 +15,7 @@ class KEBConfig {
       getEnvOrThrow("KEB_GLOBALACCOUNT_ID"),
       getEnvOrThrow("KEB_SUBACCOUNT_ID"),
       getEnvOrThrow("KEB_PLAN_ID"),
-      getEnvOrThrow("KEB_REGION")
+        process.env.KEB_REGION
     );
   }
 
@@ -79,7 +79,8 @@ class KEBClient {
 
   async buildRequest(payload, endpoint, verb) {
     const token = await this.getToken();
-    const url = `https://kyma-env-broker.${this.host}/oauth/${this.region}/v2/${endpoint}`;
+    let region = this.getRegion()
+    const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
       "Authorization": `Bearer ${token}`,
@@ -155,6 +156,14 @@ class KEBClient {
     } catch (err) {
       return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
+  }
+
+  getRegion() {
+    let reg = this.region
+    if (reg != "") {
+      reg += "/"
+    }
+    return reg
   }
 }
 
