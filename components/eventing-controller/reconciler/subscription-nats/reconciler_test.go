@@ -292,7 +292,7 @@ var _ = BeforeSuite(func(done Done) {
 		ctrl.Log.WithName("nats-reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
-	).SetupWithManager(k8sManager)
+	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

@@ -85,7 +85,7 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller"), // TODO Harmonization? Add "-beb"?
 		c.envCfg,
-	).SetupWithoutManager(c.mgr); err != nil {
+	).SetupUnmanaged(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
 	}
 	return nil

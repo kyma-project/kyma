@@ -69,8 +69,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-//  SetupWithoutManager creates a controller under the client control
-func (r *Reconciler) SetupWithoutManager(mgr ctrl.Manager) error {
+//  SetupUnmanaged creates a controller under the client control
+func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged("nats-subscription-controller", mgr, controller.Options{
 		Reconciler: r,
 	})

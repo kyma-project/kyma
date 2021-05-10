@@ -1034,7 +1034,7 @@ var _ = BeforeSuite(func(done Done) {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller"),
 		envConf,
-	).SetupWithManager(k8sManager)
+	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
