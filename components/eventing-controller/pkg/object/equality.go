@@ -281,15 +281,15 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 		return false
 	}
 
-	if *s1.SubscriptionControllerReady != *s2.SubscriptionControllerReady {
+	if !boolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
 		return false
 	}
 
-	if *s1.PublisherProxyReady != *s2.PublisherProxyReady {
+	if !boolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
 		return false
 	}
 
-	if *s1.EventingReady != *s2.EventingReady {
+	if !boolPtrEqual(s1.EventingReady, s2.EventingReady) {
 		return false
 	}
 
@@ -298,6 +298,17 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	}
 
 	if s1.BebSecretNamespace != s2.BebSecretNamespace {
+		return false
+	}
+
+	return true
+}
+
+func boolPtrEqual(b1, b2 *bool) bool {
+	if b1 != b2 {
+		return false
+	}
+	if b1 != nil && b2 != nil && *b1 != *b2 {
 		return false
 	}
 

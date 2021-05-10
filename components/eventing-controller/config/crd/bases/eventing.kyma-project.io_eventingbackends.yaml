@@ -73,8 +73,6 @@ spec:
                 type: boolean
               subscriptionControllerReady:
                 type: boolean
-            required:
-            - backendType
             type: object
         type: object
     served: true

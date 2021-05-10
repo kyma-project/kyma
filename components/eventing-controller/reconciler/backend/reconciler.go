@@ -90,7 +90,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 	r.Log.Info("Reconciling with backend as NATS")
 	backendType := eventingv1alpha1.NatsBackendType
 	currentBackend, err := r.getCurrentBackendCR(ctx)
-	if err == nil && currentBackend.Status.Backend != backendType {
+	if err == nil && currentBackend.Status.Backend == eventingv1alpha1.BebBackendType {
 		r.Log.Info("switching eventing backend from BEB to NATS")
 		currentBackend.Status.SubscriptionControllerReady = boolPtr(false)
 		if err := r.Status().Update(ctx, currentBackend); err != nil {
@@ -131,7 +131,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
-	err = r.UpdateBackendStatus(ctx, backendType, publisher, nil)
+	err = r.UpdateBackendStatus(ctx, backendType, publisher, new(v1.Secret)) // TODO: pass the secret
 	return ctrl.Result{}, err
 }
 
@@ -139,7 +139,7 @@ func (r *BackendReconciler) reconcileBEBBackend(ctx context.Context, bebSecret *
 	r.Log.Info("Reconciling with backend as BEB")
 	backendType := eventingv1alpha1.BebBackendType
 	currentBackend, err := r.getCurrentBackendCR(ctx)
-	if err == nil && currentBackend.Status.Backend != backendType {
+	if err == nil && currentBackend.Status.Backend == eventingv1alpha1.NatsBackendType {
 		r.Log.Info("switching eventing backend from NATS to BEB")
 		currentBackend.Status.SubscriptionControllerReady = boolPtr(false)
 		if err := r.Status().Update(ctx, currentBackend); err != nil {
@@ -192,6 +192,10 @@ func (r *BackendReconciler) UpdateBackendStatus(ctx context.Context, backendType
 		return err
 	}
 	currentStatus := currentBackend.Status
+	currentStatus.Backend = backendType
+	if currentStatus.SubscriptionControllerReady == nil {
+		currentStatus.SubscriptionControllerReady = boolPtr(false)
+	}
 
 	// In case a publisher already exists, make sure during the switch the status of publisherReady is false
 	publisherReady := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas && *publisher.Spec.Replicas == publisher.Status.AvailableReplicas
@@ -416,6 +420,7 @@ func (r *BackendReconciler) CreateOrUpdateBackendCR(ctx context.Context, backend
 			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
+		// TODO: setting status is not needed anymore? Doesn't even work!
 		Status: eventingv1alpha1.EventingBackendStatus{
 			Backend:                     backend,
 			EventingReady:               boolPtr(false),
@@ -462,7 +467,6 @@ func (r *BackendReconciler) getCurrentBackendCR(ctx context.Context) (*eventingv
 		Namespace: DefaultEventingBackendNamespace,
 		Name:      DefaultEventingBackendName,
 	}, backend)
-	r.Log.Info(fmt.Sprintf("***** getCurrentBackendCR: Err: %q, Backend: %v", err, backend))
 	return backend, err
 }
 

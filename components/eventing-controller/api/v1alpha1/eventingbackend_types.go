@@ -20,6 +20,7 @@ type EventingBackendSpec struct {
 // EventingBackendStatus defines the observed state of EventingBackend
 type EventingBackendStatus struct {
 	// Specifies the backend type used. Allowed values are "BEB" and "NATS"
+	// +optional
 	Backend BackendType `json:"backendType"`
 
 	// +optional
