@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.9
+    controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
   name: rules.oathkeeper.ory.sh
 spec:
@@ -22,14 +22,10 @@ spec:
           description: Rule is the Schema for the rules API
           properties:
             apiVersion:
-              description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
               type: string
             kind:
-              description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
               type: string
             metadata:
               type: object
@@ -38,13 +34,12 @@ spec:
               properties:
                 authenticators:
                   items:
-                    description: Authenticator represents a handler that authenticates
-                      provided credentials.
+                    description: Authenticator represents a handler that authenticates provided credentials.
                     properties:
                       config:
-                        description: Config configures the handler. Configuration keys
-                          vary per handler.
+                        description: Config configures the handler. Configuration keys vary per handler.
                         type: object
+                        x-kubernetes-preserve-unknown-fields: true
                       handler:
                         description: Name is the name of a handler
                         type: string
@@ -53,13 +48,12 @@ spec:
                     type: object
                   type: array
                 authorizer:
-                  description: Authorizer represents a handler that authorizes the subject
-                    ("user") from the previously validated credentials making the request.
+                  description: Authorizer represents a handler that authorizes the subject ("user") from the previously validated credentials making the request.
                   properties:
                     config:
-                      description: Config configures the handler. Configuration keys
-                        vary per handler.
+                      description: Config configures the handler. Configuration keys vary per handler.
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     handler:
                       description: Name is the name of a handler
                       type: string
@@ -67,8 +61,7 @@ spec:
                     - handler
                   type: object
                 configMapName:
-                  description: ConfigMapName points to the K8s ConfigMap that contains
-                    these rules
+                  description: ConfigMapName points to the K8s ConfigMap that contains these rules
                   maxLength: 253
                   minLength: 1
                   pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
@@ -77,14 +70,12 @@ spec:
                   description: Match defines the URL(s) that an access rule should match.
                   properties:
                     methods:
-                      description: Methods represent an array of HTTP methods (e.g.
-                        GET, POST, PUT, DELETE, ...)
+                      description: Methods represent an array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...)
                       items:
                         type: string
                       type: array
                     url:
-                      description: URL is the URL that should be matched. It supports
-                        regex templates.
+                      description: URL is the URL that should be matched. It supports regex templates.
                       type: string
                   required:
                     - methods
@@ -92,13 +83,12 @@ spec:
                   type: object
                 mutators:
                   items:
-                    description: Mutator represents a handler that transforms the HTTP
-                      request before forwarding it.
+                    description: Mutator represents a handler that transforms the HTTP request before forwarding it.
                     properties:
                       config:
-                        description: Config configures the handler. Configuration keys
-                          vary per handler.
+                        description: Config configures the handler. Configuration keys vary per handler.
                         type: object
+                        x-kubernetes-preserve-unknown-fields: true
                       handler:
                         description: Name is the name of a handler
                         type: string
@@ -107,17 +97,13 @@ spec:
                     type: object
                   type: array
                 upstream:
-                  description: Upstream represents the location of a server where requests
-                    matching a rule should be forwarded to.
+                  description: Upstream represents the location of a server where requests matching a rule should be forwarded to.
                   properties:
                     preserveHost:
-                      description: PreserveHost includes the host and port of the url
-                        value if set to false. If true, the host and port of the ORY
-                        Oathkeeper Proxy will be used instead.
+                      description: PreserveHost includes the host and port of the url value if set to false. If true, the host and port of the ORY Oathkeeper Proxy will be used instead.
                       type: boolean
                     stripPath:
-                      description: StripPath replaces the provided path prefix when
-                        forwarding the requested URL to the upstream URL.
+                      description: StripPath replaces the provided path prefix when forwarding the requested URL to the upstream URL.
                       type: string
                     url:
                       description: URL defines the target URL for incoming requests
