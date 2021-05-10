@@ -285,6 +285,7 @@ var _ = BeforeSuite(func(done Done) {
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	err = NewReconciler(
+		context.Background(),
 		k8sManager.GetClient(),
 		applicationLister,
 		k8sManager.GetCache(),

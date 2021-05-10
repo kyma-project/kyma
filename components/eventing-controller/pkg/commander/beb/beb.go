@@ -78,13 +78,14 @@ func (c *Commander) Start() error {
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
 	if err := subscription.NewReconciler(
+		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
 		c.mgr.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller"), // TODO Harmonization? Add "-beb"?
 		c.envCfg,
-	).SetupWithManager(c.mgr); err != nil {
+	).SetupWithoutManager(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
 	}
 	return nil
