@@ -3,18 +3,12 @@ package applications
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"regexp"
-	"strings"
-	"unicode"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -71,7 +65,8 @@ type Service struct {
 //go:generate mockery --name=ServiceRepository
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
-	Get(appName, serviceName, apiName string) (Service, apperrors.AppError)
+	GetFromService(appName, serviceName string) (Service, apperrors.AppError)
+	GetFromEntry(appName, serviceName, entryName string) (Service, apperrors.AppError)
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
@@ -80,25 +75,23 @@ func NewServiceRepository(appManager Manager) ServiceRepository {
 }
 
 // Get reads Service from Application by service name (bundle SKR mode) and apiName (entry
-func (r *repository) Get(appName, serviceName, apiName string) (Service, apperrors.AppError) {
+func (r *repository) GetFromService(appName, serviceName string) (Service, apperrors.AppError) {
+
+	convert := getConvertFunc(func(entry v1alpha1.Entry) bool {
+		return true
+	})
+
 	app, err := r.getApplication(appName)
 	if err != nil {
 		return Service{}, err
 	}
 
 	for _, service := range app.Spec.Services {
-
-		// service.Name personalization-webservices-v1-3b0c4
-		// service.displayName Personalization Webservices v1 (oryginalny
-		// serviceName personalization-webservices-v1 (to przychodzi z API)
-
-		usedServiceName := serviceName
-		//if len(apiName) == 0 {
-		//	usedServiceName = createServiceName(serviceName, service.ID)
-		//}
-
-		if service.Name == usedServiceName {
-			return convertFromK8sType(service, apiName)
+		for _, entry := range service.Entries {
+			// TODO: this needs to be changed once adding suffix to service name in Application Registry is removed
+			if entry.Name == serviceName {
+				return convert(service)
+			}
 		}
 	}
 
@@ -106,6 +99,72 @@ func (r *repository) Get(appName, serviceName, apiName string) (Service, apperro
 	log.Warn(message)
 
 	return Service{}, apperrors.NotFound(message)
+}
+
+func (r *repository) GetFromEntry(appName, serviceName, entryName string) (Service, apperrors.AppError) {
+	app, err := r.getApplication(appName)
+	if err != nil {
+		return Service{}, err
+	}
+
+	convert := getConvertFunc(func(entry v1alpha1.Entry) bool {
+		return entry.Name == entryName
+	})
+
+	for _, service := range app.Spec.Services {
+		if service.Name == serviceName {
+			for _, entry := range service.Entries {
+				if entry.Name == entryName {
+					return convert(service)
+				}
+			}
+		}
+	}
+
+	message := fmt.Sprintf("Service with name %s not found", serviceName)
+	log.Warn(message)
+
+	return Service{}, apperrors.NotFound(message)
+}
+
+type convertFunc func(service v1alpha1.Service) (Service, apperrors.AppError)
+
+func getConvertFunc(predicate func(entry v1alpha1.Entry) bool) convertFunc {
+	return func(service v1alpha1.Service) (Service, apperrors.AppError) {
+		var api *ServiceAPI
+		var events bool
+
+		for _, entry := range service.Entries {
+			if predicate(entry) {
+				if entry.Type == specAPIType {
+
+					api = &ServiceAPI{
+						GatewayURL:                  entry.GatewayUrl,
+						TargetURL:                   entry.TargetUrl,
+						Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
+						RequestParametersSecretName: entry.RequestParametersSecretName,
+					}
+				} else if entry.Type == specEventsType {
+					events = true
+				} else {
+					message := fmt.Sprintf("incorrect type of entry '%s' in Application Service definition", entry.Type)
+					log.Error(message)
+					return Service{}, apperrors.Internal(message)
+				}
+			}
+		}
+
+		return Service{
+			ID:                  service.ID,
+			Name:                service.Name,
+			DisplayName:         service.DisplayName,
+			LongDescription:     service.LongDescription,
+			ProviderDisplayName: service.ProviderDisplayName,
+			Tags:                service.Tags,
+			API:                 api,
+			Events:              events,
+		}, nil
+	}
 }
 
 func (r *repository) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
@@ -123,87 +182,6 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	}
 
 	return app, nil
-}
-
-func convertFromK8sType(service v1alpha1.Service, apiName string) (Service, apperrors.AppError) {
-	var api *ServiceAPI
-	var events bool
-	// Kyma OS mode - find first
-	if len(apiName) == 0 {
-		for _, entry := range service.Entries {
-			if entry.Type == specAPIType {
-				api = &ServiceAPI{
-					GatewayURL:                  entry.GatewayUrl,
-					TargetURL:                   entry.TargetUrl,
-					Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
-					RequestParametersSecretName: entry.RequestParametersSecretName,
-				}
-			} else if entry.Type == specEventsType {
-				events = true
-			} else {
-				message := fmt.Sprintf("incorrect type of entry '%s' in Application Service definition", entry.Type)
-				log.Error(message)
-				return Service{}, apperrors.Internal(message)
-			}
-		}
-	} else {
-		// TODO Rozwiazac problem z ID
-		// Management Plane mode to nie zadziała 1) get name + and Id odkleic sufix blebleble jesli nazwa jest jest postaci string_hash
-		for _, entry := range service.Entries {
-			if entry.Name == apiName {
-				if entry.Type == specAPIType {
-					api = &ServiceAPI{
-						GatewayURL:                  entry.GatewayUrl,
-						TargetURL:                   entry.TargetUrl,
-						Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
-						RequestParametersSecretName: entry.RequestParametersSecretName,
-					}
-				} else if entry.Type == specEventsType {
-					events = true
-				} else {
-					message := fmt.Sprintf("incorrect type of entry '%s' in Application Service definition", entry.Type)
-					log.Error(message)
-					return Service{}, apperrors.Internal(message)
-				}
-			}
-		}
-	}
-
-	// r bedzie co jesli nie znajdzie?
-
-	return Service{
-		ID:                  service.ID,
-		Name:                service.Name,
-		DisplayName:         service.DisplayName,
-		LongDescription:     service.LongDescription,
-		ProviderDisplayName: service.ProviderDisplayName,
-		Tags:                service.Tags,
-		API:                 api, // nil!!!
-		Events:              events,
-	}, nil
-}
-
-var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
-func createServiceName(serviceDisplayName, id string) string {
-	// generate 5 characters suffix from the id
-	sha := sha1.New()
-	sha.Write([]byte(id))
-	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
-	// remove all characters, which is not alpha numeric
-	serviceDisplayName = nonAlphaNumeric.ReplaceAllString(serviceDisplayName, "-")
-	// to lower
-	serviceDisplayName = strings.Map(unicode.ToLower, serviceDisplayName)
-	// trim dashes if exists
-	serviceDisplayName = strings.TrimSuffix(serviceDisplayName, "-")
-	if len(serviceDisplayName) > 57 {
-		serviceDisplayName = serviceDisplayName[:57]
-	}
-	// add suffix
-	serviceDisplayName = fmt.Sprintf("%s-%s", serviceDisplayName, suffix)
-	// remove dash pre3 empty or had dash prefix
-	serviceDisplayName = strings.TrimPrefix(serviceDisplayName, "-")
-	return serviceDisplayName
 }
 
 func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credentials {
