@@ -98,7 +98,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 			r.Log.Error(err, "cannot update subscription controller status in backend CR")
 			return ctrl.Result{}, err
 		}
-		// TODO: label subs or call stop on the subscription controller
+		// TODO: Stop the BEB subscription controller
 	}
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return ctrl.Result{}, err
@@ -109,8 +109,8 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	r.Log.Info("Created/updated backend CR")
-	// Stop subscription controller (Radu/Frank)
-	// Start the other subscription controller (Radu/Frank)
+
+	// TODO: Start the NATS subscription controller
 
 	// Delete secret for publisher proxy if it exists
 	err = r.DeletePublisherProxySecret(ctx)
@@ -132,7 +132,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
-	err = r.UpdateBackendStatus(ctx, backendType, publisher, nil) 
+	err = r.UpdateBackendStatus(ctx, backendType, publisher, nil)
 	return ctrl.Result{}, err
 }
 
@@ -147,7 +147,7 @@ func (r *BackendReconciler) reconcileBEBBackend(ctx context.Context, bebSecret *
 			r.Log.Error(err, "cannot update subscription controller status in backend CR")
 			return ctrl.Result{}, err
 		}
-		// TODO: label subs or call stop on the subscription controller
+		// TODO: Stop the NATS subscription controller
 	}
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return ctrl.Result{}, err
@@ -157,8 +157,9 @@ func (r *BackendReconciler) reconcileBEBBackend(ctx context.Context, bebSecret *
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	// Stop subscription controller (Radu/Frank)
-	// Start the other subscription controller (Radu/Frank)
+
+	// TODO: Start the BEB subscription controller
+
 	// CreateOrUpdate deployment for publisher proxy secret
 	_, err = r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
