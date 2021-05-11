@@ -8,6 +8,8 @@ spec:
   group: compass.kyma-project.io
   versions:
     - name: v1alpha1
+      served: true
+      storage: true
       schema:
         openAPIV3Schema: {}
   names:
