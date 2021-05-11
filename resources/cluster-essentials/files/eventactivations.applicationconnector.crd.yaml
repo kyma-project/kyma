@@ -1,4 +1,4 @@
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: eventactivations.applicationconnector.kyma-project.io
@@ -6,23 +6,24 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   group: applicationconnector.kyma-project.io
-  version: v1alpha1
   scope: Namespaced
   names:
     plural: eventactivations
     singular: eventactivation
     kind: EventActivation
     shortNames:
-    - ea
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
+      - ea
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
           properties:
-            sourceId:
-              type: string
-              minLength: 1
-              maxLength: 253
-              pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
-            displayName:
-              type: string
+            spec:
+              properties:
+                sourceId:
+                  type: string
+                  minLength: 1
+                  maxLength: 253
+                  pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
+                displayName:
+                  type: string
