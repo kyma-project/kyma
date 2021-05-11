@@ -1,11 +1,10 @@
 approvers:
-  - akgalwas 
-  - janmedrek 
-  - Szymongib 
-  - franpog859 
+  - akgalwas
+  - janmedrek
+  - franpog859
   - Maladie
-  - crabtree
   - rafalpotempa
   - koala7659
+  - ralikio
 labels:
   - area/application-connector
