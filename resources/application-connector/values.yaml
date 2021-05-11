@@ -5,7 +5,7 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 central_application_connectivity_validator:
-  enabled: &centralApplicationConnectivityValidatorEnabled true
+  enabled: &centralApplicationConnectivityValidatorEnabled false
 
 global:
   centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
