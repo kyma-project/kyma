@@ -18,7 +18,7 @@ type GenericSender interface {
 	Send(context.Context, *cev2event.Event) (int, error)
 }
 
-// HttpMessageSender is responsible for sending messages over HTTP.
+// BebMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
 	ctx        context.Context
 	logger     *logrus.Logger
