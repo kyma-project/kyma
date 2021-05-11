@@ -305,8 +305,8 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 }
 
 func boolPtrEqual(b1, b2 *bool) bool {
-	if b1 != b2 {
-		return false
+	if b1 == b2 {
+		return true
 	}
 	if b1 != nil && b2 != nil && *b1 != *b2 {
 		return false

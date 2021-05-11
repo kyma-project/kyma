@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -61,12 +62,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctrlLogger := ctrl.Log.WithName("reconciler").WithName("backend")
+	recorder := mgr.GetEventRecorderFor("backend-controller")
+	ctx := context.Background()
 	// Start the backend manager.
-	backendReconciler := &backend.BackendReconciler{
-		Client: mgr.GetClient(),
-		Cache:  mgr.GetCache(),
-		Log:    ctrl.Log.WithName("reconciler").WithName("backend"),
-	}
+	backendReconciler := backend.NewReconciler(ctx, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
+
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
 		logger.Error(err, "unable to start the backend controller")
 		os.Exit(1)
