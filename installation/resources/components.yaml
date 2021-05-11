@@ -7,7 +7,6 @@ prerequisites:
   - name: "certificates"
     namespace: "istio-system"
 components:
-  - name: "testing"
   - name: "logging"
   - name: "tracing"
   - name: "kiali"

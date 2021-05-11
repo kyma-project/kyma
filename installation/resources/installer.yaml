@@ -154,7 +154,7 @@ spec:
   - "*"
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kyma-installer-reader
   labels:
@@ -169,7 +169,7 @@ rules:
   resourceNames: ["000-kyma-installer"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kyma-installer
   labels:
