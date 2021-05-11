@@ -132,7 +132,7 @@ func (r *BackendReconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Resu
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
-	err = r.UpdateBackendStatus(ctx, backendType, publisher, new(v1.Secret)) // TODO: pass the secret
+	err = r.UpdateBackendStatus(ctx, backendType, publisher, nil) 
 	return ctrl.Result{}, err
 }
 
