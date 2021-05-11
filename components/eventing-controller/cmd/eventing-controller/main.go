@@ -64,7 +64,7 @@ func main() {
 	// Start the backend manager.
 	backendReconciler := &backend.BackendReconciler{
 		Client: mgr.GetClient(),
-		Cache: mgr.GetCache(),
+		Cache:  mgr.GetCache(),
 		Log:    ctrl.Log.WithName("reconciler").WithName("backend"),
 	}
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {

@@ -31,12 +31,12 @@ const (
 	// TODO: where to get this namespace
 	DefaultEventingBackendNamespace = "kyma-system"
 
-	PublisherNamespace       = "kyma-system"
-	PublisherName            = "eventing-publisher-proxy"
-	BackendCRLabelKey        = "kyma-project.io/eventing"
-	BackendCRLabelValue      = "backend"
-	AppLabelKey              = "app.kubernetes.io/name"
-	AppLabelValue            = PublisherName
+	PublisherNamespace  = "kyma-system"
+	PublisherName       = "eventing-publisher-proxy"
+	BackendCRLabelKey   = "kyma-project.io/eventing"
+	BackendCRLabelValue = "backend"
+	AppLabelKey         = "app.kubernetes.io/name"
+	AppLabelValue       = PublisherName
 
 	TokenEndpointFormat = "%s?grant_type=%s&response_type=token"
 )
@@ -67,7 +67,7 @@ func (r *BackendReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// This is not allowed!
 		r.Log.Info(fmt.Sprintf("more than one secret with the label %q=%q exist", BEBBackendSecretLabelKey, BEBBackendSecretLabelValue))
 		backend, err := r.getCurrentBackendCR(ctx)
-		if err == nil && *backend.Status.EventingReady{
+		if err == nil && *backend.Status.EventingReady {
 			backend.Status.EventingReady = boolPtr(false)
 			err := r.Status().Update(ctx, backend)
 			return ctrl.Result{}, err

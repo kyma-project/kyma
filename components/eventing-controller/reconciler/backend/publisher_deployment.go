@@ -230,4 +230,3 @@ func getNATSEnvVars() []v1.EnvVar {
 		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
 	}
 }
-
