@@ -31,8 +31,6 @@ type Cache interface {
 
 type proxyHandler struct {
 	appNamePlaceholder       string
-	group                    string
-	tenant                   string
 	eventServicePathPrefixV1 string
 	eventServicePathPrefixV2 string
 	eventServiceHost         string
@@ -52,8 +50,6 @@ type proxyHandler struct {
 
 func NewProxyHandler(
 	appNamePlaceholder string,
-	group string,
-	tenant string,
 	eventServicePathPrefixV1 string,
 	eventServicePathPrefixV2 string,
 	eventMeshPathPrefix string,
@@ -65,8 +61,6 @@ func NewProxyHandler(
 	log *logger.Logger) *proxyHandler {
 	return &proxyHandler{
 		appNamePlaceholder:       appNamePlaceholder,
-		group:                    group,
-		tenant:                   tenant,
 		eventServicePathPrefixV1: eventServicePathPrefixV1,
 		eventServicePathPrefixV2: eventServicePathPrefixV2,
 		eventMeshPathPrefix:      eventMeshPathPrefix,
@@ -106,7 +100,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 	subjects := extractSubjects(certInfoData)
 
-	if !hasValidSubject(subjects, applicationClientIDs, applicationName, ph.group, ph.tenant) {
+	if !hasValidSubject(subjects, applicationClientIDs, applicationName) {
 		httptools.RespondWithError(ph.log.WithTracing(r.Context()).With("handler", handlerName).With("applicationName", applicationName), w, apperrors.Forbidden("no valid subject found"))
 		return
 	}
@@ -166,8 +160,8 @@ func (ph *proxyHandler) getApplicationPrefix(path string, applicationName string
 	return path
 }
 
-func hasValidSubject(subjects, applicationClientIDs []string, appName, group, tenant string) bool {
-	subjectValidator := newSubjectValidator(applicationClientIDs, appName, group, tenant)
+func hasValidSubject(subjects, applicationClientIDs []string, appName string) bool {
+	subjectValidator := newSubjectValidator(applicationClientIDs, appName)
 
 	for _, s := range subjects {
 		parsedSubject := parseSubject(s)
@@ -180,7 +174,7 @@ func hasValidSubject(subjects, applicationClientIDs []string, appName, group, te
 	return false
 }
 
-func newSubjectValidator(applicationClientIDs []string, appName, group, tenant string) func(subject pkix.Name) bool {
+func newSubjectValidator(applicationClientIDs []string, appName string) func(subject pkix.Name) bool {
 	validateCommonNameWithAppName := func(subject pkix.Name) bool {
 		return appName == subject.CommonName
 	}
@@ -192,41 +186,11 @@ func newSubjectValidator(applicationClientIDs []string, appName, group, tenant s
 		}
 		return false
 	}
-	validateSubjectField := func(subjectField []string, expectedValue string) bool {
-		return len(subjectField) == 1 && subjectField[0] == expectedValue
-	}
-
-	switch {
-	case len(applicationClientIDs) == 0 && !areStringsFilled(group, tenant):
+	if len(applicationClientIDs) == 0 {
 		return validateCommonNameWithAppName
-
-	case len(applicationClientIDs) == 0 && areStringsFilled(group, tenant):
-		return func(subject pkix.Name) bool {
-			return validateCommonNameWithAppName(subject) && validateSubjectField(subject.Organization, tenant) && validateSubjectField(subject.OrganizationalUnit, group)
-		}
-
-	case len(applicationClientIDs) != 0 && !areStringsFilled(group, tenant):
+	} else{
 		return validateCommonNameWithClientIDs
-
-	case len(applicationClientIDs) != 0 && areStringsFilled(group, tenant):
-		return func(subject pkix.Name) bool {
-			return validateCommonNameWithClientIDs(subject) && validateSubjectField(subject.Organization, tenant) && validateSubjectField(subject.OrganizationalUnit, group)
-		}
-
-	default:
-		return func(subject pkix.Name) bool {
-			return false
-		}
 	}
-}
-
-func areStringsFilled(strs ...string) bool {
-	for _, str := range strs {
-		if str == "" {
-			return false
-		}
-	}
-	return true
 }
 
 func extractSubjects(certInfoData string) []string {

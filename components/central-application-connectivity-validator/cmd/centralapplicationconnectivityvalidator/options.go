@@ -12,8 +12,6 @@ import (
 type args struct {
 	proxyPort                   int
 	externalAPIPort             int
-	tenant                      string
-	group                       string
 	eventServicePathPrefixV1    string
 	eventServicePathPrefixV2    string
 	eventMeshPathPrefix         string
@@ -42,8 +40,6 @@ type options struct {
 func parseOptions() (*options, error) {
 	proxyPort := flag.Int("proxyPort", 8081, "Proxy port.")
 	externalAPIPort := flag.Int("externalAPIPort", 8080, "External API port.")
-	tenant := flag.String("tenant", "", "Name of the application tenant")
-	group := flag.String("group", "", "Name of the application group")
 	eventServicePathPrefixV1 := flag.String("eventServicePathPrefixV1", "/%%APP_NAME%%/v1/events", "Prefix of paths that will be directed to the Event Service V1")
 	eventServicePathPrefixV2 := flag.String("eventServicePathPrefixV2", "/%%APP_NAME%%/v2/events", "Prefix of paths that will be directed to the Event Service V2")
 	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/%%APP_NAME%%/events", "Prefix of paths that will be directed to the Event Mesh")
@@ -69,8 +65,6 @@ func parseOptions() (*options, error) {
 		args: args{
 			proxyPort:                   *proxyPort,
 			externalAPIPort:             *externalAPIPort,
-			tenant:                      *tenant,
-			group:                       *group,
 			eventServicePathPrefixV1:    *eventServicePathPrefixV1,
 			eventServicePathPrefixV2:    *eventServicePathPrefixV2,
 			eventMeshPathPrefix:         *eventMeshPathPrefix,
@@ -90,7 +84,7 @@ func parseOptions() (*options, error) {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
+	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d "+
 		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s "+
 		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
 		"--eventMeshDestinationPath=%s "+
@@ -98,7 +92,7 @@ func (o *options) String() string {
 		"--cacheExpirationSeconds=%d --cacheCleanupIntervalSeconds=%d "+
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
-		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
+		o.proxyPort, o.externalAPIPort,
 		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2,
 		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,

@@ -37,8 +37,6 @@ spec:
           - "/centralapplicationconnectivityvalidator"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--tenant={{ .Values.global.tenant }}"
-          - "--group={{ .Values.global.group }}"
           - "--eventServicePathPrefixV1=/%%APP_NAME%%/v1/events"
           - "--eventServicePathPrefixV2=/%%APP_NAME%%/v2/events"
           - "--eventMeshHost={{ .Values.eventPublisherProxy.service.name }}.{{ .Values.eventPublisherProxy.service.namespace }}"

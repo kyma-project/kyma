@@ -27,9 +27,6 @@ const (
 	applicationMetaName = "test-application-meta"
 	applicationID       = "test-application-id"
 
-	group  = "group"
-	tenant = "tenant"
-
 	appNamePlaceholder       = "%%APP_NAME%%"
 	eventServicePathPrefixV1 = "/%%APP_NAME%%/v1/events"
 	eventServicePathPrefixV2 = "/%%APP_NAME%%/v2/events"
@@ -104,8 +101,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		},
 		{
 			caseDescription: "Application with group and tenant",
-			tenant:          tenant,
-			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
@@ -115,8 +110,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		},
 		{
 			caseDescription: "Application with group, tenant and invalid Common Name",
-			tenant:          tenant,
-			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
@@ -125,31 +118,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			application:    applicationManagedByCompass,
 		},
 		{
-			caseDescription: "Application with group, tenant and invalid Organizational Unit",
-			tenant:          tenant,
-			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusForbidden,
-			application:    applicationManagedByCompass,
-		},
-		{
-			caseDescription: "Application with group, tenant and invalid Organization",
-			tenant:          tenant,
-			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusForbidden,
-			application:    applicationManagedByCompass,
-		},
-		{
 			caseDescription: "X-Forwarded-Client-Cert header not specified",
-			tenant:          tenant,
-			group:           group,
 			expectedStatus:  http.StatusInternalServerError,
 			application:     applicationManagedByCompass,
 		},
@@ -173,8 +142,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		},
 		{
 			caseDescription: "Application not managed by Compass Runtime Agent with group and tenant",
-			tenant:          tenant,
-			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
@@ -184,31 +151,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		},
 		{
 			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Common Name",
-			tenant:          tenant,
-			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusForbidden,
-			application:    applicationNotManagedByCompass,
-		},
-		{
-			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Organizational Unit",
-			tenant:          tenant,
-			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
-				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
-				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
-				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
-			expectedStatus: http.StatusForbidden,
-			application:    applicationNotManagedByCompass,
-		},
-		{
-			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Organization",
-			tenant:          tenant,
-			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
@@ -243,8 +186,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				testCase.group,
-				testCase.tenant,
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventMeshPathPrefix,
@@ -396,8 +337,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				testCase.group,
-				testCase.tenant,
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventMeshPathPrefix,
@@ -445,8 +384,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				testCase.group,
-				testCase.tenant,
 				eventServicePathPrefixV1,
 				eventServicePathPrefixV2,
 				eventMeshPathPrefix,
@@ -488,8 +425,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		proxyHandler := NewProxyHandler(
 			appNamePlaceholder,
-			group,
-			tenant,
 			eventServicePathPrefixV1,
 			eventServicePathPrefixV2,
 			eventMeshPathPrefix,
@@ -533,8 +468,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		proxyHandler := NewProxyHandler(
 			appNamePlaceholder,
-			"",
-			"",
 			eventServicePathPrefixV1,
 			eventServicePathPrefixV2,
 			eventMeshPathPrefix,
@@ -580,8 +513,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					testCase.group,
-					testCase.tenant,
 					eventServicePathPrefixV1,
 					eventServicePathPrefixV2,
 					eventMeshPathPrefix,
@@ -632,8 +563,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					testCase.group,
-					testCase.tenant,
 					eventServicePathPrefixV1,
 					eventServicePathPrefixV2,
 					eventMeshPathPrefix,
@@ -680,8 +609,6 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					testCase.group,
-					testCase.tenant,
 					eventServicePathPrefixV1,
 					eventServicePathPrefixV2,
 					eventMeshPathPrefix,
@@ -737,8 +664,6 @@ func TestProxyHandler_ReplaceAppNamePlaceholder(t *testing.T) {
 
 	ph := NewProxyHandler(
 		appNamePlaceholder,
-		"",
-		"",
 		eventServicePathPrefixV1,
 		eventServicePathPrefixV2,
 		eventMeshPathPrefix,
