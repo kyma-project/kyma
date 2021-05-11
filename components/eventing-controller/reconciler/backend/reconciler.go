@@ -105,7 +105,6 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	// CreateOrUpdate CR with NATS
 	r.Log.Info("Reconciling with backend as NATS")
 	backendType := eventingv1alpha1.NatsBackendType
-
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
 		// Update status if bad
