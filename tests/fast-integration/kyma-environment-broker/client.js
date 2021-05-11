@@ -15,7 +15,7 @@ class KEBConfig {
       getEnvOrThrow("KEB_GLOBALACCOUNT_ID"),
       getEnvOrThrow("KEB_SUBACCOUNT_ID"),
       getEnvOrThrow("KEB_PLAN_ID"),
-        process.env.KEB_REGION
+      process.env.KEB_REGION
     );
   }
 
