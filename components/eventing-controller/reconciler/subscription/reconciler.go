@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -43,6 +46,7 @@ import (
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
+	ctx context.Context
 	client.Client
 	cache.Cache
 	Log              logr.Logger
@@ -64,10 +68,12 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
+	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
 	bebHandler := &handlers.Beb{Log: log}
 	bebHandler.Initialize(cfg)
 	return &Reconciler{
+		ctx:              ctx,
 		Client:           client,
 		Cache:            cache,
 		Log:              log,
@@ -763,6 +769,31 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&eventingv1alpha1.Subscription{}).
 		Watches(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, r.getAPIRuleEventHandler()).
 		Complete(r)
+}
+
+//  SetupUnmanaged creates a controller under the client control
+func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
+	ctru, err := controller.NewUnmanaged("beb-subscription-controller", mgr, controller.Options{
+		Reconciler: r,
+	})
+	if err != nil {
+		r.Log.Error(err, "failed to create a unmanaged BEB controller")
+		return err
+	}
+
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		r.Log.Error(err, "unable to watch pods")
+		return err
+	}
+
+	go func(r *Reconciler, c controller.Controller) {
+		if err := c.Start(r.ctx.Done()); err != nil {
+			r.Log.Error(err, "failed to start the beb-subscription-controller")
+			os.Exit(1)
+		}
+	}(r, ctru)
+
+	return nil
 }
 
 // getAPIRuleEventHandler returns an APIRule event handler.

@@ -20,9 +20,11 @@ import (
 var _ MessagingBackend = &Beb{}
 
 type Beb struct {
-	Client      *client.Client
-	WebhookAuth *types.WebhookAuth
-	Log         logr.Logger
+	Client           *client.Client
+	WebhookAuth      *types.WebhookAuth
+	ProtocolSettings *eventingv1alpha1.ProtocolSettings
+	Namespace        string
+	Log              logr.Logger
 }
 
 type BebResponse struct {
@@ -35,6 +37,12 @@ func (b *Beb) Initialize(cfg env.Config) error {
 		authenticator := auth.NewAuthenticator(cfg)
 		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg)
+		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
+			ContentMode:     &cfg.ContentMode,
+			ExemptHandshake: &cfg.ExemptHandshake,
+			Qos:             &cfg.Qos,
+		}
+		b.Namespace = cfg.BEBNamespace
 	}
 	return nil
 }
@@ -61,7 +69,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err

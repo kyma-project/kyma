@@ -1,10 +1,12 @@
 package beb
 
 import (
+	"context"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/http"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -22,6 +24,7 @@ import (
 
 // Commander implements the Commander interface.
 type Commander struct {
+	cancel           context.CancelFunc
 	envCfg           *env.BebConfig
 	logger           *logrus.Logger
 	metricsCollector *metrics.Collector
@@ -55,14 +58,15 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)
 
 	// assure uniqueness
-	ctx := signals.NewContext()
+	var ctx context.Context
+	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
 	// configure auth client
 	client := oauth.NewClient(ctx, c.envCfg)
 	defer client.CloseIdleConnections()
 
 	// configure message sender
-	messageSender := sender.NewHttpMessageSender(c.envCfg.EmsPublishURL, client)
+	messageSender := sender.NewBebMessageSender(c.envCfg.EmsPublishURL, client)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -92,11 +96,17 @@ func (c *Commander) Start() error {
 	c.logger.Info("Informers are synced successfully")
 
 	// start handler which blocks until it receives a shutdown signal
-	if err := http.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
+	if err := beb.NewHandler(messageReceiver, messageSender, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
 		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
 		c.logger.Errorf("Start handler failed with error: %s", err)
 		return err
 	}
 	c.logger.Info("Shutdown the Event Publisher Proxy")
+	return nil
+}
+
+// Stop implements the Commander interface and stops the publisher.
+func (c *Commander) Stop() error {
+	c.cancel()
 	return nil
 }

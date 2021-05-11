@@ -692,12 +692,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				subscription.Spec.Filter = nil
 				return subscription
 			}()),
-		Entry("protocolsettings missing",
-			func() *eventingv1alpha1.Subscription {
-				subscription := reconcilertesting.NewSubscription("schema-protocolsettings-missing", "", reconcilertesting.WithWebhookAuthForBEB)
-				subscription.Spec.ProtocolSettings = nil
-				return subscription
-			}()),
 	)
 
 	DescribeTable("Schema tests: ensuring optional fields are not treated as required",
@@ -1020,6 +1014,8 @@ var _ = BeforeSuite(func(done Done) {
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
+		BEBNamespace:             "/default/ns",
+		Qos:                      "AT_LEAST_ONCE",
 	}
 
 	// prepare application-lister
@@ -1027,13 +1023,14 @@ var _ = BeforeSuite(func(done Done) {
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	err = NewReconciler(
+		context.Background(),
 		k8sManager.GetClient(),
 		applicationLister,
 		k8sManager.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller"),
 		envConf,
-	).SetupWithManager(k8sManager)
+	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
