@@ -9,7 +9,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525
-	github.com/kyma-project/kyma/components/event-publisher-proxy v0.0.0-20201014135541-82b304ab245a
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nats-io/nats-server/v2 v2.1.9
 	github.com/nats-io/nats.go v1.10.1-0.20201204000952-090c71e95cd0
