@@ -5,7 +5,6 @@ import io
 import os
 import sys
 import threading
-import stopit
 import bottle
 import prometheus_client as prom
 import queue
@@ -96,7 +95,6 @@ def exception_handler():
     return 'Internal server error'
 
 
-@stopit.threading_timeoutable(1)
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
@@ -120,20 +118,16 @@ def handler():
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
-            q = queue.Queue()
-            t = threading.Thread(target=func_wrap, args=(q, event, function_context))
+            que = queue.Queue()
+            t = threading.Thread(target=lambda q, e: q.put(func(e,function_context)), args=(que,event))
             t.start()
             try:
-                res = q.get(block=True, timeout=timeout)
+                res = que.get(block=True, timeout=timeout)
             except queue.Empty:
                 return bottle.HTTPError(408, "Timeout while processing the function")
             else:
                 t.join()
                 return res
-
-def func_wrap(queue, event, ctx):
-    out = func(event, ctx)
-    queue.put(out)
 
 def preload():
     """This is a no-op function used to start the forkserver."""
