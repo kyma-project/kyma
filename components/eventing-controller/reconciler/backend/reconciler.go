@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -32,9 +34,6 @@ import (
 const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
-	DefaultEventingBackendName = "eventing-backend"
-	// TODO: where to get this namespace
-	DefaultEventingBackendNamespace = "kyma-system"
 
 	PublisherNamespace  = "kyma-system"
 	PublisherName       = "eventing-publisher-proxy"
@@ -58,9 +57,11 @@ type Reconciler struct {
 	cache.Cache
 	Log    logr.Logger
 	record record.EventRecorder
+	cfg    env.BackendConfig
 }
 
 func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:           ctx,
 		natsCommander: natsCommander,
@@ -69,6 +70,7 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 		Cache:         cache,
 		Log:           log,
 		record:        recorder,
+		cfg:           cfg,
 	}
 }
 
@@ -519,9 +521,9 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
-		desiredPublisher = newNATSPublisherDeployment()
+		desiredPublisher = newNATSPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
 	case eventingv1alpha1.BebBackendType:
-		desiredPublisher = newBEBPublisherDeployment()
+		desiredPublisher = newBEBPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
 	default:
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
@@ -557,8 +559,8 @@ func (r *Reconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1al
 	}
 	desiredBackend := &eventingv1alpha1.EventingBackend{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      DefaultEventingBackendName,
-			Namespace: DefaultEventingBackendNamespace,
+			Name:      r.cfg.BackendCRName,
+			Namespace: r.cfg.BackendCRNamespace,
 			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
@@ -594,8 +596,8 @@ func (r *Reconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1al
 func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1.EventingBackend, error) {
 	backend := new(eventingv1alpha1.EventingBackend)
 	err := r.Cache.Get(ctx, types.NamespacedName{
-		Namespace: DefaultEventingBackendNamespace,
-		Name:      DefaultEventingBackendName,
+		Name:      r.cfg.BackendCRName,
+		Namespace: r.cfg.BackendCRNamespace,
 	}, backend)
 	return backend, err
 }

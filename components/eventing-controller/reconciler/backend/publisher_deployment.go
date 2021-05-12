@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	ServiceAccountName       = "eventing-event-publisher-nats"
 	LivenessInitialDelaySecs = int32(5)
 	LivenessTimeoutSecs      = int32(1)
 	LivenessPeriodSecs       = int32(2)
@@ -20,8 +19,6 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	PublisherReplicas        = 1
-	PublisherImage           = "eu.gcr.io/kyma-project/event-publisher-proxy:88360eed"
 	PublisherPortName        = "http"
 	PublisherPortNum         = int32(8080)
 	PublisherMetricsPortName = "http-metrics"
@@ -32,7 +29,7 @@ var (
 	TerminationGracePeriodSeconds = int64(30)
 )
 
-func newBEBPublisherDeployment() *appsv1.Deployment {
+func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -45,7 +42,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: intPtr(PublisherReplicas),
+			Replicas: int32Ptr(replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -56,7 +53,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 					Containers: []v1.Container{
 						{
 							Name:            PublisherName,
-							Image:           PublisherImage,
+							Image:           image,
 							Ports:           getContainerPorts(),
 							Env:             getBEBEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
@@ -66,7 +63,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
-					ServiceAccountName:            ServiceAccountName,
+					ServiceAccountName:            serviceAccountName,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 				},
 			},
@@ -74,7 +71,7 @@ func newBEBPublisherDeployment() *appsv1.Deployment {
 	}
 }
 
-func newNATSPublisherDeployment() *appsv1.Deployment {
+func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -87,7 +84,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: intPtr(PublisherReplicas),
+			Replicas: int32Ptr(replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -98,7 +95,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 					Containers: []v1.Container{
 						{
 							Name:            PublisherName,
-							Image:           PublisherImage,
+							Image:           image,
 							Ports:           getContainerPorts(),
 							Env:             getNATSEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
@@ -108,7 +105,7 @@ func newNATSPublisherDeployment() *appsv1.Deployment {
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
-					ServiceAccountName:            ServiceAccountName,
+					ServiceAccountName:            serviceAccountName,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 				},
 			},
