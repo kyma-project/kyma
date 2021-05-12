@@ -18,6 +18,11 @@ ci-skr:
 	npm install
 	npm run test-skr
 
+.PHONY: ci-monitoring
+ci-skr:
+	npm install
+	npm run test-monitoring
+
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
 	npm install
