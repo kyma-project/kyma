@@ -148,10 +148,10 @@ LABEL source = git@github.com:kyma-project/kyma.git
 COPY kubeless/requirements.txt /kubeless/requirements.txt
 RUN pip install -r /kubeless/requirements.txt
 
-COPY kubeless/ /kubeless
+COPY kubeless/ /
 
-WORKDIR /kubeless
+WORKDIR /
 
 USER 1000
 
-CMD ["python", "/kubeless/kubeless.py"]
+CMD ["python", "/kubeless.py"]
