@@ -46,7 +46,7 @@ tests:
 global:
   apiserver_proxy:
     dir:
-    version: "cd3faadd"
+    version: "6dfa4d9a"
   apiserver_proxy_integration_tests:
     dir:
     version: "8d072ec7"
@@ -57,4 +57,4 @@ global:
     path: eu.gcr.io/kyma-project
   xip_patch:
     dir:
-    version: 6dfa4d9a
+    version: 8d072ec7
