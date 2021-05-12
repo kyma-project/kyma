@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.4
+FROM alpine:3.13.5
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -31,6 +31,7 @@ RUN set -ex \
 	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \
+	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
 		xz \
 	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
