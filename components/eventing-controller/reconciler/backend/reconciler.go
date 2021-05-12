@@ -120,9 +120,14 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	}
 	r.Log.Info("Created/updated backend CR")
 
-	// TODO: Subscription controller logic
-	// Stop subscription controller (Radu/Frank)
-	// Start the other subscription controller (Radu/Frank)
+	// Stop the BEB subscription controller
+	if err := r.stopBebController(); err != nil {
+		return ctrl.Result{}, err
+	}
+	// Start the NATS subscription controller
+	if err := r.startNatsController(); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// Delete secret for publisher proxy if it exists
 	err = r.DeletePublisherProxySecret(ctx)
@@ -156,9 +161,14 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, errors.Wrapf(err, "failed to createOrUpdate EventingBackend, type: %s", eventingv1alpha1.BebBackendType)
 	}
 
-	// TODO: Controller logic
-	// Stop subscription controller (Radu/Frank)
-	// Start the other subscription controller (Radu/Frank)
+	// Stop the NATS subscription controller
+	if err := r.stopNatsController(); err != nil {
+		return ctrl.Result{}, err
+	}
+	// Start the BEB subscription controller
+	if err := r.startBebController(); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// CreateOrUpdate deployment for publisher proxy secret
 	_, err = r.SyncPublisherProxySecret(ctx, bebSecret)
