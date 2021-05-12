@@ -23,11 +23,12 @@ var Semantic = conversion.EqualitiesOrDie(
 
 // channelEqual asserts the equality of two Channel objects.
 func apiRuleEqual(a1, a2 *apigatewayv1alpha1.APIRule) bool {
-	if a1 == a2 {
-		return true
-	}
 	if a1 == nil || a2 == nil {
 		return false
+	}
+
+	if a1 == a2 {
+		return true
 	}
 
 	if !reflect.DeepEqual(a1.Labels, a2.Labels) {
@@ -58,12 +59,12 @@ func apiRuleEqual(a1, a2 *apigatewayv1alpha1.APIRule) bool {
 
 // eventingBackendEqual asserts the equality of two EventingBackend objects.
 func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
-	if b1 == b2 {
-		return true
-	}
-
 	if b1 == nil || b2 == nil {
 		return false
+	}
+
+	if b1 == b2 {
+		return true
 	}
 
 	if !reflect.DeepEqual(b1.Labels, b2.Labels) {
@@ -79,12 +80,11 @@ func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
 
 // publisherProxyDeploymentEqual asserts the equality of two Deployment objects for event publisher proxy deployments.
 func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
-	if d1 == d2 {
-		return true
-	}
-
 	if d1 == nil || d2 == nil {
 		return false
+	}
+	if d1 == d2 {
+		return true
 	}
 
 	if !reflect.DeepEqual(d1.Labels, d2.Labels) {
@@ -114,11 +114,11 @@ func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
 
 // podSpecEqual asserts the equality of two PodSpec objects.
 func podSpecEqual(ps1, ps2 *corev1.PodSpec) bool {
-	if ps1 == ps2 {
-		return true
-	}
 	if ps1 == nil || ps2 == nil {
 		return false
+	}
+	if ps1 == ps2 {
+		return true
 	}
 
 	cs1, cs2 := ps1.Containers, ps2.Containers
@@ -140,6 +140,9 @@ func podSpecEqual(ps1, ps2 *corev1.PodSpec) bool {
 
 // containerEqual asserts the equality of two Container objects.
 func containerEqual(c1, c2 *corev1.Container) bool {
+	if c1 == nil || c2 == nil {
+		return false
+	}
 	if c1.Image != c2.Image {
 		return false
 	}
@@ -188,11 +191,12 @@ EV1:
 
 // probeEqual asserts the equality of two Probe objects.
 func probeEqual(p1, p2 *corev1.Probe) bool {
-	if p1 == p2 {
-		return true
-	}
 	if p1 == nil || p2 == nil {
 		return false
+	}
+
+	if p1 == p2 {
+		return true
 	}
 
 	isInitialDelaySecondsEqual := p1.InitialDelaySeconds != p2.InitialDelaySeconds
@@ -250,6 +254,10 @@ func realProto(pr corev1.Protocol) corev1.Protocol {
 
 // secretEqual asserts the equality of two Secret objects for event publisher proxy deployments.
 func secretEqual(b1, b2 *corev1.Secret) bool {
+	if b1 == nil || b2 == nil {
+		return false
+	}
+
 	if b1 == b2 {
 		return true
 	}
@@ -270,11 +278,12 @@ func secretEqual(b1, b2 *corev1.Secret) bool {
 }
 
 func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) bool {
-	if s1 == s2 {
-		return true
-	}
 	if s1 == nil || s2 == nil {
 		return false
+	}
+
+	if s1 == s2 {
+		return true
 	}
 
 	if s1.Backend != s2.Backend {
@@ -305,12 +314,13 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 }
 
 func boolPtrEqual(b1, b2 *bool) bool {
-	if b1 == b2 {
+	if b1 == nil && b2 == nil {
 		return true
 	}
-	if b1 != nil && b2 != nil && *b1 != *b2 {
-		return false
+
+	if b1 != nil && b2 != nil {
+		return *b1 == *b2
 	}
 
-	return true
+	return false
 }
