@@ -25,6 +25,8 @@ const {
   debug,
   genRandom,
   initializeK8sClient,
+  getContainerRestartsForAllNamespaces,
+  getAllCRDs,
 } = require("../utils");
 
 describe("Monitoring test", function() {
@@ -35,12 +37,20 @@ describe("Monitoring test", function() {
   const scenarioName = `test-${suffix}`;
   const runtimeID = uuid.v4();
 
+
   debug(`RuntimeID ${runtimeID}`, `Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
 
   const testNS = "monitoring-test";
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);  
+
+  //it("should have all Rules healthy", async function() {
+  //  await checkPrometheusRules();
+  //});
   
- 
+  it("Listing all pods in cluster", async function () {
+    let crds = await getAllCRDs();
+    console.log(`CRDs: ${JSON.stringify(crds)}`)
+  });
 });

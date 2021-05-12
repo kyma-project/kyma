@@ -25,12 +25,19 @@ function initializeK8sClient(opts) {
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
     watch = new k8s.Watch(kc);
+    const forward = k8s.PortForward(kc,nil, nil)
+    const server = net.createServer((socket) => {
+      forward.portForward('default', 'demo', [8080], socket, null, socket);
+    });
+  
   } catch(err) {
     console.log(err.message);
   }
   
 }
 initializeK8sClient();
+
+
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
