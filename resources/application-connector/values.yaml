@@ -40,7 +40,7 @@ global:
   application_connectivity_validator:
     version: "1683d7cf"
   application_operator:
-    version: "PR-11224"
+    version: "c4943f65"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
