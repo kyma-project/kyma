@@ -34,7 +34,7 @@ func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr []byte) (re
 		SetHeader("Impersonate-User", username).
 		SetHeader("Impersonate-Group", u.GetGroups()...).
 		Body(ssrr).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }

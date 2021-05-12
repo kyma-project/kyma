@@ -1,6 +1,7 @@
 package servicecatalogaddons_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -30,7 +31,7 @@ func TestBindingUsageServiceCreate(t *testing.T) {
 	_, err = sut.Create("prod", usage)
 	// THEN
 	require.NoError(t, err)
-	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace(usage.Namespace).Get(usage.Name, v1.GetOptions{})
+	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace(usage.Namespace).Get(context.Background(), usage.Name, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.NotNil(t, actualUsage)
 }
@@ -47,7 +48,7 @@ func TestBindingUsageServiceCreateWithGeneratedName(t *testing.T) {
 	_, err = sut.Create("prod", sbu)
 	// THEN
 	require.NoError(t, err)
-	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace("prod").Get("generated-sbu-name", v1.GetOptions{})
+	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace("prod").Get(context.Background(), "generated-sbu-name", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.NotNil(t, actualUsage)
 }
@@ -63,7 +64,7 @@ func TestBindingUsageServiceDelete(t *testing.T) {
 	err = sut.Delete(bindingUsage.Namespace, bindingUsage.Name)
 	// THEN
 	require.NoError(t, err)
-	_, err = fakeClient.Resource(bindingUsageGVR).Namespace(bindingUsage.Namespace).Get(bindingUsage.Name, v1.GetOptions{})
+	_, err = fakeClient.Resource(bindingUsageGVR).Namespace(bindingUsage.Namespace).Get(context.Background(), bindingUsage.Name, v1.GetOptions{})
 	require.True(t, apierrors.IsNotFound(err))
 }
 
@@ -239,11 +240,11 @@ func TestBindingUsageServiceDeleteAllByUsageKind(t *testing.T) {
 		err = sut.DeleteAllByUsageKind("prod", "deployment", "app")
 		// THEN
 		require.NoError(t, err)
-		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us1.Namespace).Get(us1.Name, v1.GetOptions{})
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us1.Namespace).Get(context.Background(), us1.Name, v1.GetOptions{})
 		require.True(t, apierrors.IsNotFound(err))
-		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us2.Namespace).Get(us2.Name, v1.GetOptions{})
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us2.Namespace).Get(context.Background(), us2.Name, v1.GetOptions{})
 		require.True(t, apierrors.IsNotFound(err))
-		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us3.Namespace).Get(us3.Name, v1.GetOptions{})
+		_, err = fakeClient.Resource(bindingUsageGVR).Namespace(us3.Namespace).Get(context.Background(), us3.Name, v1.GetOptions{})
 		require.NoError(t, err)
 	})
 }

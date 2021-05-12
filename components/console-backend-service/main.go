@@ -31,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/vrischmann/envconfig"
@@ -58,7 +57,6 @@ type config struct {
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
-	Tracing              tracing.Config
 	DebugDomain          string `envconfig:"optional"`
 	EventSubscription    bool   `envconfig:"optional"`
 }

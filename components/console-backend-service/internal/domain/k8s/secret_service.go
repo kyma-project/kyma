@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
@@ -82,7 +83,7 @@ func (svc secretService) Update(name, namespace string, update v1.Secret) (*v1.S
 		return nil, err
 	}
 
-	updated, err := svc.client.Secrets(namespace).Update(&update)
+	updated, err := svc.client.Secrets(namespace).Update(context.Background(), &update, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (svc secretService) Update(name, namespace string, update v1.Secret) (*v1.S
 }
 
 func (svc secretService) Delete(name, namespace string) error {
-	return svc.client.Secrets(namespace).Delete(name, nil)
+	return svc.client.Secrets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *secretService) checkUpdatePreconditions(name string, namespace string, update v1.Secret) error {
