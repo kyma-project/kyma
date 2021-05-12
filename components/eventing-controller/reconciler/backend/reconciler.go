@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 
@@ -43,6 +44,8 @@ const (
 	AppLabelValue       = PublisherName
 
 	TokenEndpointFormat = "%s?grant_type=%s&response_type=token"
+	NamespacePrefix     = "/"
+	BEBPublishEndpoint  = "/sap/ems/v1/events"
 )
 
 type Reconciler struct {
@@ -118,7 +121,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 		// Update status if bad
 		updateErr := r.UpdateBackendStatus(ctx, backendType, nil, nil, nil)
 		if updateErr != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when CreateOrUpdateBackendCR failed")
+			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when CreateOrUpdateBackend failed")
 		}
 		return ctrl.Result{}, errors.Wrapf(err, "failed to createOrUpdate EventingBackend, type: %s", eventingv1alpha1.NatsBackendType)
 	}
@@ -193,17 +196,8 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		}
 		return ctrl.Result{}, err
 	}
-	// Start the BEB subscription controller
-	if err := r.startBebController(); err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
-		if updateErr != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
-		}
-		return ctrl.Result{}, err
-	}
-
 	// CreateOrUpdate deployment for publisher proxy secret
-	_, err = r.SyncPublisherProxySecret(ctx, bebSecret)
+	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
 		// Update status if bad
 		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
@@ -211,6 +205,21 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when SyncPublisherProxySecret failed")
 		}
 		r.Log.Error(err, "failed to sync publisher proxy secret", "backend", eventingv1alpha1.BebBackendType)
+		return ctrl.Result{}, err
+	}
+
+	// Set environment with secrets for BEB subscription controller
+	err = setUpEnvironmentForBEBController(secretForPublisher)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrapf(err, "failed to set up env var for BEB controller")
+	}
+
+	// Start the BEB subscription controller
+	if err := r.startBebController(); err != nil {
+		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
+		if updateErr != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -233,6 +242,35 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func setUpEnvironmentForBEBController(secret *v1.Secret) error {
+	err := os.Setenv("BEB_API_URL", fmt.Sprintf("%s%s", string(secret.Data["ems-publish-url"]), BEBPublishEndpoint))
+	if err != nil {
+		return errors.Wrapf(err, "cannot set BEB_API_URL env var")
+	}
+
+	err = os.Setenv("CLIENT_ID", string(secret.Data["client-id"]))
+	if err != nil {
+		return errors.Wrapf(err, "cannot set CLIENT_ID env var")
+	}
+
+	err = os.Setenv("CLIENT_SECRET", string(secret.Data["client-secret"]))
+	if err != nil {
+		return errors.Wrapf(err, "cannot set CLIENT_SECRET env var")
+	}
+
+	err = os.Setenv("TOKEN_ENDPOINT", string(secret.Data["token-endpoint"]))
+	if err != nil {
+		return errors.Wrapf(err, "cannot set TOKEN_ENDPOINT env var")
+	}
+
+	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data["beb-namespace"])))
+	if err != nil {
+		return errors.Wrapf(err, "cannot set BEB_NAMESPACE env var")
+	}
+
+	return nil
 }
 
 func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventingv1alpha1.BackendType, backend *eventingv1alpha1.EventingBackend, publisher *appsv1.Deployment, bebSecret *v1.Secret) error {
@@ -268,7 +306,7 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 
 	// Once backend changes, the publisher deployment changes are not picked up immediately
 	// Hence marking the eventingbackend ready to false
-	if hasBackendChanged(currentStatus, desiredStatus) {
+	if hasBackendTypeChanged(currentStatus, desiredStatus) {
 		// Applying existing attributes
 		desiredBackend := currentBackend.DeepCopy()
 		desiredBackend.Status = desiredStatus
@@ -327,7 +365,7 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 	return nil
 }
 
-func hasBackendChanged(currentBackendStatus, desiredBackendStatus eventingv1alpha1.EventingBackendStatus) bool {
+func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1alpha1.EventingBackendStatus) bool {
 	if currentBackendStatus.Backend != desiredBackendStatus.Backend {
 		return true
 	}
@@ -524,15 +562,6 @@ func (r *Reconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1al
 			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
-		//// TODO: setting status is not needed anymore? Doesn't even work!
-		//Status: eventingv1alpha1.EventingBackendStatus{
-		//	Backend:                     backend,
-		//	EventingReady:               boolPtr(false),
-		//	SubscriptionControllerReady: boolPtr(false),
-		//	PublisherProxyReady:         boolPtr(false),
-		//	BebSecretName:               "",
-		//	BebSecretNamespace:          "",
-		//},
 	}
 
 	currentBackend, err := r.getCurrentBackendCR(ctx)

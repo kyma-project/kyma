@@ -72,7 +72,8 @@ func (c *Commander) Init(mgr manager.Manager) error {
 // Start implements the Commander interface and starts the manager.
 func (c *Commander) Start() error {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	// Need to read env so as to read BEB related secrets
+	c.envCfg = env.GetConfig()
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
