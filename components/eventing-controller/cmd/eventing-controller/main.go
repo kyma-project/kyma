@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -12,10 +11,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
 
@@ -62,44 +59,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Instantiate and initialize all the subscription commanders.
+	natsCommander := nats.NewCommander(restCfg, enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
+	if err := natsCommander.Init(mgr); err != nil {
+		logger.Error(err, "unable to initialize the NATS commander")
+		os.Exit(1)
+	}
+
+	bebCommander := beb.NewCommander(restCfg, enableDebugLogs, metricsAddr, resyncPeriod)
+	if err := bebCommander.Init(mgr); err != nil {
+		logger.Error(err, "unable to initialize the BEB commander")
+		os.Exit(1)
+	}
+
 	ctrlLogger := ctrl.Log.WithName("reconciler").WithName("backend")
 	recorder := mgr.GetEventRecorderFor("backend-controller")
 	ctx := context.Background()
 	// Start the backend manager.
-	backendReconciler := backend.NewReconciler(ctx, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
 
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
 		logger.Error(err, "unable to start the backend controller")
-		os.Exit(1)
-	}
-
-	// Instantiate and initialize configured commander.
-	var commander commander.Commander
-
-	backend, err := env.Backend()
-	if err != nil {
-		logger.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
-
-	switch backend {
-	case env.BACKEND_VALUE_BEB:
-		commander = beb.NewCommander(restCfg, enableDebugLogs, metricsAddr, resyncPeriod)
-	case env.BACKEND_VALUE_NATS:
-		commander = nats.NewCommander(restCfg, enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
-	}
-
-	if err := commander.Init(mgr); err != nil {
-		logger.Error(err, "unable to init commander")
-		os.Exit(1)
-	}
-
-	// Start the commander.
-	// TODO Has to be done by backand management controller later.
-	logger.Info(fmt.Sprintf("starting %s commander", backend))
-
-	if err := commander.Start(); err != nil {
-		logger.Error(err, "unable to start commander")
 		os.Exit(1)
 	}
 

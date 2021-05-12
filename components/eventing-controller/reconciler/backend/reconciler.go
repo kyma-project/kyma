@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -44,20 +46,26 @@ const (
 )
 
 type Reconciler struct {
-	ctx context.Context
+	ctx                  context.Context
+	natsCommander        commander.Commander
+	natsCommanderStarted bool
+	bebCommander         commander.Commander
+	bebCommanderStarted  bool
 	client.Client
 	cache.Cache
 	Log    logr.Logger
 	record record.EventRecorder
 }
 
-func NewReconciler(ctx context.Context, client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
-		ctx:    ctx,
-		Client: client,
-		Cache:  cache,
-		Log:    log,
-		record: recorder,
+		ctx:           ctx,
+		natsCommander: natsCommander,
+		bebCommander:  bebCommander,
+		Client:        client,
+		Cache:         cache,
+		Log:           log,
+		record:        recorder,
 	}
 }
 
@@ -484,4 +492,52 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(&source.Kind{Type: &eventingv1alpha1.EventingBackend{}}, getEventingBackendCRMapper()).
 		Watches(&source.Kind{Type: &appsv1.Deployment{}}, getDeploymentMapper()).
 		Complete(r)
+}
+
+func (r *Reconciler) startNatsController() error {
+	if !r.natsCommanderStarted {
+		if err := r.natsCommander.Start(); err != nil {
+			r.Log.Error(err, "failed to start the NATS commander")
+			return err
+		}
+		r.natsCommanderStarted = true
+		r.Log.Info("NATS commander successfully started")
+	}
+	return nil
+}
+
+func (r *Reconciler) stopNatsController() error {
+	if r.natsCommanderStarted {
+		if err := r.natsCommander.Stop(); err != nil {
+			r.Log.Error(err, "failed to stop the NATS commander")
+			return err
+		}
+		r.natsCommanderStarted = false
+		r.Log.Info("NATS commander successfully stopped")
+	}
+	return nil
+}
+
+func (r *Reconciler) startBebController() error {
+	if !r.bebCommanderStarted {
+		if err := r.bebCommander.Start(); err != nil {
+			r.Log.Error(err, "failed to start the BEB commander")
+			return err
+		}
+		r.bebCommanderStarted = true
+		r.Log.Info("BEB commander successfully started")
+	}
+	return nil
+}
+
+func (r *Reconciler) stopBebController() error {
+	if r.bebCommanderStarted {
+		if err := r.bebCommander.Stop(); err != nil {
+			r.Log.Error(err, "failed to stop the BEB commander")
+			return err
+		}
+		r.bebCommanderStarted = false
+		r.Log.Info("BEB commander successfully stopped")
+	}
+	return nil
 }
