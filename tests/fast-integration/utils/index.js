@@ -1,4 +1,5 @@
 const k8s = require("@kubernetes/client-node");
+const net = require("net")
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
@@ -9,13 +10,14 @@ var k8sAppsApi;
 var k8sCoreV1Api;
 
 var watch;
+var forward;
 
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
-    if(opts.kubeconfigPath) {
+    if (opts.kubeconfigPath) {
       kc.loadFromFile(opts.kubeconfigPath);
-    } else if(opts.kubeconfig) {
+    } else if (opts.kubeconfig) {
       kc.loadFromString(opts.kubeconfig);
     } else {
       kc.loadFromDefault();
@@ -25,15 +27,11 @@ function initializeK8sClient(opts) {
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
     watch = new k8s.Watch(kc);
-    const forward = k8s.PortForward(kc,nil, nil)
-    const server = net.createServer((socket) => {
-      forward.portForward('default', 'demo', [8080], socket, null, socket);
-    });
-  
-  } catch(err) {
+    forward = new k8s.PortForward(kc);
+  } catch (err) {
     console.log(err.message);
   }
-  
+
 }
 initializeK8sClient();
 
@@ -169,7 +167,7 @@ async function kubectlApplyDir(dir, namespace) {
     if (file.endsWith('.yaml') || file.endsWith('.yml')) {
       await kubectlApply(join(dir, file), namespace).catch(console.error);
     } else {
-       await kubectlApplyDir(join(dir, file), namespace); 
+      await kubectlApplyDir(join(dir, file), namespace);
     }
   }
 }
@@ -216,9 +214,9 @@ async function k8sDelete(listOfSpecs, namespace) {
         const version = res.spec.version || res.spec.versions[0].name;
         const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`
         await deleteAllK8sResources(path);
-      }        
+      }
     } catch (err) {
-      if (err.response.statusCode!=404) {
+      if (err.response.statusCode != 404) {
         throw err;
       }
     }
@@ -448,9 +446,9 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
   return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
-      return watchObj.object.metadata.name === name && watchObj.object.status && watchObj.object.status.state == "OK"
-        && watchObj.object.status.url;
-    }, timeout, "Wait for TokenRequest timeout");
+    return watchObj.object.metadata.name === name && watchObj.object.status && watchObj.object.status.state == "OK"
+      && watchObj.object.status.url;
+  }, timeout, "Wait for TokenRequest timeout");
 }
 
 function waitForCompassConnection(name, timeout = 90000) {
@@ -582,8 +580,8 @@ async function deleteAllK8sResources(
         qs: query,
       });
       const body = JSON.parse(response.body);
-      if(body.items && body.items.length) {
-        for(let o of body.items) {
+      if (body.items && body.items.length) {
+        for (let o of body.items) {
           deleteK8sResource(o);
         }
       } else if (!body.items) {
@@ -597,18 +595,18 @@ async function deleteAllK8sResources(
 
 async function deleteK8sResource(o) {
   if (o.metadata.finalizers && o.metadata.finalizers.length) {
-    const options = {	
-      headers: { "Content-type": "application/merge-patch+json" },	
+    const options = {
+      headers: { "Content-type": "application/merge-patch+json" },
     };
-    
+
     const obj = {
       kind: o.kind || "Secret", // Secret list doesn't return kind and apiVersion
       apiVersion: o.apiVersion || "v1",
       metadata: { name: o.metadata.name, namespace: o.metadata.namespace, finalizers: [] },
     };
-    
+
     debug("Removing finalizers from", obj);
-    
+
     await k8sDynamicApi
       .patch(obj, undefined, undefined, undefined, undefined, options)
       .catch(ignore404);
@@ -709,8 +707,8 @@ function debug() {
   }
 }
 
-function switchDebug(on = true){
-  DEBUG=on;
+function switchDebug(on = true) {
+  DEBUG = on;
 }
 
 function fromBase64(s) {
@@ -728,7 +726,7 @@ function toBase64(s) {
 function genRandom(len) {
   let res = "";
   const chrs = "abcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < len; i++ ) {
+  for (let i = 0; i < len; i++) {
     res += chrs.charAt(Math.floor(Math.random() * chrs.length));
   }
 
@@ -736,7 +734,7 @@ function genRandom(len) {
 }
 
 function getEnvOrThrow(key) {
-  if(!process.env[key]) {
+  if (!process.env[key]) {
     throw new Error(`Env ${key} not present`);
   }
 
@@ -745,22 +743,22 @@ function getEnvOrThrow(key) {
 
 function wait(fn, checkFn, timeout, interval) {
   return new Promise((resolve, reject) => {
-      const th = setTimeout(function() {
-        debug("wait timeout");
-        done(reject, new Error("wait timeout"));
-      }, timeout);
-      const ih = setInterval(async function() {
-          let res;
-          try { res = await fn(); } 
-          catch(ex) { res = ex; }
-          checkFn(res) && done(resolve, res);
-      }, interval);
-      
-      function done(fn, arg) {
-          clearTimeout(th);
-          clearInterval(ih);
-          fn(arg);
-      }
+    const th = setTimeout(function () {
+      debug("wait timeout");
+      done(reject, new Error("wait timeout"));
+    }, timeout);
+    const ih = setInterval(async function () {
+      let res;
+      try { res = await fn(); }
+      catch (ex) { res = ex; }
+      checkFn(res) && done(resolve, res);
+    }, interval);
+
+    function done(fn, arg) {
+      clearTimeout(th);
+      clearInterval(ih);
+      fn(arg);
+    }
   });
 }
 
@@ -770,8 +768,8 @@ async function ensureApplicationMapping(name, ns) {
     kind: "ApplicationMapping",
     metadata: { name: name, namespace: ns }
   };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
-  return await k8sDynamicApi.create(applicationMapping).catch((ex) => {debug(ex); throw ex});
+  await k8sDynamicApi.delete(applicationMapping).catch(() => { });
+  return await k8sDynamicApi.create(applicationMapping).catch((ex) => { debug(ex); throw ex });
 }
 
 async function patchApplicationGateway(name, ns) {
@@ -787,7 +785,7 @@ async function patchApplicationGateway(name, ns) {
   expect(
     deployment.body.spec.template.spec.containers[0].args[6]
   ).to.match(/^--skipVerify/);
-  
+
   const patch = [
     {
       op: "replace",
@@ -817,7 +815,7 @@ async function patchApplicationGateway(name, ns) {
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
   await waitForDeployment(name, ns);
-  
+
   return patchedDeployment;
 }
 
@@ -829,7 +827,7 @@ async function patchApplicationGateway(name, ns) {
  * @param {string} namespace - namespace where subscription should be created
  * @returns JSON with subscription spec
  */
- function eventingSubscription(eventType, sink, name, namespace) {
+function eventingSubscription(eventType, sink, name, namespace) {
   return {
     apiVersion: "eventing.kyma-project.io/v1alpha1",
     kind: "Subscription",
@@ -845,8 +843,8 @@ async function patchApplicationGateway(name, ns) {
             property: "source", type: "exact", value: "",
           },
           eventType: {
-            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          } 
+            property: "type", type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
+          }
         }]
       },
       protocol: "BEB",
@@ -859,6 +857,15 @@ async function patchApplicationGateway(name, ns) {
   }
 }
 
+function kubectlPortForward(namespace, podName, port) {
+  const server = net.createServer(function (socket) {
+    forward.portForward(namespace, podName, [port], socket, null, socket, 3)
+  })
+
+  server.listen(port, '127.0.0.1');
+
+  return () => { server.close() }
+}
 
 module.exports = {
   initializeK8sClient,
@@ -905,5 +912,6 @@ module.exports = {
   ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription
+  kubectlPortForward,
 };
 

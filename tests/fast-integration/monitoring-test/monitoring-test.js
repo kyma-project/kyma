@@ -1,35 +1,13 @@
 const uuid = require("uuid");
-const { 
-  KEBConfig,
-  KEBClient,
-  provisionSKR,
-  deprovisionSKR,
-} = require("../kyma-environment-broker");
-const {
-  DirectorConfig,
-  DirectorClient,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-  unregisterKymaFromCompass,
-} = require("../compass");
-const {
-  GardenerConfig,
-  GardenerClient
-} = require("../gardener");
-const {
-  ensureCommerceMockWithCompassTestFixture,
-  checkAppGatewayResponse,
-  sendEventAndCheckResponse,
-} = require("../test/fixtures/commerce-mock");
+const axios = require('axios');
+
 const {
   debug,
   genRandom,
-  initializeK8sClient,
-  getContainerRestartsForAllNamespaces,
-  getAllCRDs,
+  kubectlPortForward,
 } = require("../utils");
 
-describe("Monitoring test", function() {
+describe("Monitoring test", function () {
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -43,14 +21,17 @@ describe("Monitoring test", function() {
   const testNS = "monitoring-test";
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
-  this.slow(5000);  
+  this.slow(5000);
 
   //it("should have all Rules healthy", async function() {
   //  await checkPrometheusRules();
   //});
-  
+
   it("Listing all pods in cluster", async function () {
-    let crds = await getAllCRDs();
-    console.log(`CRDs: ${JSON.stringify(crds)}`)
+    let prometheusPort = 9090;
+    let cleanup = kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
+    let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
+    console.log(JSON.stringify(response.data));
+    cleanup();
   });
 });
