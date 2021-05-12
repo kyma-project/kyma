@@ -52,10 +52,10 @@ replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
-	k8s.io/api => k8s.io/api v0.17.11
-	k8s.io/apimachinery => k8s.io/apimachinery v0.17.11
-	k8s.io/apiserver => k8s.io/apiserver v0.17.9
-	k8s.io/client-go => k8s.io/client-go v0.17.4
+	k8s.io/api => k8s.io/api v0.17.13
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.13
+	k8s.io/apiserver => k8s.io/apiserver v0.17.13
+	k8s.io/client-go => k8s.io/client-go v0.17.13
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 	// kyma/components/function-controller uses new version knative.dev, with another impelmntations functions.
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20200306230727-a56a6ea3fa56
