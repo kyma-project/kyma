@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/console-backend-service
 
-go 1.12
+go 1.13
 
 require (
 	github.com/99designs/gqlgen v0.11.3
@@ -30,7 +30,7 @@ require (
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	k8s.io/api v0.18.18
 	k8s.io/apimachinery v0.18.18
-	k8s.io/apiserver v0.18.12
+	k8s.io/apiserver v0.18.18
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20201026165741-2f75016c1368
@@ -40,9 +40,6 @@ replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
 	golang.org/x/text => golang.org/x/text v0.3.3
-	k8s.io/api => k8s.io/api v0.18.18
-	k8s.io/apimachinery => k8s.io/apimachinery v0.18.18
-	k8s.io/apiserver => k8s.io/apiserver v0.18.18
 	k8s.io/client-go => k8s.io/client-go v0.18.18
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 	// kyma/components/function-controller uses new version knative.dev, with another impelmntations functions.
