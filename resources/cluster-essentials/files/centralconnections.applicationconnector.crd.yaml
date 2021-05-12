@@ -28,4 +28,5 @@ spec:
               required:
                 - managementInfoUrl
               type: object
+          type: object
 

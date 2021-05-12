@@ -11,7 +11,9 @@ spec:
       served: true
       storage: true
       schema:
-        opeanAPIV3Schema: {}
+        openAPIV3Schema:
+          description: Application mapping
+          type: object
   scope: Namespaced
   names:
     plural: applicationmappings

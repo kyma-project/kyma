@@ -11,7 +11,9 @@ spec:
       served: true
       storage: true
       schema:
-        openAPIV3Schema: {}
+        openAPIV3Schema:
+          description: Compass Connection
+          type: object
   names:
     kind: CompassConnection
     listKind: CompassConnectionList

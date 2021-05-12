@@ -26,4 +26,5 @@ spec:
               required:
                 - csrInfoUrl
               type: object
+          type: object
 

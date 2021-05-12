@@ -7,11 +7,13 @@ metadata:
 spec:
   group: compass.kyma-project.io
   versions:
-   - name: v1alpha1
-     served: true
-     storage: true
-     schema:
-       openAPIV3Schema: {}
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Temp desc
+          type: object
   names:
     kind: CompassConnection
     listKind: CompassConnectionList

@@ -37,10 +37,11 @@ spec:
                 url:
                   type: string
               required:
-              - token
-              - url
-              - expireAfter
-              - application
-              - state
+                - token
+                - url
+                - expireAfter
+                - application
+                - state
               type: object
+          type: object
 

@@ -29,3 +29,5 @@ spec:
                   pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
                 displayName:
                   type: string
+              type: object
+          type: object

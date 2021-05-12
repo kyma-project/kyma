@@ -109,3 +109,5 @@ spec:
                         type: array
                         items:
                           type: string
+              type: object
+          type: object
