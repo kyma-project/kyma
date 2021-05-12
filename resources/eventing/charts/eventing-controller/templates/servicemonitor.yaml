@@ -1,0 +1,18 @@
+# TODO: this was only for the nats-controller? Can it exist also when using beb?
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "controller.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "controller.labels" . | nindent 4 }}
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels: {{- include "controller.labels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: {{ .Values.metrics.config.portName }}
+      interval: {{ .Values.metrics.config.interval }}

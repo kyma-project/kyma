@@ -1,0 +1,6 @@
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: EventingBackend
+metadata:
+  # TODO: full-name and labels
+  name: eventing-backend
+spec: {}
