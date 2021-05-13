@@ -1,5 +1,5 @@
 ---
-title: Internal and external registries
+title: Registries for images
 type: Overview
 ---
 
