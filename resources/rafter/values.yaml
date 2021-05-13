@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "PR-11261"
+    tag: "8b74b38e"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
