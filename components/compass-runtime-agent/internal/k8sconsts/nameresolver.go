@@ -28,12 +28,12 @@ func NewNameResolver() NameResolver {
 
 // GetCredentialsSecretName returns credential secret name
 func (resolver nameResolver) GetCredentialsSecretName(application, packageID string) string {
-	return getResourceName(fmt.Sprintf("%s-credentials", application), packageID)
+	return getResourceName(application, packageID)
 }
 
 // GetRequestParametersSecretName returns request parameters secret name
 func (resolver nameResolver) GetRequestParametersSecretName(application, packageID string) string {
-	return getResourceName(fmt.Sprintf("%s-params", application), packageID)
+	return getResourceName(fmt.Sprintf("params-%s", application), packageID)
 }
 
 // GetResourceName returns resource name with given ID

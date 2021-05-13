@@ -14,22 +14,22 @@ func TestNameResolver(t *testing.T) {
 		requestParametersSecretName string
 	}{
 		{
-			application:                 "short_app",
+			application:                 "short_application",
 			id:                          "c687e68a-9038-4f38-845b-9c61592e59e6",
-			credentialsSecretName:       "short_app-credentials-c687e68a-9038-4f38-845b-9c61592e59e6",
-			requestParametersSecretName: "short_app-params-c687e68a-9038-4f38-845b-9c61592e59e6",
+			credentialsSecretName:       "short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
+			requestParametersSecretName: "params-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
 		},
 		{
-			application:                 "app_12345678901",
+			application:                 "max_application_aaaaaaaaaa",
 			id:                          "c687e68a-9038-4f38-845b-9c61592e59e6",
-			credentialsSecretName:       "app_12345678901-credential-c687e68a-9038-4f38-845b-9c61592e59e6",
-			requestParametersSecretName: "app_12345678901-params-c687e68a-9038-4f38-845b-9c61592e59e6",
+			credentialsSecretName:       "max_application_aaaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			requestParametersSecretName: "params-max_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6",
 		},
 		{
-			application:                 "app_1234567890123456",
+			application:                 "toolong_application_aaaaaxxxx",
 			id:                          "c687e68a-9038-4f38-845b-9c61592e59e6",
-			credentialsSecretName:       "app_1234567890123456-crede-c687e68a-9038-4f38-845b-9c61592e59e6",
-			requestParametersSecretName: "app_1234567890123456-param-c687e68a-9038-4f38-845b-9c61592e59e6",
+			credentialsSecretName:       "toolong_application_aaaaax-c687e68a-9038-4f38-845b-9c61592e59e6",
+			requestParametersSecretName: "params-toolong_application-c687e68a-9038-4f38-845b-9c61592e59e6",
 		},
 	}
 

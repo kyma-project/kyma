@@ -164,7 +164,7 @@ func TestConverter(t *testing.T) {
 								TargetUrl: "www.example.com/1",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
-									SecretName:        "Appname1-credentials-package1",
+									SecretName:        "Appname1-package1",
 									AuthenticationUrl: "https://oauth.example.com",
 									CSRFInfo: &v1alpha1.CSRFInfo{
 										TokenEndpointURL: "https://tokern.example.com",
@@ -178,7 +178,7 @@ func TestConverter(t *testing.T) {
 								TargetUrl: "www.example.com/2",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
-									SecretName:        "Appname1-credentials-package1",
+									SecretName:        "Appname1-package1",
 									AuthenticationUrl: "https://oauth.example.com",
 									CSRFInfo: &v1alpha1.CSRFInfo{
 										TokenEndpointURL: "https://tokern.example.com",
@@ -201,9 +201,9 @@ func TestConverter(t *testing.T) {
 								TargetUrl: "www.example.com/3",
 								Credentials: v1alpha1.Credentials{
 									Type:       "Basic",
-									SecretName: "Appname1-credentials-package2",
+									SecretName: "Appname1-package2",
 								},
-								RequestParametersSecretName: "Appname1-params-package2",
+								RequestParametersSecretName: "params-Appname1-package2",
 							},
 						},
 					},
