@@ -1,300 +1,293 @@
 package apigateway
 
 import (
-	"context"
-	"testing"
-
-	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestApiRuleService_List(t *testing.T) {
+// func TestApiRuleService_List(t *testing.T) {
+// 	name1 := "test-apiRule1"
+// 	namespace := "test-namespace"
+// 	hostname := "test-hostname1"
+// 	serviceName := "test-service-name1"
+// 	servicePort1 := uint32(8080)
+// 	gateway1 := "gateway1"
 
-	name1 := "test-apiRule1"
-	namespace := "test-namespace"
-	hostname := "test-hostname1"
-	serviceName := "test-service-name1"
-	servicePort1 := uint32(8080)
-	gateway1 := "gateway1"
+// 	name2 := "test-apiRule2"
+// 	servicePort2 := uint32(8080)
+// 	gateway2 := "gateway2"
 
-	name2 := "test-apiRule2"
-	servicePort2 := uint32(8080)
-	gateway2 := "gateway2"
+// 	name3 := "test-apiRule3"
+// 	servicePort3 := uint32(8080)
+// 	gateway3 := "gateway3"
+
+// 	defaultGeneration := int64(0)
+
+// 	t.Run("Should filter by namespace", func(t *testing.T) {
+// 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
+// 		apiRule3 := fixTestApiRule(name3, namespace, hostname, serviceName, servicePort3, gateway3, defaultGeneration)
 
-	name3 := "test-apiRule3"
-	servicePort3 := uint32(8080)
-	gateway3 := "gateway3"
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+// 		require.NoError(t, err)
+
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-	defaultGeneration := int64(0)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should filter by namespace", func(t *testing.T) {
-		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
-		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
-		apiRule3 := fixTestApiRule(name3, namespace, hostname, serviceName, servicePort3, gateway3, defaultGeneration)
+// 		result, err := service.APIRulesQuery(context.Background(), namespace, nil, nil)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		assert.ElementsMatch(t, []*v1alpha1.APIRule{
+// 			apiRule1, apiRule3,
+// 		}, result)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should filter by namespace and hostname", func(t *testing.T) {
+// 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
+// 		apiRule3 := fixTestApiRule(name3, namespace, "different-hostname", serviceName, servicePort3, gateway3, defaultGeneration)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+// 		require.NoError(t, err)
 
-		result, err := service.APIRulesQuery(context.Background(), namespace, nil, nil)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1alpha1.APIRule{
-			apiRule1, apiRule3,
-		}, result)
-	})
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should filter by namespace and hostname", func(t *testing.T) {
-		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
-		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
-		apiRule3 := fixTestApiRule(name3, namespace, "different-hostname", serviceName, servicePort3, gateway3, defaultGeneration)
+// 		result, err := service.APIRulesQuery(context.Background(), namespace, nil, &hostname)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		assert.ElementsMatch(t, []*v1alpha1.APIRule{
+// 			apiRule1,
+// 		}, result)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should filter by namespace and serviceName", func(t *testing.T) {
+// 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
+// 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3, defaultGeneration)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+// 		require.NoError(t, err)
 
-		result, err := service.APIRulesQuery(context.Background(), namespace, nil, &hostname)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1alpha1.APIRule{
-			apiRule1,
-		}, result)
-	})
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should filter by namespace and serviceName", func(t *testing.T) {
-		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
-		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
-		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3, defaultGeneration)
+// 		result, err := service.APIRulesQuery(context.Background(), namespace, &serviceName, nil)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		assert.ElementsMatch(t, []*v1alpha1.APIRule{
+// 			apiRule1,
+// 		}, result)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should filter by namespace serviceName and hostname", func(t *testing.T) {
+// 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
+// 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3, defaultGeneration)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
+// 		require.NoError(t, err)
 
-		result, err := service.APIRulesQuery(context.Background(), namespace, &serviceName, nil)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1alpha1.APIRule{
-			apiRule1,
-		}, result)
-	})
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should filter by namespace serviceName and hostname", func(t *testing.T) {
-		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
-		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2, defaultGeneration)
-		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3, defaultGeneration)
+// 		result, err := service.APIRulesQuery(context.Background(), namespace, &serviceName, &hostname)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		assert.ElementsMatch(t, []*v1alpha1.APIRule{
+// 			apiRule1,
+// 		}, result)
+// 	})
+// }
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// func TestApiService_Find(t *testing.T) {
+// 	name1 := "test-apiRule1"
+// 	namespace := "test-namespace"
+// 	hostname := "test-hostname1"
+// 	serviceName := "test-service-name1"
+// 	servicePort1 := uint32(8080)
+// 	gateway1 := "gateway1"
+// 	defaultGeneration := int64(0)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 	t.Run("Should find an APIRule", func(t *testing.T) {
+// 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
 
-		result, err := service.APIRulesQuery(context.Background(), namespace, &serviceName, &hostname)
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1)
+// 		require.NoError(t, err)
 
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []*v1alpha1.APIRule{
-			apiRule1,
-		}, result)
-	})
-}
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-func TestApiService_Find(t *testing.T) {
-	name1 := "test-apiRule1"
-	namespace := "test-namespace"
-	hostname := "test-hostname1"
-	serviceName := "test-service-name1"
-	servicePort1 := uint32(8080)
-	gateway1 := "gateway1"
-	defaultGeneration := int64(0)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should find an APIRule", func(t *testing.T) {
-		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		result, err := service.APIRuleQuery(context.Background(), apiRule1.Name, namespace)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, apiRule1)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		assert.Equal(t, apiRule1, result)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should return error if not found", func(t *testing.T) {
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
+// 		require.NoError(t, err)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		result, err := service.APIRuleQuery(context.Background(), apiRule1.Name, namespace)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		require.NoError(t, err)
-		assert.Equal(t, apiRule1, result)
-	})
+// 		_, err = service.APIRuleQuery(context.Background(), name1, namespace)
 
-	t.Run("Should return error if not found", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
-		require.NoError(t, err)
+// 		require.Error(t, err)
+// 	})
+// }
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// func TestApiService_Create(t *testing.T) {
+// 	name1 := "test-apiRule1"
+// 	namespace := "test-namespace"
+// 	hostname := "test-hostname1"
+// 	serviceName := "test-service-name1"
+// 	servicePort1 := uint32(8080)
+// 	gateway1 := "gateway1"
+// 	defaultGeneration := int64(0)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 	newRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
 
-		_, err = service.APIRuleQuery(context.Background(), name1, namespace)
+// 	t.Run("Should create an APIRule", func(t *testing.T) {
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
+// 		require.NoError(t, err)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		require.Error(t, err)
-	})
-}
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-func TestApiService_Create(t *testing.T) {
-	name1 := "test-apiRule1"
-	namespace := "test-namespace"
-	hostname := "test-hostname1"
-	serviceName := "test-service-name1"
-	servicePort1 := uint32(8080)
-	gateway1 := "gateway1"
-	defaultGeneration := int64(0)
+// 		result, err := service.CreateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Spec)
 
-	newRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		require.NoError(t, err)
+// 		assert.Equal(t, newRule, result)
+// 	})
 
-	t.Run("Should create an APIRule", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
-		require.NoError(t, err)
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should throw an error if APIRule already exists", func(t *testing.T) {
+// 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+// 		require.NoError(t, err)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		result, err := service.CreateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Spec)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		require.NoError(t, err)
-		assert.Equal(t, newRule, result)
-	})
+// 		_, err = service.CreateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Spec)
 
-	t.Run("Should throw an error if APIRule already exists", func(t *testing.T) {
-		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		require.Error(t, err)
+// 	})
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
-		require.NoError(t, err)
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// }
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// func TestApiRuleService_Update(t *testing.T) {
+// 	name1 := "test-apiRule1"
+// 	namespace := "test-namespace"
+// 	hostname := "test-hostname1"
+// 	serviceName := "test-service-name1"
+// 	servicePort1 := uint32(8080)
+// 	gateway1 := "gateway1"
+// 	defaultGeneration := int64(0)
 
-		_, err = service.CreateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Spec)
+// 	newRule := fixTestApiRule(name1, namespace, "new-hostname", serviceName, servicePort1, gateway1, defaultGeneration)
 
-		require.Error(t, err)
-	})
+// 	t.Run("Should update an APIRule", func(t *testing.T) {
+// 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
 
-}
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+// 		require.NoError(t, err)
 
-func TestApiRuleService_Update(t *testing.T) {
-	name1 := "test-apiRule1"
-	namespace := "test-namespace"
-	hostname := "test-hostname1"
-	serviceName := "test-service-name1"
-	servicePort1 := uint32(8080)
-	gateway1 := "gateway1"
-	defaultGeneration := int64(0)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-	newRule := fixTestApiRule(name1, namespace, "new-hostname", serviceName, servicePort1, gateway1, defaultGeneration)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should update an APIRule", func(t *testing.T) {
-		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		result, err := service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Generation, newRule.Spec)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
-		require.NoError(t, err)
+// 		require.NoError(t, err)
+// 		newRule := fixTestApiRule(name1, namespace, "new-hostname", serviceName, servicePort1, gateway1, defaultGeneration)
+// 		assert.Equal(t, *newRule.Spec.Service.Host, *result.Spec.Service.Host)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should throw an error if APIRule doesn't exists", func(t *testing.T) {
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
+// 		require.NoError(t, err)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		result, err := service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Generation, newRule.Spec)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		require.NoError(t, err)
-		newRule := fixTestApiRule(name1, namespace, "new-hostname", serviceName, servicePort1, gateway1, defaultGeneration)
-		assert.Equal(t, *newRule.Spec.Service.Host, *result.Spec.Service.Host)
-	})
+// 		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Generation, newRule.Spec)
 
-	t.Run("Should throw an error if APIRule doesn't exists", func(t *testing.T) {
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
-		require.NoError(t, err)
+// 		require.Error(t, err)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should throw an error on updating already modified APIRule", func(t *testing.T) {
+// 		existingGeneration := int64(2)
+// 		updateGeneration := int64(1)
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, existingGeneration)
 
-		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, newRule.Generation, newRule.Spec)
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+// 		require.NoError(t, err)
 
-		require.Error(t, err)
-	})
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-	t.Run("Should throw an error on updating already modified APIRule", func(t *testing.T) {
-		existingGeneration := int64(2)
-		updateGeneration := int64(1)
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, existingGeneration)
+// 		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, updateGeneration, newRule.Spec)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
-		require.NoError(t, err)
+// 		require.Error(t, err)
+// 	})
 
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
+// 	t.Run("Should throw an error on updating readonly APIRule", func(t *testing.T) {
+// 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
+// 		existingApiRule.OwnerReferences = []v1.OwnerReference{{
+// 			Kind: "Subscription",
+// 			Name: "sup",
+// 		}}
 
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
+// 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+// 		require.NoError(t, err)
 
-		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, updateGeneration, newRule.Spec)
+// 		service := New(serviceFactory)
+// 		err = service.Enable()
+// 		require.NoError(t, err)
 
-		require.Error(t, err)
-	})
+// 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-	t.Run("Should throw an error on updating readonly APIRule", func(t *testing.T) {
-		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1, defaultGeneration)
-		existingApiRule.OwnerReferences = []v1.OwnerReference{{
-			Kind: "Subscription",
-			Name: "sup",
-		}}
+// 		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, defaultGeneration, newRule.Spec)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingApiRule)
-		require.NoError(t, err)
-
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
-
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
-
-		_, err = service.UpdateAPIRule(context.Background(), newRule.Name, newRule.Namespace, defaultGeneration, newRule.Spec)
-
-		require.Error(t, err)
-	})
-}
+// 		require.Error(t, err)
+// 	})
+// }
 
 // Apaprently watch does not work with fake client
 
