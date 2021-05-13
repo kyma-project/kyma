@@ -205,9 +205,12 @@ func (s *service) upsertRequestParametersSecrets(directorApplication model.Appli
 			if r.AppError != nil {
 				return r.AppError
 			}
-			_, err := s.requestParametersService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, apiPackage.DefaultInstanceAuth.Credentials.RequestParameters)
-			if err != nil {
-				appendedErr = apperrors.AppendError(appendedErr, err)
+			requestParameters := apiPackage.DefaultInstanceAuth.Credentials.RequestParameters
+			if requestParameters != nil && !requestParameters.IsEmpty() {
+				_, err := s.requestParametersService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, requestParameters)
+				if err != nil {
+					appendedErr = apperrors.AppendError(appendedErr, err)
+				}
 			}
 		}
 	}

@@ -2,6 +2,8 @@ package kyma
 
 import (
 	"fmt"
+	"github.com/google/uuid"
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
@@ -57,12 +59,12 @@ func TestKymaService(t *testing.T) {
 		credentialsService := &appSecrets.CredentialsService{}
 		requestParametersService := &appSecrets.RequestParametersService{}
 
-		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, nil)
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, nil)
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
 		entry1 := fixAPIEntry("API1", "api1")
@@ -118,6 +120,97 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock.AssertExpectations(t)
 	})
 
+	t.Run("should apply Create operation and create credentials", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Repository{}
+		converterMock := &appMocks.Converter{}
+		rafterServiceMock := &rafterMocks.Service{}
+		credentialsService := &appSecrets.CredentialsService{}
+		requestParametersService := &appSecrets.RequestParametersService{}
+
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
+		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
+		credentialsPackage1 := &model.Credentials{
+			Oauth: &model.Oauth{
+				URL:          "https://auth.example.com",
+				ClientID:     "test-client",
+				ClientSecret: "test-secret",
+			},
+			CSRFInfo: nil,
+		}
+		requestParametersPackage2 := &model.RequestParameters{
+			Headers: &map[string][]string{"header": {"header-value"}},
+		}
+		credentialsPackage2 := &model.Credentials{
+			Basic: &model.Basic{
+				Username: "test-user",
+				Password: "test-pass",
+			},
+			RequestParameters: requestParametersPackage2,
+		}
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, &model.Auth{Credentials: credentialsPackage1})
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, &model.Auth{Credentials: credentialsPackage2})
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
+		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
+
+		entry1 := fixAPIEntry("API1", "api1")
+		entry2 := fixEventAPIEntry("EventAPI1", "eventapi1")
+
+		newRuntimeService1 := fixService("package1", entry1)
+		newRuntimeService2 := fixService("package2", entry2)
+		newRuntimeService3 := fixService("package3", entry1, entry2)
+
+		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3})
+
+		directorApplications := []model.Application{
+			directorApplication,
+		}
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{},
+		}
+
+		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
+		applicationsManagerMock.On("Get", "name1", metav1.GetOptions{}).Return(&newRuntimeApplication, nil)
+		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+
+		asset1 := fixAPIAsset("API1", "name")
+		asset2 := fixEventAPIAsset("EventAPI1", "name")
+
+		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
+		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
+		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
+
+		rafterServiceMock.On("Put", "package1", expectedApiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "package2", expectedApiAssets2).Return(nil)
+		rafterServiceMock.On("Put", "package3", expectedApiAssets3).Return(nil)
+
+		credentialsService.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1).Return(applications.Credentials{}, nil)
+		credentialsService.On("Upsert", "name1", newRuntimeApplication.UID, "package2", credentialsPackage2).Return(applications.Credentials{}, nil)
+		requestParametersService.On("Upsert", "name1", newRuntimeApplication.UID, "package2", requestParametersPackage2).Return("", nil)
+
+		expectedResult := []Result{
+			{
+				ApplicationName: "name1",
+				ApplicationID:   "id1",
+				Operation:       Create,
+				Error:           nil,
+			},
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsService, requestParametersService)
+		result, err := kymaService.Apply(directorApplications)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, expectedResult, result)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		rafterServiceMock.AssertExpectations(t)
+	})
+
 	t.Run("should apply Update operation", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
@@ -126,17 +219,17 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec(), nil)
+		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, nil)
 
-		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec(), nil)
+		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
 		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
-		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2})
+		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
 
-		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil, nil)
+		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
 		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3})
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, nil)
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
@@ -306,16 +399,16 @@ func TestKymaService(t *testing.T) {
 			},
 		}
 
-		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec(), nil)
+		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil)
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, nil)
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, nil)
 		newDirectorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2)
 
 		newRuntimeApplication1 := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
 
 		existingDirectorApplication := fixDirectorApplication("id2", "name2", apiPackage3)
 		newRuntimeApplication2 := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
@@ -383,6 +476,7 @@ func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Servic
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
+			UID:  types.UID(uuid.New().String()),
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description: "Description",
@@ -391,14 +485,13 @@ func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Servic
 	}
 }
 
-func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec, credentials *model.Credentials) model.APIDefinition {
+func fixDirectorAPiDefinition(id, name, description string, spec *model.APISpec) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Name:        name,
 		Description: description,
 		TargetUrl:   "www.example.com",
 		APISpec:     spec,
-		Credentials: credentials,
 	}
 }
 
@@ -419,11 +512,12 @@ func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) mo
 	}
 }
 
-func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition) model.APIPackage {
+func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition, defaultInstanceAuth *model.Auth) model.APIPackage {
 	return model.APIPackage{
-		ID:               id,
-		APIDefinitions:   apiDefinitions,
-		EventDefinitions: eventAPIDefinitions,
+		ID:                  id,
+		APIDefinitions:      apiDefinitions,
+		EventDefinitions:    eventAPIDefinitions,
+		DefaultInstanceAuth: defaultInstanceAuth,
 	}
 }
 
