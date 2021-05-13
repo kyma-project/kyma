@@ -210,7 +210,7 @@ controller-manager:
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-b4a98c9f
+      tag: RELEASE.2020-09-21T22-31-59Z-deb4ee80
       repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
