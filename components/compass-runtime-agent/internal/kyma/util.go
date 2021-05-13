@@ -151,6 +151,8 @@ type getApplicationUIDResult struct {
 	AppError apperrors.AppError
 }
 
+// cachingGetApplicationUIDFunc provides a function which prevents duplicate function calls to input function for the same application parameter.
+// Subsequent invocations return the cached result.
 func cachingGetApplicationUIDFunc(f func(application string) (types.UID, apperrors.AppError)) func(application string) (getApplicationUIDResult, error) {
 	cache := memoize.NewMemoizer(0, 0)
 	return func(application string) (getApplicationUIDResult, error) {
