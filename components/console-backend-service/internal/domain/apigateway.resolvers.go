@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *aPIRuleResolver) JSON(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {

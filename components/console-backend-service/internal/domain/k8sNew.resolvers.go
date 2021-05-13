@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 func (r *limitRangeResolver) JSON(ctx context.Context, obj *v1.LimitRange) (gqlschema.JSON, error) {

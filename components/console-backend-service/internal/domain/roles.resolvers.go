@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/api/rbac/v1"
+	v1 "k8s.io/api/rbac/v1"
 )
 
 func (r *mutationResolver) CreateRoleBinding(ctx context.Context, name string, namespace string, params gqlschema.RoleBindingInput) (*v1.RoleBinding, error) {

@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	v1alpha12 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1alpha11 "github.com/ory/hydra-maester/api/v1alpha1"
-	"k8s.io/api/rbac/v1"
+	v1 "k8s.io/api/rbac/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1alpha13 "knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	v12 "knative.dev/pkg/apis/duck/v1"
