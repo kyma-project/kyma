@@ -1,6 +1,7 @@
 package servicecatalog_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -25,7 +26,7 @@ func TestBindingServiceCreate(t *testing.T) {
 	actualBinding, err := sut.Create("production", fixServiceBindingToRedis())
 	// THEN
 	require.NoError(t, err)
-	bindingFromClientSet, err := fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get("redis-binding", v1.GetOptions{})
+	bindingFromClientSet, err := fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get(context.Background(), "redis-binding", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, bindingFromClientSet, actualBinding)
 }
@@ -42,7 +43,7 @@ func TestBindingServiceCreateWithGeneratedName(t *testing.T) {
 	actualBinding, err := sut.Create("production", sb)
 	// THEN
 	require.NoError(t, err)
-	bindingFromClientSet, err := fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get("sb-generated-name", v1.GetOptions{})
+	bindingFromClientSet, err := fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get(context.Background(), "sb-generated-name", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, bindingFromClientSet, actualBinding)
 }
@@ -57,7 +58,7 @@ func TestBindingServiceDelete(t *testing.T) {
 	err = sut.Delete("production", "redis-binding")
 	// THEN
 	require.NoError(t, err)
-	_, err = fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get("redis-binding", v1.GetOptions{})
+	_, err = fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get(context.Background(), "redis-binding", v1.GetOptions{})
 	assert.True(t, apierrors.IsNotFound(err))
 
 }
