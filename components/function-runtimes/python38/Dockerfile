@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.4
+FROM alpine:3.13.5
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -28,7 +28,7 @@ ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
 ENV PYTHON_VERSION 3.8.9
 
 RUN set -ex \
-	&& apk add --no-cache --virtual .fetch-deps \
+	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
 		gnupg \
 		tar \
 		xz \

@@ -17,7 +17,7 @@ RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mv ./manager /app/manager
 
 # get latest CA certs
-FROM alpine:3.13.4 as certs
+FROM alpine:3.13.5 as certs
 RUN apk --update add ca-certificates
 
 # result container

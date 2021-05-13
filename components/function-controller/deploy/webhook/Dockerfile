@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o webhook-server cmd/webh
 && mkdir /app \
 && mv ./webhook-server /app/webhook-server
 
-FROM alpine:3.13.4 as certs
+FROM alpine:3.13.5 as certs
 RUN apk --update add ca-certificates
 
 FROM scratch
