@@ -333,7 +333,6 @@ func fixInternalAPIPackage(suffix string) kymamodel.APIPackage {
 			fixInternalDocument("1", fixInternalDocumentContent()),
 			fixInternalDocument("2", fixInternalDocumentContent()),
 		},
-		//InstanceAuths: []kymamodel.InstanceAuth{},
 	}
 }
 
@@ -358,7 +357,6 @@ func fixInternalAPIPackageEmptySpecs(suffix string) kymamodel.APIPackage {
 			fixInternalDocument("2", nil),
 			fixInternalDocument("3", nil),
 		},
-		//InstanceAuths: []kymamodel.InstanceAuth{},
 	}
 }
 
