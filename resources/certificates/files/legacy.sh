@@ -69,13 +69,3 @@ EOF
     )
     kubectl patch configmap coredns --patch "${COREDNS_PATCH}" -n kube-system
 fi
-
-
-# TODO: remove this when global.ingress.domainName is removed
-kubectl create configmap net-global-overrides \
-  --from-literal global.domainName="$DOMAIN" \
-  --from-literal global.ingress.domainName="$DOMAIN" \
-  -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-
-kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
-kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer

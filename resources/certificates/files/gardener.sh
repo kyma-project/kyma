@@ -13,10 +13,6 @@ fi
 
 echo "Gardener mode detected"
 
-# TODO: remove this when Gardener detection is added to the CLI/installation library
-echo "Getting shoot domain"
-DOMAIN="$(kubectl -n kube-system get configmap shoot-info -o jsonpath='{.data.domain}')"
-
 for var in DOMAIN KYMA_SECRET_NAME KYMA_SECRET_NAMESPACE; do
   if [ -z "${!var}" ]; then
     echo "ERROR: $var is not set"
@@ -44,12 +40,3 @@ EOF
 echo "Annotating istio-ingressgateway/istio-system service"
 
 kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
-
-# TODO: remove this when global.ingress.domainName is removed
-kubectl create configmap net-global-overrides \
-  --from-literal global.domainName="$DOMAIN" \
-  --from-literal global.ingress.domainName="$DOMAIN" \
-  -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-
-kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
-kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
