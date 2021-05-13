@@ -36,6 +36,7 @@ require (
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	knative.dev/eventing v0.13.1
 	knative.dev/pkg v0.0.0-20201026165741-2f75016c1368
+	sigs.k8s.io/structured-merge-diff/v3 v3.0.1-0.20201124164700-f5fd4ea1e4c9 // indirect
 )
 
 replace (
