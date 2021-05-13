@@ -1,5 +1,5 @@
 ---
-title: Serverless Functions
+title: Functions
 type: Overview
 ---
 

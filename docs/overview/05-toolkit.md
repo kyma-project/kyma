@@ -1,5 +1,5 @@
 ---
-title: Getting started toolkit
+title: Toolkit
 type: Overview
 ---
 

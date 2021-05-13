@@ -1,5 +1,5 @@
 ---
-title: Registries for images
+title: Container registries
 type: Overview
 ---
 
