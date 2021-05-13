@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/console-backend-service
 
-go 1.13
+go 1.16
 
 require (
 	github.com/99designs/gqlgen v0.11.3

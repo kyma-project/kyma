@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20210402-70b4b74f as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/console-backend-service
 ENV GO111MODULE on
@@ -9,7 +9,7 @@ COPY ./go.mod ./go.sum ./
 
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
-RUN go mod tidy
+RUN go mod download
 
 COPY . .
 
