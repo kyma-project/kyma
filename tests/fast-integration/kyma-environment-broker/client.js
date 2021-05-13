@@ -159,14 +159,10 @@ class KEBClient {
   }
 
   getRegion() {
-    let reg = this.region
-    if (!reg) {
-      return ""
+    if (this.region && this.region != "") {
+      return `${this.region}/`;
     }
-    if (reg && reg != "") {
-      reg += "/"
-    }
-    return reg
+    return "";
   }
 }
 
