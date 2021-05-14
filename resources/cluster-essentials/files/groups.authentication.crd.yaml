@@ -14,21 +14,25 @@ spec:
     kind: Group
     shortNames:
     - grp
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          type: object
-          required:
-            - idpName
-            - name            
+  versions:
+    - name: v1beta1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
           properties:
-            idpName:
-              type: string
-              maxLength: 32
-            name:
-              type: string
-              maxLength: 64
-            description:
-              type: string
-              maxLength: 256
+            spec:
+              type: object
+              required:
+                - idpName
+                - name            
+              properties:
+                idpName:
+                  type: string
+                  maxLength: 32
+                name:
+                  type: string
+                  maxLength: 64
+                description:
+                  type: string
+                  maxLength: 256
