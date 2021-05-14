@@ -862,7 +862,7 @@ function kubectlPortForward(namespace, podName, port) {
     forward.portForward(namespace, podName, [port], socket, null, socket, 3)
   })
 
-  server.listen(port, '127.0.0.1');
+  server.listen(port, 'localhost');
 
   return () => { server.close() }
 }
