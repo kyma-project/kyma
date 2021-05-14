@@ -39,7 +39,9 @@ describe("Monitoring test", function () {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
-  it("Should have all targets healthy", async () => {
+
+
+  it("All targets should be healthy", async () => {
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
     let responseBody = response.data;
     let activeTargets = responseBody.data.activeTargets;
@@ -48,7 +50,7 @@ describe("Monitoring test", function () {
     }
   });
 
-  it("Should have no firing critical alerts", async () => {
+  it("There should be no firing critical alerts", async () => {
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/alerts`);
     let responseBody = response.data;
     let alerts = responseBody.data.alerts;
