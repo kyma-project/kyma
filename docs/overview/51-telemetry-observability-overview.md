@@ -24,15 +24,24 @@ We recommend that you also implement an observability solution of your choice ou
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
-- [Prometheus](con-tbd)
-- [Grafana](con-tbd)
-- [Jaeger](con-tracing)
-- [Loki](con-logging)
+- Prometheus
+  [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more.
+- Alertmanager
+  [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or VictorOps.
+- Grafana
+  [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from the Prometheus.
+- Jaeger
+  Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend which serves as the query mechanism for displaying information about traces.
+- Loki
+  Kyma uses [Loki](https://github.com/grafana/loki) which is a Prometheus-like log management system. This lightweight solution, integrated with Grafana, is easy to understand and operate. Currently, Kyma supports the [Fluent Bit](https://fluentbit.io/) log collector.
+- Kiali
+  Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
 
 See how to configure them for your needs under [Configuring In-Cluster Observability](link_tbd).
 
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
+All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it on [Istio monitoring](link-to-istio-monitoring).
 ### External observability
 
 If you want to use other observability tools than the ones within the cluster provided by Kyma out-of-the-box, you can easily do that, too. 
