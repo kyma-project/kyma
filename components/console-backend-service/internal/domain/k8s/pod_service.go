@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
@@ -84,7 +85,7 @@ func (svc *podService) Update(name, namespace string, update v1.Pod) (*v1.Pod, e
 		return nil, err
 	}
 
-	updated, err := svc.client.Pods(namespace).Update(&update)
+	updated, err := svc.client.Pods(namespace).Update(context.Background(), &update, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (svc *podService) Update(name, namespace string, update v1.Pod) (*v1.Pod, e
 }
 
 func (svc *podService) Delete(name, namespace string) error {
-	return svc.client.Pods(namespace).Delete(name, nil)
+	return svc.client.Pods(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *podService) checkUpdatePreconditions(name string, namespace string, update v1.Pod) error {

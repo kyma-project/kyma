@@ -17,6 +17,7 @@ limitations under the License.
 package dynamicinformer
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -123,13 +124,13 @@ func NewFilteredDynamicInformer(client dynamic.Interface, gvr schema.GroupVersio
 					if tweakListOptions != nil {
 						tweakListOptions(&options)
 					}
-					return client.Resource(gvr).Namespace(namespace).List(options)
+					return client.Resource(gvr).Namespace(namespace).List(context.Background(),options)
 				},
 				WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 					if tweakListOptions != nil {
 						tweakListOptions(&options)
 					}
-					return client.Resource(gvr).Namespace(namespace).Watch(options)
+					return client.Resource(gvr).Namespace(namespace).Watch(context.Background(), options)
 				},
 			},
 			&unstructured.Unstructured{},

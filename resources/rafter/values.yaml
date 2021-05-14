@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "90589f08"
+    tag: "8b74b38e"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -206,11 +206,11 @@ controller-manager:
       secretName: "rafter-minio-old-credentials"
       image:
         repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-        tag: "20210407-86c769bd"
+        tag: "20210504-12243229"
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-b4a98c9f
+      tag: RELEASE.2020-09-21T22-31-59Z-deb4ee80
       repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
@@ -364,7 +364,7 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-        tag: "20210407-86c769bd"
+        tag: "20210504-12243229"
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/tpi/minio/mc

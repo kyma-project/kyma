@@ -1,7 +1,7 @@
 apiVersion: v1
 name: istio
-version: 1.9.1-distroless
-appVersion: 1.9.1
+version: 1.9.5-distroless
+appVersion: 1.9.5
 tillerVersion: ">=2.7.2-0"
 description: Helm chart for all istio components
 keywords:

@@ -126,8 +126,6 @@ spec:
                 type: string
             required:
             - filter
-            - protocol
-            - protocolsettings
             - sink
             type: object
           status:

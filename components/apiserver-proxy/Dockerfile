@@ -17,7 +17,7 @@ COPY . ${BASE_APP_DIR}
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o app ${BASE_APP_DIR}/cmd/proxy/main.go
 RUN mkdir /app && mv ./app /app/app && mv ${BASE_APP_DIR}/licenses /app/licenses
 
-FROM alpine:3.13.4
+FROM alpine:3.13.5
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 

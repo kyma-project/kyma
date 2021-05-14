@@ -46,10 +46,10 @@ tests:
 global:
   apiserver_proxy:
     dir:
-    version: "cd3faadd"
+    version: "6dfa4d9a"
   apiserver_proxy_integration_tests:
     dir:
-    version: "a066c1a5"
+    version: "8d072ec7"
   istio:
     gateway:
       name: kyma-gateway
@@ -57,4 +57,4 @@ global:
     path: eu.gcr.io/kyma-project
   xip_patch:
     dir:
-    version: a066c1a5
+    version: 8d072ec7

@@ -16,7 +16,10 @@
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
     "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
-    "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/"
+    "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
+    "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
+    "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
+    "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {

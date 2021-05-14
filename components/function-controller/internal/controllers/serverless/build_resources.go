@@ -431,20 +431,6 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								SuccessThreshold:    1,
 								FailureThreshold:    120, // FailureThreshold * PeriodSeconds = 120s in this case, this should be enough for any function pod to start up
 							},
-							// LivenessProbe should wait till readinessProbe fails a few times until it fails and restarts a container
-							// it's so that the traffic is no longer directed into that pod, so it may recover in that period without restarting it
-							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
-									HTTPGet: &corev1.HTTPGetAction{
-										Path: "/healthz",
-										Port: svcTargetPort,
-									},
-								},
-								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
-								SuccessThreshold:    1,
-								FailureThreshold:    3,
-								PeriodSeconds:       5,
-							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
 									HTTPGet: &corev1.HTTPGetAction{

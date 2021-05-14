@@ -122,12 +122,25 @@ func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.S
 	return newSub
 }
 
+func exemptHandshake(val bool) *bool {
+	exemptHandshake := val
+	return &exemptHandshake
+}
+
+func qos(qos string) *string {
+	q := qos
+	return &q
+}
+
 func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "BEB"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST_ONCE",
+		ContentMode: func() *string {
+			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
+			return &contentMode
+		}(),
+		ExemptHandshake: exemptHandshake(true),
+		Qos:             qos("AT-LEAST_ONCE"),
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
@@ -192,6 +205,25 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 					Type:     "exact",
 					Property: "source",
 					Value:    EventSource,
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    EventType,
+				},
+			},
+		},
+	}
+}
+
+func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    "",
 				},
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",

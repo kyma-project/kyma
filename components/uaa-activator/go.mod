@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/uaa-activator
 
-go 1.15
+go 1.16
 
 require (
 	cloud.google.com/go v0.49.0 // indirect
