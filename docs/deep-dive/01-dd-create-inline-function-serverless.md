@@ -7,7 +7,7 @@ This tutorial shows how you can create a simple "Hello World!" Function in Node.
 
 > **TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Function from Git repository sources](#tutorials-create-a-function-from-git-repository-sources).
 
-> **TIP:** As of 1.17, you can use Kyma CLI to create Functions, apply them on a cluster, and locally fetch the current state of your Function's cluster configuration after it was modified. To learn more, read how to [Use Kyma CLI to manage Functions](https://kyma-project.io/docs/cli/#tutorials-use-kyma-cli-to-manage-functions).
+> **TIP:** Read about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Steps
 

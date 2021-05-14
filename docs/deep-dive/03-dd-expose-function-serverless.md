@@ -12,6 +12,8 @@ When you complete this tutorial, you get a Function that:
 
 >**NOTE:** To learn more about securing your Function, see the [tutorial](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
+> **TIP:** Read also about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+
 ## Prerequisites
 
 This tutorial is based on an existing Function. To create one, follow the [Create a Function](#tutorials-create-a-function) tutorial.
