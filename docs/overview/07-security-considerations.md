@@ -1,15 +1,11 @@
 ---
-title: "[TBR] Security"
+title: TBR Security Considerations
 type: Details
 ---
-
-<!-- This should not be a separate docs but somehow incorporated into the overall structure, maybe as some general note of caution. -->
 
 To eliminate potential security risks when using Functions, bear in mind these few facts:
 
 - Kyma does not run any security scans against Functions and their images. Before you store any sensitive data in Functions, consider the potential risk of data leakage.
-
-- By default, JSON Web Tokens (JWTs) issued by Dex do not provide the **scope** parameter for Functions. This means that if you expose your Function and secure it with a JWT, you can use the token to validate access to all Functions within the cluster.
 
 - Kyma does not define any authorization policies that would restrict Functions' access to other resources within the Namespace. If you deploy a Function in a given Namespace, it can freely access all events and APIs of services within this Namespace.
 
