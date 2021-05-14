@@ -41,9 +41,7 @@ Follows these steps:
     kyma init function --name $NAME --namespace $NAMESPACE
     ```
 
-    Open
-
-3.  Code & configure.
+3.  Code & Configure.
 
     Open the workspace in your favorite IDE. If you have VS Code installed just call the following from the terminal in your workspace folder
 
@@ -53,7 +51,7 @@ Follows these steps:
 
     Its time to inspect the code & config.yaml. Feel free to adjust the "hello world" sample code
 
-4.  Deploy
+4.  Deploy & Verify
 
     Call the apply command from the workspace folder. It will build the container and run it on the kyma runtime pointed by your current kubeconfig.
 
