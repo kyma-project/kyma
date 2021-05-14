@@ -1,5 +1,5 @@
 ---
-title: Security Considerations
+title: Security considerations
 type: Overview
 ---
 
