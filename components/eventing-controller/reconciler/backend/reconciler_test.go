@@ -4,13 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"path/filepath"
 	"testing"
 	"time"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -26,13 +33,15 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "k8s.io/api/core/v1"
 )
 
 const (
 	useExistingCluster       = false
 	attachControlPlaneOutput = false
+	kymaSystemNamespace      = "kyma-system"
+	timeOut                  = 15 * time.Second
+	pollingInterval          = 1 * time.Second
+	eventingBackendName      = "eventing-backend"
 )
 
 var k8sClient client.Client
@@ -43,14 +52,14 @@ func TestGetSecretForPublisher(t *testing.T) {
 		name           string
 		messagingData  []byte
 		namespaceData  []byte
-		expectedSecret v1.Secret
+		expectedSecret corev1.Secret
 		expectedError  error
 	}{
 		{
 			name: "with valid message and namepsace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			namespaceData: []byte("valid/namespace"),
-			expectedSecret: v1.Secret{
+			expectedSecret: corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      PublisherName,
 					Namespace: PublisherNamespace,
@@ -94,8 +103,8 @@ func TestGetSecretForPublisher(t *testing.T) {
 	}
 }
 
-func getSecret(message, namespace []byte) *v1.Secret {
-	secret := &v1.Secret{
+func getSecret(message, namespace []byte) *corev1.Secret {
+	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: PublisherName,
 		},
@@ -141,7 +150,6 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
-	// +kubebuilder:scaffold:scheme
 
 	syncPeriod := time.Second * 2
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -149,10 +157,11 @@ var _ = BeforeSuite(func(done Done) {
 		SyncPeriod:         &syncPeriod,
 		MetricsBindAddress: ":7071",
 	})
-	Expect(err).ToNot(HaveOccurred())
-	var natsCommander, bebCommander commander.Commander
+	Expect(err).To(BeNil())
 
-	// Set env vars
+	natsCommander := TestNATSCommander{}
+	bebCommander := TestBEBCommander{}
+
 	err = NewReconciler(
 		context.Background(),
 		natsCommander,
@@ -182,10 +191,8 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-var _ = Describe("NATS Subscription Reconciliation Tests", func() {
+var _ = Describe("Backend Reconciliation Tests", func() {
 	var testId = 0
-	//var namespaceName = "test"
-
 	// enable me for debugging
 	// SetDefaultEventuallyTimeout(time.Minute)
 	// SetDefaultEventuallyPollingInterval(time.Second)
@@ -194,38 +201,54 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		// increment the test id before each "It" block, which can be used to create unique objects
 		// note: "AfterEach" is used in sync mode, so no need to use locks here
 		testId++
-
-		// print eventing backend CR
-
-		// print publisher proxy deployment
-
 	})
 
-	When("Creating a Eventing Backend without a secret", func() {
+	When("Creating a Eventing Backend based on NATS and then switch to BEB", func() {
 		It("Should create eventing infra for NATS", func() {
+			ctx := context.Background()
+			eventingBackendName := "eventing-backend"
+			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
+			ensureEventingBackendCreated(ctx, backend)
+			publisherProxy := new(appsv1.Deployment)
+			// Expect
+			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
+			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveNATSBackendReady())
+		})
+
+		It("Should create eventing infra for BEB and update Eventing Backend", func() {
+			ctx := context.Background()
+			bebSecret := reconcilertesting.WithBEBMessagingSecret("beb-secret", kymaSystemNamespace)
+			bebSecret.Labels = map[string]string{
+				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+			}
+			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
+			ensureBEBSecretCreated(ctx, bebSecret)
+			publisherProxy := new(appsv1.Deployment)
+			// Expect
+			getPublisherProxySecret(ctx).Should(And(
+				reconcilertesting.HaveValidClientID(PublisherSecretClientIDKey, "rest-clientid"),
+				reconcilertesting.HaveValidClientSecret(PublisherSecretClientSecretKey, "rest-client-secret"),
+				reconcilertesting.HaveValidTokenEndpoint(PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
+				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSEndpointKey, "https://rest-messaging"),
+				reconcilertesting.HaveValidBEBNamespace(PublisherSecretBEBNamespaceKey, "test/ns"),
+			))
+			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
+			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveBEBBackendReady())
+		})
+
+		// Creating a eventing backend CR and then labelling 2 secrets with BEB
+
+	})
+
+	PWhen("Creating a eventing backend CR and then starting of NATS controller fails", func() {
+		It("Should mark Eventing Backend CR to not ready", func() {
 			_ = context.Background()
 			_ = fmt.Sprintf("sub-%d", testId)
 
 		})
 	})
 
-	When("Creating a secret with BEB label", func() {
-		It("Should create eventing infra for BEB and create/update Eventing Backend", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
-
-		})
-	})
-
-	When("Creating a eventing backend CR and then labelling a secret with BEB", func() {
-		It("Should change eventing infra from NATS and BEB", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
-
-		})
-	})
-
-	When("Creating a eventing backend CR and then labelling 2 secrets with BEB", func() {
+	PWhen("Creating a eventing backend CR and then starting of BEB controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			_ = context.Background()
 			_ = fmt.Sprintf("sub-%d", testId)
@@ -234,3 +257,109 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 	})
 
 })
+
+func ensureEventingBackendCreated(ctx context.Context, backend *eventingv1alpha1.EventingBackend) {
+	By(fmt.Sprintf("Ensuring the test namespace %q is created", kymaSystemNamespace))
+	// create testing namespace
+	namespace := reconcilertesting.WithNamespace(kymaSystemNamespace)
+	err := k8sClient.Create(ctx, namespace)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).ShouldNot(HaveOccurred())
+	}
+
+	By(fmt.Sprintf("Ensuring an Eventing Backend %q is created", backend.Name))
+	err = k8sClient.Create(ctx, backend)
+	Expect(err).Should(BeNil())
+}
+
+// getEventingBackend fetches an EventingBackend using the lookupKey and allows to make assertions on it
+func getEventingBackend(ctx context.Context, evBackend *eventingv1alpha1.EventingBackend) AsyncAssertion {
+	return Eventually(func() *eventingv1alpha1.EventingBackend {
+		lookupKey := types.NamespacedName{
+			Namespace: evBackend.Namespace,
+			Name:      evBackend.Name,
+		}
+		if err := k8sClient.Get(ctx, lookupKey, evBackend); err != nil {
+			log.Printf("failed to fetch eventingbackend(%s): %v", lookupKey.String(), err)
+			return nil
+		}
+		log.Printf("[backend] name:%s ns:%s status:%v", evBackend.Name, evBackend.Namespace,
+			evBackend.Status)
+		return evBackend
+	}, timeOut, pollingInterval)
+}
+
+func ensureBEBSecretCreated(ctx context.Context, secret *corev1.Secret) {
+	By(fmt.Sprintf("Ensuring the test namespace %q is created", secret.Namespace))
+	// create testing namespace
+	namespace := reconcilertesting.WithNamespace(secret.Namespace)
+	err := k8sClient.Create(ctx, namespace)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).ShouldNot(HaveOccurred())
+	}
+
+	By(fmt.Sprintf("Ensuring an BEB Secret %q is created", secret.Name))
+	err = k8sClient.Create(ctx, secret)
+	Expect(err).Should(BeNil())
+}
+
+// getPublisherProxyDeployment fetches PublisherProxy deployment
+func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
+	return Eventually(func() *corev1.Secret {
+		lookupKey := types.NamespacedName{
+			Namespace: PublisherNamespace,
+			Name:      PublisherName,
+		}
+		secret := new(corev1.Secret)
+		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
+			log.Printf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
+			return nil
+		}
+		return secret
+	}, timeOut, pollingInterval)
+}
+
+// getPublisherProxySecret fetches PublisherProxy deployment
+func getPublisherProxyDeployment(ctx context.Context, publisher *appsv1.Deployment) AsyncAssertion {
+	return Eventually(func() *appsv1.Deployment {
+		lookupKey := types.NamespacedName{
+			Namespace: PublisherNamespace,
+			Name:      PublisherName,
+		}
+		if err := k8sClient.Get(ctx, lookupKey, publisher); err != nil {
+			log.Printf("failed to fetch eventingbackend(%s): %v", lookupKey.String(), err)
+			return nil
+		}
+		return publisher
+	}, timeOut, pollingInterval)
+}
+
+type TestNATSCommander struct{}
+
+func (t TestNATSCommander) Init(mgr manager.Manager) error {
+	return nil
+}
+
+func (t TestNATSCommander) Start() error {
+	log.Printf("Test NATS Controller started!")
+	return nil
+}
+
+func (t TestNATSCommander) Stop() error {
+	return nil
+}
+
+type TestBEBCommander struct{}
+
+func (t TestBEBCommander) Init(mgr manager.Manager) error {
+	return nil
+}
+
+func (t TestBEBCommander) Start() error {
+	log.Printf("Test BEB Controller started!")
+	return nil
+}
+
+func (t TestBEBCommander) Stop() error {
+	return nil
+}

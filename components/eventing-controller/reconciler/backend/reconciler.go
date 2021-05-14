@@ -45,6 +45,12 @@ const (
 	TokenEndpointFormat = "%s?grant_type=%s&response_type=token"
 	NamespacePrefix     = "/"
 	BEBPublishEndpoint  = "/sap/ems/v1/events"
+
+	PublisherSecretClientIDKey      = "client-id"
+	PublisherSecretClientSecretKey  = "client-secret"
+	PublisherSecretTokenEndpointKey = "token-endpoint"
+	PublisherSecretEMSEndpointKey   = "ems-publish-url"
+	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 )
 
 type Reconciler struct {
@@ -503,11 +509,11 @@ func getSecretForPublisher(bebSecret *v1.Secret) (*v1.Secret, error) {
 
 func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publishURL, namespace string) map[string]string {
 	return map[string]string{
-		"client-id":       clientID,
-		"client-secret":   clientSecret,
-		"token-endpoint":  fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
-		"ems-publish-url": publishURL,
-		"beb-namespace":   namespace,
+		PublisherSecretClientIDKey:      clientID,
+		PublisherSecretClientSecretKey:  clientSecret,
+		PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
+		PublisherSecretEMSEndpointKey:   publishURL,
+		PublisherSecretBEBNamespaceKey:  namespace,
 	}
 }
 

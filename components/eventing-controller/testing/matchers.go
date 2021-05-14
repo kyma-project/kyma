@@ -3,6 +3,8 @@ package testing
 import (
 	"reflect"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -10,7 +12,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	. "github.com/onsi/gomega/types"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -153,8 +155,8 @@ func HaveCondition(condition eventingv1alpha1.Condition) GomegaMatcher {
 	})))
 }
 
-func HaveEvent(event v1.Event) GomegaMatcher {
-	return WithTransform(func(l v1.EventList) []v1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+func HaveEvent(event corev1.Event) GomegaMatcher {
+	return WithTransform(func(l corev1.EventList) []corev1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Reason":  Equal(event.Reason),
 		"Message": Equal(event.Message),
 		"Type":    Equal(event.Type),
@@ -171,4 +173,74 @@ func IsK8sUnprocessableEntity() GomegaMatcher {
 
 func BeGreaterThanOrEqual(a int) GomegaMatcher {
 	return WithTransform(func(b int) bool { return b >= a }, BeTrue())
+}
+
+//
+// Eventing Backend matchers
+//
+
+func HaveNATSBackendReady() GomegaMatcher {
+	return WithTransform(func(backend *eventingv1alpha1.EventingBackend) bool {
+		return backend.Status.Backend == eventingv1alpha1.NatsBackendType && *backend.Status.EventingReady && *backend.Status.PublisherProxyReady && *backend.Status.SubscriptionControllerReady
+	}, BeTrue())
+}
+
+func HaveBEBBackendReady() GomegaMatcher {
+	return WithTransform(func(backend *eventingv1alpha1.EventingBackend) bool {
+		return backend.Status.Backend == eventingv1alpha1.BebBackendType && *backend.Status.EventingReady && *backend.Status.PublisherProxyReady && *backend.Status.SubscriptionControllerReady
+	}, BeTrue())
+}
+
+func HaveStatusReady() GomegaMatcher {
+	return WithTransform(func(publisher *appsv1.Deployment) bool {
+		if publisher != nil {
+			return publisher.Status.ReadyReplicas == publisher.Status.AvailableReplicas
+		}
+		return false
+	}, BeTrue())
+}
+
+func HaveValidClientID(clientIDKey, clientID string) GomegaMatcher {
+	return WithTransform(func(secret *corev1.Secret) bool {
+		if secret != nil {
+			return string(secret.Data[clientIDKey]) == clientID
+		}
+		return false
+	}, BeTrue())
+}
+
+func HaveValidClientSecret(clientSecretKey, clientSecret string) GomegaMatcher {
+	return WithTransform(func(secret *corev1.Secret) bool {
+		if secret != nil {
+			return string(secret.Data[clientSecretKey]) == clientSecret
+		}
+		return false
+	}, BeTrue())
+}
+
+func HaveValidTokenEndpoint(tokenEndpointKey, tokenEndpoint string) GomegaMatcher {
+	return WithTransform(func(secret *corev1.Secret) bool {
+		if secret != nil {
+			return string(secret.Data[tokenEndpointKey]) == tokenEndpoint
+		}
+		return false
+	}, BeTrue())
+}
+
+func HaveValidEMSPublishURL(emsPublishURLKey, emsPublishURL string) GomegaMatcher {
+	return WithTransform(func(secret *corev1.Secret) bool {
+		if secret != nil {
+			return string(secret.Data[emsPublishURLKey]) == emsPublishURL
+		}
+		return false
+	}, BeTrue())
+}
+
+func HaveValidBEBNamespace(bebNamespaceKey, namespace string) GomegaMatcher {
+	return WithTransform(func(secret *corev1.Secret) bool {
+		if secret != nil {
+			return string(secret.Data[bebNamespaceKey]) == namespace
+		}
+		return false
+	}, BeTrue())
 }
