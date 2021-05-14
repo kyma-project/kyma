@@ -11,6 +11,7 @@ const (
 )
 
 // NameResolver provides names for Kubernetes resources
+//go:generate mockery --name NameResolver
 type NameResolver interface {
 	// GetCredentialsSecretName returns credential secret name
 	GetCredentialsSecretName(application, packageID string) string

@@ -8,6 +8,7 @@ import (
 
 type SecretData map[string][]byte
 
+//go:generate mockery --name ModificationStrategy
 type ModificationStrategy interface {
 	CredentialsProvided(credentials *model.Credentials) bool
 	CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError)
@@ -15,10 +16,12 @@ type ModificationStrategy interface {
 	ShouldUpdate(currentData SecretData, newData SecretData) bool
 }
 
+//go:generate mockery --name AccessStrategy
 type AccessStrategy interface {
 	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) (model.Credentials, apperrors.AppError)
 }
 
+//go:generate mockery --name Factory
 type Factory interface {
 	NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError)
 	NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError)
@@ -28,8 +31,7 @@ type factory struct {
 }
 
 func NewSecretsStrategyFactory() Factory {
-	return &factory{
-	}
+	return &factory{}
 }
 
 func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError) {
