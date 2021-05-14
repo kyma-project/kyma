@@ -299,12 +299,13 @@ func TestKymaService(t *testing.T) {
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
-		runtimeServiceToCreate := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeServiceToCreate := fixService("package1", fixServiceAPIEntryWithOauth("API1", "package1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		existingServiceToUpdate1 := fixService("package2", fixServiceAPIEntryWithOauth("API2", "package2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
 		runtimeServiceToUpdate1 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
-		existingServiceToUpdate2 := fixService("package3", fixServiceAPIEntryWithBasic("API2", "package3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
-		runtimeServiceToUpdate2 := fixService("package3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
-		runtimeServiceToDelete := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
+		existingServiceToUpdate2 := fixService("package3", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToUpdate2 := fixService("package3", fixServiceAPIEntryWithBasic("API3", "package3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToDelete1 := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
+		runtimeServiceToDelete2 := fixService("package5", fixServiceAPIEntryWithBasic("API5", "package5"), fixEventAPIEntry("EventAPI5", "EventAPI5Name"))
 
 		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToCreate, runtimeServiceToUpdate1, runtimeServiceToUpdate2})
 
@@ -312,7 +313,7 @@ func TestKymaService(t *testing.T) {
 			directorApplication,
 		}
 
-		existingRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{existingServiceToUpdate1, existingServiceToUpdate2, runtimeServiceToDelete})
+		existingRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{existingServiceToUpdate1, existingServiceToUpdate2, runtimeServiceToDelete1, runtimeServiceToDelete2})
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
@@ -336,23 +337,17 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock.On("Put", "package2", apiAssets2).Return(nil)
 		rafterServiceMock.On("Delete", "package3").Return(nil)
 		rafterServiceMock.On("Delete", "package4").Return(nil)
+		rafterServiceMock.On("Delete", "package5").Return(nil)
 
-		credentialsServiceMock.
-			On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1).Return(applications.Credentials{}, nil)
-		requestParametersServiceMock.
-			On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1.RequestParameters).Return("", nil)
-
-		credentialsServiceMock.
-			On("Delete", "name1-package2").Return(nil).
-			On("Delete", "name1-package3").Return(nil)
-
-		requestParametersServiceMock.
-			On("Delete", "params-name1-package2").Return(nil).
-			On("Delete", "params-name1-package3").Return(nil)
-
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Delete", "name1-package2").Return(nil)
 		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", credentialsPackage3).Return(applications.Credentials{}, nil)
-		requestParametersServiceMock.
-			On("Upsert", "name1", newRuntimeApplication.UID, "package3", credentialsPackage3.RequestParameters).Return("", nil)
+		credentialsServiceMock.On("Delete", "name1-package5").Return(nil)
+
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Delete", "params-name1-package2").Return(nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", credentialsPackage3.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Delete", "params-name1-package5").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -395,6 +390,50 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		rafterServiceMock.On("Delete", "package1").Return(nil)
+
+		expectedResult := []Result{
+			{
+				ApplicationName: "name1",
+				ApplicationID:   "",
+				Operation:       Delete,
+				Error:           nil,
+			},
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		result, err := kymaService.Apply([]model.Application{})
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, expectedResult, result)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		rafterServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should apply Delete operation and delete credentials", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Repository{}
+		converterMock := &appMocks.Converter{}
+		rafterServiceMock := &rafterMocks.Service{}
+		credentialsServiceMock := &appSecrets.CredentialsService{}
+		requestParametersServiceMock := &appSecrets.RequestParametersService{}
+
+		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntryWithBasic("API1", "package1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{
+				runtimeApplicationToDelete,
+			},
+		}
+
+		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+		rafterServiceMock.On("Delete", "package1").Return(nil)
+		credentialsServiceMock.On("Delete", "name1-package1").Return(nil)
+		requestParametersServiceMock.On("Delete", "params-name1-package1").Return(nil)
 
 		expectedResult := []Result{
 			{
