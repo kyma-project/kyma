@@ -1,6 +1,6 @@
 
 const k8s = require("@kubernetes/client-node");
-const { k8sApply, waitForFunction, waitForSubscription, sleep, retryPromise } = require("../utils")
+const { k8sApply, waitForFunction, waitForSubscription, genRandom, retryPromise, deleteNamespaces } = require("../utils")
 const fs = require('fs')
 const path = require('path');
 const axios = require("axios");
@@ -19,6 +19,7 @@ const lastorderFunctionYaml = fs.readFileSync(
 );
 
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
+const testNamespace = "test";
 
 
 function eventingSubscription(eventType, sink, name, ns) {
@@ -54,27 +55,28 @@ function eventingSubscription(eventType, sink, name, ns) {
 
 describe("In-cluster eventing with functions", function () {
   this.timeout(60 * 1000);
+
   it("function should be ready", async function () {
     await k8sApply([{
       apiVersion: "v1",
       kind: "Namespace",
-      metadata: { name: "test" }
-    }]);
-    await k8sApply(lastorderObjs, 'test', true);
-    await waitForFunction("lastorder", "test");
+      metadata: { name: testNamespace }
+    }]);    
+    await k8sApply(lastorderObjs, testNamespace, true);
+    await waitForFunction("lastorder", testNamespace);
   });
 
   it("In-cluster event subscription should be ready", async function () {
     await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,
-      `http://lastorder.test.svc.cluster.local`,
+      `http://lastorder.${testNamespace}.svc.cluster.local`,
       "lastorder",
-      "test")]);
-    await waitForSubscription("lastorder", "test");
+      testNamespace)]);
+    await waitForSubscription("lastorder", testNamespace);
   });
 
   it("in-cluster event should be delivered", async function () {
-    const eventId = "testeventid123";
+    const eventId = "event-"+genRandom(5);
     let response = await retryPromise(() => axios.post("https://lastorder.local.kyma.dev", { id: eventId }, {params:{send:true}}), 10, 1)
     response = await axios.get("https://lastorder.local.kyma.dev", { params: { inappevent: eventId } });
     console.dir(response.data);
@@ -82,5 +84,9 @@ describe("In-cluster eventing with functions", function () {
     expect(response).to.have.nested.property("data.shipped", true, "Order should have property shipped");
 
   });
+
+  it("should clean up resources", function() {
+    deleteNamespaces([testNamespace], true);
+  })
 
 });

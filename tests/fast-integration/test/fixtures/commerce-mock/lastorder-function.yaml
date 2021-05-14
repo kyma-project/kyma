@@ -61,7 +61,7 @@ spec:
         if (event.extensions.request.query.send) {
           try {
             const response = await sendEvent("sap.kyma.custom.inapp.order.received.v1", event.data);
-            console.log("Message sent");
+            console.log("In-app message sent");
           } catch (e) {
             console.dir(e)
           }
