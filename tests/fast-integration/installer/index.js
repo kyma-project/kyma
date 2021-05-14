@@ -437,19 +437,17 @@ async function installKyma(options) {
       const chartLocation = !!customPath
         ? customPath(installLocation)
         : join(installLocation, release);
-
-      return installFn(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade)
-      // return pRetry(
-      //   async () =>
-      //     installFn(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
-      //   {
-      //     retries: 10,
-      //     onFailedAttempt: async (err) => {
-      //       console.log(`retrying install of ${release}`);
-      //       console.log(err);
-      //     },
-      //   }
-      // );
+      return pRetry(
+        async () =>
+          installFn(release, namespace, chartLocation, values, profile || "evaluation", isUpgrade),
+        {
+          retries: 10,
+          onFailedAttempt: async (err) => {
+            console.log(`retrying install of ${release}`);
+            console.log(err);
+          },
+        }
+      );
     })
   );
   const crdsAfter = await getAllCRDs();
