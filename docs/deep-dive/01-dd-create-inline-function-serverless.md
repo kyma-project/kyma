@@ -15,6 +15,66 @@ Follows these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
+  <summary label="CLI">
+  kyma CLI
+  </summary>
+
+1.  Export these variables:
+
+    ```bash
+    export NAME={FUNCTION_NAME}
+    export NAMESPACE={FUNCTION_NAMESPACE}
+    ```
+
+2.  Create a local development workspace
+
+    Create a new folder to keep function's code and configuration in one place.
+
+    ```bash
+    mkdir my-function // Call it whatever you want
+    cd my-function
+    ```
+
+    Create an inital scaffolding using dedicated CLI command.
+
+    ```bash
+    kyma init function --name $NAME --namespace $NAMESPACE
+    ```
+
+    Open
+
+3.  Code & configure.
+
+    Open the workspace in your favorite IDE. If you have VS Code installed just call the following from the terminal in your workspace folder
+
+    ```bash
+    code .
+    ```
+
+    Its time to inspect the code & config.yaml. Feel free to adjust the "hello world" sample code
+
+4.  Deploy
+
+    Call the apply command from the workspace folder. It will build the container and run it on the kyma runtime pointed by your current kubeconfig.
+
+    ```bash
+    kyma apply function
+    ```
+
+    Check if your Function was created successfully
+
+    ```bash
+    kubectl get functions $NAME -n $NAMESPACE
+    ```
+
+    You should get a result similar to the following example:
+
+    ```bash
+    NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
+    test-function   True         True      True      nodejs12   1         96s
+    ```
+
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>
@@ -65,15 +125,15 @@ Follows these steps:
     Console UI
     </summary>
 
-1. From the drop-down list in the top navigation panel, create a Namespace or select one.
+4.  From the drop-down list in the top navigation panel, create a Namespace or select one.
 
-2.  In the left navigation panel, go to **Workloads** > **Functions** and select **Create Function**.
+5.  In the left navigation panel, go to **Workloads** > **Functions** and select **Create Function**.
 
-3.  In the pop-up box, provide the Function's name, leave the default runtime `Node.js 12`, and select **Create** to confirm changes.
+6.  In the pop-up box, provide the Function's name, leave the default runtime `Node.js 12`, and select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created successfully.
 
-4.  In the Function details view that opens up automatically, enter the Function's code in the **Source** tab:
+7.  In the Function details view that opens up automatically, enter the Function's code in the **Source** tab:
 
     ```
     module.exports = {
@@ -83,7 +143,7 @@ Follows these steps:
     }
     ```
 
-5.  Select **Save** to confirm changes.
+8.  Select **Save** to confirm changes.
 
     You will see the message confirming the changes were saved. Once deployed, the new Function should have the `RUNNING` status in the list of all Functions under the **Functions** view.
 
