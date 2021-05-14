@@ -42,14 +42,16 @@ const (
 	AppLabelKey         = "app.kubernetes.io/name"
 	AppLabelValue       = PublisherName
 
-	TokenEndpointFormat = "%s?grant_type=%s&response_type=token"
-	NamespacePrefix     = "/"
-	BEBPublishEndpoint  = "/sap/ems/v1/events"
+	TokenEndpointFormat             = "%s?grant_type=%s&response_type=token"
+	NamespacePrefix                 = "/"
+	BEBPublishEndpointForSubscriber = "/sap/ems/v1"
+	BEBPublishEndpointForPublisher  = "/sap/ems/v1/events"
 
 	PublisherSecretClientIDKey      = "client-id"
 	PublisherSecretClientSecretKey  = "client-secret"
 	PublisherSecretTokenEndpointKey = "token-endpoint"
-	PublisherSecretEMSEndpointKey   = "ems-publish-url"
+	PublisherSecretEMSURLKey        = "ems-publish-url"
+	PublisherSecretEMSHostKey       = "ems-publish-host"
 	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 )
 
@@ -253,27 +255,27 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 }
 
 func setUpEnvironmentForBEBController(secret *v1.Secret) error {
-	err := os.Setenv("BEB_API_URL", fmt.Sprintf("%s%s", string(secret.Data["ems-publish-url"]), BEBPublishEndpoint))
+	err := os.Setenv("BEB_API_URL", fmt.Sprintf("%s%s", string(secret.Data[PublisherSecretEMSHostKey]), BEBPublishEndpointForSubscriber))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set BEB_API_URL env var")
 	}
 
-	err = os.Setenv("CLIENT_ID", string(secret.Data["client-id"]))
+	err = os.Setenv("CLIENT_ID", string(secret.Data[PublisherSecretClientIDKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set CLIENT_ID env var")
 	}
 
-	err = os.Setenv("CLIENT_SECRET", string(secret.Data["client-secret"]))
+	err = os.Setenv("CLIENT_SECRET", string(secret.Data[PublisherSecretClientSecretKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set CLIENT_SECRET env var")
 	}
 
-	err = os.Setenv("TOKEN_ENDPOINT", string(secret.Data["token-endpoint"]))
+	err = os.Setenv("TOKEN_ENDPOINT", string(secret.Data[PublisherSecretTokenEndpointKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set TOKEN_ENDPOINT env var")
 	}
 
-	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data["beb-namespace"])))
+	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data[PublisherSecretBEBNamespaceKey])))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set BEB_NAMESPACE env var")
 	}
@@ -512,7 +514,8 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 		PublisherSecretClientIDKey:      clientID,
 		PublisherSecretClientSecretKey:  clientSecret,
 		PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
-		PublisherSecretEMSEndpointKey:   publishURL,
+		PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, BEBPublishEndpointForPublisher),
+		PublisherSecretEMSHostKey:       fmt.Sprintf("%s", publishURL),
 		PublisherSecretBEBNamespaceKey:  namespace,
 	}
 }

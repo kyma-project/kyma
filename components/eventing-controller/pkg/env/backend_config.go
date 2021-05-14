@@ -8,7 +8,7 @@ import (
 
 // BackendConfig represents the environment config for the Backend Controller.
 type BackendConfig struct {
-	PublisherImage          string `envconfig:"PUBLISHER_IMAGE" default:"eu.gcr.io/kyma-project/event-publisher-proxy:88360eed"`
+	PublisherImage          string `envconfig:"PUBLISHER_IMAGE" default:"eu.gcr.io/kyma-project/event-publisher-proxy:c06eb4fc"`
 	PublisherPortNum        int    `envconfig:"PUBLISHER_PORT_NUM" default:"8080"`
 	PublisherMetricsPortNum int    `envconfig:"PUBLISHER_METRICS_PORT_NUM" default:"8080"`
 	PublisherServiceAccount string `envconfig:"PUBLISHER_SERVICE_ACCOUNT" default:"eventing-event-publisher-nats"`

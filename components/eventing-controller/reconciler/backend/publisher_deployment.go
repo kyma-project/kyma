@@ -175,7 +175,7 @@ func getBEBEnvVars() []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  "client-id",
+					Key:                  PublisherSecretClientIDKey,
 				}},
 		},
 		{
@@ -183,7 +183,7 @@ func getBEBEnvVars() []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  "client-secret",
+					Key:                  PublisherSecretClientSecretKey,
 				}},
 		},
 		{
@@ -191,7 +191,7 @@ func getBEBEnvVars() []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  "token-endpoint",
+					Key:                  PublisherSecretTokenEndpointKey,
 				}},
 		},
 		{
@@ -199,7 +199,7 @@ func getBEBEnvVars() []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  "ems-publish-url",
+					Key:                  PublisherSecretEMSURLKey,
 				}},
 		},
 		{
@@ -207,7 +207,7 @@ func getBEBEnvVars() []v1.EnvVar {
 			ValueFrom: &v1.EnvVarSource{
 				SecretKeyRef: &v1.SecretKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: PublisherName},
-					Key:                  "beb-namespace",
+					Key:                  PublisherSecretBEBNamespaceKey,
 				}},
 		},
 		{

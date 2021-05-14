@@ -72,6 +72,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
 	bebHandler := &handlers.Beb{Log: log}
 	bebHandler.Initialize(cfg)
+
 	return &Reconciler{
 		ctx:              ctx,
 		Client:           client,
