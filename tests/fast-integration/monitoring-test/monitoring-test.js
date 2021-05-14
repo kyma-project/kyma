@@ -12,7 +12,8 @@ const {
 } = require("../utils");
 
 const {
-  shouldIgnoreTarget
+  shouldIgnoreTarget,
+  shouldIgnoreAlert,
 } = require('../monitoring/helpers')
 
 var cancelPortForward;
@@ -43,7 +44,16 @@ describe("Monitoring test", function () {
     let responseBody = response.data;
     let activeTargets = responseBody.data.activeTargets;
     for (const target of activeTargets.filter(t => !shouldIgnoreTarget(t))) {
-      assert.equal(target.health, "up")
+      assert.equal(target.health, "up");
+    }
+  });
+
+  it("Should have no firing critical alerts", async () => {
+    let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/alerts`);
+    let responseBody = response.data;
+    let alerts = responseBody.data.alerts;
+    for (const alert of alerts.filter(a => !shouldIgnoreAlert(a))) {
+      assert.notEqual(alert.state, "firing", `Alert ${alert.labels.alertname} is firing`);
     }
     console.log();
   });
