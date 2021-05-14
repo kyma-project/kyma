@@ -27,7 +27,8 @@ const {
   debug,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway
+  patchApplicationGateway,
+  eventingSubscription
 } = require("../../../utils");
 
 const {
@@ -80,36 +81,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
 }
 
 
-function eventingSubscription(eventType, sink, fnName, ns) {
-  return {
-    apiVersion: "eventing.kyma-project.io/v1alpha1",
-    kind: "Subscription",
-    metadata: {
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      filter: {
-        dialect: "beb",
-        filters: [{
-          eventSource: {
-            property: "source", type: "exact", value: "",
-          },
-          eventType: {
-            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          } 
-        }]
-      },
-      protocol: "BEB",
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: "AT-LEAST-ONCE",
-      },
-      sink: sink/*http://lastorder.test.svc.cluster.local*/
-    }
-  }
-}
-
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
@@ -161,6 +132,7 @@ async function sendEventAndCheckResponse() {
       return axios
         .get(`https://lastorder.${host}`, { timeout: 5000 })
         .then((res) => {
+          console.dir(res.data);
           expect(res.data).to.have.nested.property("event.data.orderCode", "567");
           // See: https://github.com/kyma-project/kyma/issues/10720
           expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created");
@@ -381,7 +353,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      "lastorder",
+      "order-created",
       targetNamespace)
   ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);

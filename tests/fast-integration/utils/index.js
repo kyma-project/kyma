@@ -814,6 +814,45 @@ async function patchApplicationGateway(name, ns) {
   return patchedDeployment;
 }
 
+/**
+ * Creates eventing subscription object that can be passed to the k8s API server
+ * @param {string} eventType - full event type, e.g. sap.kyma.custom.commerce.order.created.v1
+ * @param {string} sink URL where message should be dispatched eg. http://lastorder.test.svc.cluster.local
+ * @param {string} name - subscription name
+ * @param {string} namespace - namespace where subscription should be created
+ * @returns JSON with subscription spec
+ */
+ function eventingSubscription(eventType, sink, name, namespace) {
+  return {
+    apiVersion: "eventing.kyma-project.io/v1alpha1",
+    kind: "Subscription",
+    metadata: {
+      name: `${name}`,
+      namespace: namespace,
+    },
+    spec: {
+      filter: {
+        dialect: "beb",
+        filters: [{
+          eventSource: {
+            property: "source", type: "exact", value: "",
+          },
+          eventType: {
+            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
+          } 
+        }]
+      },
+      protocol: "BEB",
+      protocolsettings: {
+        exemptHandshake: true,
+        qos: "AT-LEAST-ONCE",
+      },
+      sink: sink/*http://lastorder.test.svc.cluster.local*/
+    }
+  }
+}
+
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -858,5 +897,6 @@ module.exports = {
   wait,
   ensureApplicationMapping,
   patchApplicationGateway,
+  eventingSubscription
 };
 

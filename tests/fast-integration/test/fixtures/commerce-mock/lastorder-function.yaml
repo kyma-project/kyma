@@ -34,7 +34,6 @@ spec:
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
         return e.response.data;
       })
-      dump(response);
       return response.data;
     }
     function cloudEventHeaders(event) {
@@ -67,14 +66,15 @@ spec:
           }
         } else if (event.extensions.request.query.inappevent) {
           return inAppEvent[event.extensions.request.query.inappevent];  
-        } else if (event["ce-type"] && event["ce-type"].includes("inapp.order.received.v1")){
-          console.log("Got in-app event:",event.data);
+        } else if (event["ce-type"] && event["ce-type"].includes("order.received")){
+          console.log("Got in-app event:", event.data);
           inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data };
-        } else if (event.data) {
+        } else if (event["ce-type"] && event["ce-type"].includes("order.created")) {
+          console.log("Order created event:", event.data)
           lastEvent = { ...cloudEventHeaders(event), data: event.data };
-          if (event.data.orderCode) {
+        }
+        if (event.data && event.data.orderCode) {
             lastOrder = await getOrder(event.data.orderCode);
-          }
         }
         return {order:lastOrder, event:lastEvent};
       }
