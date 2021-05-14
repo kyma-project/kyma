@@ -11,12 +11,12 @@ This tutorial shows how you can create a simple "Hello World!" Function in Node.
 
 ## Steps
 
-Follows these steps:
+Follow these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
   <summary label="CLI">
-  kyma CLI
+  Kyma CLI
   </summary>
 
 1.  Export these variables:
@@ -26,44 +26,44 @@ Follows these steps:
     export NAMESPACE={FUNCTION_NAMESPACE}
     ```
 
-2.  Create a local development workspace
+2.  Create your local development workspace.
 
-    Create a new folder to keep function's code and configuration in one place.
+    a. Create a new folder to keep Function's code and configuration in one place.
 
     ```bash
-    mkdir my-function // Call it whatever you want
+    mkdir {FOLDER_NAME}
     cd my-function
     ```
 
-    Create an inital scaffolding using dedicated CLI command.
+    b. Create initial scaffolding for the Function using the dedicated CLI command.
 
     ```bash
     kyma init function --name $NAME --namespace $NAMESPACE
     ```
 
-3.  Code & Configure.
+3.  Code and configure.
 
-    Open the workspace in your favorite IDE. If you have VS Code installed just call the following from the terminal in your workspace folder
+    Open the workspace in your favorite IDE. If you have Visual Stdio Code installed, run the following command from the terminal in your workspace folder:
 
     ```bash
     code .
     ```
 
-    Its time to inspect the code & config.yaml. Feel free to adjust the "hello world" sample code
+    It's time to inspect the code and the `config.yaml` file. Feel free to adjust the "Hello World" sample code.
 
-4.  Deploy & Verify
+4.  Deploy and verify.
 
-    Call the apply command from the workspace folder. It will build the container and run it on the kyma runtime pointed by your current kubeconfig.
+    a. Call the `apply` command from the workspace folder. It will build the container and run it on the Kyma runtime pointed by your current KUBECONFIG file.
 
-    ```bash
-    kyma apply function
-    ```
+      ```bash
+      kyma apply function
+      ```
 
-    Check if your Function was created successfully
+    b. Check if your Function was created successfully.
 
-    ```bash
-    kubectl get functions $NAME -n $NAMESPACE
-    ```
+      ```bash
+      kubectl get functions $NAME -n $NAMESPACE
+      ```
 
     You should get a result similar to the following example:
 
@@ -72,6 +72,7 @@ Follows these steps:
     test-function   True         True      True      nodejs12   1         96s
     ```
 
+  </details>
   <details>
   <summary label="kubectl">
   kubectl
