@@ -1,6 +1,6 @@
 ---
-title: TBR Security Considerations
-type: Details
+title: Security Considerations
+type: Overview
 ---
 
 To eliminate potential security risks when using Functions, bear in mind these few facts:
