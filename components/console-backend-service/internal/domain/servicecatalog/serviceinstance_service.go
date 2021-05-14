@@ -1,6 +1,7 @@
 package servicecatalog
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -286,11 +287,11 @@ func (svc *serviceInstanceService) Create(params serviceInstanceCreateParameters
 		},
 	}
 
-	return svc.client.ServicecatalogV1beta1().ServiceInstances(params.Namespace).Create(&instance)
+	return svc.client.ServicecatalogV1beta1().ServiceInstances(params.Namespace).Create(context.Background(), &instance, v1.CreateOptions{})
 }
 
 func (svc *serviceInstanceService) Delete(name, namespace string) error {
-	return svc.client.ServicecatalogV1beta1().ServiceInstances(namespace).Delete(name, nil)
+	return svc.client.ServicecatalogV1beta1().ServiceInstances(namespace).Delete(context.Background(), name, v1.DeleteOptions{})
 }
 
 func (svc *serviceInstanceService) IsBindableWithClusterRefs(relatedClass *v1beta1.ClusterServiceClass, relatedPlan *v1beta1.ClusterServicePlan) bool {

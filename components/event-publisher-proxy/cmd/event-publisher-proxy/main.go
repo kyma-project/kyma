@@ -27,6 +27,9 @@ type Commander interface {
 
 	// Start runs the initialized commander instance.
 	Start() error
+
+	// Stop stops the commander instance.
+	Stop() error
 }
 
 func main() {

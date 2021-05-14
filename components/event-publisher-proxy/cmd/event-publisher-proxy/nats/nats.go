@@ -1,6 +1,8 @@
 package nats
 
 import (
+	"context"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
@@ -22,6 +24,7 @@ import (
 
 // Commander implements the Commander interface.
 type Commander struct {
+	cancel           context.CancelFunc
 	metricsCollector *metrics.Collector
 	logger           *logrus.Logger
 	envCfg           *env.NatsConfig
@@ -52,7 +55,8 @@ func (c *Commander) Start() error {
 	c.logger.Infof("Starting Event Publisher to NATS, envCfg: %v; opts: %#v", c.envCfg.String(), c.opts)
 
 	// assure uniqueness
-	ctx := signals.NewContext()
+	var ctx context.Context
+	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
 	// configure message receiver
 	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)
@@ -105,5 +109,11 @@ func (c *Commander) Start() error {
 
 	c.logger.Info("Event Publisher NATS shutdown")
 
+	return nil
+}
+
+// Stop implements the Commander interface and stops the publisher.
+func (c *Commander) Stop() error {
+	c.cancel()
 	return nil
 }

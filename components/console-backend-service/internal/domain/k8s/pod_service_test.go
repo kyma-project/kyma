@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -217,7 +218,7 @@ func TestPodService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, pod)
 	})
@@ -238,7 +239,7 @@ func TestPodService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.Error(t, err)
 		assert.Nil(t, pod)
 	})
@@ -261,7 +262,7 @@ func TestPodService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, examplePod, pod)
 	})
@@ -284,7 +285,7 @@ func TestPodService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, examplePod, pod)
 	})
@@ -305,7 +306,7 @@ func TestPodService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, examplePod, pod)
 	})
@@ -331,7 +332,7 @@ func TestPodService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, examplePod, pod)
 	})
@@ -353,7 +354,7 @@ func TestPodService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, pod)
 
-		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		pod, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, pod)
 	})
@@ -370,7 +371,7 @@ func TestPodService_Delete(t *testing.T) {
 		err := svc.Delete(exampleName, exampleNamespace)
 
 		require.NoError(t, err)
-		_, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		_, err = client.Pods(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		assert.True(t, errors.IsNotFound(err))
 	})
 }

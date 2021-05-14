@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -113,7 +114,7 @@ func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, s
 		Version:  uk.Spec.Resource.Version,
 		Group:    uk.Spec.Resource.Group,
 		Resource: strings.ToLower(uk.Spec.Resource.Kind) + "s",
-	}).Namespace(namespace).List(v1.ListOptions{})
+	}).Namespace(namespace).List(context.Background(), v1.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "while listing target resources")
 	}

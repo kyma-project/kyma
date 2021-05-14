@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219 as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20210402-70b4b74f as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/console-backend-service
 ENV GO111MODULE on

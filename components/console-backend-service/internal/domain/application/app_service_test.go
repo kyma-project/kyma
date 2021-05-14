@@ -1,6 +1,7 @@
 package application_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -319,7 +320,7 @@ func TestApplicationService_Delete(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	_, err = aCli.Get(fixName, v1.GetOptions{})
+	_, err = aCli.Get(context.Background(), fixName, v1.GetOptions{})
 	assert.True(t, apiErrors.IsNotFound(err))
 }
 

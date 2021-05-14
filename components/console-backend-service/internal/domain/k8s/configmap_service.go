@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
@@ -76,7 +77,7 @@ func (svc *configMapService) Update(name, namespace string, update v1.ConfigMap)
 		return nil, err
 	}
 
-	updated, err := svc.client.ConfigMaps(namespace).Update(&update)
+	updated, err := svc.client.ConfigMaps(namespace).Update(context.Background(), &update, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (svc *configMapService) Update(name, namespace string, update v1.ConfigMap)
 }
 
 func (svc *configMapService) Delete(name, namespace string) error {
-	return svc.client.ConfigMaps(namespace).Delete(name, nil)
+	return svc.client.ConfigMaps(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *configMapService) Subscribe(listener resource.Listener) {
