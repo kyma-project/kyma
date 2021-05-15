@@ -210,7 +210,7 @@ func UpdateSubscription(ctx context.Context, dClient dynamic.Interface, sub *eve
 	_, err = dClient.
 		Resource(GroupVersionResource()).
 		Namespace(sub.Namespace).
-		Update(ctx, unstructuredObj, metav1.UpdateOptions{})
+		UpdateStatus(ctx, unstructuredObj, metav1.UpdateOptions{})
 
 	return err
 }

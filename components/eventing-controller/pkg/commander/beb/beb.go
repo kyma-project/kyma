@@ -135,7 +135,9 @@ func (c *Commander) cleanup() error {
 		}
 		if apiRule != "" {
 			err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).Delete(ctx, apiRule, metav1.DeleteOptions{})
-			apiRuleDeletionResult[keyAPIRule.String()] = err
+			if err != nil {
+				apiRuleDeletionResult[keyAPIRule.String()] = err
+			}
 		}
 
 		// Clean statuses.
@@ -155,5 +157,24 @@ func (c *Commander) cleanup() error {
 			subDeletionResult[key.String()] = err
 		}
 	}
+
+	if len(apiRuleDeletionResult) == 0 {
+		logger.Info("Deletion of APIRules succeeded")
+	} else {
+		logger.Info("Deletion of APIRules failed: %+v", apiRuleDeletionResult)
+	}
+
+	if len(subDeletionResult) == 0 {
+		logger.Info("Deletion of Subscriptions in BEB succeeded")
+	} else {
+		logger.Info("Deletion of Subscriptions in BEB failed: %+v", subDeletionResult)
+	}
+
+	if len(statusDeletionResult) == 0 {
+		logger.Info("Deletion of Statuses in Subscriptions succeeded")
+	} else {
+		logger.Info("Deletion of Statuses in Subscriptions failed: %+v", statusDeletionResult)
+	}
+
 	return nil
 }
