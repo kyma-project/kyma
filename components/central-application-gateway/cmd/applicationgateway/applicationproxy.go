@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -52,15 +53,16 @@ func main() {
 	)
 	if err != nil {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
+		os.Exit(1)
 	}
 
-	internalHandlerForOS := newInternalHandler(serviceDefinitionService, options, false)
-	internalHandlerForMPS := newInternalHandler(serviceDefinitionService, options, true)
+	internalHandlerForOS := newInternalHandler(serviceDefinitionService, options)
+	internalHandlerForCompass := newInternalHandlerForCompass(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
 		internalHandlerForOS = httptools.RequestLogger("Internal handler: ", internalHandlerForOS)
-		internalHandlerForMPS = httptools.RequestLogger("Internal handler: ", internalHandlerForMPS)
+		internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 	}
 
@@ -71,21 +73,21 @@ func main() {
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	internalSrvKymaOS := &http.Server{
+	internalSrv := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.proxyOSPort),
 		Handler:      internalHandlerForOS,
 		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	internalSrvKymaMPS := &http.Server{
+	internalSrvCompass := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.proxyMPSPort),
-		Handler:      internalHandlerForMPS,
+		Handler:      internalHandlerForCompass,
 		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-
+	// TODO: handle case when server fails
 	wg := &sync.WaitGroup{}
 
 	wg.Add(2)
@@ -94,34 +96,38 @@ func main() {
 	}()
 
 	go func() {
-		log.Info(internalSrvKymaOS.ListenAndServe())
+		log.Info(internalSrv.ListenAndServe())
 	}()
 
 	go func() {
-		log.Info(internalSrvKymaMPS.ListenAndServe())
+		log.Info(internalSrvCompass.ListenAndServe())
 	}()
 
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options, managementPlaneMode bool) http.Handler {
-	if serviceDefinitionService != nil {
-		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
-		csrfCl := newCSRFClient(options.proxyTimeout)
-		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
+	csrfCl := newCSRFClient(options.proxyTimeout)
+	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
 
-		proxyConfig := proxy.Config{
-			SkipVerify:          options.skipVerify,
-			ProxyTimeout:        options.proxyTimeout,
-			ProxyCacheTTL:       options.proxyCacheTTL,
-			ManagementPlaneMode: managementPlaneMode,
-		}
+	return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
+}
 
-		proxyHandler := proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
+func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
+	authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
+	csrfCl := newCSRFClient(options.proxyTimeout)
+	csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
 
-		return proxyHandler
+	return proxy.NewForCompass(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, getProxyConfig(options))
+}
+
+func getProxyConfig(options *options) proxy.Config {
+	return proxy.Config{
+		SkipVerify:    options.skipVerify,
+		ProxyTimeout:  options.proxyTimeout,
+		ProxyCacheTTL: options.proxyCacheTTL,
 	}
-	return proxy.NewInvalidStateHandler("Application Gateway is not initialized properly")
 }
 
 func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.StrategyFactory {
@@ -130,7 +136,6 @@ func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.Stra
 	})
 }
 
-// TU PISZEMY SECRETY I SERVICE API SERVICE
 func newServiceDefinitionService(k8sConfig *restclient.Config, coreClientset kubernetes.Interface, namespace string) (metadata.ServiceDefinitionService, error) {
 	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
 	if apperror != nil {
@@ -144,28 +149,6 @@ func newServiceDefinitionService(k8sConfig *restclient.Config, coreClientset kub
 	return metadata.NewServiceDefinitionService(serviceAPIService, applicationServiceRepository), nil
 }
 
-// dla OS application+
-/*
-Przyklad service:
-- description: Personalization Webservices v1
-    displayName: Personalization Webservices v1
-    entries:
-    - apiType: OPEN_API
-      credentials:
-        secretName: ""
-        type: ""
-      gatewayUrl: ""
-      id: e092d6fa-7fa5-44e1-b284-12b2d7a9f58d
-      name: Personalization Webservices v1
-      targetUrl: https://api.c7ozw1p74a-weuroeccc1-s5-public.model-t.myhybris.cloud/personalizationwebservices
-      type: API
-    id: 077d45d1-6539-483c-8e37-f272f039e94f
-    identifier: ""
-    name: personalization-webservices-v1-3b0c4  /personalization-webservices-v1/api-1/dest-path
-    providerDisplayName: ""
-*/
-
-// TU MAMY APKI
 func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
 	applicationClientset, err := versioned.NewForConfig(config)
 	if err != nil {
@@ -177,14 +160,12 @@ func newApplicationRepository(config *restclient.Config) (applications.ServiceRe
 	return applications.NewServiceRepository(rei), nil
 }
 
-// A TU SECRETY
 func newSecretsRepository(coreClientset kubernetes.Interface, namespace string) secrets.Repository {
 	sei := coreClientset.CoreV1().Secrets(namespace)
 
 	return secrets.NewRepository(sei)
 }
 
-// A TU CACHE TOKENÓW
 func newCSRFClient(timeout int) csrf.Client {
 	cache := csrfClient.NewTokenCache()
 	client := &http.Client{}

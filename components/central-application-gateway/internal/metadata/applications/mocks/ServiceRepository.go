@@ -11,7 +11,7 @@ type ServiceRepository struct {
 	mock.Mock
 }
 
-// GetFromEntry provides a mock function with given fields: appName, serviceName, entryName
+// GetByEntryName provides a mock function with given fields: appName, serviceName, entryName
 func (_m *ServiceRepository) GetFromEntry(appName string, serviceName string, entryName string) (applications.Service, apperrors.AppError) {
 	ret := _m.Called(appName, serviceName, entryName)
 
@@ -34,7 +34,7 @@ func (_m *ServiceRepository) GetFromEntry(appName string, serviceName string, en
 	return r0, r1
 }
 
-// GetFromService provides a mock function with given fields: appName, serviceName, apiName
+// GetByServiceName provides a mock function with given fields: appName, serviceName, apiName
 func (_m *ServiceRepository) GetFromService(appName string, serviceName string, apiName string) (applications.Service, apperrors.AppError) {
 	ret := _m.Called(appName, serviceName, apiName)
 

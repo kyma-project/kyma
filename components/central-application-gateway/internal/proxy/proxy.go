@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -17,25 +17,24 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/httperrors"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 )
 
 type proxy struct {
-	serviceDefService            metadata.ServiceDefinitionService
 	cache                        Cache
 	skipVerify                   bool
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
 	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
-	splitPathFunc                func(string) (string, string, string, string)
+	extractPathFunc              pathExtractorFunc
+	apiExtractor                 APIExtractor
 }
 
-// Handler serves as a Reverse Proxy
-type Handler interface {
-	ServeHTTP(w http.ResponseWriter, r *http.Request)
+//go:generate mockery --name=APIExtractor
+type APIExtractor interface {
+	Get(identifier model.APIIdentifier) (*model.API, apperrors.AppError)
 }
 
 // Config stores Proxy config
@@ -47,45 +46,16 @@ type Config struct {
 	ManagementPlaneMode bool
 }
 
-// New creates proxy for handling user's services calls
-func New(
-	serviceDefService metadata.ServiceDefinitionService,
-	authorizationStrategyFactory authorization.StrategyFactory,
-	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
-	config Config) Handler {
-
-	splitPathFunc := extractAppInfoForKymaOS
-
-	if config.ManagementPlaneMode == true {
-		splitPathFunc = extractAppInfoForKymaMPS
-	}
-
-	return &proxy{
-		serviceDefService:            serviceDefService,
-		cache:                        NewCache(config.ProxyCacheTTL),
-		skipVerify:                   config.SkipVerify,
-		proxyTimeout:                 config.ProxyTimeout,
-		authorizationStrategyFactory: authorizationStrategyFactory,
-		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
-		splitPathFunc:                splitPathFunc,
-	}
-}
-
-// NewInvalidStateHandler creates handler always returning 500 response
-func NewInvalidStateHandler(message string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handleErrors(w, apperrors.Internal(message))
-	})
-}
-
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//old code appName, id, path := extractAppInfo(r.URL.Path)
-
-	appName, serviceName, apiName, path := p.splitPathFunc(r.URL.Path)
+	apiIdentifier, path, err := p.extractPath(r.URL.Path)
+	if err != nil {
+		handleErrors(w, err)
+		return
+	}
 
 	r.URL.Path = path
 
-	cacheEntry, err := p.getOrCreateCacheEntry(appName, serviceName, apiName)
+	cacheEntry, err := p.getOrCreateCacheEntry(apiIdentifier)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -100,7 +70,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, appName, serviceName, apiName, cacheEntry, p.createCacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, apiIdentifier, cacheEntry, p.createCacheEntry); err != nil {
 		handleErrors(w, err)
 		return
 	}
@@ -108,23 +78,32 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-func (p *proxy) getOrCreateCacheEntry(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
-	cacheObj, found := p.cache.Get(appName, serviceName, apiName)
+func (p *proxy) extractPath(path string) (model.APIIdentifier, string, apperrors.AppError) {
+	apiIdentifier, path, err := p.extractPathFunc(path)
+	if err != nil {
+		return model.APIIdentifier{}, "", apperrors.Internal("failed to extract API Identifier from path")
+	}
+
+	return apiIdentifier, path, nil
+}
+
+func (p *proxy) getOrCreateCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
+	cacheObj, found := p.cache.Get(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry)
 
 	if found {
 		return cacheObj, nil
 	}
 
-	return p.createCacheEntry(appName, serviceName, apiName)
+	return p.createCacheEntry(apiIdentifier)
 }
 
-func (p *proxy) createCacheEntry(appName, serviceName, apiName string) (*CacheEntry, apperrors.AppError) {
-	serviceAPI, err := p.serviceDefService.GetAPI(appName, serviceName, apiName)
+func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry, apperrors.AppError) {
+	serviceAPI, err := p.apiExtractor.Get(apiIdentifier)
 	if err != nil {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, serviceName, p.skipVerify)
+	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier.Service, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +111,7 @@ func (p *proxy) createCacheEntry(appName, serviceName, apiName string) (*CacheEn
 	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
 
-	return p.cache.Put(appName, serviceName, apiName, proxy, authorizationStrategy, csrfTokenStrategy), nil
+	return p.cache.Put(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
@@ -173,7 +152,7 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, appName, serviceName, apiName string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
+func (p *proxy) addModifyResponseHandler(r *http.Request, apiIdentifier model.APIIdentifier, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	secondRequestBody, err := copyRequestBody(r)
 	if err != nil {
@@ -181,7 +160,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, appName, serviceName, 
 	}
 
 	modifyResponseFunction := func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(appName, serviceName, apiName, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
+		retrier := newUnauthorizedResponseRetrier(apiIdentifier, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
 
@@ -234,77 +213,3 @@ func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorRespo
 
 	json.NewEncoder(w).Encode(body)
 }
-
-func extractAppInfo(path string) (appName, serviceID, finalPath string) {
-	split := strings.Split(path, "/")
-	appName = split[1]
-	serviceID = split[2]
-	return string(appName), string(serviceID), strings.Join(split[3:], "/")
-}
-
-// {SERVICE-NAME} OS
-// {BUNDLE-NAME}/{API-NAME} SKR
-//
-//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
-//- `{APP-NAME}/{BUNDLE-NAME}/{API-NAME}/{TARGET-PATH}`
-//               service-name/ entry / path
-
-//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
-//- `{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}`
-
-// W OS bierzemy pierwszy entry
-// W SKR by wyszukać entry musimy użyć nazwy apiName jako klucza
-
-//{APP-NAME}/{SERVICE-NAME}/{ENTRY-NAME}/{TARGET-PATH}
-func extractAppInfoForKymaMPS(path string) (appName, serviceName, apiName, finalPath string) {
-	split := strings.Split(path, "/")
-
-	appName = split[1]
-	serviceName = split[2]
-	apiName = split[3]
-	return string(appName), string(serviceName), string(apiName), strings.Join(split[4:], "/")
-}
-
-//{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
-func extractAppInfoForKymaOS(path string) (appName, serviceName, apiName, finalPath string) {
-	split := strings.Split(path, "/")
-
-	appName = split[1]
-	serviceName = split[2]
-	return string(appName), string(serviceName), string(""), strings.Join(split[3:], "/")
-}
-
-
-
-// Service represents part of the remote environment, which is mapped 1 to 1 in the service-catalog to:
-// - service class in V1
-// - service plans in V2 (since api-packages support)
-
-//SKR
-//service     apiBundle  (apiPackage)
-//  entry1      apiDefinition
-//  entry2      apiDefinition
-//  entry3      apiDefinition
-
-// Kyma OS
-// serviceName - wcześniej było sobie serviceID to będzie nasze API name
-
-//service     (apiPackage)
-//  entry1      apiDefinition
-
-//service2
-//  entry1      apiDefinition
-
-// W SKR Service reprzentuje bundle a entry reprezentuje API definition
-// W OS Entry jest target URL/ typ API i credentiale
-
-// application-gateway.kyma-integration/{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
-// there will be following URL {APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}
-//The API contains two endpoints:
-//- `{APP-NAME}/{SERVICE-NAME}/{TARGET-PATH}`
-//- `{APP-NAME}/{BUNDLE-NAME}/{API-NAME}/{TARGET-PATH}`
-
-//APP-NAME}/{SERVICE-ID}/{TARGET-PATH}
-
-// the Application Gateway caches the OAuth tokens and CSRF tokens it obtains.
-//If the service doesn't find valid tokens for the call it makes, it gets new tokens from the OAuth server and the CSRF token endpoint.

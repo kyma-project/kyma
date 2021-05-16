@@ -37,3 +37,10 @@ type Events struct {
 	// Spec contains data of events specification.
 	Spec []byte
 }
+
+// API key
+type APIIdentifier struct {
+	Application string
+	Service     string
+	Entry       string
+}

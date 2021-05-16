@@ -26,7 +26,7 @@ func TestGetServices(t *testing.T) {
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("production", "service-1", "api-1")
+		service, err := repository.GetByServiceName("production", "service-1")
 
 		// then
 		require.NotNil(t, service)
@@ -36,8 +36,7 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.DisplayName, "Orders API")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
 		assert.Equal(t, service.API, &applications.ServiceAPI{
-			GatewayURL: "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
-			TargetURL:  "https://192.168.1.2",
+			TargetURL: "https://192.168.1.2",
 			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "SecretName",
@@ -57,7 +56,7 @@ func TestGetServices(t *testing.T) {
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("production", "not-name", "api-1")
+		service, err := repository.GetByServiceName("production", "not-name")
 
 		// then
 		assert.Equal(t, applications.Service{}, service)
@@ -69,7 +68,7 @@ func createApplication(name string) *v1alpha1.Application {
 
 	reService1Entry := v1alpha1.Entry{
 		Type:        "API",
-		Name:        "api-1",
+		Name:        "service-1",
 		GatewayUrl:  "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 		AccessLabel: "access-label-1",
 		TargetUrl:   "https://192.168.1.2",
