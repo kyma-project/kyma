@@ -1,6 +1,6 @@
 ---
 title: Custom resources
-type: Technical reference
+type: Custom Resource
 ---
 
 Here's the list of Kyma custom resources (CRs):

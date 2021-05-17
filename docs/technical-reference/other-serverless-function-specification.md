@@ -1,6 +1,6 @@
 ---
 title: Function's specification
-type: DOther References
+type: Other References
 ---
 
 Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
