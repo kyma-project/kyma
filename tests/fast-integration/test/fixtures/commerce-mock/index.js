@@ -132,7 +132,6 @@ async function sendEventAndCheckResponse() {
       return axios
         .get(`https://lastorder.${host}`, { timeout: 5000 })
         .then((res) => {
-          console.dir(res.data);
           expect(res.data).to.have.nested.property("event.data.orderCode", "567");
           // See: https://github.com/kyma-project/kyma/issues/10720
           expect(res.data).to.have.nested.property("event.ce-type").that.contains("order.created");
