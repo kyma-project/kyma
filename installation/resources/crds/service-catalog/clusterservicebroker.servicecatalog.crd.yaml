@@ -22,6 +22,10 @@ spec:
       - name: Age
         type: date
         jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        description: Temp desc
+        type: object
     subresources:
       status: {}
   scope: Cluster
