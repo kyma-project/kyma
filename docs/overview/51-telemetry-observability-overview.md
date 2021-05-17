@@ -3,7 +3,7 @@ title: Telemetry and Observability
 type: Observability
 ---
 
-Out of the box, Kyma provides **telemetry** tools to collect and expose raw data, such as metrics, traces, and log data.
+Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data.
 
 Of course, you'll want to view and analyse the data you're collecting. This is where **observability** comes in. 
 
