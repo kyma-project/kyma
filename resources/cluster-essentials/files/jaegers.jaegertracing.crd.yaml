@@ -7,6 +7,15 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    description: Jaeger instance's status
+    name: Status
+    type: string
+  - JSONPath: .status.version
+    description: Jaeger Version
+    name: Version
+    type: string
   group: jaegertracing.io
   names:
     kind: Jaeger
@@ -14,18 +23,10 @@ spec:
     plural: jaegers
     singular: jaeger
   scope: Namespaced
+  subresources:
+    status: {}
+  version: v1
   versions:
     - name: v1
       served: true
       storage: true
-      additionalPrinterColumns:
-      - jsonPath: .status.phase
-        description: Jaeger instance's status
-        name: Status
-        type: string
-      - jsonPath: .status.version
-        description: Jaeger Version
-        name: Version
-        type: string
-      subresources:
-        status: {}
