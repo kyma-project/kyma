@@ -65,7 +65,7 @@ describe("Monitoring test", function () {
 
   it("Each scrape pool should have a healthy target", async () => {
     //TODO
-    let scrapePools = buildScrapePoolSet();
+    let scrapePools = await buildScrapePoolSet();
 
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
     let responseBody = response.data;
@@ -74,7 +74,7 @@ describe("Monitoring test", function () {
     for (const target of activeTargets) {
       scrapePools.delete(target.scrapePool);
     }
-    assert.isEmpty(scrapePools, `Following scrape pools have no targets: ${scrapePools.join(", ")}`)
+    assert.isEmpty(scrapePools, `Following scrape pools have no targets: ${scrapePools}`)
   });
 
   it("All rules should be healthy", async () => {

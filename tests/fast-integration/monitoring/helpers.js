@@ -64,7 +64,7 @@ function shouldIgnorePodMonitor(podMonitorName) {
     return podMonitorsToBeIgnored.includes(podMonitorName);
 }
 
-function buildScrapePoolSet() {
+async function buildScrapePoolSet() {
     let serviceMonitors = await getServiceMonitors();
     let podMonitors = await getPodMonitors();
 
