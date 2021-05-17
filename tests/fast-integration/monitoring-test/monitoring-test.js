@@ -16,18 +16,8 @@ const {
   shouldIgnoreAlert,
 } = require('../monitoring/helpers')
 
-var cancelPortForward;
-let prometheusPort = 9090;
-
-before(() => {
-  cancelPortForward = kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
-})
-
-after(() => {
-  cancelPortForward()
-})
-
 describe("Monitoring test", function () {
+  
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
@@ -39,24 +29,34 @@ describe("Monitoring test", function () {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
+  var cancelPortForward;
+  let prometheusPort = 9090;
 
+  before(() => {
+    cancelPortForward = kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
+  })
+  
+  after(() => {
+    cancelPortForward()
+  })
 
   it("All targets should be healthy", async () => {
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
     let responseBody = response.data;
     let activeTargets = responseBody.data.activeTargets;
-    for (const target of activeTargets.filter(t => !shouldIgnoreTarget(t))) {
-      assert.equal(target.health, "up");
-    }
+    let unhealthyTargets = activeTargets.filter(t => !shouldIgnoreTarget(t) && t.health != "up").map(t => t.discoveredLabels.job);
+    
+    assert.isEmpty(unhealthyTargets, `Following targets are unhealthy: ${unhealthyTargets.join(", ")}`);
   });
 
   it("There should be no firing critical alerts", async () => {
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/alerts`);
     let responseBody = response.data;
-    let alerts = responseBody.data.alerts;
-    for (const alert of alerts.filter(a => !shouldIgnoreAlert(a))) {
-      assert.notEqual(alert.state, "firing", `Alert ${alert.labels.alertname} is firing`);
-    }
-    console.log();
+    let allAlerts = responseBody.data.alerts;
+    let firingAlerts = allAlerts.filter(a => !shouldIgnoreAlert(a) && a.state == 'firing').map(a => a.labels.alertname);
+    
+    assert.isEmpty(firingAlerts, `Following alerts are firing: ${firingAlerts.join(", ")}`);
   });
+
+  
 });
