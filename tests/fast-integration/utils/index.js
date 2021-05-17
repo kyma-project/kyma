@@ -500,7 +500,7 @@ async function listResources(path) {
     });
     const listObj = JSON.parse(listResponse.body);
     if (listObj.items) {
-      return listObj.items.map((o) => o.metadata.name);
+      return listObj.items;
     }
   } catch (e) {
     if (e.statusCode != 404 && e.statusCode != 405) {
@@ -509,6 +509,11 @@ async function listResources(path) {
     }
   }
   return [];
+}
+
+async function listResourceNames(path) {
+  let resources = await listResources(path);
+  return resources.map((o) => o.metadata.name);
 }
 
 async function resourceTypes(group, version) {
@@ -897,6 +902,7 @@ module.exports = {
   getAllResourceTypes,
   getAllCRDs,
   listResources,
+  listResourceNames,
   k8sDynamicApi,
   k8sAppsApi,
   k8sCoreV1Api,

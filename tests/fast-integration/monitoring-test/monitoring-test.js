@@ -14,6 +14,8 @@ const {
 const {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
+  getServiceMonitors,
+  getPodMonitors,
 } = require('../monitoring/helpers')
 
 describe("Monitoring test", function () {
@@ -58,5 +60,52 @@ describe("Monitoring test", function () {
     assert.isEmpty(firingAlerts, `Following alerts are firing: ${firingAlerts.join(", ")}`);
   });
 
+  it("All pods should be ready", async () => {
+    //TODO
+  });
+
+  it("Each scrape pool should have a healthy target", async () => {
+    //TODO
+    let serviceMonitors = await getServiceMonitors();
+    let podMonitors = await getPodMonitors();
+
+    let scrapePools = new Set();
+
+    for (const monitor of serviceMonitors) {
+      let endpoints = monitor.spec.endpoints
+      for (let i = 0; i < endpoints.length; i++) {
+        let scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`
+        scrapePools.add(scrapePool);
+      }
+    }
+    for (const monitor of podMonitors) {
+      let endpoints = monitor.spec.podmetricsendpoints
+      for (let i = 0; i < endpoints.length; i++) {
+        let scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`
+        scrapePools.add(scrapePool);
+      }
+    }
+
+    let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
+    let responseBody = response.data;
+    let activeTargets = responseBody.data.activeTargets;
+
+    for (const target of activeTargets) {
+      scrapePools.delete(target.scrapePool);
+    }
+    assert.isEmpty(scrapePools, `Following scrape pools have no targets: ${scrapePools.join(", ")}`)
+  });
+
+  it("All rules should be healthy", async () => {
+    //TODO
+  });
   
+  it("Grafana should be ready", async () => {
+    //TODO
+  });
+  
+  it("Lambda UI dashboard should be ready", async () => {
+    //TODO
+  });
+
 });

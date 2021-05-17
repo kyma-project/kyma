@@ -1,3 +1,8 @@
+const {
+    listResources,
+    k8sDynamicApi,
+  } = require("../utils");
+
 function shouldIgnoreTarget(target) {
     let podsToBeIgnored = [
         // Ignore the pods that are created during tests.
@@ -28,7 +33,40 @@ function shouldIgnoreAlert(alert) {
     return alert.labels.severity == "critical" || alertNamesToIgnore.includes(alert.labels.alertname)
 }
 
+async function getServiceMonitors() {
+    let path = '/apis/monitoring.coreos.com/v1/servicemonitors'
+
+    let resources = await listResources(path);
+
+    return resources.filter(r => !shouldIgnoreServiceMonitor(r.metadata.name));
+}
+
+async function getPodMonitors() {
+    let path = '/apis/monitoring.coreos.com/v1/podmonitors'
+
+    let resources = await listResources(path);
+
+    return resources.filter(r => !shouldIgnorePodMonitor(r.metadata.name));
+}
+
+function shouldIgnoreServiceMonitor(serviceMonitorName) {
+    var serviceMonitorsToBeIgnored = [
+		// tracing-metrics is created automatically by jaeger operator and can't be disabled
+		"tracing-metrics",
+    ]
+    return serviceMonitorsToBeIgnored.includes(serviceMonitorName);
+}
+
+function shouldIgnorePodMonitor(podMonitorName) {
+    var podMonitorsToBeIgnored = [
+		// The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
+    ]
+    return podMonitorsToBeIgnored.includes(podMonitorName);
+}
+
 module.exports = {
     shouldIgnoreTarget,
     shouldIgnoreAlert,
+    getServiceMonitors,
+    getPodMonitors,
 };
