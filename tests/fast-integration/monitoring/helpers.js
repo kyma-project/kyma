@@ -64,9 +64,31 @@ function shouldIgnorePodMonitor(podMonitorName) {
     return podMonitorsToBeIgnored.includes(podMonitorName);
 }
 
+function buildScrapePoolSet() {
+    let serviceMonitors = await getServiceMonitors();
+    let podMonitors = await getPodMonitors();
+
+    let scrapePools = new Set();
+
+    for (const monitor of serviceMonitors) {
+      let endpoints = monitor.spec.endpoints
+      for (let i = 0; i < endpoints.length; i++) {
+        let scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`
+        scrapePools.add(scrapePool);
+      }
+    }
+    for (const monitor of podMonitors) {
+      let endpoints = monitor.spec.podmetricsendpoints
+      for (let i = 0; i < endpoints.length; i++) {
+        let scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`
+        scrapePools.add(scrapePool);
+      }
+    }
+    return scrapePools
+}
+
 module.exports = {
     shouldIgnoreTarget,
     shouldIgnoreAlert,
-    getServiceMonitors,
-    getPodMonitors,
+    buildScrapePoolSet,
 };
