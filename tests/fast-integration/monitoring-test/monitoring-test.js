@@ -15,6 +15,7 @@ const {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
   buildScrapePoolSet,
+  checkMetricWithLabels,
 } = require('../monitoring/helpers')
 
 describe("Monitoring test", function () {
@@ -85,12 +86,14 @@ describe("Monitoring test", function () {
     assert.isEmpty(unhealthyRules, `Following rules are unhealthy: ${unhealthyRules.join(", ")}`);
   });
   
-  it("Grafana should be ready", async () => {
-    //TODO
-  });
-  
-  it("Lambda UI dashboard should be ready", async () => {
-    //TODO
+  it("Lambda UI dashboard should be ready", async () => { // TODO: Maybe rename
+    await checkMetricWithLabels("kube_deployment_status_replicas_available", ["deployment", "namespace"]);
+    await checkMetricWithLabels("istio_requests_total", ["destination_service", "response_code", "source_workload"]);
+    await checkMetricWithLabels("container_memory_usage_bytes", ["pod", "container"]);
+    await checkMetricWithLabels("kube_pod_container_resource_limits_memory_bytes", ["pod", "container"]);
+    await checkMetricWithLabels("container_cpu_usage_seconds_total", ["container", "pod", "namespace"]);
+    await checkMetricWithLabels("kube_namespace_labels", ["label_istio_injection"]);
+    await checkMetricWithLabels("kube_service_labels", ["namespace"]);
   });
 
 });

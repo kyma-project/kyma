@@ -3,6 +3,9 @@ const {
     k8sDynamicApi,
   } = require("../utils");
 
+const axios = require('axios');
+const { assert } = require("chai");
+
 function shouldIgnoreTarget(target) {
     let podsToBeIgnored = [
         // Ignore the pods that are created during tests.
@@ -87,8 +90,27 @@ async function buildScrapePoolSet() {
     return scrapePools
 }
 
+async function checkMetricWithLabels(metric, labels) {
+    let prometheusPort = 9090
+    let resultlessQueries =[]
+    for (const label of labels){
+        let query = `topk(10,${metric}{${label}=~\"..*\"})`;
+        let encoded = `http://localhost:${prometheusPort}/api/v1/query?query=${encodeURIComponent(query)}`;
+        let response = await axios.get(encoded);
+        let responseBody = response.data;
+
+        if (responseBody.data.result.length == 0) {
+            resultlessQueries.push(query);
+        }
+    }
+    assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
+    
+
+}
+
 module.exports = {
     shouldIgnoreTarget,
     shouldIgnoreAlert,
     buildScrapePoolSet,
+    checkMetricWithLabels,
 };
