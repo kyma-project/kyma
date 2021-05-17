@@ -29,11 +29,11 @@ You can use the following in-cluster components to observe your applications' te
 - Alertmanager
   [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or VictorOps.
 - Grafana
-  [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from the Prometheus.
+  [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from Prometheus.
 - Jaeger
-  Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend which serves as the query mechanism for displaying information about traces.
+  Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
 - Loki
-  Kyma uses [Loki](https://github.com/grafana/loki) which is a Prometheus-like log management system. This lightweight solution, integrated with Grafana, is easy to understand and operate. Currently, Kyma supports the [Fluent Bit](https://fluentbit.io/) log collector.
+  Kyma uses [Loki](https://github.com/grafana/loki), which is a lightweight Prometheus-like log management system. Currently, Kyma supports the [Fluent Bit](https://fluentbit.io/) log collector.
 - Kiali
   Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
 
