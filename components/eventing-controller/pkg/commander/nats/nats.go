@@ -2,7 +2,6 @@ package nats
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -99,11 +98,12 @@ func (c *Commander) Stop() error {
 func (c *Commander) cleanup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
 	var natsBackend *handlers.Nats
 	var ok bool
+	var natsBackendErr error
 	if natsBackend, ok = c.backend.(*handlers.Nats); !ok {
-		return errors.New("failed to convert backend to handlers.Nats")
+		logger.Error(natsBackendErr, "no NATS backend exists")
 	}
 	// Fetch all subscriptions.
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
@@ -132,9 +132,13 @@ func (c *Commander) cleanup() error {
 		}
 
 		// Clean subscriptions from NATS.
-		err = natsBackend.DeleteSubscription(&sub)
-		if err != nil {
-			subDeletionResult[key.String()] = err
+		if natsBackend != nil {
+			err = natsBackend.DeleteSubscription(&sub)
+			if err != nil {
+				subDeletionResult[key.String()] = err
+			}
+		} else {
+			subDeletionResult[key.String()] = natsBackendErr
 		}
 	}
 	return nil

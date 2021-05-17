@@ -112,8 +112,10 @@ func (c *Commander) cleanup() error {
 	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
 	var bebBackend *handlers.Beb
 	var ok bool
+	var bebBackendErr error
 	if bebBackend, ok = c.backend.(*handlers.Beb); !ok {
-		return errors.New("failed to convert backend to handlers.Beb")
+		bebBackendErr = errors.New("failed to convert backend to handlers.Beb")
+		logger.Error(bebBackendErr, "no BEB backend exists")
 	}
 
 	// Fetch all subscriptions.
@@ -157,9 +159,13 @@ func (c *Commander) cleanup() error {
 		}
 
 		// Clean subscriptions from BEB.
-		err = bebBackend.DeleteSubscription(&sub)
-		if err != nil {
-			subDeletionResult[key.String()] = err
+		if bebBackend != nil {
+			err = bebBackend.DeleteSubscription(&sub)
+			if err != nil {
+				subDeletionResult[key.String()] = err
+			}
+		} else {
+			subDeletionResult[key.String()] = bebBackendErr
 		}
 	}
 

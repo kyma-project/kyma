@@ -68,11 +68,12 @@ func TestGetSecretForPublisher(t *testing.T) {
 					},
 				},
 				StringData: map[string]string{
-					"client-id":       "rest-clientid",
-					"client-secret":   "rest-client-secret",
-					"token-endpoint":  "https://rest-token?grant_type=client_credentials&response_type=token",
-					"ems-publish-url": "https://rest-messaging",
-					"beb-namespace":   "valid/namespace",
+					"client-id":        "rest-clientid",
+					"client-secret":    "rest-client-secret",
+					"token-endpoint":   "https://rest-token?grant_type=client_credentials&response_type=token",
+					"ems-publish-host": "https://rest-messaging",
+					"ems-publish-url":  "https://rest-messaging/sap/ems/v1/events",
+					"beb-namespace":    "valid/namespace",
 				},
 			},
 		},
@@ -204,7 +205,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	})
 
 	When("Creating a Eventing Backend based on NATS and then switch to BEB", func() {
-		It("Should create eventing infra for NATS", func() {
+		It("Should switch NATS to BEB", func() {
 			ctx := context.Background()
 			eventingBackendName := "eventing-backend"
 			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
@@ -213,23 +214,19 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// Expect
 			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
 			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveNATSBackendReady())
-		})
 
-		It("Should create eventing infra for BEB and update Eventing Backend", func() {
-			ctx := context.Background()
 			bebSecret := reconcilertesting.WithBEBMessagingSecret("beb-secret", kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
 				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 			}
-			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
 			ensureBEBSecretCreated(ctx, bebSecret)
-			publisherProxy := new(appsv1.Deployment)
 			// Expect
 			getPublisherProxySecret(ctx).Should(And(
 				reconcilertesting.HaveValidClientID(PublisherSecretClientIDKey, "rest-clientid"),
 				reconcilertesting.HaveValidClientSecret(PublisherSecretClientSecretKey, "rest-client-secret"),
 				reconcilertesting.HaveValidTokenEndpoint(PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
-				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSEndpointKey, "https://rest-messaging"),
+				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSHostKey, "https://rest-messaging"),
+				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSURLKey, "https://rest-messaging/sap/ems/v1/events"),
 				reconcilertesting.HaveValidBEBNamespace(PublisherSecretBEBNamespaceKey, "test/ns"),
 			))
 			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
