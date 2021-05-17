@@ -34,3 +34,6 @@ spec:
         openAPIV3Schema:
           description: Temp desc
           type: object
+          properties:
+            spec:
+              type: object
