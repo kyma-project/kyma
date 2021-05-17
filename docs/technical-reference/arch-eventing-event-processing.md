@@ -1,6 +1,6 @@
 ---
 title: Event processing and delivery
-type: Details
+type: Architecture
 ---
 The event processing and delivery flow uses the NATS server to process events and send them to subscribers.
 This diagram explains the event flow in Kyma, from the moment the Application sends an event, to the point when the event triggers the Function.
