@@ -15,16 +15,16 @@ spec:
     additionalPrinterColumns:
       - name: Service-Instance
         type: string
-        JSONPath: .spec.instanceRef.name
+        jsonPath: .spec.instanceRef.name
       - name: Secret-Name
         type: string
-        JSONPath: .spec.secretName
+        jsonPath: .spec.secretName
       - name: Status
         type: string
-        JSONPath: .status.lastConditionState
+        jsonPath: .status.lastConditionState
       - name: Age
         type: date
-        JSONPath: .metadata.creationTimestamp
+        jsonPath: .metadata.creationTimestamp
     subresources:
       status: {}
   scope: Namespaced

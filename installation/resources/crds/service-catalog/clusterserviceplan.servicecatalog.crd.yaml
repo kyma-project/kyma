@@ -15,16 +15,16 @@ spec:
     additionalPrinterColumns:
       - name: External-Name
         type: string
-        JSONPath: .spec.externalName
+        jsonPath: .spec.externalName
       - name: Broker
         type: string
-        JSONPath: .spec.clusterServiceBrokerName
+        jsonPath: .spec.clusterServiceBrokerName
       - name: Class
         type: string
-        JSONPath: .spec.clusterServiceClassRef.name
+        jsonPath: .spec.clusterServiceClassRef.name
       - name: Age
         type: date
-        JSONPath: .metadata.creationTimestamp
+        jsonPath: .metadata.creationTimestamp
     subresources:
       status: {}
   scope: Cluster

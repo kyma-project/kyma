@@ -15,16 +15,16 @@ spec:
     additionalPrinterColumns:
       - name: External-Name
         type: string
-        JSONPath: .spec.externalName
+        jsonPath: .spec.externalName
       - name: Broker
         type: string
-        JSONPath: .spec.serviceBrokerName
+        jsonPath: .spec.serviceBrokerName
       - name: Class
         type: string
-        JSONPath: .spec.serviceClassRef.name
+        jsonPath: .spec.serviceClassRef.name
       - name: Age
         type: date
-        JSONPath: .metadata.creationTimestamp
+        jsonPath: .metadata.creationTimestamp
     subresources:
       status: {}
   scope: Namespaced
