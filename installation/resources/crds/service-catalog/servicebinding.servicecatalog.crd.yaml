@@ -1,4 +1,4 @@
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
@@ -12,6 +12,21 @@ spec:
   - name: v1beta1
     storage: true
     served: true
+    additionalPrinterColumns:
+      - name: Service-Instance
+        type: string
+        JSONPath: .spec.instanceRef.name
+      - name: Secret-Name
+        type: string
+        JSONPath: .spec.secretName
+      - name: Status
+        type: string
+        JSONPath: .status.lastConditionState
+      - name: Age
+        type: date
+        JSONPath: .metadata.creationTimestamp
+    subresources:
+      status: {}
   scope: Namespaced
   names:
     plural: servicebindings
@@ -21,18 +36,3 @@ spec:
     categories:
       - all
       - svcat
-  additionalPrinterColumns:
-    - name: Service-Instance
-      type: string
-      JSONPath: .spec.instanceRef.name
-    - name: Secret-Name
-      type: string
-      JSONPath: .spec.secretName
-    - name: Status
-      type: string
-      JSONPath: .status.lastConditionState
-    - name: Age
-      type: date
-      JSONPath: .metadata.creationTimestamp
-  subresources:
-    status: {}
