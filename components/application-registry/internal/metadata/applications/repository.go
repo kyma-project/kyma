@@ -96,6 +96,7 @@ func NewServiceRepository(appManager AppManager) ServiceRepository {
 }
 
 // Create adds a new Service in Application
+// Service name must be unique
 func (r *repository) Create(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
 		if err := ensureServiceNotExists(service.ID, app); err != nil {

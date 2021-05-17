@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/mocks"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,13 +22,17 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should accept service details with events", func(t *testing.T) {
@@ -41,13 +46,17 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should accept service details with API and events", func(t *testing.T) {
@@ -64,13 +73,17 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept service details without API and Events", func(t *testing.T) {
@@ -81,10 +94,10 @@ func TestServiceDetailsValidator(t *testing.T) {
 			Description: "description",
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -101,10 +114,10 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -121,10 +134,10 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -141,10 +154,10 @@ func TestServiceDetailsValidator(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -162,10 +175,10 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Api:         &API{},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -184,14 +197,18 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept API spec with more than 1 type of auth", func(t *testing.T) {
@@ -220,14 +237,18 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 }
 
@@ -252,13 +273,17 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept OAuth credentials with empty oauth", func(t *testing.T) {
@@ -275,10 +300,10 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -304,10 +329,10 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -334,10 +359,10 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -365,13 +390,17 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept Basic Auth credentials with empty basic", func(t *testing.T) {
@@ -388,10 +417,10 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -416,10 +445,10 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -442,13 +471,17 @@ func TestServiceDetailsValidator_API_Certificate(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 }
 
@@ -471,13 +504,17 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept OAuth specification credentials with empty oauth", func(t *testing.T) {
@@ -494,10 +531,10 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -521,10 +558,10 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -549,10 +586,10 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -578,13 +615,17 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		assert.NoError(t, err)
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not accept Basic Auth specification credentials with empty basic", func(t *testing.T) {
@@ -601,10 +642,10 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -627,10 +668,10 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		validator := NewServiceDetailsValidator(nil)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
@@ -650,13 +691,17 @@ func TestServiceDetailsValidator_Events(t *testing.T) {
 			},
 		}
 
-		validator := NewServiceDetailsValidator()
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
 		// when
-		err := validator.Validate(serviceDetails)
+		err := validator.Validate("app-1", serviceDetails)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 }

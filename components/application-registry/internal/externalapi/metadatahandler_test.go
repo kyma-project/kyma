@@ -88,7 +88,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Documentation: documentationRaw,
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -175,9 +175,10 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Documentation: documentationRaw,
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
+
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Create", "app", serviceDefinition).Return("1", nil)
 
@@ -260,7 +261,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Documentation: documentationRaw,
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -313,7 +314,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			},
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -351,7 +352,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return apperrors.WrongInput("failed")
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -396,7 +397,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			},
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -959,7 +960,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Documentation: documentationRaw,
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -1055,7 +1056,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Documentation: documentationRaw,
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -1105,7 +1106,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return apperrors.WrongInput("failed")
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -1146,7 +1147,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
@@ -1193,7 +1194,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 		}
 
-		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+		validator := ServiceDetailsValidatorFunc(func(application string, sd ServiceDetails) apperrors.AppError {
 			return nil
 		})
 

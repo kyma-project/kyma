@@ -34,14 +34,16 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 	contextLogger := httptools.ContextLogger(r)
 	httptools.DumpRequestToLog(r, contextLogger)
 
-	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
+	application := mux.Vars(r)["application"]
+
+	serviceDefinition, apperr := mh.prepareServiceDefinition(application, r.Body)
 	if apperr != nil {
 		contextLogger.Errorf("Creating new service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
 		return
 	}
 
-	serviceId, apperr := mh.ServiceDefinitionService.Create(mux.Vars(r)["application"], &serviceDefinition)
+	serviceId, apperr := mh.ServiceDefinitionService.Create(application, &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("Creating new service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -115,7 +117,9 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 	contextLogger := httptools.ContextLoggerWithId(r)
 	httptools.DumpRequestToLog(r, contextLogger)
 
-	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
+	application := mux.Vars(r)["application"]
+
+	serviceDefinition, apperr := mh.prepareServiceDefinition(application, r.Body)
 	if apperr != nil {
 		contextLogger.Errorf("Updating service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -163,7 +167,7 @@ func (mh *metadataHandler) DeleteService(w http.ResponseWriter, r *http.Request)
 	contextLogger.Infof("Service deleted successfully.")
 }
 
-func (mh *metadataHandler) prepareServiceDefinition(body io.ReadCloser) (model.ServiceDefinition, apperrors.AppError) {
+func (mh *metadataHandler) prepareServiceDefinition(application string, body io.ReadCloser) (model.ServiceDefinition, apperrors.AppError) {
 	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to read request body, %s", err.Error())
@@ -176,7 +180,7 @@ func (mh *metadataHandler) prepareServiceDefinition(body io.ReadCloser) (model.S
 		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to unmarshal request body, %s", err.Error())
 	}
 
-	appErr := mh.validator.Validate(serviceDetails)
+	appErr := mh.validator.Validate(application, serviceDetails)
 	if appErr != nil {
 		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to validate request body, %s", appErr.Error())
 	}
