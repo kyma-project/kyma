@@ -64,7 +64,6 @@ describe("Monitoring test", function () {
   });
 
   it("Each scrape pool should have a healthy target", async () => {
-    //TODO
     let scrapePools = await buildScrapePoolSet();
 
     let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/targets?state=active`);
@@ -74,11 +73,16 @@ describe("Monitoring test", function () {
     for (const target of activeTargets) {
       scrapePools.delete(target.scrapePool);
     }
-    assert.isEmpty(scrapePools, `Following scrape pools have no targets: ${scrapePools}`)
+    assert.isEmpty(scrapePools, `Following scrape pools have no targets: ${Array.from(scrapePools).join(", ")}`)
   });
 
   it("All rules should be healthy", async () => {
-    //TODO
+    let response = await axios.get(`http://localhost:${prometheusPort}/api/v1/rules`);
+    let responseBody = response.data;
+    let allRules = responseBody.data.groups.flatMap(g => g.rules);
+    let unhealthyRules = allRules.filter(r => r.health != "ok").map(t => r.name);
+    
+    assert.isEmpty(unhealthyRules, `Following rules are unhealthy: ${unhealthyRules.join(", ")}`);
   });
   
   it("Grafana should be ready", async () => {
