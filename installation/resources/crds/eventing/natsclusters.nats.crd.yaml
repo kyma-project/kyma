@@ -23,6 +23,9 @@ spec:
         openAPIV3Schema:
           description: Temp desc
           type: object
+          properties:
+            spec:
+              type: object
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
