@@ -3,6 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kyma-project/kyma/pull/11197"
   name: serviceclasses.servicecatalog.k8s.io
   labels:
     svcat: "true"

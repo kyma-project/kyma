@@ -4,6 +4,7 @@ metadata:
   name: usagekinds.servicecatalog.kyma-project.io
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kyma-project/kyma/pull/11197"
 spec:
   group: servicecatalog.kyma-project.io
   versions:
@@ -12,6 +13,7 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
+          type: object
           properties:
             spec:
               type: object

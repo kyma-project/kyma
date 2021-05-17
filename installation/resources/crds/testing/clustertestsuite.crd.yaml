@@ -128,6 +128,7 @@ spec:
                   type: object
                 type: array
             type: object
+        type: object
     subresources:
       status: {}
   names:

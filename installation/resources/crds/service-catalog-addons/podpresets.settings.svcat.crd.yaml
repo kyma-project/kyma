@@ -4,6 +4,7 @@ metadata:
   name: podpresets.settings.svcat.k8s.io
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kyma-project/kyma/pull/11197"
 spec:
   group: settings.svcat.k8s.io
   versions:

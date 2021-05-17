@@ -54,6 +54,7 @@ spec:
             required:
             - template
             type: object
+        type: object
 status:
   acceptedNames:
     kind: ""
