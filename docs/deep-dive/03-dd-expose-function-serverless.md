@@ -24,6 +24,72 @@ Follows these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
+  <summary label="cli">
+  Kyma CLI
+  </summary>
+
+1. Export these variables:
+
+      ```bash
+      export DOMAIN={DOMAIN_NAME}
+      export NAME={APIRULE_NAME}
+      export NAMESPACE={FUNCTION_NAMESPACE}
+      ```
+
+2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with Function's code.
+
+  ```bash
+  kyma sync function $NAME -n $NAMESPACE
+  ```
+
+3. Edit the local `config.yaml` file and add the **apiRules** schema for the Function:
+
+```yaml
+apiRules:
+    - name: $NAME
+      namespace: $NAMESPACE
+      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      service:
+        host: $NAME.$DOMAIN
+        name: $NAME
+        port: 80
+      rules:
+        - methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+          accessStrategies:
+            - config: {}
+            - handler: noop
+```
+
+4. Apply the new configuration on the cluster:
+
+  ```bash
+  kyma apply function
+  ```
+
+5. Check if the Function's code was pushed to the cluster and reflects the local configuration:
+
+  ```bash
+  kubectl describe apirules $NAME -n $NAMESPACE
+  ```
+
+6. Check that the API Rule was created successfully and has the status `OK`:
+
+  ```bash
+  kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
+  ```
+
+7. Call the Function's external address:
+
+  ```bash
+  curl https://$NAME.$DOMAIN
+  ```
+
+  </details>
+  <details>
   <summary label="kubectl">
   kubectl
   </summary>

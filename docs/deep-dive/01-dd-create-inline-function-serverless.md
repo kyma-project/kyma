@@ -15,7 +15,7 @@ Follow these steps:
 
 <div tabs name="steps" group="create-function">
   <details>
-  <summary label="CLI">
+  <summary label="cli">
   Kyma CLI
   </summary>
 
