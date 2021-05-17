@@ -122,6 +122,12 @@ async function removeKymaGatewayCertsYaml(pathToResources) {
     console.log("kyma-gateway-certs.yaml already deleted");
   }
 }
+function skipHelmTest(r) {
+  return !(r.metadata.annotations && r.metadata.annotations["helm.sh/hook"] && r.metadata.annotations["helm.sh/hook"].includes("test-success"));
+}
+function skipNull(r) {
+  return (r!=null);
+}
 
 async function applyRelease(
   release,
@@ -134,7 +140,7 @@ async function applyRelease(
   const { stdout } = await helmTemplate(release, chart, namespace, values, profile);
   const yamls = k8s.loadAllYaml(stdout);
 
-  await k8sApply(yamls, namespace);
+  await k8sApply(yamls.filter(skipNull).filter(skipHelmTest), namespace);
 }
 
 async function installRelease(
@@ -226,11 +232,6 @@ async function chartList(options) {
       values: registryOverrides,
     },
     {
-      release: "dex",
-      namespace: "kyma-system",
-      values: `${overrides},resources.requests.cpu=10m`,
-    },
-    {
       release: "api-gateway",
       namespace: "kyma-system",
       values: `${overrides},deployment.resources.requests.cpu=10m`,
@@ -254,11 +255,6 @@ async function chartList(options) {
       release: "helm-broker",
       namespace: "kyma-system",
       values: `${overrides}`,
-    },
-    {
-      release: "console",
-      namespace: "kyma-system",
-      values: `${overrides},pamela.enabled=false`,
     },
     {
       release: "eventing",
@@ -415,7 +411,6 @@ async function installKyma(options) {
   }
   console.timeLog('Installation', 'Istio installed');
   await removeKymaGatewayCertsYaml(installLocation);
-  await kubectlApply(join(__dirname, "installer-local.yaml")); // needed for the console to start
   await kubectlApply(join(__dirname, "system-namespaces.yaml"));
   if (options.withCompass) {
     await kubectlApply(join(__dirname, "compass-namespace.yaml"));
