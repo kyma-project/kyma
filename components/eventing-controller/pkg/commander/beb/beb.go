@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -46,6 +48,7 @@ type Commander struct {
 	metricsAddr     string
 	resyncPeriod    time.Duration
 	mgr             manager.Manager
+	backend         handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
@@ -78,7 +81,7 @@ func (c *Commander) Start() error {
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	if err := subscription.NewReconciler(
+	reconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
@@ -86,7 +89,10 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller"), // TODO Harmonization? Add "-beb"?
 		c.envCfg,
-	).SetupUnmanaged(c.mgr); err != nil {
+	)
+
+	c.backend = reconciler.Backend
+	if err := reconciler.SetupUnmanaged(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the BEB Subscription Controller: %v", err)
 	}
 	return nil
@@ -103,12 +109,11 @@ func (c *Commander) Stop() error {
 func (c *Commander) cleanup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
-	bebHandler := &handlers.Beb{Log: logger}
-	err := bebHandler.Initialize(c.envCfg)
-	if err != nil {
-		return err
+	var bebBackend *handlers.Beb
+	var ok bool
+	if bebBackend, ok = c.backend.(*handlers.Beb); !ok {
+		return errors.New("failed to convert backend to handlers.Beb")
 	}
 
 	// Fetch all subscriptions.
@@ -152,7 +157,7 @@ func (c *Commander) cleanup() error {
 		}
 
 		// Clean subscriptions from BEB.
-		err = bebHandler.DeleteSubscription(&sub)
+		err = bebBackend.DeleteSubscription(&sub)
 		if err != nil {
 			subDeletionResult[key.String()] = err
 		}

@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -41,6 +42,7 @@ type Commander struct {
 	enableDebugLogs bool
 	metricsAddr     string
 	mgr             manager.Manager
+	backend         handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
@@ -70,8 +72,7 @@ func (c *Commander) Start() error {
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
-
-	if err := subscription.NewReconciler(
+	natsReconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
@@ -79,7 +80,9 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"), // TODO Harmonization. Drop "-nats"?
 		c.envCfg,
-	).SetupUnmanaged(c.mgr); err != nil {
+	)
+	c.backend = natsReconciler.Backend
+	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
 	}
 	return nil
@@ -97,14 +100,11 @@ func (c *Commander) cleanup() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
-	natsHandler := handlers.NewNats(c.envCfg, logger)
-	err := natsHandler.Initialize(env.Config{})
-	if err != nil {
-		logger.Error(err, "can't initialize connection with NATS")
-		return err
+	var natsBackend *handlers.Nats
+	var ok bool
+	if natsBackend, ok = c.backend.(*handlers.Nats); !ok {
+		return errors.New("failed to convert backend to handlers.Nats")
 	}
-
 	// Fetch all subscriptions.
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
@@ -132,7 +132,7 @@ func (c *Commander) cleanup() error {
 		}
 
 		// Clean subscriptions from NATS.
-		err = natsHandler.DeleteSubscription(&sub)
+		err = natsBackend.DeleteSubscription(&sub)
 		if err != nil {
 			subDeletionResult[key.String()] = err
 		}
