@@ -56,9 +56,12 @@ describe("CommerceMock tests", function () {
 
   it("in-cluster event should be delivered", async function () {
     const eventId = "event-"+genRandom(5);
-    let response = await retryPromise(() => axios.post("https://lastorder.local.kyma.dev", { id: eventId }, {params:{send:true}}), 10, 1)
-    response = await axios.get("https://lastorder.local.kyma.dev", { params: { inappevent: eventId } });
-    console.dir(response.data);
+    
+    // send event using function query parameter send=true
+    await retryPromise(() => axios.post("https://lastorder.local.kyma.dev", { id: eventId }, {params:{send:true}}), 10, 1)
+    // verify if event was received using function query parameter inappevent=eventId
+    await retryPromise(() => axios.get("https://lastorder.local.kyma.dev", { params: { inappevent: eventId } }));
+    
     expect(response).to.have.nested.property("data.id", eventId, "The same event id expected in the result");
     expect(response).to.have.nested.property("data.shipped", true, "Order should have property shipped");
 
