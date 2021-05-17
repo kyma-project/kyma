@@ -28,26 +28,6 @@ const notDeployed = "not-deployed";
 const kymaCrds = require("./kyma-crds");
 const defaultIstioVersion = "1.8.2";
 
-const eventingSecret = {
-  apiVersion: "v1",
-  data: {
-    "beb-namespace": "",
-    "client-id": "",
-    "client-secret": "",
-    "ems-publish-url": "",
-    "token-endpoint": "",
-  },
-  kind: "Secret",
-  metadata: {
-    name: "eventing",
-    namespace: "kyma-installer",
-    "labels": {
-      "app.kubernetes.io/instance": "eventing",
-      "app.kubernetes.io/name": "eventing",
-      "component": "eventing",
-    },
-  }
-}
 
 async function waitForNodesToBeReady(timeout = "180s") {
   await execa("kubectl", [
@@ -416,9 +396,6 @@ async function installKyma(options) {
     await kubectlApply(join(__dirname, "compass-namespace.yaml"));
   }
   await kubectlApplyDir(crdLocation, "kyma-system");
-  if (options.newEventing) {
-    await k8sApply([eventingSecret]);
-  }
   let kymaCharts = await chartList(options);
   if (components) {
     kymaCharts = kymaCharts.filter(c => components.includes(c.release));
