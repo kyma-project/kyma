@@ -10,7 +10,7 @@ spec:
   names:
     kind: Asset
     plural: assets
-  scope: ""
+  scope: Namespaced
   versions:
   - name: v1beta1
     additionalPrinterColumns:
