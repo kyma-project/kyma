@@ -1,6 +1,6 @@
 ---
 title: Connection with Compass
-type: Details
+type: Other References
 ---
 
 Runtime Agent connects to Compass using a one-time token from the Connector and exchanges it for a certificate, which is later used to fetch Applications from the Director.

@@ -1,6 +1,6 @@
 ---
 title: Benefits of distributed tracing
-type: Details
+type: Other References
 ---
 
 

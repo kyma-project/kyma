@@ -1,6 +1,6 @@
 ---
 title: Console Backend Service
-type: Details
+type: Other References
 ---
 
 The Console Backend Service is a backend service which provides an API for all views of the Console UI. This service consumes the Kubernetes API and exposes a simplified GraphQL API to allow frontends to perform Kubernetes resource operations.

@@ -1,6 +1,6 @@
 ---
 title: Security
-type: Details
+type: Other References
 ---
 
 To eliminate potential security risks when using Functions, bear in mind these few facts:
