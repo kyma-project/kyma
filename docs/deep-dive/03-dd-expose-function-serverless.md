@@ -76,7 +76,13 @@ apiRules:
   kubectl get apirules $NAME -n $NAMESPACE
   ```
 
-6. Call the Function's external address:
+6. Check that the API Rule was created successfully and has the status `OK`:
+
+    ```bash
+    kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
+    ```
+
+7. Call the Function's external address:
 
   ```bash
   curl https://$NAME.$DOMAIN
