@@ -33,7 +33,7 @@ func TestGetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, service.ProviderDisplayName, "SAP Hybris")
-		assert.Equal(t, service.DisplayName, "Orders API")
+		assert.Equal(t, service.DisplayName, "Service 1")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
 		assert.Equal(t, service.API, &applications.ServiceAPI{
 			TargetURL: "https://192.168.1.2",
@@ -81,7 +81,7 @@ func createApplication(name string) *v1alpha1.Application {
 	reService1 := v1alpha1.Service{
 		ID:                  "id1",
 		Name:                "service-1",
-		DisplayName:         "Orders API",
+		DisplayName:         "Service 1",
 		LongDescription:     "This is Orders API",
 		ProviderDisplayName: "SAP Hybris",
 		Tags:                []string{"orders"},

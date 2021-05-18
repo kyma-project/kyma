@@ -198,7 +198,7 @@ func normalizeName(displayName string) string {
 	// to lower
 	normalizedName = strings.Map(unicode.ToLower, normalizedName)
 	// trim dashes if exists
-	normalizedName = strings.TrimSuffix(displayName, "-")
+	normalizedName = strings.TrimSuffix(normalizedName, "-")
 	if len(normalizedName) > 57 {
 		normalizedName = normalizedName[:57]
 	}
