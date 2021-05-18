@@ -188,7 +188,7 @@ func newSubjectValidator(applicationClientIDs []string, appName string) func(sub
 	}
 	if len(applicationClientIDs) == 0 {
 		return validateCommonNameWithAppName
-	} else{
+	} else {
 		return validateCommonNameWithClientIDs
 	}
 }
