@@ -1,8 +1,9 @@
 package object
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"reflect"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 

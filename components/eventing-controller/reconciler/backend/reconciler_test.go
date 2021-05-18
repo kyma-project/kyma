@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"log"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
 	appsv1 "k8s.io/api/apps/v1"
 
