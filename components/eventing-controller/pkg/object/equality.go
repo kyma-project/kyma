@@ -282,7 +282,6 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	if s1 == nil || s2 == nil {
 		return false
 	}
-
 	if s1 == s2 {
 		return true
 	}
@@ -290,23 +289,18 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	if s1.Backend != s2.Backend {
 		return false
 	}
-
 	if !utils.BoolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
 		return false
 	}
-
 	if !utils.BoolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
 		return false
 	}
-
 	if !utils.BoolPtrEqual(s1.EventingReady, s2.EventingReady) {
 		return false
 	}
-
 	if s1.BebSecretName != s2.BebSecretName {
 		return false
 	}
-
 	if s1.BebSecretNamespace != s2.BebSecretNamespace {
 		return false
 	}

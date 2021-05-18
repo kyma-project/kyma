@@ -286,9 +286,57 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		getPublisher2  func() *appsv1.Deployment
 		expectedResult bool
 	}{
+		"should be equal if same default NATS publisher": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Name = "publisher1"
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Name = "publisher2"
+				return p
+			},
+			expectedResult: true,
+		},
+		"should be equal if same default BEB publisher": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultBEBPublisher.DeepCopy()
+				p.Name = "publisher1"
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultBEBPublisher.DeepCopy()
+				p.Name = "publisher2"
+				return p
+			},
+			expectedResult: true,
+		},
 		"should be unequal if publisher types are different": {
 			getPublisher1: func() *appsv1.Deployment {
 				return defaultBEBPublisher.DeepCopy()
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				return defaultNATSPublisher.DeepCopy()
+			},
+			expectedResult: false,
+		},
+		"should be unequal if publisher image changes": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Spec.Containers[0].Image = "new-publisher-img"
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				return defaultNATSPublisher.DeepCopy()
+			},
+			expectedResult: false,
+		},
+		"should be unequal if env var changes": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Spec.Containers[0].Env[0].Value = "new-value"
+				return p
 			},
 			getPublisher2: func() *appsv1.Deployment {
 				return defaultNATSPublisher.DeepCopy()
