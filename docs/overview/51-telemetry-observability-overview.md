@@ -7,15 +7,15 @@ Out of the box, Kyma provides tools to collect and expose **telemetry** data, su
 
 Of course, you'll want to view and analyse the data you're collecting. This is where **observability** comes in. 
 
-## Telemetry - collecting data
+## Collecting data
 
 The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together. 
 
-Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio. They are also collected in the Prometheus UI, where you can view them under **Targets**.
+Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
 
 The collected telemetry data are exposed so that you can view and analyse them with the observability tools of your choice.
 
-## Observability - analysing data
+## Analysing data
 
 Kyma supports a set of tools for in-cluster observability. 
 We recommend that you also implement an observability solution of your choice outside your cluster, which has the advantage that you can use the data for troubleshooting and root cause analysis while your cluster is down (also, it doesn't eat into your applications' bandwith). 
@@ -27,7 +27,7 @@ You can use the following in-cluster components to observe your applications' te
 - Prometheus
   [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more.
 - Alertmanager
-  [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or VictorOps.
+  [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
 - Grafana
   [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from Prometheus.
 - Jaeger
