@@ -147,18 +147,7 @@ func (sds *serviceDefinitionService) GetByID(application, id string) (model.Serv
 
 // ServiceExists returns true if name is already used as a service name.
 func (sds *serviceDefinitionService) ServiceExists(application, name string) (isUsed bool, err apperrors.AppError) {
-	services, apperr := sds.applicationRepository.GetAll(application)
-	if apperr != nil {
-		return false, apperr.Append("Reading services from Application failed")
-	}
-
-	for _, service := range services {
-		if service.Name == name {
-			return true, nil
-		}
-	}
-
-	return false, nil
+	return sds.applicationRepository.ServiceExists(application, name)
 }
 
 // GetAll returns all ServiceDefinitions.

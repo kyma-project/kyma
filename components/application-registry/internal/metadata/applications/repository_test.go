@@ -426,6 +426,64 @@ func TestUpdateServices(t *testing.T) {
 	})
 }
 
+func TestServiceExists(t *testing.T){
+
+	t.Run("should return true if service does exist", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		// when
+		exists, err := repository.ServiceExists("production", "Orders API")
+
+		// then
+		assert.Equal(t, true, exists)
+		require.NoError(t, err)
+		appManagerMock.AssertExpectations(t)
+	})
+
+	t.Run("should return false if service does not exist", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		// when
+		exists, err := repository.ServiceExists("production", "Dummy API")
+
+		// then
+		assert.Equal(t, false, exists)
+		require.NoError(t, err)
+		appManagerMock.AssertExpectations(t)
+	})
+
+	t.Run("should fail if App doesn't exist", func(t *testing.T) {
+		// given
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		// when
+		exists, err := repository.ServiceExists("production", "Orders API")
+
+		// then
+		assert.Equal(t, false, exists)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
+	})
+}
+
 func createApplication(name string) *v1alpha1.Application {
 
 	reService1Entry := v1alpha1.Entry{
@@ -439,6 +497,7 @@ func createApplication(name string) *v1alpha1.Application {
 		},
 	}
 	reService1 := v1alpha1.Service{
+		Name:                "Orders API",
 		ID:                  "id1",
 		DisplayName:         "Orders API",
 		LongDescription:     "This is Orders API",

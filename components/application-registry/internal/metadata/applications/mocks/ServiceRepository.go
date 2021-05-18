@@ -14,13 +14,13 @@ type ServiceRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: application, service
-func (_m *ServiceRepository) Create(application string, service applications.Service) apperrors.AppError {
-	ret := _m.Called(application, service)
+// Create provides a mock function with given fields: appName, service
+func (_m *ServiceRepository) Create(appName string, service applications.Service) apperrors.AppError {
+	ret := _m.Called(appName, service)
 
 	var r0 apperrors.AppError
 	if rf, ok := ret.Get(0).(func(string, applications.Service) apperrors.AppError); ok {
-		r0 = rf(application, service)
+		r0 = rf(appName, service)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -30,13 +30,13 @@ func (_m *ServiceRepository) Create(application string, service applications.Ser
 	return r0
 }
 
-// Delete provides a mock function with given fields: application, id
-func (_m *ServiceRepository) Delete(application string, id string) apperrors.AppError {
-	ret := _m.Called(application, id)
+// Delete provides a mock function with given fields: appName, id
+func (_m *ServiceRepository) Delete(appName string, id string) apperrors.AppError {
+	ret := _m.Called(appName, id)
 
 	var r0 apperrors.AppError
 	if rf, ok := ret.Get(0).(func(string, string) apperrors.AppError); ok {
-		r0 = rf(application, id)
+		r0 = rf(appName, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -46,20 +46,20 @@ func (_m *ServiceRepository) Delete(application string, id string) apperrors.App
 	return r0
 }
 
-// Get provides a mock function with given fields: application, id
-func (_m *ServiceRepository) Get(application string, id string) (applications.Service, apperrors.AppError) {
-	ret := _m.Called(application, id)
+// Get provides a mock function with given fields: appName, id
+func (_m *ServiceRepository) Get(appName string, id string) (applications.Service, apperrors.AppError) {
+	ret := _m.Called(appName, id)
 
 	var r0 applications.Service
 	if rf, ok := ret.Get(0).(func(string, string) applications.Service); ok {
-		r0 = rf(application, id)
+		r0 = rf(appName, id)
 	} else {
 		r0 = ret.Get(0).(applications.Service)
 	}
 
 	var r1 apperrors.AppError
 	if rf, ok := ret.Get(1).(func(string, string) apperrors.AppError); ok {
-		r1 = rf(application, id)
+		r1 = rf(appName, id)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)
@@ -69,13 +69,13 @@ func (_m *ServiceRepository) Get(application string, id string) (applications.Se
 	return r0, r1
 }
 
-// GetAll provides a mock function with given fields: application
-func (_m *ServiceRepository) GetAll(application string) ([]applications.Service, apperrors.AppError) {
-	ret := _m.Called(application)
+// GetAll provides a mock function with given fields: appName
+func (_m *ServiceRepository) GetAll(appName string) ([]applications.Service, apperrors.AppError) {
+	ret := _m.Called(appName)
 
 	var r0 []applications.Service
 	if rf, ok := ret.Get(0).(func(string) []applications.Service); ok {
-		r0 = rf(application)
+		r0 = rf(appName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]applications.Service)
@@ -84,7 +84,7 @@ func (_m *ServiceRepository) GetAll(application string) ([]applications.Service,
 
 	var r1 apperrors.AppError
 	if rf, ok := ret.Get(1).(func(string) apperrors.AppError); ok {
-		r1 = rf(application)
+		r1 = rf(appName)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)
@@ -94,13 +94,36 @@ func (_m *ServiceRepository) GetAll(application string) ([]applications.Service,
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: application, service
-func (_m *ServiceRepository) Update(application string, service applications.Service) apperrors.AppError {
-	ret := _m.Called(application, service)
+// ServiceExists provides a mock function with given fields: appName, serviceName
+func (_m *ServiceRepository) ServiceExists(appName string, serviceName string) (bool, apperrors.AppError) {
+	ret := _m.Called(appName, serviceName)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
+		r0 = rf(appName, serviceName)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 apperrors.AppError
+	if rf, ok := ret.Get(1).(func(string, string) apperrors.AppError); ok {
+		r1 = rf(appName, serviceName)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(apperrors.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
+// Update provides a mock function with given fields: appName, service
+func (_m *ServiceRepository) Update(appName string, service applications.Service) apperrors.AppError {
+	ret := _m.Called(appName, service)
 
 	var r0 apperrors.AppError
 	if rf, ok := ret.Get(0).(func(string, applications.Service) apperrors.AppError); ok {
-		r0 = rf(application, service)
+		r0 = rf(appName, service)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
