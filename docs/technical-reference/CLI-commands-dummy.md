@@ -2,4 +2,5 @@
 title: CLI Commands
 ---
 
-Placeholder document 
+Placeholder document. 
+Docs will be created when the commands aren't alpha anymore.
