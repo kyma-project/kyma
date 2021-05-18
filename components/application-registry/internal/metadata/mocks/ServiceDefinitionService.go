@@ -127,8 +127,8 @@ func (_m *ServiceDefinitionService) GetByID(application string, id string) (mode
 	return r0, r1
 }
 
-// IsServiceNameUsed provides a mock function with given fields: application, name
-func (_m *ServiceDefinitionService) IsServiceNameUsed(application string, name string) (bool, apperrors.AppError) {
+// ServiceExists provides a mock function with given fields: application, name
+func (_m *ServiceDefinitionService) ServiceExists(application string, name string) (bool, apperrors.AppError) {
 	ret := _m.Called(application, name)
 
 	var r0 bool

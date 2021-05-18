@@ -30,8 +30,8 @@ type ServiceDefinitionService interface {
 	// GetByID returns ServiceDefinition with provided ID.
 	GetByID(application, id string) (serviceDefinition model.ServiceDefinition, err apperrors.AppError)
 
-	// IsServiceNameUsed returns true if name is already used as a service name.
-	IsServiceNameUsed(application, name string) (isUsed bool, err apperrors.AppError)
+	// ServiceExists returns true if name is already used as a service name.
+	ServiceExists(application, name string) (isUsed bool, err apperrors.AppError)
 
 	// GetAll returns all ServiceDefinitions.
 	GetAll(application string) (serviceDefinitions []model.ServiceDefinition, err apperrors.AppError)
@@ -145,8 +145,8 @@ func (sds *serviceDefinitionService) GetByID(application, id string) (model.Serv
 	return sds.readService(application, service)
 }
 
-// IsServiceNameUsed returns true if name is already used as a service name.
-func (sds *serviceDefinitionService) IsServiceNameUsed(application, name string) (isUsed bool, err apperrors.AppError) {
+// ServiceExists returns true if name is already used as a service name.
+func (sds *serviceDefinitionService) ServiceExists(application, name string) (isUsed bool, err apperrors.AppError) {
 	services, apperr := sds.applicationRepository.GetAll(application)
 	if apperr != nil {
 		return false, apperr.Append("Reading services from Application failed")
@@ -240,7 +240,6 @@ func (sds *serviceDefinitionService) Delete(application, id string) apperrors.Ap
 }
 
 // GetAPI gets API of a service with given ID
-// TODO: should we change it?
 func (sds *serviceDefinitionService) GetAPI(application, serviceId string) (*model.API, apperrors.AppError) {
 	service, apperr := sds.applicationRepository.Get(application, serviceId)
 	if apperr != nil {

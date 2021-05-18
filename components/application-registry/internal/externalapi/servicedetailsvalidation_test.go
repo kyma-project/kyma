@@ -23,7 +23,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -47,7 +47,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -74,7 +74,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -101,7 +101,7 @@ func TestServiceDetailsValidator(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(true, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(true, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -227,7 +227,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -267,7 +267,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -303,7 +303,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -420,7 +420,7 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -501,7 +501,7 @@ func TestServiceDetailsValidator_API_Certificate(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -534,7 +534,7 @@ func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -645,7 +645,7 @@ func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 
@@ -721,7 +721,7 @@ func TestServiceDetailsValidator_Events(t *testing.T) {
 		}
 
 		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
-		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(false, nil)
+		serviceDefinitionServiceMock.On("ServiceExists", "app-1", "name").Return(false, nil)
 
 		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
 

@@ -64,7 +64,7 @@ func NewServiceDetailsValidator(serviceDefinitionService metadata.ServiceDefinit
 
 func validateServiceName(serviceDefinitionService metadata.ServiceDefinitionService, application, serviceName string) apperrors.AppError {
 
-	isAlreadyUsed, err := serviceDefinitionService.IsServiceNameUsed(application, serviceName)
+	isAlreadyUsed, err := serviceDefinitionService.ServiceExists(application, serviceName)
 
 	if err != nil {
 		return apperrors.WrongInput("Could not validate service name, %s", err.Error())
