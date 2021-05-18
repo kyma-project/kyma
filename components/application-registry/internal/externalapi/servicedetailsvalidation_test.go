@@ -86,6 +86,35 @@ func TestServiceDetailsValidator(t *testing.T) {
 		serviceDefinitionServiceMock.AssertExpectations(t)
 	})
 
+	t.Run("should not accept service details with name already used in this application", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+			},
+			Events: &Events{
+				Spec: eventsRawSpec,
+			},
+		}
+
+		serviceDefinitionServiceMock := new(mocks.ServiceDefinitionService)
+		serviceDefinitionServiceMock.On("IsServiceNameUsed", "app-1", "name").Return(true, nil)
+
+		validator := NewServiceDetailsValidator(serviceDefinitionServiceMock)
+
+		// when
+		err := validator.Validate("app-1", serviceDetails)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		serviceDefinitionServiceMock.AssertExpectations(t)
+	})
+
+
 	t.Run("should not accept service details without API and Events", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
