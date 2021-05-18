@@ -459,6 +459,24 @@ function waitForCompassConnection(name, timeout = 90000) {
   }, timeout, `Wait for Compass connection ${name} timeout (${timeout} ms)`);
 }
 
+function waitForPodWithLabel(labelKey, labelValue, namespace = "default", timeout = 90000) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+    `/api/v1/namespaces/${namespace}/pods`,
+    query,
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.status.phase == "Running" &&
+        watchObj.object.status.containerStatuses.every(cs => cs.ready)
+      );
+    },
+    timeout,
+    `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`
+  );
+}
+
 async function deleteNamespaces(namespaces, wait = true) {
   let result = await k8sCoreV1Api.listNamespace();
   let allNamespaces = result.body.items.map((i) => i.metadata.name);
@@ -897,6 +915,7 @@ module.exports = {
   waitForCompassConnection,
   waitForFunction,
   waitForSubscription,
+  waitForPodWithLabel,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,

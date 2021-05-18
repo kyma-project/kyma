@@ -9,6 +9,7 @@ const {
   debug,
   genRandom,
   kubectlPortForward,
+  waitForPodWithLabel,
 } = require("../utils");
 
 const {
@@ -19,7 +20,7 @@ const {
 } = require('../monitoring/helpers')
 
 describe("Monitoring test", function () {
-  
+
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
@@ -37,7 +38,7 @@ describe("Monitoring test", function () {
   before(() => {
     cancelPortForward = kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
   })
-  
+
   after(() => {
     cancelPortForward()
   })
@@ -47,7 +48,7 @@ describe("Monitoring test", function () {
     let responseBody = response.data;
     let activeTargets = responseBody.data.activeTargets;
     let unhealthyTargets = activeTargets.filter(t => !shouldIgnoreTarget(t) && t.health != "up").map(t => t.discoveredLabels.job);
-    
+
     assert.isEmpty(unhealthyTargets, `Following targets are unhealthy: ${unhealthyTargets.join(", ")}`);
   });
 
@@ -56,12 +57,17 @@ describe("Monitoring test", function () {
     let responseBody = response.data;
     let allAlerts = responseBody.data.alerts;
     let firingAlerts = allAlerts.filter(a => !shouldIgnoreAlert(a) && a.state == 'firing').map(a => a.labels.alertname);
-    
+
     assert.isEmpty(firingAlerts, `Following alerts are firing: ${firingAlerts.join(", ")}`);
   });
 
   it("All pods should be ready", async () => {
-    //TODO
+    let namespace = "kyma-system";
+    await waitForPodWithLabel("app", "alertmanager", namespace);
+    await waitForPodWithLabel("app", "prometheus", namespace);
+    await waitForPodWithLabel("app", "grafana", namespace);
+    await waitForPodWithLabel("app", "prometheus-node-exporter", namespace);
+    await waitForPodWithLabel("app.kubernetes.io/name", "kube-state-metrics1", namespace);
   });
 
   it("Each scrape pool should have a healthy target", async () => {
@@ -82,10 +88,10 @@ describe("Monitoring test", function () {
     let responseBody = response.data;
     let allRules = responseBody.data.groups.flatMap(g => g.rules);
     let unhealthyRules = allRules.filter(r => r.health != "ok").map(t => r.name);
-    
+
     assert.isEmpty(unhealthyRules, `Following rules are unhealthy: ${unhealthyRules.join(", ")}`);
   });
-  
+
   it("Lambda UI dashboard should be ready", async () => { // TODO: Maybe rename
     await checkMetricWithLabels("kube_deployment_status_replicas_available", ["deployment", "namespace"]);
     await checkMetricWithLabels("istio_requests_total", ["destination_service", "response_code", "source_workload"]);
@@ -95,5 +101,4 @@ describe("Monitoring test", function () {
     await checkMetricWithLabels("kube_namespace_labels", ["label_istio_injection"]);
     await checkMetricWithLabels("kube_service_labels", ["namespace"]);
   });
-
 });
