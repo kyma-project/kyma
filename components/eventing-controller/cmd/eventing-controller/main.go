@@ -75,6 +75,7 @@ func main() {
 	ctrlLogger := ctrl.Log.WithName("reconciler").WithName("backend")
 	recorder := mgr.GetEventRecorderFor("backend-controller")
 	ctx := context.Background()
+
 	// Start the backend manager.
 	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
 
