@@ -2,8 +2,8 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
-    proxyOSPort: &proxyOSPort 8080
-    proxyMPSPort: &proxyMPSPort 8082
+    proxyPort: &proxyPort 8080
+    proxyPortCompass: &proxyPortCompass 8082
     externalAPIPort: &externalAPIPort 8081
     requestTimeout: 10
     skipVerify: false
@@ -22,13 +22,8 @@ service:
   externalapi:
     port: *externalAPIPort
   proxy:
-{{- if not .Values.global.disableLegacyConnectivity }}
-    port: *proxyOSPort
-{{-else}}
-    port: *proxyMPSPort
-{{- end }}
-
-# ONLY FOR KYMA OS implementation
+    port: *proxyPort
+    portCompass: *proxyPortCompass
 
 autoscaling:
   enable: true

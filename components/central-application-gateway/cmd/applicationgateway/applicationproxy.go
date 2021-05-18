@@ -56,12 +56,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	internalHandlerForOS := newInternalHandler(serviceDefinitionService, options)
+	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	internalHandlerForCompass := newInternalHandlerForCompass(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
-		internalHandlerForOS = httptools.RequestLogger("Internal handler: ", internalHandlerForOS)
+		internalHandler = httptools.RequestLogger("Internal handler: ", internalHandler)
 		internalHandlerForCompass = httptools.RequestLogger("Internal handler: ", internalHandlerForCompass)
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 	}
@@ -75,7 +75,7 @@ func main() {
 
 	internalSrv := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.proxyOSPort),
-		Handler:      internalHandlerForOS,
+		Handler:      internalHandler,
 		ReadTimeout:  time.Duration(options.requestTimeout) * time.Second,
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
@@ -92,16 +92,18 @@ func main() {
 
 	wg.Add(2)
 	go func() {
-		log.Info(externalSrv.ListenAndServe())
+		log.Fatal(externalSrv.ListenAndServe())
 	}()
 
-	go func() {
-		log.Info(internalSrv.ListenAndServe())
-	}()
-
-	go func() {
-		log.Info(internalSrvCompass.ListenAndServe())
-	}()
+	if options.disableLegacyConnectivity {
+		go func() {
+			log.Fatal(internalSrvCompass.ListenAndServe())
+		}()
+	} else {
+		go func() {
+			log.Fatal(internalSrv.ListenAndServe())
+		}()
+	}
 
 	wg.Wait()
 }

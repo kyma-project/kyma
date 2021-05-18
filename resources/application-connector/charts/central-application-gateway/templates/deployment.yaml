@@ -35,8 +35,9 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"
-          - "--proxyOSPort={{ .Values.deployment.args.proxyOSPort }}"
-          - "--proxyMPSPort={{ .Values.deployment.args.proxyMPSPort }}"
+          - "--disableLegacyConnectivity={{ .Values.global.disableLegacyConnectivity }}"
+          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--namespace={{ .Release.Namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"

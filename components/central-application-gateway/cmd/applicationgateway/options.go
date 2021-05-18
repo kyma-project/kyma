@@ -6,21 +6,23 @@ import (
 )
 
 type options struct {
-	externalAPIPort int
-	proxyOSPort       int
-	proxyMPSPort       int
-	namespace       string
-	requestTimeout  int
-	skipVerify      bool
-	proxyTimeout    int
-	requestLogging  bool
-	proxyCacheTTL   int
+	disableLegacyConnectivity bool
+	externalAPIPort           int
+	proxyOSPort               int
+	proxyMPSPort              int
+	namespace                 string
+	requestTimeout            int
+	skipVerify                bool
+	proxyTimeout              int
+	requestLogging            bool
+	proxyCacheTTL             int
 }
 
 func parseArgs() *options {
+	disableLegacyConnectivity := flag.Bool("disableLegacyConnectivity", false, "Flag determining what HTTP handler will be used")
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
-	proxyOSPort := flag.Int("proxyOSPort", 8080, "Proxy port for Kyma OS.")
-	proxyMPSPort := flag.Int("proxyMPSPort", 8088, "Proxy port for Kyma MPS.")
+	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS.")
+	proxyPortCompass := flag.Int("proxyPortCompass", 8088, "Proxy port for Kyma MPS.")
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by the Application Gateway")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	skipVerify := flag.Bool("skipVerify", false, "Flag for skipping certificate verification for proxy target.")
@@ -31,21 +33,22 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		externalAPIPort:     *externalAPIPort,
-		proxyOSPort:         *proxyOSPort,
-		proxyMPSPort:        *proxyMPSPort,
-		namespace:           *namespace,
-		requestTimeout:      *requestTimeout,
-		skipVerify:          *skipVerify,
-		proxyTimeout:        *proxyTimeout,
-		requestLogging:      *requestLogging,
-		proxyCacheTTL:       *proxyCacheTTL,
+		disableLegacyConnectivity: *disableLegacyConnectivity,
+		externalAPIPort:           *externalAPIPort,
+		proxyOSPort:               *proxyPort,
+		proxyMPSPort:              *proxyPortCompass,
+		namespace:                 *namespace,
+		requestTimeout:            *requestTimeout,
+		skipVerify:                *skipVerify,
+		proxyTimeout:              *proxyTimeout,
+		requestLogging:            *requestLogging,
+		proxyCacheTTL:             *proxyCacheTTL,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyOSPort=%d --proxyMPSPort=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
+	return fmt.Sprintf("--disableLegacyConnectivity=%t --externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
 		" --requestLogging=%t --proxyCacheTTL=%d",
-		o.externalAPIPort, o.proxyOSPort, o.proxyMPSPort, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
+		o.disableLegacyConnectivity, o.externalAPIPort, o.proxyOSPort, o.proxyMPSPort, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
 		o.requestLogging, o.proxyCacheTTL)
 }
