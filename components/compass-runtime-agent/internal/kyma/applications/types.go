@@ -1,8 +1,8 @@
 package applications
 
 const (
-	CredentialsOAuthType          = "OAuth"
-	CredentialsBasicType          = "Basic"
+	CredentialsOAuthType = "OAuth"
+	CredentialsBasicType = "Basic"
 )
 
 type Credentials struct {

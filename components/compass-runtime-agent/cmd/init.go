@@ -1,11 +1,12 @@
 package main
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	appsecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/strategy"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
-	"time"
 
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"

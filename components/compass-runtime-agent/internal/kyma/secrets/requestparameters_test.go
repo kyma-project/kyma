@@ -1,8 +1,9 @@
 package appsecrets
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

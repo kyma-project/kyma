@@ -2,6 +2,7 @@ package appsecrets
 
 import (
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )

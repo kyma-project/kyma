@@ -21,7 +21,7 @@ func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applicati
 			ClientSecret: clientSecret,
 			URL:          appCredentials.AuthenticationUrl,
 		},
-		CSRFInfo:          convertToModelCSRInfo(appCredentials),
+		CSRFInfo: convertToModelCSRInfo(appCredentials),
 	}, nil
 }
 

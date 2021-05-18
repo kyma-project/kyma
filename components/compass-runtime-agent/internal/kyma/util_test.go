@@ -1,10 +1,11 @@
 package kyma
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/types"
-	"testing"
 )
 
 func TestCachingGetApplicationUIDFunc(t *testing.T) {

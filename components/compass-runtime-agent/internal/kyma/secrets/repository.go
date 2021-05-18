@@ -3,6 +3,7 @@ package appsecrets
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"

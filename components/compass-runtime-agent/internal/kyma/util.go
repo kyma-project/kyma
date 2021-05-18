@@ -2,6 +2,7 @@ package kyma
 
 import (
 	"fmt"
+
 	"github.com/kofalt/go-memoize"
 	"k8s.io/apimachinery/pkg/types"
 
