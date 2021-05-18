@@ -46,6 +46,8 @@ type ServiceAPI struct {
 	RequestParametersSecretName string
 }
 
+type predicateFunc func(service v1alpha1.Service, entry v1alpha1.Entry) bool
+
 // Service represents a service stored in Application
 type Service struct {
 	// Mapped to id in Application CRD
@@ -78,21 +80,24 @@ func NewServiceRepository(appManager Manager) ServiceRepository {
 
 // Get reads Service from Application by service name (bundle SKR mode) and apiName (entry
 func (r *repository) GetByServiceName(appName, serviceName string) (Service, apperrors.AppError) {
-	return r.get(appName, matchService)
+	return r.get(appName, getMatchFunction(serviceName))
 }
 
 func (r *repository) GetByEntryName(appName, serviceName, entryName string) (Service, apperrors.AppError) {
 
 	matchServiceAndEntry := func(service v1alpha1.Service, entry v1alpha1.Entry) bool {
-		return matchService(service, entry) && entryName == normalizeName(entry.Name)
+		serviceMatchFunc := getMatchFunction(serviceName)
+		return serviceMatchFunc(service, entry) && entryName == normalizeName(entry.Name)
 	}
 	return r.get(appName, matchServiceAndEntry)
 }
 
-func matchService(service v1alpha1.Service, entry v1alpha1.Entry) bool {
-	return (service.Name == normalizeName(service.DisplayName) ||
-		service.Name == normalizeServiceNameWithId(service.DisplayName, service.ID)) &&
-		entry.Type == specAPIType
+func getMatchFunction(serviceName string) predicateFunc {
+	return func(service v1alpha1.Service, entry v1alpha1.Entry) bool {
+		return (serviceName == normalizeName(service.DisplayName) ||
+			serviceName == normalizeServiceNameWithId(service.DisplayName, service.ID)) &&
+			entry.Type == specAPIType
+	}
 }
 
 func (r *repository) get(appName string, predicate func(service v1alpha1.Service, entry v1alpha1.Entry) bool) (Service, apperrors.AppError) {
