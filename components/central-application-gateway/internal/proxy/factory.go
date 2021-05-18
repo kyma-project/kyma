@@ -11,7 +11,6 @@ import (
 )
 
 type pathExtractorFunc func(string) (model.APIIdentifier, string, apperrors.AppError)
-type apiExtractorFunc func(identifier model.APIIdentifier) (*model.API, apperrors.AppError)
 
 // New creates proxy for handling user's services calls
 func New(
@@ -30,11 +29,11 @@ func New(
 		}
 
 		apiIdentifier := model.APIIdentifier{
-			Application: split[1],
-			Service:     split[2],
+			Application: split[0],
+			Service:     split[1],
 		}
 
-		targetAPIPath := strings.Join(split[3:], "/")
+		targetAPIPath := strings.Join(split[2:], "/")
 
 		return apiIdentifier, targetAPIPath, nil
 	}
@@ -68,12 +67,12 @@ func NewForCompass(
 		}
 
 		apiIdentifier := model.APIIdentifier{
-			Application: split[1],
-			Service:     split[2],
-			Entry:       split[3],
+			Application: split[0],
+			Service:     split[1],
+			Entry:       split[2],
 		}
 
-		targetAPIPath := strings.Join(split[4:], "/")
+		targetAPIPath := strings.Join(split[3:], "/")
 
 		return apiIdentifier, targetAPIPath, nil
 	}

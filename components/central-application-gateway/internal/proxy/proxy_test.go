@@ -37,6 +37,17 @@ func TestProxy(t *testing.T) {
 		Entry:       "entry",
 	}
 
+	fakePathExtractor := func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
+
+		apiIdentifier := metadatamodel.APIIdentifier{
+			Application: "app",
+			Service:     "service",
+			Entry:       "entry",
+		}
+
+		return apiIdentifier, path, nil
+	}
+
 	t.Run("should proxy without escaping the URL path characters when target URL does not contain path", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
@@ -67,7 +78,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -112,7 +123,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -157,7 +168,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -215,7 +226,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -274,7 +285,7 @@ func TestProxy(t *testing.T) {
 			RequestParameters: requestParameters,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -327,7 +338,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -374,7 +385,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -445,7 +456,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -498,7 +509,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -551,7 +562,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -602,7 +613,7 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
 		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
 
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -661,18 +672,12 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	}))
 }
 
-func newProxyForTest(apiExtractor APIExtractor, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, proxyConfig Config) http.Handler {
-
-	fakePathExtractor := func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
-
-		apiIdentifier := metadatamodel.APIIdentifier{
-			Application: "app",
-			Service:     "service",
-			Entry:       "entry",
-		}
-
-		return apiIdentifier, path, nil
-	}
+func newProxyForTest(
+	apiExtractor APIExtractor,
+	authorizationStrategyFactory authorization.StrategyFactory,
+	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
+	pathExtractorFunc pathExtractorFunc,
+	proxyConfig Config) http.Handler {
 
 	return &proxy{
 		cache:                        NewCache(proxyConfig.ProxyCacheTTL),
@@ -680,7 +685,7 @@ func newProxyForTest(apiExtractor APIExtractor, authorizationStrategyFactory aut
 		proxyTimeout:                 proxyConfig.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
-		extractPathFunc:              fakePathExtractor,
+		extractPathFunc:              pathExtractorFunc,
 		apiExtractor:                 apiExtractor,
 	}
 }
