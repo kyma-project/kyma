@@ -1,4 +1,4 @@
-# TODO: this was only for the nats-controller? Can it exist also when using beb?
+# Used by publisher proxy for NATS backend
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:

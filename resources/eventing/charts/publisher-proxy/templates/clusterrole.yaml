@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "event-publisher-proxy.fullname" . }}
-  labels: {{- include "event-publisher-proxy.labels" . | nindent 4 }}
+  name: {{ include "publisher-proxy.fullname" . }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - eventing.kyma-project.io
