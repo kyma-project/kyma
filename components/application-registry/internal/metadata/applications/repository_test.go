@@ -351,7 +351,6 @@ func TestUpdateServices(t *testing.T) {
 			Return(application, nil)
 
 		reEntry1 := v1alpha1.Entry{
-			Name:        "promotions-api-4e89d",
 			Type:        "API",
 			GatewayUrl:  "https://promotions-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-3",
