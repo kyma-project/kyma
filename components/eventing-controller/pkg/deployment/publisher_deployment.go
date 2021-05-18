@@ -1,7 +1,8 @@
-package backend
+package deployment
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -23,13 +24,22 @@ const (
 	PublisherPortNum         = int32(8080)
 	PublisherMetricsPortName = "http-metrics"
 	PublisherMetricsPortNum  = int32(9090)
+
+	PublisherNamespace              = "kyma-system"
+	PublisherName                   = "eventing-publisher-proxy"
+	AppLabelKey                     = "app.kubernetes.io/name"
+	PublisherSecretClientIDKey      = "client-id"
+	PublisherSecretClientSecretKey  = "client-secret"
+	PublisherSecretTokenEndpointKey = "token-endpoint"
+	PublisherSecretEMSURLKey        = "ems-publish-url"
+	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 )
 
 var (
 	TerminationGracePeriodSeconds = int64(30)
 )
 
-func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
+func NewBEBPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -42,7 +52,7 @@ func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32)
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(replicas),
+			Replicas: utils.Int32Ptr(replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -71,7 +81,7 @@ func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32)
 	}
 }
 
-func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
+func NewNATSPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -84,7 +94,7 @@ func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(replicas),
+			Replicas: utils.Int32Ptr(replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -116,8 +126,8 @@ func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32
 
 func getSecurityContext() *v1.SecurityContext {
 	return &v1.SecurityContext{
-		Privileged:               boolPtr(false),
-		AllowPrivilegeEscalation: boolPtr(false),
+		Privileged:               utils.BoolPtr(false),
+		AllowPrivilegeEscalation: utils.BoolPtr(false),
 	}
 }
 

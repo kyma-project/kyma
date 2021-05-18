@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"log"
 	"path/filepath"
 	"testing"
@@ -61,10 +62,10 @@ func TestGetSecretForPublisher(t *testing.T) {
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      PublisherName,
-					Namespace: PublisherNamespace,
+					Name:      deployment.PublisherName,
+					Namespace: deployment.PublisherNamespace,
 					Labels: map[string]string{
-						AppLabelKey: PublisherName,
+						deployment.AppLabelKey: deployment.PublisherName,
 					},
 				},
 				StringData: map[string]string{
@@ -107,7 +108,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 func getSecret(message, namespace []byte) *corev1.Secret {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: PublisherName,
+			Name: deployment.PublisherName,
 		},
 	}
 
@@ -222,12 +223,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ensureBEBSecretCreated(ctx, bebSecret)
 			// Expect
 			getPublisherProxySecret(ctx).Should(And(
-				reconcilertesting.HaveValidClientID(PublisherSecretClientIDKey, "rest-clientid"),
-				reconcilertesting.HaveValidClientSecret(PublisherSecretClientSecretKey, "rest-client-secret"),
-				reconcilertesting.HaveValidTokenEndpoint(PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
+				reconcilertesting.HaveValidClientID(deployment.PublisherSecretClientIDKey, "rest-clientid"),
+				reconcilertesting.HaveValidClientSecret(deployment.PublisherSecretClientSecretKey, "rest-client-secret"),
+				reconcilertesting.HaveValidTokenEndpoint(deployment.PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
 				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSHostKey, "https://rest-messaging"),
-				reconcilertesting.HaveValidEMSPublishURL(PublisherSecretEMSURLKey, "https://rest-messaging/sap/ems/v1/events"),
-				reconcilertesting.HaveValidBEBNamespace(PublisherSecretBEBNamespaceKey, "test/ns"),
+				reconcilertesting.HaveValidEMSPublishURL(deployment.PublisherSecretEMSURLKey, "https://rest-messaging/sap/ems/v1/events"),
+				reconcilertesting.HaveValidBEBNamespace(deployment.PublisherSecretBEBNamespaceKey, "test/ns"),
 			))
 			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
 			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveBEBBackendReady())
@@ -304,8 +305,8 @@ func ensureBEBSecretCreated(ctx context.Context, secret *corev1.Secret) {
 func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 	return Eventually(func() *corev1.Secret {
 		lookupKey := types.NamespacedName{
-			Namespace: PublisherNamespace,
-			Name:      PublisherName,
+			Namespace: deployment.PublisherNamespace,
+			Name:      deployment.PublisherName,
 		}
 		secret := new(corev1.Secret)
 		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
@@ -320,8 +321,8 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 func getPublisherProxyDeployment(ctx context.Context, publisher *appsv1.Deployment) AsyncAssertion {
 	return Eventually(func() *appsv1.Deployment {
 		lookupKey := types.NamespacedName{
-			Namespace: PublisherNamespace,
-			Name:      PublisherName,
+			Namespace: deployment.PublisherNamespace,
+			Name:      deployment.PublisherName,
 		}
 		if err := k8sClient.Get(ctx, lookupKey, publisher); err != nil {
 			log.Printf("failed to fetch eventingbackend(%s): %v", lookupKey.String(), err)

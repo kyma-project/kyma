@@ -1,6 +1,7 @@
 package object
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"reflect"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -290,15 +291,15 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 		return false
 	}
 
-	if !boolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
+	if !utils.BoolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
 		return false
 	}
 
-	if !boolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
+	if !utils.BoolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
 		return false
 	}
 
-	if !boolPtrEqual(s1.EventingReady, s2.EventingReady) {
+	if !utils.BoolPtrEqual(s1.EventingReady, s2.EventingReady) {
 		return false
 	}
 
@@ -311,16 +312,4 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	}
 
 	return true
-}
-
-func boolPtrEqual(b1, b2 *bool) bool {
-	if b1 == nil && b2 == nil {
-		return true
-	}
-
-	if b1 != nil && b2 != nil {
-		return *b1 == *b2
-	}
-
-	return false
 }

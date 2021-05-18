@@ -2,7 +2,9 @@ package object
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"k8s.io/utils/pointer"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	appsv1 "k8s.io/api/apps/v1"
 	"net/http"
 	"testing"
 
@@ -177,17 +179,17 @@ func TestApiRuleEqual(t *testing.T) {
 func TestEventingBackendEqual(t *testing.T) {
 	emptyBackend := eventingv1alpha1.EventingBackend{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "foo",
+			Name:      "foo",
 			Namespace: "bar",
 		},
 		Spec: eventingv1alpha1.EventingBackendSpec{},
 	}
 
 	testCases := map[string]struct {
-		getBackend1 func() *eventingv1alpha1.EventingBackend
-		getBackend2 func() *eventingv1alpha1.EventingBackend
+		getBackend1    func() *eventingv1alpha1.EventingBackend
+		getBackend2    func() *eventingv1alpha1.EventingBackend
 		expectedResult bool
-	} {
+	}{
 		"should be unequal if labels are different": {
 			getBackend1: func() *eventingv1alpha1.EventingBackend {
 				b := emptyBackend.DeepCopy()
@@ -228,32 +230,32 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		backendStatus1 eventingv1alpha1.EventingBackendStatus
 		backendStatus2 eventingv1alpha1.EventingBackendStatus
 		expectedResult bool
-	} {
+	}{
 		"should be unequal if ready status is different": {
 			backendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:               pointer.BoolPtr(false),
-				SubscriptionControllerReady: pointer.BoolPtr(true),
-				PublisherProxyReady:         pointer.BoolPtr(true),
+				EventingReady:               utils.BoolPtr(false),
+				SubscriptionControllerReady: utils.BoolPtr(true),
+				PublisherProxyReady:         utils.BoolPtr(true),
 			},
 			backendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:               pointer.BoolPtr(true),
-				SubscriptionControllerReady: pointer.BoolPtr(true),
-				PublisherProxyReady:         pointer.BoolPtr(true),
+				EventingReady:               utils.BoolPtr(true),
+				SubscriptionControllerReady: utils.BoolPtr(true),
+				PublisherProxyReady:         utils.BoolPtr(true),
 			},
 			expectedResult: false,
 		},
 		"should be unequal if missing secret": {
 			backendStatus1: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:               pointer.BoolPtr(false),
-				SubscriptionControllerReady: pointer.BoolPtr(true),
-				PublisherProxyReady:         pointer.BoolPtr(true),
-				BebSecretName: "secret",
-				BebSecretNamespace: "default",
+				EventingReady:               utils.BoolPtr(false),
+				SubscriptionControllerReady: utils.BoolPtr(true),
+				PublisherProxyReady:         utils.BoolPtr(true),
+				BebSecretName:               "secret",
+				BebSecretNamespace:          "default",
 			},
 			backendStatus2: eventingv1alpha1.EventingBackendStatus{
-				EventingReady:               pointer.BoolPtr(false),
-				SubscriptionControllerReady: pointer.BoolPtr(true),
-				PublisherProxyReady:         pointer.BoolPtr(true),
+				EventingReady:               utils.BoolPtr(false),
+				SubscriptionControllerReady: utils.BoolPtr(true),
+				PublisherProxyReady:         utils.BoolPtr(true),
 			},
 			expectedResult: false,
 		},
@@ -269,6 +271,34 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			if eventingBackendStatusEqual(&tc.backendStatus1, &tc.backendStatus2) != tc.expectedResult {
+				t.Errorf("Expected output to be %t", tc.expectedResult)
+			}
+		})
+	}
+}
+
+func TestPublisherProxyDeploymentEqual(t *testing.T) {
+	defaultNATSPublisher := deployment.NewNATSPublisherDeployment("publisher", "publisher", 1)
+	defaultBEBPublisher := deployment.NewBEBPublisherDeployment("publisher", "publisher", 1)
+
+	testCases := map[string]struct {
+		getPublisher1  func() *appsv1.Deployment
+		getPublisher2  func() *appsv1.Deployment
+		expectedResult bool
+	}{
+		"should be unequal if publisher types are different": {
+			getPublisher1: func() *appsv1.Deployment {
+				return defaultBEBPublisher.DeepCopy()
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				return defaultNATSPublisher.DeepCopy()
+			},
+			expectedResult: false,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			if publisherProxyDeploymentEqual(tc.getPublisher1(), tc.getPublisher2()) != tc.expectedResult {
 				t.Errorf("Expected output to be %t", tc.expectedResult)
 			}
 		})

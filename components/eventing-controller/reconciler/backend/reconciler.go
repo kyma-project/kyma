@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"os"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -35,24 +37,16 @@ const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
 
-	PublisherNamespace  = "kyma-system"
-	PublisherName       = "eventing-publisher-proxy"
 	BackendCRLabelKey   = "kyma-project.io/eventing"
 	BackendCRLabelValue = "backend"
-	AppLabelKey         = "app.kubernetes.io/name"
-	AppLabelValue       = PublisherName
+
+	AppLabelValue             = deployment.PublisherName
+	PublisherSecretEMSHostKey = "ems-publish-host"
 
 	TokenEndpointFormat             = "%s?grant_type=%s&response_type=token"
 	NamespacePrefix                 = "/"
 	BEBPublishEndpointForSubscriber = "/sap/ems/v1"
 	BEBPublishEndpointForPublisher  = "/sap/ems/v1/events"
-
-	PublisherSecretClientIDKey      = "client-id"
-	PublisherSecretClientSecretKey  = "client-secret"
-	PublisherSecretTokenEndpointKey = "token-endpoint"
-	PublisherSecretEMSURLKey        = "ems-publish-url"
-	PublisherSecretEMSHostKey       = "ems-publish-host"
-	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 )
 
 type Reconciler struct {
@@ -103,7 +97,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info(fmt.Sprintf("more than one secret with the label %q=%q exist", BEBBackendSecretLabelKey, BEBBackendSecretLabelValue))
 		backend, err := r.getCurrentBackendCR(ctx)
 		if err == nil && *backend.Status.EventingReady {
-			backend.Status.EventingReady = boolPtr(false)
+			backend.Status.EventingReady = utils.BoolPtr(false)
 			err := r.Status().Update(ctx, backend)
 			return ctrl.Result{}, err
 		}
@@ -260,22 +254,22 @@ func setUpEnvironmentForBEBController(secret *v1.Secret) error {
 		return errors.Wrapf(err, "cannot set BEB_API_URL env var")
 	}
 
-	err = os.Setenv("CLIENT_ID", string(secret.Data[PublisherSecretClientIDKey]))
+	err = os.Setenv("CLIENT_ID", string(secret.Data[deployment.PublisherSecretClientIDKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set CLIENT_ID env var")
 	}
 
-	err = os.Setenv("CLIENT_SECRET", string(secret.Data[PublisherSecretClientSecretKey]))
+	err = os.Setenv("CLIENT_SECRET", string(secret.Data[deployment.PublisherSecretClientSecretKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set CLIENT_SECRET env var")
 	}
 
-	err = os.Setenv("TOKEN_ENDPOINT", string(secret.Data[PublisherSecretTokenEndpointKey]))
+	err = os.Setenv("TOKEN_ENDPOINT", string(secret.Data[deployment.PublisherSecretTokenEndpointKey]))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set TOKEN_ENDPOINT env var")
 	}
 
-	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data[PublisherSecretBEBNamespaceKey])))
+	err = os.Setenv("BEB_NAMESPACE", fmt.Sprintf("%s%s", NamespacePrefix, string(secret.Data[deployment.PublisherSecretBEBNamespaceKey])))
 	if err != nil {
 		return errors.Wrapf(err, "cannot set BEB_NAMESPACE env var")
 	}
@@ -354,9 +348,9 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 	eventingReady := subscriptionControllerReady && publisherReady
 
 	desiredStatus.Backend = backendType
-	desiredStatus.SubscriptionControllerReady = boolPtr(subscriptionControllerReady)
-	desiredStatus.EventingReady = boolPtr(eventingReady)
-	desiredStatus.PublisherProxyReady = boolPtr(publisherReady)
+	desiredStatus.SubscriptionControllerReady = utils.BoolPtr(subscriptionControllerReady)
+	desiredStatus.EventingReady = utils.BoolPtr(eventingReady)
+	desiredStatus.PublisherProxyReady = utils.BoolPtr(publisherReady)
 
 	if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
 		r.Log.Info("No need to update backend CR status")
@@ -384,16 +378,16 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 	return eventingv1alpha1.EventingBackendStatus{
-		SubscriptionControllerReady: boolPtr(false),
-		PublisherProxyReady:         boolPtr(false),
-		EventingReady:               boolPtr(false),
+		SubscriptionControllerReady: utils.BoolPtr(false),
+		PublisherProxyReady:         utils.BoolPtr(false),
+		EventingReady:               utils.BoolPtr(false),
 	}
 }
 
 func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 	secretNamespacedName := types.NamespacedName{
-		Namespace: PublisherNamespace,
-		Name:      PublisherName,
+		Namespace: deployment.PublisherNamespace,
+		Name:      deployment.PublisherName,
 	}
 	currentSecret := new(v1.Secret)
 	err := r.Cache.Get(ctx, secretNamespacedName, currentSecret)
@@ -413,8 +407,8 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 
 func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Secret) (*v1.Secret, error) {
 	secretNamespacedName := types.NamespacedName{
-		Namespace: PublisherNamespace,
-		Name:      PublisherName,
+		Namespace: deployment.PublisherNamespace,
+		Name:      deployment.PublisherName,
 	}
 	currentSecret := new(v1.Secret)
 
@@ -461,10 +455,10 @@ func newSecret(name, namespace string) *v1.Secret {
 }
 
 func getSecretForPublisher(bebSecret *v1.Secret) (*v1.Secret, error) {
-	secret := newSecret(PublisherName, PublisherNamespace)
+	secret := newSecret(deployment.PublisherName, deployment.PublisherNamespace)
 
 	secret.Labels = map[string]string{
-		AppLabelKey: AppLabelValue,
+		deployment.AppLabelKey: AppLabelValue,
 	}
 
 	if _, ok := bebSecret.Data["messaging"]; !ok {
@@ -511,28 +505,28 @@ func getSecretForPublisher(bebSecret *v1.Secret) (*v1.Secret, error) {
 
 func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publishURL, namespace string) map[string]string {
 	return map[string]string{
-		PublisherSecretClientIDKey:      clientID,
-		PublisherSecretClientSecretKey:  clientSecret,
-		PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
-		PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, BEBPublishEndpointForPublisher),
-		PublisherSecretEMSHostKey:       fmt.Sprintf("%s", publishURL),
-		PublisherSecretBEBNamespaceKey:  namespace,
+		deployment.PublisherSecretClientIDKey:      clientID,
+		deployment.PublisherSecretClientSecretKey:  clientSecret,
+		deployment.PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
+		deployment.PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, BEBPublishEndpointForPublisher),
+		PublisherSecretEMSHostKey:                  fmt.Sprintf("%s", publishURL),
+		deployment.PublisherSecretBEBNamespaceKey:  namespace,
 	}
 }
 
 func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
 	publisherNamespacedName := types.NamespacedName{
-		Namespace: PublisherNamespace,
-		Name:      PublisherName,
+		Namespace: deployment.PublisherNamespace,
+		Name:      deployment.PublisherName,
 	}
 	currentPublisher := new(appsv1.Deployment)
 	var desiredPublisher *appsv1.Deployment
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
-		desiredPublisher = newNATSPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
+		desiredPublisher = deployment.NewNATSPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
 	case eventingv1alpha1.BebBackendType:
-		desiredPublisher = newBEBPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
+		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
 	default:
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
@@ -615,7 +609,7 @@ func getDeploymentMapper() handler.EventHandler {
 	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
 		var reqs []reconcile.Request
 		// Ignore deployments other than publisher-proxy
-		if mo.Meta.GetName() == PublisherName && mo.Meta.GetNamespace() == PublisherNamespace {
+		if mo.Meta.GetName() == deployment.PublisherName && mo.Meta.GetNamespace() == deployment.PublisherNamespace {
 			reqs = append(reqs, reconcile.Request{
 				NamespacedName: types.NamespacedName{Namespace: mo.Meta.GetNamespace(), Name: "any"},
 			})
