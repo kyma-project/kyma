@@ -1,6 +1,6 @@
 ---
 title: Security guidelines for MicroFrontend and ClusterMicroFrontend CRs
-type: Details
+type: Configuration
 ---
 
 For security reasons, follow the listed guidelines when you configure the web server for the MicroFrontend or ClusterMicroFrontend:

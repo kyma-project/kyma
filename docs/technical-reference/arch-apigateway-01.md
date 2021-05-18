@@ -1,5 +1,6 @@
 ---
 title: API Gateway Architecture
+type: Architecture
 ---
 
 This diagram illustrates the workflow that leads to exposing a service in Kyma:

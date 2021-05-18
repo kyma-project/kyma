@@ -1,6 +1,6 @@
 ---
 title: Available presets
-type: Details
+type: Other References
 ---
 
 Function's resources and replicas as well as resources for image-building Jobs are based on presets. A preset is a predefined group of values. There are three groups of presets defined for a Function CR and include the presents for:

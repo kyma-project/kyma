@@ -1,5 +1,7 @@
 ---
 title: Runtime Agent Architecture
+type: Architecture
+
 ---
 
 This document presents the workflow of the Runtime Agent.
