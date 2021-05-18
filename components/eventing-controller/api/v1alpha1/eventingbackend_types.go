@@ -42,7 +42,7 @@ type EventingBackendStatus struct {
 }
 
 // +kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Backend",type=string,JSONPath=`.status.backendType`
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
 // +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=boolean,JSONPath=`.status.subscriptionControllerReady`

@@ -1,6 +1,8 @@
 package object
 
 import (
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"k8s.io/utils/pointer"
 	"net/http"
 	"testing"
 
@@ -167,6 +169,107 @@ func TestApiRuleEqual(t *testing.T) {
 			testAPIRule := tc.prep()
 			if apiRuleEqual(&apiRule, testAPIRule) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
+			}
+		})
+	}
+}
+
+func TestEventingBackendEqual(t *testing.T) {
+	emptyBackend := eventingv1alpha1.EventingBackend{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "foo",
+			Namespace: "bar",
+		},
+		Spec: eventingv1alpha1.EventingBackendSpec{},
+	}
+
+	testCases := map[string]struct {
+		getBackend1 func() *eventingv1alpha1.EventingBackend
+		getBackend2 func() *eventingv1alpha1.EventingBackend
+		expectedResult bool
+	} {
+		"should be unequal if labels are different": {
+			getBackend1: func() *eventingv1alpha1.EventingBackend {
+				b := emptyBackend.DeepCopy()
+				b.Labels = map[string]string{"k1": "v1"}
+				return b
+			},
+			getBackend2: func() *eventingv1alpha1.EventingBackend {
+				return emptyBackend.DeepCopy()
+			},
+			expectedResult: false,
+		},
+		"should be equal if labels are the same": {
+			getBackend1: func() *eventingv1alpha1.EventingBackend {
+				b := emptyBackend.DeepCopy()
+				b.Labels = map[string]string{"k1": "v1"}
+				return b
+			},
+			getBackend2: func() *eventingv1alpha1.EventingBackend {
+				b := emptyBackend.DeepCopy()
+				b.Name = "bar"
+				b.Labels = map[string]string{"k1": "v1"}
+				return b
+			},
+			expectedResult: true,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			if eventingBackendEqual(tc.getBackend1(), tc.getBackend2()) != tc.expectedResult {
+				t.Errorf("Expected output to be %t", tc.expectedResult)
+			}
+		})
+	}
+}
+
+func TestEventingBackendStatusEqual(t *testing.T) {
+	testCases := map[string]struct {
+		backendStatus1 eventingv1alpha1.EventingBackendStatus
+		backendStatus2 eventingv1alpha1.EventingBackendStatus
+		expectedResult bool
+	} {
+		"should be unequal if ready status is different": {
+			backendStatus1: eventingv1alpha1.EventingBackendStatus{
+				EventingReady:               pointer.BoolPtr(false),
+				SubscriptionControllerReady: pointer.BoolPtr(true),
+				PublisherProxyReady:         pointer.BoolPtr(true),
+			},
+			backendStatus2: eventingv1alpha1.EventingBackendStatus{
+				EventingReady:               pointer.BoolPtr(true),
+				SubscriptionControllerReady: pointer.BoolPtr(true),
+				PublisherProxyReady:         pointer.BoolPtr(true),
+			},
+			expectedResult: false,
+		},
+		"should be unequal if missing secret": {
+			backendStatus1: eventingv1alpha1.EventingBackendStatus{
+				EventingReady:               pointer.BoolPtr(false),
+				SubscriptionControllerReady: pointer.BoolPtr(true),
+				PublisherProxyReady:         pointer.BoolPtr(true),
+				BebSecretName: "secret",
+				BebSecretNamespace: "default",
+			},
+			backendStatus2: eventingv1alpha1.EventingBackendStatus{
+				EventingReady:               pointer.BoolPtr(false),
+				SubscriptionControllerReady: pointer.BoolPtr(true),
+				PublisherProxyReady:         pointer.BoolPtr(true),
+			},
+			expectedResult: false,
+		},
+		"should be unequal if missing backend": {
+			backendStatus1: eventingv1alpha1.EventingBackendStatus{
+				Backend: eventingv1alpha1.NatsBackendType,
+			},
+			backendStatus2: eventingv1alpha1.EventingBackendStatus{},
+			expectedResult: false,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			if eventingBackendStatusEqual(&tc.backendStatus1, &tc.backendStatus2) != tc.expectedResult {
+				t.Errorf("Expected output to be %t", tc.expectedResult)
 			}
 		})
 	}
