@@ -73,16 +73,10 @@ apiRules:
 5. Check if the Function's code was pushed to the cluster and reflects the local configuration:
 
   ```bash
-  kubectl describe apirules $NAME -n $NAMESPACE
+  kubectl get apirules $NAME -n $NAMESPACE
   ```
 
-6. Check that the API Rule was created successfully and has the status `OK`:
-
-  ```bash
-  kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
-  ```
-
-7. Call the Function's external address:
+6. Call the Function's external address:
 
   ```bash
   curl https://$NAME.$DOMAIN
