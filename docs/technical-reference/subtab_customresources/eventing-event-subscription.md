@@ -3,7 +3,7 @@ title: Subscription
 type: Custom Resource
 ---
 
-The Subscription CustomResourceDefinition (CRD) is used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `Subscription` CustomResourceDefinition (CRD) is used to subscribe to events. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 `kubectl get crd subscriptions.eventing.kyma-project.io -o yaml`
 
