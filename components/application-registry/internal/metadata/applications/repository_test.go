@@ -236,6 +236,31 @@ func TestCreateServices(t *testing.T) {
 		assert.Equal(t, apperrors.CodeAlreadyExists, err.Code())
 	})
 
+	//t.Run("should not allow to create service if service with the same name already exists", func(t *testing.T) {
+	//	// given
+	//	application := createApplication("production")
+	//	appManagerMock := &mocks.AppManager{}
+	//	appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+	//		Return(application, nil)
+	//
+	//	repository := applications.NewServiceRepository(appManagerMock)
+	//	require.NotNil(t, repository)
+	//
+	//	newService := applications.Service{
+	//		ID:              "idx",
+	//		Name:            "promotions-api-4e7f6", // this is stupid
+	//		DisplayName:     "Promotions API",
+	//		LongDescription: "This is Promotions API",
+	//		Tags:            []string{"promotions"},
+	//		Events:          true,
+	//	}
+	//	// when
+	//	err := repository.Create("production", newService)
+	//
+	//	// then
+	//	assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	//})
+
 	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.AppManager{}
@@ -352,6 +377,108 @@ func TestUpdateServices(t *testing.T) {
 
 		reEntry1 := v1alpha1.Entry{
 			Type:        "API",
+			GatewayUrl:  "https://orders2-gateway.production.svc.cluster.local/",
+			AccessLabel: "access-label-3",
+			TargetUrl:   "https://192.168.10.10",
+			Credentials: v1alpha1.Credentials{
+				AuthenticationUrl: "https://192.168.10.10/token",
+				SecretName:        "new_secret",
+			},
+		}
+
+		reEntry2 := v1alpha1.Entry{
+			Type: "Events",
+		}
+
+		newApp := application.DeepCopy()
+		newApp.Spec.Services[0].Name = "orders-api-4e89d"
+		newApp.Spec.Services[0].DisplayName = "Orders API"
+		newApp.Spec.Services[0].ProviderDisplayName = "SAP Labs Poland"
+		newApp.Spec.Services[0].LongDescription = "This is Updated Orders API"
+		newApp.Spec.Services[0].Tags = []string{"orders"}
+		newApp.Spec.Services[0].Entries = []v1alpha1.Entry{reEntry1, reEntry2}
+
+		appManagerMock.On("Update", context.Background(), newApp, metav1.UpdateOptions{}).Return(newApp, nil)
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		service := applications.Service{
+			ID:                  "id1",
+			Name:                "",
+			DisplayName:         "Orders API",
+			LongDescription:     "This is Updated Orders API",
+			ProviderDisplayName: "SAP Labs Poland",
+			Tags:                []string{"orders"},
+			API: &applications.ServiceAPI{
+				GatewayURL:  "https://orders2-gateway.production.svc.cluster.local/",
+				AccessLabel: "access-label-3",
+				TargetUrl:   "https://192.168.10.10",
+				Credentials: applications.Credentials{
+					AuthenticationUrl: "https://192.168.10.10/token",
+					SecretName:        "new_secret",
+				},
+			},
+			Events: true,
+		}
+
+		// when
+		err := repository.Update("production", service)
+
+		// then
+		require.NoError(t, err)
+		appManagerMock.AssertExpectations(t)
+	})
+
+	t.Run("should not allow to update service when service ID is not found and return not found error", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
+
+		newApp := application.DeepCopy()
+
+		appManagerMock.On("Update", context.Background(), newApp, metav1.UpdateOptions{}).Return(newApp, nil)
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		service := applications.Service{
+			ID:                  "id5",
+			Name:                "",
+			DisplayName:         "Orders API",
+			LongDescription:     "This is Promotions API",
+			ProviderDisplayName: "SAP Labs Poland",
+			Tags:                []string{"promotions"},
+			API: &applications.ServiceAPI{
+				GatewayURL:  "https://promotions-gateway.production.svc.cluster.local/",
+				AccessLabel: "access-label-3",
+				TargetUrl:   "https://192.168.10.10",
+				Credentials: applications.Credentials{
+					AuthenticationUrl: "https://192.168.10.10/token",
+					SecretName:        "new_secret",
+				},
+			},
+			Events: true,
+		}
+
+		// when
+		err := repository.Update("production", service)
+
+		// then
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
+	})
+
+	t.Run("should not allow to update service with a different display name and return wrong input error", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
+
+		reEntry1 := v1alpha1.Entry{
+			Type:        "API",
 			GatewayUrl:  "https://promotions-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-3",
 			TargetUrl:   "https://192.168.10.10",
@@ -380,7 +507,7 @@ func TestUpdateServices(t *testing.T) {
 
 		service := applications.Service{
 			ID:                  "id1",
-			Name:                "promotions-api-4e89d",
+			Name:                "",
 			DisplayName:         "Promotions API",
 			LongDescription:     "This is Promotions API",
 			ProviderDisplayName: "SAP Labs Poland",
@@ -401,8 +528,7 @@ func TestUpdateServices(t *testing.T) {
 		err := repository.Update("production", service)
 
 		// then
-		require.NoError(t, err)
-		appManagerMock.AssertExpectations(t)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
 	t.Run("should return not found error if App doesn't exist", func(t *testing.T) {
@@ -424,65 +550,33 @@ func TestUpdateServices(t *testing.T) {
 		// then
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
+
+	/*
+		t.Run("should fail if failed to update App", func(t *testing.T) {
+				// given
+				application := createApplication("production")
+				appManagerMock := &mocks.AppManager{}
+				appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+					Return(application, nil)
+
+				appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).Return(nil, errors.New("failed to update Application"))
+
+				repository := applications.NewServiceRepository(appManagerMock)
+				require.NotNil(t, repository)
+
+				newService1 := createService()
+
+				// when
+				err := repository.Create("production", newService1)
+
+				// then
+				require.Error(t, err)
+				assert.Equal(t, apperrors.CodeInternal, err.Code())
+				appManagerMock.AssertExpectations(t)
+			})
+
+	*/
 }
-
-/*func TestServiceExists(t *testing.T){
-
-	t.Run("should return true if service does exist", func(t *testing.T) {
-		// given
-		application := createApplication("production")
-		appManagerMock := &mocks.AppManager{}
-		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-			Return(application, nil)
-
-		repository := applications.NewServiceRepository(appManagerMock)
-		require.NotNil(t, repository)
-
-		// when
-		exists, err := repository.ServiceExists("production", "Orders API")
-
-		// then
-		assert.Equal(t, true, exists)
-		require.NoError(t, err)
-		appManagerMock.AssertExpectations(t)
-	})
-
-	t.Run("should return false if service does not exist", func(t *testing.T) {
-		// given
-		application := createApplication("production")
-		appManagerMock := &mocks.AppManager{}
-		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-			Return(application, nil)
-
-		repository := applications.NewServiceRepository(appManagerMock)
-		require.NotNil(t, repository)
-
-		// when
-		exists, err := repository.ServiceExists("production", "Dummy API")
-
-		// then
-		assert.Equal(t, false, exists)
-		require.NoError(t, err)
-		appManagerMock.AssertExpectations(t)
-	})
-
-	t.Run("should fail if App doesn't exist", func(t *testing.T) {
-		// given
-		appManagerMock := &mocks.AppManager{}
-		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-
-		repository := applications.NewServiceRepository(appManagerMock)
-		require.NotNil(t, repository)
-
-		// when
-		exists, err := repository.ServiceExists("production", "Orders API")
-
-		// then
-		assert.Equal(t, false, exists)
-		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-	})
-}*/
 
 func createApplication(name string) *v1alpha1.Application {
 
@@ -497,8 +591,8 @@ func createApplication(name string) *v1alpha1.Application {
 		},
 	}
 	reService1 := v1alpha1.Service{
-		Name:                "Orders API",
 		ID:                  "id1",
+		Name:                "orders-api-4e89d",
 		DisplayName:         "Orders API",
 		LongDescription:     "This is Orders API",
 		ProviderDisplayName: "SAP Hybris",

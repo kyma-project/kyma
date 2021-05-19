@@ -160,12 +160,12 @@ func ensureServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) 
 
 		return apperrors.AlreadyExists(message)
 	}
-
-	if serviceExistsWithName(createServiceName(displayName, id), app) {
-		message := fmt.Sprintf("Service with name %s already exists", displayName)
-
-		return apperrors.WrongInput(message)
-	}
+	// can we skip that code?
+	//if serviceExistsWithName(createServiceName(displayName, id), app) {
+	//	message := fmt.Sprintf("Service with name %s already exists", displayName)
+	//
+	//	return apperrors.WrongInput(message)
+	//}
 
 	return nil
 }
