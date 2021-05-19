@@ -32,7 +32,7 @@ Follow these steps:
 
     ```bash
     mkdir {FOLDER_NAME}
-    cd my-function
+    cd {FOLDER_NAME}
     ```
 
     b. Create initial scaffolding for the Function using the dedicated CLI command.

@@ -33,7 +33,6 @@ Follows these steps:
       ```bash
       export DOMAIN={DOMAIN_NAME}
       export NAME={APIRULE_NAME}
-      export NAMESPACE={FUNCTION_NAMESPACE}
       ```
 
 2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with Function's code.
@@ -42,29 +41,24 @@ Follows these steps:
   kyma sync function $NAME -n $NAMESPACE
   ```
 
-3. Edit the local `config.yaml` file and add the **apiRules** schema for the Function:
+3. Edit the local `config.yaml` file and add the **apiRules** schema for the Function at the end of the file:
 
-```yaml
-apiRules:
-    - name: $NAME
-      namespace: $NAMESPACE
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
-      service:
-        host: $NAME.$DOMAIN
-        name: $NAME
-        port: 80
-      rules:
-        - methods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-          accessStrategies:
-            - config: {}
-            - handler: noop
-```
+  ```yaml
+  apiRules:
+      - name: {APIRULE_NAME}
+        service:
+          host: {APIRULE_NAME}.{DOMAIN_NAME}
+        rules:
+          - methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            accessStrategies:
+              - handler: noop
+  ```
 
-4. Apply the new configuration on the cluster:
+4. Apply the new configuration to the cluster:
 
   ```bash
   kyma apply function
