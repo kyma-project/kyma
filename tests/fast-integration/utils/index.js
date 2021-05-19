@@ -193,6 +193,16 @@ function kubectlDelete(file, namespace) {
   return k8sDelete(listOfSpecs, namespace);
 }
 
+function kubectlPortForward(namespace, podName, port) {
+  const server = net.createServer(function (socket) {
+    forward.portForward(namespace, podName, [port], socket, null, socket, 3)
+  })
+
+  server.listen(port, 'localhost');
+
+  return () => { server.close() }
+}
+
 async function k8sDelete(listOfSpecs, namespace) {
   for (let res of listOfSpecs) {
     if (namespace) {
@@ -880,16 +890,6 @@ function eventingSubscription(eventType, sink, name, namespace) {
   }
 }
 
-function kubectlPortForward(namespace, podName, port) {
-  const server = net.createServer(function (socket) {
-    forward.portForward(namespace, podName, [port], socket, null, socket, 3)
-  })
-
-  server.listen(port, 'localhost');
-
-  return () => { server.close() }
-}
-
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -902,6 +902,7 @@ module.exports = {
   kubectlApply,
   kubectlDelete,
   kubectlDeleteDir,
+  kubectlPortForward,
   k8sApply,
   k8sDelete,
   waitForK8sObject,
@@ -936,7 +937,6 @@ module.exports = {
   wait,
   ensureApplicationMapping,
   patchApplicationGateway,
-  eventingSubscription
-  kubectlPortForward,
+  eventingSubscription,
 };
 
