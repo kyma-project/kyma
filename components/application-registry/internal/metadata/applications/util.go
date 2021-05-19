@@ -138,28 +138,50 @@ func replaceService(id string, app *v1alpha1.Application, service v1alpha1.Servi
 	}
 }
 
-func ensureServiceExists(id string, app *v1alpha1.Application) apperrors.AppError {
-	if !serviceExists(id, app) {
+func ensureServiceCanBeReplaced(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+	if !serviceExistsWithId(id, app) {
 		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
 
-	return nil
-}
+	if !serviceExistsWithName(createServiceName(displayName, id), app) {
+		message := fmt.Sprintf("Cannot change service name to %s for service with ID %s", displayName, id)
 
-func ensureServiceNotExists(id string, app *v1alpha1.Application) apperrors.AppError {
-	if serviceExists(id, app) {
-		message := fmt.Sprintf("Service with ID %s already exists", id)
-
-		return apperrors.AlreadyExists(message)
+		return apperrors.WrongInput(message)
 	}
 
 	return nil
 }
 
-func serviceExists(id string, app *v1alpha1.Application) bool {
+func ensureServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+	if serviceExistsWithId(id, app) {
+		message := fmt.Sprintf("Service with ID %s already exists", id)
+
+		return apperrors.AlreadyExists(message)
+	}
+
+	if serviceExistsWithName(createServiceName(displayName, id), app) {
+		message := fmt.Sprintf("Service with name %s already exists", displayName)
+
+		return apperrors.WrongInput(message)
+	}
+
+	return nil
+}
+
+func serviceExistsWithId(id string, app *v1alpha1.Application) bool {
 	return getServiceIndex(id, app) != -1
+}
+
+func serviceExistsWithName(name string, app *v1alpha1.Application) bool {
+	for _, service := range app.Spec.Services {
+		if service.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 func getServiceIndex(id string, app *v1alpha1.Application) int {

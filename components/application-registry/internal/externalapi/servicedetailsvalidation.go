@@ -2,24 +2,23 @@ package externalapi
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 )
 
 type ServiceDetailsValidator interface {
-	Validate(application string, details ServiceDetails) apperrors.AppError
+	Validate(details ServiceDetails) apperrors.AppError
 }
 
-type ServiceDetailsValidatorFunc func(application string, details ServiceDetails) apperrors.AppError
+type ServiceDetailsValidatorFunc func(details ServiceDetails) apperrors.AppError
 
-func (f ServiceDetailsValidatorFunc) Validate(application string, details ServiceDetails) apperrors.AppError {
-	return f(application, details)
+func (f ServiceDetailsValidatorFunc) Validate(details ServiceDetails) apperrors.AppError {
+	return f(details)
 }
 
-func NewServiceDetailsValidator(serviceDefinitionService metadata.ServiceDefinitionService) ServiceDetailsValidator {
-	return ServiceDetailsValidatorFunc(func(application string, details ServiceDetails) apperrors.AppError {
+func NewServiceDetailsValidator() ServiceDetailsValidator {
+	return ServiceDetailsValidatorFunc(func(details ServiceDetails) apperrors.AppError {
 		_, err := govalidator.ValidateStruct(details)
 		if err != nil {
 			return apperrors.WrongInput("Incorrect structure of service definition, %s", err.Error())
@@ -30,14 +29,10 @@ func NewServiceDetailsValidator(serviceDefinitionService metadata.ServiceDefinit
 				"At least one of service definition attributes: 'api', 'events' have to be provided")
 		}
 
-		apperr := validateServiceName(serviceDefinitionService, application, details.Name)
-
-		if apperr != nil {
-			return apperr
-		}
+		var apperr apperrors.AppError
 
 		if details.Api != nil {
-			apperr = validateApiSpec(details.Api.Spec)
+			apperr := validateApiSpec(details.Api.Spec)
 			if apperr != nil {
 				return apperr
 			}
@@ -60,21 +55,6 @@ func NewServiceDetailsValidator(serviceDefinitionService metadata.ServiceDefinit
 
 		return nil
 	})
-}
-
-func validateServiceName(serviceDefinitionService metadata.ServiceDefinitionService, application, serviceName string) apperrors.AppError {
-
-	isAlreadyUsed, err := serviceDefinitionService.ServiceExists(application, serviceName)
-
-	if err != nil {
-		return apperrors.WrongInput("Could not validate service name, %s", err.Error())
-	}
-
-	if isAlreadyUsed == true {
-		return apperrors.WrongInput("Service definition is invalid: Provided service name %s is already used in application %s", serviceName, application)
-	}
-
-	return nil
 }
 
 func validateApiSpec(spec json.RawMessage) apperrors.AppError {

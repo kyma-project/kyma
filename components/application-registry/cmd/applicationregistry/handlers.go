@@ -35,7 +35,7 @@ func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	var metadataHandler externalapi.MetadataHandler
 
 	if serviceDefinitionService != nil {
-		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(serviceDefinitionService), serviceDefinitionService, opt.detailedErrorResponse)
+		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(), serviceDefinitionService, opt.detailedErrorResponse)
 	} else {
 		metadataHandler = externalapi.NewInvalidStateMetadataHandler("Service is not initialized properly.")
 	}

@@ -89,7 +89,6 @@ type ServiceRepository interface {
 	GetAll(appName string) ([]Service, apperrors.AppError)
 	Update(appName string, service Service) apperrors.AppError
 	Delete(appName, id string) apperrors.AppError
-	ServiceExists(appName, serviceName string) (bool, apperrors.AppError)
 }
 
 // NewServiceRepository creates a new ApplicationServiceRepository
@@ -100,7 +99,7 @@ func NewServiceRepository(appManager AppManager) ServiceRepository {
 // Create adds a new Service in Application
 func (r *repository) Create(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceNotExists(service.ID, app); err != nil {
+		if err := ensureServiceCanBeAdded(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
@@ -149,26 +148,10 @@ func (r *repository) GetAll(appName string) ([]Service, apperrors.AppError) {
 	return services, nil
 }
 
-// ServiceExists returns true if a service with given name is defined in the Application
-func (r* repository) ServiceExists(appName, serviceName string) (bool, apperrors.AppError) {
-	app, err := r.getApplication(appName)
-	if err != nil {
-		return false, err
-	}
-
-	for _, service := range app.Spec.Services {
-		if serviceName == service.Name {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 // Update updates a given service defined in Application
 func (r *repository) Update(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceExists(service.ID, app); err != nil {
+		if err := ensureServiceCanBeReplaced(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
@@ -185,7 +168,7 @@ func (r *repository) Update(appName string, service Service) apperrors.AppError 
 // Delete deletes a given service defined in Application
 func (r *repository) Delete(appName, id string) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if !serviceExists(id, app) {
+		if !serviceExistsWithId(id, app) {
 			return nil
 		}
 

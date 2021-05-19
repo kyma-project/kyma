@@ -30,9 +30,6 @@ type ServiceDefinitionService interface {
 	// GetByID returns ServiceDefinition with provided ID.
 	GetByID(application, id string) (serviceDefinition model.ServiceDefinition, err apperrors.AppError)
 
-	// ServiceExists returns true if name is already used as a service name.
-	ServiceExists(application, name string) (isUsed bool, err apperrors.AppError)
-
 	// GetAll returns all ServiceDefinitions.
 	GetAll(application string) (serviceDefinitions []model.ServiceDefinition, err apperrors.AppError)
 
@@ -143,11 +140,6 @@ func (sds *serviceDefinitionService) GetByID(application, id string) (model.Serv
 	}
 
 	return sds.readService(application, service)
-}
-
-// ServiceExists returns true if name is already used as a service name.
-func (sds *serviceDefinitionService) ServiceExists(application, name string) (isUsed bool, err apperrors.AppError) {
-	return sds.applicationRepository.ServiceExists(application, name)
 }
 
 // GetAll returns all ServiceDefinitions.
