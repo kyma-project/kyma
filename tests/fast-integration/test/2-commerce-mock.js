@@ -21,6 +21,7 @@ const {
   k8sApply,
   genRandom,
   retryPromise,
+  debug,
 } = require("../utils");
 
 describe("CommerceMock tests", function () {
@@ -58,13 +59,15 @@ describe("CommerceMock tests", function () {
     const eventId = "event-"+genRandom(5);
     
     // send event using function query parameter send=true
-    await retryPromise(() => axios.post("https://lastorder.local.kyma.dev", { id: eventId }, {params:{send:true}}), 10, 1)
+    await retryPromise(() => axios.post("https://lastorder.local.kyma.dev", { id: eventId }, {params:{send:true}}), 10, 1000)
     // verify if event was received using function query parameter inappevent=eventId
-    let response = await retryPromise(() => axios.get("https://lastorder.local.kyma.dev", { params: { inappevent: eventId } }));
+    await retryPromise(async () => {
+      debug("Waiting for event: ",eventId);
+      let response = await axios.get("https://lastorder.local.kyma.dev", { params: { inappevent: eventId } })
+      expect(response).to.have.nested.property("data.id", eventId, "The same event id expected in the result");
+      expect(response).to.have.nested.property("data.shipped", true, "Order should have property shipped");
+    }, 10, 1000);
     
-    expect(response).to.have.nested.property("data.id", eventId, "The same event id expected in the result");
-    expect(response).to.have.nested.property("data.shipped", true, "Order should have property shipped");
-
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {
