@@ -97,6 +97,6 @@ describe("Monitoring test", function () {
     await assertTimeSeriesExists("kube_pod_container_resource_limits_memory_bytes", ["pod", "container"]);
     await assertTimeSeriesExists("container_cpu_usage_seconds_total", ["container", "pod", "namespace"]);
     await assertTimeSeriesExists("kube_namespace_labels", ["label_istio_injection"]);
-    await assertTimeSeriesExists("kube_service_label", ["namespace"]);
+    await assertTimeSeriesExists("kube_service_labels", ["namespace"]);
   });
 });
