@@ -65,9 +65,12 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
-          - containerPort: {{ .Values.deployment.args.proxyOSPort }}
-            name: http-proxy-os
-          - containerPort: {{ .Values.deployment.args.proxyMPSPort }}
-            name: http-proxy-mps
+      {{- if .Values.global.disableLegacyConnectivity }}
+          - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
+            name: http-proxy
+      {{- else}}
+          - containerPort: {{ .Values.deployment.args.proxyPort }}
+            name: http-proxy
+      {{- end }}
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
