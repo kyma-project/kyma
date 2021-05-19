@@ -1,13 +1,14 @@
-package backend
+package deployment
 
 import (
 	"fmt"
 	"strconv"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +28,15 @@ const (
 	PublisherPortNum         = int32(8080)
 	PublisherMetricsPortName = "http-metrics"
 	PublisherMetricsPortNum  = int32(9090)
+
+	PublisherNamespace              = "kyma-system"
+	PublisherName                   = "eventing-publisher-proxy"
+	AppLabelKey                     = "app.kubernetes.io/name"
+	PublisherSecretClientIDKey      = "client-id"
+	PublisherSecretClientSecretKey  = "client-secret"
+	PublisherSecretTokenEndpointKey = "token-endpoint"
+	PublisherSecretEMSURLKey        = "ems-publish-url"
+	PublisherSecretBEBNamespaceKey  = "beb-namespace"
 )
 
 var (
@@ -46,7 +56,8 @@ func newBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(publisherConfig.Replicas),
+
+			Replicas: utils.Int32Ptr(publisherConfig.Replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -92,7 +103,8 @@ func newNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(publisherConfig.Replicas),
+
+			Replicas: utils.Int32Ptr(publisherConfig.Replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -128,8 +140,8 @@ func newNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 
 func getSecurityContext() *v1.SecurityContext {
 	return &v1.SecurityContext{
-		Privileged:               boolPtr(false),
-		AllowPrivilegeEscalation: boolPtr(false),
+		Privileged:               utils.BoolPtr(false),
+		AllowPrivilegeEscalation: utils.BoolPtr(false),
 	}
 }
 

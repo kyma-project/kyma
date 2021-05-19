@@ -87,7 +87,7 @@ func (c *Commander) Start() error {
 		applicationLister,
 		c.mgr.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		c.mgr.GetEventRecorderFor("eventing-controller"), // TODO Harmonization? Add "-beb"?
+		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
 	)
 

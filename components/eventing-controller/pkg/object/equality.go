@@ -3,6 +3,8 @@ package object
 import (
 	"reflect"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -281,7 +283,6 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	if s1 == nil || s2 == nil {
 		return false
 	}
-
 	if s1 == s2 {
 		return true
 	}
@@ -289,38 +290,21 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	if s1.Backend != s2.Backend {
 		return false
 	}
-
-	if !boolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
+	if !utils.BoolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
 		return false
 	}
-
-	if !boolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
+	if !utils.BoolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
 		return false
 	}
-
-	if !boolPtrEqual(s1.EventingReady, s2.EventingReady) {
+	if !utils.BoolPtrEqual(s1.EventingReady, s2.EventingReady) {
 		return false
 	}
-
 	if s1.BebSecretName != s2.BebSecretName {
 		return false
 	}
-
 	if s1.BebSecretNamespace != s2.BebSecretNamespace {
 		return false
 	}
 
 	return true
-}
-
-func boolPtrEqual(b1, b2 *bool) bool {
-	if b1 == nil && b2 == nil {
-		return true
-	}
-
-	if b1 != nil && b2 != nil {
-		return *b1 == *b2
-	}
-
-	return false
 }
