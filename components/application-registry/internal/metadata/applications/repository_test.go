@@ -551,31 +551,48 @@ func TestUpdateServices(t *testing.T) {
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 
-	/*
-		t.Run("should fail if failed to update App", func(t *testing.T) {
-				// given
-				application := createApplication("production")
-				appManagerMock := &mocks.AppManager{}
-				appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-					Return(application, nil)
 
-				appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).Return(nil, errors.New("failed to update Application"))
+	t.Run("should fail if failed to update App", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
 
-				repository := applications.NewServiceRepository(appManagerMock)
-				require.NotNil(t, repository)
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-				newService1 := createService()
+		appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).
+			Return(nil, errors.New("failed to update Application"))
 
-				// when
-				err := repository.Create("production", newService1)
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
 
-				// then
-				require.Error(t, err)
-				assert.Equal(t, apperrors.CodeInternal, err.Code())
-				appManagerMock.AssertExpectations(t)
-			})
+		service := applications.Service{
+			ID:                  "id1",
+			Name:                "",
+			DisplayName:         "Orders API",
+			LongDescription:     "This is Updated Orders API",
+			ProviderDisplayName: "SAP Labs Poland",
+			Tags:                []string{"orders"},
+			API: &applications.ServiceAPI{
+				GatewayURL:  "https://orders2-gateway.production.svc.cluster.local/",
+				AccessLabel: "access-label-3",
+				TargetUrl:   "https://192.168.10.10",
+				Credentials: applications.Credentials{
+					AuthenticationUrl: "https://192.168.10.10/token",
+					SecretName:        "new_secret",
+				},
+			},
+			Events: true,
+		}
 
-	*/
+		// when
+		err := repository.Update("production", service)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		appManagerMock.AssertExpectations(t)
+	})
 }
 
 func createApplication(name string) *v1alpha1.Application {
