@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -41,7 +42,7 @@ const (
 	useExistingCluster       = false
 	attachControlPlaneOutput = false
 	kymaSystemNamespace      = "kyma-system"
-	timeOut                  = 15 * time.Second
+	timeout                  = 15 * time.Second
 	pollingInterval          = 1 * time.Second
 	eventingBackendName      = "eventing-backend"
 )
@@ -154,6 +155,11 @@ var _ = BeforeSuite(func(done Done) {
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
+	// Use a "live" client to assert against the live state of the API server.
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	Expect(err).NotTo(HaveOccurred())
+	Expect(k8sClient).ToNot(BeNil())
+
 	syncPeriod := time.Second * 2
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
@@ -181,9 +187,6 @@ var _ = BeforeSuite(func(done Done) {
 		err = k8sManager.Start(ctrl.SetupSignalHandler())
 		Expect(err).ToNot(HaveOccurred())
 	}()
-
-	k8sClient = k8sManager.GetClient()
-	Expect(k8sClient).ToNot(BeNil())
 
 	close(done)
 }, 60)
@@ -255,6 +258,42 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		})
 	})
 
+	When("Creating an eventing backend and more than one secret is found label for BEB usage", func() {
+		It("Should take down eventing", func() {
+			By("Creating a new eventing backend")
+			ctx := context.Background()
+			specSpecificBackendCRName := "eventing-backend-" + strconv.Itoa(testId)
+			backend := reconcilertesting.WithEventingBackend(specSpecificBackendCRName, kymaSystemNamespace)
+			ensureEventingBackendCreated(ctx, backend)
+			By("Creating two secrets with the BEB label")
+			bebSecret1 := reconcilertesting.WithBEBMessagingSecret("beb-secret1", kymaSystemNamespace)
+			bebSecret1.Labels = map[string]string{
+				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+			}
+			bebSecret2 := bebSecret1.DeepCopy()
+			bebSecret2.Name = "beb-secret2"
+			ensureBEBSecretCreated(ctx, bebSecret1)
+			ensureBEBSecretCreated(ctx, bebSecret2)
+
+			By("Checking EventingReady status is set to false")
+			updatedBackend := &eventingv1alpha1.EventingBackend{}
+			Eventually(func() bool {
+				lookupKey := types.NamespacedName{
+					Namespace: backend.Namespace,
+					Name:      backend.Name,
+				}
+				if err := k8sClient.Get(ctx, lookupKey, updatedBackend); err != nil {
+					return false
+				}
+				if eventingReady := updatedBackend.Status.EventingReady; eventingReady == nil {
+					return false
+				} else {
+					return *eventingReady
+				}
+			}, timeout, pollingInterval).Should(BeFalse())
+		})
+	})
+
 })
 
 func ensureEventingBackendCreated(ctx context.Context, backend *eventingv1alpha1.EventingBackend) {
@@ -268,7 +307,9 @@ func ensureEventingBackendCreated(ctx context.Context, backend *eventingv1alpha1
 
 	By(fmt.Sprintf("Ensuring an Eventing Backend %q is created", backend.Name))
 	err = k8sClient.Create(ctx, backend)
-	Expect(err).Should(BeNil())
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
 }
 
 // getEventingBackend fetches an EventingBackend using the lookupKey and allows to make assertions on it
@@ -285,7 +326,7 @@ func getEventingBackend(ctx context.Context, evBackend *eventingv1alpha1.Eventin
 		log.Printf("[backend] name:%s ns:%s status:%v", evBackend.Name, evBackend.Namespace,
 			evBackend.Status)
 		return evBackend
-	}, timeOut, pollingInterval)
+	}, timeout, pollingInterval)
 }
 
 func ensureBEBSecretCreated(ctx context.Context, secret *corev1.Secret) {
@@ -315,7 +356,7 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 			return nil
 		}
 		return secret
-	}, timeOut, pollingInterval)
+	}, timeout, pollingInterval)
 }
 
 // getPublisherProxySecret fetches PublisherProxy deployment
@@ -330,7 +371,7 @@ func getPublisherProxyDeployment(ctx context.Context, publisher *appsv1.Deployme
 			return nil
 		}
 		return publisher
-	}, timeOut, pollingInterval)
+	}, timeout, pollingInterval)
 }
 
 type TestNATSCommander struct{}

@@ -57,6 +57,8 @@ type Reconciler struct {
 	bebCommander         commander.Commander
 	bebCommanderStarted  bool
 	client.Client
+	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
+	//  already uses a cache internally (check manager.DefaultNewClient)
 	cache.Cache
 	Log    logr.Logger
 	record record.EventRecorder
@@ -96,13 +98,22 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
 		r.Log.Info(fmt.Sprintf("more than one secret with the label %q=%q exist", BEBBackendSecretLabelKey, BEBBackendSecretLabelValue))
-		backend, err := r.getCurrentBackendCR(ctx)
-		if err == nil && *backend.Status.EventingReady {
-			backend.Status.EventingReady = utils.BoolPtr(false)
-			err := r.Status().Update(ctx, backend)
+		currentBackend, err := r.getCurrentBackendCR(ctx)
+		if err != nil {
+			if k8serrors.IsNotFound(err) {
+				return ctrl.Result{}, nil
+			}
 			return ctrl.Result{}, err
 		}
-		if !k8serrors.IsNotFound(err) {
+		desiredBackend := currentBackend.DeepCopy()
+		desiredBackend.Status = getDefaultBackendStatus()
+		desiredBackend.Status.EventingReady = utils.BoolPtr(false)
+		if object.Semantic.DeepEqual(&desiredBackend.Status, &currentBackend.Status) {
+			r.Log.Info("No need to update backend CR status")
+			return ctrl.Result{}, nil
+		}
+		if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
+			r.Log.Error(err, "error updating EventingBackend status")
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
