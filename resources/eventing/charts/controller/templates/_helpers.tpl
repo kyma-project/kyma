@@ -50,3 +50,17 @@ app.kubernetes.io/name: {{ include "controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 kyma-project.io/dashboard: eventing
 {{- end }}
+
+{{/*
+Create eventing backend name.
+*/}}
+{{- define "eventing.backend.name" -}}
+{{- printf "%s" .Values.eventingBackend.name }}
+{{- end }}
+
+{{/*
+-Nats server service Name
+-*/}}
+{{- define "controller.natsServer.url" -}}
+{{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
+{{- end }}

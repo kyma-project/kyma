@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -279,8 +281,19 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 }
 
 func TestPublisherProxyDeploymentEqual(t *testing.T) {
-	defaultNATSPublisher := deployment.NewNATSPublisherDeployment("publisher", "publisher", 1)
-	defaultBEBPublisher := deployment.NewBEBPublisherDeployment("publisher", "publisher", 1)
+	publisherCfg := env.PublisherConfig{
+		Image:          "publisher",
+		PortNum:        0,
+		MetricsPortNum: 0,
+		ServiceAccount: "publisher-sa",
+		Replicas:       1,
+		RequestsCPU:    "32m",
+		RequestsMemory: "64Mi",
+		LimitsCPU:      "64m",
+		LimitsMemory:   "128Mi",
+	}
+	defaultNATSPublisher := deployment.NewNATSPublisherDeployment(publisherCfg)
+	defaultBEBPublisher := deployment.NewBEBPublisherDeployment(publisherCfg)
 
 	testCases := map[string]struct {
 		getPublisher1  func() *appsv1.Deployment

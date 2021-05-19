@@ -1,4 +1,3 @@
-{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: nats.io/v1alpha2
 kind: NatsCluster
 metadata:
@@ -22,4 +21,3 @@ spec:
   natsConfig:
     debug: true
     trace: true
-{{- end }}
