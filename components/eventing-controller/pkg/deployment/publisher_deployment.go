@@ -43,7 +43,7 @@ var (
 	TerminationGracePeriodSeconds = int64(30)
 )
 
-func newBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -90,7 +90,7 @@ func newBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 	}
 }
 
-func newNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
