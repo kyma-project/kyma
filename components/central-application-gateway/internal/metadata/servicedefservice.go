@@ -3,6 +3,7 @@ package metadata
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/serviceapi"

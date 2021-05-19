@@ -6,14 +6,15 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"regexp"
+	"strings"
+	"unicode"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"regexp"
-	"strings"
-	"unicode"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (

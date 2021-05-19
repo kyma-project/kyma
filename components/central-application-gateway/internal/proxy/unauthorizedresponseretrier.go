@@ -2,10 +2,11 @@ package proxy
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"

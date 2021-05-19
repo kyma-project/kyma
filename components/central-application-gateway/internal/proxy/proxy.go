@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 
 	"github.com/sirupsen/logrus"
 

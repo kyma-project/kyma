@@ -1,9 +1,10 @@
 package proxy
 
 import (
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"

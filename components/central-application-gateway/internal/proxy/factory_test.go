@@ -1,6 +1,10 @@
 package proxy
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata"
 	metadatamocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/mocks"
@@ -11,9 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 type createHandlerFunc func(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, config Config) http.Handler

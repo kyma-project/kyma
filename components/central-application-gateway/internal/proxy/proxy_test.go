@@ -3,12 +3,13 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 
 	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/httperrors"
