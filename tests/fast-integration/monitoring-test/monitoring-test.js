@@ -90,7 +90,7 @@ describe("Monitoring test", function () {
     assert.isEmpty(unhealthyRules, `Following rules are unhealthy: ${unhealthyRules.join(", ")}`);
   });
 
-  it("Metrics used by the Kyma/Function dashboard shoud be exist", async () => {
+  it("Metrics used by the Kyma/Function dashboard shoud exist", async () => {
     await assertTimeSeriesExists("kube_deployment_status_replicas_available", ["deployment", "namespace"]);
     await assertTimeSeriesExists("istio_requests_total", ["destination_service", "response_code", "source_workload"]);
     await assertTimeSeriesExists("container_memory_usage_bytes", ["pod", "container"]);
