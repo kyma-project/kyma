@@ -17,7 +17,7 @@ spec:
     - port: {{ .Values.service.externalapi.port }}
       protocol: TCP
       name: http-api-port
-    - port: {{- if .Values.global.disableLegacyConnectivity }}{{ .Values.service.proxy.portCompass }}{{-else}}{{ .Values.service.proxy.port }}{{- end }}
+    - port: {{- if .Values.global.disableLegacyConnectivity }}{{ .Values.service.proxy.portCompass }}{{- else}}{{ .Values.service.proxy.port }}{{- end }}
       protocol: TCP
       name: http-proxy
   selector:
