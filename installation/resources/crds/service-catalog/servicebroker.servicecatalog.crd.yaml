@@ -1,9 +1,8 @@
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     "helm.sh/resource-policy": keep
-    "api-approved.kubernetes.io": "https://github.com/kyma-project/kyma/pull/11197"
   name: servicebrokers.servicecatalog.k8s.io
   labels:
     svcat: "true"
@@ -13,22 +12,6 @@ spec:
   - name: v1beta1
     storage: true
     served: true
-    additionalPrinterColumns:
-      - name: URL
-        type: string
-        jsonPath: .spec.url
-      - name: Status
-        type: string
-        jsonPath: .status.lastConditionState
-      - name: Age
-        type: date
-        jsonPath: .metadata.creationTimestamp
-    subresources:
-      status: {}
-    schema:
-      openAPIV3Schema:
-        description: Temp desc
-        type: object
   scope: Namespaced
   names:
     plural: servicebrokers
@@ -38,3 +21,15 @@ spec:
     categories:
       - all
       - svcat
+  additionalPrinterColumns:
+    - name: URL
+      type: string
+      JSONPath: .spec.url
+    - name: Status
+      type: string
+      JSONPath: .status.lastConditionState
+    - name: Age
+      type: date
+      JSONPath: .metadata.creationTimestamp
+  subresources:
+    status: {}
