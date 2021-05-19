@@ -1,12 +1,8 @@
 const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 const {
     kubectlPortForward,
-} = require("../utils");
-
-const {
-    convertAxiosError,
-    retryPromise,
 } = require("../utils");
 
 let prometheusPort = 9090;
@@ -36,7 +32,19 @@ async function queryPrometheus(query) {
 }
 
 async function get(path) {
-    let response = await axios.get(`http://localhost:${prometheusPort}${path}`);
+    axiosRetry(axios, {
+        retries: 30,
+        retryDelay: (retryCount) => {
+            return retryCount * 5000;
+        },
+        retryCondition: (error) => {
+            return !error.response || error.response.status != 200;
+        },
+    });
+
+    let response = await axios.get(`http://localhost:${prometheusPort}${path}`, {
+        timeout: 5000,
+    });
     let responseBody = response.data;
     return responseBody;
 }

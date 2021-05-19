@@ -32,6 +32,7 @@
     "@kubernetes/client-node": "0.13.0",
     "adm-zip": "^0.5.3",
     "axios": "^0.21.0",
+    "axios-retry": "^3.1.9",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "p-retry": "^4.2.0",
