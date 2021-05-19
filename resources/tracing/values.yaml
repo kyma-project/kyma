@@ -112,7 +112,8 @@ global:
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
     enabled: true
-
+virtualservice:
+  enabled: true
 kcproxy:
   enabled: true
   replicaCount: 1
