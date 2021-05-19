@@ -68,10 +68,6 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 }
 
 // Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to application.
-//
-//
-// Current implementation allows to register many services with the same name.
-// Service name must be unique since the endpoint for proxying is of the following form:
 func (sds *serviceDefinitionService) Create(application string, serviceDef *model.ServiceDefinition) (string, apperrors.AppError) {
 	if serviceDef.Identifier != "" {
 		apperr := sds.ensureUniqueIdentifier(serviceDef.Identifier, application)
