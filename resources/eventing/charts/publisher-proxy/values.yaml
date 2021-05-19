@@ -17,14 +17,6 @@ serviceAccount:
   # name defines optionally another name than the default name for the service account
   name: ""
 
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 32m
-    memory: 64Mi
-
 nats:
   config:
     port: 8080

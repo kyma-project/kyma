@@ -530,9 +530,9 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
-		desiredPublisher = newNATSPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
+		desiredPublisher = newNATSPublisherDeployment(r.cfg.PublisherConfig)
 	case eventingv1alpha1.BebBackendType:
-		desiredPublisher = newBEBPublisherDeployment(r.cfg.PublisherImage, r.cfg.PublisherServiceAccount, r.cfg.PublisherReplicas)
+		desiredPublisher = newBEBPublisherDeployment(r.cfg.PublisherConfig)
 	default:
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,7 +33,7 @@ var (
 	TerminationGracePeriodSeconds = int64(30)
 )
 
-func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
+func newBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -42,7 +46,7 @@ func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32)
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(replicas),
+			Replicas: int32Ptr(publisherConfig.Replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -53,17 +57,21 @@ func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32)
 					Containers: []v1.Container{
 						{
 							Name:            PublisherName,
-							Image:           image,
+							Image:           publisherConfig.Image,
 							Ports:           getContainerPorts(),
 							Env:             getBEBEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: v1.PullIfNotPresent,
 							SecurityContext: getSecurityContext(),
+							Resources: getResources(publisherConfig.RequestsCPU,
+								publisherConfig.RequestsMemory,
+								publisherConfig.LimitsCPU,
+								publisherConfig.LimitsMemory),
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
-					ServiceAccountName:            serviceAccountName,
+					ServiceAccountName:            publisherConfig.ServiceAccount,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 				},
 			},
@@ -71,7 +79,7 @@ func newBEBPublisherDeployment(image, serviceAccountName string, replicas int32)
 	}
 }
 
-func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32) *appsv1.Deployment {
+func newNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
@@ -84,7 +92,7 @@ func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(replicas),
+			Replicas: int32Ptr(publisherConfig.Replicas),
 			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -95,17 +103,21 @@ func newNATSPublisherDeployment(image, serviceAccountName string, replicas int32
 					Containers: []v1.Container{
 						{
 							Name:            PublisherName,
-							Image:           image,
+							Image:           publisherConfig.Image,
 							Ports:           getContainerPorts(),
 							Env:             getNATSEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: v1.PullIfNotPresent,
 							SecurityContext: getSecurityContext(),
+							Resources: getResources(publisherConfig.RequestsCPU,
+								publisherConfig.RequestsMemory,
+								publisherConfig.LimitsCPU,
+								publisherConfig.LimitsMemory),
 						},
 					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
-					ServiceAccountName:            serviceAccountName,
+					ServiceAccountName:            publisherConfig.ServiceAccount,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
 				},
 			},
@@ -226,5 +238,18 @@ func getNATSEnvVars() []v1.EnvVar {
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
 		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+	}
+}
+
+func getResources(requestsCPU, requestsMemory, limitsCPU, limitsMemory string) v1.ResourceRequirements {
+	return v1.ResourceRequirements{
+		Requests: v1.ResourceList{
+			v1.ResourceCPU:    resource.MustParse(requestsCPU),
+			v1.ResourceMemory: resource.MustParse(requestsMemory),
+		},
+		Limits: v1.ResourceList{
+			v1.ResourceCPU:    resource.MustParse(limitsCPU),
+			v1.ResourceMemory: resource.MustParse(limitsMemory),
+		},
 	}
 }

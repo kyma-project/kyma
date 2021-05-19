@@ -17,8 +17,11 @@ spec:
       terminationGracePeriodSeconds: 10
       securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        # TODO fix me
+        #- image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        #  imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        - image: shazra/eventing-controller:latest
+          imagePullPolicy: Always
           name: controller
           env:
           - name: NATS_URL
@@ -39,6 +42,14 @@ spec:
                 key: client_secret
           - name: WEBHOOK_TOKEN_ENDPOINT
             value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
+          - name: PUBLISHER_REQUESTS_CPU
+            value: {{ .Values.publisherProxy.resources.requests.cpu }}
+          - name: PUBLISHER_REQUESTS_MEMORY
+            value: {{ .Values.publisherProxy.resources.requests.memory }}
+          - name: PUBLISHER_LIMITS_CPU
+            value: {{ .Values.publisherProxy.resources.limits.cpu }}
+          - name: PUBLISHER_LIMITS_MEMORY
+            value: {{ .Values.publisherProxy.resources.limits.memory }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
