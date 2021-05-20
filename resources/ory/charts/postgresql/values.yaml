@@ -97,13 +97,13 @@ serviceAccount:
   # name:
 
 replication:
-  enabled: false
+  enabled: true
   user: repl_user
   password: repl_password
   slaveReplicas: 1
   ## Set synchronous commit mode: on, off, remote_apply, remote_write and local
   ## ref: https://www.postgresql.org/docs/9.6/runtime-config-wal.html#GUC-WAL-LEVEL
-  synchronousCommit: "off"
+  synchronousCommit: "remote_apply"
   ## From the number of `slaveReplicas` defined above, set the number of those that will have synchronous replication
   ## NOTE: It cannot be > slaveReplicas
   numSynchronousReplicas: 0
