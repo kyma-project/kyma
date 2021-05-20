@@ -27,7 +27,8 @@ const {
   debug,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway
+  patchApplicationGateway,
+  eventingSubscription
 } = require("../../../utils");
 
 const {
@@ -79,36 +80,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
-
-function eventingSubscription(eventType, sink, fnName, ns) {
-  return {
-    apiVersion: "eventing.kyma-project.io/v1alpha1",
-    kind: "Subscription",
-    metadata: {
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      filter: {
-        dialect: "beb",
-        filters: [{
-          eventSource: {
-            property: "source", type: "exact", value: "",
-          },
-          eventType: {
-            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          } 
-        }]
-      },
-      protocol: "BEB",
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: "AT-LEAST-ONCE",
-      },
-      sink: sink/*http://lastorder.test.svc.cluster.local*/
-    }
-  }
-}
 
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
@@ -381,7 +352,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      "lastorder",
+      "order-created",
       targetNamespace)
   ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
