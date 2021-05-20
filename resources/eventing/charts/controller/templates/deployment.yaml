@@ -47,6 +47,8 @@ spec:
             value: {{ .Values.publisherProxy.resources.limits.cpu }}
           - name: PUBLISHER_LIMITS_MEMORY
             value: {{ .Values.publisherProxy.resources.limits.memory }}
+          - name: PUBLISHER_IMAGE
+            value: "{{ .Values.global.image.repository }}/{{ .Values.publisherProxy.image.name }}:{{ .Values.publisherProxy.image.tag }}"
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
