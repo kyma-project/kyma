@@ -3,15 +3,13 @@ title: Telemetry and Observability
 type: Observability
 ---
 
-Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data.
-
-Of course, you'll want to view and analyse the data you're collecting. This is where **observability** tools come in. 
+Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyse the data you're collecting. This is where **observability** tools come in. 
 
 ## Collecting data
 
-The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together. 
+The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together.  Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
 
-Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
+> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](link-to-istio-monitoring).
 
 The collected telemetry data are exposed so that you can view and analyse them with the observability tools of your choice.
 
@@ -41,7 +39,6 @@ See how to configure them for your needs under [Configuring In-Cluster Observabi
 
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
-All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it on [Istio monitoring](link-to-istio-monitoring).
 ### External observability
 
 If you want to use other observability tools than the ones within the cluster provided by Kyma out-of-the-box, you can easily do that, too. 
