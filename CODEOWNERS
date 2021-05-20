@@ -19,7 +19,7 @@
 /hack @clebs @suleymanakbas91 @adamwalach
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @PhillipAmend @adamwalach @colunira @mjakobczyk @m00g3n @aerfio @pPrecel @magicmatatjahu
+/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @PhillipAmend @adamwalach @colunira @mjakobczyk @m00g3n @pPrecel
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm
@@ -47,7 +47,7 @@
 /resources/iam-kubeconfig-service/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The `rafter` chart
-/resources/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/resources/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # The `cert-manager` chart
 /resources/cert-manager/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @PhillipAmend @colunira @mjakobczyk
@@ -119,13 +119,13 @@
 /resources/testing/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @crabtree
 
 # The `docs` subchart
-/resources/core/charts/docs/ @m00g3n @aerfio @pPrecel @magicmatatjahu @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @crabtree
+/resources/core/charts/docs/ @m00g3n @pPrecel @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @crabtree
 
 # The `templates` chart
 /resources/core/templates/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @crabtree
 
 # The `templates` chart
-/resources/core/templates/tests/ @PK85 @piotrmiskiewicz @ksputo @m00g3n @aerfio @pPrecel @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @k15r @crabtree
+/resources/core/templates/tests/ @PK85 @piotrmiskiewicz @ksputo @m00g3n @pPrecel @tgorgol @antiheld @jasiu001 @adamwalach @kwiatekus @k15r @crabtree
 
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
@@ -146,13 +146,13 @@
 /resources/api-gateway/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/compass-runtime-agent/ @PK85 @crabtree @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # The `kiali` chart
 /resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash
 
 # The `serverless` chart
-/resources/serverless/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/resources/serverless/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # The `uaa-activator` chart
 /resources/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @jasiu001 @crabtree
@@ -161,7 +161,7 @@
 /resources/permission-controller/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # The `busola-migrator` chart
-/resources/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
+/resources/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Components
 
@@ -191,10 +191,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 
 # Console Backend Service Component
 /components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/components/console-backend-service/internal/gqlschema @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @aerfio @pPrecel @magicmatatjahu
-/components/console-backend-service/internal/domain/*.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @aerfio @pPrecel @magicmatatjahu
-/components/console-backend-service/internal/domain/serverless @aerfio @pPrecel @magicmatatjahu
-/components/console-backend-service/internal/domain/rafter @aerfio @pPrecel @magicmatatjahu
+/components/console-backend-service/internal/gqlschema @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/components/console-backend-service/internal/domain/*.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/components/console-backend-service/internal/domain/serverless @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/components/console-backend-service/internal/domain/rafter @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
@@ -230,13 +230,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/dex-static-user-configurer/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # Function Controller
-/components/function-controller/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/components/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Function Controller Runtimes
-/components/function-runtimes/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/components/function-runtimes/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/compass-runtime-agent/ @PK85 @crabtree @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Event Publisher Proxy
 /components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
@@ -248,7 +248,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
 
 # Busola Migrator Component
-/components/busola-migrator/ @m00g3n @aerfio @pPrecel @dbadura @tgorgol
+/components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Tests
 # Service Catalog acceptance tests
@@ -273,10 +273,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Rafter tests
-/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Function Controller tests
-/tests/function-controller/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/tests/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Tests
 /tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
@@ -300,15 +300,15 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @crabtree @kfurgol @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/compass-runtime-agent/ @PK85 @crabtree @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Fast Integration Tests
-/tests/fast-integration/ @crabtree @pbochynski @adamwalach @aerfio
+/tests/fast-integration/ @crabtree @pbochynski @adamwalach
 
 # Tools
 
 # The failery directory
-/tools/failery/ @m00g3n @aerfio @pPrecel @magicmatatjahu
+/tools/failery/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
@@ -317,7 +317,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
 
 # The tools/gitserver directory
-/tools/gitserver/ @m00g3n @aerfio @pPrecel @magicmatatjahu @tgorgol @kfurgol @dbadura
+/tools/gitserver/ @m00g3n @pPrecel @tgorgol @dbadura @rJankowski93
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @k15r @crabtree @suleymanakbas91
@@ -326,7 +326,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 
 # E2E Rafter Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @aerfio @pPrecel @magicmatatjahu @dbadura @tgorgol @kfurgol
+/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # All .md files
 *.md @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
@@ -335,10 +335,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /docs/ @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @m00g3n @aerfio @pPrecel @magicmatatjahu
+/.kyma-project-io/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @aerfio @pPrecel @magicmatatjahu @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+milv.config.yaml @m00g3n @pPrecel @kazydek @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
 
 # performance tests
 /tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
