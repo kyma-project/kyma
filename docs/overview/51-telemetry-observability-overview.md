@@ -9,7 +9,7 @@ Out of the box, Kyma provides tools to collect and expose **telemetry** data, su
 
 The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together.  Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
 
-> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it on [Istio monitoring](link-to-istio-monitoring).
+> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](link-to-istio-monitoring).
 
 The collected telemetry data are exposed so that you can view and analyse them with the observability tools of your choice.
 
