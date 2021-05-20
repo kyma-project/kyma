@@ -3,4 +3,4 @@ global:
   # Example: kymaOrgName: "kyma-incubator"
   kymaOrgName: "kyma-project"
   docs:
-    clusterAssetGroupsVersion: master
+    clusterAssetGroupsVersion: release-1.23
