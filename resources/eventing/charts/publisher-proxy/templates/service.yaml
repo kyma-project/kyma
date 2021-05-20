@@ -1,3 +1,17 @@
+# Used by application validator pod to send events to
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "legacy-eventing-publisher-proxy" . }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -14,7 +28,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "publisher-proxy.fullname" . }}{{ .Values.metrics.service.nameSuffix }}
+  name: {{ include "publisher-proxy.fullname" . }}-{{ .Values.metrics.service.nameSuffix }}
   labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
 spec:
   type: ClusterIP

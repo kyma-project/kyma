@@ -52,6 +52,13 @@ kyma-project.io/dashboard: eventing
 {{- end }}
 
 {{/*
+Service eventing-event-publisher-proxy is used by application validator pods to send traffic to
+*/}}
+{{- define "legacy-eventing-publisher-proxy" -}}
+{{- printf "%s" "eventing-event-publisher-proxy" }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "publisher-proxy.serviceAccountName" -}}
