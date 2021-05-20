@@ -5,8 +5,6 @@ const {
 } = require("chai");
 
 const {
-  debug,
-  genRandom,
   waitForPodWithLabel,
 } = require("../utils");
 
@@ -25,16 +23,8 @@ const {
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
-  const suffix = genRandom(4);
-  const appName = `app-${suffix}`;
-  const runtimeName = `kyma-${suffix}`;
-  const scenarioName = `test-${suffix}`;
-  const runtimeID = uuid.v4();
-
-  debug(`RuntimeID ${runtimeID}`, `Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
-
-  this.timeout(60 * 60 * 1000 * 3); // 3h
-  this.slow(5000);
+  this.timeout(30 * 60 * 1000); // 30 min
+  this.slow(5 * 1000);
 
   var cancelPortForward;
 
