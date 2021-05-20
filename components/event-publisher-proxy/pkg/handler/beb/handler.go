@@ -1,4 +1,4 @@
-package http
+package beb
 
 import (
 	"context"
@@ -45,7 +45,7 @@ type Handler struct {
 	// Receiver receives incoming HTTP requests
 	Receiver *receiver.HttpMessageReceiver
 	// Sender sends requests to the broker
-	Sender *sender.HttpMessageSender
+	Sender *sender.BebMessageSender
 	// Defaulter sets default values to incoming events
 	Defaulter cev2client.EventDefaulter
 	// LegacyTransformer handles transformations needed to handle legacy events
@@ -63,7 +63,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.HttpMessageSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logrus.Logger, collector *metrics.Collector) *Handler {
 	return &Handler{

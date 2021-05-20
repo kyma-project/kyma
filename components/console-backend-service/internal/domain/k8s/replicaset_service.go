@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
@@ -75,7 +76,7 @@ func (svc *replicaSetService) Update(name, namespace string, update apps.Replica
 		return nil, err
 	}
 
-	updated, err := svc.client.ReplicaSets(namespace).Update(&update)
+	updated, err := svc.client.ReplicaSets(namespace).Update(context.Background(), &update, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (svc *replicaSetService) Update(name, namespace string, update apps.Replica
 }
 
 func (svc *replicaSetService) Delete(name, namespace string) error {
-	return svc.client.ReplicaSets(namespace).Delete(name, nil)
+	return svc.client.ReplicaSets(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *replicaSetService) checkUpdatePreconditions(name string, namespace string, update apps.ReplicaSet) error {

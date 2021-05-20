@@ -97,7 +97,7 @@ func (r *Resolver) SubscribeEventSubscription(ctx context.Context, ownerName, na
 }
 
 func (r *Resolver) getBEBSourceName() (string, error) {
-	secrets, err := r.client.CoreV1().Secrets("kyma-system").Get("eventing", metav1.GetOptions{})
+	secrets, err := r.client.CoreV1().Secrets("kyma-system").Get(context.Background(), "eventing", metav1.GetOptions{})
 
 	if err != nil {
 		return "", err

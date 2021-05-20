@@ -1,10 +1,10 @@
 const {
   ensureCommerceMockLocalTestFixture,
-} = require("./fixtures/commerce-mock");
+} = require("../test/fixtures/commerce-mock");
 const {
 } = require("../utils");
 
-describe("CommerceMock preparation", function () {
+describe("Upgrade test preparation", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";

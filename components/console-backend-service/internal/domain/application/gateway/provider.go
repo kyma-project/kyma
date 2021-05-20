@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -48,10 +49,10 @@ func newProvider(corev1Interface corev1.CoreV1Interface, integrationNamespace st
 
 	svcInformer := cache.NewSharedIndexInformer(&cache.ListWatch{
 		ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
-			return svcInterface.List(options)
+			return svcInterface.List(context.Background(), options)
 		},
 		WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
-			return svcInterface.Watch(options)
+			return svcInterface.Watch(context.Background(), options)
 		},
 	}, &apiv1.Service{},
 		informerResyncPeriod,

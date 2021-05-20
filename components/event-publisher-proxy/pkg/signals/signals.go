@@ -23,6 +23,10 @@ var (
 func SetupSignalHandler() (stopCh <-chan struct{}) {
 	close(onlyOneSignalHandler) // panics when called twice
 
+	return setupStopChannel()
+}
+
+func setupStopChannel() (stopCh <-chan struct{}) {
 	stop := make(chan struct{})
 	osSignal := make(chan os.Signal, 2)
 	signal.Notify(osSignal, shutdownSignals...)
@@ -41,10 +45,16 @@ type signalContext struct {
 	stopCh <-chan struct{}
 }
 
-// NewContext creates a new context with SetupSignalHandler()
-// as our Done() channel.
+// NewContext creates a new singleton context with SetupSignalHandler()
+// as our Done() channel. This method can be called only once.
 func NewContext() context.Context {
 	return &signalContext{stopCh: SetupSignalHandler()}
+}
+
+// NewReusableContext creates a new context with setupStopChannel() as our Done() channel.
+// This method can be called multiple times, returning new contexts.
+func NewReusableContext() context.Context {
+	return &signalContext{stopCh: setupStopChannel()}
 }
 
 // Deadline implements context.Context.

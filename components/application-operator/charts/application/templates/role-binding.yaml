@@ -103,64 +103,7 @@ roleRef:
   name: {{ .Release.Name }}-application-gateway
 {{- end }}
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{.Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{.Release.Name }}-event-service
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ .Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-rules:
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "list", "watch"]
-{{- if .Values.global.podSecurityPolicyEnabled }}
-- apiGroups: ["extensions","policy"]
-  resources: ["podsecuritypolicies"]
-  verbs: ["use"]
-  resourceNames:  
-  - event-service
-{{- end }}
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ .Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-subjects:
-- kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-event-service
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ .Release.Name }}-event-service
----
+
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
