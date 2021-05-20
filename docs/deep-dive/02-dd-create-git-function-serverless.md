@@ -130,54 +130,39 @@ Follows these steps:
 
   If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-  - On your machine, create this YAML file with one of these Secret definitions:
+  a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
+  b. In the **Metadata** tab, enter the Secret name under **Name**.
+  c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
-    - Basic authentication:
+ - Basic authentication:
 
-      ```yaml
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: git-creds-basic
-        namespace: {NAMESPACE}
-      type: Opaque
-      data:
-        username: {USERNAME}
-        password: {PASSWORD_OR_TOKEN}
-      ```
+   ```bash
+   username: {USERNAME}
+   password: {PASSWORD_OR_TOKEN}
+   ```
 
-    - SSH key:
+  - SSH key:
 
+   ```bash
+   key: {SSH_KEY}
+   ```
 
-      ```yaml
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: git-creds-key
-        namespace: {NAMESPACE}
-      type: Opaque
-      data:
-        key: {SSH_KEY}
-      ```
+   >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+   - Confirm by selecting **Create**
 
-  - Go to your Namespace view and select **Deploy new workload** > **Upload YAML**.
-
-  - Locate the YAML file with the Secret and select **Deploy**.
-
-3. In the left navigation panel, go to **Workloads** > **Functions** and select the **Repositories** tab.
+3. In the left navigation panel, go to **Workloads** > **Functions** and select **Connected repositories**.
 
 4. Select **Connect Repository**, fill in the **URL** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
 
     >**NOTE:** If you want to connect a secured repository, change the **Authorization** field from `Public` to `Basic` or `SSH key` and fill in the required fields.
 
-5. Go to the **Functions** tab and select **Create Function**.
+5. Go back to the **Functions** view and select **Create Function**.
 
-6. In the pop-up box, change `Source Type` to `From Repository`. Select the created repository's name and fill in the `Reference` field with `main` and the `Base Directory` field with `orders-service/function`. Select **Create** to confirm changes.
+6. In the pop-up box, change **Source Type** to `Git repository`. Select the created repository's name and fill in the **Reference** field with `main` and the **Base Directory** field with `orders-service/function`. Select **Create** to confirm changes.
 
     The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
-    Make sure that the new Function has the `RUNNING` status in the list of all Functions under the **Functions** view.
+    Make sure that the new Function has the `RUNNING` status.
 
     </details>
 </div>

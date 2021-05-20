@@ -150,9 +150,9 @@ Follows these steps:
 
 2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the **API Rules** section. A pop-up box with the form will appear on the screen.
+3. Switch to the **Configuration** tab and select **Expose Function** in the API Rules section. A pop-up box with the form will appear on the screen.
 
-4. In the **General settings** section:
+4. In the **General settings** section of the pop-up box:
 
     - Enter the API Rule's **Name** matching the Function's name.
 
@@ -160,7 +160,7 @@ Follows these steps:
 
     - Enter **Hostname** to indicate the host on which you want to expose your Function.
 
-5. In the **Access strategies** section, leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods and the `noop` handler selected.
+5. In the **Access strategies** section, select the `noop` handler from the drop-down list and leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods.
 
 6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
