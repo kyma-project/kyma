@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strconv"
 	"testing"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
 	appsv1 "k8s.io/api/apps/v1"
-
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -45,6 +44,8 @@ const (
 	timeout                  = 15 * time.Second
 	pollingInterval          = 1 * time.Second
 	eventingBackendName      = "eventing-backend"
+	bebSecret1name           = "beb-secret-1"
+	bebSecret2name           = "beb-secret-2"
 )
 
 var k8sClient client.Client
@@ -209,8 +210,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		testId++
 	})
 
-	When("Creating a Eventing Backend based on NATS and then switch to BEB", func() {
-		It("Should switch NATS to BEB", func() {
+	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
+		It("Should start with NATS", func() {
 			ctx := context.Background()
 			eventingBackendName := "eventing-backend"
 			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
@@ -219,8 +220,16 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// Expect
 			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
 			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveNATSBackendReady())
+		})
 
-			bebSecret := reconcilertesting.WithBEBMessagingSecret("beb-secret", kymaSystemNamespace)
+	})
+
+	When("A secret labeled for BEB is found", func() {
+		It("Should switch from NATS to BEB", func() {
+			ctx := context.Background()
+			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
+			publisherProxy := new(appsv1.Deployment)
+			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
 				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 			}
@@ -238,41 +247,17 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveBEBBackendReady())
 		})
 
-		// Creating a eventing backend CR and then labelling 2 secrets with BEB
-
 	})
 
-	PWhen("Creating a eventing backend CR and then starting of NATS controller fails", func() {
-		It("Should mark Eventing Backend CR to not ready", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
-
-		})
-	})
-
-	PWhen("Creating a eventing backend CR and then starting of BEB controller fails", func() {
-		It("Should mark Eventing Backend CR to not ready", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
-
-		})
-	})
-
-	When("Creating an eventing backend and more than one secret is found label for BEB usage", func() {
+	When("More than one secret is found label for BEB usage", func() {
 		It("Should take down eventing", func() {
-			By("Creating a new eventing backend")
 			ctx := context.Background()
-			specSpecificBackendCRName := "eventing-backend-" + strconv.Itoa(testId)
-			backend := reconcilertesting.WithEventingBackend(specSpecificBackendCRName, kymaSystemNamespace)
-			ensureEventingBackendCreated(ctx, backend)
-			By("Creating two secrets with the BEB label")
-			bebSecret1 := reconcilertesting.WithBEBMessagingSecret("beb-secret1", kymaSystemNamespace)
-			bebSecret1.Labels = map[string]string{
+			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
+			By("Creating second secret with the BEB label")
+			bebSecret2 := reconcilertesting.WithBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
+			bebSecret2.Labels = map[string]string{
 				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 			}
-			bebSecret2 := bebSecret1.DeepCopy()
-			bebSecret2.Name = "beb-secret2"
-			ensureBEBSecretCreated(ctx, bebSecret1)
 			ensureBEBSecretCreated(ctx, bebSecret2)
 
 			By("Checking EventingReady status is set to false")
@@ -294,6 +279,49 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		})
 	})
 
+	When("Two BEB secrets take down eventing and one secret is removed", func() {
+		It("Should restore eventing status", func() {
+			ctx := context.Background()
+			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
+			By("Deleting the second secret with the BEB label")
+			bebSecret2 := reconcilertesting.WithBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
+			Expect(k8sClient.Delete(ctx, bebSecret2)).Should(BeNil())
+
+			By("Checking EventingReady status is set to true")
+			updatedBackend := &eventingv1alpha1.EventingBackend{}
+			Eventually(func() bool {
+				lookupKey := types.NamespacedName{
+					Namespace: backend.Namespace,
+					Name:      backend.Name,
+				}
+				if err := k8sClient.Get(ctx, lookupKey, updatedBackend); err != nil {
+					return false
+				}
+				if eventingReady := updatedBackend.Status.EventingReady; eventingReady == nil {
+					return false
+				} else {
+					return *eventingReady
+				}
+			}, timeout, pollingInterval).Should(BeTrue())
+			Expect(updatedBackend.Status.Backend).Should(Equal(eventingv1alpha1.BebBackendType))
+		})
+	})
+
+	PWhen("Switching two NATS and then starting NATS controller fails", func() {
+		It("Should mark Eventing Backend CR to not ready", func() {
+			_ = context.Background()
+			_ = fmt.Sprintf("sub-%d", testId)
+
+		})
+	})
+
+	PWhen("Switching to BEB and then starting BEB controller fails", func() {
+		It("Should mark Eventing Backend CR to not ready", func() {
+			_ = context.Background()
+			_ = fmt.Sprintf("sub-%d", testId)
+
+		})
+	})
 })
 
 func ensureEventingBackendCreated(ctx context.Context, backend *eventingv1alpha1.EventingBackend) {
