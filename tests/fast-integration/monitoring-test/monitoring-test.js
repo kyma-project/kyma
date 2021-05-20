@@ -21,7 +21,7 @@ const {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
   buildScrapePoolSet,
-  assertTimeSeriesExist: assertTimeSeriesExists,
+  assertTimeSeriesExist,
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
@@ -91,12 +91,12 @@ describe("Monitoring test", function () {
   });
 
   it("Metrics used by the Kyma/Function dashboard shoud exist", async () => {
-    await assertTimeSeriesExists("kube_deployment_status_replicas_available", ["deployment", "namespace"]);
-    await assertTimeSeriesExists("istio_requests_total", ["destination_service", "response_code", "source_workload"]);
-    await assertTimeSeriesExists("container_memory_usage_bytes", ["pod", "container"]);
-    await assertTimeSeriesExists("kube_pod_container_resource_limits_memory_bytes", ["pod", "container"]);
-    await assertTimeSeriesExists("container_cpu_usage_seconds_total", ["container", "pod", "namespace"]);
-    await assertTimeSeriesExists("kube_namespace_labels", ["label_istio_injection"]);
-    await assertTimeSeriesExists("kube_service_labels", ["namespace"]);
+    await assertTimeSeriesExist("kube_deployment_status_replicas_available", ["deployment", "namespace"]);
+    await assertTimeSeriesExist("istio_requests_total", ["destination_service", "response_code", "source_workload"]);
+    await assertTimeSeriesExist("container_memory_usage_bytes", ["pod", "container"]);
+    await assertTimeSeriesExist("kube_pod_container_resource_limits_memory_bytes", ["pod", "container"]);
+    await assertTimeSeriesExist("container_cpu_usage_seconds_total", ["container", "pod", "namespace"]);
+    await assertTimeSeriesExist("kube_namespace_labels", ["label_istio_injection"]);
+    await assertTimeSeriesExist("kube_service_labels", ["namespace"]);
   });
 });
