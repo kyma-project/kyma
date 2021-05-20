@@ -138,14 +138,14 @@ func replaceService(id string, app *v1alpha1.Application, service v1alpha1.Servi
 	}
 }
 
-func ensureServiceCanBeReplaced(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+func checkServiceCanBeReplaced(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
 	if !serviceExistsWithId(id, app) {
 		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
 
-	if !serviceExistsWithName(createServiceName(displayName, id), app) {
+	if !serviceExistsWithDisplayName(displayName, app) {
 		message := fmt.Sprintf("Cannot change service name to %s for service with ID %s", displayName, id)
 
 		return apperrors.WrongInput(message)
@@ -154,18 +154,18 @@ func ensureServiceCanBeReplaced(id, displayName string, app *v1alpha1.Applicatio
 	return nil
 }
 
-func ensureServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+func checkServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
 	if serviceExistsWithId(id, app) {
 		message := fmt.Sprintf("Service with ID %s already exists", id)
 
 		return apperrors.AlreadyExists(message)
 	}
-	// can we skip that code?
-	//if serviceExistsWithName(createServiceName(displayName, id), app) {
-	//	message := fmt.Sprintf("Service with name %s already exists", displayName)
-	//
-	//	return apperrors.WrongInput(message)
-	//}
+
+	if serviceExistsWithDisplayName(displayName, app) {
+		message := fmt.Sprintf("Service with name %s already exists", displayName)
+
+		return apperrors.WrongInput(message)
+	}
 
 	return nil
 }
@@ -174,9 +174,9 @@ func serviceExistsWithId(id string, app *v1alpha1.Application) bool {
 	return getServiceIndex(id, app) != -1
 }
 
-func serviceExistsWithName(name string, app *v1alpha1.Application) bool {
+func serviceExistsWithDisplayName(name string, app *v1alpha1.Application) bool {
 	for _, service := range app.Spec.Services {
-		if service.Name == name {
+		if service.DisplayName == name {
 			return true
 		}
 	}

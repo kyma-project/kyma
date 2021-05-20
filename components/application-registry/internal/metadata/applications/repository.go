@@ -99,7 +99,7 @@ func NewServiceRepository(appManager AppManager) ServiceRepository {
 // Create adds a new Service in Application
 func (r *repository) Create(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceCanBeAdded(service.ID, service.DisplayName, app); err != nil {
+		if err := checkServiceCanBeAdded(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
@@ -151,7 +151,7 @@ func (r *repository) GetAll(appName string) ([]Service, apperrors.AppError) {
 // Update updates a given service defined in Application
 func (r *repository) Update(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceCanBeReplaced(service.ID, service.DisplayName, app); err != nil {
+		if err := checkServiceCanBeReplaced(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
