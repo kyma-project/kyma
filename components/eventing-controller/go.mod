@@ -6,6 +6,7 @@ require (
 	github.com/avast/retry-go v2.4.1+incompatible
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.3.0
+	github.com/golang/mock v1.4.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525

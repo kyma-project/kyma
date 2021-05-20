@@ -1,3 +1,5 @@
+//go:generate mockgen -package=mocks -destination=mocks/commander.go -source=commander.go
+
 package commander
 
 import (
