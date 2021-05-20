@@ -120,9 +120,11 @@ Follows these steps:
 
     </details>
     <details>
-    <summary label="console-ui">
-    Console UI
+    <summary label="busola-ui">
+    Busola UI
     </summary>
+
+>**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola/blob/main/README.md) to install it with npx.
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
@@ -131,21 +133,23 @@ Follows these steps:
   If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
   a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
+
   b. In the **Metadata** tab, enter the Secret name under **Name**.
+
   c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
- - Basic authentication:
+    - Basic authentication:
 
-   ```bash
-   username: {USERNAME}
-   password: {PASSWORD_OR_TOKEN}
-   ```
+    ```bash
+    username: {USERNAME}
+    password: {PASSWORD_OR_TOKEN}
+    ```
 
-  - SSH key:
+   - SSH key:
 
-   ```bash
-   key: {SSH_KEY}
-   ```
+    ```bash
+    key: {SSH_KEY}
+    ```
 
    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
