@@ -52,6 +52,28 @@ kyma-project.io/dashboard: eventing
 {{- end }}
 
 {{/*
+Selector labels for peerauthentication
+*/}}
+{{- define "publisher-proxy.peerauth.selectorLabels" -}}
+purpose: metrics
+{{- end }}
+
+{{/*
+Labels for metrics service
+*/}}
+{{- define "publisher-proxy.metrics.labels" -}}
+{{ include "publisher-proxy.labels" . }}
+{{ include "publisher-proxy.peerauth.selectorLabels" . }}
+{{- end }}
+
+{{/*
+Selector labels for service monitor
+*/}}
+{{- define "publisher-proxy.service-monitor.selectors" -}}
+app.kubernetes.io/name: {{ include "publisher-proxy.fullname" . }}
+{{- end }}
+
+{{/*
 Service eventing-event-publisher-proxy is used by application validator pods to send traffic to
 */}}
 {{- define "legacy-eventing-publisher-proxy" -}}

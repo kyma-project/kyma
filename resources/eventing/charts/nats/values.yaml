@@ -8,6 +8,8 @@ nats:
 
 clusterSize: 1
 enableMetrics: false
+# TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
+enableServiceMonitor: false
 
 resources:
   limits:

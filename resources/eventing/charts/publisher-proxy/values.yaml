@@ -26,10 +26,9 @@ nats:
     legacyEventTypePrefix: sap.kyma.custom
 
 metrics:
-  service:
-    nameSuffix: "metrics"
   config:
     port: 9090
     portName: http-metrics
-    nameSuffix: "-metrics"
+    nameSuffix: "metrics"
     interval: 30s
+  enableServiceMonitor: false
