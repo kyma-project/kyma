@@ -95,9 +95,7 @@ func (r *repository) GetByEntryName(appName, serviceName, entryName string) (Ser
 
 func getMatchFunction(serviceName string) predicateFunc {
 	return func(service v1alpha1.Service, entry v1alpha1.Entry) bool {
-		return (serviceName == normalizeName(service.DisplayName) ||
-			serviceName == normalizeServiceNameWithId(service.DisplayName, service.ID)) &&
-			entry.Type == specAPIType
+		return serviceName == normalizeName(service.DisplayName) && entry.Type == specAPIType
 	}
 }
 

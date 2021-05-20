@@ -15,84 +15,134 @@ import (
 
 func TestGetServices(t *testing.T) {
 
-	t.Run("should get service by name", func(t *testing.T) {
-		// given
-		app := createApplication("production")
-		managerMock := &mocks.Manager{}
-		managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-			Return(app, nil)
+	type testFunc func(applications.ServiceRepository) (applications.Service, apperrors.AppError)
 
-		repository := applications.NewServiceRepository(managerMock)
-		require.NotNil(t, repository)
+	type testcase struct {
+		description        string
+		application        *v1alpha1.Application
+		testFunc           testFunc
+		expectedServiceAPI applications.ServiceAPI
+	}
 
-		// when
-		service, err := repository.GetByServiceName("production", "service-1")
+	expectedServiceAPI := applications.ServiceAPI{
+		TargetURL: "https://192.168.1.2",
+		Credentials: &applications.Credentials{
+			Type:       "OAuth",
+			SecretName: "SecretName",
+			URL:        "www.example.com/token",
+		},
+	}
 
-		// then
-		require.NotNil(t, service)
-		require.NoError(t, err)
-
-		assert.Equal(t, service.ProviderDisplayName, "SAP Hybris")
-		assert.Equal(t, service.DisplayName, "Service 1")
-		assert.Equal(t, service.LongDescription, "This is Orders API")
-		assert.Equal(t, service.API, &applications.ServiceAPI{
-			TargetURL: "https://192.168.1.2",
-			Credentials: &applications.Credentials{
-				Type:       "OAuth",
-				SecretName: "SecretName",
-				URL:        "www.example.com/token",
+	for _, testCase := range []testcase{
+		{
+			description: "should get service by service name",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByServiceName("production", "service-1")
 			},
+			expectedServiceAPI: expectedServiceAPI,
+		},
+		{
+			description: "should get service by service and entry name",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByEntryName("production", "service-1", "service-entry-1")
+			},
+			expectedServiceAPI: expectedServiceAPI,
+		},
+	} {
+		t.Run(testCase.description, func(t *testing.T) {
+			// given
+			managerMock := &mocks.Manager{}
+			managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+				Return(testCase.application, nil)
+
+			repository := applications.NewServiceRepository(managerMock)
+			require.NotNil(t, repository)
+
+			// when
+			service, err := testCase.testFunc(repository)
+
+			// then
+			require.NotNil(t, service)
+			require.NoError(t, err)
+
+			assert.Equal(t, service.ProviderDisplayName, "SAP Hybris")
+			assert.Equal(t, service.DisplayName, "Service 1")
+			assert.Equal(t, service.LongDescription, "This is Orders API")
+			assert.Equal(t, service.API, &testCase.expectedServiceAPI)
 		})
-	})
+	}
 
-	t.Run("should return not found error if service doesn't exist", func(t *testing.T) {
-		// given
-		app := createApplication("production")
-		reManagerMock := &mocks.Manager{}
-		reManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
-			Return(app, nil)
+	for _, testCase := range []testcase{
+		{
+			description: "should return not found error if service doesn't exist",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByServiceName("production", "not-exists")
+			},
+		},
+		{
+			description: "should return not found error if service doesn't exist",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByEntryName("production", "not-exists", "service-entry-1")
+			},
+			expectedServiceAPI: expectedServiceAPI,
+		},
+		{
+			description: "should return not found error if service entry doesn't exist",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByEntryName("production", "service-1", "not-exists")
+			},
+			expectedServiceAPI: expectedServiceAPI,
+		},
+	} {
+		t.Run("should return not found error if service doesn't exist", func(t *testing.T) {
+			// given
+			managerMock := &mocks.Manager{}
+			managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+				Return(testCase.application, nil)
 
-		repository := applications.NewServiceRepository(reManagerMock)
-		require.NotNil(t, repository)
+			repository := applications.NewServiceRepository(managerMock)
+			require.NotNil(t, repository)
 
-		// when
-		service, err := repository.GetByServiceName("production", "not-name")
+			// when
+			service, err := testCase.testFunc(repository)
 
-		// then
-		assert.Equal(t, applications.Service{}, service)
-		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-	})
+			// then
+			assert.Equal(t, applications.Service{}, service)
+			assert.Equal(t, apperrors.CodeNotFound, err.Code())
+		})
+	}
 }
 
 func createApplication(name string) *v1alpha1.Application {
 
-	reService1Entry := v1alpha1.Entry{
-		Type:        "API",
-		Name:        "service-1",
-		GatewayUrl:  "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
-		AccessLabel: "access-label-1",
-		TargetUrl:   "https://192.168.1.2",
+	service1Entry := v1alpha1.Entry{
+		Type:      "API",
+		Name:      "Service entry 1",
+		TargetUrl: "https://192.168.1.2",
 		Credentials: v1alpha1.Credentials{
 			Type:              "OAuth",
 			SecretName:        "SecretName",
 			AuthenticationUrl: "www.example.com/token",
 		},
 	}
-	reService1 := v1alpha1.Service{
+	service1 := v1alpha1.Service{
 		ID:                  "id1",
 		Name:                "service-1",
 		DisplayName:         "Service 1",
 		LongDescription:     "This is Orders API",
 		ProviderDisplayName: "SAP Hybris",
 		Tags:                []string{"orders"},
-		Entries:             []v1alpha1.Entry{reService1Entry},
+		Entries:             []v1alpha1.Entry{service1Entry},
 	}
 
-	reService2Entry := v1alpha1.Entry{
-		Type:        "API",
-		GatewayUrl:  "http://re-ec-default-f8c614e1-867e-4887-9f6c-334ca2603251.kyma-integration.svc.cluster.local",
-		AccessLabel: "access-label-2",
-		TargetUrl:   "https://192.168.1.3",
+	service2Entry := v1alpha1.Entry{
+		Type:      "API",
+		TargetUrl: "https://192.168.1.3",
 		Credentials: v1alpha1.Credentials{
 			Type:              "OAuth",
 			SecretName:        "SecretName",
@@ -100,25 +150,25 @@ func createApplication(name string) *v1alpha1.Application {
 		},
 	}
 
-	reService2 := v1alpha1.Service{
+	service2 := v1alpha1.Service{
 		ID:                  "id2",
 		DisplayName:         "Products API",
 		LongDescription:     "This is Products API",
 		ProviderDisplayName: "SAP Hybris",
 		Tags:                []string{"products"},
-		Entries:             []v1alpha1.Entry{reService2Entry},
+		Entries:             []v1alpha1.Entry{service2Entry},
 	}
 
-	reSpec1 := v1alpha1.ApplicationSpec{
+	spec1 := v1alpha1.ApplicationSpec{
 		Description: "test_1",
 		Services: []v1alpha1.Service{
-			reService1,
-			reService2,
+			service1,
+			service2,
 		},
 	}
 
 	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
-		Spec:       reSpec1,
+		Spec:       spec1,
 	}
 }

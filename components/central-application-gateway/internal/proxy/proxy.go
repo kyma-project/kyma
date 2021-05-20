@@ -11,8 +11,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -195,11 +193,6 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 		return nil, b, err
 	}
 	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
-}
-
-func logAndHandleErrors(log *logrus.Entry, w http.ResponseWriter, apperr apperrors.AppError) {
-	log.Errorf(apperr.Error())
-	handleErrors(w, apperr)
 }
 
 func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
