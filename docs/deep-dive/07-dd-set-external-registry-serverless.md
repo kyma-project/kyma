@@ -54,7 +54,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
   Docker Hub
   </summary>
 
-1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
+1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
     - **USERNAME** is the name of the account in the Docker Hub.
     - **PASSWORD** is the password for the account in the Docker Hub.
@@ -80,7 +80,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 
 To use GCR, create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
-1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
+1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
     - **SA_NAME** is the name of the service account.
     - **SA_DISPLAY_NAME** is the display name of the service account.
@@ -138,7 +138,7 @@ To use GCR, create a Google service account that has a private key and the **Sto
 
 Create an ACR and a service principal. Follow these steps:
 
-1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
+1. Run the `export {VARIABLE}={value}` command to set up these environment variables, where:
 
     - **AZ_REGISTRY_NAME** is the name of the ACR.
     - **AZ_RESOURCE_GROUP** is the name of the resource group.
@@ -204,7 +204,7 @@ Create an ACR and a service principal. Follow these steps:
 
 ### Override Serverless configuration
 
-Apply the following Secret with an override to a cluster or Minikube. Run:
+Apply this Secret with an override to a cluster or Minikube. Run:
 
 <div tabs name="override" group="external-docker-registry">
   <details>

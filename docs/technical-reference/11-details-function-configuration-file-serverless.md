@@ -3,11 +3,11 @@ title: Function configuration file
 type: Details
 ---
 
-When you initialize a Function (with the `init` command), CLI creates the `config.yaml` file in your workspace folder. This file contains the whole Function's configuration and specification not only for the Function custom resource but also any other related resources you create for it, such as Subscriptions and API Rules.
+When you initialize a Function (with the `init` command), CLI creates the `config.yaml` file in your workspace folder. This file contains the whole Function's configuration and specification not only for the Function custom resource but also any other related resources you create for it, such as Subscriptions and APIRules.
 
 ## Specification for an inline Function
 
-See the sample `config.yaml` for an inline Function for which code and dependencies are stored in the Function custom resource (CR) under the **spec.source** and **spec.deps** fields. This specification also contains the definition of a sample Subscription and API Rules for the Function:
+See the sample `config.yaml` for an inline Function for which code and dependencies are stored in the Function custom resource (CR) under the **spec.source** and **spec.deps** fields. This specification also contains the definition of a sample Subscription and APIRules for the Function:
 
 ```yaml
 name: function-practical-filip5
@@ -159,21 +159,21 @@ See all parameter descriptions.
 | **subscriptions.filter.filters.eventType.property**           | Yes  | Subscription | | Must be set to `type`.    |
 | **subscriptions.filter.filters.eventType.type**          |  No  | Subscription | | Must be set to `exact`.    |
 | **subscriptions.filter.filters.eventType.value**           | Yes  | Subscription | | Defines the name of the event the Function is subscribed to, for example `sap.kyma.custom.demo-app.order.created.v1`.         |
-| **apiRules**    | No | API Rule | | Provides the rules defining how your Function's Service API can be accessed. |
-| **apiRules.name**            | Yes | API Rule | Function name | Specifies the name of the exposed Service. It takes the name from the Function unless you specify otherwise.        |
-| **apiRules.gateway**            | No | API Rule | `kyma-gateway.kyma-system.svc.cluster.local` | Specifies the [Istio Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/).   |
-| **apiRules.service**            | No | API Rule | | Specifies the name of the exposed Service.     |
-| **apiRules.service.host**            | No | API Rule | | Specifies the Service's communication address for inbound external traffic.         |
-| **apiRules.service.port**            | No | API Rule | `80`. | Defines the port on which the Function's Service is exposed. This value cannot be modified. |
-| **apiRules.rules**            | Yes | API Rule | | Specifies the array of [Oathkeeper](https://www.ory.sh/oathkeeper/) access rules.         |
-| **apiRules.rules.methods**            | No | API Rule | | Specifies the list of HTTP request methods available for **apiRules.rules.path** .        |
-| **apiRules.rules.accessStrategies**            | Yes | API Rule | | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/oathkeeper/docs/pipeline/authn/). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, and `allow`.         |
-| **apiRules.rules.path**            | No | API Rule | `/.*` | Specifies the path to the exposed Service.         |
-| **apiRules.rules.path.accessStrategies.handler**            | Yes | API Rule | `allow` | Specifies one of the authenticators used: `oauth2_introspection`, `jwt`, `noop`, or `allow`.       |
-| **apiRules.rules.path.accessStrategies.config.** | No | API Rule |  | Defines the handler used. It can be specified globally or per access rule.         |
-| **apiRules.rules.path.accessStrategies.config.required_scope** | No | API Rule | | Defines the [limits](https://oauth.net/2/scope/) that the client specifies for an access request. In turn, the authorization server issues the access token in the defined scope. |
-| **apiRules.rules.path.accessStrategies.config.jwks_urls** | No | API Rule | |  The URLs where ORY Oathkeeper can retrieve [JSON Web Keys](https://www.ory.sh/oathkeeper/docs/pipeline/authn/#jwt) from to validate the JSON Web Token.  |
-| **apiRules.rules.path.accessStrategies.config.trustedIssuers** | No | API Rule | |  Sets a list of trusted token issuers. |
+| **apiRules**    | No | APIRule | | Provides the rules defining how your Function's Service API can be accessed. |
+| **apiRules.name**            | Yes | APIRule | Function name | Specifies the name of the exposed Service. It takes the name from the Function unless you specify otherwise.        |
+| **apiRules.gateway**            | No | APIRule | `kyma-gateway.kyma-system.svc.cluster.local` | Specifies the [Istio Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/).   |
+| **apiRules.service**            | No | APIRule | | Specifies the name of the exposed Service.     |
+| **apiRules.service.host**            | No | APIRule | | Specifies the Service's communication address for inbound external traffic.         |
+| **apiRules.service.port**            | No | APIRule | `80`. | Defines the port on which the Function's Service is exposed. This value cannot be modified. |
+| **apiRules.rules**            | Yes | APIRule | | Specifies the array of [Oathkeeper](https://www.ory.sh/oathkeeper/) access rules.         |
+| **apiRules.rules.methods**            | No | APIRule | | Specifies the list of HTTP request methods available for **apiRules.rules.path** .        |
+| **apiRules.rules.accessStrategies**            | Yes | APIRule | | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/oathkeeper/docs/pipeline/authn/). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, and `allow`.         |
+| **apiRules.rules.path**            | No | APIRule | `/.*` | Specifies the path to the exposed Service.         |
+| **apiRules.rules.path.accessStrategies.handler**            | Yes | APIRule | `allow` | Specifies one of the authenticators used: `oauth2_introspection`, `jwt`, `noop`, or `allow`.       |
+| **apiRules.rules.path.accessStrategies.config.** | No | APIRule |  | Defines the handler used. It can be specified globally or per access rule.         |
+| **apiRules.rules.path.accessStrategies.config.required_scope** | No | APIRule | | Defines the [limits](https://oauth.net/2/scope/) that the client specifies for an access request. In turn, the authorization server issues the access token in the defined scope. |
+| **apiRules.rules.path.accessStrategies.config.jwks_urls** | No | APIRule | |  The URLs where ORY Oathkeeper can retrieve [JSON Web Keys](https://www.ory.sh/oathkeeper/docs/pipeline/authn/#jwt) from to validate the JSON Web Token.  |
+| **apiRules.rules.path.accessStrategies.config.trustedIssuers** | No | APIRule | |  Sets a list of trusted token issuers. |
 | **env.name**            | No | Function |  |  Specifies the name of the environment variable to export for the Function.  |
 | **env.value**            | No | Function | |  Specifies the value of the environment variable to export for the Function.          |
 | **env.valueFrom**            | No | Function | |  Specifies that you want the Function to use values either from a Secret or a ConfigMap. These objects must be stored in the same Namespace as the Function.     |
@@ -190,4 +190,4 @@ See the detailed descriptions of all related custom resources referred to in the
 
 - [Function](https://kyma-project.io/docs/main/components/serverless/#custom-resource-function)
 - [Subscription](https://kyma-project.io/docs/main/components/eventing/#custom-resource-subscription)
-- [API Rule](https://kyma-project.io/docs/main/components/api-gateway/#custom-resource-api-rule)
+- [APIRule](https://kyma-project.io/docs/main/components/api-gateway/#custom-resource-api-rule)

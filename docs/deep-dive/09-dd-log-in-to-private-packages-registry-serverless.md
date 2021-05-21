@@ -123,7 +123,7 @@ EOF
 kubectl get functions -n $NAMESPACE
 ```
 
-You should get a result similar to the following example:
+You should get a result similar to the this example:
 
 ```bash
 NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE

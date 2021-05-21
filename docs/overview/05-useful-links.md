@@ -3,7 +3,7 @@ title: Useful links
 type: Overview
 ---
 
-If you're interested in learning more about Serverless area, follow these links to:
+If you're interested in learning more about the Serverless area, follow these links to:
 
 - Perform some simple and more advances tasks:
 
@@ -11,7 +11,7 @@ If you're interested in learning more about Serverless area, follow these links 
   - [Expose the Function](#TO-DO)
   - [Manage Functions through Kyma CLI](#TO-DO)
   - [Synchronize Functions in a GitOps fashion](#TO-DO)
-  - [Set an external Docker registry](#TO-DO) for your Function images and [switch between registries at runtime](#TO-DO).
+  - [Set an external Docker registry](#TO-DO) for your Function images and [switch between registries at runtime](#TO-DO)
   - [Log into a private package registry](#TO-DO)
 
 - Troubleshoot Serverless-related issues when:

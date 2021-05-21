@@ -1,5 +1,5 @@
 ---
-title: Create a Function from Git repository sources
+title: Create a Git Function
 type: Deep Dive
 ---
 
@@ -111,7 +111,7 @@ Follows these steps:
     kubectl get functions $GIT_FUNCTION -n $NAMESPACE
     ```
 
-    You should get a result similar to the following example:
+    You should get a result similar to this example:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
@@ -132,28 +132,28 @@ Follows these steps:
 
   If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-  a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
+      a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
-  b. In the **Metadata** tab, enter the Secret name under **Name**.
+      b. In the **Metadata** tab, enter the Secret name under **Name**.
 
-  c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
+      c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
-    - Basic authentication:
+      - Basic authentication:
 
-    ```bash
-    username: {USERNAME}
-    password: {PASSWORD_OR_TOKEN}
-    ```
+      ```bash
+      username: {USERNAME}
+      password: {PASSWORD_OR_TOKEN}
+      ```
 
-   - SSH key:
+      - SSH key:
 
-    ```bash
-    key: {SSH_KEY}
-    ```
+      ```bash
+      key: {SSH_KEY}
+      ```
 
-   >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-   - Confirm by selecting **Create**
+     d. Confirm by selecting **Create**.
 
 3. In the left navigation panel, go to **Workloads** > **Functions** and select **Connected repositories**.
 

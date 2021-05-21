@@ -15,7 +15,7 @@ This tutorial is based on a sample Python Function run on a lightweight [k3d](ht
 
 ## Prerequisites
 
-Before you start, make sure you have the following tools installed:
+Before you start, make sure you have these tools installed:
 
 - [Docker](https://www.docker.com/)
 - [Kyma CLI](#installation-install-kyma-cli)
@@ -35,7 +35,7 @@ Follow these steps:
 
   > **NOTE:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](https://kyma-project.io/docs/main/components/serverless/#details-runtimes).
 
-  The `init` command creates the following files in your workspace folder:
+  The `init` command creates these files in your workspace folder:
 
   - `config.yaml`	with the Function's configuration
 

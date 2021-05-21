@@ -1,5 +1,5 @@
 ---
-title: Expose a Function with an API Rule
+title: Expose a Function with an APIRule
 type: Deep Dive
 ---
 
@@ -12,7 +12,7 @@ When you complete this tutorial, you get a Function that:
 
 >**NOTE:** To learn more about securing your Function, see the [tutorial](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
 
-> **TIP:** Read also about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read also about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Prerequisites
 
@@ -70,11 +70,11 @@ Follows these steps:
   kubectl get apirules $NAME -n $NAMESPACE
   ```
 
-6. Check that the API Rule was created successfully and has the status `OK`:
+6. Check that the APIRule was created successfully and has the status `OK`:
 
-    ```bash
-    kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
-    ```
+  ```bash
+  kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
+  ```
 
 7. Call the Function's external address:
 
@@ -126,7 +126,7 @@ Follows these steps:
     EOF
     ```
 
-3. Check that the API Rule was created successfully and has the status `OK`:
+3. Check that the APIRule was created successfully and has the status `OK`:
 
     ```bash
     kubectl get apirules $NAME -n $NAMESPACE -o=jsonpath='{.status.APIRuleStatus.code}'
@@ -148,15 +148,15 @@ Follows these steps:
 
 >**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola/blob/main/README.md) to install it with npx.
 
-1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
+1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an APIRule.
 
 2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the API Rules section. A pop-up box with the form will appear on the screen.
+3. Switch to the **Configuration** tab and select **Expose Function** in the APIRules section. A pop-up box with the form will appear on the screen.
 
 4. In the **General settings** section of the pop-up box:
 
-    - Enter the API Rule's **Name** matching the Function's name.
+    - Enter the APIRule's **Name** matching the Function's name.
 
     >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
@@ -166,7 +166,7 @@ Follows these steps:
 
 6. Select **Create** to confirm changes. The pop-up box with the form will close.
 
-7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
+7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created APIRule.
 
     >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the hostname of the exposed Kubernetes Service to the `hosts` file on your machine.
 
