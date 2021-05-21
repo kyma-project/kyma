@@ -151,7 +151,7 @@ Follows these steps:
         key: {SSH_KEY}
         ```
 
-      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
    - Confirm by selecting **Create**.
 
