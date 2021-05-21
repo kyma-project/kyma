@@ -30,11 +30,20 @@ describe("Monitoring test", function () {
 
   before(() => {
     cancelPortForward = prometheusPortForward();
-  })
+  });
 
   after(() => {
-    cancelPortForward()
-  })
+    cancelPortForward();
+  });
+
+  it("All monitoring pods should be ready", async () => {
+    let namespace = "kyma-system";
+    await waitForPodWithLabel("app", "alertmanager", namespace);
+    await waitForPodWithLabel("app", "prometheus", namespace);
+    await waitForPodWithLabel("app", "grafana", namespace);
+    await waitForPodWithLabel("app", "prometheus-node-exporter", namespace);
+    await waitForPodWithLabel("app.kubernetes.io/name", "kube-state-metrics", namespace);
+  });
 
   it("All Prometheus targets should be healthy", async () => {
     let activeTargets = await getPrometheusActiveTargets();
@@ -50,15 +59,6 @@ describe("Monitoring test", function () {
     let firingAlerts = allAlerts.filter(a => !shouldIgnoreAlert(a) && a.state == 'firing').map(a => a.labels.alertname);
 
     assert.isEmpty(firingAlerts, `Following alerts are firing: ${firingAlerts.join(", ")}`);
-  });
-
-  it("All monitoring pods should be ready", async () => {
-    let namespace = "kyma-system";
-    await waitForPodWithLabel("app", "alertmanager", namespace);
-    await waitForPodWithLabel("app", "prometheus", namespace);
-    await waitForPodWithLabel("app", "grafana", namespace);
-    await waitForPodWithLabel("app", "prometheus-node-exporter", namespace);
-    await waitForPodWithLabel("app.kubernetes.io/name", "kube-state-metrics", namespace);
   });
 
   it("Each Prometheus scrape pool should have a healthy target", async () => {
