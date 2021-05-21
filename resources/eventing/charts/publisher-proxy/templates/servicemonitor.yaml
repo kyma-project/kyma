@@ -1,3 +1,5 @@
+# TODO Will enable when fixing dashboards
+{{- if .Values.metrics.enableServiceMonitor }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -8,10 +10,11 @@ metadata:
     prometheus: monitoring
 spec:
   selector:
-    matchLabels: {{- include "publisher-proxy.labels" . | nindent 6 }}
+    matchLabels: {{- include "publisher-proxy.service-monitor.selectors" . | nindent 6 }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
   endpoints:
     - port: {{ .Values.metrics.config.portName }}
       interval: {{ .Values.metrics.config.interval }}
+{{- end }}

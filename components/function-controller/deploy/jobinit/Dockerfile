@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
 CGO_ENABLED=0 \
@@ -17,7 +17,7 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 && mv ./jobinit /app/jobinit
 
 # result container
-FROM alpine:3.13.4 as certs
+FROM alpine:3.13.5
 
 RUN apk add --no-cache \
   ca-certificates

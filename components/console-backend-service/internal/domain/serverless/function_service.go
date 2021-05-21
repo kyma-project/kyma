@@ -1,6 +1,7 @@
 package serverless
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -101,7 +102,7 @@ func (svc *functionService) Create(function *v1alpha1.Function) (*v1alpha1.Funct
 		return nil, err
 	}
 
-	created, err := svc.Client.Namespace(function.ObjectMeta.Namespace).Create(u, metav1.CreateOptions{})
+	created, err := svc.Client.Namespace(function.ObjectMeta.Namespace).Create(context.Background(), u, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +131,7 @@ func (svc *functionService) Update(function *v1alpha1.Function) (*v1alpha1.Funct
 		return nil, err
 	}
 
-	updated, err := svc.Client.Namespace(function.ObjectMeta.Namespace).Update(u, metav1.UpdateOptions{})
+	updated, err := svc.Client.Namespace(function.ObjectMeta.Namespace).Update(context.Background(), u, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (svc *functionService) Update(function *v1alpha1.Function) (*v1alpha1.Funct
 }
 
 func (svc *functionService) Delete(function gqlschema.FunctionMetadataInput) error {
-	return svc.Client.Namespace(function.Namespace).Delete(function.Name, &metav1.DeleteOptions{})
+	return svc.Client.Namespace(function.Namespace).Delete(context.Background(), function.Name, metav1.DeleteOptions{})
 }
 
 func (svc *functionService) DeleteMany(functions []gqlschema.FunctionMetadataInput) error {

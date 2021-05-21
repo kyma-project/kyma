@@ -1,13 +1,13 @@
 const {
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
-} = require("./fixtures/commerce-mock");
+} = require("../test/fixtures/commerce-mock");
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
-describe("CommerceMock tests", function () {
+describe("Upgrade test tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;

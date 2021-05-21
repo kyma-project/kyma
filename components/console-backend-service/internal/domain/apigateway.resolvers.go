@@ -15,8 +15,8 @@ func (r *aPIRuleResolver) JSON(ctx context.Context, obj *v1alpha1.APIRule) (gqls
 	return r.ag.JsonField(ctx, obj)
 }
 
-func (r *aPIRuleResolver) OwnerSubscription(ctx context.Context, rule *v1alpha1.APIRule) (*v1.OwnerReference, error) {
-	return r.ag.GetOwnerSubscription(ctx, rule), nil
+func (r *aPIRuleResolver) OwnerSubscription(ctx context.Context, obj *v1alpha1.APIRule) (*v1.OwnerReference, error) {
+	return r.ag.GetOwnerSubscription(ctx, obj), nil
 }
 
 func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {

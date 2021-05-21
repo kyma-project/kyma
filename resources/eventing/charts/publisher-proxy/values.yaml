@@ -5,14 +5,6 @@
 # replicaCount configures the number of replicas for the event-publisher-proxy deployment
 replicaCount: 1
 
-image:
-  # name is the name of the container image for the event-publisher-proxy
-  name: "event-publisher-proxy"
-  # tag is the container tag of the event-publisher-proxy image
-  tag: "88360eed"
-  # pullPolicy is the pullPolicy for the event-publisher-proxy image
-  pullPolicy: "IfNotPresent"
-
 serviceAccount:
   # name defines optionally another name than the default name for the service account
   name: ""
@@ -26,10 +18,9 @@ nats:
     legacyEventTypePrefix: sap.kyma.custom
 
 metrics:
-  service:
-    nameSuffix: "metrics"
   config:
     port: 9090
     portName: http-metrics
-    nameSuffix: "-metrics"
+    nameSuffix: "metrics"
     interval: 30s
+  enableServiceMonitor: false
