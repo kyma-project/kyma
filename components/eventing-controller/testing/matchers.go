@@ -3,8 +3,6 @@ package testing
 import (
 	"reflect"
 
-	appsv1 "k8s.io/api/apps/v1"
-
 	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -173,31 +171,6 @@ func IsK8sUnprocessableEntity() GomegaMatcher {
 
 func BeGreaterThanOrEqual(a int) GomegaMatcher {
 	return WithTransform(func(b int) bool { return b >= a }, BeTrue())
-}
-
-//
-// Eventing Backend matchers
-//
-
-func HaveNATSBackendReady() GomegaMatcher {
-	return WithTransform(func(backend *eventingv1alpha1.EventingBackend) bool {
-		return backend.Status.Backend == eventingv1alpha1.NatsBackendType && *backend.Status.EventingReady && *backend.Status.PublisherProxyReady && *backend.Status.SubscriptionControllerReady
-	}, BeTrue())
-}
-
-func HaveBEBBackendReady() GomegaMatcher {
-	return WithTransform(func(backend *eventingv1alpha1.EventingBackend) bool {
-		return backend.Status.Backend == eventingv1alpha1.BebBackendType && *backend.Status.EventingReady && *backend.Status.PublisherProxyReady && *backend.Status.SubscriptionControllerReady
-	}, BeTrue())
-}
-
-func HaveStatusReady() GomegaMatcher {
-	return WithTransform(func(publisher *appsv1.Deployment) bool {
-		if publisher != nil {
-			return publisher.Status.ReadyReplicas == publisher.Status.AvailableReplicas
-		}
-		return false
-	}, BeTrue())
 }
 
 func HaveValidClientID(clientIDKey, clientID string) GomegaMatcher {

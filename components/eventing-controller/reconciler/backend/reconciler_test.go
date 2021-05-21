@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -48,8 +50,12 @@ const (
 	bebSecret2name           = "beb-secret-2"
 )
 
-var k8sClient client.Client
-var testEnv *envtest.Environment
+var (
+	k8sClient     client.Client
+	testEnv       *envtest.Environment
+	natsCommander = &TestCommander{}
+	bebCommander  = &TestCommander{}
+)
 
 func TestGetSecretForPublisher(t *testing.T) {
 	testCases := []struct {
@@ -169,9 +175,6 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).To(BeNil())
 
-	natsCommander := TestNATSCommander{}
-	bebCommander := TestBEBCommander{}
-
 	err = NewReconciler(
 		context.Background(),
 		natsCommander,
@@ -199,42 +202,50 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("Backend Reconciliation Tests", func() {
-	var testId = 0
-	// enable me for debugging
-	// SetDefaultEventuallyTimeout(time.Minute)
-	// SetDefaultEventuallyPollingInterval(time.Second)
-
-	AfterEach(func() {
-		// increment the test id before each "It" block, which can be used to create unique objects
-		// note: "AfterEach" is used in sync mode, so no need to use locks here
-		testId++
-	})
 
 	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
 		It("Should start with NATS", func() {
 			ctx := context.Background()
-			eventingBackendName := "eventing-backend"
-			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
-			ensureEventingBackendCreated(ctx, backend)
-			publisherProxy := new(appsv1.Deployment)
+			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
 			// Expect
-			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
-			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveNATSBackendReady())
+			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
+				ShouldNot(BeNil())
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.NatsBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
 		})
-
+		It("Should mark eventing as ready when publisher proxy is ready", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.NatsBackendType,
+					EventingReady:               utils.BoolPtr(true),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(true),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
+		})
 	})
 
 	When("A secret labeled for BEB is found", func() {
 		It("Should switch from NATS to BEB", func() {
 			ctx := context.Background()
-			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
-			publisherProxy := new(appsv1.Deployment)
-			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
-			bebSecret.Labels = map[string]string{
-				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
-			}
-			ensureBEBSecretCreated(ctx, bebSecret)
+			// As there is no deployment-controller running in envtest, patching the deployment
+			// in the reconciler will not result in a new deployment status. Let's simulate that!
+			resetPublisherProxyStatus(ctx)
+			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
+			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
+				ShouldNot(BeNil())
 			getPublisherProxySecret(ctx).Should(And(
 				reconcilertesting.HaveValidClientID(deployment.PublisherSecretClientIDKey, "rest-clientid"),
 				reconcilertesting.HaveValidClientSecret(deployment.PublisherSecretClientSecretKey, "rest-client-secret"),
@@ -243,132 +254,203 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				reconcilertesting.HaveValidEMSPublishURL(deployment.PublisherSecretEMSURLKey, "https://rest-messaging/sap/ems/v1/events"),
 				reconcilertesting.HaveValidBEBNamespace(deployment.PublisherSecretBEBNamespaceKey, "test/ns"),
 			))
-			getPublisherProxyDeployment(ctx, publisherProxy).Should(reconcilertesting.HaveStatusReady())
-			getEventingBackend(ctx, backend).Should(reconcilertesting.HaveBEBBackendReady())
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BebBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BebSecretName:               bebSecret1name,
+					BebSecretNamespace:          kymaSystemNamespace,
+				}))
 		})
-
+		It("Should mark eventing as ready when publisher proxy is ready", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BebBackendType,
+					EventingReady:               utils.BoolPtr(true),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(true),
+					BebSecretName:               bebSecret1name,
+					BebSecretNamespace:          kymaSystemNamespace,
+				}))
+		})
 	})
 
 	When("More than one secret is found label for BEB usage", func() {
 		It("Should take down eventing", func() {
 			ctx := context.Background()
-			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
-			By("Creating second secret with the BEB label")
-			bebSecret2 := reconcilertesting.WithBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
-			bebSecret2.Labels = map[string]string{
-				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
-			}
-			ensureBEBSecretCreated(ctx, bebSecret2)
-
+			ensureBEBSecretCreated(ctx, bebSecret2name, kymaSystemNamespace)
 			By("Checking EventingReady status is set to false")
-			updatedBackend := &eventingv1alpha1.EventingBackend{}
-			Eventually(func() bool {
-				lookupKey := types.NamespacedName{
-					Namespace: backend.Namespace,
-					Name:      backend.Name,
-				}
-				if err := k8sClient.Get(ctx, lookupKey, updatedBackend); err != nil {
-					return false
-				}
-				if eventingReady := updatedBackend.Status.EventingReady; eventingReady == nil {
-					return false
-				} else {
-					return *eventingReady
-				}
-			}, timeout, pollingInterval).Should(BeFalse())
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BebBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(false),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
 		})
 	})
 
 	When("Two BEB secrets take down eventing and one secret is removed", func() {
 		It("Should restore eventing status", func() {
 			ctx := context.Background()
-			backend := reconcilertesting.WithEventingBackend(eventingBackendName, kymaSystemNamespace)
 			By("Deleting the second secret with the BEB label")
 			bebSecret2 := reconcilertesting.WithBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
 			Expect(k8sClient.Delete(ctx, bebSecret2)).Should(BeNil())
-
 			By("Checking EventingReady status is set to true")
-			updatedBackend := &eventingv1alpha1.EventingBackend{}
-			Eventually(func() bool {
-				lookupKey := types.NamespacedName{
-					Namespace: backend.Namespace,
-					Name:      backend.Name,
-				}
-				if err := k8sClient.Get(ctx, lookupKey, updatedBackend); err != nil {
-					return false
-				}
-				if eventingReady := updatedBackend.Status.EventingReady; eventingReady == nil {
-					return false
-				} else {
-					return *eventingReady
-				}
-			}, timeout, pollingInterval).Should(BeTrue())
-			Expect(updatedBackend.Status.Backend).Should(Equal(eventingv1alpha1.BebBackendType))
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BebBackendType,
+					EventingReady:               utils.BoolPtr(true),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(true),
+					BebSecretName:               bebSecret1name,
+					BebSecretNamespace:          kymaSystemNamespace,
+				}))
 		})
 	})
 
-	PWhen("Switching two NATS and then starting NATS controller fails", func() {
+	When("Switching to NATS and then starting NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
-
+			ctx := context.Background()
+			natsCommander.startErr = errors.New("I don't want to start")
+			By("Un-label the BEB secret to switch to NATS")
+			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
+			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
+			By("Checking EventingReady status is set to false")
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.NatsBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(false),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
 		})
 	})
 
-	PWhen("Switching to BEB and then starting BEB controller fails", func() {
-		It("Should mark Eventing Backend CR to not ready", func() {
-			_ = context.Background()
-			_ = fmt.Sprintf("sub-%d", testId)
+	When("Eventually starting NATS controller succeeds", func() {
+		It("Should mark Eventing Backend CR to ready", func() {
+			ctx := context.Background()
+			// As there is no deployment-controller running in envtest, patching the deployment
+			// in the reconciler will not result in a new deployment status. Let's simulate that!
+			resetPublisherProxyStatus(ctx)
+			By("NATS controller starts and reports as ready")
+			natsCommander.startErr = nil
+			By("Checking EventingReady status is set to false")
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.NatsBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
+			By("Ensure publisher proxy secret is removed")
+			getPublisherProxySecret(ctx).Should(BeNil())
+		})
+		It("Should mark eventing as ready when publisher proxy is ready", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.NatsBackendType,
+					EventingReady:               utils.BoolPtr(true),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(true),
+					BebSecretName:               "",
+					BebSecretNamespace:          "",
+				}))
+		})
+	})
 
+	PWhen("Switching to BEB and then stopping NATS controller fails", func() {
+		It("Should mark Eventing Backend CR to not ready", func() {
+			// TODO:
 		})
 	})
 })
 
-func ensureEventingBackendCreated(ctx context.Context, backend *eventingv1alpha1.EventingBackend) {
-	By(fmt.Sprintf("Ensuring the test namespace %q is created", kymaSystemNamespace))
-	// create testing namespace
-	namespace := reconcilertesting.WithNamespace(kymaSystemNamespace)
-	err := k8sClient.Create(ctx, namespace)
+func ensureNamespaceCreated(ctx context.Context, namespace string) {
+	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
+	ns := reconcilertesting.WithNamespace(namespace)
+	err := k8sClient.Create(ctx, ns)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).ShouldNot(HaveOccurred())
 	}
+}
 
-	By(fmt.Sprintf("Ensuring an Eventing Backend %q is created", backend.Name))
-	err = k8sClient.Create(ctx, backend)
+func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
+	By(fmt.Sprintf("Ensuring an Eventing Backend %q/%q is created", name, namespace))
+	backend := reconcilertesting.WithEventingBackend(name, namespace)
+	err := k8sClient.Create(ctx, backend)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).Should(BeNil())
 	}
 }
 
-// getEventingBackend fetches an EventingBackend using the lookupKey and allows to make assertions on it
-func getEventingBackend(ctx context.Context, evBackend *eventingv1alpha1.EventingBackend) AsyncAssertion {
-	return Eventually(func() *eventingv1alpha1.EventingBackend {
-		lookupKey := types.NamespacedName{
-			Namespace: evBackend.Namespace,
-			Name:      evBackend.Name,
-		}
-		if err := k8sClient.Get(ctx, lookupKey, evBackend); err != nil {
-			log.Printf("failed to fetch eventingbackend(%s): %v", lookupKey.String(), err)
-			return nil
-		}
-		log.Printf("[backend] name:%s ns:%s status:%v", evBackend.Name, evBackend.Namespace,
-			evBackend.Status)
-		return evBackend
-	}, timeout, pollingInterval)
+func ensurePublisherProxyIsReady(ctx context.Context) {
+	d, err := publisherProxyDeploymentGetter(ctx)()
+	Expect(err).ShouldNot(HaveOccurred())
+	updatedDeployment := d.DeepCopy()
+	updatedDeployment.Status.ReadyReplicas = 1
+	updatedDeployment.Status.Replicas = 1
+	err = k8sClient.Status().Update(ctx, updatedDeployment)
+	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func ensureBEBSecretCreated(ctx context.Context, secret *corev1.Secret) {
-	By(fmt.Sprintf("Ensuring the test namespace %q is created", secret.Namespace))
-	// create testing namespace
-	namespace := reconcilertesting.WithNamespace(secret.Namespace)
-	err := k8sClient.Create(ctx, namespace)
-	if !k8serrors.IsAlreadyExists(err) {
-		Expect(err).ShouldNot(HaveOccurred())
-	}
+func resetPublisherProxyStatus(ctx context.Context) {
+	d, err := publisherProxyDeploymentGetter(ctx)()
+	Expect(err).ShouldNot(HaveOccurred())
+	updatedDeployment := d.DeepCopy()
+	updatedDeployment.Status.Reset()
+	err = k8sClient.Status().Update(ctx, updatedDeployment)
+	Expect(err).ShouldNot(HaveOccurred())
+}
 
-	By(fmt.Sprintf("Ensuring an BEB Secret %q is created", secret.Name))
-	err = k8sClient.Create(ctx, secret)
+func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
+	bebSecret := reconcilertesting.WithBEBMessagingSecret(name, ns)
+	bebSecret.Labels = map[string]string{
+		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+	}
+	By(fmt.Sprintf("Ensuring an BEB Secret %q/%q is created", name, ns))
+	err := k8sClient.Create(ctx, bebSecret)
 	Expect(err).Should(BeNil())
+}
+
+func eventingBackendStatusGetter(ctx context.Context, name, namespace string) func() (*eventingv1alpha1.EventingBackendStatus, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	backend := new(eventingv1alpha1.EventingBackend)
+	return func() (*eventingv1alpha1.EventingBackendStatus, error) {
+		if err := k8sClient.Get(ctx, lookupKey, backend); err != nil {
+			return nil, err
+		}
+		return &backend.Status, nil
+	}
+}
+
+func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: deployment.PublisherNamespace,
+		Name:      deployment.PublisherName,
+	}
+	dep := new(appsv1.Deployment)
+	return func() (*appsv1.Deployment, error) {
+		if err := k8sClient.Get(ctx, lookupKey, dep); err != nil {
+			return nil, err
+		}
+		return dep, nil
+	}
 }
 
 // getPublisherProxyDeployment fetches PublisherProxy deployment
@@ -387,47 +469,22 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 	}, timeout, pollingInterval)
 }
 
-// getPublisherProxySecret fetches PublisherProxy deployment
-func getPublisherProxyDeployment(ctx context.Context, publisher *appsv1.Deployment) AsyncAssertion {
-	return Eventually(func() *appsv1.Deployment {
-		lookupKey := types.NamespacedName{
-			Namespace: deployment.PublisherNamespace,
-			Name:      deployment.PublisherName,
-		}
-		if err := k8sClient.Get(ctx, lookupKey, publisher); err != nil {
-			log.Printf("failed to fetch eventingbackend(%s): %v", lookupKey.String(), err)
-			return nil
-		}
-		return publisher
-	}, timeout, pollingInterval)
+type TestCommander struct {
+	startErr, stopErr error
 }
 
-type TestNATSCommander struct{}
-
-func (t TestNATSCommander) Init(mgr manager.Manager) error {
+func (t *TestCommander) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t TestNATSCommander) Start() error {
-	log.Printf("Test NATS Controller started!")
-	return nil
+func (t *TestCommander) Start() error {
+	return t.startErr
 }
 
-func (t TestNATSCommander) Stop() error {
-	return nil
+func (t *TestCommander) Stop() error {
+	return t.stopErr
 }
 
-type TestBEBCommander struct{}
-
-func (t TestBEBCommander) Init(mgr manager.Manager) error {
-	return nil
-}
-
-func (t TestBEBCommander) Start() error {
-	log.Printf("Test BEB Controller started!")
-	return nil
-}
-
-func (t TestBEBCommander) Stop() error {
-	return nil
+func (t *TestCommander) reset() {
+	t.startErr, t.stopErr = nil, nil
 }

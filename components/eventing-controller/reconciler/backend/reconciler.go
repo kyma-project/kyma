@@ -344,7 +344,8 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 
 	// In case a publisher already exists, make sure during the switch the status of publisherReady is false
 	if publisher != nil {
-		publisherReady = publisher.Status.Replicas == publisher.Status.ReadyReplicas
+		publisherReady = publisher.Status.Replicas == publisher.Status.ReadyReplicas &&
+			*publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 	}
 
 	switch backendType {
@@ -395,6 +396,8 @@ func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 		SubscriptionControllerReady: utils.BoolPtr(false),
 		PublisherProxyReady:         utils.BoolPtr(false),
 		EventingReady:               utils.BoolPtr(false),
+		BebSecretName:               "",
+		BebSecretNamespace:          "",
 	}
 }
 

@@ -34,11 +34,11 @@ type EventingBackendStatus struct {
 
 	// The name of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BebSecretName string `json:"bebSecretName,omitempty"`
+	BebSecretName string `json:"bebSecretName"`
 
 	// The namespace of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BebSecretNamespace string `json:"bebSecretNamespace,omitempty"`
+	BebSecretNamespace string `json:"bebSecretNamespace"`
 }
 
 // +kubebuilder:object:root=true
