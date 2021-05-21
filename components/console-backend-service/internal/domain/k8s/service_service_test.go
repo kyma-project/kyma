@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -215,7 +216,7 @@ func TestServiceService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(update, service)
 
-		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		service, err = client.Services(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(update, service)
 	})
@@ -236,7 +237,7 @@ func TestServiceService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(service)
 
-		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		service, err = client.Services(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.Error(t, err)
 		assert.Nil(service)
 	})
@@ -259,7 +260,7 @@ func TestServiceService_Update(t *testing.T) {
 		assert.True(apierror.IsInvalid(err))
 		assert.Nil(service)
 
-		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		service, err = client.Services(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(exampleService, service)
 	})
@@ -277,7 +278,7 @@ func TestServiceService_Delete(t *testing.T) {
 		err := svc.Delete(exampleName, exampleNamespace)
 
 		require.NoError(t, err)
-		_, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		_, err = client.Services(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		assert.True(errors.IsNotFound(err))
 	})
 }

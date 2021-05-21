@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -138,7 +139,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, replicaSet)
 	})
@@ -159,7 +160,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.Error(t, err)
 		assert.Nil(t, replicaSet)
 	})
@@ -182,7 +183,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		assert.True(t, errors.IsInvalid(err))
 		assert.Nil(t, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleReplicaSet, replicaSet)
 	})
@@ -205,7 +206,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		assert.True(t, errors.IsInvalid(err))
 		assert.Nil(t, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleReplicaSet, replicaSet)
 	})
@@ -226,7 +227,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleReplicaSet, replicaSet)
 	})
@@ -252,7 +253,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		assert.True(t, errors.IsInvalid(err))
 		assert.Nil(t, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleReplicaSet, replicaSet)
 	})
@@ -274,7 +275,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, replicaSet)
 
-		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		replicaSet, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, replicaSet)
 	})
@@ -291,7 +292,7 @@ func TestReplicaSetService_Delete(t *testing.T) {
 		err := svc.Delete(exampleName, exampleNamespace)
 
 		require.NoError(t, err)
-		_, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		_, err = client.ReplicaSets(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		assert.True(t, errors.IsNotFound(err))
 	})
 

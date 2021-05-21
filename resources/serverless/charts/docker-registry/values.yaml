@@ -11,7 +11,7 @@ updateStrategy:
 
 image:
   repository: eu.gcr.io/kyma-project/tpi/registry
-  tag: 2.7.1-b4a98c9f
+  tag: 2.7.1-deb4ee80
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker

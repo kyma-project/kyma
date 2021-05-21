@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
@@ -76,7 +77,7 @@ func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.N
 		},
 	}
 
-	return svc.client.Namespaces().Create(&namespace)
+	return svc.client.Namespaces().Create(context.Background(), &namespace, metav1.CreateOptions{})
 }
 
 func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
@@ -95,7 +96,7 @@ func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.N
 		}
 		namespace.ObjectMeta.Labels = labels
 
-		updated, err = svc.client.Namespaces().Update(namespace)
+		updated, err = svc.client.Namespaces().Update(context.Background(), namespace, metav1.UpdateOptions{})
 
 		return errors.Wrapf(err, "while updating %s [%s]", pretty.Namespace, name)
 	})
@@ -107,7 +108,7 @@ func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.N
 }
 
 func (svc *namespaceService) Delete(name string) error {
-	return svc.client.Namespaces().Delete(name, nil)
+	return svc.client.Namespaces().Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *namespaceService) Subscribe(listener resource.Listener) {

@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
@@ -45,7 +46,7 @@ func (svc *resourceService) Create(namespace string, resource types.Resource) (*
 		Namespace(resource.Namespace).
 		Resource(pluralName).
 		Body(resource.Body).
-		Do()
+		Do(context.Background())
 	err = result.Error()
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating resource")

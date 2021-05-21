@@ -19,7 +19,7 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 RUN CGO_ENABLED=0 go test main_test.go -c
 
-FROM alpine:3.13.4
+FROM alpine:3.13.5
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 

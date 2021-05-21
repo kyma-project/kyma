@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -141,7 +142,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, configMap)
 	})
@@ -162,7 +163,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.Error(t, err)
 		assert.Nil(t, configMap)
 	})
@@ -185,7 +186,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleConfigMap, configMap)
 	})
@@ -208,7 +209,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleConfigMap, configMap)
 	})
@@ -229,7 +230,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleConfigMap, configMap)
 	})
@@ -255,7 +256,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, exampleConfigMap, configMap)
 	})
@@ -277,7 +278,7 @@ func TestConfigMapService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, update, configMap)
 
-		configMap, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		configMap, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, update, configMap)
 	})
@@ -294,7 +295,7 @@ func TestConfigMapService_Delete(t *testing.T) {
 		err := svc.Delete(exampleName, exampleNamespace)
 
 		require.NoError(t, err)
-		_, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		_, err = client.ConfigMaps(exampleNamespace).Get(context.Background(), exampleName, metav1.GetOptions{})
 		assert.True(t, errors.IsNotFound(err))
 	})
 }

@@ -1,0 +1,4 @@
+bottle==0.12.13
+cherrypy==8.9.1
+wsgi-request-logger==0.4.6
+prometheus_client==0.8.0
