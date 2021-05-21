@@ -8,8 +8,8 @@ import (
 type options struct {
 	disableLegacyConnectivity bool
 	externalAPIPort           int
-	proxyOSPort               int
-	proxyMPSPort              int
+	proxyPort                 int
+	proxyPortCompass          int
 	namespace                 string
 	requestTimeout            int
 	skipVerify                bool
@@ -35,8 +35,8 @@ func parseArgs() *options {
 	return &options{
 		disableLegacyConnectivity: *disableLegacyConnectivity,
 		externalAPIPort:           *externalAPIPort,
-		proxyOSPort:               *proxyPort,
-		proxyMPSPort:              *proxyPortCompass,
+		proxyPort:                 *proxyPort,
+		proxyPortCompass:          *proxyPortCompass,
 		namespace:                 *namespace,
 		requestTimeout:            *requestTimeout,
 		skipVerify:                *skipVerify,
@@ -49,6 +49,6 @@ func parseArgs() *options {
 func (o *options) String() string {
 	return fmt.Sprintf("--disableLegacyConnectivity=%t --externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
 		" --requestLogging=%t --proxyCacheTTL=%d",
-		o.disableLegacyConnectivity, o.externalAPIPort, o.proxyOSPort, o.proxyMPSPort, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
+		o.disableLegacyConnectivity, o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
 		o.requestLogging, o.proxyCacheTTL)
 }

@@ -2,9 +2,7 @@ package proxy
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 
 	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/httperrors"
 	metadatamodel "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	proxyMocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/proxy/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
@@ -59,8 +56,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "somepath/Xyz('123')", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -104,8 +99,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/Xyz('123')", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -148,8 +141,6 @@ func TestProxy(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "?$search=XXX", nil)
 		require.NoError(t, err)
-
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -258,8 +249,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -315,7 +304,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		req.Header.Set(httpconsts.HeaderXForwardedClientCert, "C=US;O=Example Organisation;CN=Test User 1")
 		req.Header.Set(httpconsts.HeaderXForwardedFor, "client")
 		req.Header.Set(httpconsts.HeaderXForwardedProto, "http")
@@ -365,8 +353,6 @@ func TestProxy(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "orders/123", nil)
 		require.NoError(t, err)
-
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -431,8 +417,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -485,8 +469,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -538,8 +520,6 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
@@ -589,7 +569,6 @@ func TestProxy(t *testing.T) {
 		defer tsf.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		req.AddCookie(&http.Cookie{Name: "user-cookie", Value: "user-cookie-value"})
 
 		apiExtractorMock := &proxyMocks.APIExtractor{}
@@ -761,15 +740,4 @@ func calledTwice(mockCall *mock.Call) {
 
 func calledOnce(mockCall *mock.Call) {
 	mockCall.Once()
-}
-
-func readErrorResponse(t *testing.T, body io.Reader) httperrors.ErrorResponse {
-	responseBody, err := ioutil.ReadAll(body)
-	require.NoError(t, err)
-
-	var errorResponse httperrors.ErrorResponse
-	err = json.Unmarshal(responseBody, &errorResponse)
-	require.NoError(t, err)
-
-	return errorResponse
 }

@@ -38,11 +38,10 @@ type APIExtractor interface {
 
 // Config stores Proxy config
 type Config struct {
-	SkipVerify          bool
-	ProxyTimeout        int
-	Application         string
-	ProxyCacheTTL       int
-	ManagementPlaneMode bool
+	SkipVerify    bool
+	ProxyTimeout  int
+	Application   string
+	ProxyCacheTTL int
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
