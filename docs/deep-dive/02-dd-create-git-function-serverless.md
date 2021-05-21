@@ -132,28 +132,19 @@ Follows these steps:
 
   If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-  - Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
+    - Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
-  - In the **Metadata** tab, enter the Secret name under **Name**.
+    - In the **Metadata** tab, enter the Secret name under **Name**.
 
-  - In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
+    - In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
-      - Basic authentication:
+      - Basic authentication: `username: {USERNAME}` and `password: {PASSWORD_OR_TOKEN}``
 
-        ```bash
-        username: {USERNAME}
-        password: {PASSWORD_OR_TOKEN}
-        ```
+      - SSH key: `key: {SSH_KEY}`
 
-      - SSH key:
+      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
-        ```bash
-        key: {SSH_KEY}
-        ```
-
-    >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
-
-   - Confirm by selecting **Create**.
+    - Confirm by selecting **Create**.
 
 3. In the left navigation panel, go to **Workloads** > **Functions** and select **Connected repositories**.
 
