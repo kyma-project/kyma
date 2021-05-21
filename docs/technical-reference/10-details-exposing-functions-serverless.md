@@ -15,6 +15,6 @@ To access a Function within the cluster, use the `{function-name}.{namespace}.sv
 
 This way you can specify multiple APIRules with different authentication methods for a single Function service.
 
-> **TIP:** See the [tutorial](#tutorials-expose-a-function-with-an-api-rule) for a detailed example.
+>**TIP:** See the [tutorial](#tutorials-expose-a-function-with-an-api-rule) for a detailed example.
 
-> **NOTE:** If you are using Minikube, before you can access the function you must add the endpoint to the Minikube IP entry in the `/etc/hosts` file.
+>**NOTE:** If you are using Minikube, before you can access the function you must add the endpoint to the Minikube IP entry in the `/etc/hosts` file.

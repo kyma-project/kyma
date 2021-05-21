@@ -11,7 +11,7 @@ This tutorial shows how you can [switch to an external Docker registry](#details
 
 After this change, any Function deployed in the `default` Namespace will store images in this registry.
 
-> **CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
+>**CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
 
 ## Prerequisites
 
@@ -74,7 +74,7 @@ data:
 EOF
 ```
 
-> **CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](#details-switching-registries-at-runtime).
+>**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](#details-switching-registries-at-runtime).
 
 ### Test the registry switch
 

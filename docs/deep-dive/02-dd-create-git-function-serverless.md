@@ -5,7 +5,7 @@ type: Deep Dive
 
 This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/main/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
 
-> **NOTE:** To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
+>**NOTE:** To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](#details-git-source-type).
 
 ## Steps
 
@@ -132,28 +132,28 @@ Follows these steps:
 
   If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
-      a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
+      2a. Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
-      b. In the **Metadata** tab, enter the Secret name under **Name**.
+      2b. In the **Metadata** tab, enter the Secret name under **Name**.
 
-      c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
+      2c. In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
       - Basic authentication:
 
-      ```bash
-      username: {USERNAME}
-      password: {PASSWORD_OR_TOKEN}
-      ```
+        ```bash
+        username: {USERNAME}
+        password: {PASSWORD_OR_TOKEN}
+        ```
 
       - SSH key:
 
-      ```bash
-      key: {SSH_KEY}
-      ```
+        ```bash
+        key: {SSH_KEY}
+        ```
 
-      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type). 
 
-     d. Confirm by selecting **Create**.
+     2d. Confirm by selecting **Create**.
 
 3. In the left navigation panel, go to **Workloads** > **Functions** and select **Connected repositories**.
 

@@ -7,7 +7,7 @@ A newly created or modified Function CR is first updated by the defaulting webho
 
 ## Defaulting webhook
 
-> **NOTE:** It only applies to the [Function custom resource (CR)](#custom-resource-function).
+>**NOTE:** It only applies to the [Function custom resource (CR)](#custom-resource-function).
 
 The defaulting webhook:
 
@@ -30,7 +30,7 @@ The defaulting webhook:
    | **maxReplicas**   | `1`           |
    | **runtime**       | `nodejs14`    |
 
-> **NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
+>**NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
 
 ## Validation webhook
 

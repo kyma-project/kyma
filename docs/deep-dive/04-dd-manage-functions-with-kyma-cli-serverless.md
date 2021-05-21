@@ -9,7 +9,7 @@ This tutorial shows how to use the available CLI commands to manage Functions in
 2. Generate a Function custom resource (CR) from these files and apply it on your cluster (`kyma apply function`).
 3. Fetch the current state of your Function's cluster configuration after it was modified (`kyma sync function`).
 
-> **NOTE:** If you want to debug the Function using an external IDE (Visual Studio Code or GoLand), follow the [Debug a Function](#tutorials-debug-a-function) tutorial.
+>**NOTE:** If you want to debug the Function using an external IDE (Visual Studio Code or GoLand), follow the [Debug a Function](#tutorials-debug-a-function) tutorial.
 
 This tutorial is based on a sample Python Function run on a lightweight [k3d](https://k3d.io/) cluster.
 
@@ -33,13 +33,13 @@ Follow these steps:
 
   Alternatively, use the `--dir {FULL_FOLDER_PATH}` flag to point to the directory where you want to create the Function's source files.
 
-  > **NOTE:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](https://kyma-project.io/docs/main/components/serverless/#details-runtimes).
+  >**NOTE:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](https://kyma-project.io/docs/main/components/serverless/#details-runtimes).
 
   The `init` command creates these files in your workspace folder:
 
   - `config.yaml`	with the Function's configuration
 
-> **NOTE:** See the detailed description of all fields available in the [`config.yaml` file](#details-function-configuration-file).
+>**NOTE:** See the detailed description of all fields available in the [`config.yaml` file](#details-function-configuration-file).
 
   - `handler.py` with the Function's code and the simple "Hello World" logic
   - `requirements.txt` with an empty file for your Function's custom dependencies
@@ -61,7 +61,7 @@ Follow these steps:
   kyma apply function
   ```
 
-  > **TIP:** To apply a Function from a different location, use the `--filename` flag followed by the full path to the `config.yaml` file.
+  >**TIP:** To apply a Function from a different location, use the `--filename` flag followed by the full path to the `config.yaml` file.
 
   Alternatively, use the `--dry-run` flag to list the file that will be created before you apply it. You can also preview the file's content in the format of your choice by adding the `--output {FILE_FORMAT}` flag, such as `--output yaml`.
 

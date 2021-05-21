@@ -5,7 +5,7 @@ type: Configuration
 
 To configure the Serverless chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
-> **TIP:** To learn more about how to use overrides in Kyma, see the following documents:
+>**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >
 > - [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 > - [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
@@ -14,7 +14,7 @@ To configure the Serverless chart, override the default values of its `values.ya
 
 This table lists the configurable parameters, their descriptions, and default values for both cluster and local installations.
 
-> **NOTE:** Limited memory and CPU resources on Minikube directly affect the Serverless functionality as you can process only a limited number of Functions at the same time. Also, their processing time is significantly longer. To process large workloads, we recommend using the cluster setup.
+>**NOTE:** Limited memory and CPU resources on Minikube directly affect the Serverless functionality as you can process only a limited number of Functions at the same time. Also, their processing time is significantly longer. To process large workloads, we recommend using the cluster setup.
 
 | Parameter                                       | Description                                                           | Default value | Minikube override |
 | ----------------------------------------------- | --------------------------------------------------------------------- | ------------- | ----------------- |
@@ -32,4 +32,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **webhook.values.deployment.resources.limits.memory**      | Value defining memory limits for a Function's Deployment.   | `300Mi`       | `300Mi`            |
 | **containers.manager.envs.functionBuildMaxSimultaneousJobs.value**      | Maximum number of build jobs running simultaneously.   | ` "5"`       | ` "5"`            |
 
-> **TIP:** To learn more, read the official documentation on [resource units in Kubernetes](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes).
+>**TIP:** To learn more, read the official documentation on [resource units in Kubernetes](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes).

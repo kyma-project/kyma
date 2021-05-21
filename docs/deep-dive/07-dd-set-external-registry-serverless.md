@@ -9,7 +9,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
 - [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/)
 
-> **CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
+>**CAUTION:** Function images are not cached in the Docker Hub. The reason is that this registry is not compatible with the caching logic defined in [Kaniko](https://cloud.google.com/cloud-build/docs/kaniko-cache) that Serverless uses for building images.
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
     - **SERVER_ADDRESS** is the server address of the Docker Hub. At the moment, Kyma only supports the `https://index.docker.io/v1/` server address.
     - **REGISTRY_ADDRESS** is the registry address in the Docker Hub.
 
-    > **TIP:** Usually the Docker registry address is the same as the account name.
+    >**TIP:** Usually the Docker registry address is the same as the account name.
 
     Example:
 
@@ -287,7 +287,7 @@ EOF
   </details>
 </div>
 
-> **CAUTION:** If you want to set an external Docker registry before you install Kyma, manually apply the Secret to the cluster before you run the installation script.
+>**CAUTION:** If you want to set an external Docker registry before you install Kyma, manually apply the Secret to the cluster before you run the installation script.
 
 ### Trigger installation
 

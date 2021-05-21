@@ -120,7 +120,7 @@ source:
 
 See all parameter descriptions.
 
-> **NOTE:** The **Default value** column specifies the values that Kyma CLI sets when applying resources on a cluster, if no other values are provided.
+>**NOTE:** The **Default value** column specifies the values that Kyma CLI sets when applying resources on a cluster, if no other values are provided.
 
 | Parameter         | Required | Related custom resource | Default value  | Description|
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |

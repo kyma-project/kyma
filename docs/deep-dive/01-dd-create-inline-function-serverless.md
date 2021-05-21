@@ -5,9 +5,9 @@ type: Deep Dive
 
 This tutorial shows how you can create a simple "Hello World" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
 
-> **TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](#tutorials-create-a-function-from-git-repository-sources).
+>**TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](#tutorials-create-a-function-from-git-repository-sources).
 
-> **TIP:** Read about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Steps
 
@@ -126,7 +126,7 @@ Follow these steps:
 
 >**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola/blob/main/README.md) to install it with npx.
 
-1.  From the drop-down list in the top navigation panel, create a Namespace or select one.
+1.  Create a Namespace or select one from the drop-down list in the top navigation panel.
 
 2.  In the left navigation panel, go to **Workloads** > **Functions** and select **Create Function**.
 

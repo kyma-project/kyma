@@ -5,7 +5,7 @@ type: Details
 
 When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used by Kubernetes to pull deployed Functions' images from the internal registry. These credentials also allow Kaniko to push any images to the registry each time a Function is created or updated.
 
-> **NOTE:** If you [install Serverless with overrides](#tutorials-set-an-external-docker-registry), you disable the internal registry and specify an external one to use. The `serverless-registry-config-default` Secret will then contain credentials to the specified external registry instead of the internal one.
+>**NOTE:** If you [install Serverless with overrides](#tutorials-set-an-external-docker-registry), you disable the internal registry and specify an external one to use. The `serverless-registry-config-default` Secret will then contain credentials to the specified external registry instead of the internal one.
 
 Once you have Serverless up and running, you can switch to an external registry:
 
@@ -43,13 +43,13 @@ See this example:
    registryAddress: {VALUE}
   ```
 
-  > **CAUTION:** If you have your own Secret CR in a Namespace and you don't want the system to override it with any cluster-wide configuration, add the `serverless.kyma-project.io/managed-by: user` label to that Secret CR.
+  >**CAUTION:** If you have your own Secret CR in a Namespace and you don't want the system to override it with any cluster-wide configuration, add the `serverless.kyma-project.io/managed-by: user` label to that Secret CR.
 
 ## Cluster-wide external registry
 
 To switch to one external registry in the whole cluster, you must create a Secret CR in the `kyma-system` Namespace. The Secret CR must meet the same [requirements](#namespace-scoped-external-registry) as in the case of the Namespace-scoped setup, but you must also add the `serverless.kyma-project.io/config: credentials` label. This label ensures the Secret CR gets propagated to all Namespaces. Such a cluster-wide configuration will take precedence over a Namespace-scoped one unless the Namespace-scoped configuration blocks it with the `serverless.kyma-project.io/managed-by: user` label.
 
-> **CAUTION:** Do not remove the `serverless.kyma-project.io/config: credentials` label from the existing Secret CR in the `kyma-system` Namespace. If you do so, you will not be able to remove the Secret CR afterwards.
+>**CAUTION:** Do not remove the `serverless.kyma-project.io/config: credentials` label from the existing Secret CR in the `kyma-system` Namespace. If you do so, you will not be able to remove the Secret CR afterwards.
 
 ### How this works
 

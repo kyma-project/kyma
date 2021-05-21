@@ -34,7 +34,7 @@ This phase involves creating and processing the Job CR. It ends successfully whe
 
 Updating an existing Function requires an image rebuild only if you change the Function's body (**source**) or dependencies (**deps**). An update of Function's other configuration details, such as environment variables, replicas, resources, or labels, does not require image rebuild as it only affects the Deployment.
 
-> **NOTE:** Each time you update Function's configuration, the Function Controller deletes all previous Job CRs for the given Function's **UID**.
+>**NOTE:** Each time you update Function's configuration, the Function Controller deletes all previous Job CRs for the given Function's **UID**.
 
 ![Function built](./assets/built.svg)
 

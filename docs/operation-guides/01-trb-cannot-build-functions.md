@@ -52,7 +52,7 @@ To do this, follow these steps:
   kubectl delete pod serverless-docker-registry-6869bd57dc-9tqxp -n kyma-system
   ```
 
-  > **CAUTION:** Do not remove Pods named `serverless-docker-registry-self-signed-cert-{UNIQUE_ID}`.
+  >**CAUTION:** Do not remove Pods named `serverless-docker-registry-self-signed-cert-{UNIQUE_ID}`.
 
 3. Search for the `serverless-docker-registry` PVC again to check that the capacity was resized:
 
