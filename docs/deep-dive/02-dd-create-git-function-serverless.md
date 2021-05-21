@@ -130,7 +130,7 @@ Follows these steps:
 
 2. Create a Secret (optional).
 
-  If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
+    If you use a secured repository, you must first create a Secret with either basic (username and password or token) or SSH key authentication to this repository in the same Namespace as the Function. To do that, follow these sub-steps:
 
     - Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
@@ -138,11 +138,11 @@ Follows these steps:
 
     - In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
 
-      - Basic authentication: `username: {USERNAME}` and `password: {PASSWORD_OR_TOKEN}``
+        - Basic authentication: `username: {USERNAME}` and `password: {PASSWORD_OR_TOKEN}``
 
-      - SSH key: `key: {SSH_KEY}`
+        - SSH key: `key: {SSH_KEY}`
 
-      >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
+        >**NOTE:** Read more about the [supported authentication methods](#details-git-source-type).
 
     - Confirm by selecting **Create**.
 
