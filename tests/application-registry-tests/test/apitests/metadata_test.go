@@ -420,7 +420,7 @@ func TestApiMetadata(t *testing.T) {
 			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			updatedServiceDefinition := testkit.ServiceDetails{
-				Name:        "updated test service",
+				Name:        "test service",
 				Provider:    "updated service provider",
 				Description: "updated service description",
 				Api: &testkit.API{
@@ -471,7 +471,7 @@ func TestApiMetadata(t *testing.T) {
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotNil(t, updatedService)
-			require.Equal(t, "updated test service", updatedService.Name)
+			require.Equal(t, "test service", updatedService.Name)
 			require.Equal(t, "updated service provider", updatedService.Provider)
 			require.Equal(t, "updated service description", updatedService.Description)
 			require.True(t, strings.HasPrefix(updatedService.Identifier, identifier))
@@ -489,7 +489,7 @@ func TestApiMetadata(t *testing.T) {
 			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			updatedServiceDefinition := testkit.ServiceDetails{
-				Name:        "updated test service",
+				Name:        "test service",
 				Provider:    "updated service provider",
 				Description: "updated service description",
 				Api: &testkit.API{
@@ -539,10 +539,55 @@ func TestApiMetadata(t *testing.T) {
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotNil(t, updatedService)
-			require.Equal(t, "updated test service", updatedService.Name)
+			require.Equal(t, "test service", updatedService.Name)
 			require.Equal(t, "updated service provider", updatedService.Provider)
 			require.Equal(t, "updated service description", updatedService.Description)
 			require.True(t, strings.HasPrefix(updatedService.Identifier, identifier))
+		})
+
+		t.Run("should return bad request 400 when updating service with different name", func(t *testing.T) {
+			// given
+			identifier := testkit.GenerateIdentifier()
+			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(oauthAPI)
+
+			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
+			require.NoError(t, err)
+			require.Equal(t, http.StatusOK, postStatusCode)
+
+			defer deleteService(t, metadataServiceClient, postResponseData)
+
+			updatedServiceDefinition := testkit.ServiceDetails{
+				Name:        "updated test service",
+				Provider:    "updated service provider",
+				Description: "updated service description",
+				Api: &testkit.API{
+					TargetUrl: "http://updated-service.com",
+					Credentials: &testkit.Credentials{
+						Basic: &testkit.Basic{
+							Username: "username",
+							Password: "password",
+						},
+					},
+					Spec: testkit.ApiRawSpec,
+				},
+				Events: &testkit.Events{
+					Spec: testkit.EventsRawSpec,
+				},
+				Documentation: &testkit.Documentation{
+					DisplayName: "documentation name",
+					Description: "documentation description",
+					Type:        "documentation type",
+					Tags:        []string{"tag1", "tag2"},
+					Docs:        []testkit.DocsObject{{Title: "docs title", Type: "docs type", Source: "docs source"}},
+				},
+			}
+
+			// when
+			statusCode, err := metadataServiceClient.UpdateService(t, postResponseData.ID, updatedServiceDefinition)
+
+			// then
+			require.NoError(t, err)
+			require.Equal(t, http.StatusBadRequest, statusCode)
 		})
 
 		t.Run("should return not found 404 when updating not existing service", func(t *testing.T) {
