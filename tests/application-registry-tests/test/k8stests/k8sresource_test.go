@@ -707,7 +707,7 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Api: &testkit.API{

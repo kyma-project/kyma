@@ -701,6 +701,7 @@ func TestApiMetadata(t *testing.T) {
 			initialServiceDefinition1 := prepareServiceDetails(identifier1, map[string]string{}).WithAPI(oauthAPI)
 			identifier2 := testkit.GenerateIdentifier()
 			initialServiceDefinition2 := prepareServiceDetails(identifier2, map[string]string{}).WithAPI(oauthAPI)
+			initialServiceDefinition2.Name = "test service 2"
 
 			postStatusCode1, postResponseData1, err := metadataServiceClient.CreateService(t, initialServiceDefinition1)
 			require.NoError(t, err)
