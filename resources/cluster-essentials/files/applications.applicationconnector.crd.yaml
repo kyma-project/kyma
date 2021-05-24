@@ -1,4 +1,4 @@
-apiVersion: apiextensions.k8s.io/v1
+apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
@@ -6,108 +6,103 @@ metadata:
   name: applications.applicationconnector.kyma-project.io
 spec:
   group: applicationconnector.kyma-project.io
+  version: v1alpha1
   scope: Cluster
   names:
     plural: applications
     singular: application
     kind: Application
     shortNames:
-      - app
-  versions:
-    - name: v1alpha1
-      served: true
-      storage: true
-      schema:
-        openAPIV3Schema:
+    - app
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
           properties:
-            spec:
+            compassMetadata:
+              type: object
+              required:
+              - "authentication"
               properties:
-                compassMetadata:
+                authentication:
                   type: object
                   required:
-                    - "authentication"
+                  - "clientIds"
                   properties:
-                    authentication:
+                    clientIds:
+                      type: array
+                      items:
+                        type: string
+            accessLabel:
+              type: string
+              maxLength: 63
+              pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+            services:
+              type: array
+              items:
+                type: object
+                required:
+                - "id"
+                - "name"
+                - "displayName"
+                - "providerDisplayName"
+                - "description"
+                - "entries"
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  identifier:
+                    type: string
+                  displayName:
+                    type: string
+                  description:
+                    type: string
+                  longDescription:
+                    type: string
+                  providerDisplayName:
+                    type: string
+                  entries:
+                    type: array
+                    items:
                       type: object
                       required:
-                        - "clientIds"
+                      - "type"
                       properties:
-                        clientIds:
-                          type: array
-                          items:
-                            type: string
-                accessLabel:
-                  type: string
-                  maxLength: 63
-                  pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
-                services:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - "id"
-                      - "name"
-                      - "displayName"
-                      - "providerDisplayName"
-                      - "description"
-                      - "entries"
-                    properties:
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      identifier:
-                        type: string
-                      displayName:
-                        type: string
-                      description:
-                        type: string
-                      longDescription:
-                        type: string
-                      providerDisplayName:
-                        type: string
-                      entries:
-                        type: array
-                        items:
+                        type:
+                          type: string
+                          enum:
+                          - "API"
+                          - "Events"
+                        gatewayUrl:
+                          type: string
+                        accessLabel:
+                          type: string
+                          maxLength: 63
+                          pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+                        targetUrl:
+                          type: string
+                        credentials:
                           type: object
                           required:
-                            - "type"
+                          - "type"
+                          - "secretName"
                           properties:
                             type:
                               type: string
-                              enum:
-                                - "API"
-                                - "Events"
-                            gatewayUrl:
+                            secretName:
                               type: string
-                            accessLabel:
+                            authenticationUrl:
                               type: string
-                              maxLength: 63
-                              pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
-                            targetUrl:
-                              type: string
-                            credentials:
+                            csrfInfo:
                               type: object
                               required:
-                                - "type"
-                                - "secretName"
+                              - "tokenEndpointURL"
                               properties:
-                                type:
+                                tokenEndpointURL:
                                   type: string
-                                secretName:
-                                  type: string
-                                authenticationUrl:
-                                  type: string
-                                csrfInfo:
-                                  type: object
-                                  required:
-                                    - "tokenEndpointURL"
-                                  properties:
-                                    tokenEndpointURL:
-                                      type: string
-                      tags:
-                        type: array
-                        items:
-                          type: string
-              type: object
-          type: object
+                  tags:
+                    type: array
+                    items:
+                      type: string
