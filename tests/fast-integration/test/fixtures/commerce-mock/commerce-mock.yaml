@@ -31,9 +31,9 @@ spec:
               value: "true"
             - name: RENEWCERT_JOB_CRON
               value: "00 00 */12 * * *"
-          # volumeMounts:
-          # - mountPath: "/app/keys"
-          #   name: commerce-mock-volume
+          volumeMounts:
+            - mountPath: "/app/keys"
+              name: commerce-mock-volume
           resources:
             requests:
               memory: "150Mi"
@@ -41,10 +41,23 @@ spec:
             limits:
               memory: "350Mi"
               cpu: "300m"
-      # volumes:
-      # - name: commerce-mock-volume
-      #   persistentVolumeClaim:
-      #     claimName: commerce-mock
+      volumes:
+        - name: commerce-mock-volume
+          persistentVolumeClaim:
+            claimName: commerce-mock
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: commerce-mock
+  namespace: mocks
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  #storageClassName: null #From the docs: leave storageClassName field as nil. This will cause a PV to be automatically provisioned for the user with the default StorageClass in the cluster.
 ---
 apiVersion: v1
 kind: Service
