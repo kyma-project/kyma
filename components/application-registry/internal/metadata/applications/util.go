@@ -145,7 +145,7 @@ func checkServiceCanBeReplaced(id, displayName string, app *v1alpha1.Application
 		return apperrors.NotFound(message)
 	}
 
-	if !serviceExistsWithDisplayName(displayName, app) {
+	if !serviceExistsWithNormalizedDisplayName(displayName, app) {
 		message := fmt.Sprintf("Cannot change service name to %s for service with ID %s", displayName, id)
 
 		return apperrors.WrongInput(message)
@@ -161,7 +161,7 @@ func checkServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) a
 		return apperrors.AlreadyExists(message)
 	}
 
-	if serviceExistsWithDisplayName(displayName, app) {
+	if serviceExistsWithNormalizedDisplayName(displayName, app) {
 		message := fmt.Sprintf("Service with name %s already exists", displayName)
 
 		return apperrors.WrongInput(message)
@@ -174,9 +174,12 @@ func serviceExistsWithId(id string, app *v1alpha1.Application) bool {
 	return getServiceIndex(id, app) != -1
 }
 
-func serviceExistsWithDisplayName(name string, app *v1alpha1.Application) bool {
+func serviceExistsWithNormalizedDisplayName(displayName string, app *v1alpha1.Application) bool {
+
+	normalizedDisplayName := normalizeName(displayName)
+
 	for _, service := range app.Spec.Services {
-		if service.DisplayName == name {
+		if normalizeName(service.DisplayName) == normalizedDisplayName {
 			return true
 		}
 	}
@@ -192,6 +195,21 @@ func getServiceIndex(id string, app *v1alpha1.Application) int {
 	}
 
 	return -1
+}
+
+func normalizeName(displayName string) string {
+
+	// remove all characters, which is not alpha numeric
+	normalizedName := nonAlphaNumeric.ReplaceAllString(displayName, "-")
+	// to lower
+	normalizedName = strings.Map(unicode.ToLower, normalizedName)
+	// trim dashes if exists
+	normalizedName = strings.TrimSuffix(normalizedName, "-")
+	if len(normalizedName) > 57 {
+		normalizedName = normalizedName[:57]
+	}
+
+	return strings.TrimPrefix(normalizedName, "-")
 }
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
