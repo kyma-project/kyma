@@ -466,7 +466,7 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Api: &testkit.API{
@@ -512,7 +512,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              true,
@@ -557,7 +557,7 @@ func TestK8sResources(t *testing.T) {
 		resourceName := dummyApp.Name + "-" + serviceId
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Events: &testkit.Events{
@@ -590,7 +590,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              false,
@@ -625,7 +625,7 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Api: &testkit.API{
@@ -668,7 +668,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              true,
@@ -749,7 +749,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              true,
@@ -788,7 +788,7 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Api: &testkit.API{
@@ -829,7 +829,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              true,
@@ -874,17 +874,16 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		var initialSecret *v1core.Secret
-		var error error
 
 		t.Run("should create k8s initialSecret with certificate", func(t *testing.T) {
-			initialSecret, error = k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
-			require.NoError(t, error)
+			initialSecret, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
+			require.NoError(t, err)
 
 			testkit.CheckK8sCertificateGenSecret(t, initialSecret, resourceName, expectedLabels, "commonName")
 		})
 
 		updatedServiceDefinition := testkit.ServiceDetails{
-			Name:        "updated test service",
+			Name:        "test service",
 			Provider:    "updated service provider",
 			Description: "updated service description",
 			Api: &testkit.API{
@@ -927,7 +926,7 @@ func TestK8sResources(t *testing.T) {
 
 			expectedServiceData := testkit.ServiceData{
 				ServiceId:           serviceId,
-				DisplayName:         "updated test service",
+				DisplayName:         "test service",
 				ProviderDisplayName: "updated service provider",
 				LongDescription:     "updated service description",
 				HasAPI:              true,
