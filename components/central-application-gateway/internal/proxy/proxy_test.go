@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
@@ -21,10 +22,253 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	secretName = "my-secret"
-	apiName    = "my-api"
-)
+func TestProxyRequest(t *testing.T) {
+	forbiddenHeaders := []string{
+		httpconsts.HeaderXForwardedClientCert,
+		httpconsts.HeaderXForwardedFor,
+		httpconsts.HeaderXForwardedProto,
+		httpconsts.HeaderXForwardedHost,
+	}
+	type apiExtractor struct {
+		targetPath        string
+		requestParameters *authorization.RequestParameters
+		credentials       authorization.Credentials
+	}
+	type request struct {
+		url    string
+		header http.Header
+	}
+	type expectedProxyRequest struct {
+		targetUrl string
+		header    http.Header
+	}
+	type testcase struct {
+		name                 string
+		request              request
+		apiExtractor         apiExtractor
+		expectedProxyRequest expectedProxyRequest
+	}
+	tests := []testcase{
+		{
+			name: "Should proxy without escaping the URL path characters when target URL does not contain path",
+			request: request{
+				url: "/somepath/Xyz('123')",
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/somepath/Xyz('123')",
+			},
+		},
+		{
+			name: "should proxy without escaping the URL path characters when target URL contains path",
+			request: request{
+				url: "/Xyz('123')",
+			},
+			apiExtractor: apiExtractor{
+				targetPath: "/somepath",
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/somepath/Xyz('123')",
+			},
+		},
+		{
+			name: "should proxy without escaping the URL path characters when target URL contains full path",
+			request: request{
+				url: "?$search=XXX",
+			},
+			apiExtractor: apiExtractor{
+				targetPath: "/somepath/Xyz('123')",
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/somepath/Xyz('123')?$search=XXX",
+			},
+		},
+		{
+			name: "should proxy and add additional query parameters",
+			request: request{
+				url: "/orders/123",
+			},
+			apiExtractor: apiExtractor{
+				requestParameters: &authorization.RequestParameters{
+					QueryParameters: &map[string][]string{
+						"param1": {"param-value-1"},
+						"param2": {"param-value-2.1", "param-value-2.2"},
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123?param1=param-value-1&param2=param-value-2.1&param2=param-value-2.2",
+			},
+		},
+		{
+			name: "should proxy and add additional headers",
+			request: request{
+				url: "/orders/123",
+				header: map[string][]string{
+					"X-Request1": {"request-value-1"},
+					"X-Request2": {"request-value-2.1", "request-value-2.2"},
+				},
+			},
+			apiExtractor: apiExtractor{
+				requestParameters: &authorization.RequestParameters{
+					Headers: &map[string][]string{
+						"X-Custom1": {"custom-value-1"},
+						"X-Custom2": {"custom-value-2.1", "custom-value-2.2"},
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+				header: map[string][]string{
+					"X-Custom1":  {"custom-value-1"},
+					"X-Custom2":  {"custom-value-2.1", "custom-value-2.2"},
+					"X-Request1": {"request-value-1"},
+					"X-Request2": {"request-value-2.1", "request-value-2.2"},
+				},
+			},
+		},
+		{
+			name: "should proxy and remove headers",
+			request: request{
+				url: "/orders/123",
+				header: map[string][]string{
+					httpconsts.HeaderXForwardedClientCert: {"C=US;O=Example Organisation;CN=Test User 1"},
+					httpconsts.HeaderXForwardedFor:        {"client"},
+					httpconsts.HeaderXForwardedProto:      {"http"},
+					httpconsts.HeaderXForwardedHost:       {"demo.example.com"},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+			},
+		},
+		{
+			name: "should proxy BasicAuth auth calls",
+			request: request{
+				url: "/orders/123",
+			},
+			apiExtractor: apiExtractor{
+				credentials: authorization.Credentials{
+					BasicAuth: &authorization.BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+				// authorization header is not set by the mock
+			},
+		},
+		{
+			name: "should proxy OAuth calls",
+			request: request{
+				url: "/orders/123",
+			},
+			apiExtractor: apiExtractor{
+				credentials: authorization.Credentials{
+					OAuth: &authorization.OAuth{
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+						URL:          "www.example.com/token",
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+				// authorization header is not set by the mock
+			},
+		},
+		{
+			name: "should fail with Bad Gateway error when failed to get OAuth token",
+			request: request{
+				url: "/orders/123",
+			},
+			apiExtractor: apiExtractor{
+				credentials: authorization.Credentials{
+					OAuth: &authorization.OAuth{
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+						URL:          "www.example.com/token",
+					},
+				},
+			},
+			expectedProxyRequest: expectedProxyRequest{
+				targetUrl: "/orders/123",
+				// authorization header is not set by the mock
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			ts := NewTestServer(func(req *http.Request) {
+				expectedUrl, err := url.Parse(tc.expectedProxyRequest.targetUrl)
+				assert.Nil(t, err)
+				// compare maps objects, rather than strings built from unordered maps
+				assert.Equal(t, expectedUrl.Query(), req.URL.Query())
+				assert.Equal(t, expectedUrl.RequestURI(), req.URL.RequestURI())
+
+				for name, values := range tc.expectedProxyRequest.header {
+					assert.Equal(t, values, req.Header.Values(name))
+				}
+				for _, name := range forbiddenHeaders {
+					assert.Equal(t, "", req.Header.Get(name))
+				}
+			})
+			defer ts.Close()
+
+			req, err := http.NewRequest(http.MethodGet, tc.request.url, nil)
+			require.NoError(t, err)
+			for name, values := range tc.request.header {
+				req.Header[name] = values
+			}
+			authStrategyMock := &authMock.Strategy{}
+			authStrategyMock.
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+				Return(nil).
+				Once()
+
+			credentialsMatcher := createCredentialsMatcher(&tc.apiExtractor.credentials)
+			authStrategyFactoryMock := &authMock.StrategyFactory{}
+			authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock).Once()
+
+			csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+			apiExtractorMock := &proxyMocks.APIExtractor{}
+			apiExtractorMock.On("Get", metadatamodel.APIIdentifier{
+				Application: "app",
+				Service:     "service",
+				Entry:       "entry",
+			}).Return(&metadatamodel.API{
+				TargetUrl:         ts.URL + tc.apiExtractor.targetPath,
+				Credentials:       &tc.apiExtractor.credentials,
+				RequestParameters: tc.apiExtractor.requestParameters,
+			}, nil).Once()
+
+			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
+				return metadatamodel.APIIdentifier{
+					Application: "app",
+					Service:     "service",
+					Entry:       "entry",
+				}, path, nil
+			}, createProxyConfig(10))
+			rr := httptest.NewRecorder()
+
+			// when
+			handler.ServeHTTP(rr, req)
+
+			// then
+			assert.Equal(t, http.StatusOK, rr.Code)
+			assert.Equal(t, "test", rr.Body.String())
+
+			apiExtractorMock.AssertExpectations(t)
+			authStrategyFactoryMock.AssertExpectations(t)
+			authStrategyMock.AssertExpectations(t)
+			csrfFactoryMock.AssertExpectations(t)
+			csrfStrategyMock.AssertExpectations(t)
+		})
+	}
+}
 
 func TestProxy(t *testing.T) {
 
@@ -45,469 +289,6 @@ func TestProxy(t *testing.T) {
 
 		return apiIdentifier, path, nil
 	}
-
-	t.Run("should proxy without escaping the URL path characters when target URL does not contain path", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "somepath/Xyz('123')", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:   ts.URL,
-			Credentials: credentials,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy without escaping the URL path characters when target URL contains path", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/Xyz('123')", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:   ts.URL + "/somepath",
-			Credentials: credentials,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy without escaping the URL path characters when target URL contains full path", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "/somepath/Xyz('123')?$search=XXX", req.URL.String())
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "?$search=XXX", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:   ts.URL + "/somepath/Xyz('123')",
-			Credentials: credentials,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy and add additional query parameters", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "param-value-1", req.URL.Query().Get("param1"))
-
-			assert.Equal(t, 2, len(req.URL.Query()["param2"]))
-			assert.Equal(t, "param-value-2.1", req.URL.Query().Get("param2"))
-			assert.Equal(t, "param-value-2.1", req.URL.Query()["param2"][0])
-			assert.Equal(t, "param-value-2.2", req.URL.Query()["param2"][1])
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		require.NoError(t, err)
-
-		req.Host = "test-uuid-1.namespace.svc.cluster.local"
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		requestParameters := &authorization.RequestParameters{
-			QueryParameters: &map[string][]string{
-				"param1": {"param-value-1"},
-				"param2": {"param-value-2.1", "param-value-2.2"},
-			},
-		}
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:         ts.URL,
-			Credentials:       credentials,
-			RequestParameters: requestParameters,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		apiExtractorMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy and add addidtional headers", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "custom-value-1", req.Header.Get("X-Custom1"))
-
-			assert.Equal(t, 2, len(req.Header["X-Custom2"]))
-			assert.Equal(t, "custom-value-2.1", req.Header.Get("X-Custom2"))
-			assert.Equal(t, "custom-value-2.1", req.Header["X-Custom2"][0])
-			assert.Equal(t, "custom-value-2.2", req.Header["X-Custom2"][1])
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		requestParameters := &authorization.RequestParameters{
-			Headers: &map[string][]string{
-				"X-Custom1": {"custom-value-1"},
-				"X-Custom2": {"custom-value-2.1", "custom-value-2.2"},
-			},
-		}
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:         ts.URL,
-			Credentials:       credentials,
-			RequestParameters: requestParameters,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy and remove headers", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedClientCert))
-			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedFor))
-			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedProto))
-			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedHost))
-			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		require.NoError(t, err)
-
-		req.Header.Set(httpconsts.HeaderXForwardedClientCert, "C=US;O=Example Organisation;CN=Test User 1")
-		req.Header.Set(httpconsts.HeaderXForwardedFor, "client")
-		req.Header.Set(httpconsts.HeaderXForwardedProto, "http")
-		req.Header.Set(httpconsts.HeaderXForwardedHost, "demo.example.com")
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Once()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:   ts.URL,
-			Credentials: credentials,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		apiExtractorMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy and use internal cache", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodGet)
-			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "orders/123", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).
-			Twice()
-
-		credentials := &authorization.Credentials{}
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledTwice)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl:   ts.URL,
-			Credentials: credentials,
-		}, nil).Once()
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-
-		// given
-		nextReq, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		nextReq.Host = "test-uuid-1.namespace.svc.cluster.local"
-		rr = httptest.NewRecorder()
-
-		//when
-		handler.ServeHTTP(rr, nextReq)
-
-		//then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-		apiExtractorMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy OAuth calls", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodGet)
-			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
-		defer ts.Close()
-
-		tsOAuth := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodPost)
-			assert.Equal(t, req.RequestURI, "/token")
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil)
-
-		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL+"/token")
-
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl: ts.URL,
-			Credentials: &authorization.Credentials{
-				OAuth: &authorization.OAuth{
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-					URL:          tsOAuth.URL + "/token",
-				},
-			},
-		}, nil)
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-
-		apiExtractorMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should proxy BasicAuth auth calls", func(t *testing.T) {
-		// given
-		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodGet)
-			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
-		defer ts.Close()
-
-		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		require.NoError(t, err)
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil)
-
-		credentialsMatcher := createBasicCredentialsMatcher("username", "password")
-
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
-
-		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
-
-		apiExtractorMock := &proxyMocks.APIExtractor{}
-		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
-			TargetUrl: ts.URL,
-			Credentials: &authorization.Credentials{
-				BasicAuth: &authorization.BasicAuth{
-					Username: "username",
-					Password: "password",
-				},
-			},
-		}, nil)
-
-		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-
-		apiExtractorMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-		csrfFactoryMock.AssertExpectations(t)
-		csrfStrategyMock.AssertExpectations(t)
-	})
 
 	t.Run("should fail with Bad Gateway error when failed to get OAuth token", func(t *testing.T) {
 		// given
@@ -695,7 +476,25 @@ func createProxyConfig(proxyTimeout int) Config {
 	}
 }
 
-func createOAuthCredentialsMatcher(clientID, clientSecret, url string) func(*authorization.Credentials) bool {
+type CredentialsMatcherFunc func(*authorization.Credentials) bool
+
+func createCredentialsMatcher(creds *authorization.Credentials) CredentialsMatcherFunc {
+	if creds.BasicAuth != nil {
+		return createBasicCredentialsMatcher(creds.BasicAuth.Username, creds.BasicAuth.Password)
+	}
+	if creds.OAuth != nil {
+		return createOAuthCredentialsMatcher(creds.OAuth.ClientID, creds.OAuth.ClientSecret, creds.OAuth.URL)
+	}
+	return createEmptyCredentialsMatcher()
+}
+
+func createEmptyCredentialsMatcher() CredentialsMatcherFunc {
+	return func(c *authorization.Credentials) bool {
+		return c != nil && *c == authorization.Credentials{}
+	}
+}
+
+func createOAuthCredentialsMatcher(clientID, clientSecret, url string) CredentialsMatcherFunc {
 	return func(c *authorization.Credentials) bool {
 		return c.OAuth != nil && c.OAuth.ClientID == clientID &&
 			c.OAuth.ClientSecret == clientSecret &&
@@ -703,7 +502,7 @@ func createOAuthCredentialsMatcher(clientID, clientSecret, url string) func(*aut
 	}
 }
 
-func createBasicCredentialsMatcher(username, password string) func(*authorization.Credentials) bool {
+func createBasicCredentialsMatcher(username, password string) CredentialsMatcherFunc {
 	return func(c *authorization.Credentials) bool {
 		return c.BasicAuth != nil && c.BasicAuth.Username == username &&
 			c.BasicAuth.Password == password
