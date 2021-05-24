@@ -74,7 +74,7 @@ function init() {
       --generator=run-pod/v1 \
       --restart=Never \
       --overrides='{"apiVersion":"v1","metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}' \
-      --image=tutum/curl:latest -- sleep 1d > /dev/null 2>&1
+      --image=eu.gcr.io/kyma-project/external/curlimages/curl:7.70.0 -- sleep 1d > /dev/null 2>&1
 
     while ! kubectl get pod --namespace "${_pod_ns}" "${_pod_name}" -o json | jq -er 'select(.status.phase=="Running")' >/dev/null 2>&1; do
       printf "."
