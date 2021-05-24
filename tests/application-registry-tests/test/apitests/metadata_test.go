@@ -739,7 +739,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService1.Provider)
 			require.Equal(t, "service description", postedService1.Description)
 			require.True(t, strings.HasPrefix(postedService1.Identifier, identifier1))
-			require.Equal(t, "test service", postedService2.Name)
+			require.Equal(t, "test service 2", postedService2.Name)
 			require.Equal(t, "service provider", postedService2.Provider)
 			require.Equal(t, "service description", postedService2.Description)
 			require.True(t, strings.HasPrefix(postedService2.Identifier, identifier2))

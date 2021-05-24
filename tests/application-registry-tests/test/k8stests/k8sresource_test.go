@@ -874,10 +874,11 @@ func TestK8sResources(t *testing.T) {
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		var initialSecret *v1core.Secret
+		var error error
 
 		t.Run("should create k8s initialSecret with certificate", func(t *testing.T) {
-			initialSecret, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
+			initialSecret, error = k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
+			require.NoError(t, error)
 
 			testkit.CheckK8sCertificateGenSecret(t, initialSecret, resourceName, expectedLabels, "commonName")
 		})
