@@ -20,7 +20,7 @@ enabledNamespaces: []
 
 image:
   repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
-  tag: v0.0.19
+  tag: v0.0.21
   # Image pull policy
   pullPolicy: IfNotPresent
 
