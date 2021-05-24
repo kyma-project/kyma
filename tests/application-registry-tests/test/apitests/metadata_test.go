@@ -745,6 +745,31 @@ func TestApiMetadata(t *testing.T) {
 			require.True(t, strings.HasPrefix(postedService2.Identifier, identifier2))
 		})
 
+		t.Run("should return bad request 400 when adding service with name that is already used in another service", func(t *testing.T) {
+			// given
+			identifier := testkit.GenerateIdentifier()
+			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(oauthAPI)
+			identifier2 := testkit.GenerateIdentifier()
+			initialServiceDefinition2 := prepareServiceDetails(identifier2, map[string]string{}).WithAPI(oauthAPI)
+
+			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
+			require.NoError(t, err)
+			require.Equal(t, http.StatusOK, postStatusCode)
+
+			defer func() {
+				// clean up
+				statusCode1, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode1)
+			}()
+
+			//when
+			postStatusCode2, _, err := metadataServiceClient.CreateService(t, initialServiceDefinition2)
+
+			//then
+			require.NoError(t, err)
+			require.Equal(t, http.StatusBadRequest, postStatusCode2)
+		})
 	})
 
 	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
