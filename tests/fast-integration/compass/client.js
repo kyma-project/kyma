@@ -110,19 +110,11 @@ class DirectorClient {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
                 debug(resp);
-                console.log(`DEBUG callDirector resp: ${resp}`);
-                console.dir(resp);
-                console.dir(resp.data.errors[0]);
-                for (const e in resp.data.errors) {
-                    console.dir(e);
-                }
                 throw resp.data;
             }
             return resp.data.data.result;
         } catch(err) {
             debug(err);
-            console.log(`DEBUG callDirector err: ${err}`);
-            console.dir(err);
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {
