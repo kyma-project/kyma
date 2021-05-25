@@ -12,12 +12,12 @@ const (
 	testBusolaURL = "https://busola-url.com"
 )
 
-func TestApp_HandleInfoRedirect(t *testing.T) {
+func TestApp_HandleIndexRedirect(t *testing.T) {
 	// GIVEN
 	r, _ := http.NewRequest("GET", "/any-url", nil)
 	w := httptest.NewRecorder()
 	app := App{}
-	handler := http.HandlerFunc(app.HandleInfoRedirect)
+	handler := http.HandlerFunc(app.HandleIndexRedirect)
 
 	// WHEN
 	handler.ServeHTTP(w, r)
@@ -25,7 +25,7 @@ func TestApp_HandleInfoRedirect(t *testing.T) {
 
 	// THEN
 	assert.Equal(t, http.StatusFound, res.StatusCode)
-	assert.Equal(t, "/info/", res.Header.Get("Location"))
+	assert.Equal(t, "/", res.Header.Get("Location"))
 }
 
 func TestApp_HandleConsoleRedirect(t *testing.T) {

@@ -36,6 +36,7 @@ Before running the program, make sure your active Kubeconfig is pointing at the 
 | **OVERRIDE_OIDC_CLIENT_ID** | Optional override for the OIDC client ID | None |
 | **OVERRIDE_OIDC_SCOPE** | Optional override for the OIDC scope | None |
 | **OVERRIDE_OIDC_USE_PKCE** | Optional override for the use of PKCE in OIDC  | None |
-| **APP_UAA_URL** | User Account and Authentication (UAA) server URL | None |
+| **APP_UAA_ENABLED** | Enable User Account and Authentication (UAA) migration functionality | `true` |
+| **APP_UAA_URL** | UAA server URL | None |
 | **APP_UAA_CLIENT_ID** | UAA client ID  | None |
 | **APP_UAA_CLIENT_SECRET** | UAA client secret | None |
