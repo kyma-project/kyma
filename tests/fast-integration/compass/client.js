@@ -111,18 +111,14 @@ class DirectorClient {
             if(resp.data.errors) {
                 debug(resp);
                 console.log(`DEBUG callDirector resp: ${resp}`);
-                console.log(`DEBUG callDirector resp: ${JSON.stringify(resp)}`);
-                console.error(resp);
-                console.error(JSON.stringify(resp));
+                console.dir(resp);
                 throw new Error(resp.data);
             }
             return resp.data.data.result;
         } catch(err) {
             debug(err);
             console.log(`DEBUG callDirector err: ${err}`);
-            console.log(`DEBUG callDirector err: ${JSON.stringify(err)}`);
-            console.error(err);
-            console.error(JSON.stringify(err));
+            console.dir(err);
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {
