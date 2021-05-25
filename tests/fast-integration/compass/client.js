@@ -120,7 +120,7 @@ class DirectorClient {
             } else if(err.errors) {
                 throw new Error(`${msg}: GraphQL responded with errors: ${err.errors[0].message}`)
             } else {
-                throw new Error(`${msg}: ${err.toString()}`);
+                throw new Error(`${msg}: ${err.message}`);
             }
         }
     }
