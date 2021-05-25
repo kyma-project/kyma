@@ -115,6 +115,7 @@ class DirectorClient {
             return resp.data.data.result;
         } catch(err) {
             debug(err);
+            console.error(JSON.stringify(err));
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {
