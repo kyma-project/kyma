@@ -140,7 +140,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when unregistering application: ${err.toString()}`);
+            throw new Error(`Error when unregistering application: ${err.message}`);
         }
     }
 
