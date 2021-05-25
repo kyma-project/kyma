@@ -57,7 +57,7 @@ spec:
     spec:
       containers:
       - name: tests
-        image: tutum/curl:alpine
+        image: eu.gcr.io/kyma-project/external/curlimages/curl:7.70.0
         command: ["/usr/bin/curl"]
         args: [
           "--fail",
