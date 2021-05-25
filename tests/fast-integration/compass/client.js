@@ -110,11 +110,14 @@ class DirectorClient {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
                 debug(resp);
+                console.error(resp);
+                console.error(JSON.stringify(resp));
                 throw new Error(resp.data);
             }
             return resp.data.data.result;
         } catch(err) {
             debug(err);
+            console.error(err);
             console.error(JSON.stringify(err));
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
