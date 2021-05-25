@@ -110,6 +110,8 @@ class DirectorClient {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
                 debug(resp);
+                console.log(`DEBUG callDirector resp: ${resp}`);
+                console.log(`DEBUG callDirector resp: ${JSON.stringify(resp)}`);
                 console.error(resp);
                 console.error(JSON.stringify(resp));
                 throw new Error(resp.data);
@@ -117,6 +119,8 @@ class DirectorClient {
             return resp.data.data.result;
         } catch(err) {
             debug(err);
+            console.log(`DEBUG callDirector err: ${err}`);
+            console.log(`DEBUG callDirector err: ${JSON.stringify(err)}`);
             console.error(err);
             console.error(JSON.stringify(err));
             if (err.response) {
