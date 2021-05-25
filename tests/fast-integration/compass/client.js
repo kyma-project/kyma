@@ -116,7 +116,7 @@ class DirectorClient {
                 for (const e in resp.data.errors) {
                     console.dir(e);
                 }
-                throw new Error(resp.data);
+                throw resp.data;
             }
             return resp.data.data.result;
         } catch(err) {
@@ -128,7 +128,7 @@ class DirectorClient {
             } else if(err.errors) {
                 throw new Error(`${msg}: GraphQL responded with errors: ${err.errors[0].message}`)
             } else {
-                throw new Error(`${msg}: ${err.message}`);
+                throw new Error(`${msg}: ${err.toString()}`);
             }
         }
     }
