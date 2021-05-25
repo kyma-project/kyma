@@ -10,8 +10,6 @@ const {
     getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
-const kymaVersion = process.env.INSTALL_KYMA_VERSION || "1.20.0";
-
 
 describe("Kyma Application Connectivity 2.0 tests", function () {
 
@@ -22,9 +20,8 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
     const withCentralApplicationGateway = true;
     let initialRestarts = null;
 
-    it(`Install Kyma ${kymaVersion}`, async function () {
-        const resourcesPath = await installer.downloadCharts({ source: kymaVersion })
-        await installer.installKyma({ resourcesPath, skipComponents, withCentralApplicationGateway })
+    it("Install Kyma", async function() {
+        await installer.installKyma({ skipComponents, withCentralApplicationGateway });
     });
 
     it("Listing all pods in cluster", async function () {

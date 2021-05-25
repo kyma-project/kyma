@@ -10,13 +10,12 @@ spec:
   deps: '{ "name": "orders", "version": "1.0.0", "dependencies": {"axios": "^0.19.2"}}'
   maxReplicas: 1
   minReplicas: 1
-  # TODO: Check if the `let url = findEnv(...` is correctly created
   source: |
     let lastOrder = {};
     let lastEvent = {};
     const axios = require('axios');
     async function getOrder(code) {
-      let url = findEnv("GATEWAY_URL") + "commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code;
+      let url = "http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code;
       console.log("URL: %s", url);
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
         return e.response.data;
