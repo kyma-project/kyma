@@ -112,6 +112,10 @@ class DirectorClient {
                 debug(resp);
                 console.log(`DEBUG callDirector resp: ${resp}`);
                 console.dir(resp);
+                console.dir(resp.data.errors[0]);
+                for (const e in resp.data.errors) {
+                    console.dir(e);
+                }
                 throw new Error(resp.data);
             }
             return resp.data.data.result;
