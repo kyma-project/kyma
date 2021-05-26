@@ -87,10 +87,10 @@ spec:
           resources:
             limits:
               memory: 192Mi
-              cpu: 100m
+              cpu: 400m
             requests:
               memory: 192Mi
-              cpu: 100m
+              cpu: 200m
       containers:
         - command:
             - /bin/bash
