@@ -1,6 +1,6 @@
 ---
 title: Enable the Runtime Agent
-type: Configuration
+type: obsolete?
 ---
 
 <!-- Can we rephrase this as instructions with steps? -->

@@ -1,6 +1,6 @@
 ---
 title: Configuring the Runtime
-type: Configuration
+type: obsolete?
 ---
 
 <!-- the following paragraphs need clarification; are they instructions or just FYI? -->

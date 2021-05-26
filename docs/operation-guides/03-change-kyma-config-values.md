@@ -1,6 +1,5 @@
 ---
 title: Change Kyma settings
-type: Configuration
 ---
 
 To change your Kyma settings, you simply deploy the same Kyma version that you're currently using, just with different configuration values.
