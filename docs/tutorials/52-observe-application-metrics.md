@@ -15,8 +15,6 @@ This tutorial focuses on the `cpu_temperature_celsius` metric, that is one of th
 
 ## Prerequisites
 
-- You have a cluster with Kyma 2.0 or higher.
-- You have installed Kyma 2.0 or higher locally with the Monitoring module.
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 
 ## Steps
