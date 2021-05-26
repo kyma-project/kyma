@@ -76,8 +76,19 @@ function check_sidecar_injector() {
   log "    Automatic injection policy is enabled" green
 }
 
+function require_ingressgateway_hpa() {
+    echo "--> Checking istio-ingresgateway HPA"
+    local targetMemHPA=$(kubectl -n istio-system get istiooperators.install.istio.io installed-state -o jsonpath="{.spec.components.ingressGateways[0].k8s.hpaSpec.metrics[?(@.resource.name=='memory')].resource.targetAverageUtilization}")
+    if [[ ${targetMemHPA} != "80" ]]; then
+       echo "   Memory based HPA needs to be set and targetAverageUtilization is 80" red
+       exit 1
+    fi
+    echo " Memory based HPA is has targetAverageUtilization set to 80" green
+}
+
 require_istio_system
 require_istio_version
+require_ingressgateway_hpa
 check_mtls_enabled
 check_sidecar_injector
 log "Istio is configured to run Kyma!" green
