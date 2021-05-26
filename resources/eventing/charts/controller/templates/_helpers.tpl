@@ -52,6 +52,14 @@ kyma-project.io/dashboard: eventing
 {{- end }}
 
 {{/*
+Selector labels for peerauthentication
+*/}}
+{{- define "controller.peerAuth.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "controller.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create eventing backend name.
 */}}
 {{- define "eventing.backend.name" -}}

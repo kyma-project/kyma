@@ -113,7 +113,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Application Connectivity Validator Requests",
+          "title": "-> Application Connectivity Validator Requests",
+          "description": "This graph includes requests from external sources to application validator",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -233,7 +234,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Publisher Requests",
+          "title": "-> Event Publisher Requests",
+          "description": "This graph includes requests to event publisher proxy",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -353,7 +355,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Subscribers Requests",
+          "title": "Subscribers Requests (for NATS based eventing only)",
+          "description": "This graph includes requests from eventing controller(acts as dispatcher as well) to subscribers and works only for eventing based on NATS as backend",
           "tooltip": {
             "shared": true,
             "sort": 0,

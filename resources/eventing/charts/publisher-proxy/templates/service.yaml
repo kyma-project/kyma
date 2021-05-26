@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "publisher-proxy.fullname" . }}-{{ .Values.metrics.config.nameSuffix }}
+  name: {{ include "publisher-proxy.fullname" . }}{{ .Values.metrics.config.nameSuffix }}
   labels: {{- include "publisher-proxy.metrics.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
