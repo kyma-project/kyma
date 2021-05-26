@@ -40,9 +40,9 @@ Eventing allows you to easily integrate external applications with Kyma. Under t
 ### Observability
 
 Kyma comes with tools that give you the most accurate and up-to-date monitoring, logging and tracing data.
-- [Prometheus](https://prometheus.io/) open source monitoring and alerting toolkit provides this data, which is consumed by different add-ons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
-- The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distributed tracing system. Use it to analyze performance by scrutinizing the path of the requests sent to and from your service. This information helps you optimize the latency and performance of your solution.
-- Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
+- [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different add-ons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
+- For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
+- With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of the requests sent to and from your service. This information helps you to optimize the latency and performance of your solution.
 
 ### Service Mesh
 
