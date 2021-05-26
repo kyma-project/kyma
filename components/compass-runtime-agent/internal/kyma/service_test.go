@@ -2,6 +2,7 @@ package kyma
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
@@ -19,6 +20,250 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func TestKymaUpsertCredentialsSecrets(t *testing.T) {
+	type upsert struct {
+		packageID   string
+		credentials *model.Credentials
+	}
+
+	tests := []struct {
+		name        string
+		application model.Application
+		upserts     []upsert
+	}{
+
+		{
+			name: "DefaultInstanceAuth is null",
+			application: model.Application{
+				Name: "",
+				APIPackages: []model.APIPackage{
+					{
+						DefaultInstanceAuth: nil,
+					},
+				},
+			},
+		},
+		{
+			name: "Credentials are nil",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						DefaultInstanceAuth: &model.Auth{
+							Credentials: nil,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Basic auth",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						ID:                  "package-1",
+						DefaultInstanceAuth: fixAuthBasic(),
+					},
+				},
+			},
+			upserts: []upsert{{
+				packageID:   "package-1",
+				credentials: fixAuthBasic().Credentials,
+			}},
+		},
+		{
+			name: "Oauths",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						ID:                  "package-1",
+						DefaultInstanceAuth: fixAuthOauth(),
+					},
+					{
+						ID: "package-2",
+						DefaultInstanceAuth: &model.Auth{
+							Credentials: &model.Credentials{
+								Oauth: &model.Oauth{
+									URL:          "https://auth.expamle.com",
+									ClientID:     "my-client-2",
+									ClientSecret: "my-secret-2",
+								},
+							},
+						},
+					},
+				},
+			},
+			upserts: []upsert{
+				{
+					packageID:   "package-1",
+					credentials: fixAuthOauth().Credentials,
+				},
+				{
+					packageID: "package-2",
+					credentials: &model.Credentials{
+						Oauth: &model.Oauth{
+							URL:          "https://auth.expamle.com",
+							ClientID:     "my-client-2",
+							ClientSecret: "my-secret-2",
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			const UID = "f940c082-be4f-11eb-8529-0242ac130003"
+			tc.application.Name = "my-app"
+
+			repositoryMock := &appMocks.Repository{}
+			repositoryMock.On("Get", tc.application.Name, metav1.GetOptions{}).Return(&v1alpha1.Application{
+				ObjectMeta: metav1.ObjectMeta{
+					UID: UID,
+				},
+			}, nil)
+			credentialsServiceMock := &appSecrets.CredentialsService{}
+			for _, upsert := range tc.upserts {
+				credentialsServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.credentials).
+					Return(applications.Credentials{}, nil).Once()
+			}
+
+			service := &service{
+				applicationRepository: repositoryMock,
+				credentialsService:    credentialsServiceMock,
+			}
+			err := service.upsertCredentialsSecrets(tc.application)
+			assert.NoError(t, err)
+
+			credentialsServiceMock.AssertExpectations(t)
+		})
+	}
+}
+
+func TestKymaRequestParametersSecrets(t *testing.T) {
+	type upsert struct {
+		packageID        string
+		requestParamters *model.RequestParameters
+	}
+
+	tests := []struct {
+		name        string
+		application model.Application
+		upserts     []upsert
+	}{
+
+		{
+			name: "DefaultInstanceAuth is null",
+			application: model.Application{
+				Name: "",
+				APIPackages: []model.APIPackage{
+					{
+						DefaultInstanceAuth: nil,
+					},
+				},
+			},
+		},
+		{
+			name: "Credentials are nil",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						DefaultInstanceAuth: &model.Auth{
+							Credentials: nil,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Request params are empty",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						DefaultInstanceAuth: &model.Auth{
+							Credentials: &model.Credentials{
+								Oauth: &model.Oauth{
+									URL:          "https://auth.expamle.com",
+									ClientID:     "my-client-2",
+									ClientSecret: "my-secret-2",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Request params once",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						ID:                  "package-1",
+						DefaultInstanceAuth: fixAuthBasic(),
+					},
+				},
+			},
+			upserts: []upsert{
+				{
+					packageID:        "package-1",
+					requestParamters: fixAuthBasic().RequestParameters,
+				},
+			},
+		},
+		{
+			name: "Request params twice",
+			application: model.Application{
+				APIPackages: []model.APIPackage{
+					{
+						ID:                  "package-1",
+						DefaultInstanceAuth: fixAuthBasic(),
+					},
+					{
+						ID:                  "package-2",
+						DefaultInstanceAuth: fixAuthOauth(),
+					},
+				},
+			},
+			upserts: []upsert{
+				{
+					packageID:        "package-1",
+					requestParamters: fixAuthBasic().RequestParameters,
+				},
+				{
+					packageID:        "package-2",
+					requestParamters: fixAuthOauth().RequestParameters,
+				},
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			const UID = "f940c082-be4f-11eb-8529-0242ac130003"
+			tc.application.Name = "my-app"
+
+			repositoryMock := &appMocks.Repository{}
+			repositoryMock.On("Get", tc.application.Name, metav1.GetOptions{}).Return(&v1alpha1.Application{
+				ObjectMeta: metav1.ObjectMeta{
+					UID: UID,
+				},
+			}, nil)
+			requestParametersServiceMock := &appSecrets.RequestParametersService{}
+			for _, upsert := range tc.upserts {
+				requestParametersServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.requestParamters).
+					Return("", nil).Once()
+			}
+
+			service := &service{
+				applicationRepository:    repositoryMock,
+				requestParametersService: requestParametersServiceMock,
+			}
+			err := service.upsertRequestParametersSecrets(tc.application)
+			assert.NoError(t, err)
+
+			requestParametersServiceMock.AssertExpectations(t)
+		})
+	}
+}
 
 func TestKymaService(t *testing.T) {
 
