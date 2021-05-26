@@ -231,6 +231,7 @@ spec:
                   type: object
                 runtime:
                   enum:
+                    - nodejs10
                     - nodejs12
                     - nodejs14
                     - python38
