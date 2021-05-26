@@ -11,8 +11,10 @@ Besides the default installation, there are several ways to install Kyma:
 You can simply use the `deploy` command without any flags, and Kyma provides a default domain. 
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
+>**NOTE:** If you install Kyma locally, use the evaluation profile.
+
   ```
-  kyma alpha deploy 
+  kyma deploy -p evaluation
   ```
 
 ## Installation with custom domain
@@ -29,22 +31,22 @@ If you don't have a certificate yet, you can create a self-signed certificate an
   Then, pass the certificate files to the deploy command:
 
   ```
-  kyma alpha deploy --domain {DOMAIN} --tls-cert crt.pem --tls-key key.pem
+  kyma deploy --domain {DOMAIN} --tls-cert crt.pem --tls-key key.pem
   ```
 
 ## Installation from a specific source
 
-Optionally, you can specify from which source you want to deploy Kyma, such as the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `alpha deploy` command.<br>
+Optionally, you can specify from which source you want to deploy Kyma, such as the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.<br>
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
   ```
-  kyma alpha deploy --source=1.19.1
+  kyma deploy --source=1.19.1
   ```
 
 - Alternatively, to build Kyma from your local sources and deploy it on a remote cluster, run:
 
   ```
-  kyma alpha deploy --source=local
+  kyma deploy --source=local
   ```
   > **NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
 
@@ -53,7 +55,7 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
 To deploy Kyma with only specific components, run:
 
   ```
-  kyma alpha deploy --components-file {COMPONENTS_FILE_PATH}
+  kyma deploy --components-file {COMPONENTS_FILE_PATH}
   ```
 
   `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only six components are deployed on the cluster:
@@ -73,13 +75,13 @@ To deploy Kyma with only specific components, run:
 - Alternatively, you can specify single components instead of a file:
   
   ```
-  kyma alpha deploy --component {COMPONENT_NAME@NAMESPACE}
+  kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
 
   If no Namespace is provided, then the default Namespace is used. For example, to install the `testing` component in the default Namespace and the `application-connector` component in the `kyma-integration` Namespace, run:
   
   ```
-  kyma alpha deploy --component testing --component application-connector@kyma-integration
+  kyma deploy --component testing --component application-connector@kyma-integration
   ```
 
 ## Installation with specific configuration values
