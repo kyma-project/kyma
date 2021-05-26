@@ -17,7 +17,7 @@ Kyma does not expose Kiali and Grafana by default. However you can still access 
 
   1. Run the following command to forward a local port to a port on the Kiali Pod:
   ```bash
-  kubectl port-forward svc/kiali-server -n kyma-system 20001:20001
+  kubectl -n kyma-system port-forward svc/kiali-server 20001:20001
   ```
   >Note: kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
