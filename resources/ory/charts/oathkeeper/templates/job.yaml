@@ -84,6 +84,13 @@ spec:
             runAsGroup: 101
             runAsNonRoot: true
             runAsUser: 100
+          resources:
+            limits:
+              memory: 192Mi
+              cpu: 100m
+            requests:
+              memory: 192Mi
+              cpu: 100m
       containers:
         - command:
             - /bin/bash
@@ -104,6 +111,13 @@ spec:
             runAsGroup: 65534
             runAsNonRoot: true
             runAsUser: 65534
+          resources:
+            limits:
+              memory: 128Mi
+              cpu: 100m
+            requests:
+              memory: 128Mi
+              cpu: 100m
           volumeMounts:
           - name: {{ include "oathkeeper.name" . }}-keys-volume
             mountPath: /etc/secrets
