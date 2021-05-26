@@ -53,13 +53,12 @@ type APIPackage struct {
 
 // APIDefinition contains API data such as URL, credentials and spec
 type APIDefinition struct {
-	ID                string
-	Name              string
-	Description       string
-	TargetUrl         string
-	APISpec           *APISpec
-	RequestParameters RequestParameters
-	Credentials       *Credentials
+	ID          string
+	Name        string
+	Description string
+	TargetUrl   string
+	APISpec     *APISpec
+	Credentials *Credentials
 }
 
 // EventAPIDefinition contains Event API details such
@@ -102,8 +101,6 @@ type Credentials struct {
 	Oauth *Oauth
 	// BasicAuth configuration
 	Basic *Basic
-	// Additional request parameters
-	RequestParameters *RequestParameters
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
@@ -146,5 +143,8 @@ func (r RequestParameters) IsEmpty() bool {
 
 // Auth contains authentication data
 type Auth struct {
+	// Credentials
 	Credentials *Credentials
+	// Additional request parameters
+	RequestParameters *RequestParameters
 }

@@ -171,13 +171,13 @@ func TestApplication_ToApplication(t *testing.T) {
 								Username: "my-user",
 								Password: "my-password",
 							},
-							RequestParameters: &kymamodel.RequestParameters{
-								Headers: &map[string][]string{
-									"h1": {"v1"},
-								},
-								QueryParameters: &map[string][]string{
-									"q1": {"p1"},
-								},
+						},
+						RequestParameters: &kymamodel.RequestParameters{
+							Headers: &map[string][]string{
+								"h1": {"v1"},
+							},
+							QueryParameters: &map[string][]string{
+								"q1": {"p1"},
 							},
 						},
 					}),
@@ -188,13 +188,13 @@ func TestApplication_ToApplication(t *testing.T) {
 								ClientSecret: "my-client-secret",
 								URL:          "https://test-oauth.com",
 							},
-							RequestParameters: &kymamodel.RequestParameters{
-								Headers: &map[string][]string{
-									"h1": {"v1"},
-								},
-								QueryParameters: &map[string][]string{
-									"q1": {"p1"},
-								},
+						},
+						RequestParameters: &kymamodel.RequestParameters{
+							Headers: &map[string][]string{
+								"h1": {"v1"},
+							},
+							QueryParameters: &map[string][]string{
+								"q1": {"p1"},
 							},
 						},
 					}),

@@ -117,10 +117,10 @@ func TestConverter(t *testing.T) {
 								Username: "my-username",
 								Password: "my-password",
 							},
-							RequestParameters: &model.RequestParameters{
-								Headers:         &map[string][]string{"header": {"header-value"}},
-								QueryParameters: &map[string][]string{"query-param": {"query-param-value"}},
-							},
+						},
+						RequestParameters: &model.RequestParameters{
+							Headers:         &map[string][]string{"header": {"header-value"}},
+							QueryParameters: &map[string][]string{"query-param": {"query-param-value"}},
 						},
 					},
 				},
@@ -250,7 +250,6 @@ func TestConverter(t *testing.T) {
 							APISpec: &model.APISpec{
 								Type: model.APISpecTypeOpenAPI,
 							},
-							RequestParameters: model.RequestParameters{},
 						},
 					},
 					EventDefinitions: []model.EventAPIDefinition{

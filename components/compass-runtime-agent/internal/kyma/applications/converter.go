@@ -126,11 +126,8 @@ func (c converter) toAPIEntry(applicationName string, apiPackage model.APIPackag
 }
 
 func (c converter) toRequestParametersSecretName(applicationName string, apiPackage model.APIPackage) string {
-	if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.Credentials != nil {
-		requestParameters := apiPackage.DefaultInstanceAuth.Credentials.RequestParameters
-		if requestParameters != nil && !requestParameters.IsEmpty() {
-			return c.nameResolver.GetRequestParametersSecretName(applicationName, apiPackage.ID)
-		}
+	if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.RequestParameters != nil && !apiPackage.DefaultInstanceAuth.RequestParameters.IsEmpty() {
+		return c.nameResolver.GetRequestParametersSecretName(applicationName, apiPackage.ID)
 	}
 	return ""
 }

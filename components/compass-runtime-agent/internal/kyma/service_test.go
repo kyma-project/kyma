@@ -129,14 +129,16 @@ func TestKymaService(t *testing.T) {
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		credentialsPackage1 := fixCredentialsOauth()
-		credentialsPackage1.RequestParameters = nil
-		credentialsPackage2 := fixCredentialsBasic()
+		authPackage1 := fixAuthOauth()
+		authPackage1.RequestParameters = nil
+		authPackage2 := fixAuthBasic()
+		authPackage4 := fixAuthRequestParameters()
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, &model.Auth{Credentials: credentialsPackage1})
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, &model.Auth{Credentials: credentialsPackage2})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, authPackage1)
+		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, authPackage2)
 		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
-		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
+		apiPackage4 := fixAPIPackage("package4", []model.APIDefinition{api}, nil, authPackage4)
+		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3, apiPackage4)
 
 		entry1 := fixAPIEntry("API1", "api1")
 		entry2 := fixEventAPIEntry("EventAPI1", "eventapi1")
@@ -144,8 +146,9 @@ func TestKymaService(t *testing.T) {
 		newRuntimeService1 := fixService("package1", entry1)
 		newRuntimeService2 := fixService("package2", entry2)
 		newRuntimeService3 := fixService("package3", entry1, entry2)
+		newRuntimeService4 := fixService("package4", entry1)
 
-		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3})
+		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3, newRuntimeService4})
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -166,14 +169,17 @@ func TestKymaService(t *testing.T) {
 		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
 		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
 		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
+		expectedApiAssets4 := []clusterassetgroup.Asset{asset1}
 
 		rafterServiceMock.On("Put", "package1", expectedApiAssets1).Return(nil)
 		rafterServiceMock.On("Put", "package2", expectedApiAssets2).Return(nil)
 		rafterServiceMock.On("Put", "package3", expectedApiAssets3).Return(nil)
+		rafterServiceMock.On("Put", "package4", expectedApiAssets4).Return(nil)
 
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1).Return(applications.Credentials{}, nil)
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", credentialsPackage2).Return(applications.Credentials{}, nil)
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", credentialsPackage2.RequestParameters).Return("", nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.Credentials).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", authPackage2.Credentials).Return(applications.Credentials{}, nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", authPackage2.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package4", authPackage4.RequestParameters).Return("", nil)
 
 		expectedResult := []Result{
 			{
@@ -282,12 +288,12 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		credentialsPackage1 := fixCredentialsOauth()
-		credentialsPackage3 := fixCredentialsBasic()
+		authPackage1 := fixAuthOauth()
+		authPackage3 := fixAuthBasic()
 
 		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, &model.Auth{Credentials: credentialsPackage1})
+		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, authPackage1)
 
 		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
 		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
@@ -295,7 +301,7 @@ func TestKymaService(t *testing.T) {
 
 		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
 		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, &model.Auth{Credentials: credentialsPackage3})
+		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, authPackage3)
 
 		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
 
@@ -339,14 +345,14 @@ func TestKymaService(t *testing.T) {
 		rafterServiceMock.On("Delete", "package4").Return(nil)
 		rafterServiceMock.On("Delete", "package5").Return(nil)
 
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.Credentials).Return(applications.Credentials{}, nil)
 		credentialsServiceMock.On("Delete", "name1-package2").Return(nil)
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", credentialsPackage3).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", authPackage3.Credentials).Return(applications.Credentials{}, nil)
 		credentialsServiceMock.On("Delete", "name1-package5").Return(nil)
 
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", credentialsPackage1.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.RequestParameters).Return("", nil)
 		requestParametersServiceMock.On("Delete", "params-name1-package2").Return(nil)
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", credentialsPackage3.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", authPackage3.RequestParameters).Return("", nil)
 		requestParametersServiceMock.On("Delete", "params-name1-package5").Return(nil)
 
 		expectedResult := []Result{
@@ -755,28 +761,40 @@ func fixService(serviceID string, entries ...v1alpha1.Entry) v1alpha1.Service {
 	}
 }
 
-func fixCredentialsOauth() *model.Credentials {
-	return &model.Credentials{
-		Oauth: &model.Oauth{
-			URL:          "https://auth.example.com",
-			ClientID:     "test-client",
-			ClientSecret: "test-secret",
+func fixAuthOauth() *model.Auth {
+	return &model.Auth{
+		Credentials: &model.Credentials{
+			Oauth: &model.Oauth{
+				URL:          "https://auth.example.com",
+				ClientID:     "test-client",
+				ClientSecret: "test-secret",
+			},
+			CSRFInfo: nil,
 		},
-		CSRFInfo: nil,
 		RequestParameters: &model.RequestParameters{
 			Headers: &map[string][]string{"header1": {"header-value1"}},
 		},
 	}
 }
 
-func fixCredentialsBasic() *model.Credentials {
-	return &model.Credentials{
-		Basic: &model.Basic{
-			Username: "my-user",
-			Password: "my-password",
+func fixAuthBasic() *model.Auth {
+	return &model.Auth{
+		Credentials: &model.Credentials{
+			Basic: &model.Basic{
+				Username: "my-user",
+				Password: "my-password",
+			},
 		},
 		RequestParameters: &model.RequestParameters{
 			Headers: &map[string][]string{"header2": {"header-value2"}},
+		},
+	}
+}
+
+func fixAuthRequestParameters() *model.Auth {
+	return &model.Auth{
+		RequestParameters: &model.RequestParameters{
+			Headers: &map[string][]string{"header3": {"header-value3"}},
 		},
 	}
 }

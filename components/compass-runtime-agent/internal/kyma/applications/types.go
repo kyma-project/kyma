@@ -10,8 +10,6 @@ type Credentials struct {
 	SecretName        string
 	AuthenticationUrl string
 	CSRFInfo          *CSRFInfo
-	Headers           *map[string][]string
-	QueryParameters   *map[string][]string
 }
 
 type CSRFInfo struct {

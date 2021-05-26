@@ -183,11 +183,15 @@ func (s *service) upsertCredentialsSecrets(directorApplication model.Application
 	getApplicationUIDFunc := cachingGetApplicationUIDFunc(s.getApplicationUID)
 	for _, apiPackage := range directorApplication.APIPackages {
 		if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.Credentials != nil {
+			credentials := apiPackage.DefaultInstanceAuth.Credentials
+			if credentials.Basic == nil && credentials.Oauth == nil {
+				continue
+			}
 			r, _ := getApplicationUIDFunc(directorApplication.Name)
 			if r.AppError != nil {
 				return r.AppError
 			}
-			_, err := s.credentialsService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, apiPackage.DefaultInstanceAuth.Credentials)
+			_, err := s.credentialsService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, credentials)
 			if err != nil {
 				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
@@ -201,12 +205,12 @@ func (s *service) upsertRequestParametersSecrets(directorApplication model.Appli
 
 	getApplicationUIDFunc := cachingGetApplicationUIDFunc(s.getApplicationUID)
 	for _, apiPackage := range directorApplication.APIPackages {
-		if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.Credentials != nil {
+		if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.RequestParameters != nil && !apiPackage.DefaultInstanceAuth.RequestParameters.IsEmpty() {
 			r, _ := getApplicationUIDFunc(directorApplication.Name)
 			if r.AppError != nil {
 				return r.AppError
 			}
-			requestParameters := apiPackage.DefaultInstanceAuth.Credentials.RequestParameters
+			requestParameters := apiPackage.DefaultInstanceAuth.RequestParameters
 			if requestParameters != nil && !requestParameters.IsEmpty() {
 				_, err := s.requestParametersService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, requestParameters)
 				if err != nil {
