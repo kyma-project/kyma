@@ -1,6 +1,6 @@
 ---
 title: Use Kyma CLI as kubectl plugin
-type: Tutorial
+type: Tutorials
 ---
 
 If you like to use kubectl, you can extend kubectl to support Kyma CLI and its commands.
