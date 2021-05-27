@@ -1,34 +1,32 @@
-{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ .Release.Name }}-validator
-  namespace: {{ .Release.Namespace }}
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
   labels:
+    app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app: {{ .Release.Name }}
 spec:
   hosts:
-    - gateway.{{ .Values.global.domainName }}
+    - gateway.{{ .Values.global.ingress.domainName }}
   gateways:
     - {{ .Values.istio.gateway.nameMtls }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
   http:
     - match:
         - uri:
-            prefix: /{{ .Release.Name }}/v1/metadata
+            regex: ^/[^/]+/v1/metadata(/|/.*)?
         - uri:
-            prefix: /{{ .Release.Name }}/v1/events
+            regex: ^/[^/]+/v1/events(/|/.*)?
         - uri:
-            prefix: /{{ .Release.Name }}/v2/events
+            regex: ^/[^/]+/v2/events(/|/.*)?
         - uri:
-            prefix: /{{ .Release.Name }}/events
+            regex: ^/[^/]+/events(/|/.*)?
       route:
         - destination:
             port:
-              number: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
-            host: {{ .Release.Name }}-validator
-{{- end }}
+              number: {{ .Values.deployment.args.proxyPort }}
+            host: {{ .Chart.Name }}
