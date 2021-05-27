@@ -49,7 +49,7 @@ describe("Monitoring test", function () {
     let activeTargets = await getPrometheusActiveTargets();
     let unhealthyTargets = activeTargets
       .filter(t => !shouldIgnoreTarget(t) && t.health != "up")
-      .map(t => t.discoveredLabels.job);
+      .map(t => `${t.labels.job}: ${t.lastError}`);
 
     assert.isEmpty(unhealthyTargets, `Following targets are unhealthy: ${unhealthyTargets.join(", ")}`);
   });
