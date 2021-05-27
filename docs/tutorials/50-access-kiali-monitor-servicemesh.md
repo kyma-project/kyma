@@ -1,7 +1,9 @@
 ---
 title: Access Kiali
-type: Tutorials
+type: Tutorials - Observability
 ---
+
+> **WIP**: This tutorial needs an update to reflect a more holistic perspective.
 
 1. To access Kiali, go to the [Kyma Console](/components/console/#overview-overview). 
 
