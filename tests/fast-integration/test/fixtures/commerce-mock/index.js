@@ -108,6 +108,7 @@ async function checkAppGatewayResponse() {
     2000
   ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
 
+  // TODO: Delete it later
   console.log(`DEBUG checkAppGatewayResponse res: ${res}`);
   console.dir(res);
   expect(res.data).to.have.nested.property(
