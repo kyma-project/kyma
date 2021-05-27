@@ -1,6 +1,6 @@
 ---
 title: Configure the Monitoring Flow
-type: Tutorials
+type: Tutorials - Observability
 ---
 
 The set of monitoring tutorials you are about to read describes the complete monitoring flow for your services in Kyma. Going through the tutorials, you get the gist of Kyma built-in monitoring applications, such as Prometheus, Grafana, and Alertmanager. This hands-on experience with monitoring helps you understand how and where you can observe and visualize your service metrics to monitor them for any alerting values.

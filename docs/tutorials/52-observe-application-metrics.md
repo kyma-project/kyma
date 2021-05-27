@@ -1,6 +1,6 @@
 ---
 title: Observe application metrics
-type: Tutorials
+type: Tutorials - Observability
 ---
 
 This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
@@ -15,12 +15,7 @@ This tutorial focuses on the `cpu_temperature_celsius` metric, that is one of th
 
 ## Prerequisites
 
-To complete the tutorial, you must meet one of these prerequisites and have:
-
-- A cluster with Kyma 1.3 or higher
-- Kyma 1.3 or higher installed locally with the Monitoring module
-
-> **NOTE:** The monitoring module is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
+- You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 
 ## Steps
 
