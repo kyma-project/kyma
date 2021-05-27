@@ -35,8 +35,6 @@ You can use the following in-cluster components to observe your applications' te
 - Kiali
   Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
 
-See how to configure them for your needs under [Configuring In-Cluster Observability](link_tbd).
-
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
 ### External observability
