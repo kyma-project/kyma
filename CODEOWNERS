@@ -101,7 +101,7 @@
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
 # The `eventing` chart
-/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
+/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue @pxsalehi
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @lilitgh @crabtree
@@ -239,13 +239,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/compass-runtime-agent/ @PK85 @crabtree @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Event Publisher Proxy
-/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
+/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue @pxsalehi
 
 # Eventing Controller
-/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
+/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue @pxsalehi
 
 # NATS Operator
-/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue
+/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @berkanercan @themue @pxsalehi
 
 # Busola Migrator Component
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -314,7 +314,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tools/kyma-installer/ @strekm @werdes72 @PhillipAmend @Tomasz-Smelcerz-SAP @colunira @mjakobczyk
 #
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @berkanercan @themue @pxsalehi
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @tgorgol @dbadura @rJankowski93
