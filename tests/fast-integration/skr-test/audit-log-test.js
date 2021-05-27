@@ -1,105 +1,69 @@
 const { 
     Creds,
-    OauthClient,
+    AuditLogClient,
+    waitForK8sResources,
+    createNamespace,
   } = require("../audit-log");
-var moment = require('moment');
 
 const {
-  ensureCommerceMockLocalTestFixture,
-  checkAppGatewayResponse,
-  sendEventAndCheckResponse,
-  cleanMockTestFixture,
-} = require("../test/fixtures/commerce-mock");
-
-const {
-  printRestartReport,
-  getContainerRestartsForAllNamespaces,
+  kubectlApplyDir,
+  kubectlDeleteDir,
+  sleep,
 } = require("../utils");
 
-function runTest(name) {
-  describe(name, function () {
-    for(var i = 1; i<=1; i++){
-      console.log("new test run")
+const cred = new AuditLogClient(Creds.fromEnv())
+
+describe("Check for audit logs", function(){
       
-      this.timeout(10 * 60 * 1000);
-      this.slow(5000);
-      const testNamespace = "test";
-      let initialRestarts = null;
+  this.timeout(10 * 60 * 1000);
+  this.slow(5000);
 
-      it("Listing all pods in cluster", async function () {
-        initialRestarts = await getContainerRestartsForAllNamespaces();
-      });
-
-      it("CommerceMock test fixture should be ready", async function () {
-        await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
-          console.dir(err); // first error is logged
-          return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
-        });
-      });
-
-      it("function should reach Commerce mock API through app gateway", async function () {
-        await checkAppGatewayResponse();
-      });
-
-      it("order.created.v1 event should trigger the lastorder function", async function () {
-        await sendEventAndCheckResponse();
-      });
-
-      it("Should print report of restarted containers, skipped if no crashes happened", async function () {
-        const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-        printRestartReport(initialRestarts, afterTestRestarts);
-      });
-
-      it("Test namespaces should be deleted", async function () {
-        await cleanMockTestFixture("mocks", testNamespace, true);
-      });          
-    }
-  });
-}
-
-  const cred = new OauthClient(Creds.fromEnv())
-  before(async function() {
-    this.timeout(10 * 60 * 1000);
-    this.slow(5000);
-    await runTest("foo")
+  it (`creates namespace audit-test`, async function(){
+    await createNamespace("audit-test")
   })
 
-  before(async function() {
+  it (`creates k8s resources`, async function(){
+    await kubectlApplyDir("./audit-log/fixtures", "audit-test")
+  })
+
+  it (`waits for k8s resources to be created`, async function() {
+    await waitForK8sResources()
+  })
+
+  it (`deletes function`, async function(){
+    await kubectlDeleteDir("./audit-log/fixtures", "audit-test")
+  })  
+  it (`sleeps for 2 minutes so that logs are sent to audit log server`, async function(){
+    await sleep(120000);
+
+  })
+  it (`fetch logs`, async function() {
     await cred.fetchLogs()
   })
+  it(`checks networking istio group is logged for action create`, async function() {
+    await cred.parseLogs("networking.istio.io", "create")
+  })
+  it(`checks networking istio group is logged for action delete`, async function() {
+    await cred.parseLogs("networking.istio.io", "delete")
+  })
+  it(`checks authorization group is logged for action create`, async function() {
+    await cred.parseLogs("rbac.authorization.k8s.io", "create")
+  })
+  it(`checks authorization group is logged for action delete`, async function() {
+    await cred.parseLogs("rbac.authorization.k8s.io", "delete")
+  })
+  it(`checks serverless group is logged for action create`, async function() {
+    await cred.parseLogs("serverless.kyma-project.io", "create")
+  })
 
-    // let timeStampStart = moment().utcOffset(0, false).format();
-    // console.log("timestamp start: " + timeStampStart)
-    
+  it(`checks serverless group is logged for action delete`, async function() {
+    await cred.parseLogs("serverless.kyma-project.io", "delete")
+  })
 
-      
-
-      // let timeStampEnd = moment().utcOffset(0, false).format();
-      // console.log("timestamp end: " + timeStampEnd)
-
-      describe("Check for audit logs", function(){
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("networking.istio.io", "create")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("rbac.authorization.k8s.io", "create")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("applicationconnector.kyma-project.io", "create")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("applicationconnector.kyma-project.io", "delete")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("applicationconnector.kyma-project.io", "update")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("serverless.kyma-project.io", "create")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("eventing.kyma-project.io", "create")
-        })
-        it(`checks serverless group is logged`, async function() {
-          await cred.parseLogs("eventing.kyma-project.io", "update")
-        })
-    })
+  it(`checks core group is logged for action create`, async function() {
+    await cred.parseLogs("foo-config", "create")
+  })
+  it(`checks core group is logged for action delete`, async function() {
+    await cred.parseLogs("foo-config", "delete")
+  })
+})

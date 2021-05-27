@@ -1,8 +1,8 @@
 // const { deleteItems } = require("@kubernetes/client-node");
 const axios = require("axios");
+var moment = require('moment');
 const { interfaces } = require("mocha");
 const {
-    debug,
     getEnvOrThrow,
 } = require("../utils");
 
@@ -12,7 +12,7 @@ class Creds {
     }
 }
 
-class OauthClient {
+class AuditLogClient {
     constructor(credentials) { 
         this.creds = credentials
         this._token = undefined;
@@ -42,12 +42,15 @@ class OauthClient {
         return this._token;
     }
 
-    async fetchLogs() {
+    async fetchLogs(timeStamp) {
         const token = await this.getToken()
         const serviceUrl = this.creds.url
-        var dateTo = "2021-05-19T09:51:00"
-        var dateFrom = "2021-05-19T10:06:01"
-        var url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateTo + "&time_to=" + dateFrom
+        let dateTo =  moment().utcOffset(0, false).format('YYYY-MM-DDTHH:mm:ss');
+        let dateFrom = moment().utcOffset(0, false).subtract({'minutes': 10}).format('YYYY-MM-DDTHH:mm:ss');
+        console.log("timeFrom: "+ dateFrom)
+        console.log("timeTo: "+ dateTo)
+        var url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateFrom + "&time_to=" + dateTo
+        console.log(url)
         try {
             const resp = await axios.get(url, {
                     headers: {
@@ -92,5 +95,5 @@ class OauthClient {
 
 module.exports = {
     Creds,
-    OauthClient,
+    AuditLogClient,
 };

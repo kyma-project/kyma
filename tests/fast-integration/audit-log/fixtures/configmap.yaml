@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: foo-config
+  namespace: audit-test
+data:
+  foo: bar 

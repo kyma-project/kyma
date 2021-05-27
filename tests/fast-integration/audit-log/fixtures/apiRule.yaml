@@ -1,0 +1,17 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: audit-test-fn
+  namespace: audit-test
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - accessStrategies:
+        - config: {}
+          handler: allow
+      methods: ["*"]
+      path: /.*
+  service:
+    host: audit-test-fn
+    name: audit-test-fn
+    port: 80
