@@ -37,6 +37,8 @@ publisherProxy:
     # name is the name of the container image for the eventing-publisher-proxy
     name: "event-publisher-proxy"
     tag: "c06eb4fc"
+    pullPolicy: IfNotPresent
+  replicas: 1
   resources:
     limits:
       cpu: 100m

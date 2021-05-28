@@ -55,7 +55,7 @@ kyma-project.io/dashboard: eventing
 Selector labels for peerauthentication
 */}}
 {{- define "publisher-proxy.peerauth.selectorLabels" -}}
-purpose: metrics
+app.kubernetes.io/name: {{ include "publisher-proxy.fullname" . }}
 {{- end }}
 
 {{/*
