@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/base64"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -54,7 +55,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		fakeCache := NewTokenCache()
 		fakeCache.Add(testURL, r)
 
-		c := client{timeoutDuration, fakeCache, nil}
+		c := New(timeoutDuration, fakeCache)
 
 		// when
 		response, appError := c.GetTokenEndpointResponse(testURL, nil)
@@ -72,7 +73,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		// given
 		fakeCache := NewTokenCache()
 
-		c := client{timeoutDuration, fakeCache, &http.Client{}}
+		c := New(timeoutDuration, fakeCache)
 
 		srv := startTestServer(t)
 		mockURL := srv.URL
@@ -99,7 +100,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		// given
 		fakeCache := NewTokenCache()
 
-		c := client{timeoutDuration, fakeCache, &http.Client{}}
+		c := New(timeoutDuration, fakeCache)
 
 		srv := startFailingTestServer(t)
 		mockURL := srv.URL
@@ -129,12 +130,12 @@ func TestAddAuthorization(t *testing.T) {
 			Password: testPassword,
 		}})
 
-		client := &http.Client{}
+		clientCertificate := clientcert.NewClientCertificate(nil)
 		request := getNewEmptyRequest()
 
 		// when
-		addAuthorization(request, client, strategy)
-
+		err := addAuthorization(request, clientCertificate, strategy)
+		assert.NoError(t, err)
 		// then
 		assert.Len(t, request.Header, 1)
 		assert.NotEmpty(t, request.Header.Get(httpconsts.HeaderAuthorization))
@@ -150,14 +151,15 @@ func TestAddAuthorization(t *testing.T) {
 			Certificate: certificate,
 		}})
 
-		client := &http.Client{}
+		clientCertificate := clientcert.NewClientCertificate(nil)
 		request := getNewEmptyRequest()
 
 		// when
-		addAuthorization(request, client, strategy)
+		err := addAuthorization(request, clientCertificate, strategy)
+		assert.NoError(t, err)
 
 		// then
-		assert.NotNil(t, client.Transport)
+		assert.NotNil(t, clientCertificate.GetCertificate())
 	})
 }
 
