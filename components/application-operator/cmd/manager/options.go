@@ -8,22 +8,23 @@ import (
 )
 
 type args struct {
-	appName                               string
-	appMapName                            string
-	domainName                            string
-	namespace                             string
-	syncPeriod                            int
-	installationTimeout                   int64
-	applicationGatewayImage               string
-	applicationGatewayTestsImage          string
-	applicationConnectivityValidatorImage string
-	gatewayOncePerNamespace               bool
-	strictMode                            string
-	healthPort                            string
-	helmDriver                            string
-	profile                               string
-	isBEBEnabled                          bool
-	podSecurityPolicyEnabled              bool
+	appName                                        string
+	appMapName                                     string
+	domainName                                     string
+	namespace                                      string
+	syncPeriod                                     int
+	installationTimeout                            int64
+	applicationGatewayImage                        string
+	applicationGatewayTestsImage                   string
+	applicationConnectivityValidatorImage          string
+	gatewayOncePerNamespace                        bool
+	strictMode                                     string
+	healthPort                                     string
+	helmDriver                                     string
+	profile                                        string
+	isBEBEnabled                                   bool
+	podSecurityPolicyEnabled                       bool
+	centralApplicationConnectivityValidatorEnabled bool
 }
 
 type config struct {
@@ -53,6 +54,7 @@ func parseOptions() (*options, error) {
 	profile := flag.String("profile", "", "Profile name")
 	isBEBEnabled := flag.Bool("isBEBEnabled", false, "Toggles creation of eventing infrastructure based on BEB if BEB is enabled")
 	podSecurityPolicyEnabled := flag.Bool("podSecurityPolicyEnabled", false, "The information if applications should be created with PodSecurityPolicies")
+	centralApplicationConnectivityValidatorEnabled := flag.Bool("centralApplicationConnectivityValidatorEnabled", false, "Use Central Application Connectivity Validator")
 
 	flag.Parse()
 
@@ -78,6 +80,7 @@ func parseOptions() (*options, error) {
 			profile:                               *profile,
 			isBEBEnabled:                          *isBEBEnabled,
 			podSecurityPolicyEnabled:              *podSecurityPolicyEnabled,
+			centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled,
 		},
 		config: c,
 	}, nil
@@ -88,10 +91,10 @@ func (o *options) String() string {
 		" --syncPeriod=%d --installationTimeout=%d --helmDriver=%s"+
 		" --applicationGatewayImage=%s --applicationGatewayTestsImage=%s"+
 		" --applicationConnectivityValidatorImage=%s --gatewayOncePerNamespace=%v --strictMode=%s --healthPort=%s --profile=%s"+
-		" APP_LOG_LEVEL=%s APP_LOG_FORMAT=%s --isBEBEnabled=%v --podSecurityPolicyEnabled=%v",
+		" APP_LOG_LEVEL=%s APP_LOG_FORMAT=%s --isBEBEnabled=%v --podSecurityPolicyEnabled=%v --centralApplicationConnectivityValidatorEnabled=%v",
 		o.appName, o.domainName, o.namespace,
 		o.syncPeriod, o.installationTimeout, o.helmDriver,
 		o.applicationGatewayImage, o.applicationGatewayTestsImage,
 		o.applicationConnectivityValidatorImage, o.gatewayOncePerNamespace, o.strictMode, o.healthPort, o.profile,
-		o.LogLevel, o.LogFormat, o.isBEBEnabled, o.podSecurityPolicyEnabled)
+		o.LogLevel, o.LogFormat, o.isBEBEnabled, o.podSecurityPolicyEnabled, o.centralApplicationConnectivityValidatorEnabled)
 }
