@@ -41,10 +41,10 @@ describe("Check for audit logs", function(){
     await cred.fetchLogs()
   })
   it(`checks networking istio group is logged for action create`, async function() {
-    await cred.parseLogs("networking.istio.io", "create")
+    await cred.parseLogs("monitoring.coreos.com", "create")
   })
   it(`checks networking istio group is logged for action delete`, async function() {
-    await cred.parseLogs("networking.istio.io", "delete")
+    await cred.parseLogs("monitoring.coreos.com", "delete")
   })
   it(`checks authorization group is logged for action create`, async function() {
     await cred.parseLogs("rbac.authorization.k8s.io", "create")

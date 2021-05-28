@@ -6,7 +6,6 @@ const {
 
 async function waitForK8sResources(){
     await waitForFunction("audit-test-fn", "audit-test");
-    await waitForVirtualService("audit-test-fn", )
 }
 
 async function createNamespace(namespace) {

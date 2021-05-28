@@ -1,4 +1,3 @@
-// const { deleteItems } = require("@kubernetes/client-node");
 const axios = require("axios");
 var moment = require('moment');
 const { interfaces } = require("mocha");
@@ -90,7 +89,6 @@ class AuditLogClient {
             throw new Error(`${msg}`);
         }
     }
-
 }
 
 module.exports = {
