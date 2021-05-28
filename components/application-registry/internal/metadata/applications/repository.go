@@ -143,7 +143,6 @@ func (r *repository) GetAll(appName string) ([]Service, apperrors.AppError) {
 		}
 		services[i] = s
 	}
-
 	return services, nil
 }
 
@@ -153,7 +152,6 @@ func (r *repository) Update(appName string, service Service) apperrors.AppError 
 		if err := ensureServiceExists(service.ID, app); err != nil {
 			return err
 		}
-
 		replaceService(service.ID, app, convertToK8sType(service))
 		return nil
 	})
@@ -165,6 +163,7 @@ func (r *repository) Update(appName string, service Service) apperrors.AppError 
 }
 
 // Delete deletes a given service defined in Application
+// dummy change
 func (r *repository) Delete(appName, id string) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
 		if !serviceExists(id, app) {

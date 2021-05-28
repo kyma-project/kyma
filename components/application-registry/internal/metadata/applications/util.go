@@ -108,7 +108,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 
 	return v1alpha1.Service{
 		ID:                  service.ID,
-		Name:                createServiceName2(service.DisplayName, service.ID),
+		Name:                createServiceName(service.DisplayName, service.ID),
 		DisplayName:         service.DisplayName,
 		Labels:              service.Labels,
 		Identifier:          service.Identifier,
@@ -180,7 +180,7 @@ var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 // Normalization rules:
 // - MUST only contain lowercase characters, numbers and hyphens (no spaces).
 // - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
-func createServiceName2(serviceDisplayName, id string) string {
+func createServiceName(serviceDisplayName, id string) string {
 	// generate 5 characters suffix from the id
 	sha := sha1.New()
 	sha.Write([]byte(id))

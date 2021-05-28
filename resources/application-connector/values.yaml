@@ -54,7 +54,7 @@ global:
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "1683d7cf"
+    version: "PR-11387"
   application_registry_tests:
     version: "68baa911"
   connection_token_handler:
