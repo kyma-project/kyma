@@ -1,3 +1,5 @@
+global:
+  installCRDs: false
 tracing:
   kcproxy:
     enabled: false
