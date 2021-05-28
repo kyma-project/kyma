@@ -53,7 +53,7 @@ build-preview() {
 copy-build-result() {
   mkdir -p "${DOCS_DIR}/.kyma-project-io/"
   cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
-  echo "/ /docs/kyma/2.0/deep-dive/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
+  echo "/ /docs/kyma/2.0/glossary/test/index.html" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
 }
 
 main() {
