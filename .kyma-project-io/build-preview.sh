@@ -13,7 +13,7 @@ trap on_error ERR
 readonly KYMA_PROJECT_IO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 readonly WEBSITE_DIR="website"
-readonly WEBSITE_REPO="https://github.com/kyma-project/website"
+readonly WEBSITE_REPO="https://github.com/dbadura/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
 readonly PUBLIC_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}/public"
@@ -40,7 +40,7 @@ remove-cached-content() {
 }
 
 copy-website-repo() {
-  git clone -b "main" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "new-navigation-tree" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
@@ -53,6 +53,12 @@ build-preview() {
 copy-build-result() {
   mkdir -p "${DOCS_DIR}/.kyma-project-io/"
   cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
+ 
+  #  DEBUG
+  tree ${BUILD_DIR}/content/docs
+  cat ${BUILD_DIR}/content/docs/kyma/versions.json
+  #  DEBUG
+  echo "/ /docs/kyma/preview/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
 }
 
 main() {
