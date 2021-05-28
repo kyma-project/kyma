@@ -57,7 +57,7 @@ copy-build-result() {
   tree ${BUILD_DIR}/content/docs
   cat ${BUILD_DIR}/content/docs/kyma/versions.json
 #  DEBUG
-  echo "/ /docs/kyma/2.0/deep-dive/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
+  echo "/ /docs/kyma/preview/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
 }
 
 main() {
