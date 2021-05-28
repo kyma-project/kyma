@@ -126,6 +126,7 @@ class KEBClient {
       context: {
         globalaccount_id: this.globalAccountID,
         subaccount_id: this.subaccountID,
+        user_id: "foo@bar.com"
       },
       parameters: {
         name: name,
