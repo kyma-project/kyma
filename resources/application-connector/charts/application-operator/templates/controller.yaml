@@ -55,6 +55,7 @@ spec:
         - "--profile={{ .Values.controller.resources.profile }}"
         - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
         - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
+        - "--centralApplicationConnectivityValidatorEnabled={{ .Values.global.centralApplicationConnectivityValidatorEnabled }}"
         env:
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}

@@ -13,6 +13,7 @@ spec:
     matchLabels:
       app: {{ template "loki.name" . }}
   rules:
+{{- if .Values.virtualservice.enabled }}
   # log-ui requests having a JWT token can query deprecated API
   - from:
     - source:
@@ -26,6 +27,7 @@ spec:
     - key: request.auth.claims[groups]
       values: [{{ template "kyma.auth.groups" . }}]
     {{- end }}
+{{- end }}
   # Grafana having SA can query v1 API
   - from:
     - source:

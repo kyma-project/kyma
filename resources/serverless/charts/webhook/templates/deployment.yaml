@@ -69,6 +69,8 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.metricsDomain "context" . ) | nindent 14 }}
             - name: CONFIG_OBSERVABILITY_NAME
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
+            - name: KUBERNETES_MIN_VERSION # TODO: Delete this env after all CI pipelines are using k8s >1.17.0
+              value: "1.16.0"
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

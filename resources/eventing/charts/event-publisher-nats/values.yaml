@@ -9,7 +9,7 @@ image:
   # name is the name of the container image for the event-publisher-nats
   name: "event-publisher-proxy"
   # tag is the container tag of the event-publisher-nats image
-  tag: "88360eed"
+  tag: "PR-11333"
   # pullPolicy is the pullPolicy for the event-publisher-nats image
   pullPolicy: "IfNotPresent"
 

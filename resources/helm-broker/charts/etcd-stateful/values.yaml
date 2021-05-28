@@ -1,6 +1,6 @@
 etcd:
-  image: "eu.gcr.io/kyma-project/external/quay.io/coreos/etcd"
-  imageTag: "v3.3.25"
+  image: "eu.gcr.io/kyma-project/tpi/quay.io/coreos/etcd"
+  imageTag: "v3.3.25-051e9b55"
   secure: false
   resources:
     limits:

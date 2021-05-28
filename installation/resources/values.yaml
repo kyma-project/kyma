@@ -1,0 +1,32 @@
+global:
+  installCRDs: false
+tracing:
+  kcproxy:
+    enabled: false
+  virtualservice:
+    enabled: false
+kiali:
+  kcproxy:
+    enabled: false
+  virtualservice:
+    enabled: false
+logging:
+  logui:
+    enabled: false
+  loki:
+    virtualservice:
+      enabled: false
+monitoring:
+  alertmanager:
+    enabled: false
+  grafana:
+    virtualservice:
+      enabled: false
+    kyma:
+      console:
+        enabled: false
+      authProxy:
+        enabled: false
+    env:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
