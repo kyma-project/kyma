@@ -1,0 +1,11 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "publisher-proxy.fullname" . }}-{{ .Values.metrics.config.nameSuffix }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "publisher-proxy.peerauth.selectorLabels" . | nindent 6 }}
+  mtls:
+    mode: "PERMISSIVE"

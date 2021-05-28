@@ -1103,13 +1103,14 @@ var _ = BeforeSuite(func(done Done) {
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	err = NewReconciler(
+		context.Background(),
 		k8sManager.GetClient(),
 		applicationLister,
 		k8sManager.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller"),
 		envConf,
-	).SetupWithManager(k8sManager)
+	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

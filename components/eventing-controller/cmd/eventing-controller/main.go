@@ -1,30 +1,35 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
-
-// Commander defines the interface of different implementations
-type Commander interface {
-	// Init allows main() to pass flag values to the commander instance.
-	Init() error
-
-	// Start runs the initialized commander instance.
-	Start() error
-}
 
 func main() {
 	logger := ctrl.Log.WithName("setup")
+	scheme := runtime.NewScheme()
+	restCfg := ctrl.GetConfigOrDie()
+
+	// Add schemes.
+	if err := beb.AddToScheme(scheme); err != nil {
+		logger.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+	if err := nats.AddToScheme(scheme); err != nil {
+		logger.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
 
 	// Parse flags.
 	var enableDebugLogs bool
@@ -40,31 +45,49 @@ func main() {
 	flag.DurationVar(&reconnectWait, "reconnect-wait", time.Second, "Wait time between reconnect attempts (NATS).")
 	flag.Parse()
 
-	// Instantiate configured commander.
-	var commander Commander
+	// Init the manager.
+	ctrl.SetLogger(zap.New(zap.UseDevMode(enableDebugLogs)))
 
-	backend, err := env.Backend()
+	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
+		Scheme:             scheme,
+		MetricsBindAddress: metricsAddr,
+		Port:               9443,
+		SyncPeriod:         &resyncPeriod, // CHECK Only used in BEB so far.
+	})
 	if err != nil {
 		logger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	switch backend {
-	case env.BACKEND_VALUE_BEB:
-		commander = beb.NewCommander(enableDebugLogs, metricsAddr, resyncPeriod)
-	case env.BACKEND_VALUE_NATS:
-		commander = nats.NewCommander(enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
-	}
-
-	// Init and start the commander.
-	if err := commander.Init(); err != nil {
-		logger.Error(err, "unable to start manager")
+	// Instantiate and initialize all the subscription commanders.
+	natsCommander := nats.NewCommander(restCfg, enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
+	if err := natsCommander.Init(mgr); err != nil {
+		logger.Error(err, "unable to initialize the NATS commander")
 		os.Exit(1)
 	}
 
-	logger.Info(fmt.Sprintf("starting %s subscription controller and manager", backend))
+	bebCommander := beb.NewCommander(restCfg, enableDebugLogs, metricsAddr, resyncPeriod)
+	if err := bebCommander.Init(mgr); err != nil {
+		logger.Error(err, "unable to initialize the BEB commander")
+		os.Exit(1)
+	}
 
-	if err := commander.Start(); err != nil {
+	ctrlLogger := ctrl.Log.WithName("reconciler").WithName("backend")
+	recorder := mgr.GetEventRecorderFor("backend-controller")
+	ctx := context.Background()
+
+	// Start the backend manager.
+	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
+
+	if err := backendReconciler.SetupWithManager(mgr); err != nil {
+		logger.Error(err, "unable to start the backend controller")
+		os.Exit(1)
+	}
+
+	// Start the manager.
+	logger.Info("starting manager")
+
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		logger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
