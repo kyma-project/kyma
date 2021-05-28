@@ -34,10 +34,11 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
     const testNamespace = "test"
     const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
     const withCentralApplicationGateway = true;
+    const newEventing = true;
     let initialRestarts = null;
 
     it("Install Kyma", async function() {
-        await installer.installKyma({ skipComponents, withCentralApplicationGateway });
+        await installer.installKyma({ skipComponents, newEventing, withCentralApplicationGateway });
     });
 
     it("Listing all pods in cluster", async function () {
