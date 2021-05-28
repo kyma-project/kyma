@@ -261,6 +261,31 @@ func TestCreateServices(t *testing.T) {
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
+	t.Run("should not allow to create service if a service with the same normalized display name already exists", func(t *testing.T) {
+		// given
+		application := createApplication("production")
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+			Return(application, nil)
+
+		repository := applications.NewServiceRepository(appManagerMock)
+		require.NotNil(t, repository)
+
+		newService := applications.Service{
+			ID:              "idx",
+			Name:            "",
+			DisplayName:     "Orders-API",
+			LongDescription: "This is another Orders API",
+			Tags:            []string{"orders-second"},
+			Events:          true,
+		}
+		// when
+		err := repository.Create("production", newService)
+
+		// then
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
 	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.AppManager{}

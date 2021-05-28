@@ -771,7 +771,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, http.StatusBadRequest, postStatusCode2)
 		})
 
-		t.Run("should return bad request 400 when adding service with name that is normalized to a name used in another service", func(t *testing.T) {
+		t.Run("should return bad request 400 when adding service with a name that will be identically normalized to a name used in another service", func(t *testing.T) {
 			// given
 			identifier := testkit.GenerateIdentifier()
 			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(oauthAPI)
