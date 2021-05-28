@@ -20,7 +20,7 @@ class KEBConfig {
     );
   }
 
-  constructor(host, clientID, clientSecret, globalAccountID, subaccountID, userID,planID, region) {
+  constructor(host, clientID, clientSecret, globalAccountID, subaccountID, userID, planID, region) {
     this.host = host;
     this.clientID = clientID;
     this.clientSecret = clientSecret;
