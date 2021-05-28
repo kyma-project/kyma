@@ -38,7 +38,6 @@ describe("Monitoring test", function () {
 
   it("All monitoring pods should be ready", async () => {
     let namespace = "kyma-system";
-    await waitForPodWithLabel("app", "alertmanager", namespace);
     await waitForPodWithLabel("app", "prometheus", namespace);
     await waitForPodWithLabel("app", "grafana", namespace);
     await waitForPodWithLabel("app", "prometheus-node-exporter", namespace);
