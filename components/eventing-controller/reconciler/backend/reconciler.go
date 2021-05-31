@@ -6,24 +6,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
-
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	appsv1 "k8s.io/api/apps/v1"
 
-	"github.com/go-logr/logr"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,6 +23,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/log"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -48,6 +47,8 @@ const (
 	NamespacePrefix                 = "/"
 	BEBPublishEndpointForSubscriber = "/sap/ems/v1"
 	BEBPublishEndpointForPublisher  = "/sap/ems/v1/events"
+
+	reconcilerName = "backend-reconciler"
 )
 
 type Reconciler struct {
@@ -60,12 +61,12 @@ type Reconciler struct {
 	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
 	//  already uses a cache internally (check manager.DefaultNewClient)
 	cache.Cache
-	Log    logr.Logger
+	logger *log.Logger
 	record record.EventRecorder
 	cfg    env.BackendConfig
 }
 
-func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *log.Logger, recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:           ctx,
@@ -73,7 +74,7 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 		bebCommander:  bebCommander,
 		Client:        client,
 		Cache:         cache,
-		Log:           log,
+		logger:        logger,
 		record:        recorder,
 		cfg:           cfg,
 	}
@@ -84,7 +85,7 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	var secretList v1.SecretList
 
@@ -93,11 +94,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}); err != nil {
 		return ctrl.Result{}, err
 	}
-	r.Log.Info("Found secrets with BEB label", "count", len(secretList.Items))
+	r.namedLogger().Debugw("found secrets with BEB label", "count", len(secretList.Items))
 
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
-		r.Log.Info(fmt.Sprintf("more than one secret with the label %q=%q exist", BEBBackendSecretLabelKey, BEBBackendSecretLabelValue))
+		r.namedLogger().Debugw("more than one secret with the label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue)
 		currentBackend, err := r.getCurrentBackendCR(ctx)
 		if err != nil {
 			if k8serrors.IsNotFound(err) {
@@ -111,11 +112,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		desiredBackend.Status.Backend = currentBackend.Status.Backend
 		desiredBackend.Status.EventingReady = utils.BoolPtr(false)
 		if object.Semantic.DeepEqual(&desiredBackend.Status, &currentBackend.Status) {
-			r.Log.Info("No need to update backend CR status")
+			r.namedLogger().Debug("no need to update backend CR status")
 			return ctrl.Result{}, nil
 		}
 		if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-			r.Log.Error(err, "error updating EventingBackend status")
+			r.namedLogger().Errorw("error updating EventingBackend status", "error", err)
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
@@ -132,7 +133,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, error) {
 	// CreateOrUpdate CR with NATS
-	r.Log.Info("Reconciling with backend as NATS")
+	r.namedLogger().Info("reconciling with backend as NATS")
 	backendType := eventingv1alpha1.NatsBackendType
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
@@ -143,7 +144,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 		}
 		return ctrl.Result{}, errors.Wrapf(err, "failed to createOrUpdate EventingBackend, type: %s", eventingv1alpha1.NatsBackendType)
 	}
-	r.Log.Info("Created/updated backend CR")
+	r.namedLogger().Debug("created/updated backend CR")
 
 	// Stop the BEB subscription controller
 	if err := r.stopBebController(); err != nil {
@@ -174,7 +175,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	}
 
 	// CreateOrUpdate deployment for publisher proxy
-	r.Log.Info("trying to create/update eventing publisher proxy...")
+	r.namedLogger().Debug("trying to create/update eventing publisher proxy")
 	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
 	if err != nil {
 		// Update status if bad
@@ -182,10 +183,10 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when createOrUpdatePublisherProxy failed")
 		}
-		r.Log.Error(err, "cannot create/update eventing publisher proxy deployment")
+		r.namedLogger().Errorw("cannot create/update eventing publisher proxy deployment", "error", err)
 		return ctrl.Result{}, err
 	}
-	r.Log.Info("Created/updated publisher proxy")
+	r.namedLogger().Info("created/updated publisher proxy")
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
@@ -194,7 +195,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 }
 
 func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret) (ctrl.Result, error) {
-	r.Log.Info("Reconciling with backend as BEB")
+	r.namedLogger().Info("reconciling with backend as BEB")
 	backendType := eventingv1alpha1.BebBackendType
 	// CreateOrUpdate CR with BEB
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
@@ -222,7 +223,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when SyncPublisherProxySecret failed")
 		}
-		r.Log.Error(err, "failed to sync publisher proxy secret", "backend", eventingv1alpha1.BebBackendType)
+		r.namedLogger().Errorw("failed to sync publisher proxy secret", "backend", eventingv1alpha1.BebBackendType, "error", err)
 		return ctrl.Result{}, err
 	}
 
@@ -249,13 +250,13 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when createOrUpdatePublisherProxy failed")
 		}
-		r.Log.Error(err, "failed to create or update publisher proxy", "backend", backendType)
+		r.namedLogger().Errorw("failed to create or update publisher proxy", "backend", backendType, "error", err)
 		return ctrl.Result{}, err
 	}
 	// CreateOrUpdate status of the CR
 	err = r.UpdateBackendStatus(ctx, backendType, newBackend, publisherDeploy, bebSecret)
 	if err != nil {
-		r.Log.Error(err, "failed to create or update backend status", "backend", backendType)
+		r.namedLogger().Errorw("failed to create or update backend status", "backend", backendType, "error", err)
 		return ctrl.Result{}, err
 	}
 
@@ -310,13 +311,13 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 		desiredBackend.Status = desiredStatus
 
 		if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
-			r.Log.Info("No need to update backend CR status")
+			r.namedLogger().Debug("no need to update backend CR status")
 			return nil
 		}
 
-		r.Log.Info("Updating backend CR status when backend is nil")
+		r.namedLogger().Debug("updating backend CR status when backend is nil")
 		if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-			r.Log.Error(err, "error updating EventingBackend status")
+			r.namedLogger().Errorw("error updating EventingBackend status", "error", err)
 			return err
 		}
 		return nil
@@ -330,13 +331,13 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 		desiredBackend.Status = desiredStatus
 
 		if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
-			r.Log.Info("No need to update backend CR status")
+			r.namedLogger().Debug("no need to update backend CR status")
 			return nil
 		}
 
-		r.Log.Info("Updating backend CR status for backend change")
+		r.namedLogger().Debug("updating backend CR status for backend change")
 		if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-			r.Log.Error(err, "error updating EventingBackend status")
+			r.namedLogger().Errorw("error updating EventingBackend", "error", err)
 			return err
 		}
 		return nil
@@ -368,7 +369,7 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 	desiredStatus.PublisherProxyReady = utils.BoolPtr(publisherReady)
 
 	if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
-		r.Log.Info("No need to update backend CR status")
+		r.namedLogger().Debug("no need to update backend CR status")
 		return nil
 	}
 
@@ -376,9 +377,9 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 	desiredBackend := currentBackend.DeepCopy()
 	desiredBackend.Status = desiredStatus
 
-	r.Log.Info("Updating backend CR status")
+	r.namedLogger().Debug("updating backend CR status")
 	if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
-		r.Log.Error(err, "error updating EventingBackend status")
+		r.namedLogger().Errorw("error updating EventingBackend status", "error", err)
 		return err
 	}
 	return nil
@@ -437,7 +438,7 @@ func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Se
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create secret
-			r.Log.Info("creating secret for BEB publisher")
+			r.namedLogger().Debug("creating secret for BEB publisher")
 			err := r.Create(ctx, desiredSecret)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to create secret for eventing publisher proxy")
@@ -448,14 +449,14 @@ func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Se
 	}
 
 	if object.Semantic.DeepEqual(currentSecret, desiredSecret) {
-		r.Log.Info("No need to update secret for BEB publisher")
+		r.namedLogger().Debug("no need to update secret for BEB publisher")
 		return currentSecret, nil
 	}
 
 	// Update secret
 	desiredSecret.ResourceVersion = currentSecret.ResourceVersion
 	if err := r.Update(ctx, desiredSecret); err != nil {
-		r.Log.Error(err, "Cannot update publisher proxy secret")
+		r.namedLogger().Errorw("cannot update publisher proxy secret", "error", err)
 		return nil, err
 	}
 
@@ -552,7 +553,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create
-			r.Log.Info("creating publisher proxy")
+			r.namedLogger().Debug("creating publisher proxy")
 			return desiredPublisher, r.Create(ctx, desiredPublisher)
 		}
 		return nil, err
@@ -560,12 +561,12 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
 	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
-		r.Log.Info("No need to update publisher proxy")
+		r.namedLogger().Debug("no need to update publisher proxy")
 		return currentPublisher, nil
 	}
 
 	// Update publisher proxy deployment
-	r.Log.Info("updating publisher proxy")
+	r.namedLogger().Debug("updating publisher proxy")
 	if err := r.Update(ctx, desiredPublisher); err != nil {
 		return nil, errors.Wrapf(err, "cannot update publisher proxy deployment")
 	}
@@ -589,23 +590,23 @@ func (r *Reconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1al
 	currentBackend, err := r.getCurrentBackendCR(ctx)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			r.Log.Info("trying to create backend CR...")
+			r.namedLogger().Debug("trying to create backend CR")
 			if err := r.Create(ctx, desiredBackend); err != nil {
 				return nil, errors.Wrapf(err, "cannot create an EventingBackend")
 			}
-			r.Log.Info("created backend CR")
+			r.namedLogger().Debug("created backend CR")
 			return desiredBackend, nil
 		}
 		return nil, errors.Wrapf(err, "failed to get an EventingBackend")
 	}
 
-	r.Log.Info("Found existing backend CR")
+	r.namedLogger().Debug("found existing backend CR")
 	desiredBackend.ResourceVersion = currentBackend.ResourceVersion
 	if object.Semantic.DeepEqual(&currentBackend, &desiredBackend) {
-		r.Log.Info("No need to update existing backend CR")
+		r.namedLogger().Debug("no need to update existing backend CR")
 		return currentBackend, nil
 	}
-	r.Log.Info("Update existing backend CR")
+	r.namedLogger().Debug("update existing backend CR")
 	if err := r.Update(ctx, desiredBackend); err != nil {
 		return nil, errors.Wrapf(err, "cannot update the EventingBackend")
 	}
@@ -656,11 +657,11 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *Reconciler) startNatsController() error {
 	if !r.natsCommanderStarted {
 		if err := r.natsCommander.Start(); err != nil {
-			r.Log.Error(err, "failed to start the NATS commander")
+			r.namedLogger().Errorw("failed to start the NATS commander", "error", err)
 			return err
 		}
 		r.natsCommanderStarted = true
-		r.Log.Info("NATS commander successfully started")
+		r.namedLogger().Info("commander for NATS successfully started")
 	}
 	return nil
 }
@@ -668,11 +669,11 @@ func (r *Reconciler) startNatsController() error {
 func (r *Reconciler) stopNatsController() error {
 	if r.natsCommanderStarted {
 		if err := r.natsCommander.Stop(); err != nil {
-			r.Log.Error(err, "failed to stop the NATS commander")
+			r.namedLogger().Errorw("failed to stop the NATS commander", "error", err)
 			return err
 		}
 		r.natsCommanderStarted = false
-		r.Log.Info("NATS commander successfully stopped")
+		r.namedLogger().Info("commander for NATS successfully stopped")
 	}
 	return nil
 }
@@ -680,11 +681,11 @@ func (r *Reconciler) stopNatsController() error {
 func (r *Reconciler) startBebController() error {
 	if !r.bebCommanderStarted {
 		if err := r.bebCommander.Start(); err != nil {
-			r.Log.Error(err, "failed to start the BEB commander")
+			r.namedLogger().Errorw("failed to start the BEB commander", "error", err)
 			return err
 		}
 		r.bebCommanderStarted = true
-		r.Log.Info("BEB commander successfully started")
+		r.namedLogger().Info("commander for BEB successfully started")
 	}
 	return nil
 }
@@ -692,11 +693,15 @@ func (r *Reconciler) startBebController() error {
 func (r *Reconciler) stopBebController() error {
 	if r.bebCommanderStarted {
 		if err := r.bebCommander.Stop(); err != nil {
-			r.Log.Error(err, "failed to stop the BEB commander")
+			r.namedLogger().Errorw("failed to stop the BEB commander", "error", err)
 			return err
 		}
 		r.bebCommanderStarted = false
-		r.Log.Info("BEB commander successfully stopped")
+		r.namedLogger().Info("commander for BEB successfully stopped")
 	}
 	return nil
+}
+
+func (r *Reconciler) namedLogger() *zap.SugaredLogger {
+	return r.logger.WithContext().Named(reconcilerName)
 }
