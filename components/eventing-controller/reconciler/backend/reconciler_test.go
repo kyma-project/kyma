@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -202,6 +203,18 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("Backend Reconciliation Tests", func() {
+	var ownerReferences *[]metav1.OwnerReference
+
+	When("Creating a controller deployment", func() {
+		It("Should return an non empty owner to be used as a reference in publisher deployemnt", func() {
+			ctx := context.Background()
+			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ownerReferences = ensureControllerDeploymentCreated(ctx)
+			// Expect
+			Eventually(controllerDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
+			Expect((*ownerReferences)[0].UID).ShouldNot(BeEmpty())
+		})
+	})
 
 	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
 		It("Should start with NATS", func() {
@@ -233,6 +246,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretName:               "",
 					BebSecretNamespace:          "",
 				}))
+		})
+		It("Should check that the owner of publisher deployment is the controller deployment", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			// Expect
+			Eventually(eventingOwnerReferencesGetter(ctx, "eventing-publisher-proxy", kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(ownerReferences))
 		})
 	})
 
@@ -276,6 +296,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretName:               bebSecret1name,
 					BebSecretNamespace:          kymaSystemNamespace,
 				}))
+		})
+		It("Should check that the owner of publisher deployment is the controller deployment", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			// Expect
+			Eventually(eventingOwnerReferencesGetter(ctx, "eventing-publisher-proxy", kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(ownerReferences))
 		})
 	})
 
@@ -396,6 +423,24 @@ func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 	}
 }
 
+func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerReference {
+	By("Ensuring an Eventing-Controller Deployment is created")
+	deployment := reconcilertesting.WithEventingControllerDeployment()
+
+	err := k8sClient.Create(ctx, deployment)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
+
+	return &[]metav1.OwnerReference{
+		*metav1.NewControllerRef(deployment, schema.GroupVersionKind{
+			Group:   appsv1.SchemeGroupVersion.Group,
+			Version: appsv1.SchemeGroupVersion.Version,
+			Kind:    "Deployment",
+		}),
+	}
+}
+
 func ensurePublisherProxyIsReady(ctx context.Context) {
 	d, err := publisherProxyDeploymentGetter(ctx)()
 	Expect(err).ShouldNot(HaveOccurred())
@@ -467,6 +512,34 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 		}
 		return secret
 	}, timeout, pollingInterval)
+}
+
+func controllerDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	dep := new(appsv1.Deployment)
+	return func() (*appsv1.Deployment, error) {
+		if err := k8sClient.Get(ctx, lookupKey, dep); err != nil {
+			return nil, err
+		}
+		return dep, nil
+	}
+}
+
+func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) func() (*[]metav1.OwnerReference, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	deployment := new(appsv1.Deployment)
+	return func() (*[]metav1.OwnerReference, error) {
+		if err := k8sClient.Get(ctx, lookupKey, deployment); err != nil {
+			return nil, err
+		}
+		return &deployment.OwnerReferences, nil
+	}
 }
 
 type TestCommander struct {

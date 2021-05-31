@@ -18,6 +18,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -549,6 +550,10 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
 
+	if err := r.setPublisherOwnerReference(ctx, desiredPublisher); err != nil {
+		return nil, errors.Wrapf(err, "setting owner references")
+	}
+
 	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -704,4 +709,25 @@ func (r *Reconciler) stopBebController() error {
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName)
+}
+
+func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *appsv1.Deployment) error {
+	controllerNamespacedName := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	var deploymentController appsv1.Deployment
+	if err := r.Cache.Get(ctx, controllerNamespacedName, &deploymentController); err != nil {
+		r.namedLogger().Errorw("getting controller NamespacedName", "error", err)
+		return err
+	}
+	references := []metav1.OwnerReference{
+		*metav1.NewControllerRef(&deploymentController, schema.GroupVersionKind{
+			Group:   appsv1.SchemeGroupVersion.Group,
+			Version: appsv1.SchemeGroupVersion.Version,
+			Kind:    "Deployment",
+		}),
+	}
+	publisher.SetOwnerReferences(references)
+	return nil
 }
