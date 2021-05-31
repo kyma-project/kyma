@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/log"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -61,12 +61,12 @@ type Reconciler struct {
 	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
 	//  already uses a cache internally (check manager.DefaultNewClient)
 	cache.Cache
-	logger *log.Logger
+	logger *logger.Logger
 	record record.EventRecorder
 	cfg    env.BackendConfig
 }
 
-func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *log.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:           ctx,

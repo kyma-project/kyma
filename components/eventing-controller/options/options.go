@@ -20,11 +20,13 @@ const (
 	envNameLogLevel  = "APP_LOG_LEVEL"
 )
 
+// Options represents the controller options.
 type Options struct {
 	Args
 	Env
 }
 
+// Args represents the controller command-line arguments.
 type Args struct {
 	MaxReconnects   int
 	MetricsAddr     string
@@ -32,11 +34,18 @@ type Args struct {
 	ReconcilePeriod time.Duration
 }
 
+// Env represents the controller environment variables.
 type Env struct {
 	LogFormat string `envconfig:"APP_LOG_FORMAT" default:"json"`
 	LogLevel  string `envconfig:"APP_LOG_LEVEL" default:"warn"`
 }
 
+// New returns a new Options instance.
+func New() *Options {
+	return &Options{}
+}
+
+// Parse parses the controller options.
 func (o *Options) Parse() error {
 	flag.IntVar(&o.MaxReconnects, argNameMaxReconnects, 10, "Maximum number of reconnect attempts (NATS).")
 	flag.StringVar(&o.MetricsAddr, argNameMetricsAddr, ":8080", "The address the metric endpoint binds to.")
@@ -51,6 +60,7 @@ func (o *Options) Parse() error {
 	return nil
 }
 
+// String implements the fmt.Stringer interface.
 func (o Options) String() string {
 	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v",
 		argNameMaxReconnects, o.MaxReconnects,
