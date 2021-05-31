@@ -137,6 +137,17 @@ func qos(qos string) *string {
 	return &q
 }
 
+func WithFakeSubscriptionStatus(s *eventingv1alpha1.Subscription) {
+	s.Status.Conditions = []eventingv1alpha1.Condition{
+		{
+			Type:    "foo",
+			Status:  "foo",
+			Reason:  "foo-reason",
+			Message: "foo-message",
+		},
+	}
+}
+
 func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "BEB"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
