@@ -424,7 +424,7 @@ func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 }
 
 func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerReference {
-	By(fmt.Sprintf("Ensuring an Eventing-Controller Deployment is created"))
+	By("Ensuring an Eventing-Controller Deployment is created")
 	deployment := reconcilertesting.WithEventingControllerDeployment()
 
 	err := k8sClient.Create(ctx, deployment)
