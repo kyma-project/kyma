@@ -4,39 +4,35 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-
 	appsv1 "k8s.io/api/apps/v1"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-
 	"k8s.io/client-go/kubernetes/scheme"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kyma-project/kyma/common/logging/logger"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/log"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -51,6 +47,7 @@ const (
 )
 
 var (
+	defaultLogger *log.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
 	natsCommander = &TestCommander{}
@@ -105,6 +102,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 
 			gotPublisherSecret, err := getSecretForPublisher(publisherSecret)
 			if tc.expectedError != nil {
+				assert.NotNil(t, err)
 				assert.Equal(t, tc.expectedError.Error(), err.Error(), "invalid error")
 				return
 			}
@@ -139,7 +137,11 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
+	var err error
+
+	defaultLogger, err = log.NewLogger(string(logger.JSON), string(logger.INFO))
+	Expect(err).To(BeNil())
+	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
@@ -152,8 +154,6 @@ var _ = BeforeSuite(func(done Done) {
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
 	}
-
-	var err error
 
 	cfg, err := testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
@@ -181,7 +181,7 @@ var _ = BeforeSuite(func(done Done) {
 		bebCommander,
 		k8sManager.GetClient(),
 		k8sManager.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("eventing-backend"),
+		defaultLogger,
 		k8sManager.GetEventRecorderFor("backend-controller"),
 	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
@@ -462,7 +462,7 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 		}
 		secret := new(corev1.Secret)
 		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
-			log.Printf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
+			defaultLogger.WithContext().Errorf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
 			return nil
 		}
 		return secret

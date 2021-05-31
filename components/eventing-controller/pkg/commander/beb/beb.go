@@ -41,25 +41,23 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel          context.CancelFunc
-	envCfg          env.Config
-	restCfg         *rest.Config
-	enableDebugLogs bool
-	metricsAddr     string
-	resyncPeriod    time.Duration
-	mgr             manager.Manager
-	backend         handlers.MessagingBackend
+	cancel       context.CancelFunc
+	envCfg       env.Config
+	restCfg      *rest.Config
+	metricsAddr  string
+	resyncPeriod time.Duration
+	mgr          manager.Manager
+	backend      handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration) *Commander {
 	return &Commander{
-		envCfg:          env.GetConfig(),
-		restCfg:         restCfg,
-		enableDebugLogs: enableDebugLogs,
-		metricsAddr:     metricsAddr,
-		resyncPeriod:    resyncPeriod,
+		envCfg:       env.GetConfig(),
+		restCfg:      restCfg,
+		metricsAddr:  metricsAddr,
+		resyncPeriod: resyncPeriod,
 	}
 }
 
