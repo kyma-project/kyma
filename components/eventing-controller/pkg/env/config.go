@@ -36,9 +36,9 @@ func Backend() (string, error) {
 type Config struct {
 	// Following details are for eventing-controller to communicate to BEB
 	BebApiUrl     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
-	ClientID      string `envconfig:"CLIENT_ID" required:"true"`
-	ClientSecret  string `envconfig:"CLIENT_SECRET" required:"true"`
-	TokenEndpoint string `envconfig:"TOKEN_ENDPOINT" required:"true"`
+	ClientID      string `envconfig:"CLIENT_ID" default:"client-id"`
+	ClientSecret  string `envconfig:"CLIENT_SECRET" default:"client-secret"`
+	TokenEndpoint string `envconfig:"TOKEN_ENDPOINT" default:"token-endpoint"`
 
 	// Following details are for BEB to communicate to Kyma
 	WebhookActivationTimeout time.Duration `envconfig:"WEBHOOK_ACTIVATION_TIMEOUT" default:"60s"`
@@ -52,7 +52,7 @@ type Config struct {
 	ContentMode     string `envconfig:"CONTENT_MODE" default:""`
 
 	// Default namespace for BEB
-	BEBNamespace string `envconfig:"BEB_NAMESPACE" required:"true"`
+	BEBNamespace string `envconfig:"BEB_NAMESPACE" default:"ns"`
 
 	// Domain holds the Kyma domain
 	Domain string `envconfig:"DOMAIN" required:"true"`

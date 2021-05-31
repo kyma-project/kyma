@@ -4,4 +4,7 @@ resources:
 - group: eventing
   kind: Subscription
   version: v1alpha1
+- group: eventing
+  kind: EventingBackend
+  version: v1alpha1
 version: "2"

@@ -5,7 +5,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -19,7 +20,7 @@ type Client struct {
 }
 
 func NewHttpClient(cfg clientcredentials.Config) *Client {
-	ctx := signals.NewContext()
+	ctx := signals.NewReusableContext()
 	httpClient := newOauth2Client(ctx, cfg)
 	return &Client{httpClient: httpClient}
 }

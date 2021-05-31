@@ -1,5 +1,0 @@
-apiVersion: v2
-name: nats-controller
-description: A Helm chart for nats-eventing-controller
-type: application
-version: 0.1.0

@@ -68,8 +68,3 @@ Create the name of the secret to use
 {{- define "eventing.secretName" -}}
 {{ default (include "eventing.fullname" .) .Values.global.secretName }}
 {{- end }}
-
-{{- define "eventing.preUpgrade.labels" -}}
-component: {{ .Release.Name }}
-job: pre-upgrade-hook
-{{- end }}
