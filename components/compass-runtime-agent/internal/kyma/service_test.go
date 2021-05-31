@@ -2,8 +2,9 @@ package kyma
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 
