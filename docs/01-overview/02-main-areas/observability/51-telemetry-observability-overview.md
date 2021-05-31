@@ -1,9 +1,8 @@
 ---
 title: Telemetry and Observability
-type: Observability
 ---
 
-Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyse the data you're collecting. This is where **observability** tools come in. 
+Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyse the data you're collecting. This is where **observability** tools come in.
 
 ## Collecting data
 
@@ -15,8 +14,8 @@ The collected telemetry data are exposed so that you can view and analyse them w
 
 ## Analysing data
 
-Kyma supports a set of tools for in-cluster observability. 
-We recommend that you also implement an observability solution of your choice outside your cluster, which has the advantage that you can use the data for troubleshooting and root cause analysis while your cluster is down (also, it doesn't eat into your applications' bandwith). 
+Kyma supports a set of tools for in-cluster observability.
+We recommend that you also implement an observability solution of your choice outside your cluster, which has the advantage that you can use the data for troubleshooting and root cause analysis while your cluster is down (also, it doesn't eat into your applications' bandwith).
 
 ### In-cluster observability
 
@@ -39,7 +38,7 @@ However, if your cluster is down, these components are down as well. This is why
 
 ### External observability
 
-If you want to use other observability tools than the ones within the cluster provided by Kyma out-of-the-box, you can easily do that, too. 
+If you want to use other observability tools than the ones within the cluster provided by Kyma out-of-the-box, you can easily do that, too.
 OpenTelemetry exposes the collected data *in the following way*:
 
   *TBD - input needed*
