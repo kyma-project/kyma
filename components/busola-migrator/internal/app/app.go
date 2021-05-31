@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -10,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/jwt"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/kubernetes"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/model"
+	"github.com/kyma-project/kyma/components/busola-migrator/internal/renderer"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/uaa"
 
 	jwxjwt "github.com/lestrrat-go/jwx/jwt"
@@ -24,6 +26,11 @@ type UAAClient interface {
 	GetToken(tokenEndpoint string, authCode string) (map[string]interface{}, error)
 }
 
+//go:generate mockery --name=HTMLRenderer --output=automock --outpkg=automock --case=underscore
+type HTMLRenderer interface {
+	RenderTemplate(w io.Writer, templateName renderer.TemplateName, data interface{}) error
+}
+
 //go:generate mockery --name=JWTService --output=automock --outpkg=automock --case=underscore
 type JWTService interface {
 	ParseAndVerify(jwtSrc, jwksURI string) (jwxjwt.Token, error)
@@ -36,12 +43,17 @@ type K8sClient interface {
 }
 
 type App struct {
+	UAAEnabled bool
+
 	busolaURL    string
 	fsRoot       http.FileSystem
+	fsAssets     http.FileSystem
 	uaaClient    UAAClient
 	uaaOIDConfig uaa.OpenIDConfiguration
 	k8sClient    K8sClient
 	jwtService   JWTService
+
+	htmlRenderer HTMLRenderer
 }
 
 func New(cfg config.Config, busolaURL string, kubeConfig *rest.Config) (App, error) {
@@ -49,6 +61,17 @@ func New(cfg config.Config, busolaURL string, kubeConfig *rest.Config) (App, err
 	dir := path.Join(wd, "static")
 	if cfg.StaticFilesDIR != "" {
 		dir = cfg.StaticFilesDIR
+	}
+
+	// UAA Migrator functionality is disabled, no need to initialize all clients
+	if !cfg.UAA.Enabled {
+		return App{
+			UAAEnabled:   cfg.UAA.Enabled,
+			busolaURL:    busolaURL,
+			fsRoot:       http.Dir(dir),
+			fsAssets:     http.Dir(path.Join(dir, "assets")),
+			htmlRenderer: renderer.New(path.Join(dir, "templates")),
+		}, nil
 	}
 
 	uaaCfg := cfg.UAA
@@ -65,11 +88,14 @@ func New(cfg config.Config, busolaURL string, kubeConfig *rest.Config) (App, err
 	}
 
 	return App{
+		UAAEnabled:   cfg.UAA.Enabled,
 		busolaURL:    busolaURL,
 		fsRoot:       http.Dir(dir),
+		fsAssets:     http.Dir(path.Join(dir, "assets")),
 		uaaClient:    uaaClient,
 		uaaOIDConfig: uaaOIDConfig,
 		k8sClient:    k8sClient,
 		jwtService:   jwt.NewService(),
+		htmlRenderer: renderer.New(path.Join(dir, "templates")),
 	}, nil
 }

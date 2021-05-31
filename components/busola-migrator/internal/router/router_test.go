@@ -10,8 +10,8 @@ import (
 )
 
 func Test_New(t *testing.T) {
-	fixRouter := func() *chi.Mux {
-		return New(app.App{})
+	fixRouter := func(uaaEnabled bool) *chi.Mux {
+		return New(app.App{UAAEnabled: uaaEnabled})
 	}
 
 	type request struct {
@@ -23,6 +23,7 @@ func Test_New(t *testing.T) {
 		name          string
 		request       request
 		matchingRoute string
+		uaaEnabled    bool
 	}{
 		{
 			name: "healthz",
@@ -31,6 +32,7 @@ func Test_New(t *testing.T) {
 				url:    "/healthz",
 			},
 			matchingRoute: "/healthz",
+			uaaEnabled:    true,
 		},
 		{
 			name: "redirect to busola",
@@ -39,6 +41,7 @@ func Test_New(t *testing.T) {
 				url:    "/console-redirect",
 			},
 			matchingRoute: "/console-redirect",
+			uaaEnabled:    true,
 		},
 		{
 			name: "migrate xsuaa",
@@ -47,6 +50,7 @@ func Test_New(t *testing.T) {
 				url:    "/xsuaa-migrate",
 			},
 			matchingRoute: "/xsuaa-migrate",
+			uaaEnabled:    true,
 		},
 		{
 			name: "xsuaa callback",
@@ -55,6 +59,7 @@ func Test_New(t *testing.T) {
 				url:    "/callback",
 			},
 			matchingRoute: "/callback",
+			uaaEnabled:    true,
 		},
 		{
 			name: "redirect to static page",
@@ -63,14 +68,43 @@ func Test_New(t *testing.T) {
 				url:    "/not-declared-in-router",
 			},
 			matchingRoute: "/*",
+			uaaEnabled:    true,
 		},
 		{
-			name: "static page",
+			name: "static page index",
 			request: request{
 				method: http.MethodGet,
-				url:    "/info/",
+				url:    "/",
 			},
-			matchingRoute: "/info/*",
+			matchingRoute: "/",
+			uaaEnabled:    true,
+		},
+		{
+			name: "static page asset",
+			request: request{
+				method: http.MethodGet,
+				url:    "/assets/style.css",
+			},
+			matchingRoute: "/assets/*",
+			uaaEnabled:    true,
+		},
+		{
+			name: "migrate xsuaa when uaa disabled",
+			request: request{
+				method: http.MethodGet,
+				url:    "/xsuaa-migrate",
+			},
+			matchingRoute: "/*",
+			uaaEnabled:    false,
+		},
+		{
+			name: "xsuaa callback when uaa disabled",
+			request: request{
+				method: http.MethodGet,
+				url:    "/callback",
+			},
+			matchingRoute: "/*",
+			uaaEnabled:    false,
 		},
 	}
 
@@ -79,7 +113,7 @@ func Test_New(t *testing.T) {
 		rctx := chi.NewRouteContext()
 
 		// WHEN
-		match := fixRouter().Match(rctx, tt.request.method, tt.request.url)
+		match := fixRouter(tt.uaaEnabled).Match(rctx, tt.request.method, tt.request.url)
 
 		// THEN
 		assert.True(t, match)

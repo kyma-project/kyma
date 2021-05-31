@@ -1,11 +1,11 @@
 package router
 
 import (
+	"github.com/kyma-project/kyma/components/busola-migrator/internal/app"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/icza/session"
-
-	"github.com/kyma-project/kyma/components/busola-migrator/internal/app"
 )
 
 func New(app app.App) *chi.Mux {
@@ -18,12 +18,17 @@ func New(app app.App) *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	// routes
-	r.Get("/*", app.HandleInfoRedirect)
-	r.Get("/info/*", app.HandleStaticWebsite)
+	r.Get("/*", app.HandleIndexRedirect)
+	r.Get("/", app.HandleStaticIndex)
+	r.Get("/assets/*", app.HandleStaticAssets)
 	r.Get("/console-redirect", app.HandleConsoleRedirect)
-	r.Get("/xsuaa-migrate", app.HandleXSUAAMigrate)
-	r.Get("/callback", app.HandleXSUAACallback)
 	r.Get("/healthz", app.HandleHealthy)
+
+	if app.UAAEnabled {
+		r.Get("/success", app.HandleStaticSuccess)
+		r.Get("/xsuaa-migrate", app.HandleXSUAAMigrate)
+		r.Get("/callback", app.HandleXSUAACallback)
+	}
 
 	return r
 }
