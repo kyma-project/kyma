@@ -103,6 +103,7 @@ async function checkAppGatewayResponse() {
   const host = mockHost.split(".").slice(1).join(".");
 
   console.log(`DEBUG checkAppGatewayResponse vs: ${vs}`);
+  console.dir(vs);
 
   let res = await retryPromise(
     () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
