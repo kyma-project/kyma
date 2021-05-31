@@ -1,0 +1,5 @@
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: EventingBackend
+metadata:
+  name: eventingbackend-sample
+spec:

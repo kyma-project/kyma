@@ -159,6 +159,7 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		StrictMode:                            options.strictMode,
 		IsBEBEnabled:                          options.isBEBEnabled,
 		PodSecurityPolicyEnabled:              options.podSecurityPolicyEnabled,
+		CentralApplicationConnectivityValidatorEnabled: options.centralApplicationConnectivityValidatorEnabled,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)
