@@ -5,9 +5,11 @@ const {
     kubectlDeleteDir,
     sleep
 } = require("../utils");
+const { expect } = require("chai");
+
 
 async function waitForK8sResources(){
-    await waitForFunction("audit-test-fn", "audit-test", timeout = 120000);
+    await waitForFunction("audit-test-fn", "audit-test", 120000);
 }
 
 async function createNamespace(namespace) {
@@ -15,24 +17,6 @@ async function createNamespace(namespace) {
 }
 
 async function deployK8sResources() {
-    // try {
-    //     const resp = await axios.get(url, {
-    //             headers: {
-    //                 "Authorization": `Bearer ${token}`
-    //             }
-    //         })
-    //     this._logs = resp.data
-    // }
-    // catch(err) {
-    //     const msg = "Error when fetching logs from audit log service"
-    //     if (err.response) {
-    //         throw new Error(
-    //         `${msg}: ${err.response.status} ${err.response.statusText}`
-    //         );
-    //     } else {
-    //         throw new Error(`${msg}: ${err.toString()}`);
-    //     }
-    // }
     await kubectlApplyDir("./audit-log/fixtures", "audit-test")
     await waitForK8sResources()
 }
@@ -45,31 +29,56 @@ async function waitForAuditLogs() {
     await sleep(120000);
 }
 
+function parseAuditLogs(logs, resName, groupName, action) {
+    let found = new Boolean(false)
+    logs.forEach(element => {
+        if (element.message.includes(groupName)) {
+            if (element.message.includes(resName)){
+                if (element.message.includes(action)) {
+                    found = true
+                }
+            }
+        }
+    });
+    return found
+}
+
 async function checkAuditLogs(cred) {
     let logs = await cred.fetchLogs();
-    console.log(logs)
+    var notFound = [];
     let groups = [
-        "monitoring.coreos.com",
-        "rbac.authorization.k8s.io",
-        "serverless.kyma-project.io",
-        "foo-config"
+        { "metrics-foo": "monitoring.coreos.com" } ,
+        { "audit-role-foo": "rbac.authorization.k8s.io"},
+        {"audit-test-fn": "serverless.kyma-project.io"},
+        {"foo-config": "configmaps"} // for checking configmap
     ]
     let actions = [
         "create",
         "delete"
     ]
-    logs.forEach (element => {
-        groups.forEach(group => {
-            actions.forEach(action => {
-                
-            })
+
+    groups.forEach(group => {
+        actions.forEach(action => {
+            for (let resName in group) {
+                let res = parseAuditLogs(logs, resName, group[resName],  action)
+                if (res == false) {
+                    notFound.push({
+                        key: group[resName],
+                        value: action
+                    })
+                }
+            }
         });
-    })
-    
+    });
+    if (notFound.length != 0) {
+        notFound.forEach(el => {
+            for (let key in el) {
+                    console.log("Group: " + key + " with action: " + el[key] + "not found")
+            }
+        })
+    }
+    expect(notFound).to.be.empty
 }
-
-
-
 
 function namespaceObj(name) {
     return {

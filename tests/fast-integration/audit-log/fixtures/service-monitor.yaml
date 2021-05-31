@@ -1,8 +1,8 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: metrics
-  namespace: kyma-system
+  name: metrics-foo
+  namespace: audit-test
   labels:
     prometheus: monitoring
     example: monitoring-custom-metrics

@@ -41,15 +41,12 @@ class AuditLogClient {
         return this._token;
     }
 
-    async fetchLogs(timeStamp) {
+    async fetchLogs() {
         const token = await this.getToken()
         const serviceUrl = this.creds.url
         let dateTo =  moment().utcOffset(0, false).format('YYYY-MM-DDTHH:mm:ss');
         let dateFrom = moment().utcOffset(0, false).subtract({'minutes': 10}).format('YYYY-MM-DDTHH:mm:ss');
-        console.log("timeFrom: "+ dateFrom)
-        console.log("timeTo: "+ dateTo)
         var url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateFrom + "&time_to=" + dateTo
-        console.log(url)
         try {
             const resp = await axios.get(url, {
                     headers: {
@@ -69,26 +66,6 @@ class AuditLogClient {
             }
         }
         return this._logs
-    }
-
-    async parseLogs(groupName, action) {
-        let logs = this._logs
-        let found = new Boolean(false)
-
-        logs.forEach(element => {
-            if (element.message.includes(groupName)) {
-                if (element.message.includes(action)) {
-                    let msg = JSON.parse(element.message)
-                    console.log("group: ", groupName, "action: ", msg.object.type, "uri: " , msg.object.id.requestURI)
-                    found = true
-                }
-            }
-        });
-
-        if (found == false) {
-            var msg = "Unable to find group: " + groupName
-            throw new Error(`${msg}`);
-        }
     }
 }
 

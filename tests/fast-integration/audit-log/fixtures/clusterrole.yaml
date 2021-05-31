@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: audit-foo
+  name: audit-role-foo
 rules:
 - apiGroups:
   - ""

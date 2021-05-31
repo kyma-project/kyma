@@ -42,6 +42,9 @@ describe("SKR test", function() {
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const director = new DirectorClient(DirectorConfig.fromEnv());
 
+  const cred = new AuditLogClient(Creds.fromEnv())
+
+
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
@@ -86,7 +89,6 @@ describe("SKR test", function() {
     await deleteK8sResources()
     await waitForAuditLogs()
     await checkAuditLogs(cred)
-
   })
    
   it("Deprovision SKR", async function() {
