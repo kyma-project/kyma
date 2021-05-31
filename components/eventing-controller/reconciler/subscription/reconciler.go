@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -43,11 +46,12 @@ import (
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
+	ctx context.Context
 	client.Client
 	cache.Cache
 	Log              logr.Logger
 	recorder         record.EventRecorder
-	backend          handlers.MessagingBackend
+	Backend          handlers.MessagingBackend
 	Domain           string
 	eventTypeCleaner eventtype.Cleaner
 }
@@ -64,15 +68,18 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
+	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
 	bebHandler := &handlers.Beb{Log: log}
 	bebHandler.Initialize(cfg)
+
 	return &Reconciler{
+		ctx:              ctx,
 		Client:           client,
 		Cache:            cache,
 		Log:              log,
 		recorder:         recorder,
-		backend:          bebHandler,
+		Backend:          bebHandler,
 		Domain:           cfg.Domain,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
 	}
@@ -233,7 +240,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 
 	var statusChanged bool
 	var err error
-	if statusChanged, err = r.backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
+	if statusChanged, err = r.Backend.SyncSubscription(subscription, r.eventTypeCleaner, apiRule); err != nil {
 		logger.Error(err, "Update BEB subscription failed")
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, corev1.ConditionFalse, "")
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
@@ -277,7 +284,7 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 // deleteBEBSubscription deletes the BEB subscription and updates the condition and k8s events
 func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscription, logger logr.Logger, ctx context.Context) error {
 	logger.Info("Deleting BEB subscription")
-	if err := r.backend.DeleteSubscription(subscription); err != nil {
+	if err := r.Backend.DeleteSubscription(subscription); err != nil {
 		return err
 	}
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
@@ -763,6 +770,31 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&eventingv1alpha1.Subscription{}).
 		Watches(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, r.getAPIRuleEventHandler()).
 		Complete(r)
+}
+
+//  SetupUnmanaged creates a controller under the client control
+func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
+	ctru, err := controller.NewUnmanaged("beb-subscription-controller", mgr, controller.Options{
+		Reconciler: r,
+	})
+	if err != nil {
+		r.Log.Error(err, "failed to create a unmanaged BEB controller")
+		return err
+	}
+
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		r.Log.Error(err, "unable to watch pods")
+		return err
+	}
+
+	go func(r *Reconciler, c controller.Controller) {
+		if err := c.Start(r.ctx.Done()); err != nil {
+			r.Log.Error(err, "failed to start the beb-subscription-controller")
+			os.Exit(1)
+		}
+	}(r, ctru)
+
+	return nil
 }
 
 // getAPIRuleEventHandler returns an APIRule event handler.

@@ -102,6 +102,7 @@ roleRef:
   kind: ClusterRole
   name: {{ .Release.Name }}-application-gateway
 {{- end }}
+{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
 ---
 
 kind: ClusterRole
@@ -148,3 +149,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Release.Name }}-connectivity-validator
+{{- end }}
