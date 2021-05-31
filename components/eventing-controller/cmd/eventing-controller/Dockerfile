@@ -8,6 +8,8 @@ COPY go.sum go.sum
 
 COPY api/ api/
 COPY cmd/ cmd/
+COPY log/ log/
+COPY options/ options/
 COPY pkg/ pkg/
 COPY reconciler/ reconciler/
 COPY testing/ testing/

@@ -33,6 +33,11 @@ function shouldIgnoreAlert(alert) {
     "Watchdog",
     // Scrape limits can be exceeded on long-running clusters and can be ignored
     "ScrapeLimitForTargetExceeded",
+
+    // Overcommitting means that a cluster with at least 1 node taken down doesn't have enough resources to run all the pods
+    // It's fine in an e2e test scenario since the clusters are usually deliberately created small to save money
+    "KubeCPUOvercommit",
+    "KubeMemoryOvercommit",
   ]
 
   return alert.labels.severity == "critical" || alertNamesToIgnore.includes(alert.labels.alertname)

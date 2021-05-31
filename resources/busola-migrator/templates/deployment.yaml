@@ -93,16 +93,19 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.uaaSecretName }}
+                  optional: true
                   key: url
             - name: APP_UAA_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.uaaSecretName }}
+                  optional: true
                   key: clientid
             - name: APP_UAA_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.uaaSecretName }}
+                  optional: true
                   key: clientsecret
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
