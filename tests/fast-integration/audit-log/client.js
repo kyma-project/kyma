@@ -68,6 +68,7 @@ class AuditLogClient {
                 throw new Error(`${msg}: ${err.toString()}`);
             }
         }
+        return this._logs
     }
 
     async parseLogs(groupName, action) {

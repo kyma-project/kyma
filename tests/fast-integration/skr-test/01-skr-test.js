@@ -27,6 +27,16 @@ const {
   initializeK8sClient,
 } = require("../utils");
 
+const { 
+  Creds,
+  AuditLogClient,
+  createNamespace,
+  deployK8sResources,
+  deleteK8sResources,
+  waitForAuditLogs,
+  checkAuditLogs
+} = require("../audit-log");
+
 describe("SKR test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -68,6 +78,16 @@ describe("SKR test", function() {
   it("order.created.v1 event should trigger the lastorder function", async function () {
     await sendEventAndCheckResponse();
   });
+
+  // Check audit log
+  it (`creates namespace audit-test`, async function(){
+    await createNamespace("audit-test")
+    await deployK8sResources()
+    await deleteK8sResources()
+    await waitForAuditLogs()
+    await checkAuditLogs(cred)
+
+  })
    
   it("Deprovision SKR", async function() {
     await deprovisionSKR(keb, runtimeID);
