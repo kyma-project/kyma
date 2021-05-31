@@ -1,0 +1,12 @@
+# Editors and IDEs
+/.idea
+*.iml
+*~
+*.swp
+*.swo
+
+# Binaries
+/centralapplicationconnectivityvalidator
+
+# Software licenses
+/licenses

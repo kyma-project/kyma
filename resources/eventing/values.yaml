@@ -8,11 +8,7 @@ global:
   secretName: ""
 
   # domainName is the global domain used in Kyma
-  domainName: ""
-
-  eventing:
-    # backend defines the provisioned eventing backend, either NATS or BEB
-    backend: nats
+  domainName: "domain"
 
   istio:
     proxy:

@@ -14,17 +14,19 @@ class KEBConfig {
       getEnvOrThrow("KEB_CLIENT_SECRET"),
       getEnvOrThrow("KEB_GLOBALACCOUNT_ID"),
       getEnvOrThrow("KEB_SUBACCOUNT_ID"),
+      getEnvOrThrow("KEB_USER_ID"),
       getEnvOrThrow("KEB_PLAN_ID"),
       process.env.KEB_REGION
     );
   }
 
-  constructor(host, clientID, clientSecret, globalAccountID, subaccountID, planID, region) {
+  constructor(host, clientID, clientSecret, globalAccountID, subaccountID, userID, planID, region) {
     this.host = host;
     this.clientID = clientID;
     this.clientSecret = clientSecret;
     this.globalAccountID = globalAccountID;
     this.subaccountID = subaccountID;
+    this.userID = userID;
     this.planID = planID;
     this.region = region;
   }
@@ -38,6 +40,7 @@ class KEBClient {
     this.clientSecret = config.clientSecret;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
+    this.userID = config.userID;
     this.planID = config.planID
     this.serviceID = KYMA_SERVICE_ID;
     this.region = config.region;
@@ -126,7 +129,7 @@ class KEBClient {
       context: {
         globalaccount_id: this.globalAccountID,
         subaccount_id: this.subaccountID,
-        user_id: "foo@bar.com"
+        user_id: this.userID,
       },
       parameters: {
         name: name,
