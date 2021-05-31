@@ -1,4 +1,4 @@
-package log
+package logger
 
 import (
 	"github.com/kyma-project/kyma/common/logging/logger"
@@ -8,8 +8,8 @@ type Logger struct {
 	*logger.Logger
 }
 
-// NewLogger returns a new logger with the given format and level
-func NewLogger(format, level string) (*Logger, error) {
+// New returns a new logger with the given format and level.
+func New(format, level string) (*Logger, error) {
 	logFormat, err := logger.MapFormat(format)
 	if err != nil {
 		return nil, err

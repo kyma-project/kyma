@@ -27,9 +27,9 @@ import (
 	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/common/logging/logger"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/log"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	defaultLogger *log.Logger
+	defaultLogger *logger.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
 	natsCommander = &TestCommander{}
@@ -63,7 +63,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "with valid message and namepsace data",
+			name:          "with valid message and namepsace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
@@ -90,7 +90,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 			expectedError: errors.New("message is missing from BEB secret"),
 		},
 		{
-			name: "with empty namespace data",
+			name:          "with empty namespace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			expectedError: errors.New("namespace is missing from BEB secret"),
 		},
@@ -139,7 +139,7 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func(done Done) {
 	var err error
 
-	defaultLogger, err = log.NewLogger(string(logger.JSON), string(logger.INFO))
+	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
