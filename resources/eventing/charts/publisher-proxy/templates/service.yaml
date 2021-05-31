@@ -1,0 +1,55 @@
+# Used by application validator pod to send events to
+# TODO https://github.com/kyma-project/kyma/issues/11319
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "legacy-eventing-publisher-proxy" . }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "publisher-proxy.fullname" . }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "publisher-proxy.fullname" . }}-{{ .Values.metrics.config.nameSuffix }}
+  labels: {{- include "publisher-proxy.metrics.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ .Values.metrics.config.port }}
+      name: {{ .Values.metrics.config.portName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "publisher-proxy.fullname" . }}-health
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: proxy-status
+      protocol: TCP
+      port: {{ .Values.global.istio.proxy.statusPort }}
+      targetPort: {{ .Values.global.istio.proxy.statusPort }}

@@ -1,4 +1,3 @@
-{{- if eq .Values.global.eventing.backend "beb" }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -25,13 +24,13 @@ rules:
   resources:
   - subscriptions
   verbs:
-  - create
-  - delete
   - get
   - list
+  - watch
   - patch
   - update
-  - watch
+  - create
+  - delete
 - apiGroups:
   - eventing.kyma-project.io
   resources:
@@ -51,6 +50,7 @@ rules:
   - patch
   - update
   - create
+  - delete
 - apiGroups:
   - applicationconnector.kyma-project.io
   resources:
@@ -59,4 +59,47 @@ rules:
   - get
   - list
   - watch
-{{- end }}
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - eventingbackends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - eventing.kyma-project.io
+  resources:
+  - eventingbackends/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

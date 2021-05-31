@@ -49,3 +49,23 @@ func RemoveString(slice []string, s string) (result []string) {
 	}
 	return
 }
+
+func BoolPtr(b bool) *bool {
+	return &b
+}
+
+func Int32Ptr(i int32) *int32 {
+	return &i
+}
+
+func BoolPtrEqual(b1, b2 *bool) bool {
+	if b1 == nil && b2 == nil {
+		return true
+	}
+
+	if b1 != nil && b2 != nil {
+		return *b1 == *b2
+	}
+
+	return false
+}
