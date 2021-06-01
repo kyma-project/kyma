@@ -1,3 +1,5 @@
+{{- if eq "enabled" "false" }}
+# should be fixed as part of https://github.com/kyma-project/kyma/issues/11113
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1053,3 +1055,5 @@ data:
       "uid": "26e9044a8d8111eb8dcd0242ac130003",
       "version": 1
     }
+---
+{{- end }}
