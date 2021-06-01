@@ -43,20 +43,10 @@ function parseAuditLogs(logs, resName, groupName, action) {
     return found
 }
 
-async function checkAuditLogs(cred) {
+async function checkAuditLogs(cred, groups, actions) {
     let logs = await cred.fetchLogs();
     assert.isNotEmpty(logs)
     var notFound = [];
-    const groups = [
-        { "metrics-foo": "monitoring.coreos.com" } ,
-        { "audit-role-foo": "rbac.authorization.k8s.io"},
-        {"audit-test-fn": "serverless.kyma-project.io"},
-        {"foo-config": "configmaps"} // for checking configmap
-    ]
-    const actions = [
-        "create",
-        "delete"
-    ]
 
     groups.forEach(group => {
         actions.forEach(action => {

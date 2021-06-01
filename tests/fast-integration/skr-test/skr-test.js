@@ -20,6 +20,7 @@ const {
   ensureCommerceMockWithCompassTestFixture,
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
+  deleteMockTestFixture,
 } = require("../test/fixtures/commerce-mock");
 const {
   debug,
@@ -30,9 +31,6 @@ const {
 const { 
   Creds,
   AuditLogClient,
-  createNamespace,
-  deployK8sResources,
-  deleteK8sResources,
   waitForAuditLogs,
   checkAuditLogs
 } = require("../audit-log");
@@ -82,14 +80,24 @@ describe("SKR test", function() {
     await sendEventAndCheckResponse();
   });
 
+  it("Test namespaces should be deleted", async function () {
+    await deleteMockTestFixture("mocks", testNS);
+  });
+
   // Check audit log for AWS
-  if (process.env.KEB_PLAN_ID= "361c511f-f939-4621-b228-d0fb79a1fe15") {
-    it (`checks the audit logs are collected properly`, async function(){
-      await createNamespace("audit-test")
-      await deployK8sResources()
-      await deleteK8sResources()
+  if (process.env.KEB_PLAN_ID == "361c511f-f939-4621-b228-d0fb79a1fe15") {
+    it ("checks the audit logs are collected properly", async function(){
+      const groups = [
+        { "commerce-binding": "servicecatalog.k8s.io"},
+        {"lastorder": "serverless.kyma-project.io"},
+        {"commerce-mock": "deployments"} // for checking deployments
+      ]
+      const actions = [
+          "create",
+          "delete"
+      ]
       await waitForAuditLogs()
-      await checkAuditLogs(cred)
+      await checkAuditLogs(cred, groups, actions)
     })
   }
    
