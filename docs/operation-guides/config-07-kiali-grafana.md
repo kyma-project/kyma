@@ -5,7 +5,7 @@ type: Configuration
 
 By default, Kyma does not expose Kiali and Grafana. However, you can still access them using port forwarding. Also, read [Expose Kyma UIs securely](http://tbd) to learn how to expose Kiali and Grafana securely using an identity provider of your choice.
 
-## Prerequisites
+### Prerequisites
 
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 
@@ -15,6 +15,8 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
   Kiali
   </summary>
 
+  ### Steps
+    
   To access Kiali, do the following:
 
   1. Run the following command to forward a local port to a port on the Kiali Pod:
@@ -31,6 +33,8 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
   Grafana
   </summary>
 
+  ### Steps
+    
   To access Grafana, do the following:
 
   1. Run the following command to forward a local port to a port on the Grafana Pod:
@@ -49,11 +53,11 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
 
 To make Kiali and Grafana permanently accessible, expose the services securely using [oauth2_proxy](https://oauth2-proxy.github.io/).
 
-## Prerequisites
+### Prerequisites
 
 You have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
 
-## Steps
+### Steps
 
 The following example shows how to use Github as authentication provider for Kiali and Grafana. You create a `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
 
