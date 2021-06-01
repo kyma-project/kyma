@@ -4,39 +4,36 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-
 	appsv1 "k8s.io/api/apps/v1"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-
 	"k8s.io/client-go/kubernetes/scheme"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -51,6 +48,7 @@ const (
 )
 
 var (
+	defaultLogger *logger.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
 	natsCommander = &TestCommander{}
@@ -66,7 +64,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "with valid message and namepsace data",
+			name:          "with valid message and namepsace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
@@ -93,7 +91,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 			expectedError: errors.New("message is missing from BEB secret"),
 		},
 		{
-			name: "with empty namespace data",
+			name:          "with empty namespace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			expectedError: errors.New("namespace is missing from BEB secret"),
 		},
@@ -105,6 +103,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 
 			gotPublisherSecret, err := getSecretForPublisher(publisherSecret)
 			if tc.expectedError != nil {
+				assert.NotNil(t, err)
 				assert.Equal(t, tc.expectedError.Error(), err.Error(), "invalid error")
 				return
 			}
@@ -139,7 +138,11 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
+	var err error
+
+	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	Expect(err).To(BeNil())
+	ctrl.SetLogger(zapr.NewLogger(defaultLogger.WithContext().Desugar()))
 
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
@@ -152,8 +155,6 @@ var _ = BeforeSuite(func(done Done) {
 		AttachControlPlaneOutput: attachControlPlaneOutput,
 		UseExistingCluster:       &useExistingCluster,
 	}
-
-	var err error
 
 	cfg, err := testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
@@ -181,7 +182,7 @@ var _ = BeforeSuite(func(done Done) {
 		bebCommander,
 		k8sManager.GetClient(),
 		k8sManager.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("eventing-backend"),
+		defaultLogger,
 		k8sManager.GetEventRecorderFor("backend-controller"),
 	).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
@@ -202,6 +203,18 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("Backend Reconciliation Tests", func() {
+	var ownerReferences *[]metav1.OwnerReference
+
+	When("Creating a controller deployment", func() {
+		It("Should return an non empty owner to be used as a reference in publisher deployemnt", func() {
+			ctx := context.Background()
+			ensureNamespaceCreated(ctx, kymaSystemNamespace)
+			ownerReferences = ensureControllerDeploymentCreated(ctx)
+			// Expect
+			Eventually(controllerDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
+			Expect((*ownerReferences)[0].UID).ShouldNot(BeEmpty())
+		})
+	})
 
 	When("Creating a Eventing Backend and no secret labeled for BEB is found", func() {
 		It("Should start with NATS", func() {
@@ -233,6 +246,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretName:               "",
 					BebSecretNamespace:          "",
 				}))
+		})
+		It("Should check that the owner of publisher deployment is the controller deployment", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			// Expect
+			Eventually(eventingOwnerReferencesGetter(ctx, "eventing-publisher-proxy", kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(ownerReferences))
 		})
 	})
 
@@ -276,6 +296,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretName:               bebSecret1name,
 					BebSecretNamespace:          kymaSystemNamespace,
 				}))
+		})
+		It("Should check that the owner of publisher deployment is the controller deployment", func() {
+			ctx := context.Background()
+			ensurePublisherProxyIsReady(ctx)
+			// Expect
+			Eventually(eventingOwnerReferencesGetter(ctx, "eventing-publisher-proxy", kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(ownerReferences))
 		})
 	})
 
@@ -396,6 +423,24 @@ func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 	}
 }
 
+func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerReference {
+	By("Ensuring an Eventing-Controller Deployment is created")
+	deployment := reconcilertesting.WithEventingControllerDeployment()
+
+	err := k8sClient.Create(ctx, deployment)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
+
+	return &[]metav1.OwnerReference{
+		*metav1.NewControllerRef(deployment, schema.GroupVersionKind{
+			Group:   appsv1.SchemeGroupVersion.Group,
+			Version: appsv1.SchemeGroupVersion.Version,
+			Kind:    "Deployment",
+		}),
+	}
+}
+
 func ensurePublisherProxyIsReady(ctx context.Context) {
 	d, err := publisherProxyDeploymentGetter(ctx)()
 	Expect(err).ShouldNot(HaveOccurred())
@@ -462,11 +507,39 @@ func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
 		}
 		secret := new(corev1.Secret)
 		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
-			log.Printf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
+			defaultLogger.WithContext().Errorf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
 			return nil
 		}
 		return secret
 	}, timeout, pollingInterval)
+}
+
+func controllerDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	dep := new(appsv1.Deployment)
+	return func() (*appsv1.Deployment, error) {
+		if err := k8sClient.Get(ctx, lookupKey, dep); err != nil {
+			return nil, err
+		}
+		return dep, nil
+	}
+}
+
+func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) func() (*[]metav1.OwnerReference, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	deployment := new(appsv1.Deployment)
+	return func() (*[]metav1.OwnerReference, error) {
+		if err := k8sClient.Get(ctx, lookupKey, deployment); err != nil {
+			return nil, err
+		}
+		return &deployment.OwnerReferences, nil
+	}
 }
 
 type TestCommander struct {
