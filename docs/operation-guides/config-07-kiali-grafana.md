@@ -59,7 +59,7 @@ You have a registered OAuth application with one of the [supported providers](ht
 
 ### Steps
 
-The following example shows how to use Github as authentication provider for Kiali and Grafana. You create a `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
+The following example shows how to use Github as authentication provider for Kiali and Grafana. You create an `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
 
 >**NOTE:** The `oauth2_proxy` supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
 
@@ -339,4 +339,3 @@ The following example shows how to use Github as authentication provider for Kia
 
   </details>
 </div>
-
