@@ -57,21 +57,44 @@ You have a registered OAuth application with one of the [supported providers](ht
 
 The following example shows how to use Github as authentication provider for Kiali and Grafana. You create a `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
 
+>**NOTE:** The `oauth2_proxy` supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
+
+1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `kiali.kyma.example.com` or `grafana.kyma.example.com`, respectively.
+
+2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://kiali.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
+
+3. Create a Kubernetes Secret for the client ID and secret:
+
 <div tabs>
   <details>
   <summary>
   Kiali
   </summary>
-  1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `kiali.kyma.example.com`.
 
-  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://kiali.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
-
-  3. Create a Kubernetes Secret for the client ID and secret:
   ```bash
   kubectl create secret generic oauth2-kiali-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
   ```
 
-  4. Create the `oauth2_proxy` Deployment. Adjust the `args` for the [Github auth provider](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider) depending on your own requirements:
+  </details>
+  <details>
+  <summary>
+  Grafana
+  </summary>
+
+  ```bash
+  kubectl create secret generic oauth2-grafana-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
+  ```
+
+  </details>
+</div>
+
+4. Create the `oauth2_proxy` Deployment. Adjust the `args` for the [Github auth provider](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider) depending on your own requirements:
+
+<div tabs>
+  <details>
+  <summary>
+  Kiali
+  </summary>
 
   ```yaml
   apiVersion: apps/v1
@@ -100,7 +123,7 @@ The following example shows how to use Github as authentication provider for Kia
           - --email-domain="*"
           - --http-address=0.0.0.0:3000
           - --upstream=http://kiali-server.kyma-system.svc:20001
-          - --cookie-name=grafana_oauth2_proxy
+          - --cookie-name=kiali_oauth2_proxy
           - --proxy-prefix=/oauth2
           - --ping-path=/oauth2/healthy
           - --silence-ping-logging=true
@@ -132,64 +155,11 @@ The following example shows how to use Github as authentication provider for Kia
           runAsUser: 65534
   ```
 
-  5. Create a Service for the `oauth2_proxy`:
-
-  ```yaml
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: oauth2-kiali
-    labels:
-      app: oauth2-kiali
-  spec:
-    type: ClusterIP
-    ports:
-    - port: 3000
-      name: http
-      protocol: TCP
-      targetPort: http
-    selector:
-      app: oauth2-kiali
-  ```
-
-  6. To expose the Service using Istio, create a VirtualService. Set the domain in the `hosts` list to your desired name:
-
-  ```yaml
-  apiVersion: networking.istio.io/v1alpha3
-  kind: VirtualService
-  metadata:
-    name: oauth2-kiali
-  spec:
-    hosts:
-    - kiali.kyma.example.com
-    gateways:
-    - kyma-system/kyma-gateway
-    http:
-    - match:
-      - uri:
-          regex: /.*
-      route:
-      - destination:
-          port:
-            number: 3000
-          host: oauth2-kiali
-  ```
   </details>
-</div>
   <details>
   <summary>
   Grafana
   </summary>
-  1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `grafana.kyma.example.com` .
-
-  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://grafana.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
-
-  3. Create a Kubernetes Secret for the client ID and secret:
-  ```bash
-  kubectl create secret generic oauth2-grafana-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
-  ```
-
-  4. Create the `oauth2_proxy` Deployment. Adjust the `args` for the [Github auth provider](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider) depending on your own requirements:
 
   ```yaml
   apiVersion: apps/v1
@@ -250,7 +220,41 @@ The following example shows how to use Github as authentication provider for Kia
           runAsUser: 65534
   ```
 
-  5. Create a Service for the `oauth2_proxy`:
+  </details>
+</div>
+
+
+5. Create a Service for the `oauth2_proxy`:
+
+<div tabs>
+  <details>
+  <summary>
+  Kiali
+  </summary>
+
+  ```yaml
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: oauth2-kiali
+    labels:
+      app: oauth2-kiali
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 3000
+      name: http
+      protocol: TCP
+      targetPort: http
+    selector:
+      app: oauth2-kiali
+  ```
+
+  </details>
+  <details>
+  <summary>
+  Grafana
+  </summary>
 
   ```yaml
   apiVersion: v1
@@ -270,7 +274,43 @@ The following example shows how to use Github as authentication provider for Kia
       app: oauth2-grafana
   ```
 
-  6. Expose the Service via Istio by creating a VirtualService. Set the domain in the `hosts` list to your desired name:
+  </details>
+</div>
+
+6. To expose the Service using Istio, create a VirtualService. Set the domain in the `hosts` list to your desired name:
+
+<div tabs>
+  <details>
+  <summary>
+  Kiali
+  </summary>
+
+  ```yaml
+  apiVersion: networking.istio.io/v1alpha3
+  kind: VirtualService
+  metadata:
+    name: oauth2-kiali
+  spec:
+    hosts:
+    - kiali.kyma.example.com
+    gateways:
+    - kyma-system/kyma-gateway
+    http:
+    - match:
+      - uri:
+          regex: /.*
+      route:
+      - destination:
+          port:
+            number: 3000
+          host: oauth2-kiali
+  ```
+
+  </details>
+  <details>
+  <summary>
+  Grafana
+  </summary>
 
   ```yaml
   apiVersion: networking.istio.io/v1alpha3
@@ -292,7 +332,7 @@ The following example shows how to use Github as authentication provider for Kia
             number: 3000
           host: oauth2-grafana
   ```
+
   </details>
 </div>
 
->**NOTE:** The `oauth2_proxy` supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
