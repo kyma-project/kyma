@@ -3,7 +3,7 @@ title: Set up Kiali and Grafana
 type: Configuration
 ---
 
-Kyma does not expose Kiali and Grafana by default. However you can still access them using port forwarding. Also, read [Expose Kyma UIs securely](http://tbd) to learn how to expose Kiali and Grafana securely using an identity provider of your choice.
+By default, Kyma does not expose Kiali and Grafana. However, you can still access them using port forwarding. Also, read [Expose Kyma UIs securely](http://tbd) to learn how to expose Kiali and Grafana securely using an identity provider of your choice.
 
 ## Prerequisites
 
