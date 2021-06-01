@@ -14,30 +14,16 @@ This component contains controllers for various CustomResourceDefinitions relate
 
 ### Installation
 
-- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup).
-
-- For **BEB** run:
+- To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
 
     ```sh
-    make deploy-beb-local
+    make deploy-local
     ```
 
-    To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-beb-local-dry-run`.
-    
-    ```sh
-    make deploy-beb-local-dry-run
-    ```
-
-- For **NATS** run:
+- To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-local-dry-run`:
 
     ```sh
-    make deploy-nats-local
-    ```
-
-    To verify all the manifests processed by Kustomize, without applying them to the cluster, use the make target `deploy-nats-local-dry-run`.
-
-	```sh
-    make deploy-eventing-controller-nats-local-dry-run
+    make deploy-local-dry-run
     ```
 
 ## Usage
@@ -55,14 +41,13 @@ This section explains how to use the Eventing Controller. It expects the followi
     | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              | BEB     |
     | DOMAIN                 | The Kyma cluster public domain.                                                 | BEB     |
     | NATS_URL               | The URL for the NATS server.                                                    | NATS    |
-    | APP_LOG_FORMAT         | The format of the Application logs.                                             | Both    |
-    | APP_LOG_LEVEL          | The level of the Application logs.                                              | Both    |
 
 The additional command line arguments are:
 
     | Flag                  | Description                                               | Default Value | Backend |
     | --------------------- | --------------------------------------------------------- | ------------- | ------- |
-    | metrics-addr          | The address the metric endpoint binds to.                 | :8080         | Both    |
+    | metrics-addr          | The address the metric endpoint binds to.                 | :8080         | both    |
+    | enable-debug-logs     | Enable debug logs.                                        | false         | both    |
     | reconcile-period      | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
     | max-reconnects        | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
     | reconnect-wait        | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |

@@ -51,35 +51,20 @@ uninstall-samples: manifests
 uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
-# Deploy eventing-controller for BEB in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-beb-local: manifests deploy-beb-local-dry-run
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-local: manifests deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
-# Deploy eventing-controller for NATS in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-nats-local: manifests deploy-nats-local-dry-run
-	kubectl create ns ${NAMESPACE} || true
-	kustomize build config/nats | ko apply -f -
-
-# Undeploy the eventing-controller for BEB
-undeploy-beb-local: manifests
+# Undeploy the eventing-controller
+undeploy-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
-# Undeploy the eventing-controller for NATS
-undeploy-nats-local: manifests
-	kustomize build config/nats | kubectl delete -f -
-
-# Dry run for deploying eventing-controller BEB for local development
-deploy-beb-local-dry-run: manifests
+# Dry run for deploying eventing-controller for local development
+deploy-local-dry-run: manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
-
-# Dry run for deploying eventing-controller NATS for local development
-deploy-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/nats
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
