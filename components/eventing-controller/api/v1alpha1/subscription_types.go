@@ -50,8 +50,8 @@ type BebFilters struct {
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only.
 	ID               string            `json:"id,omitempty"`
-	Protocol         string            `json:"protocol"`
-	ProtocolSettings *ProtocolSettings `json:"protocolsettings"`
+	Protocol         string            `json:"protocol,omitempty"`
+	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 	Sink             string            `json:"sink"`
 	Filter           *BebFilters       `json:"filter"`
 }
