@@ -46,7 +46,7 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
     });
 
     it("CommerceMock test fixture should be ready", async function () {
-        await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).catch((err) => {
+        await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).then(console.log("DEBUG CommerceMock works")).catch((err) => {
             console.dir(err); // first error is logged
             return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway);
         });
