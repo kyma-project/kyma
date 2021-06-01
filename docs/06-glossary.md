@@ -1,6 +1,5 @@
 ---
 title: Glossary
-type: Glossary
 ---
 
 <!-- Content partly copied from [SKR docu: Basic Concepts](https://help.sap.com/viewer/DRAFT/65de2977205c403bbc107264b8eccf4b/Cloud/en-US/468c2f3c3ca24c2c8497ef9f83154c44.html#loio4a0dd09368ce40bfa3c99cae46de49e1) -->
