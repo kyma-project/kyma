@@ -82,14 +82,16 @@ describe("SKR test", function() {
     await sendEventAndCheckResponse();
   });
 
-  // Check audit log
-  it (`creates namespace audit-test`, async function(){
-    await createNamespace("audit-test")
-    await deployK8sResources()
-    await deleteK8sResources()
-    await waitForAuditLogs()
-    await checkAuditLogs(cred)
-  })
+  // Check audit log for AWS
+  if (process.env.KEB_PLAN_ID= "361c511f-f939-4621-b228-d0fb79a1fe15") {
+    it (`checks the audit logs are collected properly`, async function(){
+      await createNamespace("audit-test")
+      await deployK8sResources()
+      await deleteK8sResources()
+      await waitForAuditLogs()
+      await checkAuditLogs(cred)
+    })
+  }
    
   it("Deprovision SKR", async function() {
     await deprovisionSKR(keb, runtimeID);

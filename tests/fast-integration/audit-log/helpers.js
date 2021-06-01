@@ -5,20 +5,20 @@ const {
     kubectlDeleteDir,
     sleep
 } = require("../utils");
-const { expect } = require("chai");
+const { assert } = require("chai");
 
+const testNS = "audit-test"
+const fnName = "audit-test-fn"
 
-async function waitForK8sResources(){
-    await waitForFunction("audit-test-fn", "audit-test", 120000);
+async function createNamespace() {
+    await k8sApply([namespaceObj(testNS)])
 }
 
-async function createNamespace(namespace) {
-    await k8sApply([namespaceObj(namespace)])
-}
 
 async function deployK8sResources() {
-    await kubectlApplyDir("./audit-log/fixtures", "audit-test")
-    await waitForK8sResources()
+    await kubectlApplyDir("./audit-log/fixtures", testNS)
+    await waitForFunction(fnName, testNS, 120000);
+
 }
 
 async function deleteK8sResources() {
@@ -26,7 +26,7 @@ async function deleteK8sResources() {
 }
 
 async function waitForAuditLogs() {
-    await sleep(120000);
+    await sleep(60000);
 }
 
 function parseAuditLogs(logs, resName, groupName, action) {
@@ -45,14 +45,15 @@ function parseAuditLogs(logs, resName, groupName, action) {
 
 async function checkAuditLogs(cred) {
     let logs = await cred.fetchLogs();
+    assert.isNotEmpty(logs)
     var notFound = [];
-    let groups = [
+    const groups = [
         { "metrics-foo": "monitoring.coreos.com" } ,
         { "audit-role-foo": "rbac.authorization.k8s.io"},
         {"audit-test-fn": "serverless.kyma-project.io"},
         {"foo-config": "configmaps"} // for checking configmap
     ]
-    let actions = [
+    const actions = [
         "create",
         "delete"
     ]
@@ -62,22 +63,19 @@ async function checkAuditLogs(cred) {
             for (let resName in group) {
                 let res = parseAuditLogs(logs, resName, group[resName],  action)
                 if (res == false) {
-                    notFound.push({
-                        key: group[resName],
-                        value: action
-                    })
+                    let resNotfound = new Map()
+                    resNotfound.set(group[resName],action )
+                    notFound.push(resNotfound)
                 }
             }
         });
     });
     if (notFound.length != 0) {
         notFound.forEach(el => {
-            for (let key in el) {
-                    console.log("Group: " + key + " with action: " + el[key] + "not found")
-            }
+            console.log("Following groups and actions not found: " , el)
         })
     }
-    expect(notFound).to.be.empty
+    assert.isEmpty(notFound, `Number of groups not found to be zero`)
 }
 
 function namespaceObj(name) {
@@ -89,7 +87,6 @@ function namespaceObj(name) {
   }
 
 module.exports = {
-    waitForK8sResources,
     createNamespace,
     deployK8sResources,
     deleteK8sResources,
