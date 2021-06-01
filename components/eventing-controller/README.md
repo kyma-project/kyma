@@ -49,7 +49,6 @@ The additional command line arguments are:
     | Flag                  | Description                                               | Default Value | Backend |
     | --------------------- | --------------------------------------------------------- | ------------- | ------- |
     | metrics-addr          | The address the metric endpoint binds to.                 | :8080         | both    |
-    | enable-debug-logs     | Enable debug logs.                                        | false         | both    |
     | reconcile-period      | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
     | max-reconnects        | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
     | reconnect-wait        | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
