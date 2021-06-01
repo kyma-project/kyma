@@ -1,5 +1,5 @@
 ---
-title: Set up Kiali and Grafana
+title: Access and Expose Kiali and Grafana
 type: Configuration
 ---
 
