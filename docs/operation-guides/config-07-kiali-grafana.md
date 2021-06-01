@@ -23,7 +23,7 @@ Kyma does not expose Kiali and Grafana by default. However you can still access 
   ```
   >**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
-  2. Open http://localhost:20001 in your browser. You should see Kiali UI.
+  2. Open http://localhost:20001 in your browser. You see the Kiali UI.
 
   </details>
   <details>
@@ -39,7 +39,7 @@ Kyma does not expose Kiali and Grafana by default. However you can still access 
   ```
   >**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
-  2. Open http://localhost:3000 in your browser. You should see Grafana UI.
+  2. Open http://localhost:3000 in your browser. You see the Grafana UI.
 
   </details>
 
@@ -47,18 +47,26 @@ Kyma does not expose Kiali and Grafana by default. However you can still access 
 
 ## Expose Kiali and Grafana Securely
 
-To make Kiali and Grafana permanently accessible, the services can be exposed securely using [oauth2_proxy](https://oauth2-proxy.github.io/). This requires a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider). The following example shows how to use Github as authentication provider for the services. We will create a `oauth2_proxy` `Deployment` to achieve this and expose it as a `VirtualService` via Kyma's Istio Gateway.
+To make Kiali and Grafana permanently accessible, expose the services securely using [oauth2_proxy](https://oauth2-proxy.github.io/).
+
+## Prerequisites
+
+You have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
+
+## Steps
+
+The following example shows how to use Github as authentication provider for Kiali and Grafana. You create a `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
 
 <div tabs>
   <details>
   <summary>
   Kiali
   </summary>
-  1. Chose a domain for the exposed service under the Kyma base domain. E.g., `kiali.kyma.example.com` if your Kyma cluster is reachable under `kyma.example.com`.
+  1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `kiali.kyma.example.com`.
 
-  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://kiali.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client id and secret.
+  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://kiali.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
 
-  3. Create a Kubernetes Secret for the client id and secret:
+  3. Create a Kubernetes Secret for the client ID and secret:
   ```bash
   kubectl create secret generic oauth2-kiali-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
   ```
@@ -144,7 +152,7 @@ To make Kiali and Grafana permanently accessible, the services can be exposed se
       app: oauth2-kiali
   ```
 
-  6. Expose the Service via Istio by creating a VirtualService. Set the domain in the `hosts` list to your desired name:
+  6. To expose the Service using Istio, create a VirtualService. Set the domain in the `hosts` list to your desired name:
 
   ```yaml
   apiVersion: networking.istio.io/v1alpha3
@@ -172,11 +180,11 @@ To make Kiali and Grafana permanently accessible, the services can be exposed se
   <summary>
   Grafana
   </summary>
-  1. Chose a domain for the exposed service under the Kyma base domain. E.g., `grafana.kyma.example.com` if your Kyma cluster is reachable under `kyma.example.com`.
+  1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `grafana.kyma.example.com` .
 
-  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://grafana.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client id and secret.
+  2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://grafana.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
 
-  3. Create a Kubernetes Secret for the client id and secret:
+  3. Create a Kubernetes Secret for the client ID and secret:
   ```bash
   kubectl create secret generic oauth2-grafana-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
   ```
@@ -287,4 +295,4 @@ To make Kiali and Grafana permanently accessible, the services can be exposed se
   </details>
 </div>
 
-The `oauth2_proxy` supports a wide range of other well known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
+>**NOTE:** The `oauth2_proxy` supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
