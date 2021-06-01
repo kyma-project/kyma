@@ -41,6 +41,8 @@ This section explains how to use the Eventing Controller. It expects the followi
     | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                              | BEB     |
     | DOMAIN                 | The Kyma cluster public domain.                                                 | BEB     |
     | NATS_URL               | The URL for the NATS server.                                                    | NATS    |
+    | APP_LOG_FORMAT         | The format of the Application logs.                                             | both    |
+    | APP_LOG_LEVEL          | The level of the Application logs.                                              | both    |
 
 The additional command line arguments are:
 
