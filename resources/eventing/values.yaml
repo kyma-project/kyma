@@ -23,6 +23,10 @@ global:
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
   eventTypePrefix: "sap.kyma.custom"
 
+  log:
+    format: "json"
+    level: "info"
+
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
   oauthClientId: ""

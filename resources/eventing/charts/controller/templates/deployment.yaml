@@ -53,6 +53,10 @@ spec:
             value: "{{ .Values.publisherProxy.image.pullPolicy }}"
           - name: PUBLISHER_REPLICAS
             value: "{{ .Values.publisherProxy.replicas }}"
+          - name: APP_LOG_FORMAT
+            value: {{ .Values.global.log.format | quote }}
+          - name: APP_LOG_LEVEL
+            value: {{ .Values.global.log.level | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
