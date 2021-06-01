@@ -73,7 +73,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 							Env:             getBEBEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
-							ImagePullPolicy: v1.PullIfNotPresent,
+							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
 							SecurityContext: getSecurityContext(),
 							Resources: getResources(publisherConfig.RequestsCPU,
 								publisherConfig.RequestsMemory,
@@ -120,7 +120,7 @@ func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 							Env:             getNATSEnvVars(),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
-							ImagePullPolicy: v1.PullIfNotPresent,
+							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
 							SecurityContext: getSecurityContext(),
 							Resources: getResources(publisherConfig.RequestsCPU,
 								publisherConfig.RequestsMemory,
@@ -135,6 +135,19 @@ func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 			},
 		},
 		Status: appsv1.DeploymentStatus{},
+	}
+}
+
+func getImagePullPolicy(imagePullPolicy string) v1.PullPolicy {
+	switch imagePullPolicy {
+	case "IfNotPresent":
+		return v1.PullIfNotPresent
+	case "Always":
+		return v1.PullAlways
+	case "Never":
+		return v1.PullNever
+	default:
+		return v1.PullIfNotPresent
 	}
 }
 
