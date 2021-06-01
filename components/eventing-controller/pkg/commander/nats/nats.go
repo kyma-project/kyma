@@ -35,21 +35,23 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel      context.CancelFunc
-	envCfg      env.NatsConfig
-	restCfg     *rest.Config
-	metricsAddr string
-	mgr         manager.Manager
-	backend     handlers.MessagingBackend
+	cancel          context.CancelFunc
+	envCfg          env.NatsConfig
+	restCfg         *rest.Config
+	enableDebugLogs bool
+	metricsAddr     string
+	mgr             manager.Manager
+	backend         handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
 	return &Commander{
-		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
-		restCfg:     restCfg,
-		metricsAddr: metricsAddr,
+		envCfg:          env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
+		restCfg:         restCfg,
+		enableDebugLogs: enableDebugLogs,
+		metricsAddr:     metricsAddr,
 	}
 }
 
@@ -104,7 +106,6 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 		logger.Error(natsBackendErr, "no NATS backend exists")
 	}
 	// Fetch all subscriptions.
-	//dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err

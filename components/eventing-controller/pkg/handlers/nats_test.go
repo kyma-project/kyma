@@ -135,7 +135,7 @@ func TestSubscription(t *testing.T) {
 
 	data := "sampledata"
 	// Send an event
-	err = SendEvent(&natsClient, data)
+	err = SendEventToNats(&natsClient, data)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestSubscription(t *testing.T) {
 
 	newData := "datawhichdoesnotexist"
 	// Send an event
-	err = SendEvent(&natsClient, newData)
+	err = SendEventToNats(&natsClient, newData)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}

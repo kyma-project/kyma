@@ -31,6 +31,7 @@ const (
 // BebMock implements a programmable mock for BEB
 type BebMock struct {
 	Requests       map[*http.Request]interface{}
+	Subscriptions  map[string]*bebtypes.Subscription
 	TokenURL       string
 	MessagingURL   string
 	BebConfig      *config.Config
@@ -45,7 +46,7 @@ type BebMock struct {
 func NewBebMock(bebConfig *config.Config) *BebMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BebMock{
-		nil, "", "", bebConfig,
+		nil, nil, "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -57,6 +58,7 @@ type response func(w http.ResponseWriter)
 func (m *BebMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = make(map[*http.Request]interface{})
+	m.Subscriptions = make(map[string]*bebtypes.Subscription)
 	m.AuthResponse = nil
 	m.GetResponse = nil
 	m.ListResponse = nil
@@ -100,6 +102,8 @@ func (m *BebMock) Start() string {
 		if strings.HasPrefix(r.RequestURI, MessagingURLPath) {
 			switch r.Method {
 			case http.MethodDelete:
+				key := r.URL.Path
+				delete(m.Subscriptions, key)
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
@@ -109,6 +113,8 @@ func (m *BebMock) Start() string {
 				var subscription bebtypes.Subscription
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
 				m.Requests[r] = subscription
+				key := r.URL.Path + "/" + subscription.Name
+				m.Subscriptions[key] = &subscription
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
@@ -124,6 +130,18 @@ func (m *BebMock) Start() string {
 					}
 				// get on a single subscription
 				default:
+					key := r.URL.Path
+					subscription := m.Subscriptions[key]
+					if subscription != nil {
+						subscription.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+						w.WriteHeader(http.StatusOK)
+						err := json.NewEncoder(w).Encode(*subscription)
+						Expect(err).ShouldNot(HaveOccurred())
+					} else {
+						w.WriteHeader(http.StatusNotFound)
+					}
+					// TODO make it work for all other BEB mock tests.
+					/*
 					var subscription bebtypes.Subscription
 					_ = json.NewDecoder(r.Body).Decode(&subscription)
 					m.Requests[r] = subscription
@@ -136,6 +154,7 @@ func (m *BebMock) Start() string {
 					} else {
 						BebGetSuccess(w, subscriptionName)
 					}
+					*/
 				}
 				return
 			default:
