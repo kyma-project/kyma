@@ -1,5 +1,6 @@
 ---
 title: Back up Kyma
+type: Backups
 ---
 The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/) and [volumes](https://kubernetes.io/docs/concepts/storage/volumes/). 
 

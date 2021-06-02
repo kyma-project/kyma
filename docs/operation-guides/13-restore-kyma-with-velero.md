@@ -1,5 +1,6 @@
 ---
 title: Backup resources using Velero
+type: Backups
 ---
 
 Use Velero to back up individual applications running on Kyma and to restore Kubernetes resources and volumes, so that you can restore them on a different cluster.
