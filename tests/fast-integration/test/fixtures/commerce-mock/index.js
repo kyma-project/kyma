@@ -287,6 +287,9 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
 
   await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+  if (withCentralApplicationGateway) {
+    await patchApplicationGateway('central-application-gateway', 'kyma-integration');
+  }
 
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",

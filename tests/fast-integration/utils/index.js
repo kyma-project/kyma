@@ -815,14 +815,16 @@ async function patchApplicationGateway(name, ns) {
   ).catch((err) => {
     throw new Error(`Timeout: ${name} is not ready`);
   });
-  expect(
-    deployment.body.spec.template.spec.containers[0].args[6]
-  ).to.match(/^--skipVerify/);
+
+  const skipVerifyIndex = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes('--skipVerify')
+  );
+  expect(skipVerifyIndex).to.not.equal(-1);
 
   const patch = [
     {
       op: "replace",
-      path: "/spec/template/spec/containers/0/args/6",
+      path: `/spec/template/spec/containers/0/args/${skipVerifyIndex}`,
       value: "--skipVerify=true",
     },
   ];
@@ -841,9 +843,10 @@ async function patchApplicationGateway(name, ns) {
     });
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(
-    patchedDeployment.body.spec.template.spec.containers[0].args[6]
-  ).to.equal("--skipVerify=true");
+  const skipVerifyTrueIndex = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes('--skipVerify=true')
+  );
+  expect(skipVerifyTrueIndex).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
