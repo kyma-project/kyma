@@ -29,9 +29,8 @@ const {
 } = require("../utils");
 
 const { 
-  Creds,
+  AuditLogCreds,
   AuditLogClient,
-  waitForAuditLogs,
   checkAuditLogs
 } = require("../audit-log");
 
@@ -40,7 +39,7 @@ describe("SKR test", function() {
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const director = new DirectorClient(DirectorConfig.fromEnv());
 
-  const cred = new AuditLogClient(Creds.fromEnv())
+  const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv())
 
 
   const suffix = genRandom(4);
@@ -52,6 +51,7 @@ describe("SKR test", function() {
   debug(`RuntimeID ${runtimeID}`, `Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
 
   const testNS = "skr-test";
+  const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);  
@@ -85,7 +85,7 @@ describe("SKR test", function() {
   });
 
   // Check audit log for AWS
-  if (process.env.KEB_PLAN_ID == "361c511f-f939-4621-b228-d0fb79a1fe15") {
+  if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
     it ("checks the audit logs are collected properly", async function(){
       const groups = [
         { "commerce-binding": "servicecatalog.k8s.io"},
@@ -96,8 +96,8 @@ describe("SKR test", function() {
           "create",
           "delete"
       ]
-      await waitForAuditLogs()
-      await checkAuditLogs(cred, groups, actions)
+      // add some retry loop with 5 seconds
+      await checkAuditLogs(auditlogs, groups, actions)
     })
   }
    

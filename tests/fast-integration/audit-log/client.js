@@ -5,7 +5,7 @@ const {
     getEnvOrThrow,
 } = require("../utils");
 
-class Creds {
+class AuditLogCreds {
     static fromEnv() {
         return JSON.parse(getEnvOrThrow("AL_SERVICE_KEY"))
     }
@@ -71,6 +71,6 @@ class AuditLogClient {
 }
 
 module.exports = {
-    Creds,
+    AuditLogCreds,
     AuditLogClient,
 };
