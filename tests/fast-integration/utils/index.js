@@ -843,10 +843,9 @@ async function patchApplicationGateway(name, ns) {
     });
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  const skipVerifyTrueIndex = deployment.body.spec.template.spec.containers[0].args.findIndex(
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
       arg => arg.toString().includes('--skipVerify=true')
-  );
-  expect(skipVerifyTrueIndex).to.not.equal(-1);
+  )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
