@@ -80,7 +80,7 @@ describe("SKR test", function() {
     await sendEventAndCheckResponse();
   });
 
-  it("Test namespaces should be deleted", async function () {
+  it("Deletes the resources that have been created", async function () {
     await deleteMockTestFixture("mocks", testNS);
   });
 
