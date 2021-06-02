@@ -52,7 +52,7 @@ func (c *FakeCommander) Stop() error {
 }
 
 func TestCleanup(t *testing.T) {
-	natsCommander := FakeCommander{}  //??
+	natsCommander := FakeCommander{} //??
 	//natsCommander := NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration)
 	g := gomega.NewWithT(t)
 	data := "sampledata"

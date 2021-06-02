@@ -3,6 +3,10 @@ package beb
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -18,8 +22,6 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"testing"
-	"time"
 )
 
 const (
@@ -56,7 +58,6 @@ func (c *FakeCleaner) Clean(eventType string) (string, error) {
 	return eventType, nil
 }
 
-
 func TestCleanup(t *testing.T) {
 	bebCommander := FakeCommander{}
 	g := gomega.NewWithT(t)
@@ -72,12 +73,8 @@ func TestCleanup(t *testing.T) {
 
 	// create an APIRule
 	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("test-host", "test-svc", apiRule)
-
-	// TODO Refactor BEB MOck to work with susbcriptions:
-	// post -> create subscription and save it in a map
-	// get -> return the saved subscription (if any)
-	// delete -> delete the subscription from map
+	controllertesting.WithService("foo-host", "foo-svc", apiRule)
+	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
 	bebMock := startBebMock()
@@ -107,34 +104,57 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.client = fakeClient
 
+	// Create ApiRule
+	unstructuredApiRule, err := toUnstructuredApiRule(apiRule)
+	g.Expect(err).To(gomega.BeNil())
+	unstructuredApiRuleBeforeCleanup, err := bebCommander.client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Create(ctx, unstructuredApiRule, metav1.CreateOptions{})
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(unstructuredApiRuleBeforeCleanup).ToNot(gomega.BeNil())
+
 	// create a BEB subscription from Kyma subscription
 	fakeCleaner := FakeCleaner{}
 	_, err = bebCommander.backend.SyncSubscription(subscription, &fakeCleaner, apiRule)
 	g.Expect(err).To(gomega.BeNil())
 
-	// check that the Kyma subscription still exists
+	//  check that the susbcription exist in bebMock
+	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, subscription.Name)
+	resp, err := http.Get(getSubscriptionUrl)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
+
+	// check that the Kyma subscription exists
 	unstructuredSub, err := bebCommander.client.Resource(SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	g.Expect(err).To(gomega.BeNil())
 	_, err = toSubscription(unstructuredSub)
 	g.Expect(err).To(gomega.BeNil())
 
-	// Then
+	// check that the APIRule exists
+	unstructuredApiRuleBeforeCleanup, err = bebCommander.client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(unstructuredApiRuleBeforeCleanup).ToNot(gomega.BeNil())
 
-	// TODO refactor BEB commader to be "unit testable"
-	/*
+	// Then
 	err = cleanup(bebCommander.backend, bebCommander.client)
 	g.Expect(err).To(gomega.BeNil())
-	*/
 
 	// Expect
 	// the BEB subscription should be deleted from BEB Mock
+	resp, err = http.Get(getSubscriptionUrl)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusNotFound))
 
-	// the Kyma subscription should be deleted
+	// the Kyma subscription status should be empty
 	unstructuredSub, err = bebCommander.client.Resource(SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, subscription.Name, metav1.GetOptions{})
 	g.Expect(err).To(gomega.BeNil())
-	g.Expect(unstructuredSub).To(gomega.BeNil())
+	gotSub, err := toSubscription(unstructuredSub)
+	g.Expect(err).To(gomega.BeNil())
+	expectedSubStatus := eventingv1alpha1.SubscriptionStatus{}
+	g.Expect(expectedSubStatus).To(gomega.Equal(gotSub.Status))
 
-	// TODO: the associated APIRule should be deleted too
+	// the associated APIRule should be deleted
+	unstructuredApiRuleAfterCleanup, err := bebCommander.client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
+	g.Expect(err).ToNot(gomega.BeNil())
+	g.Expect(unstructuredApiRuleAfterCleanup).To(gomega.BeNil())
 
 }
 
@@ -145,6 +165,16 @@ func toSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 		return nil, err
 	}
 	return subscription, nil
+}
+
+func toUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+	unstructured := &unstructured.Unstructured{}
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, err
+	}
+	unstructured.Object = unstructuredObj
+	return unstructured, nil
 }
 
 type Client struct {

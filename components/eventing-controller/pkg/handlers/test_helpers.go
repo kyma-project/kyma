@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"time"
+
+	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func SendEventToNats(natsClient *Nats, data string) error {

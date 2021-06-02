@@ -100,24 +100,25 @@ func (c *Commander) Start() error {
 func (c *Commander) Stop() error {
 	c.cancel()
 
-	return c.cleanup()
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	return cleanup(c.backend, dynamicClient)
 }
 
 // cleanup removes all created BEB artifacts.
-func (c *Commander) cleanup() error {
+func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
 	var bebBackend *handlers.Beb
 	var ok bool
 	var bebBackendErr error
-	if bebBackend, ok = c.backend.(*handlers.Beb); !ok {
+	if bebBackend, ok = backend.(*handlers.Beb); !ok {
 		bebBackendErr = errors.New("failed to convert backend to handlers.Beb")
 		logger.Error(bebBackendErr, "no BEB backend exists")
 	}
 
 	// Fetch all subscriptions.
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	//dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err

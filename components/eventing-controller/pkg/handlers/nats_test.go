@@ -172,6 +172,7 @@ func TestSubscription(t *testing.T) {
 		t.Fatal("subscription still exists in Nats")
 	}
 }
+
 // TODO should be here and not in "handlers/utils.go"
 /*
 func SendEvent(natsClient *Nats, data string) error {

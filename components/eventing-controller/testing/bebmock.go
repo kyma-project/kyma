@@ -140,8 +140,8 @@ func (m *BebMock) Start() string {
 					} else {
 						w.WriteHeader(http.StatusNotFound)
 					}
-					// TODO make it work for all other BEB mock tests.
-					/*
+					// TODO make it work for all other BEB mock tests (see reconciler_test)
+					/*  old stuff
 					var subscription bebtypes.Subscription
 					_ = json.NewDecoder(r.Body).Decode(&subscription)
 					m.Requests[r] = subscription
