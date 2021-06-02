@@ -692,11 +692,21 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
               afterTestPod,
               status.image
             );
+
+            let restartsTillTestStart = 0
+            let message = ""
+            if(!afterTestContainerStatus || !status) {
+              restartsTillTestStart = -1
+              message = "Container removed during report generation"              
+            } else {
+              restartsTillTestStart  = afterTestContainerStatus.restartCount - status.restartCount
+            }
+            
             return {
               name: status.name,
               image: status.image,
-              restartsTillTestStart:
-                afterTestContainerStatus.restartCount - status.restartCount,
+              restartsTillTestStart: restartsTillTestStart,
+              info: message
             };
           })
           .filter((status) => {
