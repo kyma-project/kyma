@@ -349,6 +349,10 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await waitForServiceInstance("commerce-webservices", targetNamespace);
   await waitForServiceInstance("commerce-events", targetNamespace);
 
+  if (withCentralApplicationGateway) {
+    await patchApplicationGateway('central-application-gateway', 'kyma-integration');
+  }
+
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceBinding",
