@@ -70,6 +70,10 @@ main() {
   copy-website-repo
   pass "Copied"
 
+  step "Remove old content from website"
+  rm -rf "${WEBSITE_DIR}"/content/docs/kyma
+  step "Removed"
+
   step "Building preview"
   build-preview
   pass "Builded"
