@@ -96,7 +96,8 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
         printRestartReport(initialRestarts, afterTestRestarts);
     });
 
-    it("Test namespaces should be deleted", async function () {
-        await cleanMockTestFixture("mocks", testNamespace, false);
-    });
+    // TODO: Uncomment it later
+    // it("Test namespaces should be deleted", async function () {
+    //     await cleanMockTestFixture("mocks", testNamespace, false);
+    // });
 });
