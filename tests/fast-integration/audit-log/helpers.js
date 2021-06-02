@@ -38,14 +38,6 @@ async function checkAuditLogs(cred, groups, actions) {
     assert.isEmpty(notFound, `Number of groups not found to be zero`)
 }
 
-function namespaceObj(name) {
-    return {
-      apiVersion: "v1",
-      kind: "Namespace",
-      metadata: { name },
-    };
-  }
-
 module.exports = {
     checkAuditLogs
 }
