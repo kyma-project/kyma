@@ -32,6 +32,11 @@ manager: generate-local fmt-local vet-local
 	go build -o bin/controller cmd/eventing-controller/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
+run: export EVENT_TYPE_PREFIX ?= "sap.kyma.custom"
+run: export WEBHOOK_CLIENT_ID ?= "WEBHOOK_CLIENT_ID"
+run: export WEBHOOK_CLIENT_SECRET ?= "WEBHOOK_CLIENT_SECRET"
+run: export WEBHOOK_TOKEN_ENDPOINT ?= "WEBHOOK_TOKEN_ENDPOINT"
+run: export DOMAIN ?= "example.com"
 run: generate-local fmt-local vet-local manifests
 	go run cmd/eventing-controller/main.go
 
