@@ -15,6 +15,10 @@ spec:
   scope: Namespaced
   versions:
   - name: v1alpha1
+    additionalPrinterColumns:
+      - jsonPath: .status.ready
+        name: Ready
+        type: string
     schema:
       openAPIV3Schema:
         description: Subscription is the Schema for the subscriptions API
@@ -122,8 +126,6 @@ spec:
                 type: string
             required:
             - filter
-            - protocol
-            - protocolsettings
             - sink
             type: object
           status:
