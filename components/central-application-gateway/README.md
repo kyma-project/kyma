@@ -39,7 +39,8 @@ To start the Central Application Gateway, run this command:
 
 The Central Application Gateway has the following parameters:
 - **disableLegacyConnectivity** is the flag for disabling the default legacy mode and enabling the Compass mode. The default value is `false`.
-- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone (legacy) mode. The default port is `8080`.
+- **proxyPortCompass** is the port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default port is `8082`.
 - **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
 - **namespace** is the Namespace in which the Central Application Gateway is deployed. The default Namespace is `kyma-system`.
