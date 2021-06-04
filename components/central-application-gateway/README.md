@@ -1,43 +1,74 @@
-# Application Gateway
+# Central Application Gateway
 
 ## Overview
 
-This is the repository for the Kyma Application Gateway.
+This is the repository for the Central Application Gateway.
 
 ## Prerequisites
 
-The Application Gateway requires Go 1.8 or higher.
+The Central Application Gateway requires Go 1.8 or higher.
 
 ## Installation
 
-To install the Application Gateway, follow these steps:
+To install the Central Application Gateway, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
-2. `cd kyma/components/application-gateway`
+2. `cd kyma/components/central-application-gateway`
 3. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
 
 ## Usage
 
-This section explains how to use the Application Gateway.
+This section explains how to use the Central Application Gateway.
 
-### Start the Application Gateway
+### Start the Central Application Gateway
 
-To start the Application Gateway, run this command:
+To start the Central Application Gateway, run this command:
 
 ```
 ./applicationgateway
 ```
 
-The Application Gateway has the following parameters:
+The Central Application Gateway has the following parameters:
+- **disableLegacyConnectivity** is the flag for disabling the default legacy and enabling the Compass mode. The default value is `false`.
 - **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
 - **externalAPIPort** is the port that exposes the API allowing to check component status. The default port is `8081`.
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
-- **namespace** is the Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
-- **requestTimeout** is the timeout for requests sent through the Application Gateway, expressed in seconds. The default value is `1`.
+- **namespace** is the Namespace in which the Central Application Gateway is deployed. The default Namespace is `kyma-system`.
+- **requestTimeout** is the timeout for requests sent through the Central Application Gateway, expressed in seconds. The default value is `1`.
 - **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
 - **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
 - **proxyCacheTTL** is the time to live of the remote API information stored in the proxy cache, expressed in seconds. The default value is `120`.
+
+
+## API
+The Central Application Gateway exposes:
+- external API implementing health endpoint for liveness and readiness probes
+- internal API implementing proxy handler accessible via a service of ClusterIP type
+
+### Standalone mode
+In case  **disableLegacyConnectivity** is `false` the proxy API exposes the following endpoint:
+```{Application name}/{Service name}/{target API path}``` 
+
+For instance, if the user registered `cc-occ-commerce-webservices` service in `ec` application using Application Registry, they can send a request to the following url:
+```http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites```
+
+As a result Central Application Gateway performs the following steps:
+- looks for `cc-occ-commerce-webservices` service in `ec` Application CRD and extracts target URL path along with authentication configuration
+- modifies request to include authentication data
+- sends request to the following path `{target URL extracted from the Application CRD}/basesites`
+
+### Compass mode
+In case  **disableLegacyConnectivity** is `true` the proxy API exposes the following endpoint:
+```{Application name}/{API bundle name}/{API definition name}/{target api path}``` 
+
+For instance, if the user registered `cc-occ` API bundle with `commerce-webservices` API definition in `ec` application, they can send a request to the following url:
+```http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites``` 
+
+As a result Central Application Gateway performs the following steps:
+- looks for `cc-occ` service and `commerce-webservices` entry in `ec` Application CRD and extracts target URL path along with authentication configuration
+- modifies request to include authentication data
+- sends request to the following path `{target URL extracted from the Application CRD}/basesites`
 
 ## Development
 
@@ -70,30 +101,8 @@ This section outlines the testing details.
 To run the unit tests, use the following command:
 
 ```
-go test `go list ./internal/... ./cmd/...`
+go test./...
 ```
-### Generate Kubernetes clients for custom resources
-
-1. Create a directory structure for each client, similar to the one in `pkg/apis`. For example, when generating a client for EgressRule in Istio, the directory structure looks like this: `pkg/apis/istio/v1alpha2`.
-2. After creating the directories, define the following files:
-    - `doc.go`
-    - `register.go`
-    - `types.go` - define the custom structs that reflect the fields of the custom resource.
-
-See an example in `pkg/apis/istio/v1alpha2`.
-
-3. Go to the project root directory and run `./hack/update-codegen.sh`. The script generates a new client in `pkg/apis/client/clientset`.
-
-
-### Contract between the Application Gateway and the Console Backend Service
-
-The Console Backend Service must check the status of the Application Gateway instance that represents the Application.
-In the current solution, the Console Backend Service iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
-The Console Backend Service has the following obligatory requirements:
-- The Kubernetes service uses the `application` key, with the value as the name of the Application.
-- The Kubernetes service contains one port with the `http-api-port` name. The system uses this port for the status check.
-- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend` chart configuration.
-- The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
 
 ### Contribution
 
