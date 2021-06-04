@@ -3,14 +3,9 @@ package applications
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"regexp"
-	"strings"
-	"unicode"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -88,14 +83,14 @@ func (r *repository) GetByEntryName(appName, serviceName, entryName string) (Ser
 
 	matchServiceAndEntry := func(service v1alpha1.Service, entry v1alpha1.Entry) bool {
 		serviceMatchFunc := getMatchFunction(serviceName)
-		return serviceMatchFunc(service, entry) && entryName == normalizeName(entry.Name)
+		return serviceMatchFunc(service, entry) && entryName == normalization.NormalizeName(entry.Name)
 	}
 	return r.get(appName, matchServiceAndEntry)
 }
 
 func getMatchFunction(serviceName string) predicateFunc {
 	return func(service v1alpha1.Service, entry v1alpha1.Entry) bool {
-		return serviceName == normalizeName(service.DisplayName) && entry.Type == specAPIType
+		return serviceName == normalization.NormalizeName(service.DisplayName) && entry.Type == specAPIType
 	}
 }
 
@@ -168,44 +163,4 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 		URL:                  credentials.AuthenticationUrl,
 		CSRFTokenEndpointURL: csrfTokenEndpointURL,
 	}
-}
-
-var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
-// normalizeServiceNameWithId creates the OSB Service Name for given Application Service.
-// The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
-//
-// Normalization rules:
-// - MUST only contain lowercase characters, numbers and hyphens (no spaces).
-// - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
-func normalizeServiceNameWithId(displayName, id string) string {
-
-	normalizedName := normalizeName(displayName)
-
-	// add suffix
-	// generate 5 characters suffix from the id
-	sha := sha1.New()
-	sha.Write([]byte(id))
-	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
-	normalizedName = fmt.Sprintf("%s-%s", normalizedName, suffix)
-	// remove dash prefix if exists
-	//  - can happen, if the name was empty before adding suffix empty or had dash prefix
-	normalizedName = strings.TrimPrefix(normalizedName, "-")
-
-	return normalizedName
-}
-
-func normalizeName(displayName string) string {
-
-	// remove all characters, which is not alpha numeric
-	normalizedName := nonAlphaNumeric.ReplaceAllString(displayName, "-")
-	// to lower
-	normalizedName = strings.Map(unicode.ToLower, normalizedName)
-	// trim dashes if exists
-	normalizedName = strings.TrimSuffix(normalizedName, "-")
-	if len(normalizedName) > 57 {
-		normalizedName = normalizedName[:57]
-	}
-
-	return strings.TrimPrefix(normalizedName, "-")
 }
