@@ -83,11 +83,11 @@ The additional command line arguments are:
 
 Before running the component, execute the following command once to pull software dependencies and run tests:
 
-```sh
-make test
-## To download dependencies only
-make resolve-local
-```
+    ```sh
+    make test
+    ## To download dependencies only
+    make resolve-local
+    ```
 
 ### Generate code during local development
 
@@ -115,14 +115,23 @@ make resolve-local
     kubebuilder init --domain kyma-project.io
     ```
 
-
 ### Set up the environment
 
 #### Start the controller locally
 
+> Currently running the controller in local developer mode is broken and needs adoptions of the latest changes.
+
 1. Export the following mandatory environment variables:
 
-    * **KUBECONFIG** - path to a local kubeconfig file, if different from the default OS location.
+    | ENV VAR                | Description                                               | Default Value          |
+    | ---------------------- | --------------------------------------------------------- | ---------------------- |
+    | KUBECONFIG             | Path to a local kubeconfig file.                          | ~/.kube/config         |
+    | NATS_URL               | URL of the NATS server.                                   | nats://127.0.0.1:4222  |
+    | EVENT_TYPE_PREFIX      | Path to a local kubeconfig file.                          | sap.kyma.custom        |
+    | WEBHOOK_CLIENT_ID      | Webhook Client ID.                                        | WEBHOOK_CLIENT_ID      |
+    | WEBHOOK_CLIENT_SECRET  | Webhook Client Secret.                                    | WEBHOOK_CLIENT_SECRET  |
+    | WEBHOOK_TOKEN_ENDPOINT | Webhook Token Endpoint.                                   | WEBHOOK_TOKEN_ENDPOINT |
+    | DOMAIN                 | Domain.                                                   | example.com            |
 
 2. Build the binary:
 
@@ -135,3 +144,4 @@ make resolve-local
     ```sh
     make run
     ```
+
