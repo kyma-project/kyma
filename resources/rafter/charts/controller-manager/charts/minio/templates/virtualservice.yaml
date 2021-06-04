@@ -33,4 +33,4 @@ spec:
         - destination:
             host: {{ template "minio.fullname" . }}
             port:
-              number: 9000
+              number: {{ .Values.service.port }}
