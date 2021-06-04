@@ -49,6 +49,10 @@ spec:
             value: {{ .Values.publisherProxy.resources.limits.memory }}
           - name: PUBLISHER_IMAGE
             value: "{{ .Values.global.image.repository }}/{{ .Values.publisherProxy.image.name }}:{{ .Values.publisherProxy.image.tag }}"
+          - name: PUBLISHER_IMAGE_PULL_POLICY
+            value: "{{ .Values.publisherProxy.image.pullPolicy }}"
+          - name: PUBLISHER_REPLICAS
+            value: "{{ .Values.publisherProxy.replicas }}"
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
           - name: APP_LOG_LEVEL

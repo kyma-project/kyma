@@ -28,6 +28,7 @@ type Config struct {
 	DirectorProxy                director.ProxyConfig
 	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
 	HealthPort                   string        `envconfig:"default=8090"`
+	IntegrationNamespace         string        `envconfig:"default=kyma-integration"`
 
 	Runtime director.RuntimeURLsConfig
 }
@@ -39,14 +40,14 @@ func (o *Config) String() string {
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s",
+		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s",
 		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.SkipCompassTLSVerify, o.GatewayPort, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
-		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort)
+		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

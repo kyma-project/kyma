@@ -8,7 +8,7 @@ global:
 deployment:
   image:
     repository: "eu.gcr.io/kyma-project/busola-migrator"
-    tag: "PR-11364"
+    tag: "74499dcb"
     pullPolicy: IfNotPresent
   env:
     busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
@@ -25,6 +25,7 @@ deployment:
     privileged: false
     allowPrivilegeEscalation: false
     runAsNonRoot: true
+    runAsUser: 1000
   resources: { }
   nodeSelector: { }
   tolerations: [ ]
@@ -43,3 +44,17 @@ service:
 config:
   secretName: "busola-migrator-config"
   uaaSecretName: "uaa-issuer-secret"
+
+vsPatch:
+  image:
+    repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+    tag: "20210504-12243229"
+    pullPolicy: IfNotPresent
+  suffixToAdd: "-old"
+  virtualServices:
+    dex:
+      name: "dex-virtualservice"
+      namespace: "kyma-system"
+    console:
+      name: "console-web"
+      namespace: "kyma-system"

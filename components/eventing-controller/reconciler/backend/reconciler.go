@@ -65,6 +65,9 @@ type Reconciler struct {
 	logger *logger.Logger
 	record record.EventRecorder
 	cfg    env.BackendConfig
+
+	// backendType is the type of the backend which the reconciler detects at runtime
+	backendType eventingv1alpha1.BackendType
 }
 
 func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
@@ -134,12 +137,11 @@ func (r *Reconciler) Reconcile(ctrl.Request) (ctrl.Result, error) {
 
 func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, error) {
 	// CreateOrUpdate CR with NATS
-	r.namedLogger().Info("reconciling with backend as NATS")
-	backendType := eventingv1alpha1.NatsBackendType
+	r.backendType = eventingv1alpha1.NatsBackendType
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
 		// Update status if bad
-		updateErr := r.UpdateBackendStatus(ctx, backendType, nil, nil, nil)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, nil, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when CreateOrUpdateBackend failed")
 		}
@@ -149,7 +151,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 
 	// Stop the BEB subscription controller
 	if err := r.stopBebController(); err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, nil)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when stopBEBController failed")
 		}
@@ -157,7 +159,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	}
 	// Start the NATS subscription controller
 	if err := r.startNatsController(); err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, nil)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startNATSController failed")
 		}
@@ -168,7 +170,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	err = r.DeletePublisherProxySecret(ctx)
 	if err != nil {
 		// Update status if bad
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, nil)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when DeletePublisherProxySecret failed")
 		}
@@ -177,31 +179,29 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 
 	// CreateOrUpdate deployment for publisher proxy
 	r.namedLogger().Debug("trying to create/update eventing publisher proxy")
-	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
+	publisher, err := r.CreateOrUpdatePublisherProxy(ctx, r.backendType)
 	if err != nil {
 		// Update status if bad
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, nil)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when createOrUpdatePublisherProxy failed")
 		}
 		r.namedLogger().Errorw("cannot create/update eventing publisher proxy deployment", "error", err)
 		return ctrl.Result{}, err
 	}
-	r.namedLogger().Info("created/updated publisher proxy")
 
 	// CreateOrUpdate status of the CR
 	// Get publisher proxy ready status
-	err = r.UpdateBackendStatus(ctx, backendType, newBackend, publisher, nil)
+	err = r.UpdateBackendStatus(ctx, r.backendType, newBackend, publisher, nil)
 	return ctrl.Result{}, err
 }
 
 func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret) (ctrl.Result, error) {
-	r.namedLogger().Info("reconciling with backend as BEB")
-	backendType := eventingv1alpha1.BebBackendType
+	r.backendType = eventingv1alpha1.BebBackendType
 	// CreateOrUpdate CR with BEB
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, nil, nil, bebSecret)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, nil, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when CreateOrUpdateBackendCR failed")
 		}
@@ -210,7 +210,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 
 	// Stop the NATS subscription controller
 	if err := r.stopNatsController(); err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when stopNATSController failed")
 		}
@@ -220,7 +220,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
 		// Update status if bad
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when SyncPublisherProxySecret failed")
 		}
@@ -236,7 +236,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 
 	// Start the BEB subscription controller
 	if err := r.startBebController(); err != nil {
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
 		}
@@ -244,20 +244,20 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// CreateOrUpdate deployment for publisher proxy
-	publisherDeploy, err := r.CreateOrUpdatePublisherProxy(ctx, backendType)
+	publisherDeploy, err := r.CreateOrUpdatePublisherProxy(ctx, r.backendType)
 	if err != nil {
 		// Update status if bad
-		updateErr := r.UpdateBackendStatus(ctx, backendType, newBackend, nil, bebSecret)
+		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when createOrUpdatePublisherProxy failed")
 		}
-		r.namedLogger().Errorw("failed to create or update publisher proxy", "backend", backendType, "error", err)
+		r.namedLogger().Errorw("failed to create or update publisher proxy", "backend", r.backendType, "error", err)
 		return ctrl.Result{}, err
 	}
 	// CreateOrUpdate status of the CR
-	err = r.UpdateBackendStatus(ctx, backendType, newBackend, publisherDeploy, bebSecret)
+	err = r.UpdateBackendStatus(ctx, r.backendType, newBackend, publisherDeploy, bebSecret)
 	if err != nil {
-		r.namedLogger().Errorw("failed to create or update backend status", "backend", backendType, "error", err)
+		r.namedLogger().Errorw("failed to create or update backend status", "backend", r.backendType, "error", err)
 		return ctrl.Result{}, err
 	}
 
@@ -708,7 +708,7 @@ func (r *Reconciler) stopBebController() error {
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
-	return r.logger.WithContext().Named(reconcilerName)
+	return r.logger.WithContext().Named(reconcilerName).With("backend", r.backendType)
 }
 
 func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *appsv1.Deployment) error {

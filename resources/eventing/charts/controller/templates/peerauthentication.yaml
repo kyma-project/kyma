@@ -2,11 +2,12 @@
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: {{ include "controller.fullname" . }}
+  name: {{ include "controller.fullname" . }}{{ .Values.metrics.config.nameSuffix }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "controller.labels" . | nindent 4 }}
 spec:
   selector:
-    matchLabels: {{- include "controller.selectorLabels" . | nindent 6 }}
-  mtls:
-    mode: "PERMISSIVE"
+    matchLabels: {{- include "controller.peerAuth.selectorLabels" . | nindent 6 }}
+  portLevelMtls:
+    {{ .Values.metrics.config.port }}:
+      mode: "PERMISSIVE"
