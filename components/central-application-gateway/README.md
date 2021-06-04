@@ -85,12 +85,11 @@ http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites
 ``` 
 
 As a result, the Central Application Gateway:
-- looks for the `cc-occ` service and the `commerce-webservices` entry in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
-- modifies the request to include the authentication data
-- sends the request to the following path: 
+1. Looks for the `cc-occ` service and the `commerce-webservices` entry in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
+2. Modifies the request to include the authentication data
+3. Sends the request to the following path: 
    ```bash
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
-   ```
 
 ## Development
 
