@@ -22,14 +22,6 @@ require (
 )
 
 replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
-	github.com/coreos/etcd => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v17.12.0-ce-rc1.0.20200916142827-bd33bbf0497b+incompatible
-	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
-
-	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/text => golang.org/x/text v0.3.3
-
 )
