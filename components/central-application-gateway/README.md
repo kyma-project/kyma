@@ -67,12 +67,11 @@ http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites
 ```
 
 As a result, the Central Application Gateway:
-- looks for the `cc-occ-commerce-webservices` service in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
-- modifies the request to include the authentication data
-- sends the request to the following path:
+1. Looks for the `cc-occ-commerce-webservices` service in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
+2. Modifies the request to include the authentication data
+3. Sends the request to the following path:
    ```bash
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
-   ```
 
 ### Compass mode
 If **disableLegacyConnectivity** is `true`, the proxy API exposes the following endpoint:
