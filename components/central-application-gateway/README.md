@@ -55,7 +55,7 @@ The Central Application Gateway exposes:
 - an external API implementing a health endpoint for liveness and readiness probes
 - an internal API implementing a proxy handler accessible via a service of type ClusterIP
 
-### Standalone mode
+### Standalone (legacy) mode
 If  **disableLegacyConnectivity** is `false`, the proxy API exposes the following endpoint:
 ```bash
 {APPLICATION_NAME}/{SERVICE_NAME}/{TARGET_API_PATH}
