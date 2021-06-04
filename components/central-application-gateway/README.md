@@ -63,7 +63,7 @@ If  **disableLegacyConnectivity** is `false`, the proxy API exposes the followin
 
 For instance, if the user registered the `cc-occ-commerce-webservices` service in the `ec` application using Application Registry, they can send a request to the following URL: 
 ```bash
-http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites`
+http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites
 ```
 
 As a result, the Central Application Gateway:
