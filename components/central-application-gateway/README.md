@@ -16,7 +16,7 @@ To install the Central Application Gateway, follow these steps:
    ```bash
    git clone git@github.com:kyma-project/kyma.git
    ```
-2. Navigate to the directory with Central Application Gateway:
+2. Navigate to the directory with the Central Application Gateway:
    ```bash
    cd kyma/components/central-application-gateway
    ```
