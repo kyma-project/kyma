@@ -1,0 +1,105 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+data:
+  vs-patch: |-
+    {{ tpl (.Files.Get "files/vs_patch.sh" | printf "%s" | nindent 4) . }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-weight: "0"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  annotations:
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-weight: "0"
+rules:
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices"]
+    verbs: ["get", "patch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  annotations:
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-weight: "0"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      securityContext:
+      {{- toYaml .Values.deployment.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+      restartPolicy: OnFailure
+      volumes:
+        - name: vs-patch
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "busola-migrator.fullname" . }}-vs-patch-job
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}
+      containers:
+      - name: vspatch
+        image: "{{ .Values.vsPatch.image.repository }}:{{ .Values.vsPatch.image.tag }}"
+        imagePullPolicy: "{{ .Values.vsPatch.image.pullPolicy }}"
+        securityContext:
+        {{- toYaml .Values.deployment.securityContext | nindent 10 }}
+        env:
+        - name: SUFFIX
+          value: {{ .Values.vsPatch.suffixToAdd | quote }}
+        - name: VS_CONSOLE_NAME
+          value: {{ .Values.vsPatch.virtualServices.console.name | quote }}
+        - name: VS_CONSOLE_NAMESPACE
+          value: {{ .Values.vsPatch.virtualServices.console.namespace | quote }}
+        - name: VS_DEX_NAME
+          value: {{ .Values.vsPatch.virtualServices.dex.name | quote }}
+        - name: VS_DEX_NAMESPACE
+          value: {{ .Values.vsPatch.virtualServices.dex.namespace | quote }}
+        command:
+          - "/bin/bash"
+          - "/config/vs-patch"
+        volumeMounts:
+          - name: vs-patch
+            mountPath: /config
