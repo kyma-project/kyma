@@ -12,9 +12,18 @@ The Central Application Gateway requires Go 1.8 or higher.
 
 To install the Central Application Gateway, follow these steps:
 
-1. `git clone git@github.com:kyma-project/kyma.git`
-2. `cd kyma/components/central-application-gateway`
-3. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
+1. Clone the repository to your local machine:
+   ```bash
+   git clone git@github.com:kyma-project/kyma.git
+   ```
+2. Navigate to the directory with Central Application Gateway:
+   ```bash
+   cd kyma/components/central-application-gateway
+   ```
+3. Build the component:
+   ```bash
+   CGO_ENABLED=0 go build ./cmd/applicationgateway
+   ```
 
 ## Usage
 
@@ -29,9 +38,9 @@ To start the Central Application Gateway, run this command:
 ```
 
 The Central Application Gateway has the following parameters:
-- **disableLegacyConnectivity** is the flag for disabling the default legacy and enabling the Compass mode. The default value is `false`.
+- **disableLegacyConnectivity** is the flag for disabling the default legacy mode and enabling the Compass mode. The default value is `false`.
 - **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution. The default port is `8080`.
-- **externalAPIPort** is the port that exposes the API allowing to check component status. The default port is `8081`.
+- **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
 - **namespace** is the Namespace in which the Central Application Gateway is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** is the timeout for requests sent through the Central Application Gateway, expressed in seconds. The default value is `1`.
@@ -43,32 +52,46 @@ The Central Application Gateway has the following parameters:
 
 ## API
 The Central Application Gateway exposes:
-- external API implementing health endpoint for liveness and readiness probes
-- internal API implementing proxy handler accessible via a service of ClusterIP type
+- an external API implementing a health endpoint for liveness and readiness probes
+- an internal API implementing a proxy handler accessible via a service of type ClusterIP
 
 ### Standalone mode
-In case  **disableLegacyConnectivity** is `false` the proxy API exposes the following endpoint:
-```{Application name}/{Service name}/{target API path}``` 
+If  **disableLegacyConnectivity** is `false`, the proxy API exposes the following endpoint:
+```bash
+{APPLICATION_NAME}/{SERVICE_NAME}/{TARGET_API_PATH}
+``` 
 
-For instance, if the user registered `cc-occ-commerce-webservices` service in `ec` application using Application Registry, they can send a request to the following url:
-```http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites```
+For instance, if the user registered the `cc-occ-commerce-webservices` service in the `ec` application using Application Registry, they can send a request to the following URL: 
+```bash
+http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites`
+```
 
-As a result Central Application Gateway performs the following steps:
-- looks for `cc-occ-commerce-webservices` service in `ec` Application CRD and extracts target URL path along with authentication configuration
-- modifies request to include authentication data
-- sends request to the following path `{target URL extracted from the Application CRD}/basesites`
+As a result, the Central Application Gateway:
+- looks for the `cc-occ-commerce-webservices` service in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
+- modifies the request to include the authentication data
+- sends the request to the following path:
+   ```bash
+   {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
+   ```
 
 ### Compass mode
-In case  **disableLegacyConnectivity** is `true` the proxy API exposes the following endpoint:
-```{Application name}/{API bundle name}/{API definition name}/{target api path}``` 
+If **disableLegacyConnectivity** is `true`, the proxy API exposes the following endpoint:
+```bash
+{APPLICATION_NAME}/{API_BUNDLE_NAME}/{API_DEFINITION_NAME}/{TARGET_API_PATH}
+``` 
 
-For instance, if the user registered `cc-occ` API bundle with `commerce-webservices` API definition in `ec` application, they can send a request to the following url:
-```http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites``` 
+For instance, if the user registered the `cc-occ` API bundle with the `commerce-webservices` API definition in the `ec` application, they can send a request to the following URL:
+```bash
+http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites
+``` 
 
-As a result Central Application Gateway performs the following steps:
-- looks for `cc-occ` service and `commerce-webservices` entry in `ec` Application CRD and extracts target URL path along with authentication configuration
-- modifies request to include authentication data
-- sends request to the following path `{target URL extracted from the Application CRD}/basesites`
+As a result, the Central Application Gateway:
+- looks for the `cc-occ` service and the `commerce-webservices` entry in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
+- modifies the request to include the authentication data
+- sends the request to the following path: 
+   ```bash
+   {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
+   ```
 
 ## Development
 
@@ -98,7 +121,7 @@ This section outlines the testing details.
 
 #### Unit tests
 
-To run the unit tests, use the following command:
+To run the unit tests, run this command:
 
 ```
 go test./...
