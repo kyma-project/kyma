@@ -29,6 +29,8 @@ spec:
       match:
         - uri:
             regex: /.*
+          method:
+            exact: GET
       route:
         - destination:
             host: {{ template "minio.fullname" . }}

@@ -28,6 +28,8 @@ spec:
       match:
         - uri:
             regex: /.*
+          method:
+            regex: GET|HEAD
       route:
         - destination:
             host: {{ template "registry-fullname" . }}
