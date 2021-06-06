@@ -1,35 +1,43 @@
 const { assert } = require("chai");
+const { sleep, wait } = require ("../utils")
 
-function parseAuditLogs(logs, resName, groupName, action) {
-    logs.forEach(element => {
-        if (element.message.includes(groupName)) {
-            if (element.message.includes(resName)){
-                if (element.message.includes(action)) {
+function findAuditLog(logs, group) {
+    for (let element of logs) {
+        if (element.message.includes(group.groupName)) {
+            if (element.message.includes(group.resName)){
+                if (element.message.includes(group.action)) {
                     return true
                 }
             }
         }
-    });
-    return false
+    }
+    return false;
 }
 
-async function checkAuditLogs(cred, groups, actions) {
-    const logs = await cred.fetchLogs();
-    assert.isNotEmpty(logs)
-    const notFound = [];
-
+function parseAuditLogs(logs, groups) {
     groups.forEach(group => {
-        actions.forEach(action => {
-            for (let resName in group) {
-                let res = parseAuditLogs(logs, resName, group[resName],  action)
-                if (res == false) {
-                    let resNotfound = new Map()
-                    resNotfound.set(group[resName],action)
-                    notFound.push(resNotfound)
-                }
+        let found = false
+        found = findAuditLog(logs, group)
+        if (found == true) {
+            const index = groups.indexOf(group);
+            if (index > -1) {
+                groups.splice(index, 1);
             }
-        });
-    });
+        }
+    })
+    return groups
+}
+
+async function checkAuditLogs(cred, groups) {
+    let retries = 0
+    let notFound = groups
+    while (retries < 15) {
+        const logs = await cred.fetchLogs();
+        assert.isNotEmpty(logs)
+        notFound = parseAuditLogs(logs, notFound)
+        await sleep(5*1000)
+        retries++
+    }
     if (notFound.length != 0) {
         notFound.forEach(el => {
             console.log("Following groups and actions not found: " , el)

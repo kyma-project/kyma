@@ -86,18 +86,16 @@ describe("SKR test", function() {
 
   // Check audit log for AWS
   if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
-    it ("checks the audit logs are collected properly", async function(){
+    it ("Check audit logs", async function() {
       const groups = [
-        { "commerce-binding": "servicecatalog.k8s.io"},
-        {"lastorder": "serverless.kyma-project.io"},
-        {"commerce-mock": "deployments"} // for checking deployments
+        { "resName": "commerce-binding", "groupName": "servicecatalog.k8s.io", "action": "create" },
+        { "resName": "commerce-binding", "groupName": "servicecatalog.k8s.io", "action": "delete" },
+        { "resName": "lastorder", "groupName": "serverless.kyma-project.io", "action": "create" },
+        { "resName": "lastorder", "groupName": "serverless.kyma-project.io", "action": "delete" },
+        {"resName":"commerce-mock", "groupName": "deployments", "action": "create"},
+        {"resName":"commerce-mock", "groupName": "deployments", "action": "delete"}
       ]
-      const actions = [
-          "create",
-          "delete"
-      ]
-      // add some retry loop with 5 seconds
-      await checkAuditLogs(auditlogs, groups, actions)
+    await checkAuditLogs(cred, groups)
     })
   }
    

@@ -1,6 +1,5 @@
 const axios = require("axios");
-var moment = require('moment');
-const { interfaces } = require("mocha");
+const moment = require('moment');
 const {
     getEnvOrThrow,
 } = require("../utils");
@@ -46,7 +45,6 @@ class AuditLogClient {
         const serviceUrl = this.creds.url
         let dateTo =  moment().utcOffset(0, false).format('YYYY-MM-DDTHH:mm:ss');
         let dateFrom = moment().utcOffset(0, false).subtract({'minutes': 10}).format('YYYY-MM-DDTHH:mm:ss');
-
         var url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateFrom + "&time_to=" + dateTo
         try {
             const resp = await axios.get(url, {
