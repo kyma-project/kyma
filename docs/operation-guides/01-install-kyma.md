@@ -1,12 +1,11 @@
 ---
-title: Custom Kyma Installation
+title: Install Kyma
 ---
-<!-- to be reviewed by ...?  -->
 
-Besides the default installation, there are several ways to install Kyma:
+You can simply use the default Kyma installation, or modify it as it fits your purposes:
 
-## Installation
-<!-- the default variant is surely mentioned in Basic Tasks/Get Started, too -->
+## Default installation
+
 You can simply use the `deploy` command without any flags, and Kyma provides a default domain. 
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
@@ -14,13 +13,28 @@ For example, if you install Kyma on a local cluster, the default URL is `https:/
   kyma deploy
   ```
 
-If you install Kyma locally, use the evaluation profile:
+## Install a profile
+
+By default, Kyma is installed with the default chart values defined in the `values.yaml` files. To control the amount of resources, such as memory and CPU, that the components can consume, you can also install Kyma with the following pre-defined profiles:
+
+- **Evaluation** needs limited resources and is suited for trial purposes.
+- **Production** is configured for high availability and scalability. It requires more resources than the evaluation profile but is a better choice for production workload.
+
+For example, to install Kyma with the evaluation profile, run the following command:
 
   ```
   kyma deploy -p evaluation
   ```
 
-## Installation with custom domain
+>**NOTE:** You can check the values used for each component in respective folders of the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory. The `profile-evaluation.yaml` file contains values used for the evaluation profile, and the `profile-production.yaml` file contains values for the production profile. If the component doesn't have files for respective profiles, the profile values are the same as default chart values defined in the `values.yaml` file.
+
+A profile is defined globally for the whole Kyma installation. It's not possible to install a profile only for the selected components. However, you can [change the settings](#03-change-kyma-config-values) by overriding the values set for the profile. The profile values have precedence over the default chart values, and override values have precedence over the applied profile.
+
+## Install specific configuration values
+
+- To install Kyma with different configuration values, use the `--values-file` and the `--value` flag. For details, see [Change Kyma settings](#03-change-kyma-config-values).
+
+## Install with custom domain
 
 To install Kyma using your own domain name, you must provide the certificate and key as files. 
 If you don't have a certificate yet, you can create a self-signed certificate and key:
@@ -37,7 +51,7 @@ If you don't have a certificate yet, you can create a self-signed certificate an
   kyma deploy --domain {DOMAIN} --tls-cert crt.pem --tls-key key.pem
   ```
 
-## Installation from a specific source
+## Install from a specific source
 
 Optionally, you can specify from which source you want to deploy Kyma, such as the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.<br>
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
@@ -53,7 +67,7 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
   ```
   > **NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
 
-## Installation of specific components
+## Install specific components
 
 To deploy Kyma with only specific components, run:
 
@@ -86,7 +100,3 @@ To deploy Kyma with only specific components, run:
   ```
   kyma deploy --component testing --component application-connector@kyma-integration
   ```
-
-## Installation with specific configuration values
-
-- You can also install Kyma with different configuration values than the default settings. To do this, you use the `--values-file` and the `--value` flag. For details, see [Change Kyma settings](#change-kyma-settings).
