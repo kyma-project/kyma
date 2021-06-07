@@ -88,15 +88,7 @@ describe("SKR test", function() {
   // Check audit log for AWS
   if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
     it ("Check audit logs", async function() {
-      const groups = [
-        { "resName": "commerce-binding", "groupName": "servicecatalog.k8s.io", "action": "create" },
-        { "resName": "commerce-binding", "groupName": "servicecatalog.k8s.io", "action": "delete" },
-        { "resName": "lastorder", "groupName": "serverless.kyma-project.io", "action": "create" },
-        { "resName": "lastorder", "groupName": "serverless.kyma-project.io", "action": "delete" },
-        {"resName":"commerce-mock", "groupName": "deployments", "action": "create"},
-        {"resName":"commerce-mock", "groupName": "deployments", "action": "delete"}
-      ]
-    await checkAuditLogs(auditlogs, groups)
+    await checkAuditLogs(auditlogs)
     })
 
     it ("Amount of audit events should not exceed a certain threshold", async function() {
