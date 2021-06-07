@@ -96,7 +96,7 @@ describe("SKR test", function() {
         {"resName":"commerce-mock", "groupName": "deployments", "action": "create"},
         {"resName":"commerce-mock", "groupName": "deployments", "action": "delete"}
       ]
-    await checkAuditLogs(cred, groups)
+    await checkAuditLogs(auditlogs, groups)
     })
 
     it ("Amount of audit events should not exceed a certain threshold", async function() {
