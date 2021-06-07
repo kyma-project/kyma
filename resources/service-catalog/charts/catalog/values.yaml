@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.1-6-ge839d22-dirty
+image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.1-12-g880e400-dirty
 # imagePullSecrets pre-existing secrets to use to pull images from a private registry
 imagePullSecrets: []
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
@@ -127,4 +127,4 @@ securityContext: { runAsUser: 1001 }
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
+  alpineKcImage: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229

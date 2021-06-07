@@ -1,5 +1,5 @@
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
   labels:
@@ -49,12 +49,6 @@ rules:
   - apiGroups: ["*"]
     resources: ["namespaces"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["eventing.knative.dev"]
-    resources: ["triggers"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["eventing.knative.dev"]
-    resources: ["triggers"]
-    verbs: ["get", "list", "watch"]
   - apiGroups: ["*"]
     resources: ["triggers", "subscriptions"]
     verbs: ["delete", "create"]
@@ -82,11 +76,10 @@ rules:
     resourceNames:
     - application-gateway
     - connectivity-validator
-    - event-service
 {{- end }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
   labels:

@@ -12,6 +12,9 @@ rules:
   - apiGroups: ["security.istio.io"]
     resources: ["peerauthentications"]
     verbs: ["get", "list"]
+  - apiGroups: ["install.istio.io"]
+    resources: ["istiooperators"]
+    verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -126,7 +127,7 @@ func (svc *applicationService) Create(name string, description string, labels gq
 		return &v1alpha1.Application{}, err
 	}
 
-	created, err := svc.aCli.Create(u, metav1.CreateOptions{})
+	created, err := svc.aCli.Create(context.Background(), u, metav1.CreateOptions{})
 
 	if err != nil {
 		return &v1alpha1.Application{}, err
@@ -155,7 +156,7 @@ func (svc *applicationService) Update(name string, description string, labels gq
 			return &v1alpha1.Application{}, err
 		}
 
-		updated, err := svc.aCli.Update(unstructuredApp, metav1.UpdateOptions{})
+		updated, err := svc.aCli.Update(context.Background(), unstructuredApp, metav1.UpdateOptions{})
 		switch {
 		case err == nil:
 			return svc.extractor.FromUnstructured(updated)
@@ -170,7 +171,7 @@ func (svc *applicationService) Update(name string, description string, labels gq
 }
 
 func (svc *applicationService) Delete(name string) error {
-	return svc.aCli.Delete(name, &metav1.DeleteOptions{})
+	return svc.aCli.Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *applicationService) ListNamespacesFor(appName string) ([]string, error) {
@@ -287,7 +288,7 @@ func (svc *applicationService) Enable(namespace, name string, services []*gqlsch
 		return &mappingTypes.ApplicationMapping{}, err
 	}
 
-	created, err := svc.mCli.Namespace(namespace).Create(m, metav1.CreateOptions{})
+	created, err := svc.mCli.Namespace(namespace).Create(context.Background(), m, metav1.CreateOptions{})
 
 	if err != nil {
 		return &mappingTypes.ApplicationMapping{}, err
@@ -319,7 +320,7 @@ func (svc *applicationService) UpdateApplicationMapping(namespace, name string, 
 		return nil, err
 	}
 
-	updated, err := svc.mCli.Namespace(namespace).Update(u, metav1.UpdateOptions{})
+	updated, err := svc.mCli.Namespace(namespace).Update(context.Background(), u, metav1.UpdateOptions{})
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s [%s]", pretty.ApplicationMapping, name)
@@ -349,7 +350,7 @@ func (svc *applicationService) ListApplicationMapping(name string) ([]*mappingTy
 
 // Disable disables Application in given namespace by removing ApplicationMapping
 func (svc *applicationService) Disable(namespace, name string) error {
-	return svc.mCli.Namespace(namespace).Delete(name, nil)
+	return svc.mCli.Namespace(namespace).Delete(context.Background(), name, metav1.DeleteOptions{})
 }
 
 func (svc *applicationService) GetConnectionURL(appName string) (string, error) {

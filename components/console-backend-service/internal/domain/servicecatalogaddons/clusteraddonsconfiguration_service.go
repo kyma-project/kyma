@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
@@ -63,7 +64,7 @@ func (s *clusterAddonsConfigurationService) List(pagingParams pager.PagingParams
 func (s *clusterAddonsConfigurationService) AddRepos(name string, repository []*gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
+		obj, err := s.addonsCfgClient.Get(context.Background(), name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -79,7 +80,7 @@ func (s *clusterAddonsConfigurationService) AddRepos(name string, repository []*
 			return err
 		}
 
-		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -91,7 +92,7 @@ func (s *clusterAddonsConfigurationService) AddRepos(name string, repository []*
 func (s *clusterAddonsConfigurationService) RemoveRepos(name string, reposToRemove []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
+		obj, err := s.addonsCfgClient.Get(context.Background(), name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -108,7 +109,7 @@ func (s *clusterAddonsConfigurationService) RemoveRepos(name string, reposToRemo
 			return err
 		}
 
-		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -138,7 +139,7 @@ func (s *clusterAddonsConfigurationService) Create(name string, repository []*gq
 	if err != nil {
 		return nil, err
 	}
-	_, err = s.addonsCfgClient.Create(obj, metav1.CreateOptions{})
+	_, err = s.addonsCfgClient.Create(context.Background(), obj, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
@@ -158,7 +159,7 @@ func (s *clusterAddonsConfigurationService) Update(name string, repository []*gq
 	if err != nil {
 		return nil, err
 	}
-	_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
+	_, err = s.addonsCfgClient.Update(context.Background(), obj, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
@@ -172,7 +173,7 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 		return nil, err
 	}
 
-	if err := s.addonsCfgClient.Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := s.addonsCfgClient.Delete(context.Background(), name, metav1.DeleteOptions{}); err != nil {
 		return nil, errors.Wrapf(err, "while deleting %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
@@ -193,7 +194,7 @@ func (s *clusterAddonsConfigurationService) Resync(name string) (*v1alpha1.Clust
 		if err != nil {
 			return err
 		}
-		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "cannot update ClusterAddonsConfiguration %s", name)

@@ -12,7 +12,7 @@ import (
 
 type Processor struct {
 	SubscriptionLister *cache.GenericLister
-	Config             *env.Config
+	Config             *env.BebConfig
 	Logger             *logrus.Logger
 }
 

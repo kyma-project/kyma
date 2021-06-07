@@ -65,9 +65,9 @@ Here you have sample development tasks you can execute on your local machine wor
     kyma-js provision k3d
     ```
 
-3. Install Kyma without some modules and with the new eventing instead of Knative:
+3. Install Kyma without some modules:
     ```
-    kyma-js install -v --skip-modules=monitoring,tracing,logging,kiali --new-eventing
+    kyma-js install -v --skip-modules=monitoring,tracing,logging,kiali
     ```
 
 4. Execute the Commerce Mock test with `DEBUG` enabled:
@@ -77,7 +77,7 @@ Here you have sample development tasks you can execute on your local machine wor
 
 5. Upgrade some components:
     ```
-    kyma-js install -v --component=application-connector --new-eventing
+    kyma-js install -v --component=application-connector
     ```
 
 6. Delete the cluster and start from scratch:
@@ -125,8 +125,8 @@ We have several pipelines that use fast-integration tests. See the list of pipel
 
 Pipeline | Description | Infrastructure
 --|--|--|
-[pre-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=pre-master-kyma-integration-k3s) | Job that runs on every PR before the merge to the `main` branch. | k3s
-[post-master-kyma-integration-k3s](https://status.build.kyma-project.io/?job=post-master-kyma-integration-k3s) | Job that runs on every PR after it is merged to the `main` branch. | k3s
+[pre-main-kyma-integration-k3s](https://status.build.kyma-project.io/?job=pre-main-kyma-integration-k3s) | Job that runs on every PR before the merge to the `main` branch. | k3s
+[post-main-kyma-integration-k3s](https://status.build.kyma-project.io/?job=post-main-kyma-integration-k3s) | Job that runs on every PR after it is merged to the `main` branch. | k3s
 [kyma-integration-k3s](https://status.build.kyma-project.io/?job=kyma-integration-k3s) | Job that periodicially runs the fast-integration tests. | k3s
 [kyma-integration-production-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-production-gardener-azure) | Periodic job that tests the production profile in Kyma. | Gardener, Azure
 [kyma-integration-evaluation-gardener-azure](https://status.build.kyma-project.io/?job=kyma-integration-evaluation-gardener-azure) | Periodic job that tests the evaluation profile in Kyma. | Gardener, Azure

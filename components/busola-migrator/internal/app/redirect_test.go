@@ -8,12 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestApp_HandleInfoRedirect(t *testing.T) {
+const (
+	testBusolaURL = "https://busola-url.com"
+)
+
+func TestApp_HandleIndexRedirect(t *testing.T) {
 	// GIVEN
 	r, _ := http.NewRequest("GET", "/any-url", nil)
 	w := httptest.NewRecorder()
-	app := New(testBusolaURL, testStaticFilesDir)
-	handler := http.HandlerFunc(app.HandleInfoRedirect)
+	app := App{}
+	handler := http.HandlerFunc(app.HandleIndexRedirect)
 
 	// WHEN
 	handler.ServeHTTP(w, r)
@@ -21,14 +25,14 @@ func TestApp_HandleInfoRedirect(t *testing.T) {
 
 	// THEN
 	assert.Equal(t, http.StatusFound, res.StatusCode)
-	assert.Equal(t, "/info/", res.Header.Get("Location"))
+	assert.Equal(t, "/", res.Header.Get("Location"))
 }
 
 func TestApp_HandleConsoleRedirect(t *testing.T) {
 	// GIVEN
 	r, _ := http.NewRequest("GET", "/console-redirect", nil)
 	w := httptest.NewRecorder()
-	app := New(testBusolaURL, testStaticFilesDir)
+	app := App{busolaURL: testBusolaURL}
 	handler := http.HandlerFunc(app.HandleConsoleRedirect)
 
 	// WHEN

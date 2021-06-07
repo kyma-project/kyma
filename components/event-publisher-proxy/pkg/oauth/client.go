@@ -12,7 +12,7 @@ import (
 )
 
 // NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
-func NewClient(ctx context.Context, cfg *env.Config) *http.Client {
+func NewClient(ctx context.Context, cfg *env.BebConfig) *http.Client {
 	// configure auth client
 	config := Config(cfg)
 	client := config.Client(ctx)

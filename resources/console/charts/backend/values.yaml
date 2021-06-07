@@ -24,13 +24,8 @@ resources:
   limits:
     cpu: 50m
     memory: 220Mi
-tests:
-  enabled: true
-  labels:
-    integration: true
-    after-upgrade: true
 
-systemNamespaces: "istio-system,knative-eventing,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
+systemNamespaces: "istio-system,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system,kube-node-lease,kubernetes-dashboard"
 
 global:
   tracing:

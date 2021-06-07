@@ -73,7 +73,7 @@ spec:
           runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
 {{- end }}
 ---
-{{- if not .Values.global.isBEBEnabled }}
+{{- if and (not .Values.global.isBEBEnabled) (not .Values.global.centralApplicationConnectivityValidatorEnabled) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

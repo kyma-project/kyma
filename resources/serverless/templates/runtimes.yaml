@@ -25,15 +25,15 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-nodejs-10
+  name: dockerfile-nodejs-14
   namespace: {{ .Release.Namespace }}
   labels:
     serverless.kyma-project.io/config: runtime
-    serverless.kyma-project.io/runtime: nodejs10
+    serverless.kyma-project.io/runtime: nodejs14
 data:
-  # scan-image: {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }} # This line allows security scan tools to scan this image
+  # scan-image: {{ .Values.images.runtimes.nodejs14.repository}}:{{ .Values.images.runtimes.nodejs14.tag }} # This line allows security scan tools to scan this image
   Dockerfile: |-
-    FROM {{ .Values.images.runtimes.nodejs10.repository}}:{{ .Values.images.runtimes.nodejs10.tag }}
+    FROM {{ .Values.images.runtimes.nodejs14.repository}}:{{ .Values.images.runtimes.nodejs14.tag }}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
 

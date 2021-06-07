@@ -25,7 +25,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["delete"]
+    verbs: ["get", "patch"]
   - apiGroups: ["apps"]
     resources: ["statefulsets"]
     verbs: ["delete"]
@@ -78,9 +78,11 @@ spec:
       terminationGracePeriodSeconds: 0
       containers:
         - name: {{ template "loki.name" . }}-pre-upgrade
-          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
+          image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
           imagePullPolicy: IfNotPresent
-
+          env:
+          - name: PVC_SIZE
+            value: {{ .Values.persistence.size }}
           command:
             - "/bin/bash"
           args:
@@ -88,4 +90,4 @@ spec:
             - |
               set -x
               kubectl delete statefulsets.apps -n kyma-system logging-loki --ignore-not-found
-              kubectl delete persistentvolumeclaims -n kyma-system storage-logging-loki-0 --ignore-not-found
+              kubectl patch persistentvolumeclaims -n kyma-system storage-logging-loki-0 --patch '{"spec": {"resources": {"requests": {"storage": "$(PVC_SIZE)"}}}}' || echo "true"

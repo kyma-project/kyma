@@ -1,4 +1,3 @@
-{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: nats.io/v1alpha2
 kind: NatsCluster
 metadata:
@@ -6,10 +5,11 @@ metadata:
 spec:
   size: {{ .Values.clusterSize }}
   version: "2.1.8"
+  serverImage: "eu.gcr.io/kyma-project/external/nats"
   pod:
     {{- if .Values.enableMetrics }}
     enableMetrics: {{ .Values.enableMetrics }}
-    metricsImage: "natsio/prometheus-nats-exporter"
+    metricsImage: "eu.gcr.io/kyma-project/external/natsio/prometheus-nats-exporter"
     metricsImageTag: "0.7.0"
     metricsImagePullPolicy: IfNotPresent
     {{- end }}
@@ -22,4 +22,3 @@ spec:
   natsConfig:
     debug: true
     trace: true
-{{- end }}

@@ -125,7 +125,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 			"type":         event.Type(),
 			"statusCode":   statusCode,
 			"duration":     dispatchTime,
-			"responseBody": respBody,
+			"responseBody": string(respBody),
 		}).Info("Event dispatched")
 }
 
@@ -166,7 +166,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 			"type":         event.Type(),
 			"statusCode":   statusCode,
 			"duration":     dispatchTime,
-			"responseBody": respBody,
+			"responseBody": string(respBody),
 		}).Info("Event dispatched")
 }
 

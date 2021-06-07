@@ -93,7 +93,7 @@ Here are some examples:
 
          initContainers:
          - name: init-helm-broker
-           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
+           image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
            command: ['sh', '-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
 
          containers:

@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
@@ -51,7 +52,7 @@ func (c *backendModules) Get(name string, options v1.GetOptions) (result *v1alph
 		Resource("backendmodules").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }
@@ -67,7 +68,7 @@ func (c *backendModules) List(opts v1.ListOptions) (result *v1alpha1.BackendModu
 		Resource("backendmodules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }
@@ -83,7 +84,7 @@ func (c *backendModules) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("backendmodules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(context.Background())
 }
 
 // Create takes the representation of a backendModule and creates it.  Returns the server's representation of the backendModule, and an error, if there is any.
@@ -92,7 +93,7 @@ func (c *backendModules) Create(backendModule *v1alpha1.BackendModule) (result *
 	err = c.client.Post().
 		Resource("backendmodules").
 		Body(backendModule).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }
@@ -104,7 +105,7 @@ func (c *backendModules) Update(backendModule *v1alpha1.BackendModule) (result *
 		Resource("backendmodules").
 		Name(backendModule.Name).
 		Body(backendModule).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }
@@ -115,7 +116,7 @@ func (c *backendModules) Delete(name string, options *v1.DeleteOptions) error {
 		Resource("backendmodules").
 		Name(name).
 		Body(options).
-		Do().
+		Do(context.Background()).
 		Error()
 }
 
@@ -130,7 +131,7 @@ func (c *backendModules) DeleteCollection(options *v1.DeleteOptions, listOptions
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(options).
-		Do().
+		Do(context.Background()).
 		Error()
 }
 
@@ -142,7 +143,7 @@ func (c *backendModules) Patch(name string, pt types.PatchType, data []byte, sub
 		SubResource(subresources...).
 		Name(name).
 		Body(data).
-		Do().
+		Do(context.Background()).
 		Into(result)
 	return
 }

@@ -16,9 +16,9 @@ type WebhookAuth struct {
 
 // ProtocolSettings defines the CE protocol setting specification implementation
 type ProtocolSettings struct {
-	ContentMode     string       `json:"contentMode,omitempty"`
-	ExemptHandshake bool         `json:"exemptHandshake,omitempty"`
-	Qos             string       `json:"qos,omitempty"`
+	ContentMode     *string      `json:"contentMode,omitempty"`
+	ExemptHandshake *bool        `json:"exemptHandshake,omitempty"`
+	Qos             *string      `json:"qos,omitempty"`
 	WebhookAuth     *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 
@@ -50,8 +50,8 @@ type BebFilters struct {
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only.
 	ID               string            `json:"id,omitempty"`
-	Protocol         string            `json:"protocol"`
-	ProtocolSettings *ProtocolSettings `json:"protocolsettings"`
+	Protocol         string            `json:"protocol,omitempty"`
+	ProtocolSettings *ProtocolSettings `json:"protocolsettings,omitempty"`
 	Sink             string            `json:"sink"`
 	Filter           *BebFilters       `json:"filter"`
 }

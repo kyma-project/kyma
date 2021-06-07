@@ -1,0 +1,25 @@
+# Default values for event-publisher-proxy.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# replicaCount configures the number of replicas for the event-publisher-proxy deployment
+replicaCount: 1
+
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+
+nats:
+  config:
+    port: 8080
+    portName: http
+    requestTimeout: "5s"
+    legacyNamespace: kyma
+    legacyEventTypePrefix: sap.kyma.custom
+
+metrics:
+  config:
+    port: 9090
+    portName: http-metrics
+    nameSuffix: "-metrics"
+    interval: 30s

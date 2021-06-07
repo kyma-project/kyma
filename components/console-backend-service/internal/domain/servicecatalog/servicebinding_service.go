@@ -1,6 +1,7 @@
 package servicecatalog
 
 import (
+	"context"
 	"fmt"
 
 	api "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -53,11 +54,11 @@ func (f *serviceBindingService) Create(ns string, sb *api.ServiceBinding) (*api.
 	if sb.Name == "" {
 		sb.Name = f.nameFunc()
 	}
-	return f.client.ServiceBindings(ns).Create(sb)
+	return f.client.ServiceBindings(ns).Create(context.Background(), sb, v1.CreateOptions{})
 }
 
 func (f *serviceBindingService) Delete(ns string, name string) error {
-	return f.client.ServiceBindings(ns).Delete(name, &v1.DeleteOptions{})
+	return f.client.ServiceBindings(ns).Delete(context.Background(), name, v1.DeleteOptions{})
 }
 
 func (f *serviceBindingService) Find(ns string, name string) (*api.ServiceBinding, error) {

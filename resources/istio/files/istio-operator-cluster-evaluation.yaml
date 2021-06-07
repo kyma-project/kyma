@@ -68,6 +68,10 @@ spec:
               name: cpu
               targetAverageUtilization: 80
             type: Resource
+          - resource:
+              name: memory
+              targetAverageUtilization: 80
+            type: Resource
           minReplicas: 1
           scaleTargetRef:
             apiVersion: apps/v1
@@ -248,6 +252,7 @@ spec:
         excludeIPRanges: ""
         excludeInboundPorts: ""
         excludeOutboundPorts: ""
+        holdApplicationUntilProxyStarts: true
         image: proxyv2
         includeIPRanges: '*'
         logLevel: warning

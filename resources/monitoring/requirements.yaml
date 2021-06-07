@@ -1,5 +1,0 @@
-dependencies:
-    - name: prometheus-pushgateway
-      condition: pushgateway.enabled
-    - name: prometheus-istio
-      condition: prometheus-istio.enabled

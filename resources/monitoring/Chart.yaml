@@ -5,3 +5,8 @@ version: 1.0.0
 # version: 11.1.1
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
+dependencies:
+    - name: prometheus-pushgateway
+      condition: pushgateway.enabled
+    - name: prometheus-istio
+      condition: prometheus-istio.enabled

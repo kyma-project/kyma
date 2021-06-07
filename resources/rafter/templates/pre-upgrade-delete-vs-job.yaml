@@ -12,9 +12,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    networking.knative.dev/certificate-provider: cert-manager
-    serving.knative.dev/controller: "true"
   name: pre-upgrade-delete-vs-rafter-minio
   annotations:
     helm.sh/hook: "pre-upgrade"
@@ -93,7 +90,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/delete-resources.sh"]
-        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210407-86c769bd
+        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
         imagePullPolicy: IfNotPresent
         name: pre-upgrade-delete-vs-rafter-minio
         securityContext:

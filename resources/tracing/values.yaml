@@ -33,7 +33,7 @@ jaeger:
     badgerPvc:
       enabled: false
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
       size: 1Gi
       storageClassName: ""
   spec:
@@ -65,14 +65,14 @@ jaeger:
         dependencies:
           menuEnabled: true
         menu:
-        - label: "About Jaeger"
-          items:
-          - label: "Documentation"
-            url: "https://www.jaegertracing.io/docs/latest"
-        - label: "About Kyma"
-          items:
-          - label: "Documentation"
-            url: "https://kyma-project.io/docs/components/tracing/"
+          - label: "About Jaeger"
+            items:
+              - label: "Documentation"
+                url: "https://www.jaegertracing.io/docs/latest"
+          - label: "About Kyma"
+            items:
+              - label: "Documentation"
+                url: "https://kyma-project.io/docs/components/tracing/"
     ingress:
       enabled: false
     annotations:
@@ -85,6 +85,12 @@ jaeger:
       requests:
         cpu: 10m
         memory: 40Mi
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      allowPrivilegeEscalation: false
+      privileged: false
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -112,7 +118,8 @@ global:
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
     enabled: true
-
+virtualservice:
+  enabled: true
 kcproxy:
   enabled: true
   replicaCount: 1

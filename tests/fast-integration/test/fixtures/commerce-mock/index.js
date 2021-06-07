@@ -27,7 +27,8 @@ const {
   debug,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway
+  patchApplicationGateway,
+  eventingSubscription
 } = require("../../../utils");
 
 const {
@@ -74,72 +75,11 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     kind: "ServiceInstance",
     metadata: {
       name: name,
-      annotations: {
-        "app": "test",
-      },
     },
     spec: { serviceClassExternalName },
   };
 }
 
-function eventingKnativeTrigger(source, fnName, ns) {
-  return {
-    apiVersion: "eventing.knative.dev/v1alpha1",
-    kind: "Trigger",
-    metadata: {
-      labels: { function: fnName },
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      broker: "default",
-      filter: {
-        attributes: {
-          eventtypeversion: "v1",
-          source: source,//commerce,
-          type: "order.created",
-        }
-      },
-      subscriber: {
-        ref: {
-          apiVersion: "v1",
-          kind: "Service",
-          name: fnName,
-        }
-      }
-    }
-  }
-}
-
-function eventingSubscription(eventType, sink, fnName, ns) {
-  return {
-    apiVersion: "eventing.kyma-project.io/v1alpha1",
-    kind: "Subscription",
-    metadata: {
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      filter: {
-        dialect: "beb",
-        filters: [{
-          eventSource: {
-            property: "source", type: "exact", value: "",
-          },
-          eventType: {
-            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          } 
-        }]
-      },
-      protocol: "BEB",
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: "AT-LEAST-ONCE",
-      },
-      sink: sink/*http://lastorder.test.svc.cluster.local*/
-    }
-  }
-}
 
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
@@ -381,9 +321,6 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     kind: "ServiceBinding",
     metadata: {
       name: "commerce-binding",
-      annotations: {
-        "app": "test",
-      },
     },
     spec: {
       instanceRef: { name: "commerce-webservices" },
@@ -412,14 +349,10 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply(commerceObjs);
   await k8sApply(lastorderObjs, targetNamespace, true);
   await k8sApply([
-    eventingKnativeTrigger(
-      appName, 
-      "lastorder", 
-      targetNamespace),
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      "lastorder",
+      "order-created",
       targetNamespace)
   ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);

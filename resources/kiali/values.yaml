@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210407-86c769bd
+    version: 20210504-12243229
   labels:
     integration: true
     after-upgrade: true
@@ -25,7 +25,8 @@ global:
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
     enabled: true
-
+virtualservice:
+    enabled: true
 kcproxy:
   enabled: true
   replicaCount: 1

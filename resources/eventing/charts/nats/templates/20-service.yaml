@@ -1,4 +1,3 @@
-{{- if eq .Values.global.eventing.backend "nats" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,4 +9,3 @@ spec:
     port: {{ .Values.nats.ports.client }}
     targetPort: client
   selector: {{ include "nats.labels.selectorLabels" . | nindent 4 }}
-{{- end }}

@@ -10,13 +10,13 @@ cluster:
   runtimeAdminGroupName: runtimeAdmin
   scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
-  systemNamespaces: istio-system knative-eventing kube-public kube-system
+  systemNamespaces: istio-system kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "02591619"
+    tag: "93bb0fcb"
   service:
     externalPort: 80
     internalPort: 8080
@@ -32,7 +32,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "02591619"
+    tag: "93bb0fcb"
   service:
     externalPort: 80
     internalPort: 80

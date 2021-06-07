@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	appsv1 "k8s.io/api/apps/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -122,12 +127,25 @@ func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.S
 	return newSub
 }
 
+func exemptHandshake(val bool) *bool {
+	exemptHandshake := val
+	return &exemptHandshake
+}
+
+func qos(qos string) *string {
+	q := qos
+	return &q
+}
+
 func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "BEB"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST_ONCE",
+		ContentMode: func() *string {
+			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
+			return &contentMode
+		}(),
+		ExemptHandshake: exemptHandshake(true),
+		Qos:             qos("AT-LEAST_ONCE"),
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
@@ -203,6 +221,25 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
+func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
+	s.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Filters: []*eventingv1alpha1.BebFilter{
+			{
+				EventSource: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "source",
+					Value:    "",
+				},
+				EventType: &eventingv1alpha1.Filter{
+					Type:     "exact",
+					Property: "type",
+					Value:    EventType,
+				},
+			},
+		},
+	}
+}
+
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
 	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
@@ -227,5 +264,70 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 				"test": "test",
 			},
 		},
+	}
+}
+
+func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		StringData: map[string]string{
+			"messaging": "[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]",
+			"namespace": "test/ns",
+		},
+	}
+}
+
+func WithNamespace(name string) *corev1.Namespace {
+	namespace := corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	return &namespace
+}
+
+func WithEventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
+	return &eventingv1alpha1.EventingBackend{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec:   eventingv1alpha1.EventingBackendSpec{},
+		Status: eventingv1alpha1.EventingBackendStatus{},
+	}
+}
+
+func WithEventingControllerDeployment() *appsv1.Deployment {
+	labels := map[string]string{
+		"app.kubernetes.io/name": "value",
+	}
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.ControllerName,
+			Namespace: deployment.ControllerNamespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: utils.Int32Ptr(1),
+			Selector: metav1.SetAsLabelSelector(labels),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:   deployment.ControllerName,
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  deployment.ControllerName,
+							Image: "eventing-controller-pod-image",
+						},
+					},
+				},
+			},
+		},
+		Status: appsv1.DeploymentStatus{},
 	}
 }

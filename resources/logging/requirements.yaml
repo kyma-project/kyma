@@ -1,7 +1,0 @@
-dependencies:
-  - name: logui
-    condition: loki.enabled
-  - name: fluent-bit
-    condition: fluent-bit.enabled
-  - name: loki
-    condition: loki.enabled

@@ -213,14 +213,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\") or sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\")",
+              "expr": "sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\")", 
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Current: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "A"
             },
             {
-              "expr": "sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
+              "expr": "sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -228,7 +228,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
+              "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Limit: {{`{{ pod }}`}}({{`{{ container }}`}})",
@@ -329,14 +329,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
+              "expr": "sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "RX: {{` {{ pod }} `}}",
               "refId": "A"
             },
             {
-              "expr": "sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
+              "expr": "sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "TX: {{` {{ pod }} `}}",
@@ -437,7 +437,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_eventing_knative_dev_broker=\"default\", namespace=\"$namespace\"}",
+              "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Restarts: {{`{{ pod }}`}}({{`{{ container }}`}})",

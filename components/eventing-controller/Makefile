@@ -7,11 +7,12 @@ override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# DEV images used during development workflow only
-DEV_IMG_DEFAULT = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
-DEV_IMG_NATS = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller-nats
+# DEV image is used during development workflow only
+DEV_IMAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+
 NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
+
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:crdVersions=v1"
 
@@ -50,31 +51,33 @@ uninstall-samples: manifests
 uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests deploy-local-dry-run
+# Deploy eventing-controller for BEB in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-beb-local: manifests deploy-beb-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
-# Deploy eventing-controller-nats in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-eventing-controller-nats-local: manifests deploy-eventing-controller-nats-local-dry-run
+# Deploy eventing-controller for NATS in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-nats-local: manifests deploy-nats-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/nats | ko apply -f -
 
-undeploy-local: manifests
+# Undeploy the eventing-controller for BEB
+undeploy-beb-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
-undeploy-eventing-controller-nats-local: manifests
+# Undeploy the eventing-controller for NATS
+undeploy-nats-local: manifests
 	kustomize build config/nats | kubectl delete -f -
 
-# Dry run for deploying controller for local development
-deploy-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMG_DEFAULT} && kustomize edit set namespace ${NAMESPACE}
+# Dry run for deploying eventing-controller BEB for local development
+deploy-beb-local-dry-run: manifests
+	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
 
-# Dry run for deploying eventing-controller-nats for local development
-deploy-eventing-controller-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMG_NATS} && kustomize edit set namespace ${NAMESPACE}
+# Dry run for deploying eventing-controller NATS for local development
+deploy-nats-local-dry-run: manifests
+	cd config/manager-nats && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/nats
 
