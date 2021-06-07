@@ -88,7 +88,7 @@ describe("SKR test", function() {
   // Check audit log for AWS
   if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
     it ("Check audit logs", async function() {
-    await checkAuditLogs(auditlogs)
+      await checkAuditLogs(auditlogs)
     })
 
     it ("Amount of audit events should not exceed a certain threshold", async function() {
