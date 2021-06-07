@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	TokenURLPath     = "/auth"
-	MessagingURLPath = "/messaging"
+	TokenURLPath        = "/auth"
+	MessagingURLPath    = "/messaging"
+	TestCommanderSuffix = "commander"
 )
 
 // BebMock implements a programmable mock for BEB
@@ -130,31 +131,30 @@ func (m *BebMock) Start() string {
 					}
 				// get on a single subscription
 				default:
-					key := r.URL.Path
-					subscription := m.Subscriptions[key]
-					if subscription != nil {
-						subscription.SubscriptionStatus = bebtypes.SubscriptionStatusActive
-						w.WriteHeader(http.StatusOK)
-						err := json.NewEncoder(w).Encode(*subscription)
-						Expect(err).ShouldNot(HaveOccurred())
+					if key := r.URL.Path; strings.HasSuffix(key, TestCommanderSuffix) {
+						subscriptionSaved := m.Subscriptions[key]
+						if subscriptionSaved != nil {
+							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+							w.WriteHeader(http.StatusOK)
+							err := json.NewEncoder(w).Encode(*subscriptionSaved)
+							Expect(err).ShouldNot(HaveOccurred())
+						} else {
+							w.WriteHeader(http.StatusNotFound)
+						}
 					} else {
-						w.WriteHeader(http.StatusNotFound)
-					}
-					// TODO make it work for all other BEB mock tests (see reconciler_test)
-					/*  old stuff
-					var subscription bebtypes.Subscription
-					_ = json.NewDecoder(r.Body).Decode(&subscription)
-					m.Requests[r] = subscription
+						var subscription bebtypes.Subscription
+						_ = json.NewDecoder(r.Body).Decode(&subscription)
+						m.Requests[r] = subscription
 
-					parsedUrl, err := url.Parse(r.RequestURI)
-					Expect(err).ShouldNot(HaveOccurred())
-					subscriptionName := parsedUrl.Path
-					if m.GetResponse != nil {
-						m.GetResponse(w, subscriptionName)
-					} else {
-						BebGetSuccess(w, subscriptionName)
+						parsedUrl, err := url.Parse(r.RequestURI)
+						Expect(err).ShouldNot(HaveOccurred())
+						subscriptionName := parsedUrl.Path
+						if m.GetResponse != nil {
+							m.GetResponse(w, subscriptionName)
+						} else {
+							BebGetSuccess(w, subscriptionName)
+						}
 					}
-					*/
 				}
 				return
 			default:

@@ -52,8 +52,7 @@ func (c *FakeCommander) Stop() error {
 }
 
 func TestCleanup(t *testing.T) {
-	natsCommander := FakeCommander{} //??
-	//natsCommander := NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration)
+	natsCommander := FakeCommander{}
 	g := gomega.NewWithT(t)
 	data := "sampledata"
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
@@ -63,7 +62,7 @@ func TestCleanup(t *testing.T) {
 	// Create a test subscriber
 	ctx := context.Background()
 	log := ctrl.Log.WithName("test-cleaner-nats")
-	subscriberPort := 8080
+	subscriberPort := 8081
 	subscriber := controllertesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
 	subscriber.Start()
 	// Shutting down subscriber
@@ -160,7 +159,6 @@ func NewFakeClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error
 	}
 
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
-	//nsResourceClient := dynamicClient.Resource(SubscriptionGroupVersionResource())
 	return dynamicClient, nil
 }
 

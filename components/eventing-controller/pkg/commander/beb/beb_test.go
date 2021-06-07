@@ -67,13 +67,13 @@ func TestCleanup(t *testing.T) {
 	log := ctrl.Log.WithName("test-cleaner-beb")
 
 	// create a Kyma subscription
-	subscription := fixtureValidSubscription("test", "test")
+	subscription := fixtureValidSubscription("test-"+controllertesting.TestCommanderSuffix, "test")
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
 	// create an APIRule
 	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("foo-host", "foo-svc", apiRule)
+	controllertesting.WithService("host-test-"+controllertesting.TestCommanderSuffix, "svc-test-"+controllertesting.TestCommanderSuffix, apiRule)
 	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
