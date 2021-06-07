@@ -31,7 +31,8 @@ const {
 const { 
   AuditLogCreds,
   AuditLogClient,
-  checkAuditLogs
+  checkAuditLogs,
+  checkAuditEventsThreshold
 } = require("../audit-log");
 
 describe("SKR test", function() {
@@ -97,6 +98,10 @@ describe("SKR test", function() {
       ]
     await checkAuditLogs(cred, groups)
     })
+
+    it ("Amount of audit events should not exceed a certain threshold", async function() {
+      await checkAuditEventsThreshold(2.5);
+    });
   }
    
   it("Deprovision SKR", async function() {
