@@ -123,15 +123,15 @@ Before running the component, execute the following command once to pull softwar
 
 1. Export the following mandatory environment variables:
 
-    | ENV VAR                | Description                                               | Default Value          |
-    | ---------------------- | --------------------------------------------------------- | ---------------------- |
-    | KUBECONFIG             | Path to a local kubeconfig file.                          | ~/.kube/config         |
-    | NATS_URL               | URL of the NATS server.                                   | nats://127.0.0.1:4222  |
-    | EVENT_TYPE_PREFIX      | Path to a local kubeconfig file.                          | sap.kyma.custom        |
-    | WEBHOOK_CLIENT_ID      | Webhook Client ID.                                        | WEBHOOK_CLIENT_ID      |
-    | WEBHOOK_CLIENT_SECRET  | Webhook Client Secret.                                    | WEBHOOK_CLIENT_SECRET  |
-    | WEBHOOK_TOKEN_ENDPOINT | Webhook Token Endpoint.                                   | WEBHOOK_TOKEN_ENDPOINT |
-    | DOMAIN                 | Domain.                                                   | example.com            |
+    | ENV VAR                | Description                                                            | Default Value          |
+    | ---------------------- | ---------------------------------------------------------------------- | ---------------------- |
+    | KUBECONFIG             | Path to a local kubeconfig file.                                       | ~/.kube/config         |
+    | NATS_URL               | URL of the NATS server.                                                | nats://127.0.0.1:4222  |
+    | EVENT_TYPE_PREFIX      | Path to a local kubeconfig file.                                       | sap.kyma.custom        |
+    | WEBHOOK_CLIENT_ID      | The Client ID used by webhooks to acquire Access Tokens from Kyma.     | WEBHOOK_CLIENT_ID      |
+    | WEBHOOK_CLIENT_SECRET  | The Client Secret used by webhooks to acquire Access Tokens from Kyma. | WEBHOOK_CLIENT_SECRET  |
+    | WEBHOOK_TOKEN_ENDPOINT | The Kyma public endpoint to provide Access Tokens.                     | WEBHOOK_TOKEN_ENDPOINT |
+    | DOMAIN                 | Domain.                                                                | example.com            |
 
 2. Build the binary:
 
