@@ -43,9 +43,9 @@ class AuditLogClient {
     async fetchLogs() {
         const token = await this.getToken()
         const serviceUrl = this.creds.url
-        let dateTo =  moment().utcOffset(0, false).format('YYYY-MM-DDTHH:mm:ss');
-        let dateFrom = moment().utcOffset(0, false).subtract({'minutes': 10}).format('YYYY-MM-DDTHH:mm:ss');
-        var url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateFrom + "&time_to=" + dateTo
+        const dateTo =  moment().utcOffset(0, false).format('YYYY-MM-DDTHH:mm:ss');
+        const dateFrom = moment().utcOffset(0, false).subtract({'minutes': 10}).format('YYYY-MM-DDTHH:mm:ss');
+        const url = serviceUrl + "/auditlog/v2/auditlogrecords?time_from=" + dateFrom + "&time_to=" + dateTo
         try {
             const resp = await axios.get(url, {
                     headers: {
