@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -52,10 +51,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Parse flags.
-	var enableDebugLogs bool
-	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
-
 	// Init the manager.
 	restCfg := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
@@ -70,7 +65,7 @@ func main() {
 	}
 
 	// Instantiate and initialize all the subscription commanders.
-	natsCommander := nats.NewCommander(restCfg, enableDebugLogs, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait)
+	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait)
 	if err := natsCommander.Init(mgr); err != nil {
 		setupLogger.Error(err, "unable to initialize the NATS commander")
 		os.Exit(1)

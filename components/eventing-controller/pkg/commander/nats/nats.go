@@ -35,23 +35,21 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel          context.CancelFunc
-	envCfg          env.NatsConfig
-	restCfg         *rest.Config
-	enableDebugLogs bool
-	metricsAddr     string
-	mgr             manager.Manager
-	backend         handlers.MessagingBackend
+	cancel      context.CancelFunc
+	envCfg      env.NatsConfig
+	restCfg     *rest.Config
+	metricsAddr string
+	mgr         manager.Manager
+	backend     handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
 	return &Commander{
-		envCfg:          env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
-		restCfg:         restCfg,
-		enableDebugLogs: enableDebugLogs,
-		metricsAddr:     metricsAddr,
+		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
+		restCfg:     restCfg,
+		metricsAddr: metricsAddr,
 	}
 }
 
@@ -90,6 +88,7 @@ func (c *Commander) Start() error {
 // Stop implements the Commander interface and stops the commander.
 func (c *Commander) Stop() error {
 	c.cancel()
+
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	return cleanup(c.backend, dynamicClient)
 }

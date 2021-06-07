@@ -118,7 +118,6 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	}
 
 	// Fetch all subscriptions.
-	//dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
