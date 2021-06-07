@@ -2,7 +2,7 @@
 title: Access and Expose Kiali and Grafana
 ---
 
-By default, Kyma does not expose Kiali and Grafana. However, you can still access them using port forwarding. If you want to expose Kiali and Grafana securely, use an identity provider of your choice. The following example uses OAuth as identity provider.
+By default, Kyma does not expose Kiali and Grafana. However, you can still access them using port forwarding. If you want to expose Kiali and Grafana securely, use an identity provider of your choice.
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
 
 >**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
-2. To access the respective service's UI, open http://localhost:20001 (for Kiali) http://localhost:3000 (for Grafana) in your browser.
+2. To access the respective service's UI, open http://localhost:20001 (for Kiali) or http://localhost:3000 (for Grafana) in your browser.
 
 ## Expose Kiali and Grafana Securely
 
