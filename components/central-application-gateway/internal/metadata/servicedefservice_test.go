@@ -1,6 +1,8 @@
 package metadata
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
 	applicationmocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications/mocks"
@@ -9,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestServiceDefinitionService_GetAPI(t *testing.T) {
