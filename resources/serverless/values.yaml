@@ -160,7 +160,7 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v1.5.1
+        value: gcr.io/kaniko-project/executor:v1.6.0
       functionBuildRepoFetcherImage:
         value: eu.gcr.io/kyma-project/function-build-init:a9278e66
       functionBuildMaxSimultaneousJobs:
