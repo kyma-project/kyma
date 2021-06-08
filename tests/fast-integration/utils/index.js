@@ -832,6 +832,10 @@ async function patchApplicationGateway(name, ns) {
   ).catch((err) => {
     throw new Error(`Timeout: ${name} is not ready`);
   });
+  if (deployment.body.spec.template.spec.containers[0].args.includes('--skipVerify=true')) {
+    debug('Application Gateway already patched');
+    return deployment;
+  }
 
   const skipVerifyIndex = deployment.body.spec.template.spec.containers[0].args.findIndex(
       arg => arg.toString().includes('--skipVerify')
@@ -839,8 +843,10 @@ async function patchApplicationGateway(name, ns) {
   expect(skipVerifyIndex).to.not.equal(-1);
 
   let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
-  const appGatewayRSs = replicaSets.body.items.filter(rs => rs.metadata.labels["app"] === name)
-  await waitForReplicaSet(appGatewayRSs[0].metadata.name, ns);
+  const appGatewayRSsNames = replicaSets.body.items
+      .filter(rs => rs.metadata.labels["app"] === name)
+      .map(r => r.metadata.name);
+  expect(appGatewayRSsNames.length).to.not.equal(0);
 
   const patch = [
     {
@@ -875,9 +881,10 @@ async function patchApplicationGateway(name, ns) {
   // Check if the new, patched pods are being created.
   // It's currently no k8s-js-native way to check if the new pods of
   // the deployment are running and the old ones are being terminated.
-  replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
+  replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
   const patchedAppGatewayRSs = replicaSets.body.items.filter(
-      rs => rs.metadata.labels["app"] === name && rs.metadata.name !== appGatewayRSs[0].metadata.name)
+      rs => rs.metadata.labels["app"] === name && !appGatewayRSsNames.includes(rs.metadata.name));
+  expect(patchedAppGatewayRSs.length).to.not.equal(0);
   await waitForReplicaSet(patchedAppGatewayRSs[0].metadata.name, ns, 120 * 1000);
 
   return patchedDeployment;
