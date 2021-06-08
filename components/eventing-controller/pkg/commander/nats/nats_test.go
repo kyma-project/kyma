@@ -106,7 +106,7 @@ func TestCleanup(t *testing.T) {
 		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
 	// Send an event
-	err = handlers.SendEventToNats(natsCommander.backend, data)
+	err = handlers.SendEventToNATS(natsCommander.backend, data)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestCleanup(t *testing.T) {
 
 	// Test NATS subscriptions are gone
 	// Send again an event and check subscriber, check subscriober should fail after 5 retries
-	err = handlers.SendEventToNats(natsCommander.backend, data)
+	err = handlers.SendEventToNATS(natsCommander.backend, data)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}

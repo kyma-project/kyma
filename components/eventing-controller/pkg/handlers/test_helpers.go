@@ -7,7 +7,7 @@ import (
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func SendEventToNats(natsClient *Nats, data string) error {
+func SendEventToNATS(natsClient *Nats, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
 	eventType := eventingtesting.EventType
@@ -16,7 +16,7 @@ func SendEventToNats(natsClient *Nats, data string) error {
 	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
-func SendEventToBeb(data string) error {
+func SendEventToBEB(data string) error {
 
 	return nil
 }
