@@ -113,7 +113,7 @@ async function sendEventAndCheckResponse() {
             "event-type": "order.created",
             "event-type-version": "v1",
             "event-time": "2020-09-28T14:47:16.491Z",
-            data: { orderCode: "567" },
+            "data": { "orderCode": "567" },
             "event-tracing": true,
           },
           {
