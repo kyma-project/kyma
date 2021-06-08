@@ -4,9 +4,11 @@ const {
     getEnvOrThrow,
 } = require("../utils");
 const {
-  OAuthCredentials
+  OAuthCredentials,
+  OAuthToken,
 } = require("../lib/oauth");
 
+const SCOPES = ["broker:write", "cld:read"];
 const KYMA_SERVICE_ID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
 
 class KEBConfig {
@@ -36,52 +38,18 @@ class KEBConfig {
 
 class KEBClient {
   constructor(config) {
+    this.token = new OAuthToken(
+      `https://oauth2.${config.host}/oauth2/token`, config.credentials);
     this.host = config.host;
-    this.credentials = config.credentials;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
     this.userID = config.userID;
     this.planID = config.planID
-    this.serviceID = KYMA_SERVICE_ID;
     this.region = config.region;
-
-    this._token = undefined;
-  }
-
-  async getToken() {
-    if (!this._token || this._token.expires_at < +new Date()) {
-      const url = `https://oauth2.${this.host}/oauth2/token`;
-      const scopes = ["broker:write", "cld:read"];
-      const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
-      const params = {
-        auth: {
-          username: this.credentials.clientID,
-          password: this.credentials.clientSecret,
-        },
-      };
-
-      try {
-        const resp = await axios.post(url, body, params);
-
-        this._token = resp.data;
-        this._token.expires_at = (+new Date() + this._token.expires_in * 1000);
-      } catch (err) {
-        const msg = "Error when requesting bearer token from KCP";
-        if (err.response) {
-          throw new Error(
-            `${msg}: ${err.response.status} ${err.response.statusText}`
-          );
-        } else {
-          throw new Error(`${msg}: ${err.toString()}`);
-        }
-      }
-    }
-
-    return this._token.access_token;
   }
 
   async buildRequest(payload, endpoint, verb) {
-    const token = await this.getToken();
+    const token = await this.token.getToken();
     const region = this.getRegion();
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
@@ -102,7 +70,6 @@ class KEBClient {
   async callKEB(payload, endpoint, verb) {
     const config = await this.buildRequest(payload, endpoint, verb);
 
-    const msg = "Error calling KEB";
     try {
       const resp = await axios.request(config);
       if (resp.data.errors) {
@@ -112,6 +79,7 @@ class KEBClient {
       return resp.data;
     } catch (err) {
       debug(err);
+      const msg = "Error calling KEB";
       if (err.response) {
         throw new Error(
           `${msg}: ${err.response.status} ${err.response.statusText}`
@@ -124,7 +92,7 @@ class KEBClient {
 
   async provisionSKR(name, instanceID) {
     const payload = {
-      service_id: this.serviceID,
+      service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
       context: {
         globalaccount_id: this.globalAccountID,
@@ -154,7 +122,7 @@ class KEBClient {
   }
 
   async deprovisionSKR(instanceID) {
-    const endpoint = `service_instances/${instanceID}?service_id=${this.serviceID}&plan_id=${this.planID}`;
+    const endpoint = `service_instances/${instanceID}?service_id=${KYMA_SERVICE_ID}&plan_id=${this.planID}`;
     try {
       return await this.callKEB(null, endpoint, "delete");
     } catch (err) {
