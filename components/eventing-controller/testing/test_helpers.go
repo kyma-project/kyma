@@ -349,6 +349,7 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 	}
 }
 
+// ToSubscription converts an unstructured subscription into a typed one
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
 	subscription := new(eventingv1alpha1.Subscription)
 	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
@@ -358,6 +359,7 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
+// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
 func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
 	unstructured := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
@@ -368,6 +370,7 @@ func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) 
 	return unstructured, nil
 }
 
+// SetupSchemeOrDie add a scheme to eventing API schemes
 func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
@@ -380,6 +383,7 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	return scheme, nil
 }
 
+// SubscriptionGroupVersionResource returns the GVR of a subscription
 func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
@@ -388,6 +392,7 @@ func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
+// NewFakeSubscriptionClient returns a fake dynamic subscription client
 func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
 	scheme, err := SetupSchemeOrDie()
 	if err != nil {
