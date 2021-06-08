@@ -6,7 +6,7 @@ You can simply use the default Kyma installation, or modify it as it fits your p
 
 ## Default installation
 
-You can simply use the `deploy` command without any flags, and Kyma provides a default domain. 
+If you use the `deploy` command without any flags, Kyma provides a default domain. 
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
   ```
