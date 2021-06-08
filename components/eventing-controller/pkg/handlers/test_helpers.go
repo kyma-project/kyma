@@ -16,11 +16,6 @@ func SendEventToNATS(natsClient *Nats, data string) error {
 	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 }
 
-func SendEventToBEB(data string) error {
-
-	return nil
-}
-
 func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {
 	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
 	return jsonCE

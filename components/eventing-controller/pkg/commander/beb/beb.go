@@ -115,6 +115,7 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	if bebBackend, ok = backend.(*handlers.Beb); !ok {
 		bebBackendErr = errors.New("failed to convert backend to handlers.Beb")
 		logger.Error(bebBackendErr, "no BEB backend exists")
+		return bebBackendErr
 	}
 
 	// Fetch all subscriptions.

@@ -4,6 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -341,4 +347,53 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 		},
 		Status: appsv1.DeploymentStatus{},
 	}
+}
+
+func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
+	subscription := new(eventingv1alpha1.Subscription)
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	if err != nil {
+		return nil, err
+	}
+	return subscription, nil
+}
+
+func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+	unstructured := &unstructured.Unstructured{}
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, err
+	}
+	unstructured.Object = unstructuredObj
+	return unstructured, nil
+}
+
+func SetupSchemeOrDie() (*runtime.Scheme, error) {
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+	return scheme, nil
+}
+
+func SubscriptionGroupVersionResource() schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Resource: "subscriptions",
+	}
+}
+
+func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
+	scheme, err := SetupSchemeOrDie()
+	if err != nil {
+		return nil, err
+	}
+
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
+	return dynamicClient, nil
 }
