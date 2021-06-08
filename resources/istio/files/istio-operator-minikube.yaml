@@ -261,7 +261,6 @@ spec:
         excludeIPRanges: ""
         excludeInboundPorts: ""
         excludeOutboundPorts: ""
-        holdApplicationUntilProxyStarts: true
         image: proxyv2
         includeIPRanges: '*'
         logLevel: warning
