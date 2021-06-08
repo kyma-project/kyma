@@ -858,7 +858,7 @@ async function patchApplicationGateway(name, ns) {
   )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
+  await sleep(120 * 1000);
   await waitForDeployment(name, ns);
 
   return patchedDeployment;
