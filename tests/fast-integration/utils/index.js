@@ -417,6 +417,23 @@ function waitForServiceBindingUsage(
   );
 }
 
+function waitForReplicaSet(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+      `/apis/apps/v1/namespaces/${namespace}/replicasets`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+            watchObj.object.metadata.name === name &&
+            watchObj.object.status &&
+            watchObj.object.status.readyReplicas > 0 &&
+            watchObj.object.status.availableReplicas > 0
+        );
+      },
+      timeout,
+      `Waiting for replica set ${name} timeout (${timeout} ms)`
+  );
+}
+
 function waitForDeployment(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
@@ -821,6 +838,10 @@ async function patchApplicationGateway(name, ns) {
   );
   expect(skipVerifyIndex).to.not.equal(-1);
 
+  let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
+  const appGatewayRSs = replicaSets.body.items.filter(rs => rs.metadata.labels["app"] === name)
+  await waitForReplicaSet(appGatewayRSs[0].metadata.name, ns);
+
   const patch = [
     {
       op: "replace",
@@ -860,6 +881,11 @@ async function patchApplicationGateway(name, ns) {
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(120 * 1000);
   await waitForDeployment(name, ns);
+
+  replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
+  const patchedAppGatewayRSs = replicaSets.body.items.filter(
+      rs => rs.metadata.labels["app"] === name && rs.metadata.name !== appGatewayRSs[0].metadata.name)
+  await waitForReplicaSet(patchedAppGatewayRSs[0].metadata.name, ns);
 
   return patchedDeployment;
 }
