@@ -8,7 +8,7 @@ global:
 deployment:
   image:
     repository: "eu.gcr.io/kyma-project/busola-migrator"
-    tag: "74499dcb"
+    tag: "PR-11414"
     pullPolicy: IfNotPresent
   env:
     busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
