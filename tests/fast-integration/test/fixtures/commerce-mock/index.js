@@ -102,18 +102,12 @@ async function checkAppGatewayResponse() {
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
-  console.log(`DEBUG checkAppGatewayResponse vs: ${vs}`);
-  console.dir(vs);
-
   let res = await retryPromise(
     () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
     45,
     2000
   ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
 
-  // TODO: Delete it later
-  console.log(`DEBUG checkAppGatewayResponse res: ${res}`);
-  console.dir(res);
   expect(res.data).to.have.nested.property(
     "order.totalPriceWithTax.value",
     100

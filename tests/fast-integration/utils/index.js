@@ -852,16 +852,6 @@ async function patchApplicationGateway(name, ns) {
   const options = {
     headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
   };
-  // await k8sDynamicApi
-  //   .requestPromise({
-  //     url:
-  //       k8sDynamicApi.basePath +
-  //       deployment.body.metadata.selfLink,
-  //     method: "PATCH",
-  //     body: patch,
-  //     json: true,
-  //     headers: options.headers,
-  //   });
   await k8sAppsApi.patchNamespacedDeployment(
       name,
       ns,
@@ -879,13 +869,16 @@ async function patchApplicationGateway(name, ns) {
   )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(120 * 1000);
+  await sleep(1000);
   await waitForDeployment(name, ns);
 
+  // Check if the new, patched pods are being created.
+  // It's currently no k8s-js-native way to check if the new pods of
+  // the deployment are running and the old ones are being terminated.
   replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
   const patchedAppGatewayRSs = replicaSets.body.items.filter(
       rs => rs.metadata.labels["app"] === name && rs.metadata.name !== appGatewayRSs[0].metadata.name)
-  await waitForReplicaSet(patchedAppGatewayRSs[0].metadata.name, ns);
+  await waitForReplicaSet(patchedAppGatewayRSs[0].metadata.name, ns, 120 * 1000);
 
   return patchedDeployment;
 }

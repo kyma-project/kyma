@@ -46,7 +46,7 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
     });
 
     it("CommerceMock test fixture should be ready", async function () {
-        await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).then(console.log("DEBUG CommerceMock works")).catch((err) => {
+        await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).catch((err) => {
             console.dir(err); // first error is logged
             return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway);
         });
@@ -96,8 +96,7 @@ describe("Kyma Application Connectivity 2.0 tests", function () {
         printRestartReport(initialRestarts, afterTestRestarts);
     });
 
-    // TODO: Uncomment it later
-    // it("Test namespaces should be deleted", async function () {
-    //     await cleanMockTestFixture("mocks", testNamespace, false);
-    // });
+    it("Test namespaces should be deleted", async function () {
+        await cleanMockTestFixture("mocks", testNamespace, false);
+    });
 });
