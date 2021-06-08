@@ -30,31 +30,40 @@ make deploy-local-dry-run
 
 This section explains how to use the Eventing Controller. It expects the following environment variables:
 
-| Environment Variable          | Description                                                                     |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| **For both**                  |                                                                                 |
-| `APP_LOG_FORMAT`              | The format of the Application logs.                                             |
-| `APP_LOG_LEVEL`               | The level of the Application logs.                                              |
-| `BACKEND_CR_NAMESPACE`        | The namespace of the Backend Resource (CR).                                     |
-| `BACKEND_CR_NAME`             | The name of the Backend Resource (CR).                                          |
-| `PUBLISHER_IMAGE`             | The image of the Event Publisher Proxy.                                         |
-| `PUBLISHER_IMAGE_PULL_POLICY` | The pull-policy of the Event Publisher Proxy.                                   |
-| `PUBLISHER_PORT_NUM`          | The port number of the Event Publisher Proxy itself.                            |
-| `PUBLISHER_METRICS_PORT_NUM`  | The port number of the Event Publisher Proxy metrics.                           |
-| `PUBLISHER_SERVICE_ACCOUNT`   | The service account of the Event Publisher Proxy.                               |
-| `PUBLISHER_REPLICAS`          | The number of replicas of the Event Publisher Proxy.                            |
-| `PUBLISHER_REQUESTS_CPU`      | The CPU requests of the Event Publisher Proxy.                                  |
-| `PUBLISHER_REQUESTS_MEMORY`   | The memory requests of the Event Publish Proxy.                                 |
-| `PUBLISHER_LIMITS_CPU`        | The CPU limits of the Event Publisher Proxy.                                    |
-| `PUBLISHER_LIMITS_MEMORY`     | The memory limits of the Event Publisher Proxy.                                 |
-| **For NATS**                  |                                                                                 |
-| `NATS_URL`                    | The URL for the NATS server.                                                    |
-| **For BEB**                   |                                                                                 |
-| `TOKEN_ENDPOINT`              | The Authentication Server Endpoint to provide Access Tokens.                    |
-| `WEBHOOK_CLIENT_ID`           | The Client ID used by webhooks to acquire Access Tokens from Kyma.              |
-| `WEBHOOK_CLIENT_SECRET`       | The Client Secret used by webhooks to acquire Access Tokens from Kyma.          |
-| `WEBHOOK_TOKEN_ENDPOINT`      | The Kyma public endpoint to provide Access Tokens.                              |
-| `DOMAIN`                      | The Kyma cluster public domain.                                                 |
+| Environment Variable          | Description                                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| **For both**                  |                                                                                     |
+| `APP_LOG_FORMAT`              | The format of the Application logs.                                                 |
+| `APP_LOG_LEVEL`               | The level of the Application logs.                                                  |
+| `BACKEND_CR_NAMESPACE`        | The namespace of the Backend Resource (CR).                                         |
+| `BACKEND_CR_NAME`             | The name of the Backend Resource (CR).                                              |
+| `PUBLISHER_IMAGE`             | The image of the Event Publisher Proxy.                                             |
+| `PUBLISHER_IMAGE_PULL_POLICY` | The pull-policy of the Event Publisher Proxy.                                       |
+| `PUBLISHER_PORT_NUM`          | The port number of the Event Publisher Proxy itself.                                |
+| `PUBLISHER_METRICS_PORT_NUM`  | The port number of the Event Publisher Proxy metrics.                               |
+| `PUBLISHER_SERVICE_ACCOUNT`   | The service account of the Event Publisher Proxy.                                   |
+| `PUBLISHER_REPLICAS`          | The number of replicas of the Event Publisher Proxy.                                |
+| `PUBLISHER_REQUESTS_CPU`      | The CPU requests of the Event Publisher Proxy.                                      |
+| `PUBLISHER_REQUESTS_MEMORY`   | The memory requests of the Event Publish Proxy.                                     |
+| `PUBLISHER_LIMITS_CPU`        | The CPU limits of the Event Publisher Proxy.                                        |
+| `PUBLISHER_LIMITS_MEMORY`     | The memory limits of the Event Publisher Proxy.                                     |
+| **For NATS**                  |                                                                                     |
+| `NATS_URL`                    | The URL for the NATS server.                                                        |
+| `EVENT_TYPE_PREFIX`           | The Event Type Prefix for the NATS backend.                                         |
+| `MAX_IDLE_CONNS`              | The maximum number of idle connecttions for the HTTP transport of the NATS backend. |
+| `MAX_CONNS_PER_HOST`          | The maximum connections per host for the HTTP transport of the NATS backend.        |
+| `MAX_IDLE_CONNS_PER_HOST`     | The maximum idle connections per host for the HTTP transport of the NATS backend.   |
+| `IDLE_CONN_TIMEOUT`           | The idle timeout duration for the HTTP transport of the NATS backend.               |
+| **For BEB**                   |                                                                                     |
+| `TOKEN_ENDPOINT`              | The Authentication Server Endpoint to provide Access Tokens.                        |
+| `WEBHOOK_ACTIVATION_TIMEOUT`  | The timeout duration used for webhook activation to acquire Access Tokens for Kyma. |
+| `WEBHOOK_CLIENT_ID`           | The Client ID used by webhooks to acquire Access Tokens from Kyma.                  |
+| `WEBHOOK_CLIENT_SECRET`       | The Client Secret used by webhooks to acquire Access Tokens from Kyma.              |
+| `WEBHOOK_TOKEN_ENDPOINT`      | The Kyma public endpoint to provide Access Tokens.                                  |
+| `EXEMPT_HANDSHAKE`            | The exemption handshake switch of the subscription protocol settings.               |
+| `QOS`                         | The quality of service setting of the subscription protocol settings.               |
+| `CONTENT_MODE`                | The conten mode of the subscription protocol settings.                              |
+| `DOMAIN`                      | The Kyma cluster public domain.                                                     |
 
 The additional command line arguments are:
 
