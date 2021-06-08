@@ -36,7 +36,7 @@ publisherProxy:
   image:
     # name is the name of the container image for the eventing-publisher-proxy
     name: "event-publisher-proxy"
-    tag: "c06eb4fc"
+    tag: "PR-11430"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
