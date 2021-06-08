@@ -97,7 +97,6 @@ func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
 	cst2 := d2.Spec.Template
 
 	if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
-
 		return false
 	}
 
@@ -154,13 +153,18 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		return false
 	}
 	for i := range ps1 {
-		p1, p2 := &ps1[i], &ps2[i]
-
-		if p1.Name != p2.Name ||
-			p1.ContainerPort != p2.ContainerPort ||
-			realProto(p1.Protocol) != realProto(p2.Protocol) {
-
-			return false
+		isFound := false
+		for j := range ps2 {
+			p1, p2 := &ps1[i], &ps2[j]
+			if p1.Name == p2.Name &&
+				p1.ContainerPort == p2.ContainerPort &&
+				realProto(p1.Protocol) == realProto(p2.Protocol) {
+				isFound = true
+				break
+			}
+		}
+		if !isFound {
+			return isFound
 		}
 	}
 
@@ -179,16 +183,19 @@ func envEqual(e1, e2 []corev1.EnvVar) bool {
 	if len(e1) != len(e2) {
 		return false
 	}
-EV1:
+	isFound := false
 	for _, ev1 := range e1 {
 		for _, ev2 := range e2 {
 			if reflect.DeepEqual(ev1, ev2) {
-				continue EV1
+				isFound = true
+				break
 			}
 		}
-		return false
+		if !isFound {
+			break
+		}
 	}
-	return true
+	return isFound
 }
 
 // probeEqual asserts the equality of two Probe objects.
@@ -204,7 +211,6 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 	isInitialDelaySecondsEqual := p1.InitialDelaySeconds != p2.InitialDelaySeconds
 	isTimeoutSecondsEqual := p1.TimeoutSeconds != p2.TimeoutSeconds && p1.TimeoutSeconds != 0 && p2.TimeoutSeconds != 0
 	isPeriodSecondsEqual := p1.PeriodSeconds != p2.PeriodSeconds && p1.PeriodSeconds != 0 && p2.PeriodSeconds != 0
-	// Knative sets a default when that value is 0
 	isSuccessThresholdEqual := p1.SuccessThreshold != p2.SuccessThreshold && p1.SuccessThreshold != 0 && p2.SuccessThreshold != 0
 	isFailureThresholdEqual := p1.FailureThreshold != p2.FailureThreshold && p1.FailureThreshold != 0 && p2.FailureThreshold != 0
 
@@ -262,10 +268,6 @@ func secretEqual(b1, b2 *corev1.Secret) bool {
 
 	if b1 == b2 {
 		return true
-	}
-
-	if b1 == nil || b2 == nil {
-		return false
 	}
 
 	if !reflect.DeepEqual(b1.Labels, b2.Labels) {
