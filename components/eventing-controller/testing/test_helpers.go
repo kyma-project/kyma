@@ -4,6 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -135,6 +141,17 @@ func exemptHandshake(val bool) *bool {
 func qos(qos string) *string {
 	q := qos
 	return &q
+}
+
+func WithFakeSubscriptionStatus(s *eventingv1alpha1.Subscription) {
+	s.Status.Conditions = []eventingv1alpha1.Condition{
+		{
+			Type:    "foo",
+			Status:  "foo",
+			Reason:  "foo-reason",
+			Message: "foo-message",
+		},
+	}
 }
 
 func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
@@ -330,4 +347,58 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 		},
 		Status: appsv1.DeploymentStatus{},
 	}
+}
+
+// ToSubscription converts an unstructured subscription into a typed one
+func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
+	subscription := new(eventingv1alpha1.Subscription)
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	if err != nil {
+		return nil, err
+	}
+	return subscription, nil
+}
+
+// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+	unstructured := &unstructured.Unstructured{}
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, err
+	}
+	unstructured.Object = unstructuredObj
+	return unstructured, nil
+}
+
+// SetupSchemeOrDie add a scheme to eventing API schemes
+func SetupSchemeOrDie() (*runtime.Scheme, error) {
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+	return scheme, nil
+}
+
+// SubscriptionGroupVersionResource returns the GVR of a subscription
+func SubscriptionGroupVersionResource() schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Resource: "subscriptions",
+	}
+}
+
+// NewFakeSubscriptionClient returns a fake dynamic subscription client
+func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
+	scheme, err := SetupSchemeOrDie()
+	if err != nil {
+		return nil, err
+	}
+
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
+	return dynamicClient, nil
 }
