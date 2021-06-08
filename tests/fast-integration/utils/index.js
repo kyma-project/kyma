@@ -423,10 +423,10 @@ function waitForDeployment(name, namespace = "default", timeout = 90000) {
     {},
     (_type, _apiObj, watchObj) => {
       return (
-        watchObj.object.metadata.name == name &&
+        watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-          (c) => c.type == "Available" && c.status == "True"
+          (c) => c.type === "Available" && c.status === "True"
         )
       );
     },
@@ -848,8 +848,8 @@ async function patchApplicationGateway(name, ns) {
   )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
-  await waitForDeployment(name, ns);
+  await sleep(3000);
+  await waitForDeployment(name, ns, 120 * 1000);
 
   return patchedDeployment;
 }
