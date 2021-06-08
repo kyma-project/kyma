@@ -831,16 +831,26 @@ async function patchApplicationGateway(name, ns) {
   const options = {
     headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
   };
-  await k8sDynamicApi
-    .requestPromise({
-      url:
-        k8sDynamicApi.basePath +
-        deployment.body.metadata.selfLink,
-      method: "PATCH",
-      body: patch,
-      json: true,
-      headers: options.headers,
-    });
+  // await k8sDynamicApi
+  //   .requestPromise({
+  //     url:
+  //       k8sDynamicApi.basePath +
+  //       deployment.body.metadata.selfLink,
+  //     method: "PATCH",
+  //     body: patch,
+  //     json: true,
+  //     headers: options.headers,
+  //   });
+  await k8sCoreV1Api.patchNamespacedDeployment(
+      name,
+      ns,
+      patch,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      options
+  );
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
   expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
@@ -848,8 +858,8 @@ async function patchApplicationGateway(name, ns) {
   )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(3000);
-  await waitForDeployment(name, ns, 120 * 1000);
+  await sleep(1000);
+  await waitForDeployment(name, ns);
 
   return patchedDeployment;
 }
