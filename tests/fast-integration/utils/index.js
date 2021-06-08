@@ -841,7 +841,7 @@ async function patchApplicationGateway(name, ns) {
   //     json: true,
   //     headers: options.headers,
   //   });
-  await k8sCoreV1Api.patchNamespacedDeployment(
+  await k8sAppsApi.patchNamespacedDeployment(
       name,
       ns,
       patch,
