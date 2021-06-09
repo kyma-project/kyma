@@ -11,7 +11,7 @@ If the Installer does not respond as expected, check the installation status usi
 scripts/is-installed.sh --verbose
 ```
 
-## Installation successful, component not working
+## Component doesn't work after successful installation
 
 If the installation is successful but a component does not behave in the expected way, inspect Helm releases for more details on all of the installed components.
 
