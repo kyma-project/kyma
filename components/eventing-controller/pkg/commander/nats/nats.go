@@ -91,25 +91,26 @@ func (c *Commander) Start() error {
 func (c *Commander) Stop() error {
 	c.cancel()
 
-	return c.cleanup()
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	return cleanup(c.backend, dynamicClient)
 }
 
 // clean removes all NATS artifacts.
-func (c *Commander) cleanup() error {
+func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
 	var natsBackend *handlers.Nats
 	var ok bool
 	isCleanupSuccessful := true
-	if natsBackend, ok = c.backend.(*handlers.Nats); !ok {
+	if natsBackend, ok = backend.(*handlers.Nats); !ok {
 		isCleanupSuccessful = false
 		natsBackendErr := errors.New("failed to convert backend to handlers.Nats")
 		logger.Error(natsBackendErr, "no NATS backend exists")
 	}
 	// Fetch all subscriptions.
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+
 	if err != nil {
 		return errors.Wrapf(err, "failed to list subscriptions")
 	}

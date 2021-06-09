@@ -5,7 +5,6 @@ import (
 	"log"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
@@ -15,10 +14,7 @@ import (
 
 func NewApplicationListerOrDie(ctx context.Context, app *applicationv1alpha1.Application) *application.Lister {
 	scheme := setupSchemeOrDie()
-	unstructuredMap := mapToUnstructuredOrDie(app)
-	appUnstructured := &unstructured.Unstructured{Object: unstructuredMap}
-	appUnstructured.SetGroupVersionKind(application.GroupVersionKind())
-	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, appUnstructured)
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, app)
 	return application.NewLister(ctx, dynamicClient)
 }
 
