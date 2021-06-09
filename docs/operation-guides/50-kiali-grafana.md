@@ -46,7 +46,7 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
 
 ## Expose Kiali and Grafana securely
 
-To make Kiali and Grafana permanently accessible, expose the services securely using [oauth2_proxy](https://oauth2-proxy.github.io/).
+To make Kiali and Grafana permanently accessible, expose the services securely using [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/).
 
 ### Steps
 
