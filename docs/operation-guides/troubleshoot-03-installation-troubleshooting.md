@@ -15,7 +15,7 @@ scripts/is-installed.sh --verbose
 
 If the installation is successful but a component does not behave in the expected way, inspect Helm releases for more details on all of the installed components.
 
-Run this command to list all of the available Helm releases:
+Run this command to list all available Helm releases:
 
 ```bash
 helm list --all-namespaces --all
