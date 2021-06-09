@@ -15,4 +15,4 @@ This may happen if PersistentVolumeClaim and VolumeSnapshot specifications are i
 
 ## Remedy
 
-Wait until the PersistentVolumeClaim is bound to the PersistentVolume and then create the snapshot.
+Wait until the PersistentVolumeClaim is bound to the PersistentVolume and create the snapshot afterward.
