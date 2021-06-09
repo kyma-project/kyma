@@ -17,4 +17,4 @@ npm run test-skr
 ```
 
 ## Environment variables
-`AL_SERVICE_KEY` needs to be a cloud foundry service key. With the info about `UAA (User Account and Authentication)`. For more info in service key refer [here](https://docs.cloudfoundry.org/devguide/services/service-keys.html)
+`AL_SERVICE_KEY` must be a cloud foundry service key with the info about `UAA (User Account and Authentication)`. Learn more about [Managing Service Keys in Cloud Foundry](https://docs.cloudfoundry.org/devguide/services/service-keys.html).
