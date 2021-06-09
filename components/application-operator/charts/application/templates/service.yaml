@@ -22,6 +22,7 @@ spec:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
 {{- end }}
+{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
 ---
 apiVersion: v1
 kind: Service
@@ -45,3 +46,4 @@ spec:
   selector:
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}
+{{- end }}

@@ -102,6 +102,7 @@ data:
           "timeRegions": [],
           "timeShift": null,
           "title": "Connectivity Validator -> Event Publisher",
+          "description": "This graph includes traffic from connectivity validator to event publisher proxy",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -201,6 +202,7 @@ data:
           "timeRegions": [],
           "timeShift": null,
           "title": "Event Publisher -> Messaging Server",
+          "description": "This graph includes traffic from event publisher proxy to eventing backend servers",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -298,7 +300,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Dispatcher -> Subscribers",
+          "title": "Event Dispatcher -> Subscribers (for NATS based eventing only)",
+          "description": "This graph includes traffic from eventing controller(acts as dispatcher as well) to subscribers and works only for eventing based on NATS as backend",
           "tooltip": {
             "shared": true,
             "sort": 0,

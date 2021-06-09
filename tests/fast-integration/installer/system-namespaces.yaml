@@ -11,17 +11,3 @@ metadata:
   labels:
     istio-injection: enabled
   name: kyma-integration
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    istio-injection: enabled
-  name: knative-eventing
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    istio-injection: enabled
-  name: natss

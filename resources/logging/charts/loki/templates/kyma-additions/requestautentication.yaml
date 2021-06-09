@@ -1,3 +1,4 @@
+{{- if .Values.virtualservice.enabled }}
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
 metadata:
@@ -14,3 +15,4 @@ spec:
   jwtRules:	
   - issuer: https://dex.{{ .Values.global.ingress.domainName }}
     jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+{{- end }}

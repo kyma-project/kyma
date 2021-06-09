@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -74,12 +75,12 @@ func (f *serviceBindingUsageService) Create(namespace string, sb *api.ServiceBin
 		return nil, err
 	}
 
-	_, err = f.dynamicClient.Namespace(namespace).Create(obj, v1.CreateOptions{})
+	_, err = f.dynamicClient.Namespace(namespace).Create(context.Background(), obj, v1.CreateOptions{})
 	return sb, err
 }
 
 func (f *serviceBindingUsageService) Delete(namespace string, name string) error {
-	return f.dynamicClient.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
+	return f.dynamicClient.Namespace(namespace).Delete(context.Background(), name, v1.DeleteOptions{})
 }
 
 func (f *serviceBindingUsageService) Find(namespace string, name string) (*api.ServiceBindingUsage, error) {

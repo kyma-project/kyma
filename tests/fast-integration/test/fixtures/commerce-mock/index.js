@@ -27,7 +27,9 @@ const {
   debug,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway
+  patchApplicationGateway,
+  eventingSubscription,
+  k8sDelete
 } = require("../../../utils");
 
 const {
@@ -80,36 +82,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
 }
 
 
-function eventingSubscription(eventType, sink, fnName, ns) {
-  return {
-    apiVersion: "eventing.kyma-project.io/v1alpha1",
-    kind: "Subscription",
-    metadata: {
-      name: `function-${fnName}`,
-      namespace: ns,
-    },
-    spec: {
-      filter: {
-        dialect: "beb",
-        filters: [{
-          eventSource: {
-            property: "source", type: "exact", value: "",
-          },
-          eventType: {
-            property: "type",type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          } 
-        }]
-      },
-      protocol: "BEB",
-      protocolsettings: {
-        exemptHandshake: true,
-        qos: "AT-LEAST-ONCE",
-      },
-      sink: sink/*http://lastorder.test.svc.cluster.local*/
-    }
-  }
-}
-
 async function checkAppGatewayResponse() {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
@@ -141,7 +113,7 @@ async function sendEventAndCheckResponse() {
             "event-type": "order.created",
             "event-type-version": "v1",
             "event-time": "2020-09-28T14:47:16.491Z",
-            data: { orderCode: "567" },
+            "data": { "orderCode": "567" },
             "event-tracing": true,
           },
           {
@@ -381,7 +353,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
       `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      "lastorder",
+      "order-created",
       targetNamespace)
   ]);
   await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
@@ -428,10 +400,37 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   });
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
+
+async function deleteMockTestFixture(targetNamespace) {
+
+  const serviceBindingUsage = {
+    apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
+    kind: "ServiceBindingUsage",
+    metadata: { name: "commerce-lastorder-sbu" },
+    spec: {
+      serviceBindingRef: { name: "commerce-binding" },
+      usedBy: { kind: "serverless-function", name: "lastorder" },
+    },
+  };
+  await k8sDelete([serviceBindingUsage], targetNamespace);
+  const serviceBinding = {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceBinding",
+    metadata: { name: "commerce-binding" },
+    spec: {
+      instanceRef: { name: "commerce" },
+    },
+  };
+  await k8sDelete([serviceBinding], targetNamespace, false);
+  await k8sDelete(lastorderObjs)
+  await k8sDelete(commerceObjs)
+  await k8sDelete(applicationObjs)
+}
 module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
   checkAppGatewayResponse,
   cleanMockTestFixture,
+  deleteMockTestFixture,
 };

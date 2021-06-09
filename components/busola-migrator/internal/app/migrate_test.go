@@ -6,12 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/icza/session"
-
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/app/automock"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/model"
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/uaa"
 
+	"github.com/icza/session"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -106,7 +105,7 @@ func TestHandleXSUAACallback(t *testing.T) {
 		{
 			Name:                   "Success",
 			ExpectedResponseStatus: http.StatusFound,
-			ExpectedLocation:       fmt.Sprintf("https://console.%s/info/success.html", testDomain),
+			ExpectedLocation:       fmt.Sprintf("https://console.%s/success", testDomain),
 			FixUAAClient: func() *automock.UAAClient {
 				mockUAAClient := &automock.UAAClient{}
 				mockUAAClient.On("GetToken", testTokenEndpoint, testQueryCode).Return(map[string]interface{}{

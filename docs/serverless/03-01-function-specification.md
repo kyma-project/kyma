@@ -3,9 +3,7 @@ title: Function's specification
 type: Details
 ---
 
-Serverless in Kyma allows you to create Functions in both Node.js (v10 & v12) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
-
->**CAUTION:** Node.js 10 runtime is deprecated, so use Node.js 12 instead.
+Serverless in Kyma allows you to create Functions in both Node.js (v12 & v14) and Python (v3.8). Although the Function's interface is unified, its specification differs depending on the runtime used to run the Function.
 
 ## Signature
 
@@ -143,7 +141,7 @@ You can use the **event.extensions.request** object to access properties and met
 
 By default, a failing Function simply throws an error to tell the event service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
-Apart from these two default codes, you can define custom responses in both Node.js 10 and Node.js 12 environments using the **event.extensions.response** object.
+Apart from these two default codes, you can define custom responses in both Node.js 12 and Node.js 14 environments using the **event.extensions.response** object.
 
 This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse).
 

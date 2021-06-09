@@ -26,15 +26,38 @@ bebSecret:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 30Mi
+    cpu: 300m
+    memory: 100Mi
   requests:
     cpu: 100m
     memory: 20Mi
 
+publisherProxy:
+  image:
+    # name is the name of the container image for the eventing-publisher-proxy
+    name: "event-publisher-proxy"
+    tag: "PR-11430"
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 32m
+      memory: 64Mi
+
+
 metrics:
   service:
     nameSuffix: "-metrics"
+  config:
+    port: 8080
+    portName: http-metrics
+    nameSuffix: "-metrics"
+    interval: 30s
+
+clusterRoleBindingSuffix: ""
 
 healthProbe:
    port: 8081
@@ -56,5 +79,5 @@ healthProbe:
      successThreshold: 1
      timeoutSeconds: 2
 
-#TODO(sayanh): Remove this as a part of https://github.com/kyma-project/kyma/issues/10317
-clusterRoleBindingSuffix: "-crole-binding"
+eventingBackend:
+  name: eventing-backend

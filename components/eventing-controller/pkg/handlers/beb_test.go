@@ -66,9 +66,18 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 			ID:       "id",
 			Protocol: "BEB",
 			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-				ExemptHandshake: true,
-				Qos:             "AT-LEAST_ONCE",
+				ContentMode: func() *string {
+					cm := eventingv1alpha1.ProtocolSettingsContentModeBinary
+					return &cm
+				}(),
+				ExemptHandshake: func() *bool {
+					eh := true
+					return &eh
+				}(),
+				Qos: func() *string {
+					qos := "AT-LEAST_ONCE"
+					return &qos
+				}(),
 				WebhookAuth: &eventingv1alpha1.WebhookAuth{
 					Type:         "oauth2",
 					GrantType:    "client_credentials",

@@ -14,12 +14,13 @@
     "test-no-install": "mocha --inline-diffs --check-leaks -g Installation --invert --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
-    "test-commerce-mock-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json test/2-commerce-mock-prep.js",
-    "test-commerce-mock-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock-tests.js",
-    "test-commerce-mock-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock-cleanup.js",
     "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
-    "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/"
+    "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
+    "test-monitoring": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./monitoring-test/",
+    "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
+    "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
+    "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -31,8 +32,10 @@
     "@kubernetes/client-node": "0.13.0",
     "adm-zip": "^0.5.3",
     "axios": "^0.21.0",
+    "axios-retry": "^3.1.9",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
+    "moment": "^2.29.1",
     "p-retry": "^4.2.0",
     "uuid": "^8.3.2",
     "yargs": "^16.2.0"

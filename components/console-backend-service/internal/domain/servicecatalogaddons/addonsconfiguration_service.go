@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
@@ -76,7 +77,7 @@ func (s *addonsConfigurationService) AddRepos(name, namespace string, repositori
 			return err
 		}
 
-		_, err = s.addonsCfgClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Namespace(namespace).Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -101,7 +102,7 @@ func (s *addonsConfigurationService) RemoveRepos(name, namespace string, reposTo
 			return err
 		}
 
-		_, err = s.addonsCfgClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Namespace(namespace).Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -130,7 +131,7 @@ func (s *addonsConfigurationService) Create(name, namespace string, repository [
 	if err != nil {
 		return nil, err
 	}
-	_, err = s.addonsCfgClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+	_, err = s.addonsCfgClient.Namespace(namespace).Create(context.Background(), obj, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating %s %s", pretty.AddonsConfiguration, addon.Name)
 	}
@@ -151,7 +152,7 @@ func (s *addonsConfigurationService) Update(name, namespace string, repository [
 		return nil, err
 	}
 
-	_, err = s.addonsCfgClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+	_, err = s.addonsCfgClient.Namespace(namespace).Update(context.Background(), obj, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addon.Name)
 	}
@@ -165,7 +166,7 @@ func (s *addonsConfigurationService) Delete(name, namespace string) (*v1alpha1.A
 		return nil, err
 	}
 
-	if err := s.addonsCfgClient.Namespace(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := s.addonsCfgClient.Namespace(namespace).Delete(context.Background(), name, metav1.DeleteOptions{}); err != nil {
 		return nil, errors.Wrapf(err, "while deleting %s %s", pretty.AddonsConfiguration, addon.Name)
 	}
 
@@ -187,7 +188,7 @@ func (s *addonsConfigurationService) Resync(name, namespace string) (*v1alpha1.A
 			return err
 		}
 
-		_, err = s.addonsCfgClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+		_, err = s.addonsCfgClient.Namespace(namespace).Update(context.Background(), obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "cannot update AddonsConfiguration %s/%s", name, namespace)

@@ -32,9 +32,10 @@ type OIDCConfig struct {
 }
 
 type UAAConfig struct {
-	URL          string
-	ClientID     string
-	ClientSecret string
+	Enabled      bool   `envconfig:"default=true"`
+	URL          string `envconfig:"optional"`
+	ClientID     string `envconfig:"optional"`
+	ClientSecret string `envconfig:"optional"`
 	RedirectURI  string `envconfig:"-"`
 }
 
@@ -51,6 +52,13 @@ func LoadConfig() Config {
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "while processing environment variables"))
+	}
+
+	if cfg.UAA.URL == "" || cfg.UAA.ClientID == "" || cfg.UAA.ClientSecret == "" {
+		cfg.UAA.Enabled = false
+	}
+	if !cfg.UAA.Enabled {
+		log.Println("UAA Migrator functionality disabled.")
 	}
 
 	overrides := getOverrides()

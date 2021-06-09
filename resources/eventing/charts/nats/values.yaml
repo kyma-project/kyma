@@ -8,6 +8,8 @@ nats:
 
 clusterSize: 1
 enableMetrics: false
+# TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
+enableServiceMonitor: false
 
 resources:
   limits:
@@ -18,7 +20,7 @@ resources:
     memory: 16Mi
 
 image:
-  tag: "cd659a72"
+  tag: "8ee92eeb"
   name: "nats-operator"
   pullPolicy: "IfNotPresent"
 

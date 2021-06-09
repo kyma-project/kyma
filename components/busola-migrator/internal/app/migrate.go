@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/icza/session"
 	"github.com/kyma-project/kyma/components/busola-migrator/pkg/rand"
 
+	"github.com/icza/session"
 	"github.com/pkg/errors"
 )
 
@@ -110,5 +110,5 @@ func (a App) HandleXSUAACallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("https://%s/info/success.html", redirectHost), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("https://%s/success", redirectHost), http.StatusFound)
 }

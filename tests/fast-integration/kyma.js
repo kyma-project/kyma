@@ -36,6 +36,9 @@ function installOptions(yargs) {
     'upgrade': {
       describe: 'Upgrade components if already installed'
     },
+    'use-helm-template' : {
+      describe: 'Use helm template | kubectl apply instead of helm upgrade -i'
+    },
     'new-eventing': {
       describe: 'Install new eventing instead of knative'
     },
@@ -52,6 +55,15 @@ function uninstallOptions(yargs) {
     },
     'skip-istio': {
       describe: 'Do not delete istio'
+    },
+    'delete-namespaces': {
+      describe: 'Delete kyma namespaces (kyma-system, kyma-integration)'
+    },
+    'skip-components': {
+      describe: 'Skip components  (comma separated list)'
+    },
+    'components': {
+      describe: 'Install only these components (comma separated list)'
     }
   });
 
@@ -93,6 +105,7 @@ async function install(argv) {
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const newEventing = argv.newEventing;
   const withCompass = argv.withCompass;
+  const useHelmTemplate = argv.useHelmTemplate;
 
   await installer.installKyma({
     resourcesPath: src,
@@ -100,7 +113,8 @@ async function install(argv) {
     skipComponents,
     isUpgrade: !!argv.upgrade,
     newEventing,
-    withCompass
+    withCompass,
+    useHelmTemplate
   });
   console.log('Kyma installed');
 }

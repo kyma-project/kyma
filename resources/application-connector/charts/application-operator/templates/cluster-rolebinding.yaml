@@ -1,5 +1,5 @@
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
   labels:
@@ -76,11 +76,10 @@ rules:
     resourceNames:
     - application-gateway
     - connectivity-validator
-    - event-service
 {{- end }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}
   labels:

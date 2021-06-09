@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/application-broker
 
-go 1.14
+go 1.16
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.6.0 // indirect

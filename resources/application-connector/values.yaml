@@ -4,7 +4,11 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+central_application_connectivity_validator:
+  enabled: &centralApplicationConnectivityValidatorEnabled false
+
 global:
+  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
   isLocalEnv: false
   namespace: kyma-integration
@@ -32,7 +36,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "72b11733"
+    version: "96c3c891"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
@@ -40,7 +44,7 @@ global:
   application_connectivity_validator:
     version: "1683d7cf"
   application_operator:
-    version: "PR-10925"
+    version: "PR-11173"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
@@ -65,6 +69,8 @@ global:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
+  central_application_connectivity_validator:
+    version: "PR-11173"
 
 application_connectivity_certs_setup_job:
   secrets:

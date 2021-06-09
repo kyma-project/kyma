@@ -1,8 +1,11 @@
 const axios = require("axios");
-const { 
+const {
     debug,
     getEnvOrThrow,
 } = require("../utils");
+const {
+  OAuthCredentials
+} = require("../lib/oauth");
 
 const KYMA_SERVICE_ID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
 
@@ -10,35 +13,38 @@ class KEBConfig {
   static fromEnv() {
     return new KEBConfig(
       getEnvOrThrow("KEB_HOST"),
-      getEnvOrThrow("KEB_CLIENT_ID"),
-      getEnvOrThrow("KEB_CLIENT_SECRET"),
+      OAuthCredentials.fromEnv("KEB_CLIENT_ID", "KEB_CLIENT_SECRET"),
       getEnvOrThrow("KEB_GLOBALACCOUNT_ID"),
       getEnvOrThrow("KEB_SUBACCOUNT_ID"),
+      getEnvOrThrow("KEB_USER_ID"),
       getEnvOrThrow("KEB_PLAN_ID"),
+      process.env.KEB_REGION
     );
   }
 
-  constructor(host, clientID, clientSecret, globalAccountID, subaccountID, planID) {
+  constructor(host, credentials, globalAccountID, subaccountID, userID, planID, region) {
     this.host = host;
-    this.clientID = clientID;
-    this.clientSecret = clientSecret;
+    this.credentials = credentials;
     this.globalAccountID = globalAccountID;
     this.subaccountID = subaccountID;
+    this.userID = userID;
     this.planID = planID;
+    this.region = region;
   }
 }
-  
+
 
 class KEBClient {
   constructor(config) {
     this.host = config.host;
-    this.clientID = config.clientID;
-    this.clientSecret = config.clientSecret;
+    this.credentials = config.credentials;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
+    this.userID = config.userID;
     this.planID = config.planID
     this.serviceID = KYMA_SERVICE_ID;
-    
+    this.region = config.region;
+
     this._token = undefined;
   }
 
@@ -49,8 +55,8 @@ class KEBClient {
       const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
       const params = {
         auth: {
-          username: this.clientID,
-          password: this.clientSecret,
+          username: this.credentials.clientID,
+          password: this.credentials.clientSecret,
         },
       };
 
@@ -76,7 +82,8 @@ class KEBClient {
 
   async buildRequest(payload, endpoint, verb) {
     const token = await this.getToken();
-    const url = `https://kyma-env-broker.${this.host}/oauth/v2/${endpoint}`;
+    const region = this.getRegion();
+    const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
       "Authorization": `Bearer ${token}`,
@@ -122,6 +129,7 @@ class KEBClient {
       context: {
         globalaccount_id: this.globalAccountID,
         subaccount_id: this.subaccountID,
+        user_id: this.userID,
       },
       parameters: {
         name: name,
@@ -152,6 +160,13 @@ class KEBClient {
     } catch (err) {
       return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
+  }
+
+  getRegion() {
+    if (this.region && this.region != "") {
+      return `${this.region}/`;
+    }
+    return "";
   }
 }
 

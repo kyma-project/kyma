@@ -14,7 +14,7 @@ The defaulting webhook:
 - Sets default values for CPU and memory requests and limits for a Function.
 - Sets default values for CPU and memory requests and limits for a Kubernetes Job responsible for building the Function's image.
 - Adds the maximum and the minimum number of replicas, if not specified already in the Function CR.
-- Sets the default `nodejs12` runtime unless specified otherwise.
+- Sets the default `nodejs14` runtime unless specified otherwise.
 
    | Parameter       | Default value |
    | ----------------- | ------------- |
@@ -28,7 +28,7 @@ The defaulting webhook:
    | **buildResources.limits.memory**  | `1100Mi`       |
    | **minReplicas**   | `1`           |
    | **maxReplicas**   | `1`           |
-   | **runtime**       | `nodejs12`    |
+   | **runtime**       | `nodejs14`    |
 
 > **NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
 
