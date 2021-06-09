@@ -44,7 +44,7 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
 
 2. To access the respective service's UI, open `http://localhost:20001` (for Kiali) or `http://localhost:3000` (for Grafana) in your browser.
 
-## Expose Kiali and Grafana Securely
+## Expose Kiali and Grafana securely
 
 To make Kiali and Grafana permanently accessible, expose the services securely using [oauth2_proxy](https://oauth2-proxy.github.io/).
 
