@@ -95,7 +95,7 @@ To deploy Kyma with only specific components, run:
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
 
-  If no Namespace is provided, then the default Namespace is used. For example, to install the `testing` component in the default Namespace and the `application-connector` component in the `kyma-integration` Namespace, run:
+  If no Namespace is provided, the `default` Namespace is used. For example, to install the `testing` component in the `default` Namespace and the `application-connector` component in the `kyma-integration` Namespace, run:
   
   ```
   kyma deploy --component testing --component application-connector@kyma-integration
