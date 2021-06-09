@@ -1,8 +1,10 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.4.0
   creationTimestamp: null
   name: subscriptions.eventing.kyma-project.io
 spec:
@@ -14,11 +16,14 @@ spec:
     singular: subscription
   scope: Namespaced
   versions:
-  - name: v1alpha1
-    additionalPrinterColumns:
-      - jsonPath: .status.ready
-        name: Ready
-        type: string
+  - additionalPrinterColumns:
+    - jsonPath: .status.ready
+      name: Ready
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Subscription is the Schema for the subscriptions API
@@ -39,7 +44,7 @@ spec:
             description: SubscriptionSpec defines the desired state of Subscription
             properties:
               filter:
-                description: BebFilters defines the list of BEB filters
+                description: Filter defines the list of filters
                 properties:
                   dialect:
                     type: string
@@ -49,26 +54,32 @@ spec:
                         of two CE filter elements
                       properties:
                         eventSource:
-                          description: Filter defines the CE filter element
+                          description: EventSource defines the source of CE filter
                           properties:
                             property:
+                              description: Property defines the property of the filter
                               type: string
                             type:
+                              description: Type defines the type of the filter
                               type: string
                             value:
+                              description: Value defines the value of the filter
                               type: string
                           required:
                           - property
                           - value
                           type: object
                         eventType:
-                          description: Filter defines the CE filter element
+                          description: EventType defines the type of CE filter
                           properties:
                             property:
+                              description: Property defines the property of the filter
                               type: string
                             type:
+                              description: Type defines the type of the filter
                               type: string
                             value:
+                              description: Value defines the value of the filter
                               type: string
                           required:
                           - property
@@ -86,6 +97,7 @@ spec:
                 description: ID is the unique identifier of Subscription, read-only.
                 type: string
               protocol:
+                description: Protocol defines the CE protocol specification implementation
                 type: string
               protocolsettings:
                 description: ProtocolSettings defines the CE protocol setting specification
@@ -98,8 +110,8 @@ spec:
                   qos:
                     type: string
                   webhookAuth:
-                    description: Webhook defines the Webhook called by an active subscription
-                      in BEB
+                    description: WebhookAuth defines the Webhook called by an active
+                      subscription in BEB
                     properties:
                       clientId:
                         type: string
@@ -123,6 +135,7 @@ spec:
                     type: object
                 type: object
               sink:
+                description: Sink defines endpoint of the subscriber
                 type: string
             required:
             - filter
@@ -132,8 +145,11 @@ spec:
             description: SubscriptionStatus defines the observed state of Subscription
             properties:
               apiRuleName:
+                description: APIRuleName defines the name of the APIRule which is
+                  used by the Subscription
                 type: string
               conditions:
+                description: Conditions defines the status conditions
                 items:
                   properties:
                     lastTransitionTime:
@@ -152,30 +168,51 @@ spec:
                   type: object
                 type: array
               emsSubscriptionStatus:
+                description: EmsSubscriptionStatus defines the status of Subscription
+                  in BEB
                 properties:
                   lastFailedDelivery:
+                    description: LastFailedDelivery defines the timestamp of the last
+                      failed delivery
                     type: string
                   lastFailedDeliveryReason:
+                    description: LastFailedDeliveryReason defines the reason of failed
+                      delivery
                     type: string
                   lastSuccessfulDelivery:
+                    description: LastSuccessfulDelivery defines the timestamp of the
+                      last successful delivery
                     type: string
                   subscriptionStatus:
+                    description: SubscriptionStatus defines the status of the Subscription
                     type: string
                   subscriptionStatusReason:
+                    description: SubscriptionStatusReason defines the reason of the
+                      status
                     type: string
                 type: object
               emshash:
+                description: Emshash defines the hash for the Subscription in BEB
                 format: int64
                 type: integer
               ev2hash:
+                description: Ev2hash defines the hash for the Subscription custom
+                  resource
                 format: int64
                 type: integer
               externalSink:
+                description: ExternalSink defines the webhook URL which is used by
+                  BEB to trigger subscribers
                 type: string
               failedActivation:
+                description: FailedActivation defines the reason if a Subscription
+                  had failed activation in BEB
                 type: string
               ready:
+                description: Ready defines the overall readiness status of a subscription
                 type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

@@ -85,8 +85,16 @@ deploy-nats-local-dry-run: manifests
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+# Generate manifests e.g. CRD, RBAC etc.
+manifests:
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
 # Generate code
-generate-local: controller-gen-local
+generate-local: manifests-local controller-gen-local
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+# Generate code
+generate: manifests
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 verify:: mod-verify
@@ -109,10 +117,18 @@ mod-verify-local:
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
-release: resolve verify build-image push-image
+release: resolve generate verify build-image push-image
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
+
+copy-crds: manifests-local
+	@echo "copying to cluster-essentials"
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
+	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
+	@echo "copying to installation/eventing"
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
+	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary

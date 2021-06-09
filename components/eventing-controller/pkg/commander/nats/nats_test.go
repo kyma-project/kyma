@@ -47,6 +47,8 @@ func TestCleanup(t *testing.T) {
 	natsPort := 4222
 	natsServer := controllertesting.RunNatsServerOnPort(natsPort)
 	natsURL := natsServer.ClientURL()
+	defer controllertesting.ShutDownNATSServer(natsServer)
+
 	envConf := env.NatsConfig{
 		Url:             natsURL,
 		MaxReconnects:   10,
