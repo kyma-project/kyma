@@ -151,8 +151,6 @@ spec:
 </p>
 </details>  
 
-
-
 ## Create a volume snapshot for cloud providers
 
 The following instructions show how to create on-demand volume snapshots for cloud providers. Before you proceed, read the general instructions on [creating volume snapshots](/#tutorials-create-on-demand-volume-snapshots).
@@ -194,12 +192,13 @@ The minimum supported Kubernetes version is 1.14.
   </details>
 <details>
   <summary label="Gardener GCP">
-  Gardener GCP
+  Gardener
   </summary>
 
 ### Prerequisites
 
-As of Kubernetes version 1.18, Gardener GCP uses CSI drivers by default and supports taking volume snapshots out of the box.
+As of Kubernetes version 1.18, Gardener GCP and AWS use CSI drivers by default and supports taking volume snapshots out of the box.
+Gardener Azure does not currently support CSI drivers, that's why you cannot use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
 
 ### Steps
 
@@ -212,10 +211,13 @@ metadata:
   annotations:
     snapshot.storage.kubernetes.io/is-default-class: "true"
   name: snapshot-class
-driver: pd.csi.storage.gke.io
+driver: <differs for GCP and AWS>
 deletionPolicy: Delete
 ```
 
+Driver for GCP must be `pd.csi.storage.gke.io`, for AWS it's `ebs.csi.aws.com`.
+  
+  
 2. Create a VolumeSnapshot resource:
 
 ```yaml
@@ -235,54 +237,4 @@ kubectl get volumesnapshot -w
 ```
 
   </details>
-  <details>
-  <summary label="Gardener AWS">
-  Gardener AWS
-  </summary>
-
-### Prerequisites
-
-As of Kubernetes version 1.18, Gardener AWS uses CSI drivers by default and supports taking volume snapshots out of the box.
-
-### Steps
-
-1. Create a VolumeSnapshotClass:
-
-```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshotClass
-metadata:
-  annotations:
-    snapshot.storage.kubernetes.io/is-default-class: "true"
-  name: snapshot-class
-driver: ebs.csi.aws.com
-deletionPolicy: Delete
-```
-
-2. Create a VolumeSnapshot resource:
-
-```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
-kind: VolumeSnapshot
-metadata:
-  name: snapshot
-spec:
-  source:
-    persistentVolumeClaimName: {PVC_NAME}
-```
-
-3. Wait until the **READYTOUSE** field receives the `true` status to verify that the snapshot was taken successfully:
-
-```bash
-kubectl get volumesnapshot -w
-```
-  </details>
-  <details>
-  <summary label="Gardener Azure">
-  Gardene Azure
-  </summary>
-
-Gardener Azure does not currently support CSI drivers, that's why you cannot use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
-
-  </details>
-</div>
+ </div>
