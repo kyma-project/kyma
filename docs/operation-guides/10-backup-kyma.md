@@ -12,7 +12,7 @@ Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes o
 
 For example, Gardener uses [etcd](https://etcd.io/) as the Kubernetes backing store for all cluster data. Gardener runs periodic jobs to take major and minor snapshots of the etcd database to include Kubernetes objects in the backup. 
 
-The major snapshot that includes all resources is taken on a daily basis, and minor snapshots happen every five minutes. 
+The major snapshot that includes all resources is taken on a daily basis, while minor snapshots are taken every five minutes. 
 
 If the etcd database experiences any problems, Gardener automatically restores the Kubernetes cluster using the most recent snapshot.
 
