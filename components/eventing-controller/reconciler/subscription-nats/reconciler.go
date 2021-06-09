@@ -4,30 +4,33 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"reflect"
 
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/record"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
+	ctx context.Context
 	client.Client
 	cache.Cache
-	backend          handlers.MessagingBackend
+	Backend          handlers.MessagingBackend
 	Log              logr.Logger
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
@@ -41,7 +44,8 @@ const (
 	NATSProtocol = "NATS"
 )
 
-func NewReconciler(client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
+	log logr.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
 	natsHandler := handlers.NewNats(cfg, log)
 	err := natsHandler.Initialize(env.Config{})
 	if err != nil {
@@ -49,9 +53,10 @@ func NewReconciler(client client.Client, applicationLister *application.Lister, 
 		panic(err)
 	}
 	return &Reconciler{
+		ctx:              ctx,
 		Client:           client,
 		Cache:            cache,
-		backend:          natsHandler,
+		Backend:          natsHandler,
 		Log:              log,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
@@ -64,8 +69,33 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+//  SetupUnmanaged creates a controller under the client control
+func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
+	ctru, err := controller.NewUnmanaged("nats-subscription-controller", mgr, controller.Options{
+		Reconciler: r,
+	})
+	if err != nil {
+		r.Log.Error(err, "failed to create a unmanaged NATS controller")
+		return err
+	}
+
+	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		r.Log.Error(err, "unable to watch pods")
+		return err
+	}
+
+	go func(r *Reconciler, c controller.Controller) {
+		if err := c.Start(r.ctx.Done()); err != nil {
+			r.Log.Error(err, "failed to start the nats-subscription-controller")
+			os.Exit(1)
+		}
+	}(r, ctru)
+
+	return nil
+}
+
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+	ctx := r.ctx
 
 	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name",
 		req.Name)
@@ -91,7 +121,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-			if err := r.backend.DeleteSubscription(desiredSubscription); err != nil {
+			if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
 				r.Log.Error(err, "failed to delete subscription")
 				// if failed to delete the external dependency here, return with error
 				// so that it can be retried
@@ -102,7 +132,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			log.Info("Removing finalizer from subscription object")
 			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers,
 				Finalizer)
-			if err := r.Client.Update(context.Background(), desiredSubscription); err != nil {
+			if err := r.Client.Update(ctx, desiredSubscription); err != nil {
 				log.Error(err, "failed to remove finalizer from subscription object")
 				return ctrl.Result{}, err
 			}
@@ -120,7 +150,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// Clean up the old subscriptions
-	err = r.backend.DeleteSubscription(desiredSubscription)
+	err = r.Backend.DeleteSubscription(desiredSubscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
@@ -145,7 +175,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return result, nil
 	}
 
-	_, err = r.backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {

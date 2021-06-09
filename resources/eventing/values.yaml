@@ -8,11 +8,7 @@ global:
   secretName: ""
 
   # domainName is the global domain used in Kyma
-  domainName: ""
-
-  eventing:
-    # backend defines the provisioned eventing backend, either NATS or BEB
-    backend: nats
+  domainName: "domain"
 
   istio:
     proxy:
@@ -26,6 +22,10 @@ global:
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
   eventTypePrefix: "sap.kyma.custom"
+
+  log:
+    format: "json"
+    level: "info"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB

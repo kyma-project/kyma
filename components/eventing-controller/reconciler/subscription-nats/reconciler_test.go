@@ -122,6 +122,44 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	When("Creating a Subscription with empty protocol, protocolsettings and dialect", func() {
+		It("Should reconcile the Subscription", func() {
+			ctx := context.Background()
+			subscriptionName := fmt.Sprintf("sub-%d", testId)
+
+			// create subscriber
+			result := make(chan []byte)
+			url, shutdown := newSubscriber(result)
+			defer shutdown()
+
+			// create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEmptySourceEventType)
+			givenSubscription.Spec.Sink = url
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")),
+			))
+
+			// publish a message
+			connection, err := connectToNats(natsUrl)
+			Expect(err).ShouldNot(HaveOccurred())
+			err = connection.Publish(reconcilertesting.EventType, []byte(reconcilertesting.StructuredCloudEvent))
+			Expect(err).ShouldNot(HaveOccurred())
+
+			// make sure that the subscriber received the message
+			Eventually(func() bool {
+				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+				received := string(<-result)
+				return sent == received
+			}).Should(BeTrue())
+		})
+	})
+
 	When("Creating a Subscription with empty event type", func() {
 		It("Should mark the subscription as not ready", func() {
 			ctx := context.Background()
@@ -285,13 +323,14 @@ var _ = BeforeSuite(func(done Done) {
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	err = NewReconciler(
+		context.Background(),
 		k8sManager.GetClient(),
 		applicationLister,
 		k8sManager.GetCache(),
 		ctrl.Log.WithName("nats-reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
-	).SetupWithManager(k8sManager)
+	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

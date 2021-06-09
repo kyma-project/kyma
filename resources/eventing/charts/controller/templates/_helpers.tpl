@@ -50,3 +50,25 @@ app.kubernetes.io/name: {{ include "controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 kyma-project.io/dashboard: eventing
 {{- end }}
+
+{{/*
+Selector labels for peerauthentication
+*/}}
+{{- define "controller.peerAuth.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "controller.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create eventing backend name.
+*/}}
+{{- define "eventing.backend.name" -}}
+{{- printf "%s" .Values.eventingBackend.name }}
+{{- end }}
+
+{{/*
+-Nats server service Name
+-*/}}
+{{- define "controller.natsServer.url" -}}
+{{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
+{{- end }}

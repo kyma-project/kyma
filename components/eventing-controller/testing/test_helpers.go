@@ -4,6 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	appsv1 "k8s.io/api/apps/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -130,6 +141,17 @@ func exemptHandshake(val bool) *bool {
 func qos(qos string) *string {
 	q := qos
 	return &q
+}
+
+func WithFakeSubscriptionStatus(s *eventingv1alpha1.Subscription) {
+	s.Status.Conditions = []eventingv1alpha1.Condition{
+		{
+			Type:    "foo",
+			Status:  "foo",
+			Reason:  "foo-reason",
+			Message: "foo-message",
+		},
+	}
 }
 
 func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
@@ -260,4 +282,123 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 			},
 		},
 	}
+}
+
+func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
+	return &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		StringData: map[string]string{
+			"messaging": "[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]",
+			"namespace": "test/ns",
+		},
+	}
+}
+
+func WithNamespace(name string) *corev1.Namespace {
+	namespace := corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+	return &namespace
+}
+
+func WithEventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
+	return &eventingv1alpha1.EventingBackend{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+		},
+		Spec:   eventingv1alpha1.EventingBackendSpec{},
+		Status: eventingv1alpha1.EventingBackendStatus{},
+	}
+}
+
+func WithEventingControllerDeployment() *appsv1.Deployment {
+	labels := map[string]string{
+		"app.kubernetes.io/name": "value",
+	}
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.ControllerName,
+			Namespace: deployment.ControllerNamespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: utils.Int32Ptr(1),
+			Selector: metav1.SetAsLabelSelector(labels),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:   deployment.ControllerName,
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  deployment.ControllerName,
+							Image: "eventing-controller-pod-image",
+						},
+					},
+				},
+			},
+		},
+		Status: appsv1.DeploymentStatus{},
+	}
+}
+
+// ToSubscription converts an unstructured subscription into a typed one
+func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
+	subscription := new(eventingv1alpha1.Subscription)
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredSub.Object, subscription)
+	if err != nil {
+		return nil, err
+	}
+	return subscription, nil
+}
+
+// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+	unstructured := &unstructured.Unstructured{}
+	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, err
+	}
+	unstructured.Object = unstructuredObj
+	return unstructured, nil
+}
+
+// SetupSchemeOrDie add a scheme to eventing API schemes
+func SetupSchemeOrDie() (*runtime.Scheme, error) {
+	scheme := runtime.NewScheme()
+	if err := corev1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return nil, err
+	}
+	return scheme, nil
+}
+
+// SubscriptionGroupVersionResource returns the GVR of a subscription
+func SubscriptionGroupVersionResource() schema.GroupVersionResource {
+	return schema.GroupVersionResource{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Resource: "subscriptions",
+	}
+}
+
+// NewFakeSubscriptionClient returns a fake dynamic subscription client
+func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Interface, error) {
+	scheme, err := SetupSchemeOrDie()
+	if err != nil {
+		return nil, err
+	}
+
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
+	return dynamicClient, nil
 }
