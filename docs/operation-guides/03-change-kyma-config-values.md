@@ -1,6 +1,5 @@
 ---
 title: Change Kyma settings
-type: Configuration
 ---
 
 To change your Kyma settings, you simply deploy the same Kyma version that you're currently using, just with different configuration values.
@@ -10,7 +9,7 @@ You can use the `--values-file` and the `--value` flag.
 - To override the standard Kyma configuration, run:
 
   ```
-  kyma alpha deploy --values-file {VALUES_FILE_PATH}
+  kyma deploy --values-file {VALUES_FILE_PATH}
   ```
 
   In the following example, `{VALUES_FILE_PATH}` is the path to a YAML file containing the desired configuration:

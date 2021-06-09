@@ -1,6 +1,6 @@
 ---
 title: Logging storage with boltDB and GCS
-type: Configuration
+type: obsolete?
 ---
 
 By default, Loki comes with the [boltDB](https://github.com/boltdb/bolt) storage configuration. It includes label and index storage, and the filesystem for object storage. Additionally, Loki supports other object stores, such as S3 or GCS.
