@@ -8,10 +8,10 @@ global:
 deployment:
   image:
     repository: "eu.gcr.io/kyma-project/busola-migrator"
-    tag: "74499dcb"
+    tag: "a5b820ae"
     pullPolicy: IfNotPresent
   env:
-    busolaURL: "https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"
+    busolaURL: "https://busola.dashboard.kyma.cloud.sap"
     oidcIssuerURL: "https://kyma.accounts.ondemand.com"
     oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
     oidcScope: "openid"
