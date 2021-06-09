@@ -1,5 +1,5 @@
 ---
-title: Backup resources using Velero
+title: Back up resources using Velero
 type: Backups
 ---
 
