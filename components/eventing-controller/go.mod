@@ -10,7 +10,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
-	github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6
+	github.com/kyma-project/kyma/common/logging v0.0.0-20210601142757-445a3b6021fe
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nats-io/nats-server/v2 v2.2.4
@@ -24,10 +24,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	k8s.io/api v0.19.3
-	k8s.io/apiextensions-apiserver v0.19.3 // indirect
-	k8s.io/apimachinery v0.19.3
-	k8s.io/client-go v0.19.3
+	k8s.io/api v0.20.7
+	k8s.io/apiextensions-apiserver v0.20.7 // indirect
+	k8s.io/apimachinery v0.20.7
+	k8s.io/client-go v0.20.7
 	sigs.k8s.io/controller-runtime v0.6.2
 )
 
