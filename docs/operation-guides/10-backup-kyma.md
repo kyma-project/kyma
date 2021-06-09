@@ -18,7 +18,7 @@ If the etcd database experiences any problems, Gardener automatically restores t
 
 ## Volume backup
 
-You should back up your volumes periodically  with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume pre-populated with the snapshot data or to restore the existing volume to the state represented by the snapshot.
+You should back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume pre-populated with the snapshot data or restore the existing volume to the state represented by the snapshot.
 
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/) which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
