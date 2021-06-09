@@ -5,7 +5,7 @@ type: Overview
 
 Kyma consists of these main areas and components:
 
-![architecture](./assets/kyma-areas.svg)
+![areas](./assets/kyma-areas.svg)
 
 ### Application connectivity
 
