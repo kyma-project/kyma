@@ -40,8 +40,6 @@ describe("SKR test", function() {
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const director = new DirectorClient(DirectorConfig.fromEnv());
 
-  const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv())
-
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -87,6 +85,8 @@ describe("SKR test", function() {
 
   // Check audit log for AWS
   if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
+    const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv())
+
     it ("Check audit logs", async function() {
       await checkAuditLogs(auditlogs)
     })
