@@ -32,7 +32,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install specific configuration values
 
-- To install Kyma with different configuration values, use the `--values-file` and the `--value` flag. For details, see [Change Kyma settings](#03-change-kyma-config-values).
+- To install Kyma with different configuration values, use the `--values-file` and the `--value` flags. For details, see [Change Kyma settings](#03-change-kyma-config-values).
 
 ## Install with custom domain
 
