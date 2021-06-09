@@ -23,5 +23,6 @@ You should back up your volumes periodically with the [VolumeSnapshot API resour
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/) which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
 >**TIP:** 
+Learn how to:
 >- Learn how to back up and restore individual resources manually or automatically: [Restoring resources using Velero](#tutorials-restore-resources-using-velero)
 >- Learn how to create on-demand volume snapshots, also for cloud providers: [Creating on-demand volume snapshots](#tutorials-create-on-demand-volume-snapshots-for-cloud-providers)
