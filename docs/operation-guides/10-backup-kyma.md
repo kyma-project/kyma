@@ -24,5 +24,5 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 
 >**TIP:** 
 Learn how to:
->- Learn how to back up and restore individual resources manually or automatically: [Restoring resources using Velero](#tutorials-restore-resources-using-velero)
+>- [Back up and restore](#tutorials-restore-resources-using-velero) individual resources manually or automatically using Velero.
 >- Learn how to create on-demand volume snapshots, also for cloud providers: [Creating on-demand volume snapshots](#tutorials-create-on-demand-volume-snapshots-for-cloud-providers)
