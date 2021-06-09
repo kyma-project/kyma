@@ -15,7 +15,7 @@ For example, if you install Kyma on a local cluster, the default URL is `https:/
 
 ## Choose resource consumption
 
-By default, Kyma is installed with the default chart values defined in the `values.yaml` files. To control the amount of resources, such as memory and CPU, that the components can consume, you can also install Kyma with the following pre-defined profiles:
+By default, Kyma is installed with the default chart values defined in the `values.yaml` files. You can also control the allocation of resources, such as memory and CPU, that the components consume by installing Kyma with the following pre-defined profiles:
 
 - **Evaluation** needs limited resources and is suited for trial purposes.
 - **Production** is configured for high availability and scalability. It requires more resources than the evaluation profile but is a better choice for production workload.
