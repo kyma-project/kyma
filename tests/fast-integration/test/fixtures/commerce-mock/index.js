@@ -16,6 +16,7 @@ const {
   k8sApply,
   waitForServiceClass,
   waitForServiceInstance,
+  waitForFunction,
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
@@ -251,7 +252,8 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
   await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
-
+  await waitForFunction("lastorder", targetNamespace);
+  
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   
   await retryPromise(
