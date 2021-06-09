@@ -117,26 +117,23 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
 	var bebBackend *handlers.Beb
 	var ok bool
-	var bebBackendErr error
+	isCleanupSuccessful := true
 	if bebBackend, ok = backend.(*handlers.Beb); !ok {
-		bebBackendErr = errors.New("failed to convert backend to handlers.Beb")
+		isCleanupSuccessful = false
+		bebBackendErr := errors.New("failed to convert backend to handlers.Beb")
 		logger.Error(bebBackendErr, "no BEB backend exists")
 		return bebBackendErr
 	}
 
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to list subscriptions")
 	}
 	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to convert to subscriptionList from unstructured list")
 	}
-
-	statusDeletionResult := make(map[string]error)
-	subDeletionResult := make(map[string]error)
-	apiRuleDeletionResult := make(map[string]error)
 
 	for _, sub := range subs.Items {
 		// Clean APIRules.
@@ -148,48 +145,35 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 		if apiRule != "" {
 			err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).Delete(ctx, apiRule, metav1.DeleteOptions{})
 			if err != nil {
-				apiRuleDeletionResult[keyAPIRule.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to delete APIRule: %s", keyAPIRule.String()))
 			}
 		}
 
 		// Clean statuses.
-		key := types.NamespacedName{
+		subKey := types.NamespacedName{
 			Namespace: sub.Namespace,
 			Name:      sub.Name,
 		}
 		desiredSub := handlers.RemoveStatus(sub)
-		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub)
 		if err != nil {
-			statusDeletionResult[key.String()] = err
+			isCleanupSuccessful = false
+			logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 		}
 
 		// Clean subscriptions from BEB.
 		if bebBackend != nil {
 			err = bebBackend.DeleteSubscription(&sub)
 			if err != nil {
-				subDeletionResult[key.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to delete Subscription: %s in BEB", subKey.String()))
 			}
-		} else {
-			subDeletionResult[key.String()] = bebBackendErr
 		}
 	}
 
-	if len(apiRuleDeletionResult) == 0 {
-		logger.Info("Deletion of APIRules succeeded")
-	} else {
-		logger.Info("Deletion of APIRules failed: %+v", apiRuleDeletionResult)
-	}
-
-	if len(subDeletionResult) == 0 {
-		logger.Info("Deletion of Subscriptions in BEB succeeded")
-	} else {
-		logger.Info("Deletion of Subscriptions in BEB failed: %+v", subDeletionResult)
-	}
-
-	if len(statusDeletionResult) == 0 {
-		logger.Info("Deletion of Statuses in Subscriptions succeeded")
-	} else {
-		logger.Info("Deletion of Statuses in Subscriptions failed: %+v", statusDeletionResult)
+	if isCleanupSuccessful {
+		logger.Info("Cleanup process succeeded!")
 	}
 
 	return nil

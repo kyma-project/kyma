@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -106,44 +108,48 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
 	var natsBackend *handlers.Nats
 	var ok bool
-	var natsBackendErr error
+	isCleanupSuccessful := true
 	if natsBackend, ok = backend.(*handlers.Nats); !ok {
+		isCleanupSuccessful = false
+		natsBackendErr := errors.New("failed to convert backend to handlers.Nats")
 		logger.Error(natsBackendErr, "no NATS backend exists")
 	}
 	// Fetch all subscriptions.
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to list subscriptions")
 	}
 	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to convert to subscriptionList from unstructured list")
 	}
-
-	statusDeletionResult := make(map[string]error)
-	subDeletionResult := make(map[string]error)
 
 	for _, sub := range subs.Items {
 		// Clean statuses.
-		key := types.NamespacedName{
+		subKey := types.NamespacedName{
 			Namespace: sub.Namespace,
 			Name:      sub.Name,
 		}
 		desiredSub := handlers.RemoveStatus(sub)
-		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub)
 		if err != nil {
-			statusDeletionResult[key.String()] = err
+			isCleanupSuccessful = false
+			logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 		}
 
 		// Clean subscriptions from NATS.
 		if natsBackend != nil {
 			err = natsBackend.DeleteSubscription(&sub)
 			if err != nil {
-				subDeletionResult[key.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 			}
-		} else {
-			subDeletionResult[key.String()] = natsBackendErr
 		}
+	}
+
+	if isCleanupSuccessful {
+		logger.Info("Cleanup process succeeded!")
 	}
 	return nil
 }
