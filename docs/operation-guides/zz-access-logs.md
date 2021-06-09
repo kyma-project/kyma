@@ -1,6 +1,6 @@
 ---
 title: Access logs
-type: Operations
+type: obsolete - keep step 3
 ---
 
 To access the logs, follow these steps:
