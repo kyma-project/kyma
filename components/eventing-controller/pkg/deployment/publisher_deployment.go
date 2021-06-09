@@ -16,18 +16,18 @@ import (
 )
 
 const (
-	LivenessInitialDelaySecs = int32(5)
-	LivenessTimeoutSecs      = int32(1)
-	LivenessPeriodSecs       = int32(2)
-	BEBNamespacePrefix       = "/"
-	InstanceLabelKey         = "app.kubernetes.io/instance"
-	InstanceLabelValue       = "eventing"
-	DashboardLabelKey        = "kyma-project.io/dashboard"
-	DashboardLabelValue      = "eventing"
-	PublisherPortName        = "http"
-	PublisherPortNum         = int32(8080)
-	PublisherMetricsPortName = "http-metrics"
-	PublisherMetricsPortNum  = int32(9090)
+	livenessInitialDelaySecs = int32(5)
+	livenessTimeoutSecs      = int32(1)
+	livenessPeriodSecs       = int32(2)
+	bebNamespacePrefix       = "/"
+	instanceLabelKey         = "app.kubernetes.io/instance"
+	instanceLabelValue       = "eventing"
+	dashboardLabelKey        = "kyma-project.io/dashboard"
+	dashboardLabelValue      = "eventing"
+	publisherPortName        = "http"
+	publisherPortNum         = int32(8080)
+	publisherMetricsPortName = "http-metrics"
+	publisherMetricsPortNum  = int32(9090)
 
 	PublisherNamespace              = "kyma-system"
 	PublisherName                   = "eventing-publisher-proxy"
@@ -46,8 +46,8 @@ var (
 func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
-		InstanceLabelKey:  InstanceLabelValue,
-		DashboardLabelKey: DashboardLabelValue,
+		instanceLabelKey:  instanceLabelValue,
+		dashboardLabelKey: dashboardLabelValue,
 	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -93,8 +93,8 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
-		InstanceLabelKey:  InstanceLabelValue,
-		DashboardLabelKey: DashboardLabelValue,
+		instanceLabelKey:  instanceLabelValue,
+		dashboardLabelKey: dashboardLabelValue,
 	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -180,9 +180,9 @@ func getLivenessProbe() *v1.Probe {
 				Scheme: v1.URISchemeHTTP,
 			},
 		},
-		InitialDelaySeconds: LivenessInitialDelaySecs,
-		TimeoutSeconds:      LivenessTimeoutSecs,
-		PeriodSeconds:       LivenessPeriodSecs,
+		InitialDelaySeconds: livenessInitialDelaySecs,
+		TimeoutSeconds:      livenessTimeoutSecs,
+		PeriodSeconds:       livenessPeriodSecs,
 		SuccessThreshold:    1,
 		FailureThreshold:    3,
 	}
@@ -191,12 +191,12 @@ func getLivenessProbe() *v1.Probe {
 func getContainerPorts() []v1.ContainerPort {
 	return []v1.ContainerPort{
 		{
-			Name:          PublisherPortName,
-			ContainerPort: PublisherPortNum,
+			Name:          publisherPortName,
+			ContainerPort: publisherPortNum,
 		},
 		{
-			Name:          PublisherMetricsPortName,
-			ContainerPort: PublisherMetricsPortNum,
+			Name:          publisherMetricsPortName,
+			ContainerPort: publisherMetricsPortNum,
 		},
 	}
 }
@@ -204,7 +204,7 @@ func getContainerPorts() []v1.ContainerPort {
 func getBEBEnvVars() []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "beb"},
-		{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
 		{Name: "REQUEST_TIMEOUT", Value: "5s"},
 		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
 		{
@@ -249,7 +249,7 @@ func getBEBEnvVars() []v1.EnvVar {
 		},
 		{
 			Name:  "BEB_NAMESPACE",
-			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", BEBNamespacePrefix),
+			Value: fmt.Sprintf("%s$(BEB_NAMESPACE_VALUE)", bebNamespacePrefix),
 		},
 	}
 }
@@ -257,7 +257,7 @@ func getBEBEnvVars() []v1.EnvVar {
 func getNATSEnvVars() []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
-		{Name: "PORT", Value: strconv.Itoa(int(PublisherPortNum))},
+		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
 		{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
 		{Name: "REQUEST_TIMEOUT", Value: "5s"},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
