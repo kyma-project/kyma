@@ -1,0 +1,38 @@
+{{- if .Values.dockerRegistry.enableInternal }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ template "registry-fullname" . }}
+  namespace: kyma-system
+  labels:
+  {{- include "tplValue" ( dict "value" .Values.global.commonLabels "context" . ) | nindent 4 }}
+spec:
+  gateways:
+    - kyma-system/kyma-gateway
+  hosts:
+    - registry.{{ .Values.global.ingress.domainName }} # docker-registry.{DOMAIN}
+  http:
+    - corsPolicy:
+        allowHeaders:
+          - Authorization
+          - Content-Type
+          - '*'
+        allowMethods:
+          - GET
+          - HEAD
+          - POST
+          - PUT
+          - DELETE
+        allowOrigins:
+          - regex: .*
+      match:
+        - uri:
+            regex: /.*
+          method:
+            regex: GET|HEAD
+      route:
+        - destination:
+            host: {{ template "registry-fullname" . }}
+            port:
+              number: {{ .Values.global.dockerServicePort }}
+{{- end }}
