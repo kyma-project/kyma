@@ -43,7 +43,7 @@ If you don't have a certificate yet, you can create a self-signed certificate an
   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out crt.pem -days 365
   ```
 
-  When prompted, provide your credentials, such as your name and your domain (as wildcard: `*.$DOMAIN`).
+  When prompted, provide your credentials, such as your name and your domain, as wildcard: `*.$DOMAIN`.
 
   Then, pass the certificate files to the deploy command:
 
