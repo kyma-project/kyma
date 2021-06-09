@@ -15,7 +15,7 @@ tests:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
     privileged: false
 
 bindings:
@@ -105,3 +105,4 @@ global:
 users:
   adminName: "admin@kyma.cx"
   adminGroup:
+  bindStaticUsers: true
