@@ -1,3 +1,5 @@
+# This file contains default overrides that are applied during Kyma 2 deployment
+
 global:
   installCRDs: false
 tracing:
@@ -30,3 +32,8 @@ monitoring:
     env:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
+rafter:
+  controller-manager:
+    minio:
+      virtualservice:
+        enabled: false
