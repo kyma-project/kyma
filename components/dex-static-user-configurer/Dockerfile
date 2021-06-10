@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
+FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
 
 RUN apk add --no-cache jq apache2-utils
 
