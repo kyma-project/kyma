@@ -15,6 +15,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -94,6 +95,13 @@ func (c *Commander) Start() error {
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
 	)
+
+	if err := c.mgr.AddHealthzCheck(c.healthEndpoint, healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up health check: %v", err)
+	}
+	if err := c.mgr.AddReadyzCheck(c.readyEndpoint, healthz.Ping); err != nil {
+		return fmt.Errorf("unable to set up ready check: %v", err)
+	}
 
 	c.backend = reconciler.Backend
 	if err := reconciler.SetupUnmanaged(c.mgr); err != nil {

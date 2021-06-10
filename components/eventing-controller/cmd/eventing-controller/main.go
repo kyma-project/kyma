@@ -54,10 +54,11 @@ func main() {
 	// Init the manager.
 	restCfg := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: opts.MetricsAddr,
-		Port:               9443,
-		SyncPeriod:         &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
+		Scheme:                 scheme,
+		MetricsBindAddress:     opts.MetricsAddr,
+		HealthProbeBindAddress: opts.ProbeAddr,
+		Port:                   9443,
+		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
 	})
 	if err != nil {
 		setupLogger.Error(err, "unable to start manager")
