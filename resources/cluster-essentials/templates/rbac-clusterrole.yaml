@@ -16,6 +16,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: kyma:psp:privileged-hostpid
+  annotations:
+    helm.sh/hook: "pre-upgrade, pre-install"
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+rules:
+- apiGroups: ["policy"] # "" indicates the core API group
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames: ["003-kyma-privileged-hostpid"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   name: kyma:psp:unprivileged
   annotations:
     helm.sh/hook: "pre-upgrade, pre-install"

@@ -43,13 +43,22 @@ data:
       exit 0
     fi
 
-    echo "Certificate is self-signed, patching Docker..."
-    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
-    if [ ! -d "${DIR}" ]; then
-      mkdir -p "${DIR}"
-    fi
+    CONTAINER_RUNTIME=$(kubectl get nodes -o jsonpath='{.items[0].status.nodeInfo.containerRuntimeVersion}'| cut -d: -f 1)
 
-    cat "${CERT_FILE}" > "${DIR}/ca.crt"
+    if [ "${CONTAINER_RUNTIME}" = "docker" ]; then
+      echo "Certificate is self-signed, patching Docker..."
+      DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
+      if [ ! -d "${DIR}" ]; then
+        mkdir -p "${DIR}"
+      fi
+
+      cat "${CERT_FILE}" > "${DIR}/ca.crt"
+    else
+      echo "Certificate is self-signed, patching Containerd..."
+      TMPDIR=$(mktemp -u)
+      # GKE nodes have /usr/local/ mounted read-only. So we need to override the default localcertsdir
+      nsenter --mount=/proc/1/ns/mnt -- sh -c "mkdir $TMPDIR && echo \"${DECODED_CERT}\" > $TMPDIR/ca.crt && update-ca-certificates --localcertsdir $TMPDIR && systemctl restart containerd"
+    fi
     echo "Done."
     exit 0
 {{- end }}
