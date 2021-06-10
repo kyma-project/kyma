@@ -129,6 +129,8 @@ spec:
       enabled: true
       k8s:
         env:
+        - name: PILOT_ENABLE_INBOUND_PASSTHROUGH
+          value: false
         - name: PILOT_TRACE_SAMPLING
           value: "100"
         - name: PILOT_HTTP10
