@@ -80,7 +80,6 @@ func (c *Commander) Start() error {
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
 		c.envCfg,
 	)
-
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {
 		return fmt.Errorf("unable to setup the NATS subscription controller: %v", err)
