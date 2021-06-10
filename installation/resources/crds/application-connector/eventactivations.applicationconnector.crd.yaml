@@ -12,6 +12,7 @@ spec:
     storage: true
     schema:
       openAPIV3Schema:
+        type: object
         properties:
           spec:
             properties:
@@ -22,6 +23,7 @@ spec:
                 pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
               displayName:
                 type: string
+            type: object
   scope: Namespaced
   names:
     plural: eventactivations

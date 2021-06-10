@@ -12,6 +12,7 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
+          type: object
           properties:
             spec:
               properties:
@@ -102,6 +103,7 @@ spec:
                         type: array
                         items:
                           type: string
+              type: object
   scope: Cluster
   names:
     plural: applications
