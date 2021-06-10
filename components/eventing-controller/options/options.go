@@ -57,9 +57,9 @@ func (o *Options) Parse() error {
 	flag.StringVar(&o.MetricsAddr, argNameMetricsAddr, ":8080", "The address the metric endpoint binds to.")
 	flag.DurationVar(&o.ReconnectWait, argNameReconnectWait, time.Second, "Wait time between reconnect attempts (NATS).")
 	flag.DurationVar(&o.ReconcilePeriod, argNameReconcilePeriod, time.Minute*10, "Period between triggering of reconciling calls (BEB).")
-	flag.StringVar(&o.ProbeAddr, "health-probe-bind-addr", ":8081", "The TCP address that the controller should bind to for serving health probes.")
-	flag.StringVar(&o.ReadyEndpoint, "ready-check-endpoint", "readyz", "The endpoint of the readiness probe.")
-	flag.StringVar(&o.HealthEndpoint, "health-check-endpoint", "healthz", "The endpoint of the health probe.")
+	flag.StringVar(&o.ProbeAddr, argNameProbeAddr, ":8081", "The TCP address that the controller should bind to for serving health probes.")
+	flag.StringVar(&o.ReadyEndpoint, argNameReadyEndpoint, "readyz", "The endpoint of the readiness probe.")
+	flag.StringVar(&o.HealthEndpoint, argNameHealthEndpoint, "healthz", "The endpoint of the health probe.")
 	flag.Parse()
 
 	if err := envconfig.Process("", &o.Env); err != nil {
