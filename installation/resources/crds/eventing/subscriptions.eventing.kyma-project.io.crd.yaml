@@ -104,28 +104,40 @@ spec:
                   implementation
                 properties:
                   contentMode:
+                    description: ContentMode defines content mode for eventing based
+                      on BEB
                     type: string
                   exemptHandshake:
+                    description: ExemptHandshake defines whether exempt handshake
+                      for eventing based on BEB
                     type: boolean
                   qos:
+                    description: Qos defines quality of service for eventing based
+                      on BEB
                     type: string
                   webhookAuth:
                     description: WebhookAuth defines the Webhook called by an active
                       subscription in BEB
                     properties:
                       clientId:
+                        description: ClientId defines clientID for OAuth2
                         type: string
                       clientSecret:
+                        description: ClientSecret defines client secret for OAuth2
                         type: string
                       grantType:
+                        description: GrantType defines grant type for OAuth2
                         type: string
                       scope:
+                        description: Scope defines scope for OAuth2
                         items:
                           type: string
                         type: array
                       tokenUrl:
+                        description: TokenUrl defines token URL for OAuth2
                         type: string
                       type:
+                        description: Type defines type of authentication
                         type: string
                     required:
                     - clientId

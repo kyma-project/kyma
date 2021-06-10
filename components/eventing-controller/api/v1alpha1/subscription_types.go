@@ -6,26 +6,43 @@ import (
 
 // WebhookAuth defines the Webhook called by an active subscription in BEB
 type WebhookAuth struct {
+	// Type defines type of authentication
 	// +optional
 	Type string `json:"type,omitempty"`
 
+	// GrantType defines grant type for OAuth2
 	GrantType string `json:"grantType"`
 
+	// ClientId defines clientID for OAuth2
 	ClientId string `json:"clientId"`
 
+	// ClientSecret defines client secret for OAuth2
 	ClientSecret string `json:"clientSecret"`
 
+	// TokenUrl defines token URL for OAuth2
 	TokenUrl string `json:"tokenUrl"`
 
+	// Scope defines scope for OAuth2
 	Scope []string `json:"scope,omitempty"`
 }
 
 // ProtocolSettings defines the CE protocol setting specification implementation
 type ProtocolSettings struct {
-	ContentMode     *string      `json:"contentMode,omitempty"`
-	ExemptHandshake *bool        `json:"exemptHandshake,omitempty"`
-	Qos             *string      `json:"qos,omitempty"`
-	WebhookAuth     *WebhookAuth `json:"webhookAuth,omitempty"`
+	// ContentMode defines content mode for eventing based on BEB
+	// +optional
+	ContentMode *string `json:"contentMode,omitempty"`
+
+	// ExemptHandshake defines whether exempt handshake for eventing based on BEB
+	// +optional
+	ExemptHandshake *bool `json:"exemptHandshake,omitempty"`
+
+	// Qos defines quality of service for eventing based on BEB
+	// +optional
+	Qos *string `json:"qos,omitempty"`
+
+	// WebhookAuth defines the Webhook called by an active subscription in BEB
+	// +optional
+	WebhookAuth *WebhookAuth `json:"webhookAuth,omitempty"`
 }
 
 const (
@@ -106,8 +123,8 @@ type EmsSubscriptionStatus struct {
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-// +kubebuilder:subresource:status
 // SubscriptionStatus defines the observed state of Subscription
+// +kubebuilder:subresource:status
 type SubscriptionStatus struct {
 	// Conditions defines the status conditions
 	// +optional
