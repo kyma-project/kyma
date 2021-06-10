@@ -7,6 +7,9 @@ connection_token_handler:
 central_application_connectivity_validator:
   enabled: &centralApplicationConnectivityValidatorEnabled false
 
+central_application_gateway:
+  enabled: true
+
 global:
   centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
@@ -71,6 +74,8 @@ global:
     version: "d6bbc47a"
   central_application_connectivity_validator:
     version: "PR-11173"
+  central_application_gateway:
+    version: "PR-11158"
 
 application_connectivity_certs_setup_job:
   secrets:
