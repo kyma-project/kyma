@@ -1,6 +1,5 @@
 ---
-title: Custom resources
-type: Custom Resource
+title: CustomResources
 ---
 
 Here's the list of Kyma custom resources (CRs):
