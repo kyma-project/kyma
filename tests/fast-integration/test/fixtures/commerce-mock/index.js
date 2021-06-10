@@ -75,7 +75,13 @@ const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 const lastorderCentralApplicationGatewayObjs = k8s.loadAllYaml(lastorderCentralApplicationGatewayFunctionYaml);
-const lastorderCentralApplicationGatewayAndCompassObjs = k8s.loadAllYaml(lastorderCentralApplicationGatewayAndCompassFunctionYaml);
+
+function prepareLastorderCentralApplicationGatewayAndCompassObjs(appName) {
+  return k8s.loadAllYaml(
+      lastorderCentralApplicationGatewayAndCompassFunctionYaml
+          .toString()
+          .replace('%%APP_NAME%%', appName));
+}
 
 function namespaceObj(name) {
   return {
@@ -266,7 +272,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
       `mp-${appName}`,
       mockNamespace,
       targetNamespace,
-      withCentralApplicationGateway ? lastorderCentralApplicationGatewayAndCompassObjs : lastorderObjs);
+      withCentralApplicationGateway ? prepareLastorderCentralApplicationGatewayAndCompassObjs(`mp-${appName}`) : lastorderObjs);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
   await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
