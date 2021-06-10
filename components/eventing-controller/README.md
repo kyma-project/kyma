@@ -62,7 +62,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `WEBHOOK_TOKEN_ENDPOINT`      | The Kyma public endpoint to provide Access Tokens.                                  |
 | `EXEMPT_HANDSHAKE`            | The exemption handshake switch of the subscription protocol settings.               |
 | `QOS`                         | The quality of service setting of the subscription protocol settings.               |
-| `CONTENT_MODE`                | The conten mode of the subscription protocol settings.                              |
+| `CONTENT_MODE`                | The content mode of the subscription protocol settings.                              |
 | `DOMAIN`                      | The Kyma cluster public domain.                                                     |
 
 The additional command line arguments are:
@@ -165,4 +165,3 @@ make manager
 ```sh
 make run
 ```
-
