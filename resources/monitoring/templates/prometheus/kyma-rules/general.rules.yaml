@@ -117,13 +117,13 @@ spec:
       labels:
         severity: critical
       annotations:
-        description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-   -  alert: APIServerEventsRejected
+        description: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+    - alert: APIServerEventsRejected
       expr: sum(rate(apiserver_audit_requests_rejected_total{job=~"apiserver"}[1m])) > 0
       for: 1m
       labels:
         severity: critical
       annotations:
-        description:  "API Server events are being rejected. Currently rejected events: {{`{{$value}}`}}"
+        description: "API Server events are being rejected. Currently rejected events: {{`{{$value}}`}}"
   
 
