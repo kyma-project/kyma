@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
 	"github.com/go-logr/zapr"
 
@@ -66,15 +67,24 @@ func main() {
 	}
 
 	// Instantiate and initialize all the subscription commanders.
-	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.ProbeAddr, opts.ReadyEndpoint, opts.HealthEndpoint, opts.MaxReconnects, opts.ReconnectWait)
+	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait)
 	if err := natsCommander.Init(mgr); err != nil {
 		setupLogger.Error(err, "unable to initialize the NATS commander")
 		os.Exit(1)
 	}
 
-	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ProbeAddr, opts.ReadyEndpoint, opts.HealthEndpoint, opts.ReconcilePeriod)
+	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod)
 	if err := bebCommander.Init(mgr); err != nil {
 		setupLogger.Error(err, "unable to initialize the BEB commander")
+		os.Exit(1)
+	}
+
+	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up health check: %v")
+		os.Exit(1)
+	}
+	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up ready check: %v")
 		os.Exit(1)
 	}
 

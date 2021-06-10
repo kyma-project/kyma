@@ -15,7 +15,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -38,27 +37,21 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel         context.CancelFunc
-	envCfg         env.NatsConfig
-	restCfg        *rest.Config
-	metricsAddr    string
-	probeAddr      string
-	readyEndpoint  string
-	healthEndpoint string
-	mgr            manager.Manager
-	backend        handlers.MessagingBackend
+	cancel      context.CancelFunc
+	envCfg      env.NatsConfig
+	restCfg     *rest.Config
+	metricsAddr string
+	mgr         manager.Manager
+	backend     handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, metricsAddr, probeAddr, readyEndpoint, healthEndpoint string, maxReconnects int, reconnectWait time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
 	return &Commander{
-		envCfg:         env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
-		restCfg:        restCfg,
-		metricsAddr:    metricsAddr,
-		probeAddr:      probeAddr,
-		readyEndpoint:  readyEndpoint,
-		healthEndpoint: healthEndpoint,
+		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
+		restCfg:     restCfg,
+		metricsAddr: metricsAddr,
 	}
 }
 
@@ -87,13 +80,6 @@ func (c *Commander) Start() error {
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
 		c.envCfg,
 	)
-
-	if err := c.mgr.AddHealthzCheck(c.healthEndpoint, healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up health check: %v", err)
-	}
-	if err := c.mgr.AddReadyzCheck(c.readyEndpoint, healthz.Ping); err != nil {
-		return fmt.Errorf("unable to set up ready check: %v", err)
-	}
 
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {
