@@ -1,3 +1,4 @@
+{{ if .Values.virtualservice.enabled }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -36,3 +37,4 @@ spec:
             host: {{ template "minio.fullname" . }}
             port:
               number: {{ .Values.service.port }}
+{{- end }}
