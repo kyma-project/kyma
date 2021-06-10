@@ -202,13 +202,13 @@ func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscript
 	return desiredSub
 }
 
-func UpdateSubscription(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
+func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
 	unstructuredObj, err := toUnstructuredSub(sub)
 	if err != nil {
 		return errors.Wrap(err, "failed to convert subscription to unstructured")
 	}
 	_, err = dClient.
-		Resource(GroupVersionResource()).
+		Resource(SubscriptionGroupVersionResource()).
 		Namespace(sub.Namespace).
 		UpdateStatus(ctx, unstructuredObj, metav1.UpdateOptions{})
 
@@ -236,7 +236,7 @@ func toUnstructuredSub(sub *eventingv1alpha1.Subscription) (*unstructured.Unstru
 	return &unstructured.Unstructured{Object: object}, nil
 }
 
-func GroupVersionResource() schema.GroupVersionResource {
+func SubscriptionGroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
 		Group:    eventingv1alpha1.GroupVersion.Group,

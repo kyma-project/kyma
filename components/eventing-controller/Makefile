@@ -29,11 +29,18 @@ all: manager
 
 # Build controller binary
 manager: generate-local fmt-local vet-local
-	go build -o bin/controller main.go
+	go build -o bin/controller cmd/eventing-controller/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
+# TODO Useful default values have to be found.
+run: export NATS_URL ?= nats://127.0.0.1:4222
+run: export EVENT_TYPE_PREFIX ?= sap.kyma.custom
+run: export WEBHOOK_CLIENT_ID ?= WEBHOOK_CLIENT_ID
+run: export WEBHOOK_CLIENT_SECRET ?= WEBHOOK_CLIENT_SECRET
+run: export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
+run: export DOMAIN ?= example.com
 run: generate-local fmt-local vet-local manifests
-	go run ./main.go
+	go run cmd/eventing-controller/main.go
 
 # Install CRDs into a cluster
 install: manifests
@@ -51,35 +58,20 @@ uninstall-samples: manifests
 uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
-# Deploy eventing-controller for BEB in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-beb-local: manifests deploy-beb-local-dry-run
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-local: manifests deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
-# Deploy eventing-controller for NATS in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-nats-local: manifests deploy-nats-local-dry-run
-	kubectl create ns ${NAMESPACE} || true
-	kustomize build config/nats | ko apply -f -
-
-# Undeploy the eventing-controller for BEB
-undeploy-beb-local: manifests
+# Undeploy the eventing-controller
+undeploy-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
-# Undeploy the eventing-controller for NATS
-undeploy-nats-local: manifests
-	kustomize build config/nats | kubectl delete -f -
-
-# Dry run for deploying eventing-controller BEB for local development
-deploy-beb-local-dry-run: manifests
+# Dry run for deploying eventing-controller for local development
+deploy-local-dry-run: manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
-
-# Dry run for deploying eventing-controller NATS for local development
-deploy-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/nats
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
