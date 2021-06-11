@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210504-12243229"
+    tag: "20210610-d25e85b1"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210504-12243229"
+    tag: "20210610-d25e85b1"
     pullPolicy: IfNotPresent
 
 tests:
@@ -34,7 +34,7 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210504-12243229"
+      tag: "20210610-d25e85b1"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun

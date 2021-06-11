@@ -3,7 +3,7 @@ replicaCount: 1
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: 20210504-12243229
+    tag: 20210610-d25e85b1
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
