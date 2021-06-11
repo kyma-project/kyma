@@ -1,6 +1,5 @@
 ---
 title: From code to Function
-type: Overview
 ---
 
 Pick the programming language for the Function and decide where you want to keep the source code. Serverless will create the workload out of it for you.

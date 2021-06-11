@@ -1,6 +1,5 @@
 ---
 title: Container registries
-type: Overview
 ---
 
 By default, Serverless uses PersistentVolume (PV) as the internal registry to store Docker images for Functions. The default storage size of a single volume is 20 GB. This internal registry is suitable for local development.

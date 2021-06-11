@@ -1,6 +1,5 @@
 ---
 title: Security considerations
-type: Overview
 ---
 
 To eliminate potential security risks when using Functions, bear in mind these few facts:

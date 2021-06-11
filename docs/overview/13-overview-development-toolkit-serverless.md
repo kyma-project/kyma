@@ -1,6 +1,5 @@
 ---
 title: Development toolkit
-type: Overview
 ---
 
 To start developing your first Functions, you need:

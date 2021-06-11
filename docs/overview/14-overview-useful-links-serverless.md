@@ -1,6 +1,5 @@
 ---
 title: Useful links
-type: Overview
 ---
 
 If you're interested in learning more about the Serverless area, follow these links to:
