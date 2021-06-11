@@ -64,17 +64,26 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu }}
               memory: {{ .Values.resources.limits.memory }}
-          # TODO: probe on metrics endpoint is a temporary workaround, should be cleaned up by https://github.com/kyma-project/kyma/issues/9769
           livenessProbe:
-            failureThreshold: 3
+            failureThreshold: {{ .Values.healthProbe.liveness.failureThreshold }}
             httpGet:
-              path: /metrics
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 3
+              path: {{ .Values.healthProbe.liveness.service.path }}
+              port: {{ .Values.healthProbe.port }}
+              scheme: {{ .Values.healthProbe.scheme }}
+            initialDelaySeconds: {{ .Values.healthProbe.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthProbe.liveness.periodSeconds }}
+            successThreshold: {{ .Values.healthProbe.liveness.successThreshold }}
+            timeoutSeconds: {{ .Values.healthProbe.liveness.timeoutSeconds }}
+          readinessProbe:
+            failureThreshold: {{ .Values.healthProbe.readiness.failureThreshold }}
+            httpGet:
+              path: {{ .Values.healthProbe.readiness.service.path }}
+              port: {{ .Values.healthProbe.port }}
+              scheme:  {{ .Values.healthProbe.scheme }}
+            initialDelaySeconds: {{ .Values.healthProbe.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthProbe.readiness.periodSeconds }}
+            successThreshold: {{ .Values.healthProbe.readiness.successThreshold }}
+            timeoutSeconds: {{ .Values.healthProbe.readiness.timeoutSeconds }}
           {{- if .Values.global.securityContext }}
           securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
           {{- end }}

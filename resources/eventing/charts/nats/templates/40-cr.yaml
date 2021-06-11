@@ -22,3 +22,14 @@ spec:
   natsConfig:
     debug: true
     trace: true
+  template:
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    nats_cluster: eventing-nats
+                topologyKey: kubernetes.io/hostname
+              weight: 100
