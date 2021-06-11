@@ -1,6 +1,12 @@
 const axios = require("axios");
 const gql = require("./gql");
-const { getEnvOrThrow, debug } = require("../utils")
+const { 
+    getEnvOrThrow, 
+    debug 
+} = require("../utils");
+const {
+    OAuthCredentials
+  } = require("../lib/oauth");
 
 /**
  * Class DirectorConfig represents configuration data for DirectorClient.
@@ -21,16 +27,14 @@ class DirectorConfig {
     static fromEnv() {
         return new DirectorConfig(
             getEnvOrThrow("COMPASS_HOST"),
-            getEnvOrThrow("COMPASS_CLIENT_ID"),
-            getEnvOrThrow("COMPASS_CLIENT_SECRET"),
+            OAuthCredentials.fromEnv("COMPASS_CLIENT_ID", "COMPASS_CLIENT_SECRET"),
             getEnvOrThrow("COMPASS_TENANT")
         )
     }
 
-    constructor(host, clientID, clientSecret, tenantID) {
+    constructor(host, credentials, tenantID) {
         this.host = host;
-        this.clientID = clientID;
-        this.clientSecret = clientSecret;
+        this.credentials = credentials;
         this.tenantID = tenantID;
     }
 }
@@ -46,8 +50,7 @@ class DirectorClient {
      */
     constructor(config) {
         this.host = config.host;
-        this.clientID = config.clientID;
-        this.clientSecret = config.clientSecret;
+        this.credentials = config.credentials;
         this.tenantID = config.tenantID;
 
         this._token = undefined;
@@ -67,8 +70,8 @@ class DirectorClient {
             const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
             const params = {
                 auth: {
-                    username: this.clientID,
-                    password: this.clientSecret
+                    username: this.credentials.clientID,
+                    password: this.credentials.clientSecret
                 },
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"

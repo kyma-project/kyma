@@ -6,7 +6,7 @@ dependencies:
   condition: connection_token_handler.enabled
 - name: connector-service
   condition: connector_service.enabled
-- name: central-application-gateway
-  condition: central_application_gateway.enabled
 - name: central-application-connectivity-validator
   condition: central_application_connectivity_validator.enabled
+- name: central-application-gateway
+  condition: central_application_gateway.enabled

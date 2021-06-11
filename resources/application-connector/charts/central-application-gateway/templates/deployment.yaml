@@ -30,47 +30,47 @@ spec:
     spec:
       serviceAccountName: {{.Chart.Name }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
-          args:
-            - "/applicationgateway"
-            - "--disableLegacyConnectivity={{ .Values.global.disableLegacyConnectivity }}"
-            - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
-            - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
-            - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-            - "--namespace={{ .Release.Namespace }}"
-            - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
-            - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
-            - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
-            - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
-            - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
-          readinessProbe:
-            httpGet:
-              path: /v1/health
-              port: {{ .Values.deployment.args.externalAPIPort }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /v1/health
-              port: {{ .Values.deployment.args.externalAPIPort }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          resources:
-            limits:
-              cpu: {{ .Values.deployment.resources.limits.cpu }}
-              memory: {{ .Values.deployment.resources.limits.memory }}
-            requests:
-              cpu: {{ .Values.deployment.resources.requests.cpu }}
-              memory: {{ .Values.deployment.resources.requests.memory }}
-          ports:
-          {{- if .Values.global.disableLegacyConnectivity }}
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/applicationgateway"
+          - "--disableLegacyConnectivity={{ .Values.global.disableLegacyConnectivity }}"
+          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--namespace={{ .Release.Namespace }}"
+          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
+          - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
+          - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
+          - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
+          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
+        ports:
+      {{- if .Values.global.disableLegacyConnectivity }}
           - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
             name: http-proxy
-          {{- else}}
+      {{- else}}
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: http-proxy
-          {{- end }}
+      {{- end }}
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port

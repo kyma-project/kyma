@@ -28,7 +28,8 @@ const {
   toBase64,
   ensureApplicationMapping,
   patchApplicationGateway,
-  eventingSubscription
+  eventingSubscription,
+  k8sDelete
 } = require("../../../utils");
 
 const {
@@ -134,7 +135,7 @@ async function sendEventAndCheckResponse() {
             "event-type": "order.created",
             "event-type-version": "v1",
             "event-time": "2020-09-28T14:47:16.491Z",
-            data: { orderCode: "567" },
+            "data": { "orderCode": "567" },
             "event-tracing": true,
           },
           {
@@ -436,10 +437,37 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   });
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
+
+async function deleteMockTestFixture(targetNamespace) {
+
+  const serviceBindingUsage = {
+    apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
+    kind: "ServiceBindingUsage",
+    metadata: { name: "commerce-lastorder-sbu" },
+    spec: {
+      serviceBindingRef: { name: "commerce-binding" },
+      usedBy: { kind: "serverless-function", name: "lastorder" },
+    },
+  };
+  await k8sDelete([serviceBindingUsage], targetNamespace);
+  const serviceBinding = {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceBinding",
+    metadata: { name: "commerce-binding" },
+    spec: {
+      instanceRef: { name: "commerce" },
+    },
+  };
+  await k8sDelete([serviceBinding], targetNamespace, false);
+  await k8sDelete(lastorderObjs)
+  await k8sDelete(commerceObjs)
+  await k8sDelete(applicationObjs)
+}
 module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
   checkAppGatewayResponse,
   cleanMockTestFixture,
+  deleteMockTestFixture,
 };

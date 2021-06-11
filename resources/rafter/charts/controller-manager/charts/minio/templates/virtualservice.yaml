@@ -1,0 +1,40 @@
+{{ if .Values.virtualservice.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ template "minio.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "minio.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  gateways:
+    - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
+  hosts:
+    - storage.{{ .Values.global.ingress.domainName }}
+  http:
+    - corsPolicy:
+        allowHeaders:
+          - Authorization
+          - Content-Type
+          - '*'
+        allowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+        allowOrigins:
+          - regex: .*
+      match:
+        - uri:
+            regex: /.*
+          method:
+            exact: GET
+      route:
+        - destination:
+            host: {{ template "minio.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}
