@@ -1,6 +1,5 @@
 ---
 title: Serverless chart
-type: Configuration
 ---
 
 To configure the Serverless chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.

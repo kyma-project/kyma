@@ -1,6 +1,5 @@
 ---
 title: Git source type
-type: Details
 ---
 
 Depending on a runtime you use to build your Function (Node.js 12, Node.js 14, or Python 3.8), your Git repository must contain at least a directory with these files:

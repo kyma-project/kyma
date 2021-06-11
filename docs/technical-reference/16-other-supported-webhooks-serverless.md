@@ -1,6 +1,5 @@
 ---
 title: Supported webhooks
-type: Details
 ---
 
 A newly created or modified Function CR is first updated by the defaulting webhook and then verified by the validation webhook before the Function Controller starts to process it.

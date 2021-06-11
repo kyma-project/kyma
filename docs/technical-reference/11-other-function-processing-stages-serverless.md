@@ -1,6 +1,5 @@
 ---
 title: Function processing stages
-type: Details
 ---
 
 From the moment you create a Function (Function CR) until the time it is ready, it goes through three processing stages that are defined as these condition types:
@@ -26,7 +25,7 @@ The diagrams illustrate all three core status changes in the Function processing
 
 This initial phase starts when you create a Function CR with configuration specifying the Function's setup. It ends with creating a ConfigMap that is used as a building block for a Function image.
 
-![Function configured](./assets/configured.svg)
+![Function configured](./assets/configured-serverless.svg)
 
 ## Built
 
@@ -36,7 +35,7 @@ Updating an existing Function requires an image rebuild only if you change the F
 
 >**NOTE:** Each time you update Function's configuration, the Function Controller deletes all previous Job CRs for the given Function's **UID**.
 
-![Function built](./assets/built.svg)
+![Function built](./assets/built-serverless.svg)
 
 ## Running
 
@@ -46,4 +45,4 @@ In general, the Deployment is considered updated when both configuration and the
 
 Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated resources. If it detects changes, it fetches the appropriate resource's status and only then updates the Function's status.
 
-![Function running](./assets/running.svg)
+![Function running](./assets/running-serverless.svg)

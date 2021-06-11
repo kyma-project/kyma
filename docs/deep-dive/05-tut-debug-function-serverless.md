@@ -1,6 +1,5 @@
 ---
 title: Debug a Function
-type: Deep Dive
 ---
 
 This tutorial shows how to use an external IDE to debug a Function in Kyma CLI.

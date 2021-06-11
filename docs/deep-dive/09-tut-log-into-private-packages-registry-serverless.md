@@ -1,6 +1,5 @@
 ---
 title: Log into a private package registry using credentials from a Secret
-type: Deep Dive
 ---
 
 Serverless allows you to consume private packages in your Functions. This tutorial shows how you can log into a private package registry by defining credentials in a Secret custom resource (CR).

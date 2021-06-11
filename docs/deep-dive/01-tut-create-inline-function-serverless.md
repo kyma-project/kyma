@@ -1,6 +1,5 @@
 ---
 title: Create an inline Function
-type: Deep Dive
 ---
 
 This tutorial shows how you can create a simple "Hello World" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.

@@ -1,6 +1,5 @@
 ---
 title: Switch to an external Docker registry at runtime
-type: Deep Dive
 ---
 
 This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-at-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:

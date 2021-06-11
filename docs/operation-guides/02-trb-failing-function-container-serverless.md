@@ -1,6 +1,5 @@
 ---
 title: Failing Function container
-type: Troubleshooting
 ---
 
 The container can suddenly fail when you use the `kyma run function` command with these flags:
