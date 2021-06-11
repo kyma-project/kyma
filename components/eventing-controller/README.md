@@ -69,7 +69,7 @@ The additional command line arguments are:
 
 | Flag                     | Description                                               | Default Value | Backend |
 | ------------------------ | --------------------------------------------------------- | ------------- | ------- |
-| `metrics-addr`           | The TCP address that the controller binds to for serving prometheus metrics.  | :8080 | Both  |
+| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080` | Both  |
 | `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | :8080 | Both  |
 | `ready-check-endpoint`   | The endpoint of the readiness probe.                      | readyz        | Both    |
 | `health-check-endpoint`  | The endpoint of the health probe.                         | healthz       | Both    |
