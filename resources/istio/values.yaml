@@ -33,7 +33,7 @@ kyma:
 istio:
   installer:
     image: eu.gcr.io/kyma-project/istio-installer
-    tag: "4039a61f"
+    tag: "49659ad2"
   securityContext:
     runAsUser: 65534
     runAsNonRoot: true
