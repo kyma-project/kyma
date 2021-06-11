@@ -4,9 +4,6 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-central_application_gateway:
-  enabled: true
-
 central_application_connectivity_validator:
   enabled: &centralApplicationConnectivityValidatorEnabled false
 
@@ -75,8 +72,6 @@ global:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
-  central_application_gateway:
-    version: "PR-11158"
   central_application_connectivity_validator:
     version: "PR-11173"
   central_application_gateway:

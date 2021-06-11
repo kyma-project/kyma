@@ -45,6 +45,11 @@ connection-token-handler:
         cpu: 10m
         memory: 32Mi
 central-application-gateway:
+  autoscaling:
+    enable: true
+    minReplicas: 1
+    maxReplicas: 10
+    cpuUsagePercent: 40
   deployment:
     resources:
       limits:
