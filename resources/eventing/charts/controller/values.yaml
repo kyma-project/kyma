@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-10674"
+  tag: "3631b06"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
