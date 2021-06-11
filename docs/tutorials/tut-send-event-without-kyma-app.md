@@ -8,12 +8,15 @@ type: Tutorials
 
 ## Prerequisites
 
-- A running Kyma cluster
-- ???
+- A running Kyma cluster with a valid Namespace
 
 ## Steps
 
-1. Create a subscription where the **eventType.value** field includes the name of your Application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an Application that does not exist in Kyma.
+1. In Kyma's left navigation panel, go to **Workloads** > **Functions** and navigate to your Function.
+
+2. Once in the Function details view, Switch to the **Configuration** tab, and select **Create Event Subscription** in the **Event Subscriptions** section.
+
+3. Create a subscription where the **eventType.value** field includes the name of your Application. In this example, this is `sap.kyma.custom.nonexistingapp.order.created.v1`, where `nonexistingapp` is an Application that does not exist in Kyma.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
@@ -35,9 +38,16 @@ spec:
   protocol: ""
   protocolsettings: {}
   sink: http://myservice.mynamespace.svc.cluster.local
+
 ```
 
-2. On the publisher side, include the exact same Application name in the `type` field, like in this example:
+
+4. Select the event type and version that you want to use for your Function and select **Save** to confirm changes.
+
+The message appears on the UI confirming that the Event Subscription was successfully created, and you will see it in the **Event Subscriptions** section in your Function.
+
+
+5. On the event publisher's side, include the exact same Application name in the `type` field, like in this example:
 
 ```yaml
 curl -k -i \
