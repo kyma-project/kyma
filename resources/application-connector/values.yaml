@@ -7,6 +7,9 @@ connection_token_handler:
 central_application_connectivity_validator:
   enabled: &centralApplicationConnectivityValidatorEnabled false
 
+central_application_gateway:
+  enabled: true
+
 global:
   centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
@@ -44,7 +47,7 @@ global:
   application_connectivity_validator:
     version: "1683d7cf"
   application_operator:
-    version: "PR-11173"
+    version: "b11a4b7b"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
@@ -70,7 +73,9 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "PR-11173"
+    version: "b11a4b7b"
+  central_application_gateway:
+    version: "ec86782f"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -93,7 +98,7 @@ application_connectivity_certs_sync:
       namespace: istio-system
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210504-12243229"
+    tag: "20210610-d25e85b1"
 
 tests:
   application_connector_tests:
