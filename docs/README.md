@@ -1,20 +1,22 @@
-# Documentation
+Kyma is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes.
 
-# Overview
+![overview](./assets/kyma-overview.svg)
 
-The `docs` folder contains end-to-end documentation on Kyma.
+Out of the box, Kyma offers various functionalities, such as:  
 
-Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the [Getting Started guides](./getting-started/).
+- Serverless development platform to run lightweight Functions in a cost-efficient and scalable way
+- System connectivity that provides endpoint to register Events and APIs of external applications
+- Eventing that provides messaging channel to receive Events, enrich them, and trigger business flows using Functions or services
+- Service Mesh for service-to-service communication and proxying
+- Service consumption
+- Secure API exposure
+- In-cluster observability
+- CLI supported by the intuitive Console UI
 
-Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
+Read about [Kyma main areas](#overview-main-areas) to learn more.
 
-The navigation order of the documentation page is based on the **rafter.kyma-project.io/order** label specified in the [ClusterAssetGroup](../resources/core/charts/docs/charts/content-ui/templates) for a given Kyma component.
+Kyma is built upon leading cloud-native, open-source projects, such as Istio, NATS, Serverless, and Prometheus. The features developed by Kyma are the unique “glue” that holds them together, so you can connect and extend your applications easily and intuitively. To learn how to do that, head over to the [Get Started](../get-started) section where you can find step-by-step instructions to get your environment up and running.
 
-## Development
+The extensions and customizations you create are decoupled from your core applications, which adds to these general advantages of using Kyma:
 
-Follow these basic rules when you add a new document to the official Kyma documentation:
-
-1. Get familiar with the [Content Strategy](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/01-content-strategy.md) to learn about the Kyma's official approach to content development.
-2. Follow the [Contribution Guide](https://github.com/kyma-project/community/blob/master/contributing/02-contributing.md) for the general contribution rules and process.
-3. Make use of the [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
-4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
+![advantages](./assets/kyma-advantages.svg)
