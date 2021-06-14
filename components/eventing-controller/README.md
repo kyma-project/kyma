@@ -67,12 +67,15 @@ This section explains how to use the Eventing Controller. It expects the followi
 
 The additional command line arguments are:
 
-| Flag                  | Description                                               | Default Value | Backend |
-| --------------------- | --------------------------------------------------------- | ------------- | ------- |
-| `metrics-addr`        | The address the metric endpoint binds to.                 | :8080         | both    |
-| `reconcile-period`    | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
-| `max-reconnects`      | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
-| `reconnect-wait`      | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
+| Flag                     | Description                                               | Default Value | Backend |
+| ------------------------ | --------------------------------------------------------- | ------------- | ------- |
+| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080` | Both  |
+| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | `:8080` | Both  |
+| `ready-check-endpoint`   | The endpoint of the readiness probe.                      | `readyz`        | Both    |
+| `health-check-endpoint`  | The endpoint of the health probe.                         | `healthz`       | Both    |
+| `reconcile-period`       | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
+| `max-reconnects`         | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
+| `reconnect-wait`         | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 

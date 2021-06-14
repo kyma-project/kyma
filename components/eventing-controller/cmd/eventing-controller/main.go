@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
 	"github.com/go-logr/zapr"
 
@@ -54,10 +55,11 @@ func main() {
 	// Init the manager.
 	restCfg := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: opts.MetricsAddr,
-		Port:               9443,
-		SyncPeriod:         &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
+		Scheme:                 scheme,
+		MetricsBindAddress:     opts.MetricsAddr,
+		HealthProbeBindAddress: opts.ProbeAddr,
+		Port:                   9443,
+		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
 	})
 	if err != nil {
 		setupLogger.Error(err, "unable to start manager")
@@ -74,6 +76,15 @@ func main() {
 	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod)
 	if err := bebCommander.Init(mgr); err != nil {
 		setupLogger.Error(err, "unable to initialize the BEB commander")
+		os.Exit(1)
+	}
+
+	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up health check: %v")
+		os.Exit(1)
+	}
+	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up ready check: %v")
 		os.Exit(1)
 	}
 
