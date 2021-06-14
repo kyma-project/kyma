@@ -9,13 +9,13 @@ When you complete this tutorial, you get a Function that:
 - Is available on an unsecured endpoint (**handler** set to `noop` in the APIRule CR).
 - Accepts the `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your Function, see the [tutorial](/components/api-gateway#tutorials-expose-and-secure-a-service-deploy-expose-and-secure-the-sample-resources).
+>**NOTE:** To learn more about securing your Function, see the [tutorial](../api-exposure/apig-01-expose-and-secure-service.md).
 
->**TIP:** Read also about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read also about [Function’s specification](../../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Prerequisites
 
-This tutorial is based on an existing Function. To create one, follow the [Create a Function](#tutorials-create-a-function) tutorial.
+This tutorial is based on an existing Function. To create one, follow the [Create a Function](./svls-01-create-inline-function.md) tutorial.
 
 ## Steps
 
@@ -97,7 +97,7 @@ Follows these steps:
 
     >**NOTE:** Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](#architecture-architecture).
+2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../../05-technical-reference/03-architecture/svls-01-architecture.md).
 
     ```yaml
     cat <<EOF | kubectl apply -f -

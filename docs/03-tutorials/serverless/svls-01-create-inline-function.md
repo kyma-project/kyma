@@ -4,9 +4,9 @@ title: Create an inline Function
 
 This tutorial shows how you can create a simple "Hello World" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
 
->**TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](#tutorials-create-a-function-from-git-repository-sources).
+>**TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
 
->**TIP:** Read about [Function’s specification](#details-function-s-specification) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read about [Function’s specification](../../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Steps
 

@@ -8,7 +8,7 @@ This tutorial shows how to use the available CLI commands to manage Functions in
 2. Generate a Function custom resource (CR) from these files and apply it on your cluster (`kyma apply function`).
 3. Fetch the current state of your Function's cluster configuration after it was modified (`kyma sync function`).
 
->**NOTE:** If you want to debug the Function using an external IDE (Visual Studio Code or GoLand), follow the [Debug a Function](#tutorials-debug-a-function) tutorial.
+>**NOTE:** If you want to debug the Function using an external IDE (Visual Studio Code or GoLand), follow the [Debug a Function](./svls-05-debug-function.md) tutorial.
 
 This tutorial is based on a sample Python Function run on a lightweight [k3d](https://k3d.io/) cluster.
 
@@ -18,7 +18,7 @@ Before you start, make sure you have these tools installed:
 
 - [Docker](https://www.docker.com/)
 - [Kyma CLI](#installation-install-kyma-cli)
-- Kyma installed [locally](https://kyma-project.io/docs/main/root/kyma/#installation-install-kyma-locally) or [on a cluster](https://kyma-project.io/docs/main/root/kyma/#installation-install-kyma-on-a-cluster)
+- Kyma installed locally or on a cluster
 
 ## Steps
 
