@@ -65,7 +65,7 @@ Here you have sample development tasks you can execute on your local machine wor
     kyma-js provision k3d
     ```
 
-3. Install Kyma without some modules:
+3. Install Kyma without some components:
     ```
     kyma-js install -v --skip-components=monitoring,tracing,logging,kiali
     ```
