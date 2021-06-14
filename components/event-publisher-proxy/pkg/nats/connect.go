@@ -21,9 +21,14 @@ type BackendConnection struct {
 
 // NewBackendConnection returns a new NewNatsConnection instance with the given NATS connection data.
 func NewBackendConnection(url string, retry bool, reconnects int, wait time.Duration) *BackendConnection {
-	bc := &BackendConnection{}
-	bc.connectionData = connectionData{url: url, retry: retry, reconnects: reconnects, wait: wait}
-	return bc
+	return &BackendConnection{
+		connectionData: connectionData{
+			url:        url,
+			retry:      retry,
+			reconnects: reconnects,
+			wait:       wait,
+		},
+	}
 }
 
 // Connect returns a nats connection that is ready for use, or error if connection to the nats server failed
