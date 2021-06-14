@@ -159,15 +159,15 @@ You can now install the Flux operator, connect it with a specific Git repository
 
 8. Go to **Settings** in your GitHub account:
 
-  ![GitHub account settings](./../assets/settings-serverless.png)
+  ![GitHub account settings](./assets/svls-settings.png)
 
 9. Go to the **SSH and GPG keys** section and select the **New SSH key** button:
 
-  ![Create a new SSH key](./../assets/create-ssh-key-serverless.png)
+  ![Create a new SSH key](./assets/svls-create-ssh-key.png)
 
 10. Provide the new key name, paste the previously copied SSH key, and confirm changes by selecting the **Add SSH Key** button:
 
-  ![Add a new SSH key](./../assets/add-ssh-key-serverless.png)
+  ![Add a new SSH key](./assets/svls-add-ssh-key.png)
 
 ### Create a Function
 
