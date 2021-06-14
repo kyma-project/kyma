@@ -15,7 +15,7 @@ tests:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-        - ALL
+      - ALL
     privileged: false
 
 bindings:
