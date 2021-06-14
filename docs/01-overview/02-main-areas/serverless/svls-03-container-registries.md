@@ -8,12 +8,12 @@ If you use Serverless for production purposes, it is recommended that you use an
 
 Serverless supports two ways of connecting to an external registry:
 
-- [You can set up an external registry before installation](#tutorials-set-an-external-docker-registry).
+- [You can set up an external registry before installation](../../../03-tutorials/serverless/svls-07-set-external-registry.md).
 
   In this scenario, you can use Kyma overrides to change the default values supplied by the installation mechanism.
 
-- [You can switch to an external registry at runtime](#tutorials-switch-to-an-external-docker-registry-at-runtime).
+- [You can switch to an external registry at runtime](../../../03-tutorials/serverless/svls-08-switch-to-external-registry.md).
 
   In this scenario, you can change the registry on the fly, with Kyma already installed on your cluster. This option gives you way more flexibility and control over the choice of an external registry for your Functions.
 
->**TIP:** For details, read about [switching registries at runtime](#details-switching-registries-at-runtime).
+>**TIP:** For details, read about [switching registries at runtime](../../../05-technical-reference/svls-03-switching-registries.md).
