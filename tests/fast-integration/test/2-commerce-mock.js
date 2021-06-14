@@ -5,7 +5,6 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
 axios.defaults.httpsAgent = httpsAgent;
-
 const {
   ensureCommerceMockLocalTestFixture,
   checkAppGatewayResponse,
@@ -28,6 +27,7 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
+  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
   const testNamespace = "test";
   let initialRestarts = null;
 
@@ -36,9 +36,9 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway);
     });
   });
 

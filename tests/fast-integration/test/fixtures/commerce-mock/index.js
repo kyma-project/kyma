@@ -58,30 +58,25 @@ const lastorderFunctionYaml = fs.readFileSync(
   }
 );
 
-const lastorderCentralApplicationGatewayFunctionYaml = fs.readFileSync(
-    path.join(__dirname, "..", "..", "..", "application-connectivity-2-test", "./lastorder-function.yaml"),
-    {
-      encoding: "utf8",
-    }
-);
-
-const lastorderCentralApplicationGatewayAndCompassFunctionYaml = fs.readFileSync(
-    path.join(__dirname, "..", "..", "..", "application-connectivity-2-compass-test", "./lastorder-function.yaml"),
-    {
-      encoding: "utf8",
-    }
-);
-
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
-const lastorderCentralApplicationGatewayObjs = k8s.loadAllYaml(lastorderCentralApplicationGatewayFunctionYaml);
 
-function prepareLastorderCentralApplicationGatewayAndCompassObjs(appName) {
-  return k8s.loadAllYaml(
-      lastorderCentralApplicationGatewayAndCompassFunctionYaml
-          .toString()
-          .replace('%%APP_NAME%%', appName));
+function prepareLastorderObjs(type='standard', appName='commerce') {
+  if (type === 'central-app-gateway')
+    return k8s.loadAllYaml(
+        lastorderFunctionYaml
+            .toString()
+            .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+  if (type === 'central-app-gateway-compass')
+    return k8s.loadAllYaml(
+        lastorderFunctionYaml
+            .toString()
+            .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
+            .replace('%%APP_NAME%%', appName));
+  return k8s.loadAllYaml(lastorderFunctionYaml
+      .toString()
+      .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
 }
 
 function namespaceObj(name) {
@@ -273,7 +268,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
       `mp-${appName}`,
       mockNamespace,
       targetNamespace,
-      withCentralApplicationGateway ? prepareLastorderCentralApplicationGatewayAndCompassObjs(`mp-${appName}`) : lastorderObjs);
+      withCentralApplicationGateway ? prepareLastorderObjs('central-app-gateway-compass', `mp-${appName}`) : prepareLastorderObjs());
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
   await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
@@ -325,7 +320,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
       "commerce",
       mockNamespace,
       targetNamespace,
-      withCentralApplicationGateway ? lastorderCentralApplicationGatewayObjs : lastorderObjs);
+      withCentralApplicationGateway ? prepareLastorderObjs('central-app-gateway') : prepareLastorderObjs());
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
