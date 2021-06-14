@@ -150,7 +150,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 	r.namedLogger().Debug("created/updated backend CR")
 
 	// Stop the BEB subscription controller
-	if err := r.stopBebController(); err != nil {
+	if err := r.stopBEBController(); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when stopBEBController failed")
@@ -158,7 +158,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 		return ctrl.Result{}, err
 	}
 	// Start the NATS subscription controller
-	if err := r.startNatsController(); err != nil {
+	if err := r.startNATSController(); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, nil)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startNATSController failed")
@@ -209,7 +209,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Stop the NATS subscription controller
-	if err := r.stopNatsController(); err != nil {
+	if err := r.stopNATSController(); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when stopNATSController failed")
@@ -235,7 +235,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if err := r.startBebController(); err != nil {
+	if err := r.startBEBController(); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
@@ -659,7 +659,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *Reconciler) startNatsController() error {
+func (r *Reconciler) startNATSController() error {
 	if !r.natsCommanderStarted {
 		if err := r.natsCommander.Start(); err != nil {
 			r.namedLogger().Errorw("failed to start the NATS commander", "error", err)
@@ -671,7 +671,7 @@ func (r *Reconciler) startNatsController() error {
 	return nil
 }
 
-func (r *Reconciler) stopNatsController() error {
+func (r *Reconciler) stopNATSController() error {
 	if r.natsCommanderStarted {
 		if err := r.natsCommander.Stop(); err != nil {
 			r.namedLogger().Errorw("failed to stop the NATS commander", "error", err)
@@ -683,7 +683,7 @@ func (r *Reconciler) stopNatsController() error {
 	return nil
 }
 
-func (r *Reconciler) startBebController() error {
+func (r *Reconciler) startBEBController() error {
 	if !r.bebCommanderStarted {
 		if err := r.bebCommander.Start(); err != nil {
 			r.namedLogger().Errorw("failed to start the BEB commander", "error", err)
@@ -695,7 +695,7 @@ func (r *Reconciler) startBebController() error {
 	return nil
 }
 
-func (r *Reconciler) stopBebController() error {
+func (r *Reconciler) stopBEBController() error {
 	if r.bebCommanderStarted {
 		if err := r.bebCommander.Stop(); err != nil {
 			r.namedLogger().Errorw("failed to stop the BEB commander", "error", err)

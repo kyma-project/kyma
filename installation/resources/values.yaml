@@ -1,3 +1,5 @@
+# This file contains default overrides that are applied during Kyma 2 deployment
+
 global:
   installCRDs: false
 tracing:
@@ -33,3 +35,8 @@ monitoring:
 cluster-users:
   users:
     bindStaticUsers: false
+rafter:
+  controller-manager:
+    minio:
+      virtualservice:
+        enabled: false

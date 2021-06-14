@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-11428"
+  tag: "3631b06e"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -36,7 +36,7 @@ publisherProxy:
   image:
     # name is the name of the container image for the eventing-publisher-proxy
     name: "event-publisher-proxy"
-    tag: "PR-11430"
+    tag: "7324e441"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
@@ -58,6 +58,26 @@ metrics:
     interval: 30s
 
 clusterRoleBindingSuffix: ""
+
+healthProbe:
+   port: 8081
+   scheme: HTTP
+   liveness:
+     service:
+       path: "/healthz"
+     failureThreshold: 3
+     initialDelaySeconds: 5
+     periodSeconds: 10
+     successThreshold: 1
+     timeoutSeconds: 2
+   readiness:
+     service:
+       path: "/readyz"
+     failureThreshold: 3
+     initialDelaySeconds: 10
+     periodSeconds: 3
+     successThreshold: 1
+     timeoutSeconds: 2
 
 eventingBackend:
   name: eventing-backend

@@ -285,13 +285,52 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 }
 
 func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
+	messagingValue := `
+				[{
+					"broker": {
+						"type": "sapmgw"
+					},
+					"oa2": {
+						"clientid": "clientid",
+						"clientsecret": "clientsecret",
+						"granttype": "client_credentials",
+						"tokenendpoint": "https://token"
+					},
+					"protocol": ["amqp10ws"],
+					"uri": "wss://amqp"
+				}, {
+					"broker": {
+						"type": "sapmgw"
+					},
+					"oa2": {
+						"clientid": "clientid",
+						"clientsecret": "clientsecret",
+						"granttype": "client_credentials",
+						"tokenendpoint": "https://token"
+					},
+					"protocol": ["amqp10ws"],
+					"uri": "wss://amqp"
+				}, {
+					"broker": {
+						"type": "saprestmgw"
+					},
+					"oa2": {
+						"clientid": "rest-clientid",
+						"clientsecret": "rest-client-secret",
+						"granttype": "client_credentials",
+						"tokenendpoint": "https://rest-token"
+					},
+					"protocol": ["httprest"],
+					"uri": "https://rest-messaging"
+				}]`
+
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
 		},
 		StringData: map[string]string{
-			"messaging": "[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]",
+			"messaging": messagingValue,
 			"namespace": "test/ns",
 		},
 	}

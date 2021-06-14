@@ -14,6 +14,9 @@ const (
 	argNameMetricsAddr     = "metrics-addr"
 	argNameReconnectWait   = "reconnect-wait"
 	argNameReconcilePeriod = "reconcile-period"
+	argNameProbeAddr       = "health-probe-bind-addr"
+	argNameReadyEndpoint   = "ready-check-endpoint"
+	argNameHealthEndpoint  = "health-check-endpoint"
 
 	// env
 	envNameLogFormat = "APP_LOG_FORMAT"
@@ -32,6 +35,9 @@ type Args struct {
 	MetricsAddr     string
 	ReconnectWait   time.Duration
 	ReconcilePeriod time.Duration
+	ProbeAddr       string
+	ReadyEndpoint   string
+	HealthEndpoint  string
 }
 
 // Env represents the controller environment variables.
@@ -51,6 +57,9 @@ func (o *Options) Parse() error {
 	flag.StringVar(&o.MetricsAddr, argNameMetricsAddr, ":8080", "The address the metric endpoint binds to.")
 	flag.DurationVar(&o.ReconnectWait, argNameReconnectWait, time.Second, "Wait time between reconnect attempts (NATS).")
 	flag.DurationVar(&o.ReconcilePeriod, argNameReconcilePeriod, time.Minute*10, "Period between triggering of reconciling calls (BEB).")
+	flag.StringVar(&o.ProbeAddr, argNameProbeAddr, ":8081", "The TCP address that the controller should bind to for serving health probes.")
+	flag.StringVar(&o.ReadyEndpoint, argNameReadyEndpoint, "readyz", "The endpoint of the readiness probe.")
+	flag.StringVar(&o.HealthEndpoint, argNameHealthEndpoint, "healthz", "The endpoint of the health probe.")
 	flag.Parse()
 
 	if err := envconfig.Process("", &o.Env); err != nil {
@@ -62,11 +71,14 @@ func (o *Options) Parse() error {
 
 // String implements the fmt.Stringer interface.
 func (o Options) String() string {
-	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v",
+	return fmt.Sprintf("--%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v --%s=%v %s=%v %s=%v",
 		argNameMaxReconnects, o.MaxReconnects,
 		argNameMetricsAddr, o.MetricsAddr,
 		argNameReconnectWait, o.ReconnectWait,
 		argNameReconcilePeriod, o.ReconcilePeriod,
+		argNameProbeAddr, o.ProbeAddr,
+		argNameReadyEndpoint, o.ReadyEndpoint,
+		argNameHealthEndpoint, o.HealthEndpoint,
 		envNameLogFormat, o.LogFormat,
 		envNameLogLevel, o.LogLevel,
 	)

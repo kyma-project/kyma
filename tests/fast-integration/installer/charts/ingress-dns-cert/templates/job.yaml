@@ -16,7 +16,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: {{ .Release.Name }}
-        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
+        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
         command: ["/bin/sh", ]
         args: ["-c","kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class=garden dns.gardener.cloud/dnsnames=*.$(GLOBAL_DOMAIN) --overwrite" ]
         env:
@@ -41,7 +41,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: {{ .Release.Name }}-job1
-        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
+        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
         command: ["/bin/sh", ]
         args: ["-c","kubectl create secret tls kyma-gateway-certs -n kyma-system --cert=/etc/kyma-gateway-certs/tls.crt --key=/etc/kyma-gateway-certs/tls.key --dry-run -oyaml |
   kubectl apply -f -"]
@@ -49,7 +49,7 @@ spec:
         - name: cert
           mountPath: /etc/kyma-gateway-certs/
       - name: {{ .Release.Name }}-job2
-        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
+        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
         command: ["/bin/sh", ]
         args: ["-c","kubectl create secret generic ingress-tls-cert -n kyma-system --from-file=tls.crt=/etc/kyma-gateway-certs/tls.crt --dry-run -oyaml |
   kubectl apply -f -"]
@@ -57,7 +57,7 @@ spec:
         - name: cert
           mountPath: /etc/kyma-gateway-certs/
       - name: {{ .Release.Name }}-job3
-        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210504-12243229
+        image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
         command: ["/bin/sh", ]
         args: ["-c","kubectl create secret tls apiserver-proxy-tls-cert -n kyma-system --cert=/etc/kyma-gateway-certs/tls.crt --key=/etc/kyma-gateway-certs/tls.key --dry-run -oyaml |
   kubectl apply -f -"]
