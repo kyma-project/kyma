@@ -2,6 +2,7 @@ package applications
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,7 +80,7 @@ func (c converter) toService(applicationName string, apiPackage model.APIPackage
 	return v1alpha1.Service{
 		ID:                        apiPackage.ID,
 		Identifier:                "", // not available in the Director's API
-		Name:                      createServiceName(apiPackage.Name, apiPackage.ID),
+		Name:                      normalization.NormalizeServiceNameWithId(apiPackage.Name, apiPackage.ID),
 		AuthCreateParameterSchema: apiPackage.InstanceAuthRequestInputSchema,
 		DisplayName:               apiPackage.Name,
 		Description:               description,
