@@ -3,10 +3,9 @@ package nats
 import (
 	"testing"
 
+	publishertesting "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
-
-	publishertesting "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
 func TestConnectToNats(t *testing.T) {
@@ -15,9 +14,18 @@ func TestConnectToNats(t *testing.T) {
 	assert.NotEmpty(t, natsServer.ClientURL())
 	defer natsServer.Shutdown()
 
-	connection, err := ConnectToNats(natsServer.ClientURL(), true, 1, 3)
+	bc := NewBackendConnection(natsServer.ClientURL(), true, 1, 3)
+	err := bc.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, connection)
-	assert.Equal(t, connection.Status(), nats.CONNECTED)
-	defer connection.Close()
+	assert.NotNil(t, bc.Connection)
+	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
+
+	bc.Connection.Close()
+
+	err = bc.Reconnect()
+	assert.Nil(t, err)
+	assert.NotNil(t, bc.Connection)
+	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
+
+	defer bc.Connection.Close()
 }
