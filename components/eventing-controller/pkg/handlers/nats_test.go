@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/avast/retry-go"
 	"strings"
 	"testing"
 	"time"
 
+	. "github.com/onsi/gomega"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/nats-io/nats.go"
@@ -171,4 +173,108 @@ func TestSubscription(t *testing.T) {
 	if err == nil {
 		t.Fatal("subscription still exists in Nats")
 	}
+}
+
+func TestIsValidSubscription(t *testing.T) {
+	g := NewWithT(t)
+
+	natsPort := 5223
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	//defer natsServer.Shutdown()
+
+	// Create Nats client
+	natsURL := natsServer.ClientURL()
+	natsClient := Nats{
+		subscriptions: make(map[string]*nats.Subscription),
+		config: env.NatsConfig{
+			Url:           natsURL,
+			MaxReconnects: 2,
+			ReconnectWait: time.Second,
+		},
+		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
+	}
+	err := natsClient.Initialize(env.Config{})
+	if err != nil {
+		t.Fatalf("failed to connect to Nats Server: %v", err)
+	}
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	if err != nil {
+		t.Fatalf("failed to Sync subscription: %v", err)
+	}
+
+	// get filter
+	filter := sub.Spec.Filter.Filters[0]
+	subject, err := getSubject(filter, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(subject).To(Not(BeEmpty()))
+
+	// get internal key
+	key := getKey(sub, subject)
+	g.Expect(key).To(Not(BeEmpty()))
+	natsSub := natsClient.subscriptions[key]
+	g.Expect(natsSub).To(Not(BeNil()))
+
+	// the associated Nats subscription should be valid
+	g.Expect(natsSub.IsValid()).To(BeTrue())
+
+	natsServer.Shutdown()
+
+	// the associated Nats subscription should not be valid anymore
+	err = checkIsNotValid(natsSub, t)
+	g.Expect(err).To(BeNil())
+
+	// Restart Nats server
+	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	// TODO: the controller should react and inject Kyma subscriptions into NATS for all "invalid" subscriptions
+	// the associated Nats subscription should be valid again
+	/*
+	err = checkIsValid(natsSub, t)
+	g.Expect(err).To(BeNil())
+	*/
+
+
+}
+
+func checkIsValid(sub *nats.Subscription, t *testing.T) error {
+	return checkValidity(sub, true, t)
+}
+
+func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
+	return checkValidity(sub, false, t)
+}
+
+func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) error {
+	maxAttempts := uint(5)
+	delay := time.Second
+	err := retry.Do(
+		func() error {
+			if toCheckIsValid == sub.IsValid() {
+				return nil
+			}
+			if toCheckIsValid {
+				return errors.New("still invalid Nats subscription, expected valid")
+			}
+			return errors.New("still valid Nats subscription, expected invalid")
+		},
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(maxAttempts),
+		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
+	)
+	return err
 }

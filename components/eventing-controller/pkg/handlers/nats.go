@@ -89,20 +89,15 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 
 // The returned bool should be ignored now. It's a marker for changed subscription status
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
-	namespacedName := types.NamespacedName{
-		Namespace: sub.Namespace,
-		Name:      sub.Name,
-	}
 	var filters []*eventingv1alpha1.BebFilter
 	if sub.Spec.Filter != nil {
 		filters = sub.Spec.Filter.Filters
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
-		eventType := strings.TrimSpace(filter.EventType.Value)
-		if len(eventType) == 0 {
-			err := nats.ErrBadSubject
-			n.log.Error(err, "failed to create a Nats subscription")
+		subject, err := getSubject(filter, cleaner)
+		if err != nil {
+			n.log.Error(err, "failed to create a Nats subject")
 			return false, err
 		}
 
@@ -117,29 +112,19 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		// clean the application name segment in the event-type from none-alphanumeric characters
-		eventType, err := cleaner.Clean(eventType)
-		if err != nil {
-			return false, err
-		}
-
-		sub, subscribeErr := n.connection.Subscribe(eventType, callback)
+		natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
 		if subscribeErr != nil {
 			n.log.Error(subscribeErr, "failed to create a Nats subscription")
 			return false, subscribeErr
 		}
-		n.subscriptions[fmt.Sprintf("%s.%s", namespacedName.String(), filter.EventType.Value)] = sub
+		n.subscriptions[getKey(sub, subject)] = natsSub
 	}
 	return false, nil
 }
 
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	subNsName := types.NamespacedName{
-		Namespace: subscription.Namespace,
-		Name:      subscription.Name,
-	}
 	for k, v := range n.subscriptions {
-		if strings.HasPrefix(k, subNsName.String()) {
+		if strings.HasPrefix(k, getKeyPrefix(subscription)) {
 			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
@@ -196,4 +181,26 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 		return nil, err
 	}
 	return &event, nil
+}
+
+func getKeyPrefix(sub *eventingv1alpha1.Subscription) string {
+	namespacedName := types.NamespacedName{
+		Namespace: sub.Namespace,
+		Name:      sub.Name,
+	}
+	return fmt.Sprintf("%s", namespacedName.String())
+}
+
+func getKey(sub *eventingv1alpha1.Subscription, subject string) string {
+	return fmt.Sprintf("%s.%s", getKeyPrefix(sub), subject)
+}
+
+func getSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
+	eventType := strings.TrimSpace(filter.EventType.Value)
+	if len(eventType) == 0 {
+		return "", nats.ErrBadSubject
+	}
+	// clean the application name segment in the event-type from none-alphanumeric characters
+	// return it as a Nats subject
+	return cleaner.Clean(eventType)
 }
