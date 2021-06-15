@@ -7,7 +7,7 @@ import (
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-	"github.com/nats-io/nats.go"
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,14 +20,14 @@ type GenericSender interface {
 
 // BebMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
-	ctx        context.Context
-	logger     *logrus.Logger
-	connection *nats.Conn
+	ctx               context.Context
+	logger            *logrus.Logger
+	backendConnection *pkgnats.BackendConnection
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
-func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logrus.Logger) *NatsMessageSender {
-	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
+func NewNatsMessageSender(ctx context.Context, bc *pkgnats.BackendConnection, logger *logrus.Logger) *NatsMessageSender {
+	return &NatsMessageSender{ctx: ctx, backendConnection: bc, logger: logger}
 }
 
 // Send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
@@ -36,7 +36,7 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 	// The same Nats subject used by Nats subscription
 	subject := event.Type()
 
-	sender, err := cenats.NewSenderFromConn(h.connection, subject)
+	sender, err := cenats.NewSenderFromConn(h.backendConnection.Connection, subject)
 	if err != nil {
 		h.logger.Errorf("Failed to create nats protocol, %s", err.Error())
 		return http.StatusInternalServerError, err
@@ -51,6 +51,12 @@ func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (i
 	err = client.Send(ctx, *event)
 	if cev2.IsUndelivered(err) {
 		h.logger.Errorf("Failed to send: %s", err.Error())
+		if h.backendConnection.Connection.IsClosed() {
+			h.logger.Info("Reconnect...")
+			if err := h.backendConnection.Reconnect(); err != nil {
+				h.logger.Errorf("Failed to reconnect: %s", err.Error())
+			}
+		}
 		return http.StatusBadGateway, err
 	}
 

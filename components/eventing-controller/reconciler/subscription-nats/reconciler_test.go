@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,8 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/nats-io/nats.go"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -267,6 +267,7 @@ var natsUrl string
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var natsServer *natsserver.Server
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -280,8 +281,8 @@ var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
 
-	natsPort := 4222
-	natsServer := reconcilertesting.RunNatsServerOnPort(natsPort)
+	natsPort := 4221
+	natsServer = reconcilertesting.RunNatsServerOnPort(natsPort)
 	natsUrl = natsServer.ClientURL()
 	log.Printf("started test Nats server: %v", natsUrl)
 
@@ -312,7 +313,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{
-		Url:             nats.DefaultURL,
+		Url:             natsUrl,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
@@ -347,6 +348,7 @@ var _ = BeforeSuite(func(done Done) {
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
+	reconcilertesting.ShutDownNATSServer(natsServer)
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })

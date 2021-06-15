@@ -66,12 +66,13 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+	bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+	err := bc.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, connection)
+	assert.NotNil(t, bc.Connection)
 
 	// create a Nats sender
-	msgSender := sender.NewNatsMessageSender(ctx, connection, test.logger)
+	msgSender := sender.NewNatsMessageSender(ctx, bc, test.logger)
 	assert.NotNil(t, msgSender)
 
 	// configure legacyTransformer
@@ -151,13 +152,14 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		err := bc.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, connection)
+		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
 
 		// run the tests for publishing cloudevents
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
@@ -199,13 +201,14 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		err := bc.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, connection)
+		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
 
 		// run the tests for publishing legacy events
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {

@@ -67,12 +67,15 @@ This section explains how to use the Eventing Controller. It expects the followi
 
 The additional command line arguments are:
 
-| Flag                  | Description                                               | Default Value | Backend |
-| --------------------- | --------------------------------------------------------- | ------------- | ------- |
-| `metrics-addr`        | The address the metric endpoint binds to.                 | :8080         | both    |
-| `reconcile-period`    | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
-| `max-reconnects`      | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
-| `reconnect-wait`      | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
+| Flag                     | Description                                               | Default Value | Backend |
+| ------------------------ | --------------------------------------------------------- | ------------- | ------- |
+| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080` | Both  |
+| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | `:8080` | Both  |
+| `ready-check-endpoint`   | The endpoint of the readiness probe.                      | `readyz`        | Both    |
+| `health-check-endpoint`  | The endpoint of the health probe.                         | `healthz`       | Both    |
+| `reconcile-period`       | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
+| `max-reconnects`         | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
+| `reconnect-wait`         | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
@@ -126,6 +129,11 @@ make manifests
 
 ```sh
 make manifests
+```
+
+- To use the newly generated CRDs, copy them to installation folders of Kyma:
+```sh
+make copy-crds
 ```
 
 - Add the necessary changes manually in the sample CustomResources after updating fields for an existing CustomResourceDefinition inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`

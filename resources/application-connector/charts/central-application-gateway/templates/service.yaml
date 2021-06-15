@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    application: {{ .Chart.Name }}
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app.kubernetes.io/name: {{ template "name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.externalapi.port }}
+      protocol: TCP
+      name: http-api-port
+  {{- if .Values.global.disableLegacyConnectivity }}
+    - port: {{ .Values.service.proxy.portCompass }}
+  {{- else}}
+    - port: {{ .Values.service.proxy.port }}
+  {{- end }}
+      protocol: TCP
+      name: http-proxy
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
