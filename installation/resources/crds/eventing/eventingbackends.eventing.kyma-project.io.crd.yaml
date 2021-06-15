@@ -1,8 +1,10 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.4.0
   creationTimestamp: null
   name: eventingbackends.eventing.kyma-project.io
 spec:
@@ -14,69 +16,69 @@ spec:
     singular: eventingbackend
   scope: Namespaced
   versions:
-    - additionalPrinterColumns:
-        - jsonPath: .status.backendType
-          name: Backend
-          type: string
-        - jsonPath: .status.eventingReady
-          name: EventingReady
-          type: boolean
-        - jsonPath: .status.subscriptionControllerReady
-          name: SubscriptionControllerReady
-          type: boolean
-        - jsonPath: .status.publisherProxyReady
-          name: PublisherProxyReady
-          type: boolean
-      name: v1alpha1
-      schema:
-        openAPIV3Schema:
-          description: EventingBackend is the Schema for the eventingbackends API
-          properties:
-            apiVersion:
-              description: 'APIVersion defines the versioned schema of this representation
+  - additionalPrinterColumns:
+    - jsonPath: .status.backendType
+      name: Backend
+      type: string
+    - jsonPath: .status.eventingReady
+      name: EventingReady
+      type: boolean
+    - jsonPath: .status.subscriptionControllerReady
+      name: SubscriptionControllerReady
+      type: boolean
+    - jsonPath: .status.publisherProxyReady
+      name: PublisherProxyReady
+      type: boolean
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: EventingBackend is the Schema for the eventingbackends API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-              type: string
-            kind:
-              description: 'Kind is a string value representing the REST resource this
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-              type: string
-            metadata:
-              type: object
-            spec:
-              description: EventingBackendSpec defines the desired state of EventingBackend
-              type: object
-            status:
-              description: EventingBackendStatus defines the observed state of EventingBackend
-              properties:
-                backendType:
-                  description: Specifies the backend type used. Allowed values are "BEB"
-                    and "NATS"
-                  enum:
-                    - BEB
-                    - NATS
-                  type: string
-                bebSecretName:
-                  description: The name of the secret containing BEB access tokens,
-                    required only for BEB
-                  type: string
-                bebSecretNamespace:
-                  description: The namespace of the secret containing BEB access tokens,
-                    required only for BEB
-                  type: string
-                eventingReady:
-                  type: boolean
-                publisherProxyReady:
-                  type: boolean
-                subscriptionControllerReady:
-                  type: boolean
-              type: object
-          type: object
-      served: true
-      storage: true
-      subresources:
-        status: {}
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EventingBackendSpec defines the desired state of EventingBackend
+            type: object
+          status:
+            description: EventingBackendStatus defines the observed state of EventingBackend
+            properties:
+              backendType:
+                description: Specifies the backend type used. Allowed values are "BEB"
+                  and "NATS"
+                enum:
+                - BEB
+                - NATS
+                type: string
+              bebSecretName:
+                description: The name of the secret containing BEB access tokens,
+                  required only for BEB
+                type: string
+              bebSecretNamespace:
+                description: The namespace of the secret containing BEB access tokens,
+                  required only for BEB
+                type: string
+              eventingReady:
+                type: boolean
+              publisherProxyReady:
+                type: boolean
+              subscriptionControllerReady:
+                type: boolean
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""
