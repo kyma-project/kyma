@@ -6,11 +6,11 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 
 ![Serverless architecture](./assets/svls-architecture.svg)
 
->**CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with Functions correctly. Also, if you apply custom [LimitRanges](/root/kyma/#details-resource-quotas) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](#configuration-serverless-chart).
+>**CAUTION:** Serverless imposes some requirements on the setup of Namespaces. If you create a new Namespace, do not disable sidecar injection in it as Serverless requires Istio for other resources to communicate with Functions correctly. Also, if you apply custom [LimitRanges](https://kubernetes.io/docs/concepts/policy/limit-range/) for a new Namespace, they must be higher than or equal to the [limits for building Jobs' resources](../05-configuration-parameters/svls-01-serverless-chart.md).
 
 1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
-2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](#details-supported-webhooks) respectively.
+2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](../svls-07-supported-webhooks.md) respectively.
 
 3. Function Controller (FC) detects the new, validated Function CR.
 

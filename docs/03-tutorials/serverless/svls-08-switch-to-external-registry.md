@@ -2,7 +2,7 @@
 title: Switch to an external Docker registry at runtime
 ---
 
-This tutorial shows how you can [switch to an external Docker registry](#details-internal-and-external-registries-switching-registries-at-runtime) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
+This tutorial shows how you can [switch to an external Docker registry](../../../05-technical-reference/svls-03-switching-registries.md) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
@@ -49,7 +49,7 @@ After this change, any Function deployed in the `default` Namespace will store i
 
 ### Create required cloud resources
 
-To create cloud resources required for a given registry provider, follow the steps described in the [Set an external Docker registry](#tutorials-set-an-external-docker-registry-create-required-cloud-resources) tutorial.
+To create cloud resources required for a given registry provider, follow the steps described in the [Set an external Docker registry](./svls-07-set-external-registry.md) tutorial.
 
 ### Create a Secret CR
 
@@ -73,11 +73,11 @@ data:
 EOF
 ```
 
->**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](#details-switching-registries-at-runtime).
+>**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](../../../05-technical-reference/svls-03-switching-registries.md).
 
 ### Test the registry switch
 
-[Create a Function](#tutorials-create-an-inline-function) in the `default` Namespace and check if the Function's Deployment points to the external registry using this command:
+[Create a Function](./svls-01-create-inline-function.md) in the `default` Namespace and check if the Function's Deployment points to the external registry using this command:
 
 ```bash
 kubectl get pods -n default -l serverless.kyma-project.io/resource=deployment -o jsonpath='{ ...image }'

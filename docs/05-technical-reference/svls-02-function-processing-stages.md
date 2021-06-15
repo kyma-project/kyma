@@ -19,7 +19,7 @@ When you update an existing Function, conditions change asynchronously depending
 
 The diagrams illustrate all three core status changes in the Function processing circle that the Function Controller handles. They also list all custom resources involved in this process and specify in which cases their update is required.
 
->**NOTE:** Before you start reading, see the [Function CR](#custom-resource-function) document for the custom resource detailed definition, the list of all Function's condition types and reasons for their success or failure.
+>**NOTE:** Before you start reading, see the [Function CR](./05-technical-reference/06-custom-resources/svls-01-function.md) document for the custom resource detailed definition, the list of all Function's condition types and reasons for their success or failure.
 
 ## Configured
 

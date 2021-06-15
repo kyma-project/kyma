@@ -6,7 +6,7 @@ A newly created or modified Function CR is first updated by the defaulting webho
 
 ## Defaulting webhook
 
->**NOTE:** It only applies to the [Function custom resource (CR)](#custom-resource-function).
+>**NOTE:** It only applies to the [Function custom resource (CR)](./05-technical-reference/06-custom-resources/svls-01-function.md).
 
 The defaulting webhook:
 
@@ -29,13 +29,13 @@ The defaulting webhook:
    | **maxReplicas**   | `1`           |
    | **runtime**       | `nodejs14`    |
 
->**NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](#details-available-presets) to find out more.
+>**NOTE:** Function's resources and replicas as well as resources for a Kubernetes Job are based on presets. Read about all [available presets](./svls-09-available-presets.md) to find out more.
 
 ## Validation webhook
 
 It checks the following conditions for these CRs:
 
-1. [Function CR](#custom-resource-function)
+1. [Function CR](./05-technical-reference/06-custom-resources/svls-01-function.md)
 
    - Minimum values requested for a Function (CPU, memory, and replicas) and a Kubernetes Job (CPU and memory) responsible for building the Function's image must not be lower than the required ones:
 
@@ -53,7 +53,7 @@ It checks the following conditions for these CRs:
    - The format of deps, envs, labels, and the Function name ([RFC 1035](https://tools.ietf.org/html/rfc1035)) is correct.
    - The Function CR contains any envs reserved for the Deployment: `FUNC_RUNTIME`, `FUNC_HANDLER`, `FUNC_PORT`, `MOD_NAME`, `NODE_PATH`, `PYTHONPATH`.
 
-2. [GitRepository CR](#custom-resource-git-repository)
+2. [GitRepository CR](./05-technical-reference/06-custom-resources/svls-02-gitrepository.md)
 
    - The **spec.url** parameter must:
 
@@ -75,7 +75,7 @@ It checks the following conditions for these CRs:
 
 There is also the admission webhook that is only triggered in the scenario when you switch at runtime from one registry to another.
 
-To switch registries at runtime, you must create or update a Secret CR that complies with [specific requirements](#details-switching-registries-at-runtime). This Secret CR, among other details, contains a username and password to the registry. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. These encoded credentials also allow Kubernetes to pull images of deployed Functions from the registry. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
+To switch registries at runtime, you must create or update a Secret CR that complies with [specific requirements](./svls-03-switching-registries.md). This Secret CR, among other details, contains a username and password to the registry. The admission webhook encodes these credentials to base64, a format that is required by Kaniko - the Function's job building tool - to access the registry and push a Function's image to it. These encoded credentials also allow Kubernetes to pull images of deployed Functions from the registry. The admission webhook adds these credentials to the created Secret CR. They take the form of the `.dockerconfigjson` entry with a valid value. The admission webhook also updates this entry's value each time the username and password change.
 
 ### Requirements
 

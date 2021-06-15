@@ -10,7 +10,7 @@ Function's resources and replicas as well as resources for image-building Jobs a
 
 ## Configuration
 
-To add a new preset to the Serverless configuration for the defaulting webhook to set it on all Function CRs, update the `values.yaml` file in the Serverless chart. To do it, change the configuration for the **webhook.values.function.replicas.presets**, **webhook.values.function.resources.presets** or **webhook.values.buildJob.resources.presets** parameters. Read the [Serverless chart configuration](#configuration-serverless-chart) to find out more.
+To add a new preset to the Serverless configuration for the defaulting webhook to set it on all Function CRs, update the `values.yaml` file in the Serverless chart. To do it, change the configuration for the **webhook.values.function.replicas.presets**, **webhook.values.function.resources.presets** or **webhook.values.buildJob.resources.presets** parameters. Read the [Serverless chart configuration](./05-configuration-parameters/svls-01-serverless-chart.md) to find out more.
 
 ## Usage
 

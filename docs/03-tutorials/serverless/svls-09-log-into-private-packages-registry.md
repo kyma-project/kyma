@@ -116,7 +116,7 @@ EOF
 
 ### Test the package registry switch
 
-[Create a Function](#tutorials-create-an-inline-function) with dependencies from the external registry. Check if your Function was created and all conditions are set to `True`:
+[Create a Function](./svls-01-create-inline-function.md) with dependencies from the external registry. Check if your Function was created and all conditions are set to `True`:
 
 ```bash
 kubectl get functions -n $NAMESPACE
@@ -129,4 +129,4 @@ NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
 test-function   True         True      True      nodejs12   1         96s
 ```
 
->**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](#details-switching-registries-at-runtime).
+>**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](../../../05-technical-reference/svls-03-switching-registries.md).
