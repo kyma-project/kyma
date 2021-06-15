@@ -85,7 +85,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
-		if err := c.Start(r.ctx.Done()); err != nil {
+		if err := c.Start(r.ctx); err != nil {
 			r.Log.Error(err, "failed to start the nats-subscription-controller")
 			os.Exit(1)
 		}
@@ -94,9 +94,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := r.ctx
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name",
 		req.Name)
 
