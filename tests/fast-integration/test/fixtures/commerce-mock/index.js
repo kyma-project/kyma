@@ -63,20 +63,18 @@ const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 
 function prepareLastorderObjs(type='standard', appName='commerce') {
-  if (type === 'central-app-gateway')
-    return k8s.loadAllYaml(
-        lastorderFunctionYaml
-            .toString()
-            .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
-  if (type === 'central-app-gateway-compass')
-    return k8s.loadAllYaml(
-        lastorderFunctionYaml
-            .toString()
-            .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
-            .replace('%%APP_NAME%%', appName));
-  return k8s.loadAllYaml(lastorderFunctionYaml
-      .toString()
-      .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
+  switch (type) {
+    case "central-app-gateway":
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+    case "central-app-gateway-compass":
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
+        .replace('%%APP_NAME%%', appName));
+    default:
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
+  }
 }
 
 function namespaceObj(name) {
