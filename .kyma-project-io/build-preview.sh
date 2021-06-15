@@ -72,8 +72,8 @@ copy-build-result() {
   cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
  
   #  DEBUG
-  tree ${BUILD_DIR}/content/docs
-  cat ${BUILD_DIR}/content/docs/kyma/versions.json
+  tree "${BUILD_DIR}"/content/docs
+  cat "${BUILD_DIR}"/content/docs/kyma/versions.json
   #  DEBUG
   echo "/ /docs/kyma/preview/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
 }
