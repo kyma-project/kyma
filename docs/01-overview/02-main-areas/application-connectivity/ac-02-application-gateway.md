@@ -10,9 +10,9 @@ The Application Gateway is an intermediary component between a Function or a ser
 ## Proxying requests
 
 The Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
-​
+
 ### Proxy configuration
-​
+
 The Secret that the Application Gateway expects has the following structure:
 
 ```
@@ -25,7 +25,7 @@ data:
 
 * The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters.
 * The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `NoAuth`.
-​
+
 
 An example **CONFIGURATION** for APIs secured with OAuth looks as follows:
 
@@ -77,13 +77,13 @@ An example **CONFIGURATION** for APIs secured with BasicAuth looks as follows:
 
 
 ### Calling the Application Gateway
-​
+
 The Secret name and the API name are specified as path variables in the following format:
 
 ```
 http://my-namespace-application-gateway:8080/secret/{SECRET_NAME}/api/{API_NAME}/{CUSTOM_PATH}
 ```
-​
+
 In order for the Application Gateway to properly read Secrets, they must exist in the same Namespace as the Gateway.
 
 ## Caching
