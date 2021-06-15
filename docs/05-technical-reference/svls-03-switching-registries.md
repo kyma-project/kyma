@@ -4,7 +4,7 @@ title: Switching registries at runtime
 
 When you install Kyma with the default internal registry, Helm creates the `serverless-registry-config-default` Secret in the `kyma-system` Namespace. This Secret contains credentials used by Kubernetes to pull deployed Functions' images from the internal registry. These credentials also allow Kaniko to push any images to the registry each time a Function is created or updated.
 
->**NOTE:** If you [install Serverless with overrides](./03-tutorials/serverless/svls-07-set-external-registry.md), you disable the internal registry and specify an external one to use. The `serverless-registry-config-default` Secret will then contain credentials to the specified external registry instead of the internal one.
+>**NOTE:** If you [install Serverless with overrides](../03-tutorials/serverless/svls-07-set-external-registry.md), you disable the internal registry and specify an external one to use. The `serverless-registry-config-default` Secret will then contain credentials to the specified external registry instead of the internal one.
 
 Once you have Serverless up and running, you can switch to an external registry:
 
