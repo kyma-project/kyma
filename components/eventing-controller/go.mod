@@ -15,8 +15,9 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nats-io/nats-server/v2 v2.2.4
 	github.com/nats-io/nats.go v1.11.0
-	github.com/onsi/ginkgo v1.15.0
+	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.10.5
+	github.com/ory/hydra-maester v0.0.23
 	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

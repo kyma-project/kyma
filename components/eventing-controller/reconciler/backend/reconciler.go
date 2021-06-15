@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"os"
 
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -215,6 +216,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		}
 		return ctrl.Result{}, err
 	}
+	_ = r.SyncOAuth2ClientCR(ctx)
 	// CreateOrUpdate deployment for publisher proxy secret
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
@@ -625,6 +627,11 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 		Namespace: r.cfg.BackendCRNamespace,
 	}, backend)
 	return backend, err
+}
+
+func (r *Reconciler) SyncOAuth2ClientCR(ctx context.Context) error {
+	_ = hydrav1alpha1.OAuth2Client{}
+	return nil
 }
 
 func getDeploymentMapper() handler.EventHandler {
