@@ -1,6 +1,5 @@
 ---
 title: Registration rules
-type: Details
 ---
 
 This document presents the rules you must follow when you configure the Helm Broker. It also describes the Helm Broker's behavior in case of conflicts.

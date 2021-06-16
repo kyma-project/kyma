@@ -1,6 +1,5 @@
 ---
 title: Create addons
-type: Details
 ---
 
 Addons which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your addons:

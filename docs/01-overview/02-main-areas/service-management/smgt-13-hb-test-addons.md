@@ -1,6 +1,5 @@
 ---
 title: Test addons
-type: Details
 ---
 
 If you want to test whether your addons are correct, you can use the dry run mode to check the generated manifests of the chart without installing it.

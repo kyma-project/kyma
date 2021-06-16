@@ -1,6 +1,5 @@
 ---
 title: Addons validation
-type: Details
 ---
 
 Checker is a tool that validates addons in the [`addons`](https://github.com/kyma-project/addons) repository on every pull request. It checks whether all [required](#details-create-addons) fields are set in your addons.

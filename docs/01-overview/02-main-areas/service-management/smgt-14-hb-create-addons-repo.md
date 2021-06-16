@@ -1,6 +1,5 @@
 ---
 title: Create addons repository
-type: Details
 ---
 
 The repository in which you create your own addons must contain at least one `index.yaml` file and have a specific structure, depending on the type of server that exposes your addons.
