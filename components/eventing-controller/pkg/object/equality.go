@@ -3,15 +3,15 @@ package object
 import (
 	"reflect"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
@@ -19,11 +19,12 @@ import (
 var Semantic = conversion.EqualitiesOrDie(
 	apiRuleEqual,
 	eventingBackendEqual,
+	oauth2ClientEqual,
 	publisherProxyDeploymentEqual,
 	eventingBackendStatusEqual,
 )
 
-// channelEqual asserts the equality of two Channel objects.
+// apiRuleEqual asserts the equality of two APIRule objects.
 func apiRuleEqual(a1, a2 *apigatewayv1alpha1.APIRule) bool {
 	if a1 == nil || a2 == nil {
 		return false
@@ -64,7 +65,6 @@ func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
 	if b1 == nil || b2 == nil {
 		return false
 	}
-
 	if b1 == b2 {
 		return true
 	}
@@ -80,7 +80,25 @@ func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
 	return true
 }
 
-// publisherProxyDeploymentEqual asserts the equality of two Deployment objects for event publisher proxy deployments.
+// oauth2ClientEqual asserts the equality of two OAuth2Client objects for the
+// eventing backend.
+func oauth2ClientEqual(oa1, oa2 *hydrav1alpha1.OAuth2Client) bool {
+	if oa1 == nil || oa2 == nil {
+		return false
+	}
+	if oa1 == oa2 {
+		return true
+	}
+
+	if !reflect.DeepEqual(oa1.Spec, oa2.Spec) {
+		return false
+	}
+
+	return false
+}
+
+// publisherProxyDeploymentEqual asserts the equality of two Deployment objects
+// for event publisher proxy deployments.
 func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
 	if d1 == nil || d2 == nil {
 		return false
@@ -179,6 +197,8 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 	return true
 }
 
+// envEqual asserts the queality of two core environment slices. It's used
+// by containerEqual.
 func envEqual(e1, e2 []corev1.EnvVar) bool {
 	if len(e1) != len(e2) {
 		return false
@@ -198,7 +218,8 @@ func envEqual(e1, e2 []corev1.EnvVar) bool {
 	return isFound
 }
 
-// probeEqual asserts the equality of two Probe objects.
+// probeEqual asserts the equality of two Probe objects. It's used by
+// containerEqual.
 func probeEqual(p1, p2 *corev1.Probe) bool {
 	if p1 == nil || p2 == nil {
 		return false
@@ -225,7 +246,8 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 	return true
 }
 
-// handlerEqual asserts the equality of two Handler objects.
+// handlerEqual asserts the equality of two Handler objects. It's used
+// by probeEqual.
 func handlerEqual(h1, h2 *corev1.Handler) bool {
 	if h1 == h2 {
 		return true
@@ -251,7 +273,7 @@ func handlerEqual(h1, h2 *corev1.Handler) bool {
 	return true
 }
 
-// default Protocol is TCP, so we assume empty equals TCP
+// realProto ensures the Protocol, which by default is TCP. We assume empty equals TCP.
 // https://godoc.org/k8s.io/api/core/v1#ServicePort
 func realProto(pr corev1.Protocol) corev1.Protocol {
 	if pr == "" {
@@ -281,6 +303,7 @@ func secretEqual(b1, b2 *corev1.Secret) bool {
 	return true
 }
 
+// eventingBackendStatusEqual asserts the equality of of EventingBackendStatus objects.
 func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) bool {
 	if s1 == nil || s2 == nil {
 		return false
