@@ -1,5 +1,5 @@
 ---
-title: Service Catalog basic architecture
+title: Service Catalog architecture
 ---
 
 The diagram describes the Service Catalog workflow and the roles of specific cluster and Namespace-scoped resources in this process:
