@@ -42,7 +42,7 @@ rafter:
         enabled: false
 helm-broker:
   addons-ui:
-    enabled: false
+    replicaCount: 0
 service-catalog-addons:
   service-catalog-ui: 
-    enabled: false
+    replicaCount: 0
