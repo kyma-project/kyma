@@ -3,12 +3,16 @@ title: Tracing Architecture
 ---
 
 
-The Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. This way you inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. See the diagram for details: 
+Kyma's Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. 
+
+This way, you can inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. 
+
+## Architecture diagram
 
 ![Tracing architecture](./assets/obsv-tracing-architecture.svg)
 
 
-## Collect traces
+## Flow: Collect traces
 
 The process of collecting traces by Jaeger looks as follows:
  
@@ -17,7 +21,7 @@ The process of collecting traces by Jaeger looks as follows:
 3. Jaeger processes the data. Specifically, the Jaeger Agent component receives the spans, batches them, and forwards to the Jaeger Collector service. 
 4. The BadgerDB database stores the data and persists it using a PersistentVolume resource.
 
-## Query traces
+## Flow: Query traces
 
 The process of querying traces from Jaeger looks as follows:
 
