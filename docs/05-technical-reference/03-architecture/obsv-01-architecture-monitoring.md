@@ -2,12 +2,11 @@
 title: Monitoring Architecture
 ---
 
-Before you go into component details, find out more about the end-to-end monitoring flow in Kyma.
 ## End-to-end monitoring flow
 
 The complete monitoring flow in Kyma comes down to these components and steps:
 
-![End-to-end monitoring flow](./assets/monitoring-flow.svg)
+![End-to-end monitoring flow](./assets/obsv-monitoring-flow.svg)
 
 1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with the default configuration.
 2. The Prometheus server periodically polls all metrics exposed on `/metrics` endpoints of ports specified in ServiceMonitor CRDs. Prometheus stores these metrics in a time-series database.
@@ -19,7 +18,7 @@ The complete monitoring flow in Kyma comes down to these components and steps:
 
 The diagram presents monitoring components and the way they interact with one another.
 
-![Monitoring components](./assets/monitoring-architecture.svg)
+![Monitoring components](./assets/obsv-monitoring-architecture.svg)
 
 
 1. [**Prometheus Operator**](https://github.com/coreos/prometheus-operator) creates a Prometheus instance, manages its deployment, and provides configuration for it. It also deploys Alertmanager and operates ServiceMonitor custom resources that specify monitoring definitions for groups of services.
