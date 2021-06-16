@@ -218,7 +218,12 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		}
 		return ctrl.Result{}, err
 	}
-	_, _ = r.syncOAuth2ClientCR(ctx)
+
+	oauth2Client, err := r.syncOAuth2ClientCR(ctx)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrap(err, "failed to sync OAuth2Client CR")
+	}
+	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, oauth2Client.Spec.SecretName, oauth2Client.Namespace)
 
 	// CreateOrUpdate deployment for publisher proxy secret
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
@@ -239,7 +244,8 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if err := r.startBEBController(); err != nil {
+	// TODO: decode? encode?
+	if err := r.startBEBController(string(oauth2ClientID), string(oauth2ClientSecret)); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
@@ -662,6 +668,25 @@ func (r *Reconciler) syncOAuth2ClientCR(ctx context.Context) (*hydrav1alpha1.OAu
 	return desiredOAuth2Client, nil
 }
 
+func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context, name, namespace string) (clientID, clientSecret []byte, err error) {
+	oauth2Secret := new(v1.Secret)
+	oauth2SecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
+	if getErr := r.Cache.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
+		err = errors.Wrapf(getErr, "cannot get secret '%s/%s'", namespace, name)
+		return
+	}
+	var exists bool
+	if clientID, exists = oauth2Secret.Data["client_id"]; !exists {
+		err = errors.New("key 'client_id' not found in secret " + oauth2SecretNamespacedName.String())
+		return
+	}
+	if clientSecret, exists = oauth2Secret.Data["client_secret"]; !exists {
+		err = errors.New("key 'client_secret' not found in secret " + oauth2SecretNamespacedName.String())
+		return
+	}
+	return
+}
+
 func getDeploymentMapper() handler.EventHandler {
 	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
 		var reqs []reconcile.Request
@@ -695,7 +720,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) startNATSController() error {
 	if !r.natsCommanderStarted {
-		if err := r.natsCommander.Start(); err != nil {
+		if err := r.natsCommander.Start(commander.Params{}); err != nil {
 			r.namedLogger().Errorw("failed to start the NATS commander", "error", err)
 			return err
 		}
@@ -717,9 +742,10 @@ func (r *Reconciler) stopNATSController() error {
 	return nil
 }
 
-func (r *Reconciler) startBEBController() error {
+func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
 	if !r.bebCommanderStarted {
-		if err := r.bebCommander.Start(); err != nil {
+		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
+		if err := r.bebCommander.Start(bebCommanderParams); err != nil {
 			r.namedLogger().Errorw("failed to start the BEB commander", "error", err)
 			return err
 		}

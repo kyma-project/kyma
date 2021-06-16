@@ -77,3 +77,11 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - hydra.ory.sh
+  resources:
+  - oauth2client
+  verbs:
+  - create
+  - get
+  - update

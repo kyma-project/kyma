@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -586,7 +588,7 @@ func (t *TestCommander) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t *TestCommander) Start() error {
+func (t *TestCommander) Start(_ commander.Params) error {
 	return t.startErr
 }
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -71,7 +73,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the manager.
-func (c *Commander) Start() error {
+func (c *Commander) Start(params commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
