@@ -27,6 +27,8 @@ spec:
               value: "{{ .Values.certificates.kyma.name }}"
             - name: KYMA_SECRET_NAMESPACE
               value: "{{ .Values.certificates.kyma.namespace }}"
+            - name: CERT_CHECK_TIMEOUT
+              value: "5"
           securityContext:
 {{- toYaml .Values.securityContext | nindent 12 }}
       restartPolicy: Never

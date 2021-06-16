@@ -8,7 +8,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -22,9 +21,9 @@ const (
 )
 
 type Client interface {
-	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
-	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error
+	Get(ctx context.Context, key client.ObjectKey, obj client.Object) error
+	Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error
+	Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error
 }
 
 // Reconciler reconciles a CompassConnection object
@@ -66,12 +65,12 @@ func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime 
 }
 
 // Reconcile reads that state of the cluster for a CompassConnection object and makes changes based on the state read
-func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	log := r.log.WithField("CompassConnection", request.Name)
 
 	// Fetch the CompassConnection instance
 	instance := &v1alpha1.CompassConnection{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Info("Compass Connection deleted. Trying to initialize new connection...")

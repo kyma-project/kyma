@@ -32,6 +32,9 @@ monitoring:
     env:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
+cluster-users:
+  users:
+    bindStaticUsers: false
 rafter:
   controller-manager:
     minio:

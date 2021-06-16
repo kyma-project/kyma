@@ -419,12 +419,14 @@ roleRef:
   kind: ClusterRole
   name: kyma-essentials
 subjects:
+{{ if .Values.users.bindStaticUsers }}
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 - kind: User
   name: developer@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{ if .Values.global.kymaRuntime.developerGroup }}
 - kind: Group
   name: {{ .Values.global.kymaRuntime.developerGroup }}
@@ -457,6 +459,7 @@ roleRef:
   kind: ClusterRole
   name: kyma-view
 subjects:
+{{ if .Values.users.bindStaticUsers }}
 - kind: User
   name: user1@kyma.cx
   apiGroup: rbac.authorization.k8s.io
@@ -466,6 +469,7 @@ subjects:
 - kind: User
   name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ end }}  
 {{ if .Values.global.kymaRuntime.operatorGroup }}
 - kind: Group
   name: {{ .Values.global.kymaRuntime.operatorGroup }}
@@ -493,9 +497,11 @@ roleRef:
   kind: ClusterRole
   name: kyma-admin
 subjects:
+{{ if .Values.users.bindStaticUsers }}
 - kind: User
   name: {{ .Values.users.adminName }}
   apiGroup: rbac.authorization.k8s.io
+{{ end }}
 {{ if .Values.users.adminGroup }}
 - kind: Group
   name: {{ .Values.users.adminGroup }}
@@ -528,9 +534,11 @@ roleRef:
   kind: ClusterRole
   name: kyma-namespace-admin-essentials
 subjects:
+{{ if .Values.users.bindStaticUsers }}
 - kind: User
   name: namespace.admin@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+{{ end }}
 - kind: Group
   name: {{ .Values.global.kymaRuntime.namespaceAdminGroup }}
   apiGroup: rbac.authorization.k8s.io
