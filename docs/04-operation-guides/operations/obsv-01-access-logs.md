@@ -1,7 +1,8 @@
 ---
 title: Access logs
-type: obsolete - keep step 3
 ---
+
+<!-- steps 1 and 2 are obsolete; only step 3 remains -->
 
 To access the logs, follow these steps:
 
