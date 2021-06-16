@@ -77,16 +77,16 @@ To deploy Kyma with only specific components, run:
 
   `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only six components are deployed on the cluster:
 
-  ```
+  ```yaml
   prerequisites:
     - name: "cluster-essentials"
     - name: "istio"
       namespace: "istio-system"
   components:
-    - name: "testing"
-    - name: "xip-patch"
-    - name: "istio-kyma-patch"
-    - name: "dex"
+    - name: "logging"
+    - name: "tracing"
+    - name: "monitoring"
+    - name: "eventing"
   ```
 
 - Alternatively, you can specify single components instead of a file:
@@ -95,8 +95,8 @@ To deploy Kyma with only specific components, run:
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
 
-  If no Namespace is provided, the `default` Namespace is used. For example, to install the `testing` component in the `default` Namespace and the `application-connector` component in the `kyma-integration` Namespace, run:
+  If no Namespace is provided, the `default` Namespace is used. For example, to install the `eventing` component in the `default` Namespace and the `istio` component in the `istio-system` Namespace, run:
   
   ```
-  kyma deploy --component testing --component application-connector@kyma-integration
+  kyma deploy --component eventing --component istio@istio-system
   ```
