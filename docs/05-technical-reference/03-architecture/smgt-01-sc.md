@@ -4,7 +4,7 @@ title: Service Catalog basic architecture
 
 The diagram describes the Service Catalog workflow and the roles of specific cluster and Namespace-scoped resources in this process:
 
-![Service Catalog flow](./assets/service-catalog-flow.svg)
+![Service Catalog flow](./assets/smgt-sc-architecture.svg)
 
 1. The Kyma installation results in the registration of the default Service Brokers in the Kyma cluster. The Kyma administrator can manually register other ClusterServiceBrokers in the Kyma cluster. The Kyma user can also register a Service Broker in a given Namespace.
 

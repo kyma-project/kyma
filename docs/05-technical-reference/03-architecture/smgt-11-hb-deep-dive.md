@@ -4,7 +4,7 @@ title: Helm Broker deep-dive architecture
 
 This document describes the Helm Broker workflow in details, including the logic of its inner components, namely the Controller and Broker.
 
-![Architecture deep dive](./assets/hb-deep-dive.svg)
+![Architecture deep dive](./assets/smgt-hb-deep-dive.svg)
 
 1. The Controller watches for ClusterAddonsConfiguration (CAC) and AddonsConfiguration (AC) custom resources (CRs).
 2. The user creates, updates, or deletes CAC or AC custom resources.

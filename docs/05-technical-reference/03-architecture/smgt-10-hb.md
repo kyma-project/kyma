@@ -18,7 +18,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 5. The Service Catalog fetches services that the ClusterServiceBroker exposes.
 6. The Service Catalog creates a ClusterServiceClass for each service received from the ClusterServiceBroker.
 
-![Helm Broker cluster](./assets/hb-cluster.svg)
+![Helm Broker cluster](./assets/smgt-hb-cluster.svg)
 
 ## Namespace-scoped addons flow
 
@@ -30,7 +30,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 5. The Service Catalog fetches the services that the Service Broker exposes.
 6. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 
-![Helm Broker cluster](./assets/hb-namespaced.svg)
+![Helm Broker cluster](./assets/smgt-hb-namespaced.svg)
 
 ## Provisioning and binding
 
@@ -41,4 +41,4 @@ After you register your addons in the Service Catalog, you can provision and bin
 3. Bind your ServiceInstance to a service or a Function.
 4. The service or Function calls a given addon.
 
-![Helm Broker architecture](./assets/hb-architecture.svg)
+![Helm Broker architecture](./assets/smgt-hb-architecture.svg)
