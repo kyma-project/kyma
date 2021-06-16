@@ -9,7 +9,7 @@ You can simply use the default Kyma installation, or modify it as it fits your p
 If you use the `deploy` command without any flags, Kyma provides a default domain. 
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
-  ```
+  ```bash
   kyma deploy
   ```
 
@@ -22,7 +22,7 @@ By default, Kyma is installed with the default chart values defined in the `valu
 
 For example, to install Kyma with the evaluation profile, run the following command:
 
-  ```
+  ```bash
   kyma deploy -p evaluation
   ```
 
@@ -39,7 +39,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 To install Kyma using your own domain name, you must provide the certificate and key as files. 
 If you don't have a certificate yet, you can create a self-signed certificate and key:
 
-  ```
+  ```bash
   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out crt.pem -days 365
   ```
 
@@ -47,31 +47,32 @@ If you don't have a certificate yet, you can create a self-signed certificate an
 
   Then, pass the certificate files to the `deploy` command:
 
-  ```
+  ```bash
   kyma deploy --domain {DOMAIN} --tls-cert crt.pem --tls-key key.pem
   ```
 
 ## Install from a specific source
 
-Optionally, you can specify from which source you want to deploy Kyma. For example, you can choose the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.<br>
+Optionally, you can specify from which source you want to deploy Kyma. For example, you can choose the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
-  ```
+  ```bash
   kyma deploy --source=1.19.1
   ```
 
 - Alternatively, to build Kyma from your local sources and deploy it on a remote cluster, run:
 
-  ```
+  ```bash
   kyma deploy --source=local
   ```
+
   > **NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
 
 ## Install specific components
 
 To deploy Kyma with only specific components, run:
 
-  ```
+  ```bash
   kyma deploy --components-file {COMPONENTS_FILE_PATH}
   ```
 
@@ -91,12 +92,12 @@ To deploy Kyma with only specific components, run:
 
 - Alternatively, you can specify single components instead of a file:
   
-  ```
+  ```bash
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
 
   If no Namespace is provided, the `default` Namespace is used. For example, to install the `eventing` component in the `default` Namespace and the `istio` component in the `istio-system` Namespace, run:
   
-  ```
+  ```bash
   kyma deploy --component eventing --component istio@istio-system
   ```
