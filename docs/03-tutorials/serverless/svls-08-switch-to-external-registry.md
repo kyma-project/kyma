@@ -2,7 +2,7 @@
 title: Switch to an external Docker registry at runtime
 ---
 
-This tutorial shows how you can [switch to an external Docker registry](../../../05-technical-reference/svls-03-switching-registries.md) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
+This tutorial shows how you can [switch to an external Docker registry](../../05-technical-reference/svls-03-switching-registries.md) in a specific Namespace, with Serverless already installed on your cluster. This example relies on the `default` Namespace but you can use any other. You will create a Secret custom resource (CR) with credentials to one of these registries:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
@@ -73,7 +73,7 @@ data:
 EOF
 ```
 
->**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](../../../05-technical-reference/svls-03-switching-registries.md).
+>**CAUTION:** If you want to create a cluster-wide Secret, you must create it in the `kyma-system` Namespace and add the `serverless.kyma-project.io/config: credentials` label. Read more about [requirements for Secret CRs](../../05-technical-reference/svls-03-switching-registries.md).
 
 ### Test the registry switch
 

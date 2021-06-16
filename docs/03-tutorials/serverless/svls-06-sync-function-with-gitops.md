@@ -64,7 +64,7 @@ These sections will lead you through the whole installation, configuration, and 
   kyma init function --runtime python38 --dir $PWD/{WORKSPACE_FOLDER}
   ```
 
-  >**TIP:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](../../../05-technical-reference/svls-01-sample-functions.md).
+  >**TIP:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](../../05-technical-reference/svls-01-sample-functions.md).
 
   This command will download the following files to your workspace folder:
 

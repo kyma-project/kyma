@@ -2,9 +2,9 @@
 title: Create a Git Function
 ---
 
-This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/main/orders-service). It describes steps required to fetch Function's source code and dependencies from a public Git repository that does not require any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
+This tutorial shows how you can build a Function from code and dependencies stored in a Git repository, which is an alternative way to keeping the code in the Function CR. The tutorial is based on the Function from the [`orders service` example](https://github.com/kyma-project/examples/tree/main/orders-service). It describes steps required to fetch the Function's source code and dependencies from a public Git repository that does not need any authentication method. However, it also provides additional guidance on how to secure it if you are using a private repository.
 
->**NOTE:** To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](../../../05-technical-reference/svls-04-git-source-type.md).
+>**NOTE:** To learn more about Git repository sources for Functions and different ways of securing your repository, read about the [Git source type](../../05-technical-reference/svls-04-git-source-type.md).
 
 ## Steps
 
@@ -58,9 +58,9 @@ Follows these steps:
     EOF
     ```
 
-    >**NOTE:** Read more about the [supported authentication methods](../../../05-technical-reference/svls-04-git-source-type.md).
+    >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../../05-technical-reference/06-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a [GitRepository CR](../../05-technical-reference/06-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -141,7 +141,7 @@ Follows these steps:
 
         - SSH key: `key: {SSH_KEY}`
 
-        >**NOTE:** Read more about the [supported authentication methods](../../../05-technical-reference/svls-04-git-source-type.md).
+        >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
     - Confirm by selecting **Create**.
 

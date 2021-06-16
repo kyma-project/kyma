@@ -60,7 +60,7 @@ By default, you install Kyma with Serverless that uses the internal Docker regis
     - **SERVER_ADDRESS** is the server address of the Docker Hub. At the moment, Kyma only supports the `https://index.docker.io/v1/` server address.
     - **REGISTRY_ADDRESS** is the registry address in the Docker Hub.
 
-    >**TIP:** Usually the Docker registry address is the same as the account name.
+    >**TIP:** Usually, the Docker registry address is the same as the account name.
 
     Example:
 

@@ -11,7 +11,7 @@ When you complete this tutorial, you get a Function that:
 
 >**NOTE:** To learn more about securing your Function, see the [tutorial](../api-exposure/apig-01-expose-and-secure-service.md).
 
->**TIP:** Read also about [Function’s specification](../../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ Follows these steps:
       export NAME={APIRULE_NAME}
       ```
 
-2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with Function's code.
+2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with the Function's code.
 
   ```bash
   kyma sync function $NAME -n $NAMESPACE
@@ -97,7 +97,7 @@ Follows these steps:
 
     >**NOTE:** Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../../05-technical-reference/03-architecture/svls-01-architecture.md).
+2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../05-technical-reference/03-architecture/svls-01-architecture.md).
 
     ```yaml
     cat <<EOF | kubectl apply -f -

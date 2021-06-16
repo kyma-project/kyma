@@ -4,9 +4,9 @@ title: Create an inline Function
 
 This tutorial shows how you can create a simple "Hello World" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
 
->**TIP:** Serverless also allows you to store Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
+>**TIP:** Serverless also allows you to store the Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
 
->**TIP:** Read about [Function’s specification](../../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
+>**TIP:** Read about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 ## Steps
 
@@ -27,7 +27,7 @@ Follow these steps:
 
 2.  Create your local development workspace.
 
-    a. Create a new folder to keep Function's code and configuration in one place:
+    a. Create a new folder to keep the Function's code and configuration in one place:
 
     ```bash
     mkdir {FOLDER_NAME}
@@ -133,7 +133,7 @@ Follow these steps:
 
     The pop-up box closes. Wait for the **Status** field to change into `RUNNING`, confirming that the Function was created successfully.
 
-4.  In the Function details view that opens up automatically, you will see sample Function's code under the **Code** tab:
+4.  In the Function details view that opens up automatically, you will see the sample Function's code under the **Code** tab:
 
     ```
     module.exports = {
