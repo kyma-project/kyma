@@ -1,6 +1,5 @@
 ---
 title: Tracing Architecture
-type: Architecture
 ---
 
 

@@ -3,7 +3,7 @@ title: Configure the Monitoring Flow
 type: Tutorials - Observability
 ---
 
-The set of monitoring tutorials you are about to read describes the complete monitoring flow for your services in Kyma. Going through the tutorials, you get the gist of Kyma built-in monitoring applications, such as Prometheus, Grafana, and Alertmanager. This hands-on experience with monitoring helps you understand how and where you can observe and visualize your service metrics to monitor them for any alerting values.
+The following tutorials describe the complete monitoring flow for your services in Kyma. Going through the isntructions, you get the gist of Kyma built-in monitoring applications, such as Prometheus, Grafana, and Alertmanager. This hands-on experience with monitoring helps you understand how and where you can observe and visualize your service metrics to monitor them for any alerting values.
 
 All the tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services called `sample-metrics-8081`. This service exposes the `cpu_temperature_celsius` custom metric on the `/metrics` endpoint. This custom metric is the central element of the whole tutorial set. The metric value simulates the current processor temperature and changes randomly from 60 to 90 degrees Celsius. The alerting threshold in these tutorials is 75 degrees Celsius. If the temperature exceeds this value, the Grafana dashboard, Prometheus rule, and Alertmanager notifications you create inform you about this.
 

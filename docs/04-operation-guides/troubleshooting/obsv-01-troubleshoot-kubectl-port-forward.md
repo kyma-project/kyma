@@ -1,6 +1,5 @@
 ---
-title: Issues with port forwarding
-type: Troubleshooting
+title: Error for kubectl port forwarding
 ---
 
 # Condition

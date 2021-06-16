@@ -1,6 +1,5 @@
 ---
 title: Logging chart
-type: Configuration Parameters
 ---
 
 To configure the Logging chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.

@@ -1,6 +1,5 @@
 ---
 title: Monitoring Architecture
-type: Architecture
 ---
 
 Before you go into component details, find out more about the end-to-end monitoring flow in Kyma.

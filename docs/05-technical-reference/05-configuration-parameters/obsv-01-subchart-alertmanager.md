@@ -1,6 +1,5 @@
 ---
 title: Alertmanager sub-chart
-type: Configuration Parameters
 ---
 
 To configure the Alertmanager sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can set.

@@ -1,6 +1,5 @@
 ---
 title: Logging Architecture
-type: Architecture
 ---
 
 This document provides an overview of the logging architecture in Kyma.
