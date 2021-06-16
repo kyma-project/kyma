@@ -23,6 +23,11 @@ const {
   debug,
   waitForVirtualService,
 } = require("../utils");
+const {
+  checkLokiLogs
+} = require("../logging");
+ 
+const testStartTimestamp = new Date().toISOString();
 
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
@@ -84,6 +89,10 @@ describe("CommerceMock tests", function () {
   it("Should print report of restarted containers, skipped if no crashes happened", async function () {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
+  });
+
+  it("Logs from commerce mock pod should be retrieved through Loki", async function() {
+    await checkLokiLogs(testStartTimestamp);
   });
 
   it("Test namespaces should be deleted", async function () {
