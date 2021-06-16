@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"os"
+
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -216,7 +217,8 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		}
 		return ctrl.Result{}, err
 	}
-	_ = r.SyncOAuth2ClientCR(ctx)
+	_, _ = r.syncOAuth2ClientCR(ctx)
+
 	// CreateOrUpdate deployment for publisher proxy secret
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
@@ -551,8 +553,8 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
 
-	if err := r.setPublisherOwnerReference(ctx, desiredPublisher); err != nil {
-		return nil, errors.Wrapf(err, "setting owner references")
+	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+		return nil, errors.Wrapf(err, "setting owner reference for publisher")
 	}
 
 	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
@@ -629,9 +631,34 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 	return backend, err
 }
 
-func (r *Reconciler) SyncOAuth2ClientCR(ctx context.Context) error {
-	_ = hydrav1alpha1.OAuth2Client{}
-	return nil
+func (r *Reconciler) syncOAuth2ClientCR(ctx context.Context) (*hydrav1alpha1.OAuth2Client, error) {
+	desiredOAuth2Client := deployment.NewOAuth2Client()
+	if err := r.setAsOwnerReference(ctx, desiredOAuth2Client); err != nil {
+		return nil, errors.Wrapf(err, "setting owner reference for OAuth2Client CR")
+	}
+	CRNamespacedName := types.NamespacedName{
+		Namespace: desiredOAuth2Client.Namespace,
+		Name:      desiredOAuth2Client.Name,
+	}
+	currentOAuth2Client := new(hydrav1alpha1.OAuth2Client)
+	if err := r.Cache.Get(ctx, CRNamespacedName, currentOAuth2Client); err != nil {
+		if k8serrors.IsNotFound(err) {
+			// Create
+			r.namedLogger().Debug("creating OAuth2Client CR")
+			return desiredOAuth2Client, r.Create(ctx, desiredOAuth2Client)
+		}
+		return nil, err
+	}
+
+	desiredOAuth2Client.ResourceVersion = currentOAuth2Client.ResourceVersion
+	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
+		r.namedLogger().Debug("no need to update OAuth2Client")
+		return currentOAuth2Client, nil
+	}
+	if err := r.Update(ctx, desiredOAuth2Client); err != nil {
+		return nil, errors.Wrap(err, "cannot update OAuth2Client")
+	}
+	return desiredOAuth2Client, nil
 }
 
 func getDeploymentMapper() handler.EventHandler {
@@ -717,7 +744,8 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName).With("backend", r.backendType)
 }
 
-func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *appsv1.Deployment) error {
+// sets this reconciler as owner of obj
+func (r *Reconciler) setAsOwnerReference(ctx context.Context, obj metav1.Object) error {
 	controllerNamespacedName := types.NamespacedName{
 		Namespace: deployment.ControllerNamespace,
 		Name:      deployment.ControllerName,
@@ -734,6 +762,6 @@ func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *
 			Kind:    "Deployment",
 		}),
 	}
-	publisher.SetOwnerReferences(references)
+	obj.SetOwnerReferences(references)
 	return nil
 }
