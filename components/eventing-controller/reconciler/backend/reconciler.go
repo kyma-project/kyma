@@ -89,8 +89,7 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
 
-func (r *Reconciler) Reconcile(ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
 	var secretList v1.SecretList
 
 	if err := r.Cache.List(ctx, &secretList, client.MatchingLabels{
@@ -629,26 +628,26 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 }
 
 func getDeploymentMapper() handler.EventHandler {
-	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
+	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
 		var reqs []reconcile.Request
 		// Ignore deployments other than publisher-proxy
-		if mo.Meta.GetName() == deployment.PublisherName && mo.Meta.GetNamespace() == deployment.PublisherNamespace {
+		if obj.GetName() == deployment.PublisherName && obj.GetNamespace() == deployment.PublisherNamespace {
 			reqs = append(reqs, reconcile.Request{
-				NamespacedName: types.NamespacedName{Namespace: mo.Meta.GetNamespace(), Name: "any"},
+				NamespacedName: types.NamespacedName{Namespace: obj.GetNamespace(), Name: "any"},
 			})
 		}
 		return reqs
 	}
-	return &handler.EnqueueRequestsFromMapFunc{ToRequests: &mapper}
+	return handler.EnqueueRequestsFromMapFunc(mapper)
 }
 
 func getEventingBackendCRMapper() handler.EventHandler {
-	var mapper handler.ToRequestsFunc = func(mo handler.MapObject) []reconcile.Request {
+	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
 		return []reconcile.Request{
-			{NamespacedName: types.NamespacedName{Namespace: mo.Meta.GetNamespace(), Name: "any"}},
+			{NamespacedName: types.NamespacedName{Namespace: obj.GetNamespace(), Name: "any"}},
 		}
 	}
-	return &handler.EnqueueRequestsFromMapFunc{ToRequests: &mapper}
+	return handler.EnqueueRequestsFromMapFunc(mapper)
 }
 
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {

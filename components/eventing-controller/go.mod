@@ -28,7 +28,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.20.7 // indirect
 	k8s.io/apimachinery v0.20.7
 	k8s.io/client-go v0.20.7
-	sigs.k8s.io/controller-runtime v0.6.2
+	sigs.k8s.io/controller-runtime v0.8.3
 )
 
 replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0

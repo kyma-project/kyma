@@ -416,8 +416,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(false),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BebSecretName:               bebSecret1name,
+					BebSecretNamespace:          kymaSystemNamespace,
 				}))
 			By("Checking that no BEB secret is created for publisher")
 			getPublisherProxySecret(ctx).Should(BeNil())
