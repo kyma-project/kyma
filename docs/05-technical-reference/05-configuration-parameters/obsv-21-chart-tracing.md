@@ -2,15 +2,12 @@
 title: Tracing chart
 ---
 
-To configure the Tracing chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
+To configure the Tracing chart, override the default values of its `values.yaml` file.
+Learn how it works under [Configurable Parameters](./README.md).
 
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
->* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)
+You can set the following parameters:
 
 ## Configurable parameters
-
-This table lists the configurable parameters, their descriptions, and default values:
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
