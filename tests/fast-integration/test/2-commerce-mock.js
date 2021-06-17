@@ -24,7 +24,8 @@ const {
   waitForVirtualService,
 } = require("../utils");
 const {
-  checkLokiLogs
+  checkLokiLogs,
+  lokiPortForward
 } = require("../logging");
  
 const testStartTimestamp = new Date().toISOString();
@@ -35,6 +36,15 @@ describe("CommerceMock tests", function () {
   const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
   const testNamespace = "test";
   let initialRestarts = null;
+  let cancelPortForward = null;
+
+  before(() => {
+    cancelPortForward = lokiPortForward();
+  });
+
+  after(() => {
+    cancelPortForward();
+  });
 
   it("Listing all pods in cluster", async function () {
     initialRestarts = await getContainerRestartsForAllNamespaces();
