@@ -1089,8 +1089,6 @@ var _ = BeforeSuite(func(done Done) {
 		ClientSecret:             "foo-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "foo-client-id",
-		WebhookClientSecret:      "foo-client-secret",
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,

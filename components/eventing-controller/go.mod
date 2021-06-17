@@ -7,7 +7,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.4.4 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210601142757-445a3b6021fe

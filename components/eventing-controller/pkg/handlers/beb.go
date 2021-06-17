@@ -51,11 +51,9 @@ func (b *Beb) Initialize(cfg env.Config) error {
 // or returns an error if the env config contains invalid grant type or auth type.
 func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 	return &types.WebhookAuth{
-		ClientID:     cfg.WebhookClientID,
-		ClientSecret: cfg.WebhookClientSecret,
-		TokenURL:     cfg.WebhookTokenEndpoint,
-		Type:         types.AuthTypeClientCredentials,
-		GrantType:    types.GrantTypeClientCredentials,
+		TokenURL:  cfg.WebhookTokenEndpoint,
+		Type:      types.AuthTypeClientCredentials,
+		GrantType: types.GrantTypeClientCredentials,
 	}
 }
 

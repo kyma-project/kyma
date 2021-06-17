@@ -48,8 +48,6 @@ func TestCleanup(t *testing.T) {
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "webhook-client-id",
-		WebhookClientSecret:      "webhook-client-secret",
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          controllertesting.EventTypePrefix,
