@@ -125,7 +125,7 @@ See all parameter descriptions.
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |
 | **name**              | Yes | Function | | Specifies the name of your Function.         |
 | **namespace**             | No | Function | `default` | Defines the Namespace in which the Function is created.        |
-| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs12`, `nodejs14`, and `python38`.      |
+| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs12`, `nodejs14`, `python38`, and `python39`.      |
 | **labels**             | No | Function | | Specifies the Function's Pod labels. |
 | **source**            | Yes | Function | | Provides details on the type and location of your Function's source code and dependencies.         |
 | **source.sourceType**            | Yes | Function | | Defines whether you use either inline code or a Git repository as the source of the Function's code and dependencies. It must be set either to `inline` or `git`.         |
