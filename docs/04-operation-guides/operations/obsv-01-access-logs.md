@@ -1,10 +1,30 @@
 ---
-title: Access logs
+title: Access Kyma logs
 ---
 
-<!-- steps 1 and 2 are obsolete; only step 3 remains -->
+There are two kinds of logs that give you insights into your cluster - Kubernetes logs and Loki logs.
 
-To access the logs, follow these steps:
+Check out real-time logs immediately using the Kubernetes functionalities.
+
+Kyma's logging stack provides additional features:
+
+In Grafana, you can see a visual representation of your logs and filter functions for up to five days
+
+If you want to see logs from up to five days back and to use search functionality, call the Loki API directly. 
+
+
+## Kubernetes logs via kubectl
+
+
+## Kubernetes logs via Busola UI
+
+
+## Loki logs via Grafana UI
+
+
+## Loki logs via Loki API
+
+To access the logs through the Loki API directly, follow these steps:
 
 1. Run the following command to get the Pod name:
 
