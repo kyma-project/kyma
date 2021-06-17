@@ -228,22 +228,19 @@ func TestIsValidSubscription(t *testing.T) {
 	natsSub := natsClient.subscriptions[key]
 	g.Expect(natsSub).To(Not(BeNil()))
 
-	// the associated Nats subscription should be valid
-	g.Expect(natsSub.IsValid()).To(BeTrue())
-
 	// check the mapping of Kyma subscription and Nats subscription
 	nsn := getKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
 	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
 
+	// the associated Nats subscription should be valid
+	g.Expect(natsSub.IsValid()).To(BeTrue())
+
 	// check that no invalid subscriptions exist
-	inactiveNsn := natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*inactiveNsn)).To(BeZero())
+	invalidNsn := natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeZero())
 
 	natsClient.connection.Close()
-
-	// the associated Nats subscription should be valid
-	g.Expect(natsSub.IsValid()).To(BeFalse())
 
 	// the associated Nats subscription should not be valid anymore
 	err = checkIsNotValid(natsSub, t)
@@ -257,19 +254,16 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	// check that only one invalid subscription exist
-	inactiveNsn = natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*inactiveNsn)).To(BeIdenticalTo(1))
+	invalidNsn = natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
 
-	// Restart Nats server
+	// restart Nats server
 	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
 	defer natsServer.Shutdown()
 
-	// TODO: the controller should react and inject Kyma subscriptions into NATS for all "invalid" subscriptions
-	// the associated Nats subscription should be valid again
-	/*
-		err = checkIsValid(natsSub, t)
-		g.Expect(err).To(BeNil())
-	*/
+	// check that only one invalid subscription still exist, the controller is not running...
+	invalidNsn = natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
 
 }
 
