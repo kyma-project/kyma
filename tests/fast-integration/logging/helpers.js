@@ -1,4 +1,6 @@
 const { assert } = require("chai");
+
+const { sleep } = require ("../utils");
 const {
     lokiPortForward,
     queryLoki
