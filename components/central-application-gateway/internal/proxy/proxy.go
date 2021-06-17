@@ -95,7 +95,7 @@ func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry
 	clientCertificate := clientcert.NewClientCertificate(nil)
 	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
-	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier, p.skipVerify, authorizationStrategy, csrfTokenStrategy, clientCertificate, p.proxyTimeout)
+	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier.Service, p.skipVerify, authorizationStrategy, csrfTokenStrategy, clientCertificate, p.proxyTimeout)
 	if err != nil {
 		return nil, err
 	}
