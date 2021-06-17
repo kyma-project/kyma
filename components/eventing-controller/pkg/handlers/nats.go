@@ -89,20 +89,15 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 
 // The returned bool should be ignored now. It's a marker for changed subscription status
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
-	namespacedName := types.NamespacedName{
-		Namespace: sub.Namespace,
-		Name:      sub.Name,
-	}
 	var filters []*eventingv1alpha1.BebFilter
 	if sub.Spec.Filter != nil {
 		filters = sub.Spec.Filter.Filters
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
-		eventType := strings.TrimSpace(filter.EventType.Value)
-		if len(eventType) == 0 {
-			err := nats.ErrBadSubject
-			n.log.Error(err, "failed to create a Nats subscription")
+		subject, err := createSubject(filter, cleaner)
+		if err != nil {
+			n.log.Error(err, "failed to create a Nats subject")
 			return false, err
 		}
 
@@ -117,46 +112,52 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		// clean the application name segment in the event-type from none-alphanumeric characters
-		eventType, err := cleaner.Clean(eventType)
-		if err != nil {
-			return false, err
-		}
-
-		sub, subscribeErr := n.connection.Subscribe(eventType, callback)
+		natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
 		if subscribeErr != nil {
 			n.log.Error(subscribeErr, "failed to create a Nats subscription")
 			return false, subscribeErr
 		}
-		n.subscriptions[fmt.Sprintf("%s.%s", namespacedName.String(), filter.EventType.Value)] = sub
+		n.subscriptions[createKey(sub, subject)] = natsSub
 	}
 	return false, nil
 }
 
+// DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	subNsName := types.NamespacedName{
-		Namespace: subscription.Namespace,
-		Name:      subscription.Name,
-	}
-	for k, v := range n.subscriptions {
-		if strings.HasPrefix(k, subNsName.String()) {
+	for key, sub := range n.subscriptions {
+		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
 			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
 				initializeErr := n.Initialize(env.Config{})
 				if initializeErr != nil {
-					return errors.Wrapf(initializeErr, "can't connect to Nats server")
+					return errors.Wrapf(initializeErr, "can't connect to NATS server")
 				}
 			}
-			err := v.Unsubscribe()
-			if err != nil {
-				return errors.Wrapf(err, "failed to unsubscribe")
+			if sub.IsValid() {
+				if err := sub.Unsubscribe(); err != nil {
+					return errors.Wrapf(err, "failed to unsubscribe")
+				}
+			} else {
+				n.log.Info("cannot unsubscribe an invalid NATS subscription: ", "key", key, "subject", sub.Subject)
 			}
-			delete(n.subscriptions, k)
+			delete(n.subscriptions, key)
 			n.log.Info("successfully unsubscribed/deleted subscription")
 		}
 	}
 	return nil
+}
+
+// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions marked as "invalid" by NATS client
+func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
+	var nsn []types.NamespacedName
+	for k, v := range n.subscriptions {
+		if !v.IsValid() {
+			n.log.Info("invalid NATS subscription: ", "key", k, "subject", v.Subject)
+			nsn = append(nsn, createKymaSubscriptionNamespacedName(k, v))
+		}
+	}
+	return &nsn
 }
 
 func (n *Nats) getCallback(sink string) nats.MsgHandler {
@@ -196,4 +197,34 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 		return nil, err
 	}
 	return &event, nil
+}
+
+func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
+	namespacedName := types.NamespacedName{
+		Namespace: sub.Namespace,
+		Name:      sub.Name,
+	}
+	return fmt.Sprintf("%s", namespacedName.String())
+}
+
+func createKey(sub *eventingv1alpha1.Subscription, subject string) string {
+	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), subject)
+}
+
+func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
+	eventType := strings.TrimSpace(filter.EventType.Value)
+	if len(eventType) == 0 {
+		return "", nats.ErrBadSubject
+	}
+	// clean the application name segment in the event-type from none-alphanumeric characters
+	// return it as a Nats subject
+	return cleaner.Clean(eventType)
+}
+
+func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
+	nsn := types.NamespacedName{}
+	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
+	nsn.Namespace = nnvalues[0]
+	nsn.Name = nnvalues[1]
+	return nsn
 }
