@@ -78,6 +78,10 @@ func (c *Commander) Start(params commander.Params) error {
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	oauth2credential, err := getOAuth2ClientCredentials(params)
+	if err != nil {
+		return errors.Wrap(err, "cannot get oauth2client credentials")
+	}
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
@@ -89,6 +93,7 @@ func (c *Commander) Start(params commander.Params) error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		oauth2credential,
 	)
 
 	c.backend = reconciler.Backend
@@ -173,4 +178,21 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	}
 
 	return nil
+}
+
+func getOAuth2ClientCredentials(params commander.Params) (*handlers.OAuth2ClientCredentials, error) {
+	val := params["client_id"]
+	id, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_id, but received %T", val)
+	}
+	val = params["client_secret"]
+	secret, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_secret, but received %T", val)
+	}
+	return &handlers.OAuth2ClientCredentials{
+		ClientID:     id,
+		ClientSecret: secret,
+	}, nil
 }

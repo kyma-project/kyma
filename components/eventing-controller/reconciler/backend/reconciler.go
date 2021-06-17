@@ -221,6 +221,9 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, errors.Wrap(err, "failed to sync OAuth2Client CR")
 	}
 	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, oauth2Client.Spec.SecretName, oauth2Client.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	// CreateOrUpdate deployment for publisher proxy secret
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
@@ -241,7 +244,6 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	// TODO: decode? encode?
 	if err := r.startBEBController(string(oauth2ClientID), string(oauth2ClientSecret)); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
