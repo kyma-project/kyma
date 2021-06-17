@@ -90,6 +90,10 @@ func oauth2ClientEqual(oa1, oa2 *hydrav1alpha1.OAuth2Client) bool {
 		return true
 	}
 
+	if !reflect.DeepEqual(oa1.Labels, oa2.Labels) {
+		return false
+	}
+
 	if !reflect.DeepEqual(oa1.Spec, oa2.Spec) {
 		return false
 	}
