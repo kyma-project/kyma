@@ -12,7 +12,7 @@ function lokiPortForward() {
 
 async function queryLoki(labels, startTimestamp) {
     try {
-        const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
+        const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}`;
         const responseBody = await axios.get(url);
         return responseBody.data;
     } catch(err) {

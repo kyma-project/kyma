@@ -28,6 +28,7 @@ const {
 } = require("../logging");
  
 const testStartTimestamp = new Date().toISOString();
+console.log("current timestamp: ", testStartTimestamp);
 
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
