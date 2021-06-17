@@ -6,20 +6,20 @@ const {
 
 async function checkLokiLogs(startTimestamp) {
     const cancelPortForward = lokiPortForward();
-
-    const retries = 0;
+    const labels = '{app="commerce-mock", container="commerce-mock", namespace="mocks"}';
+    let logsFetched = false;
+    let retries = 0;
     while (retries < 10) {
-        const labels = '{app="commerce-mock", container="commerce-mock", namespace="mocks"}';
         const logs = await queryLoki(labels, startTimestamp);
         if (logs.streams.length > 0) {
+            logsFetched = true;
             break;
         }
         console.log("retry num: ", retries);
         await sleep(1000);
         retries++;
     }
-    assert.isNotEmpty(logs.streams, "No logs fetched from Loki");
-
+    assert.isTrue(logsFetched, "No logs fetched from Loki");
     cancelPortForward();
 }
 
