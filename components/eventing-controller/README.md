@@ -57,25 +57,23 @@ This section explains how to use the Eventing Controller. It expects the followi
 | **For BEB**                   |                                                                                     |
 | `TOKEN_ENDPOINT`              | The Authentication Server Endpoint to provide Access Tokens.                        |
 | `WEBHOOK_ACTIVATION_TIMEOUT`  | The timeout duration used for webhook activation to acquire Access Tokens for Kyma. |
-| `WEBHOOK_CLIENT_ID`           | The Client ID used by webhooks to acquire Access Tokens from Kyma.                  |
-| `WEBHOOK_CLIENT_SECRET`       | The Client Secret used by webhooks to acquire Access Tokens from Kyma.              |
 | `WEBHOOK_TOKEN_ENDPOINT`      | The Kyma public endpoint to provide Access Tokens.                                  |
 | `EXEMPT_HANDSHAKE`            | The exemption handshake switch of the subscription protocol settings.               |
 | `QOS`                         | The quality of service setting of the subscription protocol settings.               |
-| `CONTENT_MODE`                | The content mode of the subscription protocol settings.                              |
+| `CONTENT_MODE`                | The content mode of the subscription protocol settings.                             |
 | `DOMAIN`                      | The Kyma cluster public domain.                                                     |
 
 The additional command line arguments are:
 
-| Flag                     | Description                                               | Default Value | Backend |
-| ------------------------ | --------------------------------------------------------- | ------------- | ------- |
-| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080` | Both  |
-| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | `:8080` | Both  |
-| `ready-check-endpoint`   | The endpoint of the readiness probe.                      | `readyz`        | Both    |
-| `health-check-endpoint`  | The endpoint of the health probe.                         | `healthz`       | Both    |
-| `reconcile-period`       | The period between triggering of reconciling calls (BEB). | 10 minutes    | BEB     |
-| `max-reconnects`         | The maximum number of reconnection attempts (NATS).       | 10            | NATS    |
-| `reconnect-wait`         | Wait time between reconnection attempts (NATS).           | 1 second      | NATS    |
+| Flag                     | Description                                                                   | Default Value | Backend |
+| ------------------------ | ----------------------------------------------------------------------------- | ------------- | ------- |
+| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080`       | Both    |
+| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | `:8080`       | Both    |
+| `ready-check-endpoint`   | The endpoint of the readiness probe.                                          | `readyz`      | Both    |
+| `health-check-endpoint`  | The endpoint of the health probe.                                             | `healthz`     | Both    |
+| `reconcile-period`       | The period between triggering of reconciling calls (BEB).                     | 10 minutes    | BEB     |
+| `max-reconnects`         | The maximum number of reconnection attempts (NATS).                           | 10            | NATS    |
+| `reconnect-wait`         | Wait time between reconnection attempts (NATS).                               | 1 second      | NATS    |
 
 - To install the CustomResourceDefinitions in a cluster, run:
 
@@ -157,8 +155,6 @@ kubebuilder init --domain kyma-project.io
 | `KUBECONFIG`             | Path to a local kubeconfig file.                                       | ~/.kube/config         |
 | `NATS_URL`               | URL of the NATS server.                                                | nats://127.0.0.1:4222  |
 | `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | sap.kyma.custom        |
-| `WEBHOOK_CLIENT_ID`      | The Client ID used by webhooks to acquire Access Tokens from Kyma.     | WEBHOOK_CLIENT_ID      |
-| `WEBHOOK_CLIENT_SECRET`  | The Client Secret used by webhooks to acquire Access Tokens from Kyma. | WEBHOOK_CLIENT_SECRET  |
 | `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | WEBHOOK_TOKEN_ENDPOINT |
 | `DOMAIN`                 | Domain.                                                                | example.com            |
 
