@@ -7,7 +7,7 @@ import (
 	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -171,7 +171,7 @@ func TestRetryableRoundTripper(t *testing.T) {
 			res, err := httpClient.Do(req)
 			require.NoError(t, err)
 
-			resBody, err := io.ReadAll(res.Body)
+			resBody, err := ioutil.ReadAll(res.Body)
 			_ = res.Body.Close()
 			require.NoError(t, err)
 			require.Equal(t, res.StatusCode, tc.expectedStatusCode)
