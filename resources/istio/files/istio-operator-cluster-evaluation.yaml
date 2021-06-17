@@ -213,10 +213,6 @@ spec:
         type: LoadBalancer
         zvpn: {}
     global:
-      arch:
-        amd64: 2
-        ppc64le: 2
-        s390x: 2
       configValidation: true
       defaultNodeSelector: {}
       defaultPodDisruptionBudget:
@@ -301,7 +297,6 @@ spec:
       replicaCount: 1
       traceSampling: 1
     sidecarInjectorWebhook:
-      useLegacySelectors: true
       enableNamespacesByDefault: true
       objectSelector:
         autoInject: true
