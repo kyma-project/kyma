@@ -27,14 +27,13 @@ const {
   checkLokiLogs,
   lokiPortForward
 } = require("../logging");
- 
-const testStartTimestamp = new Date().toISOString();
 
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
   const testNamespace = "test";
+  const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;
   let cancelPortForward = null;
 
