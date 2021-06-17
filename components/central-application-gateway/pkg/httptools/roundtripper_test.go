@@ -7,7 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
-	"io"
+	"io/ioutil"
 	"math/big"
 	mathrand "math/rand"
 	"net"
@@ -90,7 +90,7 @@ func TestRoundTripper(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			_, err = io.ReadAll(res.Body)
+			_, err = ioutil.ReadAll(res.Body)
 			_ = res.Body.Close()
 			require.NoError(t, err)
 			require.Equal(t, res.StatusCode, http.StatusOK)
