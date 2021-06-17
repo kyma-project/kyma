@@ -3,6 +3,10 @@ package subscription_nats
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"os"
+	"reflect"
+
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
@@ -13,9 +17,6 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
-	"net/url"
-	"os"
-	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -89,7 +90,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
-	p := predicate.Funcs {
+	p := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
 			if e.Object.GetName() == NATSFirstInstanceName && e.Object.GetNamespace() == NATSNamespace {
 				return true
@@ -282,12 +283,12 @@ func (r Reconciler) assertProtocolValidity(protocol string) error {
 func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
 	handler, _ := r.Backend.(*handlers.Nats)
 	invalidSubs := handler.GetInvalidSubscriptions()
-	for _,v := range *invalidSubs {
+	for _, v := range *invalidSubs {
 		r.Log.Info("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
 		sub := &eventingv1alpha1.Subscription{}
 		err := r.Client.Get(ctx, v, sub)
 		if err != nil {
-			r.Log.Error(err, "failed to get invalid subscription","namespace", v.Namespace, "name", v.Name)
+			r.Log.Error(err, "failed to get invalid subscription", "namespace", v.Namespace, "name", v.Name)
 			continue
 		}
 		// mark the subscription to be not ready, it will throw a new reconcile call

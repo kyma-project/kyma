@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/avast/retry-go"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/avast/retry-go"
 
 	. "github.com/onsi/gomega"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -266,10 +267,9 @@ func TestIsValidSubscription(t *testing.T) {
 	// TODO: the controller should react and inject Kyma subscriptions into NATS for all "invalid" subscriptions
 	// the associated Nats subscription should be valid again
 	/*
-	err = checkIsValid(natsSub, t)
-	g.Expect(err).To(BeNil())
+		err = checkIsValid(natsSub, t)
+		g.Expect(err).To(BeNil())
 	*/
-
 
 }
 

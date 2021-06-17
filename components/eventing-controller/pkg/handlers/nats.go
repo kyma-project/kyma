@@ -134,7 +134,7 @@ func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) e
 				}
 			}
 			if v.IsValid() {
-				if err := v.Unsubscribe();  err != nil {
+				if err := v.Unsubscribe(); err != nil {
 					return errors.Wrapf(err, "failed to unsubscribe")
 				}
 			} else {
@@ -198,7 +198,7 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 }
 
 func getKeyPrefix(sub *eventingv1alpha1.Subscription) string {
-	namespacedName := types.NamespacedName {
+	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
 	}
@@ -220,7 +220,7 @@ func getSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (
 }
 
 func getKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
-	nsn := types.NamespacedName {}
+	nsn := types.NamespacedName{}
 	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
 	nsn.Namespace = nnvalues[0]
 	nsn.Name = nnvalues[1]
