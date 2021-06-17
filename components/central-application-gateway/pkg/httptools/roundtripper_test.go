@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"io/ioutil"
 	"math/big"
 	mathrand "math/rand"
@@ -15,6 +14,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/stretchr/testify/require"
 )

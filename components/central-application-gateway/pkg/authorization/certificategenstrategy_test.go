@@ -5,9 +5,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 

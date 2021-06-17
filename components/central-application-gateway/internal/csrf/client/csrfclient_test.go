@@ -2,11 +2,12 @@ package client
 
 import (
 	"encoding/base64"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"

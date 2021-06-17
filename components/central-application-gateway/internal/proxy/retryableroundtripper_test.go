@@ -2,16 +2,17 @@ package proxy
 
 import (
 	"crypto/tls"
-	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
-	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	csrfMock "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	authMock "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRetryableRoundTripper(t *testing.T) {
