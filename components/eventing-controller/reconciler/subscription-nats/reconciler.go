@@ -282,8 +282,8 @@ func (r Reconciler) assertProtocolValidity(protocol string) error {
 
 func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
 	handler, _ := r.Backend.(*handlers.Nats)
-	invalidSubs := handler.GetInvalidSubscriptions()
-	for _, v := range *invalidSubs {
+	namespacedName := handler.GetInvalidSubscriptions()
+	for _, v := range *namespacedName {
 		r.Log.Info("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
 		sub := &eventingv1alpha1.Subscription{}
 		err := r.Client.Get(ctx, v, sub)

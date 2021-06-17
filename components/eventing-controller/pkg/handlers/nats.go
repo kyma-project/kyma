@@ -95,7 +95,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
-		subject, err := getSubject(filter, cleaner)
+		subject, err := createSubject(filter, cleaner)
 		if err != nil {
 			n.log.Error(err, "failed to create a Nats subject")
 			return false, err
@@ -117,42 +117,44 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			n.log.Error(subscribeErr, "failed to create a Nats subscription")
 			return false, subscribeErr
 		}
-		n.subscriptions[getKey(sub, subject)] = natsSub
+		n.subscriptions[createKey(sub, subject)] = natsSub
 	}
 	return false, nil
 }
 
+// DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	for k, v := range n.subscriptions {
-		if strings.HasPrefix(k, getKeyPrefix(subscription)) {
+	for key, sub := range n.subscriptions {
+		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
 			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
 				initializeErr := n.Initialize(env.Config{})
 				if initializeErr != nil {
-					return errors.Wrapf(initializeErr, "can't connect to Nats server")
+					return errors.Wrapf(initializeErr, "can't connect to NATS server")
 				}
 			}
-			if v.IsValid() {
-				if err := v.Unsubscribe(); err != nil {
+			if sub.IsValid() {
+				if err := sub.Unsubscribe(); err != nil {
 					return errors.Wrapf(err, "failed to unsubscribe")
 				}
 			} else {
-				n.log.Info("cannot unsubscribe an invalid NATS subscription: ", "key", k, "subject", v.Subject)
+				n.log.Info("cannot unsubscribe an invalid NATS subscription: ", "key", key, "subject", sub.Subject)
 			}
-			delete(n.subscriptions, k)
+			delete(n.subscriptions, key)
 			n.log.Info("successfully unsubscribed/deleted subscription")
 		}
 	}
 	return nil
 }
 
+// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions marked as "invalid" by NATS client
 func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	var nsn []types.NamespacedName
 	for k, v := range n.subscriptions {
 		if !v.IsValid() {
 			n.log.Info("invalid NATS subscription: ", "key", k, "subject", v.Subject)
-			nsn = append(nsn, getKymaSubscriptionNamespacedName(k, v))
+			nsn = append(nsn, createKymaSubscriptionNamespacedName(k, v))
 		}
 	}
 	return &nsn
@@ -197,7 +199,7 @@ func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
 	return &event, nil
 }
 
-func getKeyPrefix(sub *eventingv1alpha1.Subscription) string {
+func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	namespacedName := types.NamespacedName{
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
@@ -205,11 +207,11 @@ func getKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	return fmt.Sprintf("%s", namespacedName.String())
 }
 
-func getKey(sub *eventingv1alpha1.Subscription, subject string) string {
-	return fmt.Sprintf("%s.%s", getKeyPrefix(sub), subject)
+func createKey(sub *eventingv1alpha1.Subscription, subject string) string {
+	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), subject)
 }
 
-func getSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
+func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
 	eventType := strings.TrimSpace(filter.EventType.Value)
 	if len(eventType) == 0 {
 		return "", nats.ErrBadSubject
@@ -219,7 +221,7 @@ func getSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (
 	return cleaner.Clean(eventType)
 }
 
-func getKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
+func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
 	nsn := types.NamespacedName{}
 	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
 	nsn.Namespace = nnvalues[0]

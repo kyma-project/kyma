@@ -183,11 +183,10 @@ func TestIsValidSubscription(t *testing.T) {
 	subscriberPort := 8080
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 
-	// Start Nats server
+	// Start NATS server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	//defer natsServer.Shutdown()
 
-	// Create Nats client
+	// Create NATS client
 	natsURL := natsServer.ClientURL()
 	natsClient := Nats{
 		subscriptions: make(map[string]*nats.Subscription),
@@ -200,7 +199,7 @@ func TestIsValidSubscription(t *testing.T) {
 	}
 	err := natsClient.Initialize(env.Config{})
 	if err != nil {
-		t.Fatalf("failed to connect to Nats Server: %v", err)
+		t.Fatalf("failed to connect to NATS Server: %v", err)
 	}
 
 	// Prepare event-type cleaner
@@ -218,18 +217,18 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// get filter
 	filter := sub.Spec.Filter.Filters[0]
-	subject, err := getSubject(filter, cleaner)
+	subject, err := createSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
 	// get internal key
-	key := getKey(sub, subject)
+	key := createKey(sub, subject)
 	g.Expect(key).To(Not(BeEmpty()))
 	natsSub := natsClient.subscriptions[key]
 	g.Expect(natsSub).To(Not(BeNil()))
 
 	// check the mapping of Kyma subscription and Nats subscription
-	nsn := getKymaSubscriptionNamespacedName(key, natsSub)
+	nsn := createKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
 	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
 
@@ -242,14 +241,14 @@ func TestIsValidSubscription(t *testing.T) {
 
 	natsClient.connection.Close()
 
-	// the associated Nats subscription should not be valid anymore
+	// the associated NATS subscription should not be valid anymore
 	err = checkIsNotValid(natsSub, t)
 	g.Expect(err).To(BeNil())
 
 	// shutdown NATS
 	natsServer.Shutdown()
 
-	// the associated Nats subscription should not be valid anymore
+	// the associated NATS subscription should not be valid anymore
 	err = checkIsNotValid(natsSub, t)
 	g.Expect(err).To(BeNil())
 
@@ -257,7 +256,7 @@ func TestIsValidSubscription(t *testing.T) {
 	invalidNsn = natsClient.GetInvalidSubscriptions()
 	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
 
-	// restart Nats server
+	// restart NATS server
 	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
 	defer natsServer.Shutdown()
 
