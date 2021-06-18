@@ -8,7 +8,7 @@ The `addonsconfiguration.addons.kyma-project.io` CustomResourceDefinition (CRD) 
 kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
 ```
 
->**NOTE:** Only users with the **kyma-admin** role can modify the AddonsConfiguration CR. For more information, read about [roles in Kyma](/components/security/#details-roles-in-kyma).
+>**NOTE:** Only users with the **kyma-admin** role can modify the AddonsConfiguration CR. For more information, read about [roles in Kyma](todo).
 
 ## Sample custom resource
 
@@ -108,4 +108,4 @@ These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| Helm Broker |  Fetches Namespace-scoped addons provided by this CR. |
+| [Helm Broker](../../01-overview/02-main-areas/service-management/smgt-10-hb-overview.md) |  Fetches Namespace-scoped addons provided by this CR. |

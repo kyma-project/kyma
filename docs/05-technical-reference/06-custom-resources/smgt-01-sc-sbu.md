@@ -74,7 +74,7 @@ spec:
   labelsPath: spec.template.metadata.labels
 ```
 
->**NOTE:** For more information, see the description of the [UsageKind custom resource](#custom-resource-usage-kind).
+>**NOTE:** For more information, see the description of the [UsageKind custom resource](./smgt-02-sc-usage-kind.md).
 
 ## Custom resource parameters
 
@@ -105,7 +105,7 @@ These are the resources related to this CR:
 
 | Custom resource   |   Description |
 |----------|------|
-| [UsageKind](#custom-resource-usagekind) |  Provides information on where to inject Secrets. |
+| [UsageKind](./smgt-02-sc-usage-kind.md) |  Provides information on where to inject Secrets. |
 | [ServiceBinding](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) |  Provides Secrets to inject.  |
 
 These components use this CR:
@@ -113,4 +113,4 @@ These components use this CR:
 | Component   |   Description |
 |----------|------|
 | [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/main/components/service-binding-usage-controller) |  Reacts to every action of creating, updating, and deleting ServiceBindingUsage resources in all Namespaces and uses ServiceBindingUsage data to inject the binding. |
-| [Console Backend Service](/components/console/#details-console-backend-service) |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |
+| [Console Backend Service](todo) |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |

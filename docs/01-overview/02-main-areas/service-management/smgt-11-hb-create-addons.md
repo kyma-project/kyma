@@ -77,7 +77,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 |  **bindable**   |   No  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
 |     **free**    |   No  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
-* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information, read about [binding addons](#details-bind-addons).
+* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information, read about [binding addons](./smgt-12-hb-bind-addons.md).
 
 * `values.yaml` file - provides the default configuration values in a given plan for the chart definition located in the `chart` directory. For more information, see the [values files](https://github.com/kubernetes/helm/blob/release-2.6/docs/chart_template_guide/values_files.md) specification.
 
@@ -92,8 +92,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 ## docs directory
 
 In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded.
-Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](/components/rafter/#custom-resource-cluster-asset-group) or [AssetGroups](/components/rafter/#custom-resource-asset-group) custom resources, respectively.
-<!-- Check if the links work once Rafter is already in Kyma. -->
+Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](todo) or [AssetGroups](todo) custom resources, respectively.
 
 The `meta.yaml` file contains the specification of the ClusterAssetGroup or AssetGroup. The example structure of the `meta.yaml` file looks as follows:
 
@@ -112,4 +111,4 @@ The `meta.yaml` file contains the specification of the ClusterAssetGroup or Asse
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon. Read also how to [provide addons documentation](#details-provide-service-classes-documentation).
+See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon. Read also how to [provide addons documentation](todo).

@@ -54,14 +54,14 @@ These are the resources related to this CR:
 
 | Custom resource   |   Description |
 |----------|------|
-| [ServiceBindingUsage](#custom-resource-servicebindingusage) |  Contains the reference to the UsageKind. |
+| [ServiceBindingUsage](./smgt-01-sc-sbu.md) |  Contains the reference to the UsageKind. |
 
 These components use this CR:
 
 | Component   |   Description |
 |----------|------|
 | [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/main/components/service-binding-usage-controller) |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and path to which it should inject Secrets. |
-| [Console Backend Service](/components/console/#details-console-backend-service) |  Exposes the given CR to the Console UI. |
+| [Console Backend Service](todo) |  Exposes the given CR to the Console UI. |
 
 ## RBAC settings
 
