@@ -8,6 +8,7 @@ rules:
   - ""
   resources:
   - services
+  - pods
   verbs:
   - list
   - get

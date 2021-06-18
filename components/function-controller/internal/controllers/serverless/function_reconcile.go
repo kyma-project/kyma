@@ -201,7 +201,7 @@ func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Funct
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
 		instance.Spec.Reference != instance.Status.Reference ||
-		instance.Spec.Runtime != instance.Status.Runtime ||
+		serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime) != instance.Status.Runtime ||
 		instance.Spec.BaseDir != instance.Status.BaseDir ||
 		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }

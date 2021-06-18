@@ -230,6 +230,8 @@ spec:
                       type: object
                   type: object
                 runtime:
+                  description: Runtime enumerates runtimes that are currently supported
+                    by Function Controller It is a subset of RuntimeExtended
                   enum:
                     - nodejs12
                     - nodejs14
@@ -244,8 +246,7 @@ spec:
                 - source
               type: object
             status:
-              description: 'FunctionStatus defines the observed state of FuncSONPath:
-              .status.phase'
+              description: FunctionStatus defines the observed state of Function
               properties:
                 baseDir:
                   type: string
@@ -273,11 +274,14 @@ spec:
                 reference:
                   type: string
                 runtime:
+                  description: RuntimeExtended enumerates runtimes that are either currently
+                    supported or no longer supported but there still might be "read-only"
+                    Functions using them
                   enum:
-                    - nodejs10
                     - nodejs12
                     - nodejs14
                     - python38
+                    - nodejs10
                   type: string
                 source:
                   type: string
