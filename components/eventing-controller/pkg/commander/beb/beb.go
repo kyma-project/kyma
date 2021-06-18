@@ -3,8 +3,9 @@ package beb
 import (
 	"context"
 	"fmt"
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"time"
+
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 
