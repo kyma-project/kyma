@@ -3,6 +3,7 @@ package beb
 import (
 	"context"
 	"fmt"
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
@@ -36,6 +37,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := hydrav1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil

@@ -80,8 +80,9 @@ rules:
 - apiGroups:
   - hydra.ory.sh
   resources:
-  - oauth2client
+  - oauth2clients
   verbs:
   - create
   - get
+  - list
   - update
