@@ -113,7 +113,7 @@ class DirectorClient {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
                 debug(resp);
-                throw new Error(resp.data);
+                throw resp.data;
             }
             return resp.data.data.result;
         } catch(err) {
@@ -143,7 +143,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when unregistering application`);
+            throw new Error(`Error when unregistering application: ${err.message}`);
         }
     }
 
@@ -162,7 +162,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when unregistering runtime`);
+            throw new Error(`Error when unregistering runtime: ${err.toString()}`);
         }
     }
 
@@ -195,7 +195,7 @@ class DirectorClient {
             }
             return res;
         } catch(err) {
-            throw new Error(`Error when querying for label definition with key ${labelKey}`);
+            throw new Error(`Error when querying for label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
 
@@ -204,7 +204,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when updating label definition with key ${labelKey}`);
+            throw new Error(`Error when updating label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
 
@@ -214,7 +214,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when querying for runtimes filtered`);
+            throw new Error(`Error when querying for runtimes filtered: ${err.toString()}`);
         }
     }
 
@@ -224,7 +224,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when querying for applications filtered`);
+            throw new Error(`Error when querying for applications filtered: ${err.toString()}`);
         }
     }
 
@@ -234,7 +234,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}`);
+            throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
 
@@ -244,7 +244,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res;
         } catch(err) {
-            throw new Error(`Error whe querying for the runtime with ID ${runtimeID}`);
+            throw new Error(`Error whe querying for the runtime with ID ${runtimeID}: ${err.toString()}`);
         }
     }
 
@@ -254,7 +254,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res;
         } catch(err) {
-            throw new Error(`Error when querying for the application with ID ${appID}`);
+            throw new Error(`Error when querying for the application with ID ${appID}: ${err.toString()}`);
         }
     }
 
@@ -264,7 +264,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when setting application ${appID} label ${key} and value ${value}`);
+            throw new Error(`Error when setting application ${appID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
 
@@ -274,7 +274,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when deleting label ${key} from application ${appID}`);
+            throw new Error(`Error when deleting label ${key} from application ${appID}: ${err.toString()}`);
         }
     }
 }

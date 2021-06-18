@@ -21,7 +21,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
@@ -42,6 +44,10 @@ var (
 
 const (
 	NATSProtocol = "NATS"
+	// NATSFirstInstanceName the name of first instance of NATS cluster
+	NATSFirstInstanceName = "eventing-nats-1"
+	// NATSNamespace namespace of NATS cluster
+	NATSNamespace = "kyma-system"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
@@ -80,7 +86,32 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.Log.Error(err, "unable to watch pods")
+		r.Log.Error(err, "unable to watch subscriptions")
+		return err
+	}
+
+	p := predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == NATSFirstInstanceName && e.Object.GetNamespace() == NATSNamespace {
+				return true
+			}
+			return false
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			if e.Object.GetName() == NATSFirstInstanceName && e.Object.GetNamespace() == NATSNamespace {
+				return true
+			}
+			return false
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			return false
+		},
+		GenericFunc: func(e event.GenericEvent) bool {
+			return false
+		},
+	}
+	if err := ctru.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{}, p); err != nil {
+		r.Log.Error(err, "unable to watch eventing-nats-1 pod")
 		return err
 	}
 
@@ -95,8 +126,13 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name",
-		req.Name)
+
+	if req.Name == NATSFirstInstanceName && req.Namespace == NATSNamespace {
+		r.Log.Info("received watch request", "namespace", req.Namespace, "name", req.Name)
+		return r.syncInvalidSubscriptions(ctx)
+	}
+
+	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
 
 	actualSubscription := &eventingv1alpha1.Subscription{}
 	result := ctrl.Result{}
@@ -242,4 +278,24 @@ func (r Reconciler) assertProtocolValidity(protocol string) error {
 		return fmt.Errorf("invalid protocol: %s", protocol)
 	}
 	return nil
+}
+
+func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
+	handler, _ := r.Backend.(*handlers.Nats)
+	namespacedName := handler.GetInvalidSubscriptions()
+	for _, v := range *namespacedName {
+		r.Log.Info("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
+		sub := &eventingv1alpha1.Subscription{}
+		err := r.Client.Get(ctx, v, sub)
+		if err != nil {
+			r.Log.Error(err, "failed to get invalid subscription", "namespace", v.Namespace, "name", v.Name)
+			continue
+		}
+		// mark the subscription to be not ready, it will throw a new reconcile call
+		if err := r.syncSubscriptionStatus(ctx, sub, false, "invalid subscription"); err != nil {
+			r.Log.Error(err, "failed to save status for invalid subscription", "namespace", v.Namespace, "name", v.Name)
+			return ctrl.Result{}, err
+		}
+	}
+	return ctrl.Result{}, nil
 }

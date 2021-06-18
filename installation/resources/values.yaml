@@ -40,3 +40,9 @@ rafter:
     minio:
       virtualservice:
         enabled: false
+helm-broker:
+  addons-ui:
+    enabled: false
+service-catalog-addons:
+  service-catalog-ui: 
+    enabled: false

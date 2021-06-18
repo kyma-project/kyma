@@ -104,7 +104,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 	}
 
 	service.Status.Source = instance.Spec.Source
-	service.Status.Runtime = instance.Spec.Runtime
+	service.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
 
 	if err := r.client.Status().Update(ctx, service); err != nil {
 		return ctrl.Result{}, err

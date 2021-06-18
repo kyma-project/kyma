@@ -7,18 +7,31 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38
-
-type Runtime string
-
 const (
 	SourceTypeGit SourceType = "git"
 )
+
+// Runtime enumerates runtimes that are currently supported by Function Controller
+// It is a subset of RuntimeExtended
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38
+type Runtime string
 
 const (
 	Nodejs12 Runtime = "nodejs12"
 	Nodejs14 Runtime = "nodejs14"
 	Python38 Runtime = "python38"
+)
+
+// RuntimeExtended enumerates runtimes that are either currently supported or
+// no longer supported but there still might be "read-only" Functions using them
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38;nodejs10
+type RuntimeExtended string
+
+const (
+	RuntimeExtendedNodejs10 RuntimeExtended = "nodejs10"
+	RuntimeExtendedNodejs12 RuntimeExtended = "nodejs12"
+	RuntimeExtendedNodejs14 RuntimeExtended = "nodejs14"
+	RuntimeExtendedPython38 RuntimeExtended = "python38"
 )
 
 const (
@@ -113,13 +126,13 @@ type Condition struct {
 	Message            string                 `json:"message,omitempty"`
 }
 
-// FunctionStatus defines the observed state of FuncSONPath: .status.phase
+// FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 	Repository `json:",inline,omitempty"`
-	Commit     string  `json:"commit,omitempty"`
-	Source     string  `json:"source,omitempty"`
-	Runtime    Runtime `json:"runtime,omitempty"`
+	Commit     string          `json:"commit,omitempty"`
+	Source     string          `json:"source,omitempty"`
+	Runtime    RuntimeExtended `json:"runtime,omitempty"`
 }
 
 type Repository struct {
