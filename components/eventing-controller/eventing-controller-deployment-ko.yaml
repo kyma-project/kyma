@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    meta.helm.sh/release-name: eventing
+    meta.helm.sh/release-namespace: kyma-system
+  labels:
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: controller
+    helm.sh/chart: controller-0.1.0
+    kyma-project.io/dashboard: eventing
+  name: eventing-controller
+  namespace: kyma-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: eventing
+      app.kubernetes.io/name: controller
+      kyma-project.io/dashboard: eventing
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: eventing
+        app.kubernetes.io/name: controller
+        kyma-project.io/dashboard: eventing
+    spec:
+      containers:
+      - env:
+        - name: NATS_URL
+          value: eventing-nats.kyma-system.svc.cluster.local
+        - name: EVENT_TYPE_PREFIX
+          value: sap.kyma.custom
+        - name: DOMAIN
+          value: ps-oath2cr.kymatunas.shoot.canary.k8s-hana.ondemand.com
+        - name: WEBHOOK_TOKEN_ENDPOINT
+          value: https://oauth2.ps-oath2cr.kymatunas.shoot.canary.k8s-hana.ondemand.com/oauth2/token
+        - name: PUBLISHER_REQUESTS_CPU
+          value: 5m
+        - name: PUBLISHER_REQUESTS_MEMORY
+          value: 16Mi
+        - name: PUBLISHER_LIMITS_CPU
+          value: 10m
+        - name: PUBLISHER_LIMITS_MEMORY
+          value: 32Mi
+        - name: PUBLISHER_IMAGE
+          value: eu.gcr.io/kyma-project/event-publisher-proxy:7324e441
+        - name: PUBLISHER_IMAGE_PULL_POLICY
+          value: IfNotPresent
+        - name: PUBLISHER_REPLICAS
+          value: "1"
+        - name: APP_LOG_FORMAT
+          value: json
+        - name: APP_LOG_LEVEL
+          value: info
+        image: ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: controller
+        ports:
+        - containerPort: 8080
+          name: http-metrics
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+          limits:
+            cpu: 20m
+            memory: 64Mi
+          requests:
+            cpu: 5m
+            memory: 16Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: eventing-controller
+      serviceAccountName: eventing-controller
+      terminationGracePeriodSeconds: 10
