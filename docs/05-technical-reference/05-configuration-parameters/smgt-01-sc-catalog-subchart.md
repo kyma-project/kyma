@@ -1,5 +1,5 @@
 ---
-title: Service Catalog: Catalog sub-chart
+title: Service Catalog - Catalog sub-chart
 ---
 
 To configure the Catalog sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
