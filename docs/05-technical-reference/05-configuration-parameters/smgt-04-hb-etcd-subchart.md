@@ -1,5 +1,5 @@
 ---
-title: Helm Broker: Etcd-stateful sub-chart
+title: Helm Broker - Etcd-stateful sub-chart
 ---
 
 To configure the Etcd-stateful sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
