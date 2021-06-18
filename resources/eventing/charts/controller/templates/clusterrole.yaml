@@ -103,3 +103,11 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - hydra.ory.sh
+  resources:
+  - oauth2client
+  verbs:
+  - create
+  - get
+  - update
