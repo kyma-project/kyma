@@ -27,11 +27,18 @@ RUN set -eux; \
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
 ENV PYTHON_VERSION 3.9.5
 
+
+# expat-dev for alpine:3.13.5 is outdated and vulnerable. We will add a tagged repo to installed it from alpine:3.14. 
+# We can't upgrade fully to 3.14 because it has a dependancy on a specific recent docker version https://gitlab.alpinelinux.org/alpine/aports/-/issues/12396
+# RUN echo -e "@3.14 https://dl-cdn.alpinelinux.org/alpine/v3.14/main\n@3.14 https://dl-cdn.alpinelinux.org/alpine/v3.14/community" >> /etc/apk/repositories
+
+
 RUN set -ex \
 	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
 		gnupg \
 		tar \
 		xz \
+		expat-dev \
 	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
@@ -49,7 +56,6 @@ RUN set -ex \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
-		expat-dev \
 		findutils \
 		gcc \
 		gdbm-dev \
