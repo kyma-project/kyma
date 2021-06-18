@@ -98,7 +98,7 @@ func oauth2ClientEqual(oa1, oa2 *hydrav1alpha1.OAuth2Client) bool {
 		return false
 	}
 
-	return false
+	return true
 }
 
 // publisherProxyDeploymentEqual asserts the equality of two Deployment objects

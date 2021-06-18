@@ -86,3 +86,4 @@ rules:
   - get
   - list
   - update
+  - watch
