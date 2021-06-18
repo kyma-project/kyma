@@ -4,10 +4,6 @@ title: Service Catalog: Catalog sub-chart
 
 To configure the Catalog sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->* [Helm overrides for Kyma installation](todo)
->* [Sub-charts overrides](todo)
-
 ## Configurable parameters
 
 This table lists the configurable parameters, their descriptions, and default values:
