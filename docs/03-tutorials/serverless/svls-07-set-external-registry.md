@@ -2,7 +2,7 @@
 title: Set an external Docker registry
 ---
 
-By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from one of these cloud providers using an [override](TO_DO):
+By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from one of these cloud providers:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)

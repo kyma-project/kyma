@@ -2,12 +2,7 @@
 title: Serverless chart
 ---
 
-To configure the Serverless chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
-
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->
-> - [Helm overrides for Kyma installation](TO_DO)
-> - [Top-level charts overrides](TO_DO)
+To configure the Serverless chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/serverless/values.yaml) file. This document describes parameters that you can configure.
 
 ## Configurable parameters
 
