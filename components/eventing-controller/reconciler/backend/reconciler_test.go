@@ -51,11 +51,33 @@ var (
 	defaultLogger *logger.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
+
 	natsCommander = &TestCommander{}
 	bebCommander  = &TestCommander{}
 )
 
+// TestGetSecretForPublisher verifies the successful and failing retrieval
+// of secrets.
 func TestGetSecretForPublisher(t *testing.T) {
+	secretFor = func(message, namespace []byte) *corev1.Secret {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: deployment.PublisherName,
+			},
+		}
+
+		secret.Data = make(map[string][]byte)
+
+		if len(message) > 0 {
+			secret.Data["messaging"] = message
+		}
+		if len(namespace) > 0 {
+			secret.Data["namespace"] = namespace
+		}
+
+		return secret
+	}
+
 	testCases := []struct {
 		name           string
 		messagingData  []byte
@@ -99,7 +121,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			publisherSecret := getSecret(tc.messagingData, tc.namespaceData)
+			publisherSecret := secretFor(tc.messagingData, tc.namespaceData)
 
 			gotPublisherSecret, err := getSecretForPublisher(publisherSecret)
 			if tc.expectedError != nil {
@@ -113,30 +135,13 @@ func TestGetSecretForPublisher(t *testing.T) {
 	}
 }
 
-func getSecret(message, namespace []byte) *corev1.Secret {
-	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: deployment.PublisherName,
-		},
-	}
-
-	secret.Data = make(map[string][]byte)
-
-	if len(message) > 0 {
-		secret.Data["messaging"] = message
-	}
-	if len(namespace) > 0 {
-		secret.Data["namespace"] = namespace
-	}
-
-	return secret
-}
-
+// TestAPIs prepares gingko to run the test suite.
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecsWithDefaultAndCustomReporters(t, "Eventing Backend Controller Suite", []Reporter{printer.NewlineReporter{}})
 }
 
+// Prepare the test suite.
 var _ = BeforeSuite(func(done Done) {
 	var err error
 
@@ -196,12 +201,14 @@ var _ = BeforeSuite(func(done Done) {
 	close(done)
 }, 60)
 
+// Post-process the test suite.
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
 
+// Verify the working backend reconciliation.
 var _ = Describe("Backend Reconciliation Tests", func() {
 	var ownerReferences *[]metav1.OwnerReference
 
@@ -578,6 +585,7 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 	}
 }
 
+// TestCommander simulates the the commander implementation for BEB and NATS.
 type TestCommander struct {
 	startErr, stopErr error
 }
