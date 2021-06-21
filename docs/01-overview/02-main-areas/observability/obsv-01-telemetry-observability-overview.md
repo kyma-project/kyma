@@ -8,7 +8,7 @@ Out of the box, Kyma provides tools to collect and expose **telemetry** data, su
 
 The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together.  Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
 
-> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](link-to-istio-monitoring).
+> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](#docs/01-overview/02-main-areas/service-mesh/con-monitoring-istio.md).
 
 The collected telemetry data are exposed so that you can view and analyse them with the observability tools of your choice.
 
@@ -36,23 +36,6 @@ You can use the following in-cluster components to observe your applications' te
 
 However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
 
-### External observability
-
-If you want to use other observability tools than the ones within the cluster provided by Kyma out-of-the-box, you can easily do that, too.
-OpenTelemetry exposes the collected data *in the following way*:
-
-  *TBD - input needed*
-
-You can integrate various frameworks and libraries, such as:
-
-  *TBD - input needed*
-
-- *option 1*
-- *option 2*
-- *option 3*
-
-Learn how to integrate Kyma with your preferred observability solution under [this tutorial](link-to-topic).
-
 ## Learn more
 
-Interested in the architecture details? Check out the [logging architecture](arch-logging) and the [end-to-end monitoring flow](arch-monitoring).
+Interested in the architecture details? Check out the [logging architecture](docs/05-technical-reference/03-architecture/obsv-02-architecture-logging.md) and the [end-to-end monitoring flow](docs/05-technical-reference/03-architecture/obsv-01-architecture-monitoring.md).
