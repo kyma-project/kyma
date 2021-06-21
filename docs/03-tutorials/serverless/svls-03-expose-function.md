@@ -145,7 +145,7 @@ Follows these steps:
     Busola UI
     </summary>
 
->**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola/blob/main/README.md) to install it with npx.
+>**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an APIRule.
 

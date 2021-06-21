@@ -123,7 +123,7 @@ Follows these steps:
     Busola UI
     </summary>
 
->**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola/blob/main/README.md) to install it with npx.
+>**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 
