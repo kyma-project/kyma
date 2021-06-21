@@ -9,13 +9,13 @@ All the tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-
 
 The tutorial set consists of these documents:
 
-1. [**Observe application metrics**](#tutorials-observe-application-metrics) in which you redirect the `cpu_temperature_celsius` metric to the localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10 seconds interval in which Prometheus scrapes the metric values from the service's `/metrics` endpoint.
+1. [**Observe application metrics**](#obsv-02-observe-application-metrics.md) in which you redirect the `cpu_temperature_celsius` metric to the localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10 seconds interval in which Prometheus scrapes the metric values from the service's `/metrics` endpoint.
 
-2. [**Create a Grafana dashboard**](#tutorials-create-a-grafana-dashboard) in which you create a Grafana dashboard of a Gauge type for the `cpu_temperature_celsius` metric. This dashboard shows explicitly when the CPU temperature is equal to or higher than the predefined threshold of 75 degrees Celsius, at which point the dashboard turns red.
+2. [**Create a Grafana dashboard**](#obsv-03-create-and-configure-grafana-dashboard.md) in which you create a Grafana dashboard of a Gauge type for the `cpu_temperature_celsius` metric. This dashboard shows explicitly when the CPU temperature is equal to or higher than the predefined threshold of 75 degrees Celsius, at which point the dashboard turns red.
 
-3. [**Define alerting rules**](#tutorials-define-alerting-rules) in which you define the `CPUTempHigh` alerting rule by creating a PrometheusRule resource. Prometheus accesses the `/metrics` endpoint every 10 seconds and validates the current value of the `cpu_temperature_celsius` metric. If the value is equal to or higher than 75 degrees Celsius, Prometheus waits for 10 seconds to recheck it. If the value still exceeds the threshold, Prometheus triggers the rule. You can observe both the rule and the alert it generates on the Prometheus dashboard.
+3. [**Define alerting rules**](#docs/03-tutorials/observability/obsv-04-define-alerting-rules-monitor.md) in which you define the `CPUTempHigh` alerting rule by creating a PrometheusRule resource. Prometheus accesses the `/metrics` endpoint every 10 seconds and validates the current value of the `cpu_temperature_celsius` metric. If the value is equal to or higher than 75 degrees Celsius, Prometheus waits for 10 seconds to recheck it. If the value still exceeds the threshold, Prometheus triggers the rule. You can observe both the rule and the alert it generates on the Prometheus dashboard.
 
-4. [**Send notifications to Slack**](#tutorials-send-notifications-to-slack) in which you configure Alertmanager to send notifications on Prometheus alerts to a Slack channel. This way, whenever Prometheus triggers or resolves the `CPUTempHigh` alert, Alertmanager sends a notification to the `test-monitoring-alerts` Slack channel defined for the tutorial.
+4. [**Send notifications to Slack**](#docs/03-tutorials/observability/obsv-05-send-notifications.md) in which you configure Alertmanager to send notifications on Prometheus alerts to a Slack channel. This way, whenever Prometheus triggers or resolves the `CPUTempHigh` alert, Alertmanager sends a notification to the `test-monitoring-alerts` Slack channel defined for the tutorial.
 
 See the diagram for an overview of the purpose of the tutorials and the tools used in them:
 
