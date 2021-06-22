@@ -1,11 +1,9 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-metadata:
   name: {{ template "prometheus.server.fullname" . }}-server
   namespace: {{ $.Release.Namespace }}
   labels:
-    app: {{ template "prometheus.server.fullname" . }}-server
     {{- include "prometheus.server.labels" . | nindent 4 }}
 spec:
   namespaceSelector:
