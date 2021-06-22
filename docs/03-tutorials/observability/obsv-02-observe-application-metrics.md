@@ -74,7 +74,7 @@ You can see the `cpu_temperature_celsius` metric and its current value of `62` o
 
 Thanks to the example logic, the custom metric value changes each time you refresh the localhost address.
 
-### View metrics on the Prometheus UI
+## View metrics on the Prometheus UI
 
 You can also observe the `cpu_temperature_celsius` metric in the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus scrapes the metric values from the service endpoint.
 
