@@ -2,7 +2,7 @@
 title: Useful links
 ---
 
-You can find out more about Eventing by following the links on this page.
+Find out more about Eventing by following the links on this page.
 
 To learn more about how Eventing works, see:
 
@@ -26,4 +26,3 @@ For other technical resources, check out these links on the the Kyma GitHub repo
 - [Eventing Helm chart](https://github.com/kyma-project/kyma/tree/main/resources/eventing)
 - [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy)
 - [Eventing Controller](https://github.com/kyma-project/kyma/tree/main/components/eventing-controller)
-
