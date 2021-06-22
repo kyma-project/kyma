@@ -6,7 +6,6 @@ metadata:
     grafana_dashboard: "1"
     app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 data:
-data:
   pods.json: |-
     {
         "__inputs": [
