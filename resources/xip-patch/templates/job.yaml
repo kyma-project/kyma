@@ -13,39 +13,39 @@ spec:
       serviceAccountName: {{ .Release.Name }}-service-account
       restartPolicy: Never
       containers:
-        - name: {{ .Release.Name }}
-          image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
-          env:
-            - name: EXTERNAL_PUBLIC_IP
-              value: {{ .Values.global.loadBalancerIP }}
-            - name: INGRESSGATEWAY_SERVICE_NAME
-              value: istio-ingressgateway
-            - name: GLOBAL_DOMAIN
-              value: {{ .Values.global.domainName }}
-            - name: GLOBAL_TLS_CERT
-              value: {{ .Values.global.tlsCrt }}
-            - name: GLOBAL_TLS_KEY
-              value: {{ .Values.global.tlsKey }}
-            - name: INGRESS_DOMAIN
-              valueFrom:
-                configMapKeyRef:
-                  name: net-global-overrides
-                  key: global.ingress.domainName
-                  optional: true
-            - name: INGRESS_TLS_CERT
-              valueFrom:
-                configMapKeyRef:
-                  name: net-global-overrides
-                  key: global.ingress.tlsCrt
-                  optional: true
-            - name: INGRESS_TLS_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: net-global-overrides
-                  key: global.ingress.tlsKey
-                  optional: true
-            - name: TLS_SECRET_NAME
-              value: {{ .Values.tls.secretName }}
-      {{- if .Values.global.priorityClassName }}
+      - name: {{ .Release.Name }}
+        image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
+        env:
+        - name: EXTERNAL_PUBLIC_IP
+          value: {{ .Values.global.loadBalancerIP }}
+        - name: INGRESSGATEWAY_SERVICE_NAME
+          value: istio-ingressgateway
+        - name: GLOBAL_DOMAIN
+          value: {{ .Values.global.domainName }}
+        - name: GLOBAL_TLS_CERT
+          value: {{ .Values.global.tlsCrt }}
+        - name: GLOBAL_TLS_KEY
+          value: {{ .Values.global.tlsKey }}
+        - name: INGRESS_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: net-global-overrides
+              key: global.ingress.domainName
+              optional: true
+        - name: INGRESS_TLS_CERT
+          valueFrom:
+            configMapKeyRef:
+              name: net-global-overrides
+              key: global.ingress.tlsCrt
+              optional: true
+        - name: INGRESS_TLS_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: net-global-overrides
+              key: global.ingress.tlsKey
+              optional: true
+        - name: TLS_SECRET_NAME
+          value: {{ .Values.tls.secretName }}
+    {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
-  {{- end }}
+    {{- end }}
