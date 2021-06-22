@@ -58,10 +58,10 @@ global:
   # paths to docker images
   helm_broker:
     dir: ""
-    version: "28103b92"
+    version: "d39e2c8a"
   helm_controller:
     dir: ""
-    version: "3c7851c6"
+    version: "d39e2c8a"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
