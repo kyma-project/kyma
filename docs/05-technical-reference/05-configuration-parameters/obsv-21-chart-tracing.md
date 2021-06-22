@@ -5,7 +5,8 @@ title: Tracing chart
 To configure the Tracing chart, override the default values of its `values.yaml` file.
 Learn how it works under [Configurable Parameters](./README.md).
 
-You can set the following parameters:
+Here are some of the parameters you can set. 
+For the complete list, see the `values.yaml` file.
 
 ## Configurable parameters
 
