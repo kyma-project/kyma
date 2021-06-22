@@ -72,12 +72,3 @@ check_cert_status "kyma-tls-cert" $KYMA_SECRET_NAMESPACE $CERT_CHECK_TIMEOUT
 echo "Annotating istio-ingressgateway/istio-system service"
 
 kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
-
-# TODO: remove this when global.ingress.domainName is removed
-kubectl create configmap net-global-overrides \
-  --from-literal global.domainName="$DOMAIN" \
-  --from-literal global.ingress.domainName="$DOMAIN" \
-  -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-
-kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
-kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
