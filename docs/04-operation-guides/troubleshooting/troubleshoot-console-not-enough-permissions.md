@@ -12,7 +12,7 @@ If you log in to the Kyma Console and receive `Not enough permissions` error mes
 ```bash
 {
 ...
-  "iss": "https://dex.c-6d073c0.kyma-stage.shoot.live.k8s-hana.ondemand.com",
+  "iss": "{your OIDC issuer}",
   "aud": [
     "kyma-client",
     "console"

@@ -76,11 +76,9 @@ apiRules:
               handler: jwt
             - config:
                 jwksUrls:
-                    - http://dex-service.kyma-system.svc.cluster.local:5556/keys
-                    - http://dex-service.kyma-system.svc.cluster.local:5556
+                    - { jwks_uri of our OpenID Connect compliant Identity provider }
                 trustedIssuers:
-                    - https://dex.34.90.136.181.xip.io
-                    - https://dex.34.90.136.181.xip.io
+                    - { issuer URL of our OpenID Connect compliant Identity provider }
 env:
     - name: REDIS_PASS
       value: YgJUg8z6eA
