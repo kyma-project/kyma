@@ -1,12 +1,12 @@
 ---
 title: Send notifications to Slack
-type: Tutorials - Observability
 ---
+
 This tutorial shows you how to configure Alertmanager to send notifications. Alertmanager supports several [notification receivers](https://prometheus.io/docs/alerting/configuration/#receiver), but this tutorial only focuses on sending notifications to Slack.
 
 ## Prerequisites
 
-This  tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) and the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
+-You have performed the steps to observe application metrics and define alerting rules using the `monitoring-custom-metrics` example and successfully deployed the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric.
 
 ## Steps
 
@@ -22,14 +22,17 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
    ![Integration Settings](./assets/integration-settings.png)
 
-3. To ..., run the following command.
+3. To deploy the configuration, run the following command:
 
-   ```
+   ```bash
    kyma deploy \
    --component monitoring \
    --value "global.alertTools.credentials.slack.channel={CHANNEL_NAME}" \
    --value "global.alertTools.credentials.slack.apiurl={WEBHOOK_URL}"
    ```
+
 4. Verify if your Slack channel receives alert notifications about firing and resolved alerts. See the example:
 
    ![Alert Notifications](./assets/alert-notifications.png)
+
+5. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).

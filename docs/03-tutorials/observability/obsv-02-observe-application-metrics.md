@@ -1,23 +1,22 @@
 ---
 title: Observe application metrics
-type: Tutorials - Observability
 ---
 
-This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
+## Purpose
 
-This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
+
+Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
 - From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
 - At `10s` interval
 
-This tutorial focuses on the `cpu_temperature_celsius` metric, that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
+The instructions focus on the `cpu_temperature_celsius` metric, which is one of the custom metrics exposed by the `sample-metrics-8081` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
 
 ## Prerequisites
 
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
-
-## Steps
 
 Follow this tutorial to:
 
@@ -26,9 +25,7 @@ Follow this tutorial to:
 - Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI.
 - Clean up the deployed example.
 
-### Deploy the example configuration
-
-Follow these steps:
+## Deploy the example configuration
 
 1. Create the `testing-monitoring` Namespace.
 
@@ -61,9 +58,7 @@ Follow these steps:
    sample-metrics-6f7c8fcf4b-mlgbx   2/2     Running   0          26m
    ```
 
-### View metrics on a localhost
-
-Follow these steps:
+## View metrics on a localhost
 
 1. Run the `port-forward` command on the `sample-metrics-8081` service for port `8081` to check the metrics.
 
@@ -101,28 +96,4 @@ Follow these steps to redirect the metrics:
 
    The Prometheus UI shows a new value every 10 seconds upon refreshing the page.
 
-### Clean up the configuration
-
-When you finish the tutorial, remove the deployed example and all its resources from the cluster.
-
-> **NOTE:** Do not clean up the resources if you want to continue with the next tutorial as these resources are used there as well.
-
-Follow these steps:
-
-1. Remove the deployed ServiceMonitor CRD from the `kyma-system` Namespace.
-
-    ```bash
-    kubectl delete servicemonitor -l example=monitoring-custom-metrics -n kyma-system
-    ```
-
-2. Remove the example deployment from the `testing-monitoring` Namespace.
-
-    ```bash
-    kubectl delete all -l example=monitoring-custom-metrics -n testing-monitoring
-    ```
-
-3. Remove the `testing-monitoring` Namespace.
-
-    ```bash
-    kubectl delete namespace testing-monitoring
-    ```
+4. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).

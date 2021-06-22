@@ -8,7 +8,7 @@ Out of the box, Kyma provides tools to collect and expose **telemetry** data, su
 
 The [OpenTelemetry](https://opentelemetry.io/) observability framework is the core tool where all of Kyma's raw data comes together.  Among the data sources that flow into the OpenTelemetry collector are Kubernetes and Istio.
 
-> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](#docs/01-overview/02-main-areas/service-mesh/con-monitoring-istio.md).
+> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/02-main-areas/service-mesh/con-monitoring-istio.md).
 
 The collected telemetry data are exposed so that you can view and analyse them with the observability tools of your choice.
 
@@ -38,4 +38,4 @@ However, if your cluster is down, these components are down as well. This is why
 
 ## Learn more
 
-Interested in the architecture details? Check out the [logging architecture](docs/05-technical-reference/03-architecture/obsv-02-architecture-logging.md) and the [end-to-end monitoring flow](docs/05-technical-reference/03-architecture/obsv-01-architecture-monitoring.md).
+Interested in the architecture details? Check out the [logging architecture](../../../05-technical-reference/03-architecture/obsv-02-architecture-logging.md) and the [end-to-end monitoring flow](../../../05-technical-reference/03-architecture/obsv-01-architecture-monitoring.md).
