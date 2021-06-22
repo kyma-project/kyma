@@ -76,9 +76,9 @@ apiRules:
               handler: jwt
             - config:
                 jwksUrls:
-                    - { jwks_uri of our OpenID Connect compliant Identity provider }
+                    - {jwks_uri of your OpenID Connect-compliant identity provider}
                 trustedIssuers:
-                    - { issuer URL of our OpenID Connect compliant Identity provider }
+                    - {issuer URL of your OpenID Connect-compliant Identity provider}
 env:
     - name: REDIS_PASS
       value: YgJUg8z6eA
