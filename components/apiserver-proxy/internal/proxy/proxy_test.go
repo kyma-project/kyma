@@ -29,6 +29,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		Authorization: &authz.Config{},
 	}
 
+	maliciousGroup := "malicious-group"
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
 	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
 	metrics, _ := monitoring.NewProxyMetrics()
@@ -56,8 +57,8 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 					t.Errorf("User in the response header does not match authenticated user. Expected : %s, received : %s ", fakeUser.GetName(), user)
 				}
 
-				if strings.Contains(groups, "malicious-group") {
-					t.Errorf("Groups should not contain %s injected in the request", "malicious-group")
+				if strings.Contains(groups, maliciousGroup) {
+					t.Errorf("Groups should not contain %s injected in the request", maliciousGroup)
 				}
 
 				if groups != strings.Join(fakeUser.GetGroups(), cfg.Authentication.Header.GroupSeparator) {
