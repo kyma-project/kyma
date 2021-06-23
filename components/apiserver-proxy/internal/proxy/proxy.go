@@ -92,7 +92,7 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 }
 
 func (h *kubeRBACProxy) cleanupImpersonateGroupHeader(req *http.Request) {
-	req.Header.Set("Impersonate-Group", "")
+	req.Header.Del("Impersonate-Group")
 }
 
 func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) authorizer.RequestAttributesGetter {
