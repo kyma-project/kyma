@@ -81,6 +81,7 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	}
 
 	req.Header.Set("Impersonate-User", r.User.GetName())
+	h.cleanupImpersonateGroupHeader(req)
 	for _, gr := range r.User.GetGroups() {
 		req.Header.Add("Impersonate-Group", gr)
 	}
@@ -88,6 +89,10 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	h.metrics.RequestCounterVec.With(prometheus.Labels{"code": fmt.Sprint(http.StatusOK), "method": req.Method}).Inc()
 
 	return true
+}
+
+func (h *kubeRBACProxy) cleanupImpersonateGroupHeader(req *http.Request) {
+	req.Header.Set("Impersonate-Group", "")
 }
 
 func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) authorizer.RequestAttributesGetter {
