@@ -14,7 +14,7 @@ spec:
   http:
   - route:
     - destination:
-        {{- if .Values.kcproxy.enabled}}
+        {{- if .Values.authProxy.enabled}}
         host: {{ template "kiali-server.name" . }}-secured
         {{- else}}
         host: {{ template "kiali-server.name" . }}-server
