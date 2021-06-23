@@ -1,0 +1,72 @@
+{{if .Values.authProxy.enabled}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.authProxy.replicaCount }}
+  selector:
+    matchLabels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: auth-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: auth-proxy
+    spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true   #only for minikube
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      {{- if .Values.authProxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
+      {{- end }}
+      volumes:
+        - name: templates-cm
+          configMap:
+            name: {{ .Release.Name }}-auth-proxy-{{ template "jaeger-operator.fullname" . }}-templates
+      containers:
+      - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
+        imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
+        name: auth-proxy
+        args:
+        - --http-address=0.0.0.0:{{ .Values.authProxy.inPort }}
+        - --upstream=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
+        - --cookie-secure=true
+        - --cookie-domain=https://jaeger.{{ .Values.global.ingress.domainName }}
+        - --cookie-name=KYMA_JAEGER_TOKEN
+        - --silence-ping-logging=true
+        - --reverse-proxy=true
+        - --auth-logging={{ .Values.authProxy.config.authLogging }}
+        envFrom:
+        - secretRef:
+            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+            optional: false
+        - secretRef:
+            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy-user
+            optional: true
+        ports:
+        - name: http
+          containerPort: {{ .Values.authProxy.inPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        {{- if .Values.authProxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.authProxy.securityContext | nindent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.authProxy.resources | indent 10 }}
+        volumeMounts:
+          - name: templates-cm
+            mountPath: /templates
+{{end}}
