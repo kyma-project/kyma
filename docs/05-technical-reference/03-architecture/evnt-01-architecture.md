@@ -1,9 +1,16 @@
 ---
 title: Eventing Architecture
-type: Architecture
 ---
 
-Eventing uses NATS to implement the Event Publisher Proxy and the Eventing Controller which work together to process and deliver events in Kyma.
+Eventing uses NATS to implement the Event Publisher Proxy and the Eventing Controller which work together to process and deliver events in Kyma. See how Eventing works inside a Kyma cluster:
+
+![Eventing architecture](./assets/evnt-architecture.svg)
+
+1. Kyma user creates the Application custom resource (CR).
+2. Application Operator watches for Application CRs and creates a HTTPSource CR.
+3. EventSource Controller watches for HTTPSource CRs and deploys the HTTP Source Adapter.
+4. Application Broker watches for Application CRs, exposes events, deploys NATS subscriptions, and labels secrets in the User Namespace.
+5. Kyma user creates an event [Subscription CR]()../../../05-technical-reference/06-custom-resources/evnt-01-subscription.md).
 
 ## Event Publisher Proxy
 
