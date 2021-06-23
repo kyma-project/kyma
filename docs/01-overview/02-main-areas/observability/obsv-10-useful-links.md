@@ -3,7 +3,7 @@ title: Observability: Useful links
 
 If you're interested in learning more about the Observability area, check out these links:
 
-- Learn how to set up the [Monitoring Flow](../../../3-tutorials/observability/obsv-01-monitoring-overview.md) for your services in Kyma, in which you [observe your application metrics](../../../3-tutorials/observability/obsv-02-observe-application-metrics.md), [set up your Grafana Dashboard](../../../03-tutorials/observability/obsv-03-create-and-configure-grafana-dashboard.md), [define alerting rules](../../../03-tutorials/observability/obsv-04-define-alerting-rules-monitor.md), and eventually, [send notifications](../../../03-tutorials/observability/obsv-05-send-notifications.md). Please remember to [clean up when you're done](../../../03-tutorials/observability/obsv-06-clean-up-configuration.md) ;)
+- Learn how to set up the [Monitoring Flow](../../../3-tutorials/observability/obsv-01-monitoring-overview.md) for your services in Kyma, in which you [observe your application metrics](../../../3-tutorials/observability/obsv-02-observe-application-metrics.md), [set up your Grafana Dashboard](../../../03-tutorials/observability/obsv-03-create-and-configure-grafana-dashboard.md), [define alerting rules](../../../03-tutorials/observability/obsv-04-define-alerting-rules-monitor.md), and eventually, [send notifications](../../../03-tutorials/observability/obsv-05-send-notifications.md). ...And remember to [clean up when you're done](../../../03-tutorials/observability/obsv-06-clean-up-configuration.md) ;)
 
 - Check out the different ways to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) provided by Kubernetes and Loki.
 
