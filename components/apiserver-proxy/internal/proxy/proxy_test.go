@@ -57,7 +57,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 					t.Errorf("User in the response header does not match authenticated user. Expected : %s, received : %s ", fakeUser.GetName(), user)
 				}
 
-				if strings.Contains(groups, maliciousGroup) {
+				if strings.Contains(v.req.Header.Get("Impersonate-Group"), maliciousGroup) {
 					t.Errorf("Groups should not contain %s injected in the request", maliciousGroup)
 				}
 
