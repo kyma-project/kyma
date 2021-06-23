@@ -16,7 +16,7 @@ The diagram shows the user authentication flow:
 
 ### ID Tokens
 
- ID Tokens are JSON Web Tokens (JWTs) signed by an OpenID Connect-compliant identity provider and returned as part of the OAuth2 response that attest to the end user's identity.
+ ID Tokens are JSON Web Tokens (JWTs) signed by an OIDC-compliant identity provider and returned as part of the OAuth2 response that attest to the end user's identity.
  An example decoded JWT looks as follows:
 
 ```json
