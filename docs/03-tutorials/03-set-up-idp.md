@@ -43,12 +43,16 @@ k3d cluster create kyma \
 --k3s-server-arg "--kube-apiserver-arg=oidc-groups-claim=<group-claim-at-your-ipd>" \
 ```
 
-Now, whenever api server is called with a JWT token, the api server will be able to validate and extract the associated identity ( from the `username` claim ) and groups ( from the `group` claim) from the token.
+If you use managed kubernetes you will do it different depending on your provider.
+For example, if you use gardener as a managed kubernetes offering you will probably wnt to look at the [OIDCPreset](https://github.com/gardener/gardener/blob/master/docs/usage/openidconnect-presets.md) resources that help you with the task.
+
 
 
 ### Configure Role Based Access to identies provided by your OIDC server
 
-Now, after having completed the steps so far, every request to api server with JWT token attached is automatically associated with identity string of the user and optionally a set of groups to which the user belongs. You shoud now define which individuals or groups should have access to which kyma resources because by default they won't have access to anything. You need to modelpermissions using the concept of Role Based Access Control ([RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)).
+Now, whenever api server is called with a JWT token, the api server will be able to validate and extract the associated identity ( from the `username` and `group` claims of the JWT token).
+
+You shoud now define which individuals or groups should have access to which kyma resources because by default they won't have access to anything. You need to model permissions using the concept of Role Based Access Control ([RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)).
 
 By default, Kyma comes with the following ClusterRoles:
 
@@ -81,7 +85,7 @@ You can combine user and group level permission in one binding. Run `kubectl cre
 
 ### Configure kubectl access
 
-With this step you will set up the OIDC provider in  kubeconfig file to enforce authentication flow.
+With this step you will set up the OIDC provider in  kubeconfig file to enforce authentication flow when accessing kyma via `kubectl`.
 
 1. Install [kubelogin](https://github.com/int128/kubelogin) plugin
 2. Copy your current kubeconfig file into a new file
