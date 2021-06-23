@@ -9,7 +9,6 @@ import (
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
@@ -115,6 +114,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	defer cancel()
 	h.receive(ctx, event)
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
+
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
 
@@ -156,6 +156,7 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 
 	h.receive(ctx, event)
+
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
 

@@ -51,7 +51,6 @@ func ValidateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacy
 	if err != nil {
 		t.Fatalf("failed to read response body: %v", err)
 	}
-	fmt.Println(string(bodyBytes))
 	if err = json.Unmarshal(bodyBytes, &legacyOkResponse); err != nil {
 		t.Fatalf("failed to unmarshal response body: %v", err)
 	}

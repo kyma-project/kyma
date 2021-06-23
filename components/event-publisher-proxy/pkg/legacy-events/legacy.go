@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
+
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -122,6 +124,9 @@ func (t Transformer) TransformLegacyRequestsToCE(writer http.ResponseWriter, req
 		writeJSONResponse(writer, response)
 		return nil
 	}
+
+	// Add tracing context to cloud events
+	tracing.AddTracingContextToCEExtensions(request.Header, event)
 
 	return event
 }

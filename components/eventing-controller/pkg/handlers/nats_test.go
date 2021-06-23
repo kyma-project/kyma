@@ -340,9 +340,9 @@ func TestIsValidSubscription(t *testing.T) {
 
 }
 
-func checkIsValid(sub *nats.Subscription, t *testing.T) error {
-	return checkValidity(sub, true, t)
-}
+//func checkIsValid(sub *nats.Subscription, t *testing.T) error {
+//	return checkValidity(sub, true, t)
+//}
 
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, false, t)

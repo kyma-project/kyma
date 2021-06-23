@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
@@ -38,8 +39,9 @@ func NewNats(config env.NatsConfig, log logr.Logger) *Nats {
 }
 
 const (
-	period   = time.Minute
-	maxTries = 5
+	period         = time.Minute
+	maxTries       = 5
+	traceParentKey = "traceparent"
 )
 
 // Initialize creates a connection to Nats
@@ -80,11 +82,8 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
 		IdleConnTimeout:     config.IdleConnTimeout,
 	}
-	protocol, err := cev2.NewHTTP(cev2.WithRoundTripper(transport))
-	if err != nil {
-		return nil, err
-	}
-	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
+
+	return cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
 }
 
 // The returned bool should be ignored now. It's a marker for changed subscription status
@@ -182,11 +181,13 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
 
-		if result := n.client.Send(ctxWithCE, *ce); !cev2.IsACK(result) {
+		// Add tracing headers to the subsequent request
+		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
+
+		if result := n.client.Send(traceCtxWithCE, *ce); !cev2.IsACK(result) {
 			n.log.Error(result, "failed to dispatch event")
 			return
 		}
-
 		n.log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), sink))
 	}
 }

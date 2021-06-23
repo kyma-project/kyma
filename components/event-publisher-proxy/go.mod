@@ -4,13 +4,15 @@ go 1.15
 
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
-	github.com/cloudevents/sdk-go/v2 v2.3.1
+	github.com/cloudevents/sdk-go/v2 v2.4.1
 	github.com/google/uuid v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210520105418-ddc3a476c40a
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210112215829-419ae45b5316
 	github.com/nats-io/nats-server/v2 v2.2.4
 	github.com/nats-io/nats.go v1.11.0
+	github.com/onsi/ginkgo v1.14.2 // indirect
+	github.com/onsi/gomega v1.10.4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.9.0
 	github.com/sirupsen/logrus v1.7.0
