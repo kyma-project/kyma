@@ -36,9 +36,9 @@ spec:
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
-            - --service-blacklist={{ include "api-gateway.serviceBlackList" . | trimAll "," }}
+            - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
-            - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
+            - --domain-allowlist={{ include "api-gateway.domainAllowList" . }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}

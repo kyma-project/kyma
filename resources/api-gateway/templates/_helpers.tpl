@@ -45,10 +45,10 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
-Create a list of namespaced services to blacklist
+Create a list of namespaced services to blocklist
 */}}
-{{- define "api-gateway.serviceBlackList" -}}
-{{- range $i, $e := .Values.config.serviceBlackList -}}
+{{- define "api-gateway.serviceBlockList" -}}
+{{- range $i, $e := .Values.config.serviceBlockList -}}
 {{- range $e -}}
 {{ printf "%s.%s," . $i -}}
 {{- end }}
@@ -56,10 +56,10 @@ Create a list of namespaced services to blacklist
 {{- end -}}
 
 {{/*
-Create a list of domains to whitelist
+Create a list of domains to allowlist
 */}}
-{{- define "api-gateway.domainWhiteList" -}}
-{{- range $domain := .Values.config.domainWhiteList -}}
+{{- define "api-gateway.domainAllowList" -}}
+{{- range $domain := .Values.config.domainAllowList -}}
 {{ printf "%s," $domain -}}
 {{- end }}
 {{- with .Values.global.ingress.domainName }}
