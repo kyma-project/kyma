@@ -9,6 +9,7 @@ webhook:
   verbosity: 6
   pdb:
     enabled: false
+    minAvailable: 0
   timeout: 10
   resources:
     requests:

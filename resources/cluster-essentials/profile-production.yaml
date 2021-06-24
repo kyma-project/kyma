@@ -3,7 +3,8 @@ pod-preset:
     replicaCount: 2
     timeout: "15"
     pdb:
-      enabled: "true"
+      enabled: true
+      minAvailable: 1
     resources:
       requests:
         cpu: 50m
