@@ -29,6 +29,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		Authorization: &authz.Config{},
 	}
 
+	maliciousGroup := "malicious-group"
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
 	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
 	metrics, _ := monitoring.NewProxyMetrics()
@@ -55,8 +56,13 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 				if user != fakeUser.GetName() {
 					t.Errorf("User in the response header does not match authenticated user. Expected : %s, received : %s ", fakeUser.GetName(), user)
 				}
+
+				if strings.Contains(v.req.Header.Get("Impersonate-Group"), maliciousGroup) {
+					t.Errorf("Groups should not contain %s injected in the request", maliciousGroup)
+				}
+
 				if groups != strings.Join(fakeUser.GetGroups(), cfg.Authentication.Header.GroupSeparator) {
-					t.Errorf("Groupsr in the response header does not match authenticated user groups. Expected : %s, received : %s ", fakeUser.GetName(), groups)
+					t.Errorf("Groups in the response header does not match authenticated user groups. Expected : %s, received : %s ", fakeUser.GetGroups(), groups)
 				}
 			}
 		})
@@ -114,7 +120,7 @@ func setupTestScenario() []testCase {
 		{
 			description: "Request with invalid Token should be authenticated and rejected with 401",
 			given: given{
-				req:        fakeJWTRequest("GET", "/accounts", "Bearer INVALID"),
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer INVALID", "malicious-group"),
 				authorizer: denier{},
 			},
 			expected: expected{
@@ -124,7 +130,7 @@ func setupTestScenario() []testCase {
 		{
 			description: "Request with valid token, should return 200 due to sufficient permissions",
 			given: given{
-				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID"),
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", "malicious-group"),
 				authorizer: approver{},
 			},
 			expected: expected{
@@ -136,9 +142,10 @@ func setupTestScenario() []testCase {
 	return testScenario
 }
 
-func fakeJWTRequest(method, path, token string) *http.Request {
+func fakeJWTRequest(method, path, token, groups string) *http.Request {
 	req := requestFor(method, path)
 	req.Header.Add("Authorization", token)
+	req.Header.Add("Impersonate-Group", groups)
 
 	return req
 }
