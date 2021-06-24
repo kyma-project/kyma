@@ -2,8 +2,6 @@
 title: Authentication in Kyma
 ---
 
-## User authentication
-
 The identity federation in Kyma is managed through an [OpenID Connect (OIDC)](https://openid.net/connect/)-compliant identity provider.
 
 The diagram shows the user authentication flow:
