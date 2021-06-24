@@ -50,7 +50,7 @@ authProxy:
     runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
-    tag: 7.1.3-2d6c9454
+    tag: 7.1.3-96ae36d3
     pullPolicy: IfNotPresent
   resources:
     limits:
