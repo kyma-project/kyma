@@ -19,7 +19,7 @@ The diagram shows the user authentication flow:
 
 ```json
 {
-  "iss": "http://127.0.0.1:5556/dex",
+  "iss": "https://myapp.eu.auth0.com",
   "sub": "CgcyMzQyNzQ5EgZnaXRodWI",
   "aud": "example-app",
   "exp": 1492882042,
