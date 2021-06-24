@@ -129,8 +129,6 @@ spec:
       enabled: true
       k8s:
         env:
-        - name: PILOT_TRACE_SAMPLING
-          value: "100"
         - name: PILOT_HTTP10
           value: "1"
         - name: POD_NAME
@@ -177,6 +175,7 @@ spec:
     defaultConfig:
       proxyMetadata: {}
       tracing:
+        sampling: 1
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
@@ -297,25 +296,9 @@ spec:
       keepaliveMaxServerConnectionAge: 30m
       nodeSelector: {}
       replicaCount: 1
-      traceSampling: 1
     sidecarInjectorWebhook:
       enableNamespacesByDefault: true
       objectSelector:
         autoInject: true
         enabled: false
       rewriteAppHTTPProbe: true
-    telemetry:
-      enabled: true
-      v2:
-        enabled: true
-        metadataExchange:
-          wasmEnabled: false
-        prometheus:
-          enabled: true
-          wasmEnabled: false
-        stackdriver:
-          configOverride: {}
-          enabled: false
-          logging: false
-          monitoring: false
-          topology: false
