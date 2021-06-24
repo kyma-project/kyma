@@ -96,11 +96,11 @@ describe("SKR test", function() {
     });
   }
    
-  it("Deprovision SKR", async function() {
-    await deprovisionSKR(keb, runtimeID);
-  });
-
-  it("Unregister SKR resources from Compass", async function() {
-    await unregisterKymaFromCompass(director, scenarioName);
-  });
+  // it("Deprovision SKR", async function() {
+  //   await deprovisionSKR(keb, runtimeID);
+  // });
+  //
+  // it("Unregister SKR resources from Compass", async function() {
+  //   await unregisterKymaFromCompass(director, scenarioName);
+  // });
 });
