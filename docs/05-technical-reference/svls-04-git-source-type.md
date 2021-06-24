@@ -2,7 +2,7 @@
 title: Git source type
 ---
 
-Depending on a runtime you use to build your Function (Node.js 12, Node.js 14, or Python 3.8), your Git repository must contain at least a directory with these files:
+Depending on a runtime you use to build your Function (Node.js 12, Node.js 14, Python 3.8, or Python 3.9), your Git repository must contain at least a directory with these files:
 
 - `handler.js` or `handler.py` with Function's code
 - `package.json` or `requirements.txt` with Function's dependencies

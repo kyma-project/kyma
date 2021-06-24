@@ -57,7 +57,7 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
         - handler: jwt
           config:
             trusted_issuers:
-            - https://dex.{CLUSTER_DOMAIN}
+            - {issuer URL of your custom OpenID Connect-compliant identity provider}
   ```
 
   </details>
@@ -78,7 +78,7 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
          - handler: jwt
            config:
              trusted_issuers:
-             - https://dex.$DOMAIN
+             - {issuer URL of your custom OpenID Connect-compliant identity provider}
              token_from:
                header: ID-Token
   ```

@@ -20,7 +20,7 @@ To establish a secure connection with Compass and generate the client certificat
 
     >**NOTE:** To access the Compass Console, go to the `https://compass.{CLUSTER_DOMAIN}` URL and enter your Kyma credentials.
 
-    Alternatively, make a call to the Director including the `Tenant` header with Tenant ID and `authorization` header with the Dex Bearer token. Use the following mutation:
+    Alternatively, make a call to the Director including the `Tenant` header with Tenant ID and `authorization` header with the Bearer token issued by your custom OpenID Connect-compliant identity provider. Use the following mutation:
 
     ```graphql
     mutation {

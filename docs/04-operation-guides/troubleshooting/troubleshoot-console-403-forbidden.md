@@ -16,3 +16,9 @@ If you log to the Console and get the `403 Forbidden` error, do the following:
       ```
      
   4. Make sure the group you are assigned to has [permissions](#details-roles-in-kyma) to view resources you requested.
+  5. If your token does not contain a group claim, check the token subject field:
+
+      ```json
+      "sub": "john.doe@acme.com"
+      ```
+  6. Make sure the user is assigned to the [permissions](#details-roles-in-kyma) to view the resources you requested.

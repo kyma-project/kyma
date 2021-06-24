@@ -6,7 +6,7 @@ Pick the programming language for the Function and decide where you want to keep
 
 ## Runtimes
 
-Functions support multiple languages by using the underlying execution environments known as runtimes. Currently, you can create both Node.js (12 & 14) and Python (3.8) Functions in Kyma.
+Functions support multiple languages by using the underlying execution environments known as runtimes. Currently, you can create both Node.js (12 & 14) and Python (3.8 & 3.9) Functions in Kyma.
 
 >**TIP:** See [sample Functions](../../../05-technical-reference/svls-01-sample-functions.md) for each available runtime.
 

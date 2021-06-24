@@ -14,7 +14,7 @@ For the complete list, see the `values.yaml` file.
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **env.GF_USERS_DEFAULT_THEME** | Specifies the background color of the Grafana UI. You can change it to `dark`. | `light` |
-| **env.GF_AUTH_GENERIC_OAUTH_ENABLED** | Enables the generic OAuth plugin for Grafana that is already pre-configured based on the in-cluster Dex setup. | `true` |
+| **env.GF_AUTH_GENERIC_OAUTH_ENABLED** | Enables the generic OAuth plugin for Grafana that is already pre-configured based on the in-cluster identity provider setup. | `true` |
 | **env.GF_USERS_AUTO_ASSIGN_ORG_ROLE** | Specifies the automatically assigned [user role](https://grafana.com/docs/grafana/latest/manage-users) for a user already authenticated by Grafana. You can change the value to `Viewer` or `Admin`. | `Editor` |
 | **env.GF_AUTH_ANONYMOUS_ENABLED** | Enables anonymous login to Grafana. | `false` |
 | **env.GF_AUTH_ANONYMOUS_ORG_ROLE** | Specifies the automatically assigned [user role](https://grafana.com/docs/grafana/latest/manage-users) for an anonymous user. You can change the value to `Viewer` or `Admin`. | `Editor` |
