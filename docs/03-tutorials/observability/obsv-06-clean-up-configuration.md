@@ -4,7 +4,7 @@ title: Clean up the configuration
 
 ## Purpose
 
-When you finish the tutorial, remove the deployed example and all its resources from the cluster.
+When you're finished working with the monitoring example, remove the example deployment and all its resources from the cluster.
 
 > **NOTE:** Do not clean up the resources if you want to continue with the following tutorial as these resources are used there as well.
 

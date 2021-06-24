@@ -6,7 +6,7 @@ To monitor the health status of your resources, you can define alerting rules. I
 
 ## Prerequisites
 
-You have performed the steps to observe application metrics using the `monitoring-custom-metrics` example and successfully deployed the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric.
+You have performed the steps to observe application metrics using the `monitoring-custom-metrics` example and successfully deployed the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric.
 
 ## Steps
 

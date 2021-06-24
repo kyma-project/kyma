@@ -20,6 +20,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
     kubect edit deployment -n kyma monitoring-prometheus-istio-server
 
     ```
+
     Increase the limits for memory:
 
     ```yaml
@@ -67,7 +68,10 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 <!-- why is there suddenly a sub-headline when the previous steps had no separate headline? -->
 
 ### Create an override
+
 Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
+
+<!-- why "these steps" when it's just one"? -->
 
 1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and/or **drop the labels** from Istio metrics.
 
