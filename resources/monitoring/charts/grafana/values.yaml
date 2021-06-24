@@ -22,6 +22,22 @@ serviceAccount:
 
 replicas: 1
 
+## Create HorizontalPodAutoscaler object for deployment type
+#
+autoscaling:
+  enabled: false
+#   minReplicas: 1
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       targetAverageUtilization: 60
+#   - type: Resource
+#     resource:
+#       name: memory
+#       targetAverageUtilization: 60
+
 ## See `kubectl explain poddisruptionbudget.spec` for more
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 podDisruptionBudget: {}
@@ -56,7 +72,7 @@ livenessProbe:
 
 image:
   repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.4.0-0bae0d22
+  tag: 7.5.5 #7.4.0-0bae0d22
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -68,35 +84,36 @@ image:
   #   - myRegistrKeySecretName
 
 testFramework:
-  enabled: false
+  enabled: false # TODO true
   image: "bats/bats"
   tag: "v1.1.0"
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-podSecurityContext:
+securityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
-
-securityContext:
   allowPrivilegeEscalation: false
   privileged: false
 
+containerSecurityContext: {}
 
-extraConfigmapMounts: []
+extraConfigmapMounts:
+  []
   # - name: certs-configmap
   #   mountPath: /etc/grafana/ssl/
   #   subPath: certificates.crt # (optional)
   #   configMap: certs-configmap
   #   readOnly: true
 
-
-extraEmptyDirMounts: []
+extraEmptyDirMounts:
+  []
   # - name: provisioning-notifiers
   #   mountPath: /etc/grafana/provisioning/notifiers
 
-
+# Apply extra labels to common labels.
+extraLabels: {}
 ## Assign a PriorityClassName to pods if set
 # priorityClassName:
 
@@ -108,6 +125,7 @@ downloadDashboardsImage:
 
 downloadDashboards:
   env: {}
+  envFromSecret: ""
   resources: {}
   securityContext:
     allowPrivilegeEscalation: false
@@ -130,13 +148,15 @@ podPortName: grafana
 ## ref: http://kubernetes.io/docs/user-guide/services/
 ##
 service:
+  enabled: true
   type: ClusterIP
   port: 80
-  targetPort: 3000
+  targetPort:
+    3000
     # targetPort: 4181 To be used with a proxy extraContainer
   annotations: {}
   labels: {}
-  portName: http-service
+  portName: service
 
 serviceMonitor:
   ## If true, a ServiceMonitor CRD is created for a prometheus operator
@@ -154,13 +174,14 @@ serviceMonitor:
 
 # Customization: due to kyma-installer limitations, this override has to be a multi-line string and not a list
 extraExposePorts:
- # - name: keycloak
- #   port: 8080
- #   targetPort: 8080
- #   type: ClusterIP
+  # - name: keycloak
+  #   port: 8080
+  #   targetPort: 8080
+  #   type: ClusterIP
 
 # overrides pod.spec.hostAliases in the grafana deployment's pods
-hostAliases: []
+hostAliases:
+  []
   # - ip: "1.2.3.4"
   #   hostnames:
   #     - "my.host.com"
@@ -171,11 +192,15 @@ ingress:
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # ingressClassName: nginx
   # Values can be templated
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   labels: {}
   path: /
+
+  # pathType is only for k8s > 1.19
+  pathType: Prefix
   hosts:
     - chart-example.local
   ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
@@ -184,6 +209,15 @@ ingress:
   #   backend:
   #     serviceName: ssl-redirect
   #     servicePort: use-annotation
+  ## Or for k8s > 1.19
+  # - path: /*
+  #   pathType: Prefix
+  #   backend:
+  #     service:
+  #       name: ssl-redirect
+  #       port:
+  #         name: service
+
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -191,10 +225,10 @@ ingress:
 
 resources:
   limits:
-#    cpu: 100m
+    #    cpu: 100m
     memory: 200Mi
   requests:
-#    cpu: 100m
+    #    cpu: 100m
     memory: 200Mi
 
 ## Node labels for pod assignment
@@ -244,17 +278,26 @@ extraContainerVolumes: []
 ##
 persistence:
   type: pvc
-  enabled: true
+  enabled: true # TODO false
   # storageClassName: default
   accessModes:
     - ReadWriteOnce
-  size: 1Gi
+  size: 1Gi # TODO 10Gi
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection
   # subPath: ""
   # existingClaim:
-
+  ## If persistence is not enabled, this allows to mount the
+  ## local storage in-memory to improve performance
+  ##
+  # inMemory:
+  #   enabled: false
+  ## The maximum usage on memory medium EmptyDir would be
+  ## the minimum value between the SizeLimit specified
+  ## here and the sum of memory limits of all containers in a pod
+  ##
+  # sizeLimit: 300M
 initChownData:
   ## If false, data ownership will not be reset at startup
   ## This allows the prometheus-server to be run with an arbitrary user
@@ -265,7 +308,7 @@ initChownData:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.32.0"
+    tag: "1.32.0" # TODO 1.31.1
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -285,7 +328,6 @@ initChownData:
     runAsUser: 0
     allowPrivilegeEscalation: false
     privileged: false
-
 
 # Administrator credentials when not using an existing secret (see below)
 adminUser: admin
@@ -367,7 +409,8 @@ envRenderSecret: {}
 
 ## Additional grafana server secret mounts
 # Defines additional mounts with secrets. Secrets must be manually created in the namespace.
-extraSecretMounts: []
+extraSecretMounts:
+  []
   # - name: secret-files
   #   mountPath: /etc/secrets
   #   secretName: grafana-secret-files
@@ -400,7 +443,8 @@ extraSecretMounts: []
 
 ## Additional grafana server volume mounts
 # Defines additional volume mounts.
-extraVolumeMounts: []
+extraVolumeMounts:
+  []
   # - name: extra-volume
   #   mountPath: /mnt/volume
   #   readOnly: true
@@ -408,7 +452,8 @@ extraVolumeMounts: []
 
 ## Pass the plugins you want installed as a list.
 ##
-plugins: []
+plugins:
+  []
   # - digrich-bubblechart-panel
   # - grafana-clock-panel
 
@@ -475,7 +520,8 @@ dashboardProviders: {}
 ##
 ## dashboards per provider, use provider name as key.
 ##
-dashboards: {}
+dashboards:
+  {}
   # default:
   #   some-dashboard:
   #     json: |
@@ -509,7 +555,7 @@ dashboardsConfigMaps: {}
 ##
 grafana.ini:
   paths:
-    data: /var/lib/grafana/data
+    data: /var/lib/grafana/data # TODO no data
     logs: /var/log/grafana
     plugins: /var/lib/grafana/plugins
     provisioning: /etc/grafana/provisioning
@@ -520,27 +566,27 @@ grafana.ini:
   grafana_net:
     url: https://grafana.net
 ## grafana Authentication can be enabled with the following values on grafana.ini
- # server:
-      # The full public facing url you use in browser, used for redirects and emails
- #    root_url:
- # https://grafana.com/docs/grafana/latest/auth/github/#enable-github-in-grafana
- # auth.github:
- #    enabled: false
- #    allow_sign_up: false
- #    scopes: user:email,read:org
- #    auth_url: https://github.com/login/oauth/authorize
- #    token_url: https://github.com/login/oauth/access_token
- #    api_url: https://api.github.com/user
- #    team_ids:
- #    allowed_organizations:
- #    client_id:
- #    client_secret:
+# server:
+# The full public facing url you use in browser, used for redirects and emails
+#    root_url:
+# https://grafana.com/docs/grafana/latest/auth/github/#enable-github-in-grafana
+# auth.github:
+#    enabled: false
+#    allow_sign_up: false
+#    scopes: user:email,read:org
+#    auth_url: https://github.com/login/oauth/authorize
+#    token_url: https://github.com/login/oauth/access_token
+#    api_url: https://api.github.com/user
+#    team_ids:
+#    allowed_organizations:
+#    client_id:
+#    client_secret:
 ## LDAP Authentication can be enabled with the following values on grafana.ini
 ## NOTE: Grafana will fail to start if the value for ldap.toml is invalid
-  # auth.ldap:
-  #   enabled: true
-  #   allow_sign_up: true
-  #   config_file: /etc/grafana/ldap.toml
+# auth.ldap:
+#   enabled: true
+#   allow_sign_up: true
+#   config_file: /etc/grafana/ldap.toml
 
 ## Grafana's LDAP configuration
 ## Templated by the template in _helpers.tpl
@@ -580,7 +626,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.10.6-22caa7d3
+    tag: 1.10.6-22caa7d3 # TODO 1.10.7
   imagePullPolicy: IfNotPresent
   resources:
     limits:
@@ -600,6 +646,8 @@ sidecar:
     SCProvider: true
     # label that the configmaps with dashboards are marked with
     label: grafana_dashboard
+    # value of label that the configmaps with dashboards are set to
+    labelValue: null
     # folder in the pod that should hold the collected dashboards (unless `defaultFolderName` is set)
     folder: /tmp/dashboards
     # The default folder name, it will create a subfolder under the `folder` and put dashboards in there instead
@@ -608,6 +656,8 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
     # If specified, the sidecar will look for annotation with this name to create folder and put graph here.
     # You can use this parameter together with `provider.foldersFromFilesStructure`to annotate configmaps and create folder structure.
     folderAnnotation: null
@@ -618,7 +668,7 @@ sidecar:
       # orgid as configured in grafana
       orgid: 1
       # folder in which the dashboards should be imported in grafana
-      folder: ''
+      folder: ""
       # type of the provider
       type: file
       # disableDelete to activate a import-only behaviour
@@ -630,11 +680,14 @@ sidecar:
   datasources:
     enabled: false
     # label that the configmaps with datasources are marked with
-    label: grafana_datasource
+    label: grafana_datasource # value of label that the configmaps with datasources are set to
+    labelValue: null
     # If specified, the sidecar will search for datasource config-maps inside this namespace.
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
   notifiers:
     enabled: false
     # label that the configmaps with notifiers are marked with
@@ -643,6 +696,8 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
 
 ## Override the deployment namespace
 ##
@@ -667,20 +722,28 @@ imageRenderer:
     # image-renderer ImagePullPolicy
     pullPolicy: Always
   # extra environment variables
-  env: {}
+  env:
+    {}
     # RENDERING_ARGS: --disable-gpu,--window-size=1280x758
     # RENDERING_MODE: clustered
+  # image-renderer deployment serviceAccount
+  serviceAccountName: ""
   # image-renderer deployment securityContext
   securityContext: {}
   # image-renderer deployment Host Aliases
   hostAliases: []
   # image-renderer deployment priority class
-  priorityClassName: ''
+  priorityClassName: ""
   service:
+    # Enable the image-renderer service
+    enabled: true
     # image-renderer service port name
-    portName: 'http'
+    portName: "http"
     # image-renderer service port used by both service and deployment
     port: 8081
+    targetPort: 8081
+  # In case a sub_path is used this needs to be added to the image renderer callback
+  grafanaSubPath: ""
   # name of the image-renderer port on the pod
   podPortName: http
   # number of image-renderer replica sets to keep
