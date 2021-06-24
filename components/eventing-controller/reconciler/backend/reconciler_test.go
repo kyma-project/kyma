@@ -613,22 +613,23 @@ func (oac *oauth2Clienter) ensureOAuth2ClientCRCreated() *oauth2Clienter {
 	By("Ensuring the OAuth2 Client CR is created")
 	ctx := context.Background()
 	desiredOAuth2Client := deployment.NewOAuth2Client()
+	// CHECK Seems not to be needed in test.
 	// Set owner reference.
-	controllerNamespacedName := types.NamespacedName{
-		Namespace: deployment.ControllerNamespace,
-		Name:      deployment.ControllerName,
-	}
-	var deploymentController appsv1.Deployment
-	err := oac.cache.Get(ctx, controllerNamespacedName, &deploymentController)
-	Expect(err).ShouldNot(HaveOccurred())
-	references := []metav1.OwnerReference{
-		*metav1.NewControllerRef(&deploymentController, schema.GroupVersionKind{
-			Group:   appsv1.SchemeGroupVersion.Group,
-			Version: appsv1.SchemeGroupVersion.Version,
-			Kind:    "Deployment",
-		}),
-	}
-	desiredOAuth2Client.SetOwnerReferences(references)
+	// controllerNamespacedName := types.NamespacedName{
+	// 		Namespace: deployment.ControllerNamespace,
+	// 		Name:      deployment.ControllerName,
+	// 	}
+	// 	var deploymentController appsv1.Deployment
+	// 	err := oac.cache.Get(ctx, controllerNamespacedName, &deploymentController)
+	// 	Expect(err).ShouldNot(HaveOccurred())
+	// 	references := []metav1.OwnerReference{
+	// 		*metav1.NewControllerRef(&deploymentController, schema.GroupVersionKind{
+	// 			Group:   appsv1.SchemeGroupVersion.Group,
+	// 			Version: appsv1.SchemeGroupVersion.Version,
+	// 			Kind:    "Deployment",
+	// 		}),
+	// 	}
+	// 	desiredOAuth2Client.SetOwnerReferences(references)
 	// Ensure that the client is created.
 	crNamespacedName := types.NamespacedName{
 		Namespace: desiredOAuth2Client.Namespace,
