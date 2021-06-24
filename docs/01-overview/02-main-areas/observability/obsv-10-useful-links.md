@@ -1,4 +1,5 @@
-title: Observability: Useful links
+---
+title: Observability - Useful links
 ---
 
 If you're interested in learning more about the Observability area, check out these links:
