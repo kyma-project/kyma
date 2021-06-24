@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-logr/zapr"
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/onsi/ginkgo"
@@ -16,12 +17,14 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -32,6 +35,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -59,7 +63,7 @@ var (
 // TestGetSecretForPublisher verifies the successful and failing retrieval
 // of secrets.
 func TestGetSecretForPublisher(t *testing.T) {
-	secretFor = func(message, namespace []byte) *corev1.Secret {
+	secretFor := func(message, namespace []byte) *corev1.Secret {
 		secret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: deployment.PublisherName,
@@ -181,6 +185,11 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).To(BeNil())
 
+	// "Deploy" an OAuth2ClientCR.
+	newOAuth2Clienter(k8sManager).
+		ensureOAuth2ClientCRCreated().
+		ensureOAuth2ClientCredentialsSet("rest-clientid", "rest-client-secret")
+
 	err = NewReconciler(
 		context.Background(),
 		natsCommander,
@@ -273,7 +282,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// Expect
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
-			getPublisherProxySecret(ctx).Should(And(
+			eventuallyPublisherProxySecret(ctx).Should(And(
 				reconcilertesting.HaveValidClientID(deployment.PublisherSecretClientIDKey, "rest-clientid"),
 				reconcilertesting.HaveValidClientSecret(deployment.PublisherSecretClientSecretKey, "rest-client-secret"),
 				reconcilertesting.HaveValidTokenEndpoint(deployment.PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
@@ -389,7 +398,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretNamespace:          "",
 				}))
 			By("Ensure publisher proxy secret is removed")
-			getPublisherProxySecret(ctx).Should(BeNil())
+			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()
@@ -427,7 +436,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretNamespace:          kymaSystemNamespace,
 				}))
 			By("Checking that no BEB secret is created for publisher")
-			getPublisherProxySecret(ctx).Should(BeNil())
+			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
 	})
 
@@ -541,8 +550,8 @@ func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deploym
 	}
 }
 
-// getPublisherProxyDeployment fetches PublisherProxy deployment
-func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
+// eventuallyPublisherProxyDeployment fetches PublisherProxy deployment for assertion.
+func eventuallyPublisherProxySecret(ctx context.Context) AsyncAssertion {
 	return Eventually(func() *corev1.Secret {
 		lookupKey := types.NamespacedName{
 			Namespace: deployment.PublisherNamespace,
@@ -583,6 +592,90 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 		}
 		return &deployment.OwnerReferences, nil
 	}
+}
+
+// oauth2Clienter encapsulates the tasks and testing regarding OAuth2Client.
+type oauth2Clienter struct {
+	client    client.Client
+	cache     cache.Cache
+	name      string
+	namespace string
+}
+
+func newOAuth2Clienter(m manager.Manager) *oauth2Clienter {
+	return &oauth2Clienter{
+		client: m.GetClient(),
+		cache:  m.GetCache(),
+	}
+}
+
+func (oac *oauth2Clienter) ensureOAuth2ClientCRCreated() *oauth2Clienter {
+	By("Ensuring the OAuth2 Client CR is created")
+	ctx := context.Background()
+	desiredOAuth2Client := deployment.NewOAuth2Client()
+	// Set owner reference.
+	controllerNamespacedName := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	var deploymentController appsv1.Deployment
+	err := oac.cache.Get(ctx, controllerNamespacedName, &deploymentController)
+	Expect(err).ShouldNot(HaveOccurred())
+	references := []metav1.OwnerReference{
+		*metav1.NewControllerRef(&deploymentController, schema.GroupVersionKind{
+			Group:   appsv1.SchemeGroupVersion.Group,
+			Version: appsv1.SchemeGroupVersion.Version,
+			Kind:    "Deployment",
+		}),
+	}
+	desiredOAuth2Client.SetOwnerReferences(references)
+	// Ensure that the client is created.
+	crNamespacedName := types.NamespacedName{
+		Namespace: desiredOAuth2Client.Namespace,
+		Name:      desiredOAuth2Client.Name,
+	}
+	currentOAuth2Client := new(hydrav1alpha1.OAuth2Client)
+	if err := oac.cache.Get(ctx, crNamespacedName, currentOAuth2Client); err != nil {
+		if k8serrors.IsNotFound(err) {
+			err = oac.client.Create(ctx, desiredOAuth2Client)
+		}
+		Expect(err).ShouldNot(HaveOccurred())
+	}
+	desiredOAuth2Client.ResourceVersion = currentOAuth2Client.ResourceVersion
+	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
+		return oac
+	}
+	err = oac.client.Update(ctx, desiredOAuth2Client)
+	Expect(err).ShouldNot(HaveOccurred())
+	// Keep name and namespace.
+	oac.name = desiredOAuth2Client.Spec.SecretName
+	oac.namespace = desiredOAuth2Client.Namespace
+
+	return oac
+}
+
+func (oac *oauth2Clienter) ensureOAuth2ClientCredentialsSet(clientID, clientSecret string) *oauth2Clienter {
+	By("Ensuring the OAuth2 Client credentials are set")
+	ctx := context.Background()
+	oauth2SecretNamespacedName := types.NamespacedName{
+		Namespace: oac.namespace,
+		Name:      oac.name,
+	}
+	oauth2Secret := new(v1.Secret)
+	if err := oac.cache.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); err != nil {
+		if k8serrors.IsNotFound(err) {
+			err = oac.client.Create(ctx, oauth2Secret)
+		}
+		Expect(err).ShouldNot(HaveOccurred())
+	}
+
+	oauth2Secret.Data["client_id"] = []byte(clientID)
+	oauth2Secret.Data["client_secret"] = []byte(clientSecret)
+
+	err := oac.client.Update(ctx, oauth2Secret)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	return oac
 }
 
 // TestCommander simulates the the commander implementation for BEB and NATS.
