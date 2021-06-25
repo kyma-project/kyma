@@ -71,8 +71,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.5.5 #7.4.0-0bae0d22
+  repository: grafana/grafana
+  tag: 7.5.9 #7.4.0-0bae0d22
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -90,11 +90,11 @@ testFramework:
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-podSecurityContext:
+# podSecurityContext:
+securityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
-securityContext:
   allowPrivilegeEscalation: false
   privileged: false
 
