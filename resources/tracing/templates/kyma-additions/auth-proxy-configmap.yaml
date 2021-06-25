@@ -1,0 +1,19 @@
+{{- if .Values.authProxy.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-auth-proxy-{{ template "jaeger-operator.fullname" . }}-templates
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+data:
+  sign_in.html: |
+    <!DOCTYPE html>
+    <html lang="en" charset="utf-8">
+      <head>
+        <meta http-equiv = "refresh" content = "0; url = {{ .Values.authProxy.configDocsLink }}" />
+      </head>
+      <body>
+      </body>
+    </html>
+{{- end }}

@@ -32,69 +32,38 @@ spec:
       nodeSelector:
 {{ toYaml .Values.kyma.authProxy.nodeSelector | indent 8 }}
       {{- end }}
+      volumes:
+      - name: templates-cm
+        configMap:
+          name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-templates
       containers:
       - image: "{{ .Values.kyma.authProxy.image.repository }}:{{ .Values.kyma.authProxy.image.tag }}"
         imagePullPolicy: {{ .Values.kyma.authProxy.image.pullPolicy }}
         name: auth-proxy
-        command: ["/keycloak-gatekeeper"]
         args:
-        - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
-        - --skip-openid-provider-tls-verify={{ not .Values.kyma.authProxy.config.tlsVerify }}
-        - --client-id=$(CLIENT_ID)
-        - --client-secret=$(CLIENT_SECRET)
-        - --resources=uri={{ .Values.kyma.authProxy.config.resources.uri }}{{ template "grafana.kyma.authProxy.methods" . }}{{ template "grafana.kyma.authProxy.groups" . }}{{ template "grafana.kyma.authProxy.roles" . }}
-        - --redirection-url=https://grafana.{{ .Values.global.ingress.domainName }}
-        {{- if .Values.kyma.authProxy.config.scopes }}
-        {{- range $i, $scope := (splitList "," .Values.kyma.authProxy.config.scopes) }}
-        - --scopes={{ $scope }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.kyma.authProxy.config.addClaims }}
-        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.addClaims) }}
-        - --add-claims={{ $claim }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.kyma.authProxy.config.matchClaims }}
-        {{- range $i, $claim := (splitList "," .Values.kyma.authProxy.config.matchClaims) }}
-        - --match-claims={{ $claim }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.kyma.authProxy.config.headers }}
-        {{- range $i, $header := (splitList "," .Values.kyma.authProxy.config.headers) }}
-        - --headers={{ $header }}
-        {{- end }}
-        {{- end }}
-        - --verbose=false
-        - --listen=0.0.0.0:{{ .Values.kyma.authProxy.port }}
-        - --upstream-url=http://{{ template "grafana.fullname" . }}:{{ .Values.service.port }}
-        - --enable-logging=false
-        - --enable-json-logging=true
-        - --secure-cookie=true
-        - --enable-authorization-cookies=false
-        - --enable-authorization-header=false
-        - --enable-token-header=false
-        - --enable-encrypted-token=true
-        - --enable-security-filter=true
-        - --filter-browser-xss=true
-        - --filter-content-nosniff=true
-        - --filter-frame-deny=true
-        - --encryption-key=$(ENCRYPTION_KEY)
-        - --http-only-cookie=true
-        - --upstream-keepalives=true
-        - --upstream-keepalive-timeout=60s
-        - --cookie-domain=https://grafana.{{ .Values.global.ingress.domainName }}
-        - --cookie-access-name=KYMA_GRAFANA_TOKEN
+        - --http-address=0.0.0.0:{{ .Values.kyma.authProxy.port }}
+        - --upstream=http://{{ template "grafana.fullname" . }}:{{ .Values.service.port }}
+        - --cookie-secure=true
+        - --cookie-domain=grafana.{{ .Values.global.ingress.domainName }}
+        - --cookie-name=KYMA_GRAFANA_TOKEN
+        - --silence-ping-logging=true
+        - --reverse-proxy=true
+        - --auth-logging={{ .Values.kyma.authProxy.config.authLogging }}
+        - --request-logging={{ .Values.kyma.authProxy.config.requestLogging }}
         envFrom:
         - secretRef:
             name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
             optional: false
+        - secretRef:
+            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-user
+            optional: true
         ports:
         - name: http
           containerPort: {{ .Values.kyma.authProxy.port }}
           protocol: TCP
         livenessProbe:
           httpGet:
-            path: /oauth/health
+            path: /ping
             port: http
         {{- if .Values.kyma.authProxy.securityContext }}
         securityContext:
@@ -102,4 +71,7 @@ spec:
         {{- end }}
         resources:
 {{ toYaml .Values.kyma.authProxy.resources | indent 10 }}
+        volumeMounts:
+          - name: templates-cm
+            mountPath: /templates
 {{- end}}

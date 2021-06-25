@@ -14,3 +14,5 @@ spec:
   portLevelMtls:
     9090:
       mode: PERMISSIVE
+    {{ .Values.kiali.spec.server.port }}:
+      mode: PERMISSIVE

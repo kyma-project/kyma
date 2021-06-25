@@ -59,24 +59,8 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "jaeger-operator.kcproxy.groups" -}}
-{{- if .Values.kcproxy.config.resources.useKymaGroups }}
-{{- printf "|groups=%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- else if .Values.kcproxy.config.resources.groups }}
-{{- printf "|groups=%s" .Values.kcproxy.config.resources.groups }}
-{{- end }}
-{{- end -}}
-
-{{- define "jaeger-operator.kcproxy.methods" -}}
-{{- if .Values.kcproxy.config.resources.methods }}
-{{- printf "|methods=%s" .Values.kcproxy.config.resources.methods }}
-{{- end }}
-{{- end -}}
-
-{{- define "jaeger-operator.kcproxy.roles" -}}
-{{- if .Values.kcproxy.config.resources.roles }}
-{{- printf "|roles=%s" .Values.kcproxy.config.resources.roles }}
-{{- end }}
+{{- define "jaeger-operator.kyma.authProxy.kymaGroups" -}}
+{{- printf "%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
 {{- end -}}
 
 {{- define "kyma.checkRequirements" }}
