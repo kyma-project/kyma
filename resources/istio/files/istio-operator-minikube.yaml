@@ -185,7 +185,7 @@ spec:
     defaultConfig:
       proxyMetadata: {}
       tracing:
-        sampling: 1
+        # sampling: 1 # use the istio default (which is 1) to support override by pilot env variable at runtime
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
