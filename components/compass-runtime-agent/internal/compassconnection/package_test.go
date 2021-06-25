@@ -61,6 +61,15 @@ var (
 	connectorTokenHeaders = map[string]string{
 		ConnectorTokenHeader: token,
 	}
+	connectorTokenHeadersFunc = mock.MatchedBy(func(input map[string]string) bool {
+		for k, v := range connectorTokenHeaders {
+			if k != RequestIDHeader && input[k] != v {
+				return false
+			}
+		}
+		// only check if x-request-id header was set
+		return input[RequestIDHeader] != ""
+	})
 	nilHeaders map[string]string
 
 	connectorURL            = "https://connector.com"
@@ -470,8 +479,8 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to sign CSR",
 			setupFunc: func() {
 				clearMockCalls(&connectorTokenClientMock.Mock)
-				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
-				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
+				connectorTokenClientMock.On("Configuration", connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
+				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
 				return mockFunctionCalled(&connectorTokenClientMock.Mock, "SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders)
@@ -481,8 +490,8 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to fetch Configuration",
 			setupFunc: func() {
 				clearMockCalls(&connectorTokenClientMock.Mock)
-				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
-				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
+				connectorTokenClientMock.On("Configuration", connectorTokenHeadersFunc).Return(gqlschema.Configuration{}, errors.New("error"))
+				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
 				return mockFunctionCalled(&connectorTokenClientMock.Mock, "Configuration", connectorTokenHeaders)
@@ -649,8 +658,8 @@ func connectorCertClientMock() *connectorMocks.Client {
 
 func connectorTokensClientMock() *connectorMocks.Client {
 	connectorMock := &connectorMocks.Client{}
-	connectorMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
-	connectorMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(connectorCertResponse, nil)
+	connectorMock.On("Configuration", connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
+	connectorMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(connectorCertResponse, nil)
 
 	return connectorMock
 }
