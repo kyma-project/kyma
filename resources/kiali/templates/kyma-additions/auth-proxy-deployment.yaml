@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kiali-server.name" . }}-auth-proxy
+  name: {{ template "kiali-server.fullname" . }}-auth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
@@ -10,11 +10,11 @@ spec:
   replicas: {{ .Values.authProxy.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "kiali-server.name" . }}-auth-proxy
+      app: {{ template "kiali-server.fullname" . }}-auth-proxy
   template:
     metadata:
       labels:
-        app: {{ template "kiali-server.name" . }}-auth-proxy
+        app: {{ template "kiali-server.fullname" . }}-auth-proxy
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
@@ -30,14 +30,14 @@ spec:
       volumes:
         - name: templates-cm
           configMap:
-            name: {{ template "kiali-server.name" . }}-auth-proxy
+            name: {{ template "kiali-server.fullname" . }}-auth-proxy
       containers:
       - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:
         - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
-        - --upstream=http://{{ template "kiali-server.name" . }}-server:{{ .Values.kiali.spec.server.port }}
+        - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
         - --cookie-secure=true
         - --cookie-domain=kiali.{{ .Values.global.ingress.domainName }}
         - --cookie-name=KYMA_KIALI_TOKEN
@@ -47,10 +47,10 @@ spec:
         - --request-logging={{ .Values.authProxy.config.requestLogging }}
         envFrom:
         - secretRef:
-            name: {{ template "kiali-server.name" . }}-auth-proxy
+            name: {{ template "kiali-server.fullname" . }}-auth-proxy
             optional: false
         - secretRef:
-            name: {{ template "kiali-server.name" . }}-auth-proxy-user
+            name: {{ template "kiali-server.fullname" . }}-auth-proxy-user
             optional: true
         ports:
         - name: http
