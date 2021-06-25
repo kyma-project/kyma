@@ -725,6 +725,7 @@ kyma:
       useKymaGroups: false
       scopes: "groups"
       authLogging: true
+      requestLogging: false
     env: {}
     nodeSelector: {}
     securityContext:

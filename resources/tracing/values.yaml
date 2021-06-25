@@ -135,6 +135,7 @@ authProxy:
     useKymaGroups: false
     scopes: "groups"
     authLogging: true
+    requestLogging: false
   env: {}
   nodeSelector: {}
   podSecurityContext: {}
