@@ -1,0 +1,100 @@
+{{if .Values.kcproxy.enabled}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "kiali-server.fullname" . }}-kcproxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.kcproxy.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "kiali-server.fullname" . }}-kcproxy
+  template:
+    metadata:
+      labels:
+        app: {{ template "kiali-server.fullname" . }}-kcproxy
+    spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true   #only for minikube
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
+      {{- end }}
+      {{- if .Values.kcproxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.kcproxy.nodeSelector | indent 8 }}
+      {{- end }}
+      containers:
+      - image: "{{ .Values.kcproxy.image.repository }}:{{ .Values.kcproxy.image.tag }}"
+        imagePullPolicy: {{ .Values.kcproxy.image.pullPolicy }}
+        name: kcproxy
+        command: ["/keycloak-gatekeeper"]
+        args:
+        - --discovery-url={{tpl .Values.kcproxy.config.discoveryUrl .}}
+        - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
+        - --client-id=$(CLIENT_ID)
+        - --client-secret=$(CLIENT_SECRET)
+        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "kiali.kcproxy.methods" . }}{{ template "kiali.kcproxy.groups" . }}{{ template "kiali.kcproxy.roles" . }}
+        - --redirection-url=https://kiali.{{ .Values.global.ingress.domainName }}
+        {{- if .Values.kcproxy.config.scopes }}
+        {{- range $i, $scope := (splitList "," .Values.kcproxy.config.scopes) }}
+        - --scopes={{ $scope }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.addClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.addClaims) }}
+        - --add-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.matchClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.matchClaims) }}
+        - --match-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.headers }}
+        {{- range $i, $header := (splitList "," .Values.kcproxy.config.headers) }}
+        - --headers={{ $header }}
+        {{- end }}
+        {{- end }}
+        - --verbose=false
+        - --listen=0.0.0.0:{{ .Values.kcproxy.port }}
+        - --upstream-url=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
+        - --enable-logging=false
+        - --enable-json-logging=true
+        - --secure-cookie=true
+        - --enable-authorization-cookies=false
+        - --enable-authorization-header=false
+        - --enable-token-header=false
+        - --enable-encrypted-token=true
+        - --enable-security-filter=true
+        - --filter-browser-xss=true
+        - --filter-content-nosniff=true
+        - --filter-frame-deny=true
+        - --encryption-key=$(ENCRYPTION_KEY)
+        - --http-only-cookie=true
+        - --upstream-keepalives=true
+        - --upstream-keepalive-timeout=60s
+        - --cookie-domain=https://kiali.{{ .Values.global.ingress.domainName }}
+        - --cookie-access-name=KYMA_KIALI_TOKEN
+        envFrom:
+        - secretRef:
+            name: {{ template "kiali-server.fullname" . }}-kcproxy
+            optional: false
+        ports:
+        - name: http
+          containerPort: {{ .Values.kcproxy.port }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
+        {{- if .Values.kcproxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.kcproxy.securityContext | nindent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.kcproxy.resources | indent 10 }}
+{{end}}
