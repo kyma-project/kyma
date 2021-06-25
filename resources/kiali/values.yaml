@@ -297,7 +297,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_name: "quay.io/kiali/kiali" #"eu.gcr.io/kyma-project/tpi/kiali"
+      image_name: "eu.gcr.io/kyma-project/tpi/kiali"
     #
     # The Kubernetes pull policy for the Kiali deployment.
     # This is overridden to be "Always" if image_version is set to "latest".
@@ -322,7 +322,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.36.0" #"1.28.1-96ae36d3"
+      image_version: "1.36.0-PR-103"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
@@ -397,7 +397,8 @@ kiali:
     #
     # Custom annotations to be created on the Kiali pod.
     #    ---
-    #    pod_annotations: {}
+      pod_annotations:
+        "sidecar.istio.io/inject": "false"
     #
     # Custom labels to be created on the Kiali pod.
     #    ---
@@ -983,4 +984,4 @@ kiali:
         allowPrivilegeEscalation: false
         privileged: false
         readOnlyRootFilesystem: true
-        #runAsNonRoot: true
+        runAsNonRoot: true
