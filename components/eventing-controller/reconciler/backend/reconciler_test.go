@@ -646,7 +646,7 @@ func (oac *oauth2Clienter) ensureOAuth2ClientCRCreated() *oauth2Clienter {
 	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
 		return oac
 	}
-	err = oac.client.Update(ctx, desiredOAuth2Client)
+	err := oac.client.Update(ctx, desiredOAuth2Client)
 	Expect(err).ShouldNot(HaveOccurred())
 	// Keep name and namespace.
 	oac.name = desiredOAuth2Client.Spec.SecretName
