@@ -90,10 +90,11 @@ testFramework:
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-securityContext:
+podSecurityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
+securityContext:
   allowPrivilegeEscalation: false
   privileged: false
 
