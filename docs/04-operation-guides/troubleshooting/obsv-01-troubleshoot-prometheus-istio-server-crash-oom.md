@@ -69,7 +69,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 
 ### Create an override
 
-Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
+Follow these steps to [override](TO_DO) the existing configuration
 
 <!-- why "these steps" when it's just one"? -->
 

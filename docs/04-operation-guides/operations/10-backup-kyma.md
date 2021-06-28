@@ -25,5 +25,5 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 >**TIP:**
 Learn how to:
 
->- [Back up and restore individual resources](#13-restore-kyma-with-velero.md) manually or automatically using Velero.
->- [Create on-demand volume snapshots](#15-backup-volume-snapshots.md), also for cloud providers.
+>- [Back up and restore individual resources](13-restore-kyma-with-velero.md) manually or automatically using Velero.
+>- [Create on-demand volume snapshots](15-backup-volume-snapshots.md), also for cloud providers.

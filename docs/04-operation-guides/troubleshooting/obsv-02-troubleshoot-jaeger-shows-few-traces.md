@@ -20,7 +20,7 @@ Change the default behavior, either by overriding the existing settings or adjus
 
 ### Create an override
 
-Follow these steps to [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation) the existing configuration
+Follow these steps to [override](TO_DO) the existing configuration
 
 1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **trace sampling** attribute to `60`.
 
