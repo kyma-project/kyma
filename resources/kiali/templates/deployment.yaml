@@ -57,16 +57,16 @@ spec:
         - "/opt/kiali/kiali"
         - "-config"
         - "/kiali-configuration/config.yaml"
+        {{- if .Values.kiali.spec.server.securityContext }}
+        securityContext:
+        {{- toYaml .Values.kiali.spec.server.securityContext | nindent 10 }}
+        {{- end }}
         ports:
         - name: api-port
           containerPort: {{ .Values.kiali.spec.server.port | default 20001 }}
         {{- if .Values.kiali.spec.server.metrics_enabled }}
         - name: http-metrics
           containerPort: {{ .Values.kiali.spec.server.metrics_port | default 9090 }}
-        {{- end }}
-        {{- if .Values.kiali.spec.server.securityContext }}
-        securityContext:
-        {{- toYaml .Values.kiali.spec.server.securityContext | nindent 10 }}
         {{- end }}
         readinessProbe:
           httpGet:
