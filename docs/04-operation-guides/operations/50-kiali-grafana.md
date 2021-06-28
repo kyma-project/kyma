@@ -1,15 +1,15 @@
 ---
-title: Access and Expose Kiali, Grafana and Jaeger
+title: Access and Expose Kiali, Grafana, and Jaeger
 ---
 
-By default, Kyma does not expose Kiali, Grafana and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana and Jaeger securely, use an identity provider of your choice.
+By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
 
 ## Prerequisites
 
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 - To expose the services securely with OAuth, you must have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
 
-## Access Kiali, Grafana and Jaeger
+## Access Kiali, Grafana, and Jaeger
 
 ### Steps
 
@@ -53,7 +53,7 @@ By default, Kyma does not expose Kiali, Grafana and Jaeger. However, you can sti
 
 2. To access the respective service's UI, open `http://localhost:20001` (for Kiali), `http://localhost:3000` (for Grafana), or `http://localhost:16686` (for Jaeger) in your browser.
 
-## Expose Kiali, Grafana and Jaeger Securely
+## Expose Kiali, Grafana, and Jaeger securely
 
 Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Kiali, Grafana and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes `Secret` with your identity provider credentials.
 
