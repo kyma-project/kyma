@@ -216,10 +216,14 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
+	// Ensure that an OAuth2Client CR exists that gets processed by the Hydra operator and creates a secret
+	// containing the oauth2 credentials.
 	oauth2Client, err := r.syncOAuth2ClientCR(ctx)
 	if err != nil {
 		return ctrl.Result{}, errors.Wrap(err, "failed to sync OAuth2Client CR")
 	}
+	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
+	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
 	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, oauth2Client.Spec.SecretName, oauth2Client.Namespace)
 	if err != nil {
 		return ctrl.Result{}, err
