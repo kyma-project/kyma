@@ -17,14 +17,12 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -35,7 +33,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -171,7 +168,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = hydrav1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
-	
+
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
@@ -187,11 +184,6 @@ var _ = BeforeSuite(func(done Done) {
 		MetricsBindAddress: ":7071",
 	})
 	Expect(err).To(BeNil())
-
-	// "Deploy" an OAuth2ClientCR.
-	newOAuth2Clienter(k8sManager).
-		ensureOAuth2ClientCRCreated().
-		ensureOAuth2ClientCredentialsSet("rest-clientid", "rest-client-secret")
 
 	err = NewReconciler(
 		context.Background(),
@@ -230,6 +222,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ensureNamespaceCreated(ctx, kymaSystemNamespace)
 			ownerReferences = ensureControllerDeploymentCreated(ctx)
 			// Expect
+			// The matcher in the following Eventually assertion will match against the first returned parameter
+			// and ensure that the second returned parameter (an error) is nil.
 			Eventually(controllerDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Expect((*ownerReferences)[0].UID).ShouldNot(BeEmpty())
 		})
@@ -281,8 +275,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// As there is no deployment-controller running in envtest, patching the deployment
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
+			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs,
+			// we create a secret, and just ensure that the OAuth2Client CR is created correctly.
+			createOAuth2Secret(ctx)
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
+			Eventually(oauth2ClientGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
 			eventuallyPublisherProxySecret(ctx).Should(And(
@@ -515,6 +513,23 @@ func resetPublisherProxyStatus(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
+// creates a secret containing the oauth2 credentials that is expected to be
+// created by the Hydra operator
+func createOAuth2Secret(ctx context.Context) {
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.OAuth2ClientSecretName(),
+			Namespace: deployment.ControllerNamespace,
+		},
+		Data: map[string][]byte{
+			"client_id":     []byte("random_id"),
+			"client_secret": []byte("random_secret"),
+		},
+	}
+	err := k8sClient.Create(ctx, sec)
+	Expect(err).ShouldNot(HaveOccurred())
+}
+
 func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
 	bebSecret := reconcilertesting.WithBEBMessagingSecret(name, ns)
 	bebSecret.Labels = map[string]string{
@@ -583,6 +598,20 @@ func controllerDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment,
 	}
 }
 
+func oauth2ClientGetter(ctx context.Context) func() (*hydrav1alpha1.OAuth2Client, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	oa2c := new(hydrav1alpha1.OAuth2Client)
+	return func() (*hydrav1alpha1.OAuth2Client, error) {
+		if err := k8sClient.Get(ctx, lookupKey, oa2c); err != nil {
+			return nil, err
+		}
+		return oa2c, nil
+	}
+}
+
 func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) func() (*[]metav1.OwnerReference, error) {
 	lookupKey := types.NamespacedName{
 		Namespace: namespace,
@@ -595,91 +624,6 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 		}
 		return &deployment.OwnerReferences, nil
 	}
-}
-
-// oauth2Clienter encapsulates the tasks and testing regarding OAuth2Client.
-type oauth2Clienter struct {
-	client    client.Client
-	cache     cache.Cache
-	name      string
-	namespace string
-}
-
-func newOAuth2Clienter(m manager.Manager) *oauth2Clienter {
-	return &oauth2Clienter{
-		client: m.GetClient(),
-		cache:  m.GetCache(),
-	}
-}
-
-func (oac *oauth2Clienter) ensureOAuth2ClientCRCreated() *oauth2Clienter {
-	By("Ensuring the OAuth2 Client CR is created")
-	ctx := context.Background()
-	desiredOAuth2Client := deployment.NewOAuth2Client()
-	// CHECK Seems not to be needed in test.
-	// Set owner reference.
-	// controllerNamespacedName := types.NamespacedName{
-	// 		Namespace: deployment.ControllerNamespace,
-	// 		Name:      deployment.ControllerName,
-	// 	}
-	// 	var deploymentController appsv1.Deployment
-	// 	err := oac.cache.Get(ctx, controllerNamespacedName, &deploymentController)
-	// 	Expect(err).ShouldNot(HaveOccurred())
-	// 	references := []metav1.OwnerReference{
-	// 		*metav1.NewControllerRef(&deploymentController, schema.GroupVersionKind{
-	// 			Group:   appsv1.SchemeGroupVersion.Group,
-	// 			Version: appsv1.SchemeGroupVersion.Version,
-	// 			Kind:    "Deployment",
-	// 		}),
-	// 	}
-	// 	desiredOAuth2Client.SetOwnerReferences(references)
-	// Ensure that the client is created.
-	crNamespacedName := types.NamespacedName{
-		Namespace: desiredOAuth2Client.Namespace,
-		Name:      desiredOAuth2Client.Name,
-	}
-	currentOAuth2Client := new(hydrav1alpha1.OAuth2Client)
-	if err := oac.cache.Get(ctx, crNamespacedName, currentOAuth2Client); err != nil {
-		if k8serrors.IsNotFound(err) {
-			err = oac.client.Create(ctx, desiredOAuth2Client)
-		}
-		Expect(err).ShouldNot(HaveOccurred())
-	}
-	desiredOAuth2Client.ResourceVersion = currentOAuth2Client.ResourceVersion
-	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
-		return oac
-	}
-	err := oac.client.Update(ctx, desiredOAuth2Client)
-	Expect(err).ShouldNot(HaveOccurred())
-	// Keep name and namespace.
-	oac.name = desiredOAuth2Client.Spec.SecretName
-	oac.namespace = desiredOAuth2Client.Namespace
-
-	return oac
-}
-
-func (oac *oauth2Clienter) ensureOAuth2ClientCredentialsSet(clientID, clientSecret string) *oauth2Clienter {
-	By("Ensuring the OAuth2 Client credentials are set")
-	ctx := context.Background()
-	oauth2SecretNamespacedName := types.NamespacedName{
-		Namespace: oac.namespace,
-		Name:      oac.name,
-	}
-	oauth2Secret := new(v1.Secret)
-	if err := oac.cache.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); err != nil {
-		if k8serrors.IsNotFound(err) {
-			err = oac.client.Create(ctx, oauth2Secret)
-		}
-		Expect(err).ShouldNot(HaveOccurred())
-	}
-
-	oauth2Secret.Data["client_id"] = []byte(clientID)
-	oauth2Secret.Data["client_secret"] = []byte(clientSecret)
-
-	err := oac.client.Update(ctx, oauth2Secret)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	return oac
 }
 
 // TestCommander simulates the the commander implementation for BEB and NATS.

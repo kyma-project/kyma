@@ -23,8 +23,12 @@ func NewOAuth2Client() *hydrav1alpha1.OAuth2Client {
 		Spec: hydrav1alpha1.OAuth2ClientSpec{
 			GrantTypes: []hydrav1alpha1.GrantType{"client_credentials"},
 			Scope:      "read write beb uaa.resource",
-			SecretName: ControllerName + BEBSecretNameSuffix,
+			SecretName: OAuth2ClientSecretName(),
 		},
 	}
 	return oa2CR
+}
+
+func OAuth2ClientSecretName() string {
+	return ControllerName + BEBSecretNameSuffix
 }
