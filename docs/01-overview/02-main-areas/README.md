@@ -30,6 +30,8 @@ Kyma comes with tools that give you the most accurate and up-to-date monitoring,
 - For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 - With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of the requests sent to and from your service. This information helps you to optimize the latency and performance of your solution.
 
+For more details, see [Observability](./observability/51-telemetry-observability-overview.md).
+
 ### What is Serverless?
 
 - Ensures quick deployments following a Function approach
@@ -54,7 +56,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ### ...And what about the UI?
 
-Kyma provides you with two interfaces that you can use for interactions:
+Kyma provides two interfaces that you can use for interactions:
 
-- [Console UI](link) - a web-based administrative UI that allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
+- [Console UI](link) - a web-based administrative UI for the Kyma functionality and to manage the basic Kubernetes resources.
 - [Kyma CLI](link) - a CLI to execute various Kyma tasks, such as installing or upgrading Kyma.
