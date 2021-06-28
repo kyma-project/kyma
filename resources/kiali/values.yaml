@@ -322,7 +322,7 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-      image_version: "1.36.0-PR-103"
+      image_version: "1.36.0-5d8d17c0"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.
