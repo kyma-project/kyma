@@ -53,7 +53,6 @@ spec:
         - "--strictMode={{ .Values.global.strictMode }}"
         - "--healthPort={{ .Values.controller.args.healthPort }}"
         - "--profile={{ .Values.controller.resources.profile }}"
-        - "--isBEBEnabled={{ .Values.global.isBEBEnabled }}"
         - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
         - "--centralApplicationConnectivityValidatorEnabled={{ .Values.global.centralApplicationConnectivityValidatorEnabled }}"
         env:
