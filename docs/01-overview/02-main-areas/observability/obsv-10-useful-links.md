@@ -8,7 +8,7 @@ If you're interested in learning more about the Observability area, check out th
 
 - Check out the different ways to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) provided by Kubernetes and Loki.
 
-- See how to [access and expose](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md) the observability-related services Grafana<!-- , Jaeger, --> and Kiali.
+- See how to [access and expose](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md) the services Grafana<!-- , Jaeger, --> and Kiali.
 
 - Find out what to do when the [Prometheus Istio Server keeps crashing](../../../04-operation-guides/troubleshooting/obsv-01-troubleshoot-prometheus-istio-server-crash-oom.md) or when [Jaeger shows fewer traces than expected](../../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md).
 
