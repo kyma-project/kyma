@@ -49,11 +49,12 @@ type Reconciler struct {
 	ctx context.Context
 	client.Client
 	cache.Cache
-	Log              logr.Logger
-	recorder         record.EventRecorder
-	Backend          handlers.MessagingBackend
-	Domain           string
-	eventTypeCleaner eventtype.Cleaner
+	Log               logr.Logger
+	recorder          record.EventRecorder
+	Backend           handlers.MessagingBackend
+	Domain            string
+	eventTypeCleaner  eventtype.Cleaner
+	oauth2credentials *handlers.OAuth2ClientCredentials
 }
 
 var (
@@ -68,20 +69,20 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
-	bebHandler := &handlers.Beb{Log: log}
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials) *Reconciler {
+	bebHandler := handlers.NewBEB(credential, log)
 	bebHandler.Initialize(cfg)
 
 	return &Reconciler{
-		ctx:              ctx,
-		Client:           client,
-		Cache:            cache,
-		Log:              log,
-		recorder:         recorder,
-		Backend:          bebHandler,
-		Domain:           cfg.Domain,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		ctx:               ctx,
+		Client:            client,
+		Cache:             cache,
+		Log:               log,
+		recorder:          recorder,
+		Backend:           bebHandler,
+		Domain:            cfg.Domain,
+		eventTypeCleaner:  eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		oauth2credentials: credential,
 	}
 }
 

@@ -27,16 +27,6 @@ spec:
             value: {{ .Values.global.eventTypePrefix }}
           - name: DOMAIN
             value: {{ .Values.global.domainName }}
-          - name: WEBHOOK_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
-                key: client_id
-          - name: WEBHOOK_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
-                key: client_secret
           - name: WEBHOOK_TOKEN_ENDPOINT
             value: https://oauth2.{{ .Values.global.domainName }}/oauth2/token
           - name: PUBLISHER_REQUESTS_CPU
