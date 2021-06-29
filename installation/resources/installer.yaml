@@ -102,7 +102,7 @@ spec:
       priorityClassName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:408cb6a6
+        image: eu.gcr.io/kyma-project/kyma-installer:2.0.0-rc1
         imagePullPolicy: IfNotPresent
         args:
           - -overrideLogFile=/app/overrides.txt
