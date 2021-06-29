@@ -1,15 +1,15 @@
 ---
-title: Access and Expose Kiali and Grafana
+title: Access and Expose Kiali, Grafana, and Jaeger
 ---
 
-By default, Kyma does not expose Kiali and Grafana. However, you can still access them using port forwarding. If you want to expose Kiali and Grafana securely, use an identity provider of your choice.
+By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
 
 ## Prerequisites
 
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
 - To expose the services securely with OAuth, you must have a registered OAuth application with one of the [supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider).
 
-## Access Kiali and Grafana
+## Access Kiali, Grafana, and Jaeger
 
 ### Steps
 
@@ -36,28 +36,39 @@ By default, Kyma does not expose Kiali and Grafana. However, you can still acces
   ```
 
   </details>
+  <details>
+  <summary>
+  Jaeger
+  </summary>
 
+  ```bash
+  kubectl -n kyma-system port-forward svc/tracing-jaeger-query 16686:16686 
+  ```
+
+  </details>
 </div>
 
 >**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
-2. To access the respective service's UI, open `http://localhost:20001` (for Kiali) or `http://localhost:3000` (for Grafana) in your browser.
+2. To access the respective service's UI, open `http://localhost:20001` (for Kiali), `http://localhost:3000` (for Grafana), or `http://localhost:16686` (for Jaeger) in your browser.
 
-## Expose Kiali and Grafana securely
+## Expose Kiali, Grafana, and Jaeger securely
 
-To make Kiali and Grafana permanently accessible, expose the services securely using [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/).
+Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Kiali, Grafana and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes `Secret` with your identity provider credentials.
 
 ### Steps
 
-The following example shows how to use Github as authentication provider for Kiali and Grafana. You create an `oauth2_proxy` `Deployment` to achieve this, and expose it as a `VirtualService` via Kyma's Istio Gateway.
+The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Kiali, Grafana and Jaeger.
 
->**NOTE:** The `oauth2_proxy` supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. See the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider) to find instructions for other authentication services.
+>**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
-1. Chose a domain for the exposed service under the Kyma base domain. For example, if your Kyma cluster is reachable under `kyma.example.com`, use `kiali.kyma.example.com` or `grafana.kyma.example.com`, respectively.
+1. Create a new OpenID Connect application for your identity provider. Set the callback URL to the `/oauth2/callback` path of your service, for example, `https://kiali.kyma.example.com/oauth2/callback`. Your identity provider will return a client ID, a client secret, and a token issuer URL.
 
-2. Create a new Github application under https://github.com/settings/apps. Set the callback URL to `https://kiali.kyma.example.com/oauth2/callback`. Ensure at least read-only access to email addresses for the Github application. Copy the client ID and secret.
-
-3. Create a Kubernetes Secret for the client ID and secret:
+2. Create a `Secret` for the OAuth2 Proxy configuration [environment variables](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#environment-variables). 
+   
+   - For an OpenID Connect compliant provider, adapt the client ID, secret and token issuer to the values that were provided while creating the application. 
+   
+   - To limit access to specific user groups, configure this with the `OAUTH2_PROXY_ALLOWED_GROUPS` variable and ensure that `OAUTH2_PROXY_OIDC_GROUPS_CLAIM` points to the groups attribute name that is used by your authentication service (`groups` is the default). To get the configuration flags required for other identity provider types, see [OAuth2 Proxy docs](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/).
 
 <div tabs>
   <details>
@@ -66,7 +77,14 @@ The following example shows how to use Github as authentication provider for Kia
   </summary>
 
   ```bash
-  kubectl create secret generic oauth2-kiali-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
+  kubectl -n kyma-system create secret generic kiali-auth-proxy-user \
+    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
+    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
+    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
+    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
+    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
 
   </details>
@@ -76,13 +94,39 @@ The following example shows how to use Github as authentication provider for Kia
   </summary>
 
   ```bash
-  kubectl create secret generic oauth2-grafana-secret -n kyma-system --from-literal="OAUTH2_PROXY_CLIENT_ID=<client-id>" --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<client-secret>" --from-literal="OAUTH2_PROXY_COOKIE_SECRET=``openssl rand -hex 16``"
+  kubectl -n kyma-system create secret generic monitoring-auth-proxy-grafana-user \
+    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
+    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
+    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
+    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
+    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
+  ```
+
+  </details>
+  <details>
+  <summary>
+  Jaeger
+  </summary>
+
+  ```bash
+  kubectl -n kyma-system create secret generic tracing-auth-proxy-grafana-user \
+    --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
+    --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
+    --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
+    --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
+    --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
 
   </details>
 </div>
 
-4. Create the `oauth2_proxy` Deployment. Adjust the `args` for the [Github auth provider](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider) depending on your own requirements:
+>**NOTE:** By default, you are redirected to the documentation. To go to the service's UI instead, disable the OAuth2 Proxy provider button by setting `OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true`.
+
+6. Restart the OAuth2 Proxy pod:
 
 <div tabs>
   <details>
@@ -90,63 +134,8 @@ The following example shows how to use Github as authentication provider for Kia
   Kiali
   </summary>
 
-  ```yaml
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: oauth2-kiali
-    labels:
-      app: oauth2-kiali
-      target: oauth2-kiali
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        app: oauth2-kiali
-    template:
-      metadata:
-        labels:
-          app: oauth2-kiali
-      spec:
-        containers:
-        - name: oauth2-proxy
-          image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
-          imagePullPolicy: IfNotPresent
-          args:
-          - --provider=github
-          - --email-domain="*"
-          - --http-address=0.0.0.0:3000
-          - --upstream=http://kiali-server.kyma-system.svc:20001
-          - --cookie-name=kiali_oauth2_proxy
-          - --proxy-prefix=/oauth2
-          - --ping-path=/oauth2/healthy
-          - --silence-ping-logging=true
-          - --reverse-proxy=true
-          - --skip-provider-button=true
-          - --cookie-secure
-          envFrom:
-          - secretRef:
-              name: oauth2-kiali-secret
-          ports:
-          - name: http
-            containerPort: 3000
-            protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /oauth2/healthy
-              port: http
-            initialDelaySeconds: 3
-            timeoutSeconds: 2
-          readinessProbe:
-            httpGet:
-              path: /oauth2/healthy
-              port: http
-            initialDelaySeconds: 3
-            timeoutSeconds: 2
-        securityContext:
-          fsGroup: 65534
-          runAsNonRoot: true
-          runAsUser: 65534
+  ```bash
+  kubectl -n kyma-system delete pod -l app=kiali-auth-proxy
   ```
 
   </details>
@@ -155,176 +144,18 @@ The following example shows how to use Github as authentication provider for Kia
   Grafana
   </summary>
 
-  ```yaml
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: oauth2-grafana
-    labels:
-      app: oauth2-grafana
-      target: oauth2-grafana
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        app: oauth2-grafana
-    template:
-      metadata:
-        labels:
-          app: oauth2-grafana
-      spec:
-        containers:
-        - name: oauth2-proxy
-          image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
-          imagePullPolicy: IfNotPresent
-          args:
-          - --provider=github
-          - --email-domain="*"
-          - --http-address=0.0.0.0:3000
-          - --upstream=http://monitoring-grafana.kyma-system.svc:80
-          - --cookie-name=grafana_oauth2_proxy
-          - --proxy-prefix=/oauth2
-          - --ping-path=/oauth2/healthy
-          - --silence-ping-logging=true
-          - --reverse-proxy=true
-          - --skip-provider-button=true
-          - --cookie-secure
-          envFrom:
-          - secretRef:
-              name: oauth2-grafana-secret
-          ports:
-          - name: http
-            containerPort: 3000
-            protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /oauth2/healthy
-              port: http
-            initialDelaySeconds: 3
-            timeoutSeconds: 2
-          readinessProbe:
-            httpGet:
-              path: /oauth2/healthy
-              port: http
-            initialDelaySeconds: 3
-            timeoutSeconds: 2
-        securityContext:
-          fsGroup: 65534
-          runAsNonRoot: true
-          runAsUser: 65534
-  ```
-
-  </details>
-</div>
-
-
-5. Create a Service for the `oauth2_proxy`:
-
-<div tabs>
-  <details>
-  <summary>
-  Kiali
-  </summary>
-
-  ```yaml
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: oauth2-kiali
-    labels:
-      app: oauth2-kiali
-  spec:
-    type: ClusterIP
-    ports:
-    - port: 3000
-      name: http
-      protocol: TCP
-      targetPort: http
-    selector:
-      app: oauth2-kiali
+  ```bash
+  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=monitoring
   ```
 
   </details>
   <details>
   <summary>
-  Grafana
+  Jaeger
   </summary>
 
-  ```yaml
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: oauth2-grafana
-    labels:
-      app: oauth2-grafana
-  spec:
-    type: ClusterIP
-    ports:
-    - port: 3000
-      name: http
-      protocol: TCP
-      targetPort: http
-    selector:
-      app: oauth2-grafana
-  ```
-
-  </details>
-</div>
-
-6. To expose the Service using Istio, create a VirtualService. Set the domain in the `hosts` list to your desired name:
-
-<div tabs>
-  <details>
-  <summary>
-  Kiali
-  </summary>
-
-  ```yaml
-  apiVersion: networking.istio.io/v1alpha3
-  kind: VirtualService
-  metadata:
-    name: oauth2-kiali
-  spec:
-    hosts:
-    - kiali.kyma.example.com
-    gateways:
-    - kyma-system/kyma-gateway
-    http:
-    - match:
-      - uri:
-          regex: /.*
-      route:
-      - destination:
-          port:
-            number: 3000
-          host: oauth2-kiali
-  ```
-
-  </details>
-  <details>
-  <summary>
-  Grafana
-  </summary>
-
-  ```yaml
-  apiVersion: networking.istio.io/v1alpha3
-  kind: VirtualService
-  metadata:
-    name: oauth2-grafana
-  spec:
-    hosts:
-    - grafana.kyma.example.com
-    gateways:
-    - kyma-system/kyma-gateway
-    http:
-    - match:
-      - uri:
-          regex: /.*
-      route:
-      - destination:
-          port:
-            number: 3000
-          host: oauth2-grafana
+  ```bash
+  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=tracing
   ```
 
   </details>
