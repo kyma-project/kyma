@@ -1,19 +1,16 @@
 ---
 title: Create a Grafana dashboard
-type: Tutorials - Observability
 ---
 
 This tutorial shows how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/latest/panels/visualizations/gauge-panel/#gauge-panel) type. The dashboard shows how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. This example deploys the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
-
-## Steps
+You have performed the steps to observe application metrics using the `monitoring-custom-metrics` example and successfully deployed the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric.
 
 Follow these sections to create the Gauge dashboard type for the `cpu_temperature_celsius` metric.
 
-### Create the dashboard
+## Create the dashboard
 
 1. Navigate to Grafana. It is available under the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster, such as `https://grafana.34.63.57.190.xip.io` or `https://grafana.example.com/`. To access it from the Console UI, click **Metrics** on the left navigation menu.
 
@@ -43,7 +40,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Save the dashboard](./assets/save-dashboard.png)
 
-### Configure the dashboard
+## Configure the dashboard
 
 1. To edit the dashboard settings, go to the **Panel Title** options and select **Edit**.
 
@@ -73,7 +70,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
    ![Note](./assets/save-note.png)
 
-### Verify the dashboard
+## Verify the dashboard
 
 Refresh the browser to see how the dashboard changes according to the current value of the `cpu_temperature_celsius` metric.
 
@@ -85,4 +82,6 @@ Refresh the browser to see how the dashboard changes according to the current va
 
    ![Red dashboard](./assets/red-dashboard.png)
 
->**NOTE:** You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [`README.md`](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md) document.
+You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [`README.md`](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md) document.
+
+> **NOTE:** If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).

@@ -1,11 +1,14 @@
 ---
 title: Logging Architecture
-type: Architecture
 ---
 
-This document provides an overview of the logging architecture in Kyma.
+This is the logging architecture in Kyma:
 
-![Logging architecture in Kyma](./assets/logging-architecture.svg)
+## Architecture diagram
+
+![Logging architecture in Kyma](./assets/obsv-logging-architecture.svg)
+
+## Process flow
 
 1. Container logs are stored under the `var/log` directory and its subdirectories.
 2. The agent queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) which validates and configures data for objects such as Pods or Services.

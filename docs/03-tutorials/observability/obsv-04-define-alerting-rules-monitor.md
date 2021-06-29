@@ -1,17 +1,14 @@
 ---
 title: Define alerting rules
-type: Tutorials - Observability
 ---
 
-To monitor the health status of your resources, you can define alerting rules. In the following example, you will write an alerting rule based on the `cpu_temperature_celsius` metric. The alert defined in the rule will fire whenever the CPU temperature is equal to or greater than 75 degrees Celsius.
+To monitor the health status of your resources, you can define alerting rules. In the following example, you write an alerting rule based on the `cpu_temperature_celsius` metric. The alert defined in the rule fires whenever the CPU temperature is equal to or greater than 75 degrees Celsius.
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+You have performed the steps to observe application metrics using the `monitoring-custom-metrics` example and successfully deployed the `sample-metrics-8081` service, which exposes the `cpu_temperature_celsius` metric.
 
 ## Steps
-
-Follow these steps to create an alerting rule:
 
 1. Create the PrometheusRule resource holding the configuration of your alerting rule.
 
@@ -40,7 +37,7 @@ Follow these steps to create an alerting rule:
            summary: "CPU temperature is too high"
    ```
 
-   Configure your alert rule using the following parameters:
+   Configure your alert rule with the following parameters:
 
    | Parameter | Description | Example value |
    |-----------|-------------|---------------|
@@ -73,3 +70,5 @@ Follow these steps to create an alerting rule:
 5. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires appropriately.
 
    ![Alert on the dashboard](./assets/fired-alert.png)
+
+6. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).

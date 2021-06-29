@@ -48,7 +48,6 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
   </details>
 </div>
 
-
 >**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
 
 2. To access the respective service's UI, open `http://localhost:20001` (for Kiali), `http://localhost:3000` (for Grafana), or `http://localhost:16686` (for Jaeger) in your browser.

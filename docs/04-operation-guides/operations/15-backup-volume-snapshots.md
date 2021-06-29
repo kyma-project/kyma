@@ -5,8 +5,6 @@ type: Backups
 
 You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
 
-If you want to create volume snapshots for cloud providers, see [Create on-demand snapshots for cloud providers](task-create-volume-snapshots-providers).
-
 ## Prerequisites
 
 As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which you have created using a CSI-enabled StorageClass.
@@ -153,11 +151,9 @@ spec:
 
 ## Create a volume snapshot for cloud providers
 
-The following instructions show how to create on-demand volume snapshots for cloud providers. Before you proceed, read the general instructions on [creating volume snapshots](/#tutorials-create-on-demand-volume-snapshots).
+The following instructions show how to create on-demand volume snapshots for cloud providers. Before you proceed, read the aforementioned instructions on creating volume snapshots.
 
 <!-- why do I have to read those instructions first? -->
-
-<!-- it's completely unclear to me why Gardener providers are under a new headline. Why not put all five providers as tabs into the same div?? And then maybe even integrate this file with the other snapshot instruction -->
 
 <div tabs name="backup-providers">
   <details>

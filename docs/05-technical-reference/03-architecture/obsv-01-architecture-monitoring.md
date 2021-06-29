@@ -1,14 +1,12 @@
 ---
 title: Monitoring Architecture
-type: Architecture
 ---
 
-Before you go into component details, find out more about the end-to-end monitoring flow in Kyma.
 ## End-to-end monitoring flow
 
 The complete monitoring flow in Kyma comes down to these components and steps:
 
-![End-to-end monitoring flow](./assets/monitoring-flow.svg)
+![End-to-end monitoring flow](./assets/obsv-monitoring-flow.svg)
 
 1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with the default configuration.
 2. The Prometheus server periodically polls all metrics exposed on `/metrics` endpoints of ports specified in ServiceMonitor CRDs. Prometheus stores these metrics in a time-series database.
@@ -20,7 +18,7 @@ The complete monitoring flow in Kyma comes down to these components and steps:
 
 The diagram presents monitoring components and the way they interact with one another.
 
-![Monitoring components](./assets/monitoring-architecture.svg)
+![Monitoring components](./assets/obsv-monitoring-architecture.svg)
 
 
 1. [**Prometheus Operator**](https://github.com/coreos/prometheus-operator) creates a Prometheus instance, manages its deployment, and provides configuration for it. It also deploys Alertmanager and operates ServiceMonitor custom resources that specify monitoring definitions for groups of services.
@@ -28,7 +26,7 @@ The diagram presents monitoring components and the way they interact with one an
 2. [**Prometheus**](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. To obtain such metrics, Prometheus uses the [**kube-state-metrics**](https://github.com/kubernetes/kube-state-metrics) service. It generates the metrics from Kubernetes API objects and exposes them on the `/metrics` HTTP endpoint.  
 Pods can also contain applications with custom metrics, such as the total storage space available in the MinIO server. Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to generate alerts if it detects any metric anomalies. It also scrapes metrics provided by [**Node Exporter**](https://github.com/mindprince/nvidia_gpu_prometheus_exporter) which exposes existing hardware metrics from external systems as Prometheus metrics.
 
-   >**NOTE:** Besides this main Prometheus instance, there is a second Prometheus instance running in the `kyma-system` Namespace. This second instance is responsible for collecting and aggregating [Istio Service Mesh metrics](#details-istio-monitoring).
+   >**NOTE:** Besides this main Prometheus instance, there is a second Prometheus instance running in the `kyma-system` Namespace. This second instance is responsible for collecting and aggregating [Istio Service Mesh metrics](../../../01-overview/02-main-areas/service-mesh/con-monitoring-istio.md).
 
 3. **ServiceMonitors** monitor services and specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the `/metrics` endpoints of ports specified in ServiceMonitor CRDs.
 
