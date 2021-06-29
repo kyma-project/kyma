@@ -186,7 +186,3 @@ Determine the auth strategy to use - default is "token" on Kubernetes and "opens
   {{- end }}
 {{- end }}
 {{- end }}
-
-{{- define "kiali.kyma.authProxy.kymaGroups" -}}
-{{- printf "%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- end -}}
