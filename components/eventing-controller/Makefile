@@ -113,12 +113,17 @@ path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
 
 copy-crds: manifests-local
-	@echo "copying to cluster-essentials"
+	@echo "copying Eventing CRDs to cluster-essentials"
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
-	@echo "copying to installation/eventing"
+	@echo "copying Eventing CRDs to installation/eventing"
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
+
+copy-external-crds:
+	@echo "copying external CRDs to config/crd/external"
+	curl -L#o config/crd/external/apirules-gateway-kyma-project-io.yaml https://raw.githubusercontent.com/kyma-incubator/api-gateway/main/config/crd/bases/gateway.kyma-project.io_apirules.yaml
+	curl -L#o config/crd/external/hydra.ory.sh_oauth2clients.yaml https://raw.githubusercontent.com/ory/hydra-maester/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -182,7 +187,7 @@ push-image: $(cmds_images_push) ;
 #   make eventing-controller
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
-$(cmds): %: resolve-local
+$(cmds): %: resolve-local copy-external-crds
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
