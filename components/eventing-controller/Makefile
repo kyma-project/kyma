@@ -107,7 +107,7 @@ mod-verify-local:
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
-release: resolve generate verify build-image push-image
+release: resolve generate verify build-image push-image copy-external-crds
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
@@ -187,7 +187,7 @@ push-image: $(cmds_images_push) ;
 #   make eventing-controller
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
-$(cmds): %: resolve-local copy-external-crds
+$(cmds): %: resolve-local
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
