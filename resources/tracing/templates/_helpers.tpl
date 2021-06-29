@@ -59,10 +59,6 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "jaeger-operator.kyma.authProxy.kymaGroups" -}}
-{{- printf "%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- end -}}
-
 {{- define "kyma.checkRequirements" }}
 {{- if not .Values.global.tracing.enabled }}
 {{- fail (print "Tracing is not enabled across all the components. Set global.tracing.enabled to enable tracing while installing Kyma") }}
