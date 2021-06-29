@@ -142,6 +142,42 @@ func TestRoundTripperMTLS(t *testing.T) {
 	require.Equal(t, res.StatusCode, http.StatusOK)
 }
 
+func TestRoundTripperMTLSMissingCert(t *testing.T) {
+	caTLSCert, caX509Cert, err := newCA()
+	require.NoError(t, err)
+
+	serverCert, err := newCert(caTLSCert)
+	require.NoError(t, err)
+
+	certpool := x509.NewCertPool()
+	certpool.AddCert(caX509Cert)
+
+	ts := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	ts.TLS = &tls.Config{
+		Certificates: []tls.Certificate{*serverCert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certpool,
+	}
+	ts.StartTLS()
+	defer ts.Close()
+
+	transport := NewRoundTripper(
+		WithTLSConfig(&tls.Config{RootCAs: certpool}),
+		WithGetClientCertificate(clientcert.NewClientCertificate(nil).GetClientCertificate))
+
+	httpClient := &http.Client{
+		Transport: transport,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, ts.URL, nil)
+	require.NoError(t, err)
+
+	_, err = httpClient.Do(req)
+	require.ErrorIs(t, err, clientcert.ErrMissingClientCertificate)
+}
+
 func newCert(caCert *tls.Certificate) (*tls.Certificate, error) {
 	certificate := &x509.Certificate{
 		SerialNumber: big.NewInt(mathrand.Int63()),
