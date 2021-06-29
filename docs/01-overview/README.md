@@ -1,6 +1,5 @@
 ---
 title: What is Kyma?
-type: Overview
 ---
 
 Kyma is an application runtime that provides you a flexible and easy way to connect, extend, and customize your applications in the cloud-native world of Kubernetes.
