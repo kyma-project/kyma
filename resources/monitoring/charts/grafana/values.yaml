@@ -56,7 +56,7 @@ livenessProbe:
 
 image:
   repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.4.0-0bae0d22
+  tag: 7.4.5-be190f01
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -714,20 +714,19 @@ kyma:
   authProxy:
     enabled: false
     replicaCount: 1
+    configDocsLink: ""
     config:
       clientId: "grafana"
       clientSecret: "apie4eeX6hiC9ainieli"
+      useDex: true
       tlsVerify: false
-      resources:
-        uri: "/*"
-        methods: "GET,POST,PUT,DELETE"
-        useKymaGroups: false
-        groups: ""
-        roles: ""
+      emailDomains: "*"
+      groups: ""
+      useKymaGroups: false
       scopes: "groups"
-      headers: ""
-      matchClaims: ""
-      addClaims: ""
+      authLogging: true
+      requestLogging: false
+    env: {}
     nodeSelector: {}
     securityContext:
       allowPrivilegeEscalation: false
@@ -735,8 +734,8 @@ kyma:
       runAsNonRoot: true
     port: 3000
     image:
-      repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
-      tag: 10.0.0
+      repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
+      tag: 7.1.3-96ae36d3
       pullPolicy: IfNotPresent
     resources:
       limits:

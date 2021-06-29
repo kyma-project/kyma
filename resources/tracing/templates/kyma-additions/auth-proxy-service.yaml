@@ -1,4 +1,4 @@
-{{if .Values.kcproxy.enabled}}
+{{if .Values.authProxy.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,10 +8,10 @@ metadata:
 spec:
   ports:
   - port: {{ .Values.jaeger.kyma.uiPort }}
-    targetPort: {{ .Values.kcproxy.inPort }}
+    targetPort: {{ .Values.authProxy.inPort }}
     protocol: TCP
     name: http
   selector:
     app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
-    app.kubernetes.io/component: kcproxy
+    app.kubernetes.io/component: auth-proxy
 {{end}}
