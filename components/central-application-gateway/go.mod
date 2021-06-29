@@ -4,13 +4,13 @@ go 1.14
 
 require (
 	github.com/gorilla/mux v1.8.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210604090801-9a75cdfd1c7c
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210624133846-3e1e71e9f682
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.20.2
-	k8s.io/apimachinery v0.20.2
-	k8s.io/client-go v0.20.2
+	k8s.io/api v0.21.2
+	k8s.io/apimachinery v0.21.2
+	k8s.io/client-go v0.21.2
 )
 
 replace (
