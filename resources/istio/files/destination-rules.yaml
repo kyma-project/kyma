@@ -11,3 +11,6 @@ spec:
     connectionPool:
       tcp:
         connectTimeout: "30s"
+    tls:
+      mode: SIMPLE
+      caCertificates: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
