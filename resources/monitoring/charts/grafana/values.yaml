@@ -71,8 +71,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: grafana/grafana
-  tag: 7.5.9 #7.4.0-0bae0d22
+  repository: eu.gcr.io/kyma-project/tpi/grafana #grafana/grafana
+  tag: PR-107 #7.4.0-0bae0d22
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -84,19 +84,19 @@ image:
   #   - myRegistrKeySecretName
 
 testFramework:
-  enabled: false # TODO true
+  enabled: false
   image: "bats/bats"
   tag: "v1.1.0"
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-podSecurityContext:
 securityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
-  # allowPrivilegeEscalation: false
-  # privileged: false
+podSecurityContext: #{}
+  allowPrivilegeEscalation: false
+  privileged: false
 
 containerSecurityContext: {}
 
@@ -279,11 +279,11 @@ extraContainerVolumes: []
 ##
 persistence:
   type: pvc
-  enabled: true # TODO false
+  enabled: true
   # storageClassName: default
   accessModes:
     - ReadWriteOnce
-  size: 1Gi # TODO 10Gi
+  size: 1Gi
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection
@@ -309,7 +309,7 @@ initChownData:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.32.0" # TODO 1.31.1
+    tag: "1.32.0"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -627,7 +627,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.10.6-22caa7d3 # TODO 1.10.7
+    tag: 1.12.2-PR-107 #1.10.6-22caa7d3
   imagePullPolicy: IfNotPresent
   resources:
     limits:
