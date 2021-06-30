@@ -111,7 +111,3 @@ Return the appropriate apiVersion for rbac.
 {{- print "rbac.authorization.k8s.io/v1beta1" -}}
 {{- end -}}
 {{- end -}}
-
-{{- define "grafana.kyma.authProxy.kymaGroups" -}}
-{{- printf "%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- end -}}
