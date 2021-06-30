@@ -40,7 +40,7 @@ spec:
         - --upstream=http://{{ template "kiali-server.name" . }}-server:{{ .Values.kiali.spec.server.port }}
         - --cookie-secure=true
         - --cookie-domain=kiali.{{ .Values.global.ingress.domainName }}
-        - --cookie-name=KYMA_KIALI_TOKEN
+        - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true
         - --auth-logging={{ .Values.authProxy.config.authLogging }}

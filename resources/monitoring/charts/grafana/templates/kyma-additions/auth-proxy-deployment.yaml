@@ -45,7 +45,7 @@ spec:
         - --upstream=http://{{ template "grafana.fullname" . }}:{{ .Values.service.port }}
         - --cookie-secure=true
         - --cookie-domain=grafana.{{ .Values.global.ingress.domainName }}
-        - --cookie-name=KYMA_GRAFANA_TOKEN
+        - --cookie-name=KYMA_GRAFANA_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true
         - --auth-logging={{ .Values.kyma.authProxy.config.authLogging }}
