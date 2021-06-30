@@ -32,6 +32,12 @@ DB_USER="{{ .Values.global.postgresql.postgresqlUsername }}"
 DB_URL="ory-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432"
 DB_NAME="{{ .Values.global.postgresql.postgresqlDatabase }}"
 PASSWORD="{{ .Values.global.postgresql.postgresqlPassword }}"
+PASSWORDR="{{ .Values.global.postgresql.replicationPassword }}"
+PASSWORD_R_KEY="postgresql-replication-password"
+  if [[ -z "${PASSWORDR}" ]]; then
+	    communicate_missing_override "${PASSWORD_R_KEY}"
+	      PASSWORDR=$(get_from_file "${PASSWORD_R_KEY}" || generateRandomString 10)
+  fi
 PASSWORD_KEY="postgresql-password"
 if [[ -z "${PASSWORD}" ]]; then
   communicate_missing_override "${PASSWORD_KEY}"
@@ -80,6 +86,7 @@ DATA=$(cat << EOF
   ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}" | base64 -w 0)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
   ${PASSWORD_KEY}: $(echo -n "${PASSWORD}" | base64 -w 0)
+  ${PASSWORD_R_KEY}: $(echo -n "${PASSWORDR}" | base64 -w 0)
   {{- end }}
   {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
   ${SERVICE_ACCOUNT_KEY}: $(echo -n "${SERVICE_ACCOUNT}")
