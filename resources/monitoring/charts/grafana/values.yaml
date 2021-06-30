@@ -90,13 +90,13 @@ testFramework:
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-# podSecurityContext:
+podSecurityContext:
 securityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
-  allowPrivilegeEscalation: false
-  privileged: false
+  # allowPrivilegeEscalation: false
+  # privileged: false
 
 containerSecurityContext: {}
 
@@ -371,14 +371,14 @@ env:
   GF_AUTH_PROXY_HEADER_NAME: X-AUTH-EMAIL
   GF_AUTH_PROXY_HEADER_PROPERTY: "email"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#server
-  GF_SERVER_ROOT_URL: ""
+  # GF_SERVER_ROOT_URL: ""
   # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
   GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
   GF_AUTH_GENERIC_OAUTH_SCOPES: "openid email groups"
   GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "http://dex-service:5556/token"
-  GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
+  # GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
   GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"

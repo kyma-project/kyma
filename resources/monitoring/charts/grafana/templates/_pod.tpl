@@ -1,17 +1,3 @@
-{{- /*
-  Customization:
-  Added additional OAuth related env vars:
-    GF_AUTH_GENERIC_OAUTH_AUTH_URL
-    GF_SERVER_ROOT_URL
-  Added a value check in the env range loop:
-  {{- range $key, $value := .Values.env }}
-  {{- if $value }}
-      - name: "{{ tpl $key $ }}"
-        value: "{{ tpl (print $value) $ }}"
-  {{- end }}
-  {{- end }}
-*/ -}}
-
 {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
 schedulerName: "{{ .Values.schedulerName }}"
@@ -42,7 +28,6 @@ initContainers:
     {{- if .Values.initChownData.securityContext }}
     securityContext:
 {{ toYaml .Values.initChownData.securityContext | indent 6 }}
-    {{ .Values.}}
     {{- end }}
     command: ["chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }}", "/var/lib/grafana"]
     resources:
@@ -344,6 +329,19 @@ containers:
         containerPort: 3000
         protocol: TCP
     env:
+      {{- /*
+    Customization:
+    Added additional OAuth related env vars:
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL
+      GF_SERVER_ROOT_URL
+    Added a value check in the env range loop:
+    {{- range $key, $value := .Values.env }}
+    {{- if $value }}
+        - name: "{{ tpl $key $ }}"
+          value: "{{ tpl (print $value) $ }}"
+    {{- end }}
+    {{- end }}
+  */ -}}
       {{- if and (not .Values.env.GF_SECURITY_ADMIN_USER) (not .Values.env.GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION) }}
       - name: GF_SECURITY_ADMIN_USER
         valueFrom:
@@ -405,10 +403,8 @@ containers:
 {{ toYaml $value | indent 10 }}
     {{- end }}
 {{- range $key, $value := .Values.env }}
-{{- if $value }}
       - name: "{{ tpl $key $ }}"
         value: "{{ tpl (print $value) $ }}"
-{{- end }}
 {{- end }}
     {{- if .Values.envFromSecret }}
     envFrom:
@@ -426,10 +422,6 @@ containers:
 {{ toYaml .Values.readinessProbe | indent 6 }}
     resources:
 {{ toYaml .Values.resources | indent 6 }}
-{{- if .Values.securityContext }}
-    securityContext:
-{{ toYaml .Values.securityContext | indent 6 }}
-{{- end }}
 {{- with .Values.extraContainers }}
 {{ tpl . $ | indent 2 }}
 {{- end }}
