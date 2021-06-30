@@ -2,7 +2,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "kiali-server.name" . }}
+  name: {{ template "kiali-server.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
@@ -14,10 +14,10 @@ spec:
   http:
   - route:
     - destination:
-        {{- if .Values.kcproxy.enabled}}
-        host: {{ template "kiali-server.name" . }}-secured
+        {{- if .Values.authProxy.enabled}}
+        host: {{ template "kiali-server.fullname" . }}-secured
         {{- else}}
-        host: {{ template "kiali-server.name" . }}-server
+        host: {{ template "kiali-server.fullname" . }}-server
         {{- end}}
         port:
           number: {{ .Values.kiali.spec.server.port }}

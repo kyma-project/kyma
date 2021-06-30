@@ -8,6 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/avast/retry-go"
+
+	. "github.com/onsi/gomega"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/nats-io/nats.go"
@@ -135,7 +138,7 @@ func TestSubscription(t *testing.T) {
 
 	data := "sampledata"
 	// Send an event
-	err = SendEvent(&natsClient, data)
+	err = SendEventToNATS(&natsClient, data)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}
@@ -155,7 +158,7 @@ func TestSubscription(t *testing.T) {
 
 	newData := "datawhichdoesnotexist"
 	// Send an event
-	err = SendEvent(&natsClient, newData)
+	err = SendEventToNATS(&natsClient, newData)
 	if err != nil {
 		t.Fatalf("failed to publish event: %v", err)
 	}
@@ -173,16 +176,121 @@ func TestSubscription(t *testing.T) {
 	}
 }
 
-func SendEvent(natsClient *Nats, data string) error {
-	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
-	// because the publisher-application should have cleaned it already before publishing
-	eventType := eventingtesting.EventType
-	eventTime := time.Now().Format(time.RFC3339)
-	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
-	return natsClient.connection.Publish(eventType, []byte(sampleEvent))
+func TestIsValidSubscription(t *testing.T) {
+	g := NewWithT(t)
+
+	natsPort := 5223
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+
+	// Start NATS server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+
+	// Create NATS client
+	natsURL := natsServer.ClientURL()
+	natsClient := Nats{
+		subscriptions: make(map[string]*nats.Subscription),
+		config: env.NatsConfig{
+			Url:           natsURL,
+			MaxReconnects: 2,
+			ReconnectWait: time.Second,
+		},
+		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
+	}
+	err := natsClient.Initialize(env.Config{})
+	if err != nil {
+		t.Fatalf("failed to connect to NATS Server: %v", err)
+	}
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	if err != nil {
+		t.Fatalf("failed to Sync subscription: %v", err)
+	}
+
+	// get filter
+	filter := sub.Spec.Filter.Filters[0]
+	subject, err := createSubject(filter, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(subject).To(Not(BeEmpty()))
+
+	// get internal key
+	key := createKey(sub, subject)
+	g.Expect(key).To(Not(BeEmpty()))
+	natsSub := natsClient.subscriptions[key]
+	g.Expect(natsSub).To(Not(BeNil()))
+
+	// check the mapping of Kyma subscription and Nats subscription
+	nsn := createKymaSubscriptionNamespacedName(key, natsSub)
+	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
+	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
+
+	// the associated Nats subscription should be valid
+	g.Expect(natsSub.IsValid()).To(BeTrue())
+
+	// check that no invalid subscriptions exist
+	invalidNsn := natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeZero())
+
+	natsClient.connection.Close()
+
+	// the associated NATS subscription should not be valid anymore
+	err = checkIsNotValid(natsSub, t)
+	g.Expect(err).To(BeNil())
+
+	// shutdown NATS
+	natsServer.Shutdown()
+
+	// the associated NATS subscription should not be valid anymore
+	err = checkIsNotValid(natsSub, t)
+	g.Expect(err).To(BeNil())
+
+	// check that only one invalid subscription exist
+	invalidNsn = natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
+
+	// restart NATS server
+	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	// check that only one invalid subscription still exist, the controller is not running...
+	invalidNsn = natsClient.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
+
 }
 
-func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {
-	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
-	return jsonCE
+func checkIsValid(sub *nats.Subscription, t *testing.T) error {
+	return checkValidity(sub, true, t)
+}
+
+func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
+	return checkValidity(sub, false, t)
+}
+
+func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) error {
+	maxAttempts := uint(5)
+	delay := time.Second
+	err := retry.Do(
+		func() error {
+			if toCheckIsValid == sub.IsValid() {
+				return nil
+			}
+			if toCheckIsValid {
+				return errors.New("still invalid Nats subscription, expected valid")
+			}
+			return errors.New("still valid Nats subscription, expected invalid")
+		},
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(maxAttempts),
+		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
+	)
+	return err
 }

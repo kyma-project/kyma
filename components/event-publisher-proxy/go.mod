@@ -18,9 +18,9 @@ require (
 	go.opencensus.io v0.22.4
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.1.1 // indirect
-	k8s.io/api v0.20.2
-	k8s.io/apimachinery v0.20.2
-	k8s.io/client-go v0.20.2
+	k8s.io/api v0.20.7
+	k8s.io/apimachinery v0.20.7
+	k8s.io/client-go v0.20.7
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 
@@ -30,8 +30,4 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
-
-	k8s.io/api => k8s.io/api v0.19.8
-	k8s.io/apimachinery => k8s.io/apimachinery v0.19.8
-	k8s.io/client-go => k8s.io/client-go v0.19.8
 )

@@ -17,9 +17,7 @@ import (
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
@@ -444,23 +442,8 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 	}
 	subscription := testingutils.NewSubscription()
 
-	subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
-	if err != nil {
-		t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
-	}
-	// Creating unstructured subscriptions
-	subUnstructured := &unstructured.Unstructured{
-		Object: subUnstructuredMap,
-	}
-	// Setting Kind information in unstructured subscription
-	subscriptionGVK := schema.GroupVersionKind{
-		Group:   subscribed.GVR.Group,
-		Version: subscribed.GVR.Version,
-		Kind:    "Subscription",
-	}
-	subUnstructured.SetGroupVersionKind(subscriptionGVK)
 	// Configuring fake dynamic client
-	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
+	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient,
 		10*time.Second,

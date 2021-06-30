@@ -29,7 +29,7 @@ spec:
       return axios.post("http://eventing-event-publisher-proxy.kyma-system/publish",payload,{headers:{"Content-Type": "application/cloudevents+json"}})
     }
     async function getOrder(code) {
-      let url = findEnv("GATEWAY_URL") + "/site/orders/" + code;
+      let url = %%URL%%;
       console.log("URL: %s", url);
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
         return e.response.data;

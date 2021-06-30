@@ -1,6 +1,12 @@
 const axios = require("axios");
 const gql = require("./gql");
-const { getEnvOrThrow, debug } = require("../utils")
+const { 
+    getEnvOrThrow, 
+    debug 
+} = require("../utils");
+const {
+    OAuthCredentials
+  } = require("../lib/oauth");
 
 /**
  * Class DirectorConfig represents configuration data for DirectorClient.
@@ -21,16 +27,14 @@ class DirectorConfig {
     static fromEnv() {
         return new DirectorConfig(
             getEnvOrThrow("COMPASS_HOST"),
-            getEnvOrThrow("COMPASS_CLIENT_ID"),
-            getEnvOrThrow("COMPASS_CLIENT_SECRET"),
+            OAuthCredentials.fromEnv("COMPASS_CLIENT_ID", "COMPASS_CLIENT_SECRET"),
             getEnvOrThrow("COMPASS_TENANT")
         )
     }
 
-    constructor(host, clientID, clientSecret, tenantID) {
+    constructor(host, credentials, tenantID) {
         this.host = host;
-        this.clientID = clientID;
-        this.clientSecret = clientSecret;
+        this.credentials = credentials;
         this.tenantID = tenantID;
     }
 }
@@ -46,8 +50,7 @@ class DirectorClient {
      */
     constructor(config) {
         this.host = config.host;
-        this.clientID = config.clientID;
-        this.clientSecret = config.clientSecret;
+        this.credentials = config.credentials;
         this.tenantID = config.tenantID;
 
         this._token = undefined;
@@ -67,8 +70,8 @@ class DirectorClient {
             const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
             const params = {
                 auth: {
-                    username: this.clientID,
-                    password: this.clientSecret
+                    username: this.credentials.clientID,
+                    password: this.credentials.clientSecret
                 },
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -110,7 +113,7 @@ class DirectorClient {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
                 debug(resp);
-                throw new Error(resp.data);
+                throw resp.data;
             }
             return resp.data.data.result;
         } catch(err) {
@@ -140,7 +143,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when unregistering application`);
+            throw new Error(`Error when unregistering application: ${err.message}`);
         }
     }
 
@@ -159,7 +162,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when unregistering runtime`);
+            throw new Error(`Error when unregistering runtime: ${err.toString()}`);
         }
     }
 
@@ -192,7 +195,7 @@ class DirectorClient {
             }
             return res;
         } catch(err) {
-            throw new Error(`Error when querying for label definition with key ${labelKey}`);
+            throw new Error(`Error when querying for label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
 
@@ -201,7 +204,7 @@ class DirectorClient {
         try {
             await this.callDirector(payload);
         } catch(err) {
-            throw new Error(`Error when updating label definition with key ${labelKey}`);
+            throw new Error(`Error when updating label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
 
@@ -211,7 +214,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when querying for runtimes filtered`);
+            throw new Error(`Error when querying for runtimes filtered: ${err.toString()}`);
         }
     }
 
@@ -221,7 +224,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when querying for applications filtered`);
+            throw new Error(`Error when querying for applications filtered: ${err.toString()}`);
         }
     }
 
@@ -231,7 +234,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}`);
+            throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
 
@@ -241,7 +244,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res;
         } catch(err) {
-            throw new Error(`Error whe querying for the runtime with ID ${runtimeID}`);
+            throw new Error(`Error whe querying for the runtime with ID ${runtimeID}: ${err.toString()}`);
         }
     }
 
@@ -251,7 +254,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res;
         } catch(err) {
-            throw new Error(`Error when querying for the application with ID ${appID}`);
+            throw new Error(`Error when querying for the application with ID ${appID}: ${err.toString()}`);
         }
     }
 
@@ -261,7 +264,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when setting application ${appID} label ${key} and value ${value}`);
+            throw new Error(`Error when setting application ${appID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
 
@@ -271,7 +274,7 @@ class DirectorClient {
             const res = await this.callDirector(payload);
             return res.data;
         } catch(err) {
-            throw new Error(`Error when deleting label ${key} from application ${appID}`);
+            throw new Error(`Error when deleting label ${key} from application ${appID}: ${err.toString()}`);
         }
     }
 }

@@ -1,3 +1,6 @@
+service-catalog-ui:
+  enabled: true
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project

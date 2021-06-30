@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	natsserver "github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,8 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/nats-io/nats.go"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -119,6 +119,44 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 					v1.ConditionFalse, "parse \"invalid\": invalid URI for request")),
 			))
+		})
+	})
+
+	When("Creating a Subscription with empty protocol, protocolsettings and dialect", func() {
+		It("Should reconcile the Subscription", func() {
+			ctx := context.Background()
+			subscriptionName := fmt.Sprintf("sub-%d", testId)
+
+			// create subscriber
+			result := make(chan []byte)
+			url, shutdown := newSubscriber(result)
+			defer shutdown()
+
+			// create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEmptySourceEventType)
+			givenSubscription.Spec.Sink = url
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")),
+			))
+
+			// publish a message
+			connection, err := connectToNats(natsUrl)
+			Expect(err).ShouldNot(HaveOccurred())
+			err = connection.Publish(reconcilertesting.EventType, []byte(reconcilertesting.StructuredCloudEvent))
+			Expect(err).ShouldNot(HaveOccurred())
+
+			// make sure that the subscriber received the message
+			Eventually(func() bool {
+				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+				received := string(<-result)
+				return sent == received
+			}).Should(BeTrue())
 		})
 	})
 
@@ -229,6 +267,7 @@ var natsUrl string
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var natsServer *natsserver.Server
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -242,8 +281,8 @@ var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
 	useExistingCluster := useExistingCluster
 
-	natsPort := 4222
-	natsServer := reconcilertesting.RunNatsServerOnPort(natsPort)
+	natsPort := 4221
+	natsServer = reconcilertesting.RunNatsServerOnPort(natsPort)
 	natsUrl = natsServer.ClientURL()
 	log.Printf("started test Nats server: %v", natsUrl)
 
@@ -274,7 +313,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{
-		Url:             nats.DefaultURL,
+		Url:             natsUrl,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
@@ -309,6 +348,7 @@ var _ = BeforeSuite(func(done Done) {
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
+	reconcilertesting.ShutDownNATSServer(natsServer)
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })

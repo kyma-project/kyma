@@ -3,6 +3,8 @@ set -eo pipefail
 
 export HOME="/tmp"
 
+CERT_CHECK_TIMEOUT=${CERT_CHECK_TIMEOUT:=5}
+
 echo "Checking if running in Gardener mode"
 
 SHOOT_INFO="$(kubectl -n kube-system get configmap shoot-info --ignore-not-found)"
@@ -41,15 +43,32 @@ spec:
   secretName: "$KYMA_SECRET_NAME"
 EOF
 
+get_cert_status () {
+  local cert=$1
+  local nspace=$2
+  kubectl -n $nspace get certificates.cert.gardener.cloud $cert -o jsonpath='{.status.state}'
+}
+
+check_cert_status() {
+  local cert=$1
+  local nspace=$2
+  local cert_check_timeout=$3
+
+  local next_wait_time=0
+  local cert_status=$(get_cert_status $cert $nspace)
+
+  while [[ $next_wait_time -lt $cert_check_timeout && $cert_status != "Ready" ]]; do
+    sleep $(( next_wait_time++ ))
+    cert_status=$(get_cert_status $cert $nspace)
+  done
+  if [[ $cert_status != "Ready" ]]; then
+      echo "certificate $cert in ns $nspace is not Ready"
+      exit 1
+  fi
+}
+
+check_cert_status "kyma-tls-cert" $KYMA_SECRET_NAMESPACE $CERT_CHECK_TIMEOUT
+
 echo "Annotating istio-ingressgateway/istio-system service"
 
 kubectl -n istio-system annotate service istio-ingressgateway dns.gardener.cloud/class='garden' dns.gardener.cloud/dnsnames='*.'"${DOMAIN}"'' --overwrite
-
-# TODO: remove this when global.ingress.domainName is removed
-kubectl create configmap net-global-overrides \
-  --from-literal global.domainName="$DOMAIN" \
-  --from-literal global.ingress.domainName="$DOMAIN" \
-  -n kyma-installer -o yaml --dry-run | kubectl apply -f -
-
-kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
-kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer

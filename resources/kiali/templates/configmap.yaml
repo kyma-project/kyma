@@ -18,6 +18,7 @@ data:
     {{- $_ := set $cm "istio_namespace" (include "kiali-server.istio_namespace" .) }}
     {{- $_ := set $cm.auth "strategy" (include "kiali-server.auth.strategy" .) }}
     {{- $_ := set $cm.auth.openshift "client_id_prefix" (include "kiali-server.fullname" .) }}
+    {{- $_ := set $cm.deployment "instance_name" (include "kiali-server.fullname" .) }}
     {{- $_ := set $cm.identity "cert_file" (include "kiali-server.identity.cert_file" .) }}
     {{- $_ := set $cm.identity "private_key_file" (include "kiali-server.identity.private_key_file" .) }}
     {{- $_ := set $cm.login_token "signing_key" (include "kiali-server.login_token.signing_key" .) }}

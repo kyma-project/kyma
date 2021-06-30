@@ -127,8 +127,6 @@ spec:
       enabled: true
       k8s:
         env:
-        - name: PILOT_TRACE_SAMPLING
-          value: "100"
         - name: PILOT_HTTP10
           value: "1"
         - name: POD_NAME
@@ -174,6 +172,7 @@ spec:
     defaultConfig:
       proxyMetadata: {}
       tracing:
+        # sampling: 1 # use the istio default (which is 1) to support override by pilot env variable at runtime
         zipkin:
           address: "{{ .Values.global.tracing.zipkinAddress }}"
     enablePrometheusMerge: false
@@ -210,10 +209,6 @@ spec:
         type: LoadBalancer
         zvpn: {}
     global:
-      arch:
-        amd64: 2
-        ppc64le: 2
-        s390x: 2
       configValidation: true
       defaultNodeSelector: {}
       defaultPodDisruptionBudget:
@@ -249,6 +244,7 @@ spec:
         excludeIPRanges: ""
         excludeInboundPorts: ""
         excludeOutboundPorts: ""
+        holdApplicationUntilProxyStarts: true
         image: proxyv2
         includeIPRanges: '*'
         logLevel: warning
@@ -297,25 +293,9 @@ spec:
       keepaliveMaxServerConnectionAge: 30m
       nodeSelector: {}
       replicaCount: 1
-      traceSampling: 1
     sidecarInjectorWebhook:
       enableNamespacesByDefault: true
       objectSelector:
         autoInject: true
         enabled: false
       rewriteAppHTTPProbe: true
-    telemetry:
-      enabled: true
-      v2:
-        enabled: true
-        metadataExchange:
-          wasmEnabled: false
-        prometheus:
-          enabled: true
-          wasmEnabled: false
-        stackdriver:
-          configOverride: {}
-          enabled: false
-          logging: false
-          monitoring: false
-          topology: false

@@ -24,19 +24,19 @@ oidc:
       name: Grafana UI
       redirectURIs:
       - 'https://grafana.{{ .Values.global.ingress.domainName }}/login/generic_oauth'
-      - 'https://grafana.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      - 'https://grafana.{{ .Values.global.ingress.domainName }}/oauth2/callback'
       secret: apie4eeX6hiC9ainieli
     - id: jaeger
       name: Jaeger UI
       redirectURIs:
-      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
-      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth2/callback'
+      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth2/callback'
       secret: oiEWUWOIEwedfgg
     - id: kiali
       name: Kiali UI
       redirectURIs:
-      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
-      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth2/callback'
+      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth2/callback'
       secret: hiFWLWqIxw5d3gl
     - id: compass-ui
       name: Compass UI
@@ -91,7 +91,7 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: 8d072ec7
+    version: 49659ad2
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:

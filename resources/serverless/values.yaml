@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210504-12243229"
+    tag: "20210610-d25e85b1"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210504-12243229"
+    tag: "20210610-d25e85b1"
     pullPolicy: IfNotPresent
 
 tests:
@@ -34,7 +34,7 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210504-12243229"
+      tag: "20210610-d25e85b1"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
@@ -81,7 +81,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "a9278e66"
+    tag: "3d36a7ba"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -162,7 +162,7 @@ containers:
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v1.5.1
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:a9278e66
+        value: eu.gcr.io/kyma-project/function-build-init:3d36a7ba
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -243,7 +243,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "a9278e66"
+    tag: "3d36a7ba"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

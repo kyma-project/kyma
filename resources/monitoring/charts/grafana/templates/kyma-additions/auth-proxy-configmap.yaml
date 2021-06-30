@@ -1,0 +1,22 @@
+{{- if .Values.kyma.authProxy.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-templates
+  namespace: kyma-system
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: auth-proxy
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "grafana.chart" . }}
+data:
+  sign_in.html: |
+    <!DOCTYPE html>
+    <html lang="en" charset="utf-8">
+      <head>
+        <meta http-equiv = "refresh" content = "0; url = {{ .Values.kyma.authProxy.configDocsLink }}" />
+      </head>
+      <body>
+      </body>
+    </html>
+{{- end }}

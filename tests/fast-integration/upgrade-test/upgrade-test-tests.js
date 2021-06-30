@@ -1,4 +1,5 @@
 const {
+  checkInClusterEventDelivery,
   checkAppGatewayResponse,
   sendEventAndCheckResponse,
 } = require("../test/fixtures/commerce-mock");
@@ -11,9 +12,14 @@ describe("Upgrade test tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
+  const testNamespace = "test";
 
   it("Listing all pods in cluster", async function () {
     initialRestarts = await getContainerRestartsForAllNamespaces();
+  });
+
+  it("in-cluster event should be delivered", async function () {
+    await checkInClusterEventDelivery(testNamespace);
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {

@@ -12,13 +12,17 @@ import (
 )
 
 type Subscriber struct {
-	addr   string
-	server *http.Server
+	addr          string
+	server        *http.Server
+	StoreEndpoint string
+	CheckEndpoint string
 }
 
 func NewSubscriber(addr string) *Subscriber {
 	return &Subscriber{
-		addr: addr,
+		addr:          addr,
+		StoreEndpoint: "/store",
+		CheckEndpoint: "/check",
 	}
 }
 
@@ -41,6 +45,7 @@ func (s *Subscriber) Start() {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		store = ""
 	})
 
 	s.server = &http.Server{

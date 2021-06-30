@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
+	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,23 +39,21 @@ func AddToScheme(scheme *runtime.Scheme) error {
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel          context.CancelFunc
-	envCfg          env.NatsConfig
-	restCfg         *rest.Config
-	enableDebugLogs bool
-	metricsAddr     string
-	mgr             manager.Manager
-	backend         handlers.MessagingBackend
+	cancel      context.CancelFunc
+	envCfg      env.NatsConfig
+	restCfg     *rest.Config
+	metricsAddr string
+	mgr         manager.Manager
+	backend     handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration) *Commander {
 	return &Commander{
-		envCfg:          env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
-		restCfg:         restCfg,
-		enableDebugLogs: enableDebugLogs,
-		metricsAddr:     metricsAddr,
+		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
+		restCfg:     restCfg,
+		metricsAddr: metricsAddr,
 	}
 }
 
@@ -65,7 +67,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the commander.
-func (c *Commander) Start() error {
+func (c *Commander) Start(_ commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c.cancel = cancel
@@ -91,55 +93,59 @@ func (c *Commander) Start() error {
 func (c *Commander) Stop() error {
 	c.cancel()
 
-	return c.cleanup()
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	return cleanup(c.backend, dynamicClient)
 }
 
 // clean removes all NATS artifacts.
-func (c *Commander) cleanup() error {
+func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	logger := ctrl.Log.WithName("eventing-controller-nats-cleaner").WithName("Subscription")
 	var natsBackend *handlers.Nats
 	var ok bool
-	var natsBackendErr error
-	if natsBackend, ok = c.backend.(*handlers.Nats); !ok {
+	isCleanupSuccessful := true
+	if natsBackend, ok = backend.(*handlers.Nats); !ok {
+		isCleanupSuccessful = false
+		natsBackendErr := errors.New("failed to convert backend to handlers.Nats")
 		logger.Error(natsBackendErr, "no NATS backend exists")
 	}
 	// Fetch all subscriptions.
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to list subscriptions")
 	}
 	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to convert to subscriptionList from unstructured list")
 	}
-
-	statusDeletionResult := make(map[string]error)
-	subDeletionResult := make(map[string]error)
 
 	for _, sub := range subs.Items {
 		// Clean statuses.
-		key := types.NamespacedName{
+		subKey := types.NamespacedName{
 			Namespace: sub.Namespace,
 			Name:      sub.Name,
 		}
 		desiredSub := handlers.RemoveStatus(sub)
-		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub)
 		if err != nil {
-			statusDeletionResult[key.String()] = err
+			isCleanupSuccessful = false
+			logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 		}
 
 		// Clean subscriptions from NATS.
 		if natsBackend != nil {
 			err = natsBackend.DeleteSubscription(&sub)
 			if err != nil {
-				subDeletionResult[key.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 			}
-		} else {
-			subDeletionResult[key.String()] = natsBackendErr
 		}
+	}
+
+	if isCleanupSuccessful {
+		logger.Info("Cleanup process succeeded!")
 	}
 	return nil
 }

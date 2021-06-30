@@ -13,14 +13,14 @@ image:
   # ORY Oathkeeper image
   repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.38.9-alpine
+  tag: v0.38.11-alpine
   # Image pull policy
   pullPolicy: IfNotPresent
 
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/external/oryd/oathkeeper-maester
-    tag: v0.1.0
+    tag: v0.1.4
   port:
     metrics: 8080
 

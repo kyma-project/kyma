@@ -29,8 +29,6 @@ istioctl install -f "${OPERATOR_FILE}" -y
 echo "Apply custom kyma manifests"
 kubectl apply -f /opt/istio/manifests
 
+#This is still needed as mutating webhook disrupts Gardener cluster operations, like being able to hibernate the cluster. See https://github.com/kyma-project/kyma/issues/8868#issuecomment-658764987
 echo "Apply Kyma related checks and patches"
-kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/-","value":{"key":"gardener.cloud/purpose","operator":"NotIn","values":["kube-system"]}}]'
-
-echo "patching namespace selector of mutating webhook istio-sidecar-injector with kube-system"
-kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/0/namespaceSelector/matchExpressions/0/values/-","value": "kube-system"}]'
+kubectl patch MutatingWebhookConfiguration istio-sidecar-injector --type 'json' -p '[{"op":"add","path":"/webhooks/4/namespaceSelector/matchExpressions/-","value":{"key":"gardener.cloud/purpose","operator":"NotIn","values":["kube-system"]}}]'

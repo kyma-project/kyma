@@ -13,9 +13,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
@@ -68,12 +66,13 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+	bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+	err := bc.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, connection)
+	assert.NotNil(t, bc.Connection)
 
 	// create a Nats sender
-	msgSender := sender.NewNatsMessageSender(ctx, connection, test.logger)
+	msgSender := sender.NewNatsMessageSender(ctx, bc, test.logger)
 	assert.NotNil(t, msgSender)
 
 	// configure legacyTransformer
@@ -93,23 +92,8 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 		t.Fatalf("failed to add eventing v1alpha1 to scheme: %v", err)
 	}
 
-	subUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(subscription)
-	if err != nil {
-		t.Fatalf("failed to convert subscription to unstructured obj: %v", err)
-	}
-	// Creating unstructured subscriptions
-	subUnstructured := &unstructured.Unstructured{
-		Object: subUnstructuredMap,
-	}
-	// Setting Kind information in unstructured subscription
-	subscriptionGVK := schema.GroupVersionKind{
-		Group:   subscribed.GVR.Group,
-		Version: subscribed.GVR.Version,
-		Kind:    "Subscription",
-	}
-	subUnstructured.SetGroupVersionKind(subscriptionGVK)
 	// Configuring fake dynamic client
-	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subUnstructured)
+	dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 
 	dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
 	genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
@@ -168,13 +152,14 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		err := bc.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, connection)
+		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
 
 		// run the tests for publishing cloudevents
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
@@ -216,13 +201,14 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		connection, err := pkgnats.ConnectToNats(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		err := bc.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, connection)
+		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
 
 		// run the tests for publishing legacy events
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {

@@ -12,6 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -28,7 +31,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -162,6 +164,86 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Sending at least one creation requests for the Subscription")
 			_, postRequests, _ := countBebRequests(subscriptionName)
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+		})
+	})
+
+	When("Creating a Subscription with empty protocol, protocolsettings and dialect", func() {
+		It("Should reconcile the Subscription", func() {
+			subscriptionName := "test-valid-subscription-1"
+
+			// Ensuring subscriber svc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(subscriberSvc, ctx)
+
+			// Creating subscription with empty protocol, protocolsettings and dialect
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter)
+			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			ensureAPIRuleStatusUpdatedWithStatusReady(&apiRuleCreated, ctx).Should(BeNil())
+
+			By("Setting APIRule status in Subscription to Ready")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
+			))
+
+			By("Setting a finalizer")
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
+			))
+
+			By("Setting a subscribed condition")
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, "")
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
+			))
+
+			By("Emitting a subscription created event")
+			var subscriptionEvents = v1.EventList{}
+			subscriptionCreatedEvent := v1.Event{
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
+				Message: "",
+				Type:    v1.EventTypeNormal,
+			}
+			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
+
+			By("Setting a subscription active condition")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionActiveCondition),
+			))
+
+			By("Emitting a subscription active event")
+			subscriptionActiveEvent := v1.Event{
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
+				Message: "",
+				Type:    v1.EventTypeNormal,
+			}
+			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionActiveEvent))
+
+			By("Creating a BEB Subscription")
+			var bebSubscription bebtypes.Subscription
+			Eventually(func() bool {
+				for r, payloadObject := range beb.Requests {
+					if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+						bebSubscription = payloadObject.(bebtypes.Subscription)
+						receivedSubscriptionName := bebSubscription.Name
+						// ensure the correct subscription was created
+						return subscriptionName == receivedSubscriptionName
+					}
+				}
+				return false
+			}).Should(BeTrue())
 		})
 	})
 
@@ -1009,8 +1091,6 @@ var _ = BeforeSuite(func(done Done) {
 		ClientSecret:             "foo-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "foo-client-id",
-		WebhookClientSecret:      "foo-client-secret",
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
@@ -1018,19 +1098,18 @@ var _ = BeforeSuite(func(done Done) {
 		Qos:                      "AT_LEAST_ONCE",
 	}
 
+	credentials := &handlers.OAuth2ClientCredentials{
+		ClientID:     "foo-client-id",
+		ClientSecret: "foo-client-secret",
+	}
+
 	// prepare application-lister
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
-	err = NewReconciler(
-		context.Background(),
-		k8sManager.GetClient(),
-		applicationLister,
-		k8sManager.GetCache(),
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		k8sManager.GetEventRecorderFor("eventing-controller"),
-		envConf,
-	).SetupUnmanaged(k8sManager)
+		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

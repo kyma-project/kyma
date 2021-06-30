@@ -29,11 +29,16 @@ all: manager
 
 # Build controller binary
 manager: generate-local fmt-local vet-local
-	go build -o bin/controller main.go
+	go build -o bin/controller cmd/eventing-controller/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
+# TODO Useful default values have to be found.
+run: export NATS_URL ?= nats://127.0.0.1:4222
+run: export EVENT_TYPE_PREFIX ?= sap.kyma.custom
+run: export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
+run: export DOMAIN ?= example.com
 run: generate-local fmt-local vet-local manifests
-	go run ./main.go
+	go run cmd/eventing-controller/main.go
 
 # Install CRDs into a cluster
 install: manifests
@@ -51,42 +56,35 @@ uninstall-samples: manifests
 uninstall: manifests
 	kustomize build config/crd | ko delete -f -
 
-# Deploy eventing-controller for BEB in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-beb-local: manifests deploy-beb-local-dry-run
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-local: manifests deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
 	kustomize build config/default | ko apply -f -
 
-# Deploy eventing-controller for NATS in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-nats-local: manifests deploy-nats-local-dry-run
-	kubectl create ns ${NAMESPACE} || true
-	kustomize build config/nats | ko apply -f -
-
-# Undeploy the eventing-controller for BEB
-undeploy-beb-local: manifests
+# Undeploy the eventing-controller
+undeploy-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
-# Undeploy the eventing-controller for NATS
-undeploy-nats-local: manifests
-	kustomize build config/nats | kubectl delete -f -
-
-# Dry run for deploying eventing-controller BEB for local development
-deploy-beb-local-dry-run: manifests
+# Dry run for deploying eventing-controller for local development
+deploy-local-dry-run: manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default
-
-# Dry run for deploying eventing-controller NATS for local development
-deploy-nats-local-dry-run: manifests
-	cd config/manager-nats && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/nats
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+# Generate manifests e.g. CRD, RBAC etc.
+manifests:
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
 # Generate code
-generate-local: controller-gen-local
+generate-local: manifests-local controller-gen-local
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+# Generate code
+generate: manifests
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 verify:: mod-verify
@@ -109,10 +107,23 @@ mod-verify-local:
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
-release: resolve verify build-image push-image
+release: resolve generate verify build-image push-image copy-external-crds
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
+
+copy-crds: manifests-local
+	@echo "copying Eventing CRDs to cluster-essentials"
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
+	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
+	@echo "copying Eventing CRDs to installation/eventing"
+	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
+	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
+
+copy-external-crds:
+	@echo "copying external CRDs to config/crd/external"
+	curl -L#o config/crd/external/apirules-gateway-kyma-project-io.yaml https://raw.githubusercontent.com/kyma-incubator/api-gateway/main/config/crd/bases/gateway.kyma-project.io_apirules.yaml
+	curl -L#o config/crd/external/hydra.ory.sh_oauth2clients.yaml https://raw.githubusercontent.com/ory/hydra-maester/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary

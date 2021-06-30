@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -36,30 +40,31 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
+	if err := hydrav1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
 	return nil
 }
 
 // Commander implements the Commander interface.
 type Commander struct {
-	cancel          context.CancelFunc
-	envCfg          env.Config
-	restCfg         *rest.Config
-	enableDebugLogs bool
-	metricsAddr     string
-	resyncPeriod    time.Duration
-	mgr             manager.Manager
-	backend         handlers.MessagingBackend
+	cancel       context.CancelFunc
+	envCfg       env.Config
+	restCfg      *rest.Config
+	metricsAddr  string
+	resyncPeriod time.Duration
+	mgr          manager.Manager
+	backend      handlers.MessagingBackend
 }
 
 // NewCommander creates the Commander for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, enableDebugLogs bool, metricsAddr string, resyncPeriod time.Duration) *Commander {
+func NewCommander(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration) *Commander {
 	return &Commander{
-		envCfg:          env.GetConfig(),
-		restCfg:         restCfg,
-		enableDebugLogs: enableDebugLogs,
-		metricsAddr:     metricsAddr,
-		resyncPeriod:    resyncPeriod,
+		envCfg:       env.GetConfig(),
+		restCfg:      restCfg,
+		metricsAddr:  metricsAddr,
+		resyncPeriod: resyncPeriod,
 	}
 }
 
@@ -73,11 +78,15 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the manager.
-func (c *Commander) Start() error {
+func (c *Commander) Start(params commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	oauth2credential, err := getOAuth2ClientCredentials(params)
+	if err != nil {
+		return errors.Wrap(err, "cannot get oauth2client credentials")
+	}
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
@@ -89,6 +98,7 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		oauth2credential,
 	)
 
 	c.backend = reconciler.Backend
@@ -102,36 +112,34 @@ func (c *Commander) Start() error {
 func (c *Commander) Stop() error {
 	c.cancel()
 
-	return c.cleanup()
+	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	return cleanup(c.backend, dynamicClient)
 }
 
 // cleanup removes all created BEB artifacts.
-func (c *Commander) cleanup() error {
+func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	logger := ctrl.Log.WithName("eventing-controller-beb-cleaner").WithName("Subscription")
 	var bebBackend *handlers.Beb
 	var ok bool
-	var bebBackendErr error
-	if bebBackend, ok = c.backend.(*handlers.Beb); !ok {
-		bebBackendErr = errors.New("failed to convert backend to handlers.Beb")
+	isCleanupSuccessful := true
+	if bebBackend, ok = backend.(*handlers.Beb); !ok {
+		isCleanupSuccessful = false
+		bebBackendErr := errors.New("failed to convert backend to handlers.Beb")
 		logger.Error(bebBackendErr, "no BEB backend exists")
+		return bebBackendErr
 	}
 
 	// Fetch all subscriptions.
-	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
-	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.GroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to list subscriptions")
 	}
 	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to convert to subscriptionList from unstructured list")
 	}
-
-	statusDeletionResult := make(map[string]error)
-	subDeletionResult := make(map[string]error)
-	apiRuleDeletionResult := make(map[string]error)
 
 	for _, sub := range subs.Items {
 		// Clean APIRules.
@@ -143,49 +151,53 @@ func (c *Commander) cleanup() error {
 		if apiRule != "" {
 			err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).Delete(ctx, apiRule, metav1.DeleteOptions{})
 			if err != nil {
-				apiRuleDeletionResult[keyAPIRule.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to delete APIRule: %s", keyAPIRule.String()))
 			}
 		}
 
 		// Clean statuses.
-		key := types.NamespacedName{
+		subKey := types.NamespacedName{
 			Namespace: sub.Namespace,
 			Name:      sub.Name,
 		}
 		desiredSub := handlers.RemoveStatus(sub)
-		err := handlers.UpdateSubscription(ctx, dynamicClient, desiredSub)
+		err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub)
 		if err != nil {
-			statusDeletionResult[key.String()] = err
+			isCleanupSuccessful = false
+			logger.Error(err, fmt.Sprintf("failed to update status of Subscription: %s", subKey.String()))
 		}
 
 		// Clean subscriptions from BEB.
 		if bebBackend != nil {
 			err = bebBackend.DeleteSubscription(&sub)
 			if err != nil {
-				subDeletionResult[key.String()] = err
+				isCleanupSuccessful = false
+				logger.Error(err, fmt.Sprintf("failed to delete Subscription: %s in BEB", subKey.String()))
 			}
-		} else {
-			subDeletionResult[key.String()] = bebBackendErr
 		}
 	}
 
-	if len(apiRuleDeletionResult) == 0 {
-		logger.Info("Deletion of APIRules succeeded")
-	} else {
-		logger.Info("Deletion of APIRules failed: %+v", apiRuleDeletionResult)
-	}
-
-	if len(subDeletionResult) == 0 {
-		logger.Info("Deletion of Subscriptions in BEB succeeded")
-	} else {
-		logger.Info("Deletion of Subscriptions in BEB failed: %+v", subDeletionResult)
-	}
-
-	if len(statusDeletionResult) == 0 {
-		logger.Info("Deletion of Statuses in Subscriptions succeeded")
-	} else {
-		logger.Info("Deletion of Statuses in Subscriptions failed: %+v", statusDeletionResult)
+	if isCleanupSuccessful {
+		logger.Info("Cleanup process succeeded!")
 	}
 
 	return nil
+}
+
+func getOAuth2ClientCredentials(params commander.Params) (*handlers.OAuth2ClientCredentials, error) {
+	val := params["client_id"]
+	id, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_id, but received %T", val)
+	}
+	val = params["client_secret"]
+	secret, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_secret, but received %T", val)
+	}
+	return &handlers.OAuth2ClientCredentials{
+		ClientID:     id,
+		ClientSecret: secret,
+	}, nil
 }

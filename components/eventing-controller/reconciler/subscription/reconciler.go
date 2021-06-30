@@ -49,11 +49,12 @@ type Reconciler struct {
 	ctx context.Context
 	client.Client
 	cache.Cache
-	Log              logr.Logger
-	recorder         record.EventRecorder
-	Backend          handlers.MessagingBackend
-	Domain           string
-	eventTypeCleaner eventtype.Cleaner
+	Log               logr.Logger
+	recorder          record.EventRecorder
+	Backend           handlers.MessagingBackend
+	Domain            string
+	eventTypeCleaner  eventtype.Cleaner
+	oauth2credentials *handlers.OAuth2ClientCredentials
 }
 
 var (
@@ -68,20 +69,20 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
-	bebHandler := &handlers.Beb{Log: log}
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials) *Reconciler {
+	bebHandler := handlers.NewBEB(credential, log)
 	bebHandler.Initialize(cfg)
 
 	return &Reconciler{
-		ctx:              ctx,
-		Client:           client,
-		Cache:            cache,
-		Log:              log,
-		recorder:         recorder,
-		Backend:          bebHandler,
-		Domain:           cfg.Domain,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		ctx:               ctx,
+		Client:            client,
+		Cache:             cache,
+		Log:               log,
+		recorder:          recorder,
+		Backend:           bebHandler,
+		Domain:            cfg.Domain,
+		eventTypeCleaner:  eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		oauth2credentials: credential,
 	}
 }
 
@@ -96,8 +97,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 // Source: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 // TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	//_ = r.Log.WithValues("subscription", req.NamespacedName)
 
 	actualSubscription := &eventingv1alpha1.Subscription{}
@@ -788,7 +788,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}
 
 	go func(r *Reconciler, c controller.Controller) {
-		if err := c.Start(r.ctx.Done()); err != nil {
+		if err := c.Start(r.ctx); err != nil {
 			r.Log.Error(err, "failed to start the beb-subscription-controller")
 			os.Exit(1)
 		}
@@ -809,19 +809,19 @@ func (r *Reconciler) getAPIRuleEventHandler() handler.EventHandler {
 
 	return handler.Funcs{
 		CreateFunc: func(e event.CreateEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Create", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventType, name, namespace := "Create", e.Object.GetName(), e.Object.GetNamespace()
 			eventHandler(eventType, name, namespace, q)
 		},
 		UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Update", e.MetaNew.GetName(), e.MetaNew.GetNamespace()
+			eventType, name, namespace := "Update", e.ObjectNew.GetName(), e.ObjectNew.GetNamespace()
 			eventHandler(eventType, name, namespace, q)
 		},
 		DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Delete", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventType, name, namespace := "Delete", e.Object.GetName(), e.Object.GetNamespace()
 			eventHandler(eventType, name, namespace, q)
 		},
 		GenericFunc: func(e event.GenericEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Generic", e.Meta.GetName(), e.Meta.GetNamespace()
+			eventType, name, namespace := "Generic", e.Object.GetName(), e.Object.GetNamespace()
 			eventHandler(eventType, name, namespace, q)
 		},
 	}

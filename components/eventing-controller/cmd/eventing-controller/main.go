@@ -2,93 +2,105 @@ package main
 
 import (
 	"context"
-	"flag"
 	"os"
-	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
+	"github.com/go-logr/zapr"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
 
 func main() {
-	logger := ctrl.Log.WithName("setup")
-	scheme := runtime.NewScheme()
-	restCfg := ctrl.GetConfigOrDie()
+	setupLogger := ctrl.Log.WithName("setup")
+
+	opts := options.New()
+	if err := opts.Parse(); err != nil {
+		setupLogger.Error(err, "failed to parse options")
+		os.Exit(1)
+	}
+
+	ctrLogger, err := logger.New(opts.LogFormat, opts.LogLevel)
+	if err != nil {
+		setupLogger.Error(err, "failed to initialize logger")
+		os.Exit(1)
+	}
+	defer func() {
+		if err := ctrLogger.WithContext().Sync(); err != nil {
+			setupLogger.Error(err, "failed to flush logger")
+		}
+	}()
+
+	// Set controller core logger.
+	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 
 	// Add schemes.
+	scheme := runtime.NewScheme()
 	if err := beb.AddToScheme(scheme); err != nil {
-		logger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 	if err := nats.AddToScheme(scheme); err != nil {
-		logger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	// Parse flags.
-	var enableDebugLogs bool
-	var metricsAddr string
-	var resyncPeriod time.Duration
-	var maxReconnects int
-	var reconnectWait time.Duration
-
-	flag.BoolVar(&enableDebugLogs, "enable-debug-logs", false, "Enable debug logs.")
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.DurationVar(&resyncPeriod, "reconcile-period", time.Minute*10, "Period between triggering of reconciling calls (BEB).")
-	flag.IntVar(&maxReconnects, "max-reconnects", 10, "Maximum number of reconnect attempts (NATS).")
-	flag.DurationVar(&reconnectWait, "reconnect-wait", time.Second, "Wait time between reconnect attempts (NATS).")
-	flag.Parse()
-
 	// Init the manager.
-	ctrl.SetLogger(zap.New(zap.UseDevMode(enableDebugLogs)))
-
+	restCfg := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		Port:               9443,
-		SyncPeriod:         &resyncPeriod, // CHECK Only used in BEB so far.
+		Scheme:                 scheme,
+		MetricsBindAddress:     opts.MetricsAddr,
+		HealthProbeBindAddress: opts.ProbeAddr,
+		Port:                   9443,
+		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
 	})
 	if err != nil {
-		logger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
 	// Instantiate and initialize all the subscription commanders.
-	natsCommander := nats.NewCommander(restCfg, enableDebugLogs, metricsAddr, maxReconnects, reconnectWait)
+	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait)
 	if err := natsCommander.Init(mgr); err != nil {
-		logger.Error(err, "unable to initialize the NATS commander")
+		setupLogger.Error(err, "unable to initialize the NATS commander")
 		os.Exit(1)
 	}
 
-	bebCommander := beb.NewCommander(restCfg, enableDebugLogs, metricsAddr, resyncPeriod)
+	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod)
 	if err := bebCommander.Init(mgr); err != nil {
-		logger.Error(err, "unable to initialize the BEB commander")
+		setupLogger.Error(err, "unable to initialize the BEB commander")
 		os.Exit(1)
 	}
 
-	ctrlLogger := ctrl.Log.WithName("reconciler").WithName("backend")
-	recorder := mgr.GetEventRecorderFor("backend-controller")
-	ctx := context.Background()
+	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up health check: %v")
+		os.Exit(1)
+	}
+	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
+		setupLogger.Error(err, "unable to set up ready check: %v")
+		os.Exit(1)
+	}
 
 	// Start the backend manager.
-	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrlLogger, recorder)
-
+	ctx := context.Background()
+	recorder := mgr.GetEventRecorderFor("backend-controller")
+	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
-		logger.Error(err, "unable to start the backend controller")
+		setupLogger.Error(err, "unable to start the backend controller")
 		os.Exit(1)
 	}
 
 	// Start the manager.
-	logger.Info("starting manager")
-
+	ctrLogger.WithContext().With("options", opts).Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		logger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 }
