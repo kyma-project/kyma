@@ -6,8 +6,9 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"net/http"
-	"net/http/httputil"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/testconsts"
 
@@ -16,8 +17,6 @@ import (
 )
 
 var (
-	proxyStub = &httputil.ReverseProxy{}
-
 	certificate = []byte(testconsts.Certificate)
 	privateKey  = []byte(testconsts.PrivateKey)
 )
@@ -26,34 +25,23 @@ func TestCertificateGenStrategy(t *testing.T) {
 
 	t.Run("should add certificates to proxy", func(t *testing.T) {
 		// given
-		proxy := &httputil.ReverseProxy{}
-
-		expectedProxy := &httputil.ReverseProxy{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					Certificates: []tls.Certificate{
-						{
-							Certificate: [][]byte{cert()},
-							PrivateKey:  key(),
-						},
-					},
-				},
-			},
-		}
-
+		clientCert := clientcert.NewClientCertificate(nil)
 		certGenStrategy := newCertificateGenStrategy(certificate, privateKey)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, func(transport *http.Transport) {
-			proxy.Transport = transport
+		err = certGenStrategy.AddAuthorization(request, func(cert *tls.Certificate) {
+			clientCert.SetCertificate(cert)
 		})
+		require.NoError(t, err)
 
 		// then
-		require.NoError(t, err)
-		assert.Equal(t, expectedProxy, proxy)
+		assert.Equal(t, &tls.Certificate{
+			Certificate: [][]byte{cert()},
+			PrivateKey:  key(),
+		}, clientCert.GetCertificate())
 	})
 
 	t.Run("should return error when key is invalid", func(t *testing.T) {

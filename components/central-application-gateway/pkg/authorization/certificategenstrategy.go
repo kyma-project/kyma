@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 )
 
 type certificateGenStrategy struct {
@@ -19,20 +20,12 @@ func newCertificateGenStrategy(certificate, privateKey []byte) certificateGenStr
 	}
 }
 
-func (b certificateGenStrategy) AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError {
+func (b certificateGenStrategy) AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc) apperrors.AppError {
 	cert, err := b.prepareCertificate()
 	if err != nil {
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
 	}
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		},
-	}
-
-	setter(transport)
-
+	setter(&cert)
 	return nil
 }
 
