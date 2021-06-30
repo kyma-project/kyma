@@ -1,24 +1,24 @@
-      {{- /*
-    Customization:
-    Added additional OAuth related env vars:
-      GF_AUTH_GENERIC_OAUTH_AUTH_URL
-      GF_SERVER_ROOT_URL
-    Added a value check in the env range loop:
-    {{- range $key, $value := .Values.env }}
-    {{- if $value }}
-        - name: "{{ tpl $key $ }}"
-          value: "{{ tpl (print $value) $ }}"
-    {{- end }}
-    {{- end }}
-  */ -}}
-  {{- define "grafana.pod" -}}
+{{- /*
+  Customization:
+  Added additional OAuth related env vars:
+    GF_AUTH_GENERIC_OAUTH_AUTH_URL
+    GF_SERVER_ROOT_URL
+  Added a value check in the env range loop:
+  {{- range $key, $value := .Values.env }}
+  {{- if $value }}
+      - name: "{{ tpl $key $ }}"
+        value: "{{ tpl (print $value) $ }}"
+  {{- end }}
+  {{- end }}
+*/ -}}
+{{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
 schedulerName: "{{ .Values.schedulerName }}"
 {{- end }}
 serviceAccountName: {{ template "grafana.serviceAccountName" . }}
-{{- if .Values.securityContext }}
+{{- if .Values.podSecurityContext }}
 securityContext:
-{{ toYaml .Values.securityContext | indent 2 }}
+{{ toYaml .Values.podSecurityContext | indent 2 }}
 {{- end }}
 {{- if .Values.hostAliases }}
 hostAliases:
@@ -42,7 +42,7 @@ initContainers:
     securityContext:
 {{ toYaml .Values.initChownData.securityContext | indent 6 }}
     {{- end }}
-    command: ["chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }}", "/var/lib/grafana"]
+    command: ["chown", "-R", "{{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.runAsGroup }}", "/var/lib/grafana"]
     resources:
 {{ toYaml .Values.initChownData.resources | indent 6 }}
     volumeMounts:

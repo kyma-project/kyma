@@ -90,16 +90,15 @@ testFramework:
   imagePullPolicy: IfNotPresent
   securityContext: {}
 
-securityContext:
+securityContext: {}
+podSecurityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
-podSecurityContext: #{}
+
+containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
-
-containerSecurityContext: {}
-
 extraConfigmapMounts:
   []
   # - name: certs-configmap
