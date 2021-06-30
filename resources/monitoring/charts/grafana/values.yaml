@@ -175,6 +175,7 @@ serviceMonitor:
 
 # Customization: due to kyma-installer limitations, this override has to be a multi-line string and not a list
 extraExposePorts:
+  {}
   # - name: keycloak
   #   port: 8080
   #   targetPort: 8080

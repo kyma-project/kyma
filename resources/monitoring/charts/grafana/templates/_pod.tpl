@@ -1,4 +1,17 @@
-{{- define "grafana.pod" -}}
+      {{- /*
+    Customization:
+    Added additional OAuth related env vars:
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL
+      GF_SERVER_ROOT_URL
+    Added a value check in the env range loop:
+    {{- range $key, $value := .Values.env }}
+    {{- if $value }}
+        - name: "{{ tpl $key $ }}"
+          value: "{{ tpl (print $value) $ }}"
+    {{- end }}
+    {{- end }}
+  */ -}}
+  {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
 schedulerName: "{{ .Values.schedulerName }}"
 {{- end }}
@@ -329,19 +342,6 @@ containers:
         containerPort: 3000
         protocol: TCP
     env:
-      {{- /*
-    Customization:
-    Added additional OAuth related env vars:
-      GF_AUTH_GENERIC_OAUTH_AUTH_URL
-      GF_SERVER_ROOT_URL
-    Added a value check in the env range loop:
-    {{- range $key, $value := .Values.env }}
-    {{- if $value }}
-        - name: "{{ tpl $key $ }}"
-          value: "{{ tpl (print $value) $ }}"
-    {{- end }}
-    {{- end }}
-  */ -}}
       {{- if and (not .Values.env.GF_SECURITY_ADMIN_USER) (not .Values.env.GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION) }}
       - name: GF_SECURITY_ADMIN_USER
         valueFrom:
@@ -379,7 +379,7 @@ containers:
       - name: GF_RENDERING_SERVER_URL
         value: http://{{ template "grafana.fullname" . }}-image-renderer.{{ template "grafana.namespace" . }}:{{ .Values.imageRenderer.service.port }}/render
       - name: GF_RENDERING_CALLBACK_URL
-        value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}/{{ .Values.imageRenderer.grafanaSubPath }}
+        value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}
       {{ end }}
       {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_AUTH_URL }}
       - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
