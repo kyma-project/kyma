@@ -379,7 +379,7 @@ containers:
       - name: GF_RENDERING_SERVER_URL
         value: http://{{ template "grafana.fullname" . }}-image-renderer.{{ template "grafana.namespace" . }}:{{ .Values.imageRenderer.service.port }}/render
       - name: GF_RENDERING_CALLBACK_URL
-        value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}
+        value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}/
       {{ end }}
       {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_AUTH_URL }}
       - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
