@@ -48,17 +48,19 @@ func TestCleanup(t *testing.T) {
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "webhook-client-id",
-		WebhookClientSecret:      "webhook-client-secret",
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
 		Qos:                      "AT_LEAST_ONCE",
 	}
+	credentials := &handlers.OAuth2ClientCredentials{
+		ClientID:     "webhook_client_id",
+		ClientSecret: "webhook_client_secret",
+	}
 
 	// create a BEB handler to connect to BEB Mock
-	bebHandler := &handlers.Beb{Log: log}
+	bebHandler := handlers.NewBEB(credentials, log)
 	err := bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.Backend = bebHandler

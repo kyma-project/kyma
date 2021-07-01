@@ -42,8 +42,6 @@ type Config struct {
 
 	// Following details are for BEB to communicate to Kyma
 	WebhookActivationTimeout time.Duration `envconfig:"WEBHOOK_ACTIVATION_TIMEOUT" default:"60s"`
-	WebhookClientID          string        `envconfig:"WEBHOOK_CLIENT_ID" required:"true"`
-	WebhookClientSecret      string        `envconfig:"WEBHOOK_CLIENT_SECRET" required:"true"`
 	WebhookTokenEndpoint     string        `envconfig:"WEBHOOK_TOKEN_ENDPOINT" required:"true"`
 
 	// Default protocol setting for BEB

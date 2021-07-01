@@ -157,7 +157,6 @@ func newApplicationReleaseManager(options *options, cfg *rest.Config, helmClient
 		LogLevel:                              options.LogLevel,
 		GatewayOncePerNamespace:               options.gatewayOncePerNamespace,
 		StrictMode:                            options.strictMode,
-		IsBEBEnabled:                          options.isBEBEnabled,
 		PodSecurityPolicyEnabled:              options.podSecurityPolicyEnabled,
 		CentralApplicationConnectivityValidatorEnabled: options.centralApplicationConnectivityValidatorEnabled,
 	}

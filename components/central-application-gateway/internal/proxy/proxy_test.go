@@ -224,7 +224,7 @@ func TestProxyRequest(t *testing.T) {
 			}
 			authStrategyMock := &authMock.Strategy{}
 			authStrategyMock.
-				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+				On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
 				Return(nil).
 				Once()
 
@@ -303,7 +303,7 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("SetClientCertificateFunc")).
 			Return(apperrors.UpstreamServerCallFailed("failed"))
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
@@ -356,11 +356,11 @@ func TestProxy(t *testing.T) {
 		apiExtractorMock.On("Get", apiIdentifier).Return(&metadatamodel.API{
 			TargetUrl:   tsf.URL,
 			Credentials: &authorization.Credentials{},
-		}, nil).Twice()
+		}, nil)
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.Anything, mock.AnythingOfType("TransportSetter")).
+			On("AddAuthorization", mock.Anything, mock.AnythingOfType("SetClientCertificateFunc")).
 			Return(nil).Twice()
 		authStrategyMock.On("Invalidate").Return().Once()
 
@@ -369,10 +369,10 @@ func TestProxy(t *testing.T) {
 		csrfTokenStrategyMock.On("Invalidate").Return().Once()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
+		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock)
 
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock)
 
 		handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, fakePathExtractor, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -532,10 +532,6 @@ func neverCalledCSRFStrategy(authorizationStrategy authorization.Strategy) (*csr
 }
 
 type ensureCalledFunc func(mockCall *mock.Call)
-
-func calledTwice(mockCall *mock.Call) {
-	mockCall.Twice()
-}
 
 func calledOnce(mockCall *mock.Call) {
 	mockCall.Once()

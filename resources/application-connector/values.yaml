@@ -16,7 +16,6 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   strictMode: disabled
-  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -45,9 +44,9 @@ global:
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "1683d7cf"
+    version: "PR-11527"
   application_operator:
-    version: "b11a4b7b"
+    version: "PR-11591"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
@@ -57,9 +56,9 @@ global:
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "1683d7cf"
+    version: "PR-11295"
   application_registry_tests:
-    version: "68baa911"
+    version: "PR-11295"
   connection_token_handler:
     version: "1683d7cf"
   connection_token_handler_tests:
@@ -75,7 +74,7 @@ global:
   central_application_connectivity_validator:
     version: "b11a4b7b"
   central_application_gateway:
-    version: "ec86782f"
+    version: "PR-11491"
 
 application_connectivity_certs_setup_job:
   secrets:

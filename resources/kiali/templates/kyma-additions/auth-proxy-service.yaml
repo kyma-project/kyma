@@ -1,8 +1,8 @@
-{{if .Values.kcproxy.enabled}}
+{{if .Values.authProxy.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kiali-server.name" . }}-secured
+  name: {{ template "kiali-server.fullname" . }}-secured
   labels:
       {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
@@ -12,5 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-      app: {{ template "kiali-server.name" . }}-kcproxy
+      app: {{ template "kiali-server.fullname" . }}-auth-proxy
 {{end}}
