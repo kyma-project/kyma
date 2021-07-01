@@ -71,8 +71,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/grafana #grafana/grafana
-  tag: PR-107 #7.4.0-0bae0d22
+  repository: eu.gcr.io/kyma-project/tpi/grafana
+  tag: 7.5.9-68c3e77b
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -370,7 +370,7 @@ env:
   GF_AUTH_PROXY_HEADER_NAME: X-AUTH-EMAIL
   GF_AUTH_PROXY_HEADER_PROPERTY: "email"
   # https://grafana.com/docs/grafana/latest/installation/configuration/#server
-  # GF_SERVER_ROOT_URL: ""
+  GF_SERVER_ROOT_URL: ""
   # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
@@ -626,7 +626,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.12.2-PR-107 #1.10.6-22caa7d3
+    tag: 1.12.2-68c3e77b
   imagePullPolicy: IfNotPresent
   resources:
     limits:
