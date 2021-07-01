@@ -52,7 +52,7 @@ global:
   application_gateway:
     version: "PR-11558"
   application_gateway_tests:
-    version: "PR-11558"
+    version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
@@ -62,7 +62,7 @@ global:
   connection_token_handler:
     version: "PR-11558"
   connection_token_handler_tests:
-    version: "PR-11558"
+    version: "9776cb81"
   connector_service:
     version: "1683d7cf"
   connector_service_tests:

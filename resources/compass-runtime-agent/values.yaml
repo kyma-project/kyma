@@ -5,7 +5,7 @@ global:
     runtimeAgent:
       version: "PR-11558"
     runtimeAgentTests:
-      version: "PR-11558"
+      version: "5b55dce8"
   istio:
     gateway:
       name: kyma-gateway
