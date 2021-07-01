@@ -2,8 +2,7 @@
 title: Tracing Architecture
 ---
 
-
-Kyma uses a Jaeger-based tracing component to collect and query traces. 
+Kyma uses a Jaeger-based tracing component to collect and query traces.
 
 Collection and query may occur at the same time. This way, you can inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel.
 
