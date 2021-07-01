@@ -31,8 +31,8 @@ controller-manager:
   fullnameOverride: "rafter-controller-manager"
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-controller-manager
-    tag: PR-109
+    repository: eu.gcr.io/kyma-project/rafter-controller-manager
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -276,8 +276,8 @@ upload-service:
       size: 10Gi
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-upload-service
-    tag: PR-109
+    repository: eu.gcr.io/kyma-project/rafter-upload-service
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -382,8 +382,8 @@ front-matter-service:
   fullnameOverride: "rafter-front-matter-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-front-matter-service
-    tag: PR-109
+    repository: eu.gcr.io/kyma-project/rafter-front-matter-service
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -418,8 +418,8 @@ asyncapi-service:
   fullnameOverride: "rafter-asyncapi-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/pr/rafter-asyncapi-service
-    tag: PR-109
+    repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
