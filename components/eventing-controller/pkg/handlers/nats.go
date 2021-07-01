@@ -91,7 +91,11 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BebFilter
 	if sub.Spec.Filter != nil {
-		filters = sub.Spec.Filter.Filters
+		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
+		if err != nil {
+			return false, errors.Wrap(err, "error deduplicating subscription filters")
+		}
+		filters = uniqueFilters.Filters
 	}
 	// Create subscriptions in Nats
 	for _, filter := range filters {
