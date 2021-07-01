@@ -44,13 +44,13 @@ global:
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "PR-11527"
+    version: "PR-11558"
   application_operator:
     version: "PR-11558"
   application_operator_tests:
     version: "PR-11558"
   application_gateway:
-    version: "1683d7cf"
+    version: "PR-11558"
   application_gateway_tests:
     version: "PR-11558"
   application_gateway_legacy_tests:
