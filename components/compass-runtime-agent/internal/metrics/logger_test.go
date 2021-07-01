@@ -90,8 +90,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan struct{})
-		defer close(quitChannel)
+		ctx, cancelFunc := context.WithCancel(context.Background())
+		defer cancelFunc()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -101,12 +101,12 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			err := logger.Start(quitChannel)
+			err := logger.Start(ctx)
 			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- struct{}{}
+		cancelFunc()
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -141,8 +141,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan struct{}, 1)
-		defer close(quitChannel)
+		ctx, cancelFunc := context.WithCancel(context.Background())
+		defer cancelFunc()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -152,12 +152,12 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			err := logger.Start(quitChannel)
+			err := logger.Start(ctx)
 			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- struct{}{}
+		cancelFunc()
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -180,8 +180,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		quitChannel := make(chan struct{}, 1)
-		defer close(quitChannel)
+		ctx, cancelFunc := context.WithCancel(context.Background())
+		defer cancelFunc()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -191,12 +191,12 @@ func Test_Log(t *testing.T) {
 
 		// when
 		go func() {
-			err := logger.Start(quitChannel)
+			err := logger.Start(ctx)
 			assert.NoError(t, err, "failed to finish gracefully")
 		}()
 
 		time.Sleep(loggingWaitTime)
-		quitChannel <- struct{}{}
+		cancelFunc()
 		time.Sleep(loggingWaitTime)
 
 		// then

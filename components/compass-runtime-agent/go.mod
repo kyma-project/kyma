@@ -14,11 +14,11 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 	github.com/vrischmann/envconfig v1.3.0
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/api v0.20.2
+	k8s.io/apimachinery v0.20.2
+	k8s.io/client-go v0.20.2
 	k8s.io/metrics v0.18.8
-	sigs.k8s.io/controller-runtime v0.6.2
+	sigs.k8s.io/controller-runtime v0.8.3
 )
 
 replace (
@@ -30,6 +30,4 @@ replace (
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
-
-	k8s.io/client-go => k8s.io/client-go v0.18.8
 )
