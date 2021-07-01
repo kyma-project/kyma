@@ -4,6 +4,7 @@ const {
 
 const {
   queryPrometheus,
+  queryGrafana,
 } = require("./client");
 
 const { assert } = require("chai");
@@ -110,9 +111,17 @@ async function assertTimeSeriesExist(metric, labels) {
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
 }
 
+async function assertGrafanaredirect() {
+  console.log("here")
+  let url  = "https://application-operator.rg-1.berlin.shoot.canary.k8s-hana.ondemand.com"
+  res = await queryGrafana(url)
+  console.log(res)
+}
+
 module.exports = {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
   buildScrapePoolSet,
   assertTimeSeriesExist,
+  assertGrafanaredirect,
 };

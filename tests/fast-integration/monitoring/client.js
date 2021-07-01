@@ -49,10 +49,37 @@ async function get(path) {
     return responseBody;
 }
 
+async function queryGrafana(url) {
+    console.log("ggg: " + url)
+
+    try {
+        console.log("ggg1")
+
+        const responseBody = await axios.get(url);
+        console.log("foo: ", responseBody)
+        return responseBody.data;
+    } catch(err) {
+        console.log("ggg2")
+
+        const msg = "Error when querying Grafana";
+        if (err.response) {
+            console.log("ggg3: " + err.response.statusText)
+        
+
+            throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}: ${err.response.data}`);
+        } else {
+            console.log("ggg4")
+
+            throw new Error(`${msg}: ${err.toString()}`);
+        }
+    }
+}
+
 module.exports = {
     prometheusPortForward,
     getPrometheusActiveTargets,
     getPrometheusAlerts,
     getPrometheusRuleGroups,
     queryPrometheus,
+    queryGrafana,
 };
