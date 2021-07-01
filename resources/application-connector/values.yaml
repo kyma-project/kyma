@@ -46,23 +46,23 @@ global:
   application_connectivity_validator:
     version: "PR-11527"
   application_operator:
-    version: "PR-11591"
+    version: "PR-11558"
   application_operator_tests:
-    version: "68baa911"
+    version: "PR-11558"
   application_gateway:
     version: "1683d7cf"
   application_gateway_tests:
-    version: "68baa911"
+    version: "PR-11558"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "PR-11295"
+    version: "PR-11558"
   application_registry_tests:
-    version: "PR-11295"
+    version: "PR-11558"
   connection_token_handler:
-    version: "1683d7cf"
+    version: "PR-11558"
   connection_token_handler_tests:
-    version: "9776cb81"
+    version: "PR-11558"
   connector_service:
     version: "1683d7cf"
   connector_service_tests:
@@ -72,9 +72,9 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "b11a4b7b"
+    version: "PR-11558"
   central_application_gateway:
-    version: "PR-11491"
+    version: "PR-11558"
 
 application_connectivity_certs_setup_job:
   secrets:
