@@ -38,7 +38,7 @@ metadata:
 spec:
   group: installer.kyma-project.io
   versions:
-    - name: v1
+    - name: v1alpha1
       served: true
       storage: true
       schema:
@@ -63,7 +63,7 @@ metadata:
 spec:
   group: release.kyma-project.io
   versions:
-    - name: v1
+    - name: v1alpha1
       served: true
       storage: true
       schema:
