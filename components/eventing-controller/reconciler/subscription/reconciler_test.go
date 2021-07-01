@@ -1184,7 +1184,7 @@ func countBebRequests(subscriptionName string) (countGet int, countPost int, cou
 			subscription, ok := v.(bebtypes.Subscription)
 			if ok && len(subscription.Events) > 0 {
 				for _, event := range subscription.Events {
-					if event.Type == reconcilertesting.EventType && subscription.Name == subscriptionName {
+					if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
 						countPost++
 					}
 				}

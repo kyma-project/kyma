@@ -30,17 +30,17 @@ const (
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
 	// event properties
-	EventSource       = "/default/kyma/id"
-	EventTypePrefix   = "sap.kyma"
-	EventType         = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	EventTypeNotClean = EventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
-	EventID           = "8945ec08-256b-11eb-9928-acde48001122"
-	EventSpecVersion  = "1.0"
-	EventData         = "test-data"
+	EventSource                   = "/default/kyma/id"
+	EventTypePrefix               = "sap.kyma"
+	OrderCreatedEventType         = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
+	OrderCreatedEventTypeNotClean = EventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
+	EventID                       = "8945ec08-256b-11eb-9928-acde48001122"
+	EventSpecVersion              = "1.0"
+	EventData                     = "test-data"
 
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
-           "type":"` + EventType + `",
+           "type":"` + OrderCreatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
@@ -193,7 +193,7 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "type",
-					Value:    EventTypeNotClean,
+					Value:    OrderCreatedEventTypeNotClean,
 				},
 			},
 		},
@@ -231,7 +231,7 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "type",
-					Value:    EventType,
+					Value:    OrderCreatedEventType,
 				},
 			},
 		},
@@ -250,7 +250,7 @@ func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "type",
-					Value:    EventType,
+					Value:    OrderCreatedEventType,
 				},
 			},
 		},

@@ -86,7 +86,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			// publish a message
 			connection, err := connectToNats(natsUrl)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = connection.Publish(reconcilertesting.EventType, []byte(reconcilertesting.StructuredCloudEvent))
+			err = connection.Publish(reconcilertesting.OrderCreatedEventType, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// make sure that the subscriber received the message
@@ -148,7 +148,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			// publish a message
 			connection, err := connectToNats(natsUrl)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = connection.Publish(reconcilertesting.EventType, []byte(reconcilertesting.StructuredCloudEvent))
+			err = connection.Publish(reconcilertesting.OrderCreatedEventType, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// make sure that the subscriber received the message

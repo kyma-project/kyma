@@ -27,7 +27,7 @@ func NewSubscriber(addr string) *Subscriber {
 }
 
 func (s *Subscriber) Start() {
-	store := ""
+	store := make(chan string, 5)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -36,16 +36,22 @@ func (s *Subscriber) Start() {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		store = string(data)
+		store <- string(data)
 	})
 	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte(store))
+		var msg string
+		select {
+		case m := <-store:
+			msg = m
+		case <-time.After(500 * time.Millisecond):
+			msg = ""
+		}
+		_, err := w.Write([]byte(msg))
 		if err != nil {
 			log.Printf("failed to write data: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		store = ""
 	})
 
 	s.server = &http.Server{
