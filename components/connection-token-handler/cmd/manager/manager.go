@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
 	"os"
 	"time"
+
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/controller/tokenrequest"
