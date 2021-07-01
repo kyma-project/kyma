@@ -5,7 +5,7 @@ metadata:
   name: {{ template "fullname" . }}-controller-manager
 spec:
   mtls:
-    mode: DISABLE
+    mode: PERMISSIVE
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-controller-manager
