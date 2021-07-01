@@ -367,7 +367,7 @@ function waitForServicePlanByServiceClass(serviceClassName, namespace = "default
       return watchObj.object.spec.serviceClassRef.name.includes(serviceClassName);
     },
     timeout,
-    `Waiting for ${name} service plan timeout (${timeout} ms)`
+    `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`
   );
 }
 
