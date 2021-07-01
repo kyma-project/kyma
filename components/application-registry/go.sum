@@ -519,6 +519,8 @@ github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20190909175253-9
 github.com/kubernetes-sigs/service-catalog v0.3.0/go.mod h1:zRfgMd1T9HuXR24Qj4GOu/TGWABVGw62MGlyHVcpWnU=
 github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200903161647-0fae3728c173 h1:O+TXtyIgMQEYSaOGSNnmLaZReJ5VsN829C0UYSOf358=
 github.com/kyma-project/kyma/components/application-gateway v0.0.0-20200903161647-0fae3728c173/go.mod h1:CBev1velA2qQHNAHsGJk0SPfMP3BUPEHdquL9y79ea4=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20210604090801-9a75cdfd1c7c h1:/cnpPGs2Y5Pz6vrJznHeQnJ80MU/EHuQdDd1nuediNc=
+github.com/kyma-project/kyma/components/application-gateway v0.0.0-20210604090801-9a75cdfd1c7c/go.mod h1:vW5gDfDIk/GdQ/zCfeIvLn3V/jIUi0NuMscptuXF6Jc=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30 h1:bqG/FehsUzEmeTOYZuzjVQQZCgWu545IHWRX9M5eq2I=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20200902071617-83c683010f30/go.mod h1:caerCWyllbJsqBM4gtwWW3QsRFgRuRmqYXOqrpji/Ms=
 github.com/kyma-project/kyma/components/application-operator v0.0.0-20210624133846-3e1e71e9f682 h1:wJqPug6+6zf5WKiWeuaWqioZWzf2tBIGBE/9YurrFjE=
