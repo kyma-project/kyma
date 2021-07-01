@@ -23,6 +23,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	k8sConfig, err := restclient.InClusterConfig()
+	k8sConfig, err := clientcmd.BuildConfigFromFlags(options.apiServerURL, options.kubeConfig)
 	if err != nil {
 		log.Fatalf("Error reading in cluster config: %s", err.Error())
 	}

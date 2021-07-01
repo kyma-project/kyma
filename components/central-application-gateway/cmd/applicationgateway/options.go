@@ -16,6 +16,8 @@ type options struct {
 	proxyTimeout              int
 	requestLogging            bool
 	proxyCacheTTL             int
+	kubeConfig                string
+	apiServerURL              string
 }
 
 func parseArgs() *options {
@@ -29,6 +31,8 @@ func parseArgs() *options {
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	proxyCacheTTL := flag.Int("proxyCacheTTL", 120, "TTL, in seconds, for proxy cache of Remote API information")
+	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 
 	flag.Parse()
 
@@ -43,12 +47,14 @@ func parseArgs() *options {
 		proxyTimeout:              *proxyTimeout,
 		requestLogging:            *requestLogging,
 		proxyCacheTTL:             *proxyCacheTTL,
+		kubeConfig:                *kubeConfig,
+		apiServerURL:              *apiServerURL,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--disableLegacyConnectivity=%t --externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
-		" --requestLogging=%t --proxyCacheTTL=%d",
+		" --requestLogging=%t --proxyCacheTTL=%d --kubeConfig=%s --apiServerURL=%s",
 		o.disableLegacyConnectivity, o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
-		o.requestLogging, o.proxyCacheTTL)
+		o.requestLogging, o.proxyCacheTTL, o.kubeConfig, o.apiServerURL)
 }
