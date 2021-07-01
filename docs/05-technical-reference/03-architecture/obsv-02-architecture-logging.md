@@ -2,8 +2,6 @@
 title: Logging Architecture
 ---
 
-This is the logging architecture in Kyma:
-
 ## Architecture diagram
 
 ![Logging architecture in Kyma](./assets/obsv-logging-architecture.svg)
@@ -20,3 +18,5 @@ This is the logging architecture in Kyma:
     * Grafana dashboards to analyze and visualize logs fetched and processed by Loki. 
     * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/sources/api/_index.md) for Loki.
     * Log UI, accessed from the Kyma Console, to display and analyze logs.
+
+> **TIP:** Learn how to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) and how to [access and expose Grafana](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
