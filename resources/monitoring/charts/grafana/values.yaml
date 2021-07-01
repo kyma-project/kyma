@@ -814,8 +814,3 @@ global:
     operatorGroup: runtimeOperator
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
-
-podSecurityPolicy:
-  hostPorts:
-    - max: 65535
-      min: 1024

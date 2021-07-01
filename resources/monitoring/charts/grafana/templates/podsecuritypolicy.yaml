@@ -30,6 +30,10 @@ spec:
   hostNetwork: false
   hostIPC: false
   hostPID: false
+  hostPorts:
+    - min: 1024
+      max: 65535
+      
   runAsUser:
     rule: 'MustRunAsNonRoot'
   seLinux:
