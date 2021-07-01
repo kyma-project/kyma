@@ -116,6 +116,42 @@ func TestGetServices(t *testing.T) {
 			assert.Equal(t, apperrors.CodeNotFound, err.Code())
 		})
 	}
+
+	for _, testCase := range []testcase{
+
+		{
+			description: "should return bad request error if service has multiple entries with the same names",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByEntryName("production", "service-3", "service-entry-duplicate")
+			},
+		},
+		{
+			description: "should return bad request error if there are multiple services with the same name",
+			application: createApplication("production"),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByServiceName("production", "service-4")
+			},
+		},
+	} {
+		t.Run("should return bad request error if multiple services were found", func(t *testing.T) {
+			// given
+			managerMock := &mocks.Manager{}
+			managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
+				Return(testCase.application, nil)
+
+			repository := applications.NewServiceRepository(managerMock)
+			require.NotNil(t, repository)
+
+			// when
+			service, err := testCase.testFunc(repository)
+
+			// then
+			assert.Equal(t, applications.Service{}, service)
+			assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		})
+	}
+
 }
 
 func createApplication(name string) *v1alpha1.Application {
@@ -159,11 +195,69 @@ func createApplication(name string) *v1alpha1.Application {
 		Entries:             []v1alpha1.Entry{service2Entry},
 	}
 
+	service3Entry1 := v1alpha1.Entry{
+		Name:      "Service entry duplicate",
+		Type:      "API",
+		TargetUrl: "https://192.168.1.3",
+		Credentials: v1alpha1.Credentials{
+			Type:              "OAuth",
+			SecretName:        "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
+	}
+
+	service3Entry2 := v1alpha1.Entry{
+		Name:      "Service entry duplicate",
+		Type:      "API",
+		TargetUrl: "https://192.168.1.3",
+		Credentials: v1alpha1.Credentials{
+			Type:              "OAuth",
+			SecretName:        "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
+	}
+	service3Entry3 := v1alpha1.Entry{
+		Name:      "Service entry 3",
+		Type:      "API",
+		TargetUrl: "https://192.168.1.3",
+		Credentials: v1alpha1.Credentials{
+			Type:              "OAuth",
+			SecretName:        "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
+	}
+
+	service3 := v1alpha1.Service{
+		Name:        "service-3",
+		DisplayName: "Service 3",
+		Entries:     []v1alpha1.Entry{service3Entry1, service3Entry2, service3Entry3},
+	}
+
+	service4Entry := v1alpha1.Entry{
+		Name:      "Service entry 4",
+		Type:      "API",
+		TargetUrl: "https://192.168.1.3",
+		Credentials: v1alpha1.Credentials{
+			Type:              "OAuth",
+			SecretName:        "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
+	}
+	service4 := v1alpha1.Service{
+		Name:        "service-4",
+		DisplayName: "Service 4",
+		Entries:     []v1alpha1.Entry{service4Entry},
+	}
+
 	spec1 := v1alpha1.ApplicationSpec{
 		Description: "test_1",
 		Services: []v1alpha1.Service{
 			service1,
 			service2,
+			service3,
+			// duplicate services
+			service4,
+			service4,
 		},
 	}
 
