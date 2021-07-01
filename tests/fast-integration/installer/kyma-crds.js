@@ -24,8 +24,6 @@ const kymaCrds =
     'assets.rafter.kyma-project.io',
     'backendmodules.ui.kyma-project.io',
     'buckets.rafter.kyma-project.io',
-    'centralconnections.applicationconnector.kyma-project.io',
-    'certificaterequests.applicationconnector.kyma-project.io',
     'clusteraddonsconfigurations.addons.kyma-project.io',
     'clusterassetgroups.rafter.kyma-project.io',
     'clusterassets.rafter.kyma-project.io',
