@@ -105,3 +105,4 @@ global:
 users:
   adminName: "admin@kyma.cx"
   adminGroup:
+  bindStaticUsers: true

@@ -3,15 +3,15 @@
 global:
   installCRDs: false
 tracing:
-  kcproxy:
-    enabled: false
-  virtualservice:
-    enabled: false
+  authProxy:
+    configDocsLink: "https://kyma-project.io/docs" # TODO: Update link once docs are available
+    config:
+      useDex: false
 kiali:
-  kcproxy:
-    enabled: false
-  virtualservice:
-    enabled: false
+  authProxy:
+    configDocsLink: "https://kyma-project.io/docs" # TODO: Update link once docs are available
+    config:
+      useDex: false
 logging:
   logui:
     enabled: false
@@ -22,18 +22,28 @@ monitoring:
   alertmanager:
     enabled: false
   grafana:
-    virtualservice:
-      enabled: false
     kyma:
       console:
         enabled: false
       authProxy:
-        enabled: false
+        enabled: true
+        configDocsLink: "https://kyma-project.io/docs" # TODO: Update link once docs are available
+        config:
+          useDex: false
     env:
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
+cluster-users:
+  users:
+    bindStaticUsers: false
 rafter:
   controller-manager:
     minio:
       virtualservice:
         enabled: false
+helm-broker:
+  addons-ui:
+    enabled: false
+service-catalog-addons:
+  service-catalog-ui:
+    enabled: false

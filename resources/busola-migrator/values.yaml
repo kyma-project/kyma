@@ -11,11 +11,11 @@ deployment:
     tag: "a5b820ae"
     pullPolicy: IfNotPresent
   env:
-    busolaURL: "https://busola.dashboard.kyma.cloud.sap"
+    busolaURL: "https://dashboard.kyma.cloud.sap"
     oidcIssuerURL: "https://kyma.accounts.ondemand.com"
-    oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
-    oidcScope: "openid"
-    oidcUsePKCE: "false"
+    oidcClientId: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
+    oidcScope: "openid email"
+    oidcUsePKCE: "true"
   replicaCount: 1
   imagePullSecrets: []
   podAnnotations:
@@ -26,10 +26,10 @@ deployment:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
     runAsUser: 1000
-  resources: { }
-  nodeSelector: { }
-  tolerations: [ ]
-  affinity: { }
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 serviceAccount:
   create: true

@@ -30,7 +30,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "publisher-proxy.fullname" . }}{{ .Values.metrics.config.nameSuffix }}
-  labels: {{- include "publisher-proxy.metrics.labels" . | nindent 4 }}
+  labels: {{- include "publisher-proxy.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}

@@ -59,14 +59,6 @@ app.kubernetes.io/name: {{ include "publisher-proxy.fullname" . }}
 {{- end }}
 
 {{/*
-Labels for metrics service
-*/}}
-{{- define "publisher-proxy.metrics.labels" -}}
-{{ include "publisher-proxy.labels" . }}
-{{ include "publisher-proxy.peerauth.selectorLabels" . }}
-{{- end }}
-
-{{/*
 Selector labels for service monitor
 */}}
 {{- define "publisher-proxy.service-monitor.selectors" -}}

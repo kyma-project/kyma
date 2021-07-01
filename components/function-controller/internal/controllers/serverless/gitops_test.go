@@ -65,7 +65,7 @@ func Test_isOnSourceChange(t *testing.T) {
 						Reference: "1",
 					},
 					Commit:  "1",
-					Runtime: v1alpha1.Nodejs12,
+					Runtime: v1alpha1.RuntimeExtendedNodejs12,
 				},
 			},
 			revision:       "1",

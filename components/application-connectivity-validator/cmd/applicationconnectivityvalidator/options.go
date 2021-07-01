@@ -13,12 +13,11 @@ type args struct {
 	externalAPIPort          int
 	tenant                   string
 	group                    string
-	eventServicePathPrefixV1 string
-	eventServicePathPrefixV2 string
-	eventServiceHost         string
-	eventMeshPathPrefix      string
-	eventMeshHost            string
-	eventMeshDestinationPath string
+	eventingPathPrefixV1     string
+	eventingPathPrefixV2     string
+	eventingPublisherHost    string
+	eventingPathPrefixEvents string
+	eventingDestinationPath  string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 	appName                  string
@@ -44,12 +43,11 @@ func parseOptions() (*options, error) {
 	externalAPIPort := flag.Int("externalAPIPort", 8080, "External API port.")
 	tenant := flag.String("tenant", "", "Name of the application tenant")
 	group := flag.String("group", "", "Name of the application group")
-	eventServicePathPrefixV1 := flag.String("eventServicePathPrefixV1", "/v1/events", "Prefix of paths that will be directed to the Event Service V1")
-	eventServicePathPrefixV2 := flag.String("eventServicePathPrefixV2", "/v2/events", "Prefix of paths that will be directed to the Event Service V2")
-	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host (and port) of the Event Service")
-	eventMeshPathPrefix := flag.String("eventMeshPathPrefix", "/events", "Prefix of paths that will be directed to the Event Mesh")
-	eventMeshHost := flag.String("eventMeshHost", "events-adapter:8080", "Host (and port) of the Event Mesh adapter")
-	eventMeshDestinationPath := flag.String("eventMeshDestinationPath", "/", "Path of the destination of the requests to the Event Mesh")
+	eventingPathPrefixV1 := flag.String("eventingPathPrefixV1", "/v1/events", "Prefix of paths that will be directed to Kyma Eventing V1")
+	eventingPathPrefixV2 := flag.String("eventingPathPrefixV2", "/v2/events", "Prefix of paths that will be directed to Kyma Eventing V2")
+	eventingPublisherHost := flag.String("eventingPublisherHost", "eventing-event-publisher-proxy.kyma-system", "Host (and port) of the Eventing Publisher")
+	eventingDestinationPath := flag.String("eventingDestinationPath", "/publish", "Path of the destination of the requests to the Eventing")
+	eventingPathPrefixEvents := flag.String("eventingPathPrefixEvents", "/events", "Prefix of paths that will be directed to the Eventing")
 	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appName := flag.String("appName", "", "Name of the application CR the validator is created for")
@@ -72,12 +70,11 @@ func parseOptions() (*options, error) {
 			externalAPIPort:          *externalAPIPort,
 			tenant:                   *tenant,
 			group:                    *group,
-			eventServicePathPrefixV1: *eventServicePathPrefixV1,
-			eventServicePathPrefixV2: *eventServicePathPrefixV2,
-			eventServiceHost:         *eventServiceHost,
-			eventMeshPathPrefix:      *eventMeshPathPrefix,
-			eventMeshHost:            *eventMeshHost,
-			eventMeshDestinationPath: *eventMeshDestinationPath,
+			eventingPathPrefixV1:     *eventingPathPrefixV1,
+			eventingPathPrefixV2:     *eventingPathPrefixV2,
+			eventingPublisherHost:    *eventingPublisherHost,
+			eventingPathPrefixEvents: *eventingPathPrefixEvents,
+			eventingDestinationPath:  *eventingDestinationPath,
 			appRegistryPathPrefix:    *appRegistryPathPrefix,
 			appRegistryHost:          *appRegistryHost,
 			appName:                  *appName,
@@ -93,16 +90,15 @@ func parseOptions() (*options, error) {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
-		"--eventServicePathPrefixV1=%s --eventServicePathPrefixV2=%s --eventServiceHost=%s "+
-		"--eventMeshPathPrefix=%s --eventMeshHost=%s "+
-		"--eventMeshDestinationPath=%s "+
+		"--eventingPathPrefixV1=%s --eventingPathPrefixV2=%s --eventingPublisherHost=%s "+
+		"--eventingPathPrefixEvents=%s --eventingDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
-		o.eventServicePathPrefixV1, o.eventServicePathPrefixV2, o.eventServiceHost,
-		o.eventMeshPathPrefix, o.eventMeshHost, o.eventMeshDestinationPath,
+		o.eventingPathPrefixV1, o.eventingPathPrefixV2, o.eventingPublisherHost,
+		o.eventingPathPrefixEvents, o.eventingDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
 		o.kubeConfig, o.apiServerURL, o.syncPeriod,

@@ -90,8 +90,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		ctx, cancelFunc := context.WithCancel(context.Background())
-		defer cancelFunc()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -106,7 +106,7 @@ func Test_Log(t *testing.T) {
 		}()
 
 		time.Sleep(loggingWaitTime)
-		cancelFunc()
+		cancel()
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -141,8 +141,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		ctx, cancelFunc := context.WithCancel(context.Background())
-		defer cancelFunc()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -157,7 +157,7 @@ func Test_Log(t *testing.T) {
 		}()
 
 		time.Sleep(loggingWaitTime)
-		cancelFunc()
+		cancel()
 		time.Sleep(loggingWaitTime)
 
 		// then
@@ -180,8 +180,8 @@ func Test_Log(t *testing.T) {
 
 		logger := NewMetricsLogger(resourcesClientset, metricsClientset, loggingInterval)
 
-		ctx, cancelFunc := context.WithCancel(context.Background())
-		defer cancelFunc()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		var buffer bytes.Buffer
 		log.SetOutput(&buffer)
@@ -196,7 +196,7 @@ func Test_Log(t *testing.T) {
 		}()
 
 		time.Sleep(loggingWaitTime)
-		cancelFunc()
+		cancel()
 		time.Sleep(loggingWaitTime)
 
 		// then

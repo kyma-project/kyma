@@ -44,6 +44,9 @@ function installOptions(yargs) {
     },
     'with-compass': {
       describe: 'Install with compass-runtime-agent and disable legacy connectivity'
+    },
+    'with-central-application-gateway': {
+      describe: 'Install a single cluster-wide application gateway'
     }
   });
 
@@ -105,6 +108,7 @@ async function install(argv) {
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const newEventing = argv.newEventing;
   const withCompass = argv.withCompass;
+  const withCentralApplicationGateway = argv.withCentralApplicationGateway;
   const useHelmTemplate = argv.useHelmTemplate;
 
   await installer.installKyma({
@@ -114,6 +118,7 @@ async function install(argv) {
     isUpgrade: !!argv.upgrade,
     newEventing,
     withCompass,
+    withCentralApplicationGateway,
     useHelmTemplate
   });
   console.log('Kyma installed');

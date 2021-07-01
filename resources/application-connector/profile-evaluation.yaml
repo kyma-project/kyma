@@ -44,6 +44,17 @@ connection-token-handler:
       requests:
         cpu: 1m
         memory: 16Mi
+central-application-gateway:
+  autoscaling:
+    enable: false
+  deployment:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
 central-application-connectivity-validator:
   autoscaling:
     enable: false

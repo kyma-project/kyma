@@ -7,7 +7,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.3.1
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.4.4 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210601142757-445a3b6021fe
@@ -15,8 +15,9 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nats-io/nats-server/v2 v2.2.4
 	github.com/nats-io/nats.go v1.11.0
-	github.com/onsi/ginkgo v1.15.0
+	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.10.5
+	github.com/ory/hydra-maester v0.0.23
 	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
@@ -28,7 +29,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.20.7 // indirect
 	k8s.io/apimachinery v0.20.7
 	k8s.io/client-go v0.20.7
-	sigs.k8s.io/controller-runtime v0.6.2
+	sigs.k8s.io/controller-runtime v0.8.3
 )
 
 replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0

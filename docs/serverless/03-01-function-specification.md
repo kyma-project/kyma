@@ -135,7 +135,7 @@ See the detailed descriptions of these fields:
 
 ## HTTP requests
 
-You can use the **event.extensions.request** object to access properties and methods of a given request that vary depending on the runtime. For more information, read the API documentation for [Node.js](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_clientrequest) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
+You can use the **event.extensions.request** object to access properties and methods of a given request that vary depending on the runtime. For more information, read the API documentation for [Node.js Express](http://expressjs.com/en/api.html#req) and [Python](https://bottlepy.org/docs/dev/api.html#the-request-object).
 
 ## Custom HTTP responses in Node.js
 

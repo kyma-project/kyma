@@ -44,6 +44,9 @@ defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/downlo
 #   myRepo2: "https://github.com/myOrg/myRepo/releases/download/0.x.0/index.yaml"
 additionalAddonsRepositories: {}
 
+addons-ui:
+  enabled: true
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -55,10 +58,10 @@ global:
   # paths to docker images
   helm_broker:
     dir: ""
-    version: "28103b92"
+    version: "d39e2c8a"
   helm_controller:
     dir: ""
-    version: "3c7851c6"
+    version: "d39e2c8a"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 

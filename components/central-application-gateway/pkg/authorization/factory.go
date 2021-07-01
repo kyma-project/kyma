@@ -3,26 +3,27 @@ package authorization
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
 )
 
+//go:generate mockery --name=Strategy
 type Strategy interface {
 	// Adds Authorization header to the request
-	AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError
+	AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc) apperrors.AppError
 	// Invalidates internal state
 	Invalidate()
 }
 
-type TransportSetter func(transport *http.Transport)
-
+//go:generate mockery --name=StrategyFactory
 type StrategyFactory interface {
 	// Creates strategy for credentials provided
 	Create(credentials *Credentials) Strategy
 }
 
+//go:generate mockery --name=OAuthClient
 type OAuthClient interface {
 	// GetToken obtains OAuth token
 	GetToken(clientID string, clientSecret string, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)

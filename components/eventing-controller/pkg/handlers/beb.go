@@ -19,11 +19,21 @@ import (
 // compile time check
 var _ MessagingBackend = &Beb{}
 
+type OAuth2ClientCredentials struct {
+	ClientID     string
+	ClientSecret string
+}
+
+func NewBEB(credentials *OAuth2ClientCredentials, log logr.Logger) *Beb {
+	return &Beb{OAth2credentials: credentials, Log: log}
+}
+
 type Beb struct {
 	Client           *client.Client
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
+	OAth2credentials *OAuth2ClientCredentials
 	Log              logr.Logger
 }
 
@@ -36,7 +46,7 @@ func (b *Beb) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
 		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
-		b.WebhookAuth = getWebHookAuth(cfg)
+		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
 			ExemptHandshake: &cfg.ExemptHandshake,
@@ -49,10 +59,10 @@ func (b *Beb) Initialize(cfg env.Config) error {
 
 // getWebHookAuth returns the webhook auth config from the given env config
 // or returns an error if the env config contains invalid grant type or auth type.
-func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
+func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types.WebhookAuth {
 	return &types.WebhookAuth{
-		ClientID:     cfg.WebhookClientID,
-		ClientSecret: cfg.WebhookClientSecret,
+		ClientID:     credentials.ClientID,
+		ClientSecret: credentials.ClientSecret,
 		TokenURL:     cfg.WebhookTokenEndpoint,
 		Type:         types.AuthTypeClientCredentials,
 		GrantType:    types.GrantTypeClientCredentials,

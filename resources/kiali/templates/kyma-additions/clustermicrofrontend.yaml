@@ -2,7 +2,7 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: {{ template "kiali-server.name" . }}
+  name: {{ template "kiali-server.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}

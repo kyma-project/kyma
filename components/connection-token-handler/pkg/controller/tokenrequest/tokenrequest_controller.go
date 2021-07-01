@@ -63,11 +63,11 @@ type ReconcileTokenRequest struct {
 
 // Reconcile reads that state of the cluster for a TokenRequest object and makes changes based on the state read
 // and what is in the TokenRequest.Spec
-func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileTokenRequest) Reconcile(context context.Context, request reconcile.Request) (reconcile.Result, error) {
 	log.Printf("Processing TokenRequest %s", request.NamespacedName)
 
 	instance := &applicationconnectorv1alpha1.TokenRequest{}
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Get(context, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Printf("TokenRequest %s not found", request.NamespacedName)

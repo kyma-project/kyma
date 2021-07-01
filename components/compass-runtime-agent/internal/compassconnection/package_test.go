@@ -165,9 +165,7 @@ func TestCompassConnectionController(t *testing.T) {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
 	}()
-
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	StartTestManager(t, ctx, ctrlManager)
+	cancelFunc, _ := StartTestManager(t, ctrlManager)
 	defer cancelFunc()
 
 	connection, err := supervisor.InitializeCompassConnection()
@@ -437,9 +435,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			t.Logf("error while deleting Compass Connection: %s", err.Error())
 		}
 	}()
-
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	StartTestManager(t, ctx, ctrlManager)
+	cancelFunc, _ := StartTestManager(t, ctrlManager)
 	defer cancelFunc()
 
 	initConnectionIfNotExist := func() {
@@ -668,7 +664,9 @@ func configProviderMock() *configMocks.Provider {
 }
 
 // StartTestManager
-func StartTestManager(t *testing.T, ctx context.Context, mgr manager.Manager) {
+func StartTestManager(t *testing.T, mgr manager.Manager) (context.CancelFunc, *sync.WaitGroup) {
+	ctx, cancel := context.WithCancel(context.Background())
+
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -676,4 +674,5 @@ func StartTestManager(t *testing.T, ctx context.Context, mgr manager.Manager) {
 		err := mgr.Start(ctx)
 		require.NoError(t, err)
 	}()
+	return cancel, wg
 }

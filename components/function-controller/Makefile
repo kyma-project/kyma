@@ -14,6 +14,13 @@ IMG ?= $(APP_NAME):latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,crdVersions=v1"
 
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
 pull-licenses-local:
 	@echo "Omitting licenses will not be pulled."	
 
@@ -31,19 +38,35 @@ test-local:
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests
-manifests: generate-local
+manifests: controller-gen-local generate-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=serverless webhook paths="./..." \
 		object:headerFile=hack/boilerplate.go.txt \
 		output:crd:artifacts:config=config/crd/bases \
 		output:rbac:artifacts:config=config/rbac \
 		output:webhook:artifacts:config=config/webhook
 
-CONTROLLER_GEN := $(shell which controller-gen)
-
 # Generate code
 .PHONY: generate-local
-generate-local:
+generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+
+# find or download controller-gen
+# download controller-gen if necessary
+.PHONY: controller-gen-local
+controller-gen-local:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.9 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
 
 .PHONY: build-image 
 build-image: build-function-webhook \

@@ -11,15 +11,6 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 10
   cpuUsagePercent: 40
-eventService:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 50m
-        memory: 64Mi
 applicationConnectivityValidator:
   resources:
     limits:
