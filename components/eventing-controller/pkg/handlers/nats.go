@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,6 +41,7 @@ func NewNats(config env.NatsConfig, log logr.Logger) *Nats {
 const (
 	period   = time.Minute
 	maxTries = 5
+	queueSubscribers = 10
 )
 
 // Initialize creates a connection to Nats
@@ -116,12 +118,15 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
-		if subscribeErr != nil {
-			n.log.Error(subscribeErr, "failed to create a Nats subscription")
-			return false, subscribeErr
+		//natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
+		for i:=0; i<queueSubscribers; i++ {
+			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
+			if subscribeErr != nil {
+				n.log.Error(subscribeErr, "failed to create a Nats subscription")
+				return false, subscribeErr
+			}
+			n.subscriptions[createKey(sub, subject+strconv.Itoa(i))] = natsSub
 		}
-		n.subscriptions[createKey(sub, subject)] = natsSub
 	}
 	return false, nil
 }
@@ -226,6 +231,8 @@ func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner
 }
 
 func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
+	// hack
+	key = key[:len(key)-1]
 	nsn := types.NamespacedName{}
 	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
 	nsn.Namespace = nnvalues[0]

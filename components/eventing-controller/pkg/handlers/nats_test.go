@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -296,11 +297,14 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(subject).To(Not(BeEmpty()))
 
 	// get internal key
-	key := createKey(sub, subject)
-	g.Expect(key).To(Not(BeEmpty()))
-	natsSub := natsClient.subscriptions[key]
-	g.Expect(natsSub).To(Not(BeNil()))
-
+	var key string
+	var natsSub *nats.Subscription
+	for i:=0; i<queueSubscribers; i++ {
+		key = createKey(sub, subject+strconv.Itoa(i))
+		g.Expect(key).To(Not(BeEmpty()))
+		natsSub = natsClient.subscriptions[key]
+		g.Expect(natsSub).To(Not(BeNil()))
+	}
 	// check the mapping of Kyma subscription and Nats subscription
 	nsn := createKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
@@ -328,7 +332,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// check that only one invalid subscription exist
 	invalidNsn = natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(queueSubscribers))
 
 	// restart NATS server
 	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
@@ -336,7 +340,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// check that only one invalid subscription still exist, the controller is not running...
 	invalidNsn = natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(queueSubscribers))
 
 }
 
