@@ -343,7 +343,7 @@ function waitForSubscription(name, namespace = "default", timeout = 90000) {
       );
     },
     timeout,
-    `Waiting for ${name} function timeout (${timeout} ms)`
+    `Waiting for ${name} subscription timeout (${timeout} ms)`
   );
 }
 
