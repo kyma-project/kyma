@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 	"strconv"
 	"strings"
 	"testing"
@@ -300,7 +301,7 @@ func TestIsValidSubscription(t *testing.T) {
 	var key string
 	var natsSub *nats.Subscription
 	for i:=0; i<queueSubscribers; i++ {
-		key = createKey(sub, subject+strconv.Itoa(i))
+		key = createKey(sub, subject + string(types.Separator) + strconv.Itoa(i))
 		g.Expect(key).To(Not(BeEmpty()))
 		natsSub = natsClient.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))

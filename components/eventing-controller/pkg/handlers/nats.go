@@ -125,7 +125,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 				n.log.Error(subscribeErr, "failed to create a Nats subscription")
 				return false, subscribeErr
 			}
-			n.subscriptions[createKey(sub, subject+strconv.Itoa(i))] = natsSub
+			n.subscriptions[createKey(sub, subject + string(types.Separator) + strconv.Itoa(i))] = natsSub
 		}
 	}
 	return false, nil
@@ -231,11 +231,9 @@ func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner
 }
 
 func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
-	// hack
-	key = key[:len(key)-1]
 	nsn := types.NamespacedName{}
-	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
+	nnvalues := strings.Split(key, string(types.Separator))
 	nsn.Namespace = nnvalues[0]
-	nsn.Name = nnvalues[1]
+	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
 	return nsn
 }
