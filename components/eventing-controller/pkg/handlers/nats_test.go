@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/avast/retry-go"
 
@@ -300,8 +300,8 @@ func TestIsValidSubscription(t *testing.T) {
 	// get internal key
 	var key string
 	var natsSub *nats.Subscription
-	for i:=0; i<queueSubscribers; i++ {
-		key = createKey(sub, subject + string(types.Separator) + strconv.Itoa(i))
+	for i := 0; i < queueSubscribers; i++ {
+		key = createKey(sub, subject+string(types.Separator)+strconv.Itoa(i))
 		g.Expect(key).To(Not(BeEmpty()))
 		natsSub = natsClient.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))

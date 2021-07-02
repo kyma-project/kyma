@@ -39,8 +39,8 @@ func NewNats(config env.NatsConfig, log logr.Logger) *Nats {
 }
 
 const (
-	period   = time.Minute
-	maxTries = 5
+	period           = time.Minute
+	maxTries         = 5
 	queueSubscribers = 10
 )
 
@@ -119,13 +119,13 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 
 		//natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
-		for i:=0; i<queueSubscribers; i++ {
+		for i := 0; i < queueSubscribers; i++ {
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
 			if subscribeErr != nil {
 				n.log.Error(subscribeErr, "failed to create a Nats subscription")
 				return false, subscribeErr
 			}
-			n.subscriptions[createKey(sub, subject + string(types.Separator) + strconv.Itoa(i))] = natsSub
+			n.subscriptions[createKey(sub, subject+string(types.Separator)+strconv.Itoa(i))] = natsSub
 		}
 	}
 	return false, nil
