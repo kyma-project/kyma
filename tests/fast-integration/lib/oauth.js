@@ -62,7 +62,7 @@ class OAuthToken {
             try {
                 const resp = await axios.post(this.url, body, params);
                 this._token = resp.data;
-                this._token.expores_at = (+new Date() + this._token.expires_in * 1000);
+                this._token.expires_at = (+new Date() + this._token.expires_in * 1000);
             } catch(err) {
                 const msg = `Error when requesting bearer token from ${this.url}`;
                 if(err.response) {
