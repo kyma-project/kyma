@@ -73,7 +73,7 @@ const initTemplate string = `{
 
 func BuildInitURL(appCfg config.Config) (string, error) {
 
-	initURL, err := url.ParseRequestURI(fmt.Sprintf("%s/?kubeconfigid=%s", appCfg.BusolaURL, appCfg.KubeconfigID))
+	initURL, err := url.ParseRequestURI(fmt.Sprintf("%s/?kubeconfigID=%s", appCfg.BusolaURL, appCfg.KubeconfigID))
 	if err != nil {
 		return "", errors.Wrap(err, "while parsing Busola init url")
 	}

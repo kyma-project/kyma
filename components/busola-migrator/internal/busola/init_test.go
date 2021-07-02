@@ -16,7 +16,7 @@ func TestBuildInitURL(t *testing.T) {
 		BusolaURL:    "https://busola.url",
 		KubeconfigID: "BCD86FA5-8D8E-4567-ACD9-511CCD4A7FF2",
 	}
-	urlRegexp := regexp.MustCompile(`^https://busola\.url/\?kubeconfigid=[0-9a-zA-Z-_]+$`)
+	urlRegexp := regexp.MustCompile(`^https://busola\.url/\?kubeconfigID=[0-9a-zA-Z-_]+$`)
 
 	// WHEN
 	res, err := BuildInitURL(appCfg)

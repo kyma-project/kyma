@@ -19,7 +19,7 @@ type Config struct {
 	TimeoutIdle    time.Duration `envconfig:"default=120s"`
 	BusolaURL      string        `envconfig:"default=https://busola.main.hasselhoff.shoot.canary.k8s-hana.ondemand.com"`
 	StaticFilesDIR string        `envconfig:"optional"`
-	KubeconfigID   string        `envconfig:"required"`
+	KubeconfigID   string        `envconfig:""`
 
 	OIDC OIDCConfig
 	UAA  UAAConfig
