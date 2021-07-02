@@ -175,8 +175,7 @@ resolve_clean:
 licenses_clean:
 	rm -rf licenses
 
-#build-local: $(cmds) test-local ;
-build-local: $(cmds);
+build-local: $(cmds) test-local ;
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
