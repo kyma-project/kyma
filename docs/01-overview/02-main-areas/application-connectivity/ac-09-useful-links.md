@@ -14,7 +14,7 @@ If you're interested in learning more about the Application Connectivity area, f
     - [Bind a service to a Namespace](../../../03-tutorials/application-connectivity/ac-06-service-mapping.md)
     - [Trigger a Function with events](../../../03-tutorials/application-connectivity/ac-07-trigger-function-with-event.md)
     - [Call a registered external service from Kyma](../../../03-tutorials/application-connectivity/ac-08-call-registered-service-from-kyma.md)
-    - [Renew a client certificate](../../../03-tutorials/application-connectivity/ac-09-renew-client-cert.mdc)
+    - [Renew a client certificate](../../../03-tutorials/application-connectivity/ac-09-renew-client-cert.md)
     - [Revoke a client certificate](../../../03-tutorials/application-connectivity/ac-10-revoke-client-cert.md)
     - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/application-connectivity/ac-11-rotate-root-ca.md)
     - [Get the API specification for AC components](../../../03-tutorials/application-connectivity/ac-12-get-api-specification.md)
@@ -23,8 +23,8 @@ If you're interested in learning more about the Application Connectivity area, f
 - Troubleshoot Application Connectivity-related issues for:
 
     - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md)
-    - [Application Registry](../../../04-operation-guides/troubleshooting/{LINK})
-    - [Connector Service](../../../04-operation-guides/troubleshooting/{LINK})
+    - [Application Registry](../../../04-operation-guides/troubleshooting/ac-02-application-registry-troubleshooting.md)
+    - [Connector Service](../../../04-operation-guides/troubleshooting/ac-03-connector-service-troubleshooting.md)
 
 - Analyze Application Connectivity specification and configuration files:
 
