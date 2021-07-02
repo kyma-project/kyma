@@ -1,5 +1,5 @@
 ---
-title: Helm Broker deep-dive architecture
+title: Helm Broker architecture deep-dive
 ---
 
 This document describes the Helm Broker workflow in details, including the logic of its inner components, namely the Controller and Broker.
