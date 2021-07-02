@@ -74,7 +74,7 @@ global:
   central_application_connectivity_validator:
     version: "PR-11558"
   central_application_gateway:
-    version: "PR-11558"
+    version: "PR-11624"
 
 application_connectivity_certs_setup_job:
   secrets:
