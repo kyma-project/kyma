@@ -17,13 +17,12 @@ spec:
     - port: {{ .Values.service.externalapi.port }}
       protocol: TCP
       name: http-api-port
-  {{- if .Values.global.disableLegacyConnectivity }}
-    - port: {{ .Values.service.proxy.portCompass }}
-  {{- else}}
     - port: {{ .Values.service.proxy.port }}
-  {{- end }}
       protocol: TCP
       name: http-proxy
+    - port: {{ .Values.service.proxy.portCompass }}
+      protocol: TCP
+      name: http-proxy-mps
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

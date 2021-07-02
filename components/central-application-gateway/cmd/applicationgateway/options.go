@@ -6,24 +6,22 @@ import (
 )
 
 type options struct {
-	disableLegacyConnectivity bool
-	externalAPIPort           int
-	proxyPort                 int
-	proxyPortCompass          int
-	namespace                 string
-	requestTimeout            int
-	skipVerify                bool
-	proxyTimeout              int
-	requestLogging            bool
-	proxyCacheTTL             int
-	kubeConfig                string
-	apiServerURL              string
+	externalAPIPort  int
+	proxyPort        int
+	proxyPortCompass int
+	namespace        string
+	requestTimeout   int
+	skipVerify       bool
+	proxyTimeout     int
+	requestLogging   bool
+	proxyCacheTTL    int
+	kubeConfig       string
+	apiServerURL     string
 }
 
 func parseArgs() *options {
-	disableLegacyConnectivity := flag.Bool("disableLegacyConnectivity", false, "Flag determining what HTTP handler will be used")
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
-	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS.")
+	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS or MPS with single service entry")
 	proxyPortCompass := flag.Int("proxyPortCompass", 8088, "Proxy port for Kyma MPS.")
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by the Application Gateway")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
@@ -37,24 +35,23 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		disableLegacyConnectivity: *disableLegacyConnectivity,
-		externalAPIPort:           *externalAPIPort,
-		proxyPort:                 *proxyPort,
-		proxyPortCompass:          *proxyPortCompass,
-		namespace:                 *namespace,
-		requestTimeout:            *requestTimeout,
-		skipVerify:                *skipVerify,
-		proxyTimeout:              *proxyTimeout,
-		requestLogging:            *requestLogging,
-		proxyCacheTTL:             *proxyCacheTTL,
-		kubeConfig:                *kubeConfig,
-		apiServerURL:              *apiServerURL,
+		externalAPIPort:  *externalAPIPort,
+		proxyPort:        *proxyPort,
+		proxyPortCompass: *proxyPortCompass,
+		namespace:        *namespace,
+		requestTimeout:   *requestTimeout,
+		skipVerify:       *skipVerify,
+		proxyTimeout:     *proxyTimeout,
+		requestLogging:   *requestLogging,
+		proxyCacheTTL:    *proxyCacheTTL,
+		kubeConfig:       *kubeConfig,
+		apiServerURL:     *apiServerURL,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--disableLegacyConnectivity=%t --externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
+	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --proxyPortCompass=%d --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
 		" --requestLogging=%t --proxyCacheTTL=%d --kubeConfig=%s --apiServerURL=%s",
-		o.disableLegacyConnectivity, o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
+		o.externalAPIPort, o.proxyPort, o.proxyPortCompass, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
 		o.requestLogging, o.proxyCacheTTL, o.kubeConfig, o.apiServerURL)
 }

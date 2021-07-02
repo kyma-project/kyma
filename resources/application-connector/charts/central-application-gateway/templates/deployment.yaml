@@ -35,7 +35,6 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"
-          - "--disableLegacyConnectivity={{ .Values.global.disableLegacyConnectivity }}"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
@@ -65,12 +64,9 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
-      {{- if .Values.global.disableLegacyConnectivity }}
-          - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
-            name: http-proxy
-      {{- else}}
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: http-proxy
-      {{- end }}
+          - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
+            name: http-proxy-mps
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
