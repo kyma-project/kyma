@@ -10,8 +10,8 @@ Application Broker (AB) workflow consists of the following steps:
 
 >**NOTE:** Application Broker is the sole component that manages the `application-broker` Service Broker. The user should not create or delete this resource.
 
-4. The Service Catalog fetches services that the `application-broker` Service Broker exposes.
-5. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
+4. Service Catalog fetches services that the `application-broker` Service Broker exposes.
+5. Service Catalog creates a ServiceClass for each service received from Service Broker.
 
 ![AB architecture](assets/ac-AB-architecture.svg)
 
@@ -21,7 +21,7 @@ When this process is complete, you can provision and bind your services.
 
 This ServiceClass has a **bindable** parameter set to `true`, which means that you have to provision a ServiceInstance and bind it to the service or Function to connect to the given API. The provisioning and binding workflow for an API ServiceClass consists of the following steps:
 
-1. Select an API ServiceClass from the Service Catalog.
+1. Select an API ServiceClass from Service Catalog.
 2. Provision this ServiceClass by creating its ServiceInstance in a Namespace.
 3. Bind your ServiceInstance to the service or Function. During the binding process, ServiceBinding and ServiceBindingUsage resources are created.
 * ServiceBinding contains a Secret with a GatewayURL required to connect to the given API.
@@ -35,9 +35,9 @@ This ServiceClass has a **bindable** parameter set to `true`, which means that y
 
 This ServiceClass has a **bindable** parameter set to `false` which means that after provisioning a ServiceClass in the Namespace, given events are ready to use for all services. The provisioning workflow for an event ServiceClass consists of the following steps:
 
-1. Select a given event ServiceClass from the Service Catalog.
+1. Select a given event ServiceClass from Service Catalog.
 2. Provision this ServiceClass by creating a ServiceInstance in the given Namespace.
-3. During the provisioning process, the [EventActivation](../06-custom-resources/ac-03-eventactivation.md) resource is created together with the ServiceInstance. This resource allows you to create a Trigger from the Kyma Console.
+3. During the provisioning process, the [EventActivation](../06-custom-resources/ac-03-eventactivation.md) custom resource is created together with the ServiceInstance. This resource allows you to create a Trigger from the Kyma Console.
 4. The Application sends an event to Application Connector.
 5. When the Trigger receives the event, it triggers the Function based on the parameters defined for a Trigger.
 
