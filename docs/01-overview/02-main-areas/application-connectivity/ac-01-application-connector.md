@@ -2,11 +2,11 @@
 title: Application Connector
 ---
 
-The Application Connector (AC) is a custom, in-house built Kyma component that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process does not change, which allows to avoid any configuration or network-related problems.
+Application Connector (AC) is a custom, in-house built Kyma component that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process does not change, which allows to avoid any configuration or network-related problems.
 
 The external solution you connect to Kyma using the AC is represented as an Application. There is always a one-to-one relationship between a connected solution and an Application, which helps to ensure the highest level of security and separation. This means that you must create five separate Applications in your cluster to connect five different external solutions and use their APIs and event catalogs in Kyma.
 
-The Application Connector:
+Application Connector:
 
 - Manages lifecycles of Applications.
 - Establishes a secure connection and generates the client certificate used by the connected external solution.
@@ -21,7 +21,7 @@ All of the AC components scale independently, which allows to adjust it to fit t
 
 ## Supported APIs
 
-The Application Connector allows you to register secured REST APIs exposed by the connected external solution. The Application Connector supports a variety of authentication methods to ensure smooth integration with a wide range of APIs.
+Application Connector allows you to register secured REST APIs exposed by the connected external solution. Application Connector supports a variety of authentication methods to ensure smooth integration with a wide range of APIs.
 
 You can register an API secured with one of the following authentication methods:
 
@@ -31,10 +31,10 @@ You can register an API secured with one of the following authentication methods
 
 > **NOTE:** You can register non-secured APIs for testing purposes, however, it is not recommended in the production environment.
 
-In addition to authentication methods, the Application Connector supports Cross-Site Request Forgery Tokens.
+In addition to authentication methods, Application Connector supports Cross-Site Request Forgery (CSRF) Tokens.
 
-You can register any API that adheres to the REST principles and is available over the HTTP protocol. The Application Connector also allows you to register APIs implemented with the OData technology.
+You can register any API that adheres to the REST principles and is available over the HTTP protocol. Application Connector also allows you to register APIs implemented with the OData technology.
 
-You can provide specifications that document your APIs. The Application Connector supports [AsyncAPI](https://www.asyncapi.com/), [OpenAPI](https://www.openapis.org/), and [OData](https://www.odata.org/documentation) specification formats.
+You can provide specifications that document your APIs. Application Connector supports [AsyncAPI](https://www.asyncapi.com/), [OpenAPI](https://www.openapis.org/), and [OData](https://www.odata.org/documentation) specification formats.
 
->**TIP:** Follow the [tutorial](/components/rafter/#details-asyncapi-service) to read about the AsyncAPI Service used in Kyma to process AsyncAPI specifications.
+>**TIP:** Read about the [AsyncAPI Service used in Kyma](https://github.com/kyma-project/rafter/blob/main/docs/12-asyncapi-service.md) to process AsyncAPI specifications.

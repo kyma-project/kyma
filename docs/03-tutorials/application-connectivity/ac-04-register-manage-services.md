@@ -1,6 +1,5 @@
 ---
 title: Register a service
-type: Tutorials
 ---
 
 This guide shows you how to register a service of your external solution in Kyma.
@@ -13,7 +12,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body:
 
-   >**NOTE:** Follow the [tutorial](#tutorials-register-a-secured-api) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+   >**NOTE:** Follow the [tutorial](../../03-tutorials/application-connectivity/ac-05-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
    ```json
    {
@@ -130,7 +129,7 @@ curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERV
 
 ## Register an API with a specification URL
 
-The Application Registry allows you to pass API specifications in a form of specification URLs.
+Application Registry allows you to pass API specifications in a form of specification URLs.
 
 To register an API with a specification URL, replace `api.spec` with `api.specificationUrl`.
 
@@ -155,7 +154,7 @@ See the example of the API part of the request body with a specification URL:
 
 ## Register an API with a secured specification URL
 
-The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant). You can specify only one type of authentication for an API.
+Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant). You can specify only one type of authentication for an API.
 
 ### Register an API with a Basic Authentication-secured specification URL
 
@@ -248,9 +247,9 @@ To register an API with a specification URL that requires specific custom header
 
 ## Register an OData API
 
-If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch the specification from the target URL with the `$metadata` path.
+If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, Application Registry will try to fetch the specification from the target URL with the `$metadata` path.
 
-For example, for the service with the following API, the Application Registry will try to fetch the API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
+For example, for the service with the following API, Application Registry will try to fetch the API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
 
 ```json
 "api": {

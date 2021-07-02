@@ -1,14 +1,13 @@
 ---
 title: Get the client certificate
-type: Tutorials
 ---
 
 After you create an Application, connect it to an external solution to consume the solution's APIs and event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See the [tutorial](#tutorials-renew-the-client-certificate) to learn how to renew the client certificate.
-You can also revoke the client certificate, which prevents it from being renewed. See the [tutorial](#tutorials-revoke-the-client-certificate) to learn how to do this.
+>**NOTE:** The client certificate is valid for 92 days. See how to [renew the client certificate](../../03-tutorials/application-connectivity/ac-09-renew-client-cert.md), and 
+how to [revoke the client certificate](../../03-tutorials/application-connectivity/ac-10-revoke-client-cert.md), which prevents it from being renewed.
 
 ## Prerequisites
 
@@ -153,11 +152,11 @@ A successful call returns the following response:
 
 Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Publisher API.
 
-## Call the Application Registry and Event Publisher on local deployment
+## Call Application Registry and Event Publisher on local deployment
 
 Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification.
 
-Call the Application Registry with this command:
+Call Application Registry with this command:
 
 ```bash
 curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k

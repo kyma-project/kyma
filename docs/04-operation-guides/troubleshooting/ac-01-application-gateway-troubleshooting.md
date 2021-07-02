@@ -8,18 +8,18 @@ If you call a registered service and receive an error, follow these steps to det
 
 1. Check the logs.
 
-    Check the logs from the Application Gateway Pod to verify that the call reached the Application Gateway.
+    Check the logs from the Application Gateway Pod to verify that the call reached Application Gateway.
     To fetch these logs, run this command:
     
     ```bash
     kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
     ```
    
-    The request that reached the Pod is logged by the Application Gateway.
+    The request that reached the Pod is logged by Application Gateway.
 
 2. Check for the Access Service.
 
-    If the call you tried to make is not in the logs, check if the [Access Service](#architecture-application-connector-components-access-service) for the service you are trying to call exists.
+    If the call you tried to make is not in the logs, check if the [Access Service](../../05-technical-reference/03-architecture/ac-01-application-connector-components.md#access-service) for the service you are trying to call exists.
     ```
     kubectl -n kyma-integration get svc {APP_NAME}-{SERVICE_ID}
     ```
@@ -49,13 +49,13 @@ If you call a registered service and receive an error, follow these steps to det
     </div>
 
     Then, register the service and try calling again. Registering the service again recreates the Access Service.
-    To register a service, see [this tutorial](#tutorials-register-a-service-register-a-service).
+    To register a service, see [this tutorial](../../03-tutorials/application-connectivity/ac-04-register-manage-services.md).
 
 
 4. Check the API URL.
 
-    If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
-    To check the target URL of the API, fetch the Service definition from the Application Registry:
+    If your call reaches Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
+    To check the target URL of the API, fetch the Service definition from Application Registry:
 
     <div tabs name="verification" group="error-when-calling-a-registered-service">
       <details>

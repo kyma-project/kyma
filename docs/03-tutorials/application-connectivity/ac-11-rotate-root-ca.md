@@ -1,6 +1,5 @@
 ---
-title: Rotate the Root certificate and the key issued by the Certificate Authority 
-type: Tutorials
+title: Rotate the Root certificate and the key issued by the Certificate Authority
 ---
 
 The Central Connector Service uses the Root certificate issued by the Certificate Authority (CA) to issue new certificates for Runtimes and by the Istio Ingress Gateway to validate their identity.

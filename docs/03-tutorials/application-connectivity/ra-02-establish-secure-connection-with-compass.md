@@ -1,6 +1,5 @@
 ---
 title: Establish a secure connection with Compass
-type: Tutorials
 ---
 
 To establish a secure connection with Compass and generate the client certificate, follow this tutorial.
@@ -98,4 +97,4 @@ To establish a secure connection with Compass and generate the client certificat
     base64 -d {CERTIFICATE_CHAIN}
     ```
 
- >**NOTE:** To learn how to renew a client certificate, read the [tutorial](#tutorials-maintain-a-secure-connection-with-compass).
+> **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](../../03-tutorials/application-connectivity/ra-03-maintain-secure-connection-with-compass.md).

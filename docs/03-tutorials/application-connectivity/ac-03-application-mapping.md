@@ -1,6 +1,5 @@
 ---
 title: Bind an Application to a Namespace
-type: Tutorials
 ---
 
 This guide shows you how to bind an Application to a Namespace in Kyma. To execute the binding, create an ApplicationMapping custom resource in the cluster. Follow the instructions to bind your Application to a desired Namespace.

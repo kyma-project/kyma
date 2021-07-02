@@ -1,6 +1,5 @@
 ---
 title: Get subscribed events
-type: Tutorials
 ---
 
 Eventing provides an endpoint for fetching subscribed events for the application. To fetch all of them, make a call:

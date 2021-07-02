@@ -1,6 +1,5 @@
 ---
 title: Connection with Compass
-type: Other References
 ---
 
 Runtime Agent connects to Compass using a one-time token from the Connector and exchanges it for a certificate, which is later used to fetch Applications from the Director.
@@ -16,14 +15,14 @@ The initial connection requires the following parameters:
 
 Runtime Agent reads this configuration from the Secret specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
 
-To see how to create the Secret, see the [tutorial](#tutorials-configure-runtime-agent-with-compass).
+To see how to create the Secret, see the [tutorial](../../03-tutorials/application-connectivity/ra-05-configure-runtime-agent-with-compass.md).
 
 ## Connection status
 
-The connection status is preserved in the [CompassConnection Custom Resource](#custom-resource-compass-connection) (CR). This CR also stores the Connector URL and the Director URL.
+The connection status is preserved in the [CompassConnection](../06-custom-resources/ra-01-compassconnection.md) custom resource (CR). This CR also stores the Connector URL and the Director URL.
 
 ## Reconnecting Runtime Agent
 
-If the connection with Compass fails, the Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, the Runtime Agent ignores the Secret until the connection is lost.
+If the connection with Compass fails, Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, Runtime Agent ignores the Secret until the connection is lost.
 
-To see how to reconnect the Runtime Agent with Compass, see the [tutorial](#tutorials-reconnect-runtime-agent-with-compass).
+To see how to reconnect Runtime Agent with Compass, see the [tutorial](../../03-tutorials/application-connectivity/ra-06-reconnect-runtime-agent-with-compass.md).

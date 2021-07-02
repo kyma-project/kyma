@@ -1,6 +1,5 @@
 ---
 title: Revoke a client certificate
-type: Tutorials
 ---
 
 After you have established a secure connection with Compass and generated a client certificate, you may want to revoke this certificate at some point. To revoke a client certificate, follow the steps in this tutorial.
@@ -13,9 +12,9 @@ After you have established a secure connection with Compass and generated a clie
 - [Compass](https://github.com/kyma-incubator/compass)
 - Registered Application
 - Runtime connected to Compass
-- [Established secure connection with Compass](#tutorials-establish-a-secure-connection-with-compass)
+- [Established secure connection with Compass](../../03-tutorials/application-connectivity/ra-02-establish-secure-connection-with-compass.md)
 
-> **NOTE**: To see how to maintain a secure connection with Compass and renew a client certificate, read the [tutorial](#tutorials-maintain-a-secure-connection-with-compass).
+> **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](../../03-tutorials/application-connectivity/ra-03-maintain-secure-connection-with-compass.md).
 
 ## Steps
 

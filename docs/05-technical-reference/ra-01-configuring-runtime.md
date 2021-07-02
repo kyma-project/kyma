@@ -1,19 +1,15 @@
 ---
 title: Configuring the Runtime
-type: obsolete?
 ---
 
-<!-- the following paragraphs need clarification; are they instructions or just FYI? -->
+> **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, Open Service Broker API usage is recommended.
 
-
-> **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, we recommend you use Open Service Broker API.
-
-In a Kyma Runtime, during Runtime configuration, Application's Bundles are integrated into [Service Catalog](components/service-catalog) using [Application](components/application-connector#custom-resource-application) custom resources and [Application Broker](components/application-connector#architecture-application-broker).
-By default, a single Application is represented as a [ServiceClass](components/service-catalog/#architecture-resources), and a single Bundle is represented as a [ServicePlan](components/service-catalog/#architecture-resources) in Service Catalog.
+In a Kyma Runtime, during Runtime configuration, Application's Bundles are integrated into [Service Catalog](../01-overview/02-main-areas/service-management/01-01-service-catalog.md) using [Application](06-custom-resources/ac-01-application.md) custom resources and [Application Broker](03-architecture/ac-04-application-broker.md).
+By default, a single Application is represented as a [ServiceClass](../01-overview/02-main-areas/service-management/smgt-03-sc-resources.md), and a single Bundle is represented as a [ServicePlan](../01-overview/02-main-areas/service-management/smgt-03-sc-resources.md) in Service Catalog.
 Refer to the documentation to learn more about [API Bundles](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-bundles-api.md).
 
 Runtime Agent periodically requests for the configuration of its Runtime from Compass.
-Changes in the configuration for the Runtime are applied by the Runtime Agent on the Runtime.
+Changes in the configuration for the Runtime are applied by Runtime Agent on the Runtime.
 
 To fetch the Runtime configuration, Runtime Agent calls the [`applicationsForRuntime`](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) query offered by the Compass component called Director.
 The response for the query contains Applications assigned for the Runtime.

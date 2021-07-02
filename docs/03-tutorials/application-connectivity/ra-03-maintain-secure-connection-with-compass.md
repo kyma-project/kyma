@@ -1,6 +1,5 @@
 ---
 title: Maintain a secure connection with Compass
-type: Tutorials
 ---
 
 After you have established a secure connection with Compass, you can fetch the configuration details and renew the client certificate before it expires. To renew the client certificate, follow the steps in this tutorial.
@@ -11,7 +10,7 @@ After you have established a secure connection with Compass, you can fetch the c
 - [Compass](https://github.com/kyma-incubator/compass)
 - Registered Application
 - Runtime connected to Compass
-- [Established secure connection with Compass](#tutorials-establish-a-secure-connection-with-compass)
+- [Established secure connection with Compass](../../03-tutorials/application-connectivity/ra-02-establish-secure-connection-with-compass.md)
 
 ## Steps
 
@@ -76,4 +75,4 @@ After you have established a secure connection with Compass, you can fetch the c
     base64 -d {CERTIFICATE_CHAIN}
     ```
 
->**NOTE:** To learn how to revoke a client certificate, read the [tutorial](#tutorials-revoke-a-client-certificate).
+>**NOTE:** See how to [revoke a client certificate](../../03-tutorials/application-connectivity/ra-04-revoke-client-certificate.md).

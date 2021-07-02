@@ -1,16 +1,15 @@
 ---
 title: Trigger a Function with events
-type: Tutorials
 ---
 
-To create a simple Function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the Function. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it.
+To create a simple Function and trigger it with an event, you must first register a service using Application Registry that is a part of Application Connector. This service then sends the event that triggers the Function. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it.
 
 ## Prerequisites
 
 - An Application bound to a Namespace
 - Client certificates generated for the connected Application
 
->**NOTE:** See the respective tutorials to learn how to [create](#tutorials-create-a-new-application) an Application, [get](#tutorials-get-the-client-certificate) the client certificate, and [bind](#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
+>**NOTE:** See the respective tutorials to learn how to [create an Application](../../03-tutorials/application-connectivity/ac-01-create-application.md), [get the client certificate](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md), and [bind the Application to a Namespace](../../03-tutorials/application-connectivity/ac-03-application-mapping.md).
 
 ## Steps
 
@@ -24,7 +23,7 @@ To create a simple Function and trigger it with an event, you must first registe
 
 2. Register a service with events in the desired Application. Use the example AsyncAPI specification.
 
-   > **NOTE:** See the [tutorial](#tutorials-register-a-service) to learn how to register a service.
+   > **NOTE:** See the [tutorial](../../03-tutorials/application-connectivity/ac-04-register-manage-services.md) to learn how to register a service.
 
    ```json
    {

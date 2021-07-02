@@ -1,8 +1,8 @@
 ---
-title: Application Gateway
+title: Application Gateway details
 ---
 
->**CAUTION:** This document describes Application Gateway working in the alternative Compass [mode](../../../05-technical-reference/03-architecture/ac-01-application-connector-components.md). To learn about the default legacy mode, see the [Application Gateway architecture](../../../05-technical-reference/03-architecture/ac-03-application-gateway.md).
+>**CAUTION:** This document describes Application Gateway working in the alternative Compass [mode](03-architecture/ac-01-application-connector-components.md#application-operator). See the [architecture](03-architecture/ac-03-application-gateway.md) to learn about Application Gateway working in the default legacy mode.
 
 Application Gateway is an intermediary component between a Function or a service and an external API.
 
@@ -24,7 +24,6 @@ data:
 
 * The `BASE64_ENCODED_CONFIG_JSON` configuration contains credentials and request parameters.
 * The `BASE64_ENCODED_CREDENTIALS_TYPE` assumes one of the following values:  `OAuth`, `BasicAuth`, `NoAuth`.
-
 
 An example **CONFIGURATION** for APIs secured with OAuth looks as follows:
 

@@ -1,15 +1,14 @@
 ---
 title: Register a secured API
-type: Tutorials
 ---
 
-The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
+Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
 
-You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns the `400` code response.
+You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, Application Registry returns the `400` code response.
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.  
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](#tutorials-register-a-service).
+>**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](../../03-tutorials/application-connectivity/ac-04-register-manage-services.md).
 
 ## Register a Basic Authentication-secured API
 
@@ -71,7 +70,7 @@ This is an example of the `api` section of the request body for an API secured w
 
 ## Register a client certificate-secured API
 
-To register an API and secure it with client certificates, you must add the `credentials.certificateGen` object to the `api` section of the service registration request body. The Application Registry generates a ready to use certificate and key pair for every API registered this way. You can use the generated pair or replace it with your own certificate and key.
+To register an API and secure it with client certificates, you must add the `credentials.certificateGen` object to the `api` section of the service registration request body. Application Registry generates a ready to use certificate and key pair for every API registered this way. You can use the generated pair or replace it with your own certificate and key.
 
 Include this field in the service registration request body:
 
@@ -92,11 +91,11 @@ This is an example of the `api` section of the request body for an API secured w
     }
 ```
 
->**NOTE:** If you update the registered API and change the `certificateGen.commonName`, the Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, the Application Registry deletes the corresponding certificate and key.
+>**NOTE:** If you update the registered API and change the `certificateGen.commonName`, Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, Application Registry deletes the corresponding certificate and key.
 
 ### Details
 
-When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
+When you register an API with the `credentials.certificateGen` object, Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
 
 You can retrieve the client certificate by sending the following request:
 
@@ -131,7 +130,7 @@ kubectl -n kyma-integration patch secrets {APP_NAME}-{SERVICE_ID} --patch 'data:
 
 ## Register a CSRF-protected API
 
-The Application Registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, add the `credentials.{AUTHENTICATION_METHOD}.csrfInfo` object to the `api` section of the service registration request body.
+Application Registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, add the `credentials.{AUTHENTICATION_METHOD}.csrfInfo` object to the `api` section of the service registration request body.
 
 Include this field in the service registration request body:
 
