@@ -39,7 +39,7 @@ class OAuthCredentials {
  * internal fast-integration tests usage.
  */
 class OAuthToken {
-    consturctor(url, credentials) {
+    constructor(url, credentials) {
         this.url = url;
         this.credentials = credentials;
 
