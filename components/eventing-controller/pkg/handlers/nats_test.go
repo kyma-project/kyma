@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/avast/retry-go"
 
 	. "github.com/onsi/gomega"
@@ -174,6 +176,78 @@ func TestSubscription(t *testing.T) {
 	if err == nil {
 		t.Fatal("subscription still exists in Nats")
 	}
+}
+
+func TestSubscriptionWithDuplicateFilters(t *testing.T) {
+	g := NewWithT(t)
+
+	natsPort := 5223
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	natsClient := Nats{
+		subscriptions: map[string]*nats.Subscription{},
+		config: env.NatsConfig{
+			Url:           natsServer.ClientURL(),
+			MaxReconnects: 2,
+			ReconnectWait: time.Second,
+		},
+		log: ctrl.Log.WithName("reconciler").WithName("Subscription"),
+	}
+	if err := natsClient.Initialize(env.Config{}); err != nil {
+		t.Fatalf("cannot start NATS eventing backend: %s", err.Error())
+	}
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+	defer subscriber.Shutdown()
+
+	// Check subscriber is running or not by checking the store
+	if err := subscriber.CheckEvent("", subscriberCheckURL); err != nil {
+		t.Fatalf("subscriber did not receive the event: %v", err)
+	}
+
+	sub := eventingtesting.NewSubscription("sub", "foo")
+	filter := &eventingv1alpha1.BebFilter{
+		EventSource: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "source",
+			Value:    "",
+		},
+		EventType: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "type",
+			Value:    eventingtesting.OrderCreatedEventType,
+		},
+	}
+	sub.Spec.Filter = &eventingv1alpha1.BebFilters{
+		Filters: []*eventingv1alpha1.BebFilter{filter, filter},
+	}
+	sub.Spec.Sink = subscriberReceiveURL
+	idFunc := func(et string) (string, error) { return et, nil }
+	if _, err := natsClient.SyncSubscription(sub, eventtype.CleanerFunc(idFunc)); err != nil {
+		t.Fatalf("failed to sync subscription: %s", err.Error())
+	}
+
+	data := "sampledata"
+	// Send an event
+	if err := SendEventToNATS(&natsClient, data); err != nil {
+		t.Fatalf("failed to publish event: %v", err)
+	}
+
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	if err := subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL); err != nil {
+		t.Fatalf("subscriber did not receive the event: %v", err)
+	}
+
+	// There should be no more!
+	err := subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
+	g.Expect(err).Should(HaveOccurred())
 }
 
 func TestIsValidSubscription(t *testing.T) {

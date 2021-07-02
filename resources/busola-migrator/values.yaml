@@ -13,8 +13,8 @@ deployment:
   env:
     busolaURL: "https://dashboard.kyma.cloud.sap"
     oidcIssuerURL: "https://kyma.accounts.ondemand.com"
-    oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
-    oidcScope: "openid"
+    oidcClientId: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
+    oidcScope: "openid email"
     oidcUsePKCE: "true"
   replicaCount: 1
   imagePullSecrets: []

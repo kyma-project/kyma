@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +38,9 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := hydrav1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil
@@ -71,11 +78,15 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the manager.
-func (c *Commander) Start() error {
+func (c *Commander) Start(params commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	oauth2credential, err := getOAuth2ClientCredentials(params)
+	if err != nil {
+		return errors.Wrap(err, "cannot get oauth2client credentials")
+	}
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
@@ -87,6 +98,7 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		oauth2credential,
 	)
 
 	c.backend = reconciler.Backend
@@ -171,4 +183,21 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface)
 	}
 
 	return nil
+}
+
+func getOAuth2ClientCredentials(params commander.Params) (*handlers.OAuth2ClientCredentials, error) {
+	val := params["client_id"]
+	id, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_id, but received %T", val)
+	}
+	val = params["client_secret"]
+	secret, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected string value for client_secret, but received %T", val)
+	}
+	return &handlers.OAuth2ClientCredentials{
+		ClientID:     id,
+		ClientSecret: secret,
+	}, nil
 }

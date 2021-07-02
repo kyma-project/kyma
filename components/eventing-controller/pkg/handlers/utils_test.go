@@ -90,7 +90,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			Events: types.Events{
 				{
 					Source: reconcilertesting.EventSource,
-					Type:   reconcilertesting.EventType,
+					Type:   reconcilertesting.OrderCreatedEventType,
 				},
 			},
 			WebhookUrl: expectedWebhookURL,
@@ -125,7 +125,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			Events: types.Events{
 				{
 					Source: defaultNamespace,
-					Type:   reconcilertesting.EventType,
+					Type:   reconcilertesting.OrderCreatedEventType,
 				},
 			},
 			WebhookUrl:      expectedWebhookURL,
@@ -161,7 +161,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 		Events: []types.Event{
 			{
 				Source: reconcilertesting.EventSource,
-				Type:   reconcilertesting.EventTypeNotClean,
+				Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
 			},
 		},
 	}
@@ -180,7 +180,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
 			Source: reconcilertesting.EventSource,
-			Type:   reconcilertesting.EventTypeNotClean,
+			Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
 		},
 	}))
 	g.Expect(bebSubscription)

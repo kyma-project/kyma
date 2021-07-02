@@ -8,6 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-logr/zapr"
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
+	"github.com/stretchr/testify/assert"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -15,22 +22,16 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
-	"github.com/go-logr/zapr"
-	"github.com/stretchr/testify/assert"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -51,11 +52,33 @@ var (
 	defaultLogger *logger.Logger
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
+
 	natsCommander = &TestCommander{}
 	bebCommander  = &TestCommander{}
 )
 
+// TestGetSecretForPublisher verifies the successful and failing retrieval
+// of secrets.
 func TestGetSecretForPublisher(t *testing.T) {
+	secretFor := func(message, namespace []byte) *corev1.Secret {
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: deployment.PublisherName,
+			},
+		}
+
+		secret.Data = make(map[string][]byte)
+
+		if len(message) > 0 {
+			secret.Data["messaging"] = message
+		}
+		if len(namespace) > 0 {
+			secret.Data["namespace"] = namespace
+		}
+
+		return secret
+	}
+
 	testCases := []struct {
 		name           string
 		messagingData  []byte
@@ -99,7 +122,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			publisherSecret := getSecret(tc.messagingData, tc.namespaceData)
+			publisherSecret := secretFor(tc.messagingData, tc.namespaceData)
 
 			gotPublisherSecret, err := getSecretForPublisher(publisherSecret)
 			if tc.expectedError != nil {
@@ -113,30 +136,13 @@ func TestGetSecretForPublisher(t *testing.T) {
 	}
 }
 
-func getSecret(message, namespace []byte) *corev1.Secret {
-	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: deployment.PublisherName,
-		},
-	}
-
-	secret.Data = make(map[string][]byte)
-
-	if len(message) > 0 {
-		secret.Data["messaging"] = message
-	}
-	if len(namespace) > 0 {
-		secret.Data["namespace"] = namespace
-	}
-
-	return secret
-}
-
+// TestAPIs prepares gingko to run the test suite.
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecsWithDefaultAndCustomReporters(t, "Eventing Backend Controller Suite", []Reporter{printer.NewlineReporter{}})
 }
 
+// Prepare the test suite.
 var _ = BeforeSuite(func(done Done) {
 	var err error
 
@@ -159,6 +165,9 @@ var _ = BeforeSuite(func(done Done) {
 	cfg, err := testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
+
+	err = hydrav1alpha1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
 
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
@@ -196,12 +205,14 @@ var _ = BeforeSuite(func(done Done) {
 	close(done)
 }, 60)
 
+// Post-process the test suite.
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
 
+// Verify the working backend reconciliation.
 var _ = Describe("Backend Reconciliation Tests", func() {
 	var ownerReferences *[]metav1.OwnerReference
 
@@ -211,6 +222,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ensureNamespaceCreated(ctx, kymaSystemNamespace)
 			ownerReferences = ensureControllerDeploymentCreated(ctx)
 			// Expect
+			// The matcher in the following Eventually assertion will match against the first returned parameter
+			// and ensure that the second returned parameter (an error) is nil.
 			Eventually(controllerDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Expect((*ownerReferences)[0].UID).ShouldNot(BeEmpty())
 		})
@@ -262,11 +275,15 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// As there is no deployment-controller running in envtest, patching the deployment
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
+			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs,
+			// we create a secret, and just ensure that the OAuth2Client CR is created correctly.
+			createOAuth2Secret(ctx)
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
+			Eventually(oauth2ClientGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
-			getPublisherProxySecret(ctx).Should(And(
+			eventuallyPublisherProxySecret(ctx).Should(And(
 				reconcilertesting.HaveValidClientID(deployment.PublisherSecretClientIDKey, "rest-clientid"),
 				reconcilertesting.HaveValidClientSecret(deployment.PublisherSecretClientSecretKey, "rest-client-secret"),
 				reconcilertesting.HaveValidTokenEndpoint(deployment.PublisherSecretTokenEndpointKey, "https://rest-token?grant_type=client_credentials&response_type=token"),
@@ -382,7 +399,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretNamespace:          "",
 				}))
 			By("Ensure publisher proxy secret is removed")
-			getPublisherProxySecret(ctx).Should(BeNil())
+			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()
@@ -420,7 +437,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BebSecretNamespace:          kymaSystemNamespace,
 				}))
 			By("Checking that no BEB secret is created for publisher")
-			getPublisherProxySecret(ctx).Should(BeNil())
+			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
 	})
 
@@ -496,6 +513,23 @@ func resetPublisherProxyStatus(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
+// creates a secret containing the oauth2 credentials that is expected to be
+// created by the Hydra operator
+func createOAuth2Secret(ctx context.Context) {
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deployment.OAuth2ClientSecretName(),
+			Namespace: deployment.ControllerNamespace,
+		},
+		Data: map[string][]byte{
+			"client_id":     []byte("random_id"),
+			"client_secret": []byte("random_secret"),
+		},
+	}
+	err := k8sClient.Create(ctx, sec)
+	Expect(err).ShouldNot(HaveOccurred())
+}
+
 func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
 	bebSecret := reconcilertesting.WithBEBMessagingSecret(name, ns)
 	bebSecret.Labels = map[string]string{
@@ -534,8 +568,8 @@ func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deploym
 	}
 }
 
-// getPublisherProxyDeployment fetches PublisherProxy deployment
-func getPublisherProxySecret(ctx context.Context) AsyncAssertion {
+// eventuallyPublisherProxyDeployment fetches PublisherProxy deployment for assertion.
+func eventuallyPublisherProxySecret(ctx context.Context) AsyncAssertion {
 	return Eventually(func() *corev1.Secret {
 		lookupKey := types.NamespacedName{
 			Namespace: deployment.PublisherNamespace,
@@ -564,6 +598,20 @@ func controllerDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment,
 	}
 }
 
+func oauth2ClientGetter(ctx context.Context) func() (*hydrav1alpha1.OAuth2Client, error) {
+	lookupKey := types.NamespacedName{
+		Namespace: deployment.ControllerNamespace,
+		Name:      deployment.ControllerName,
+	}
+	oa2c := new(hydrav1alpha1.OAuth2Client)
+	return func() (*hydrav1alpha1.OAuth2Client, error) {
+		if err := k8sClient.Get(ctx, lookupKey, oa2c); err != nil {
+			return nil, err
+		}
+		return oa2c, nil
+	}
+}
+
 func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) func() (*[]metav1.OwnerReference, error) {
 	lookupKey := types.NamespacedName{
 		Namespace: namespace,
@@ -578,6 +626,7 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 	}
 }
 
+// TestCommander simulates the the commander implementation for BEB and NATS.
 type TestCommander struct {
 	startErr, stopErr error
 }
@@ -586,7 +635,7 @@ func (t *TestCommander) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t *TestCommander) Start() error {
+func (t *TestCommander) Start(_ commander.Params) error {
 	return t.startErr
 }
 

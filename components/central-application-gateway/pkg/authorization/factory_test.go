@@ -3,8 +3,9 @@ package authorization
 import (
 	"crypto/tls"
 	"net/http"
-	"net/http/httputil"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 
 	oauthMocks "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
@@ -155,21 +156,7 @@ func TestStrategyFactory(t *testing.T) {
 				PrivateKey:  privateKey,
 			},
 		}
-
-		proxy := &httputil.ReverseProxy{}
-
-		expectedProxy := &httputil.ReverseProxy{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					Certificates: []tls.Certificate{
-						{
-							Certificate: [][]byte{cert()},
-							PrivateKey:  key(),
-						},
-					},
-				},
-			},
-		}
+		clientCert := clientcert.NewClientCertificate(nil)
 
 		// when
 		strategy := factory.Create(credentials)
@@ -182,15 +169,16 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, func(transport *http.Transport) {
-			proxy.Transport = transport
+		err = strategy.AddAuthorization(request, func(cert *tls.Certificate) {
+			clientCert.SetCertificate(cert)
 		})
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
 		assert.Nil(t, err)
-		assert.Equal(t, expectedProxy, proxy)
-
+		expectedCert, err := tls.X509KeyPair(credentials.CertificateGen.Certificate, credentials.CertificateGen.PrivateKey)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedCert, *clientCert.GetCertificate())
 		// given
 		requestWithExternalToken, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)

@@ -12,6 +12,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -28,7 +31,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -1089,8 +1091,6 @@ var _ = BeforeSuite(func(done Done) {
 		ClientSecret:             "foo-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "foo-client-id",
-		WebhookClientSecret:      "foo-client-secret",
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
@@ -1098,19 +1098,18 @@ var _ = BeforeSuite(func(done Done) {
 		Qos:                      "AT_LEAST_ONCE",
 	}
 
+	credentials := &handlers.OAuth2ClientCredentials{
+		ClientID:     "foo-client-id",
+		ClientSecret: "foo-client-secret",
+	}
+
 	// prepare application-lister
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
-	err = NewReconciler(
-		context.Background(),
-		k8sManager.GetClient(),
-		applicationLister,
-		k8sManager.GetCache(),
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(),
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
-		k8sManager.GetEventRecorderFor("eventing-controller"),
-		envConf,
-	).SetupUnmanaged(k8sManager)
+		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
@@ -1185,7 +1184,7 @@ func countBebRequests(subscriptionName string) (countGet int, countPost int, cou
 			subscription, ok := v.(bebtypes.Subscription)
 			if ok && len(subscription.Events) > 0 {
 				for _, event := range subscription.Events {
-					if event.Type == reconcilertesting.EventType && subscription.Name == subscriptionName {
+					if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
 						countPost++
 					}
 				}

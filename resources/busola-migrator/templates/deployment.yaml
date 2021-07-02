@@ -54,7 +54,7 @@ spec:
             - name: APP_OIDC_ISSUER_URL
               value: {{ .Values.deployment.env.oidcIssuerURL | quote }}
             - name: APP_OIDC_CLIENT_ID
-              value: {{ .Values.deployment.env.oidcClientURL | quote }}
+              value: {{ .Values.deployment.env.oidcClientId | quote }}
             - name: APP_OIDC_SCOPE
               value: {{ .Values.deployment.env.oidcScope | quote }}
             - name: APP_OIDC_USE_PKCE

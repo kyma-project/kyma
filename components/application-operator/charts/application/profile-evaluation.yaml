@@ -8,15 +8,6 @@ deployment:
       memory: 32Mi
 autoscaling:
   enable: false
-eventService:
-  deployment:
-    resources:
-      limits:
-        cpu: 10m
-        memory: 64Mi
-      requests:
-        cpu: 5m
-        memory: 16Mi
 applicationConnectivityValidator:
   resources:
     limits:

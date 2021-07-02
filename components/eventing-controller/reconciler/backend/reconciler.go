@@ -6,15 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
+	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	appsv1 "k8s.io/api/apps/v1"
-
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,6 +20,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -88,6 +87,7 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hydra.ory.sh,resources=oauth2clients,verbs=get;create;update;list;watch
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
 	var secretList v1.SecretList
@@ -215,6 +215,20 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		}
 		return ctrl.Result{}, err
 	}
+
+	// Ensure that an OAuth2Client CR exists that gets processed by the Hydra operator and creates a secret
+	// containing the oauth2 credentials.
+	oauth2Client, err := r.syncOAuth2ClientCR(ctx)
+	if err != nil {
+		return ctrl.Result{}, errors.Wrap(err, "failed to sync OAuth2Client CR")
+	}
+	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
+	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
+	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, oauth2Client.Spec.SecretName, oauth2Client.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// CreateOrUpdate deployment for publisher proxy secret
 	secretForPublisher, err := r.SyncPublisherProxySecret(ctx, bebSecret)
 	if err != nil {
@@ -234,7 +248,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if err := r.startBEBController(); err != nil {
+	if err := r.startBEBController(string(oauth2ClientID), string(oauth2ClientSecret)); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "failed to update status when startBEBController failed")
@@ -549,8 +563,8 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)
 	}
 
-	if err := r.setPublisherOwnerReference(ctx, desiredPublisher); err != nil {
-		return nil, errors.Wrapf(err, "setting owner references")
+	if err := r.setAsOwnerReference(ctx, desiredPublisher); err != nil {
+		return nil, errors.Wrapf(err, "setting owner reference for publisher")
 	}
 
 	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
@@ -627,6 +641,55 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 	return backend, err
 }
 
+func (r *Reconciler) syncOAuth2ClientCR(ctx context.Context) (*hydrav1alpha1.OAuth2Client, error) {
+	desiredOAuth2Client := deployment.NewOAuth2Client()
+	if err := r.setAsOwnerReference(ctx, desiredOAuth2Client); err != nil {
+		return nil, errors.Wrapf(err, "setting owner reference for OAuth2Client CR")
+	}
+	CRNamespacedName := types.NamespacedName{
+		Namespace: desiredOAuth2Client.Namespace,
+		Name:      desiredOAuth2Client.Name,
+	}
+	currentOAuth2Client := new(hydrav1alpha1.OAuth2Client)
+	if err := r.Cache.Get(ctx, CRNamespacedName, currentOAuth2Client); err != nil {
+		if k8serrors.IsNotFound(err) {
+			// Create
+			r.namedLogger().Debug("creating OAuth2Client CR")
+			return desiredOAuth2Client, r.Create(ctx, desiredOAuth2Client)
+		}
+		return nil, err
+	}
+
+	desiredOAuth2Client.ResourceVersion = currentOAuth2Client.ResourceVersion
+	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
+		r.namedLogger().Debug("no need to update OAuth2Client")
+		return currentOAuth2Client, nil
+	}
+	if err := r.Update(ctx, desiredOAuth2Client); err != nil {
+		return nil, errors.Wrap(err, "cannot update OAuth2Client")
+	}
+	return desiredOAuth2Client, nil
+}
+
+func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context, name, namespace string) (clientID, clientSecret []byte, err error) {
+	oauth2Secret := new(v1.Secret)
+	oauth2SecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
+	if getErr := r.Cache.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
+		err = errors.Wrapf(getErr, "cannot get secret '%s/%s'", namespace, name)
+		return
+	}
+	var exists bool
+	if clientID, exists = oauth2Secret.Data["client_id"]; !exists {
+		err = errors.New("key 'client_id' not found in secret " + oauth2SecretNamespacedName.String())
+		return
+	}
+	if clientSecret, exists = oauth2Secret.Data["client_secret"]; !exists {
+		err = errors.New("key 'client_secret' not found in secret " + oauth2SecretNamespacedName.String())
+		return
+	}
+	return
+}
+
 func getDeploymentMapper() handler.EventHandler {
 	var mapper handler.MapFunc = func(obj client.Object) []reconcile.Request {
 		var reqs []reconcile.Request
@@ -660,7 +723,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) startNATSController() error {
 	if !r.natsCommanderStarted {
-		if err := r.natsCommander.Start(); err != nil {
+		if err := r.natsCommander.Start(commander.Params{}); err != nil {
 			r.namedLogger().Errorw("failed to start the NATS commander", "error", err)
 			return err
 		}
@@ -682,9 +745,10 @@ func (r *Reconciler) stopNATSController() error {
 	return nil
 }
 
-func (r *Reconciler) startBEBController() error {
+func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
 	if !r.bebCommanderStarted {
-		if err := r.bebCommander.Start(); err != nil {
+		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
+		if err := r.bebCommander.Start(bebCommanderParams); err != nil {
 			r.namedLogger().Errorw("failed to start the BEB commander", "error", err)
 			return err
 		}
@@ -710,7 +774,8 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName).With("backend", r.backendType)
 }
 
-func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *appsv1.Deployment) error {
+// sets this reconciler as owner of obj
+func (r *Reconciler) setAsOwnerReference(ctx context.Context, obj metav1.Object) error {
 	controllerNamespacedName := types.NamespacedName{
 		Namespace: deployment.ControllerNamespace,
 		Name:      deployment.ControllerName,
@@ -727,6 +792,6 @@ func (r *Reconciler) setPublisherOwnerReference(ctx context.Context, publisher *
 			Kind:    "Deployment",
 		}),
 	}
-	publisher.SetOwnerReferences(references)
+	obj.SetOwnerReferences(references)
 	return nil
 }
