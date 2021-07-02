@@ -1,13 +1,10 @@
 package busola
 
 import (
-	"encoding/base64"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/pkg/errors"
-	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/components/busola-migrator/internal/config"
 )
@@ -74,42 +71,12 @@ const initTemplate string = `{
  }
 }`
 
-func BuildInitURL(appCfg config.Config, kubeConfig *rest.Config) (string, error) {
-	if kubeConfig == nil {
-		return "", errors.New("Kubeconfig not found")
-	}
+func BuildInitURL(appCfg config.Config) (string, error) {
 
-	host, err := url.Parse(kubeConfig.Host)
-	if err != nil {
-		return "", errors.Wrap(err, "while parsing apiserver host")
-	}
-
-	initString := fmt.Sprintf(initTemplate,
-		getClusterName(host.Host),
-		fmt.Sprintf("https://%s", host.Hostname()),
-		base64.StdEncoding.EncodeToString(kubeConfig.CAData),
-		appCfg.OIDC.IssuerURL,
-		appCfg.OIDC.ClientID,
-		appCfg.OIDC.Scope,
-		appCfg.OIDC.UsePKCE,
-	)
-	encodedInitString, err := encodeInitString(initString)
-	if err != nil {
-		return "", errors.Wrap(err, "while encoding Busola init string payload")
-	}
-
-	initURL, err := url.ParseRequestURI(fmt.Sprintf("%s/?init=%s", appCfg.BusolaURL, encodedInitString))
+	initURL, err := url.ParseRequestURI(fmt.Sprintf("%s/?kubeconfigid=%s", appCfg.BusolaURL, appCfg.KubeconfigID))
 	if err != nil {
 		return "", errors.Wrap(err, "while parsing Busola init url")
 	}
 
 	return initURL.String(), nil
-}
-
-func getClusterName(host string) string {
-	split := strings.Split(host, ".")
-	if split[0] == "api" {
-		return split[1]
-	}
-	return split[0]
 }

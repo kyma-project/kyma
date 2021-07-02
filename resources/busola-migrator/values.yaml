@@ -16,6 +16,7 @@ deployment:
     oidcClientId: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
     oidcScope: "openid email"
     oidcUsePKCE: "true"
+    kubeconfigID: "Should_be_overridden"
   replicaCount: 1
   imagePullSecrets: []
   podAnnotations:

@@ -59,6 +59,8 @@ spec:
               value: {{ .Values.deployment.env.oidcScope | quote }}
             - name: APP_OIDC_USE_PKCE
               value: {{ .Values.deployment.env.oidcUsePKCE | quote }}
+            - name: APP_KUBECONFIG_ID
+              value: {{ .Values.deployment.env.kubeconfigID | quote }}
             - name: OVERRIDE_BUSOLA_URL
               valueFrom:
                 secretKeyRef:
