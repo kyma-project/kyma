@@ -21,8 +21,8 @@ type options struct {
 
 func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
-	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS or MPS with single service entry")
-	proxyPortCompass := flag.Int("proxyPortCompass", 8088, "Proxy port for Kyma MPS.")
+	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS or MPS bundles with a single API definition")
+	proxyPortCompass := flag.Int("proxyPortCompass", 8082, "Proxy port for Kyma MPS.")
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by the Application Gateway")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	skipVerify := flag.Bool("skipVerify", false, "Flag for skipping certificate verification for proxy target.")
