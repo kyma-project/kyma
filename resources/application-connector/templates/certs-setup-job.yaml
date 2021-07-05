@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       name: {{ .Chart.Name }}-certs-setup-job
-      namespace: {{ .Values.global.namespace }}
+      namespace: {{ .Values.global.integrationNamespace }}
       annotations:
         sidecar.istio.io/inject: “false”
       labels:

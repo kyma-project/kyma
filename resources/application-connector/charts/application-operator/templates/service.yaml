@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Chart.Name }}-service
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
@@ -22,7 +22,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Chart.Name }}-health
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}

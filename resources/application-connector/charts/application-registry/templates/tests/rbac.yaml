@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     release: {{ .Release.Name }}
@@ -53,6 +53,6 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
 {{- end }}
 {{- end }}

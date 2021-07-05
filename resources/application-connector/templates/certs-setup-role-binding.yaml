@@ -31,7 +31,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
-    namespace: {{ .Values.global.namespace }}
+    namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-certs-setup-job-ca-cert-role
@@ -69,7 +69,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
-    namespace: {{ .Values.global.namespace }}
+    namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role

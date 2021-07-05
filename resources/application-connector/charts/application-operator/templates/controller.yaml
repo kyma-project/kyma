@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
@@ -42,7 +42,7 @@ spec:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
         - "--domainName={{ .Values.global.ingress.domainName }}"
-        - "--namespace={{ .Values.global.namespace }}"
+        - "--namespace={{ .Values.global.integrationNamespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
         - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-legacy-tests:{{ .Values.global.application_gateway_legacy_tests.version }}"

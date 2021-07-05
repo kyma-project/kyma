@@ -42,7 +42,7 @@ spec:
           imagePullPolicy: {{ .Values.tests.application_connector_tests.image.pullPolicy }}
           env:
           - name: NAMESPACE
-            value: {{ .Values.global.namespace }}
+            value: {{ .Values.global.integrationNamespace }}
           - name: SKIP_SSL_VERIFY
             value: {{ .Values.tests.application_connector_tests.skipSslVerify | quote }}
           securityContext:

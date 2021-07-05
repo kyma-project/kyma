@@ -37,9 +37,9 @@ spec:
         imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
         env:
         - name: INTERNAL_API_URL
-          value: http://{{ .Chart.Name }}-internal-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.internalapi.port }}
+          value: http://{{ .Chart.Name }}-internal-api.{{ .Values.global.integrationNamespace }}.svc.cluster.local:{{ .Values.service.internalapi.port }}
         - name: EXTERNAL_API_URL
-          value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
+          value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.integrationNamespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
         - name: GATEWAY_URL
           value: https://gateway.{{ .Values.global.ingress.domainName }}
         - name: SKIP_SSL_VERIFY

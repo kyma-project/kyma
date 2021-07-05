@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     release: {{ .Release.Name }}
@@ -52,7 +52,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-tests
-    namespace: {{ .Values.global.namespace }}
+    namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -62,7 +62,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     release: {{ .Release.Name }}
@@ -86,7 +86,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     release: {{ .Release.Name }}
@@ -101,5 +101,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-tests
-    namespace: {{ .Values.global.namespace }}
+    namespace: {{ .Values.global.integrationNamespace }}
 {{- end }}
