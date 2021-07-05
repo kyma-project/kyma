@@ -17,7 +17,7 @@ The collected telemetry data are exposed so that you can view and analyse them w
 Kyma supports a set of tools for in-cluster observability.
 We recommend that you also implement an observability solution of your choice outside your cluster, which has the advantage that you can use the data for troubleshooting and root cause analysis while your cluster is down (also, it doesn't eat into your applications' bandwith).
 
-### In-cluster observability
+## In-cluster observability
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
@@ -34,8 +34,6 @@ You can use the following in-cluster components to observe your applications' te
 - Kiali
   Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
 
-However, if your cluster is down, these components are down as well. This is why we recommend that you implement an observability solution outside your cluster.
-
 ## Learn more
 
-Interested in the architecture details? Check out the [logging architecture](../../../05-technical-reference/03-architecture/obsv-02-architecture-logging.md) and the [end-to-end monitoring flow](../../../05-technical-reference/03-architecture/obsv-01-architecture-monitoring.md).
+Interested in the architecture details? Check out the [end-to-end monitoring flow](../../../05-technical-reference/03-architecture/obsv-01-architecture-monitoring.md), the [logging architecture](../../../05-technical-reference/03-architecture/obsv-02-architecture-logging.md) and the [tracing architecture](../../../05-technical-reference/03-architecture/obsv-03-architecture-tracing.md).

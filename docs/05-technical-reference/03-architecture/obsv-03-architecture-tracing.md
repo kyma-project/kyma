@@ -23,7 +23,7 @@ The process of collecting traces by Jaeger looks as follows:
 The process of querying traces from Jaeger looks as follows:
 
 1. A Kyma user accesses the Jaeger UI to look for specific traces.
-2. The user has [two options](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md) to pass the request to the Jaeger Query service and retrieve the trace information: 
-  - If port forwarding has been set up, the user can access the Jaeger UI directly.
-  - If authentication using a OIDC provider has been configured, the request goes through the [Istio Ingress Gateway](TO_DO), which forwards the incoming connections to the service. Jaeger Query passes the request to the [Keycloak Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper) for authorization. The Gatekeeper calls the identity provider to authenticate the user and the request, and grants further access if the authentication is successful.
+2. The user has [two options](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md) to pass the request to the Jaeger Query service and retrieve the trace information:
+   - If port forwarding has been set up, the user can access the Jaeger UI directly.
+   - If authentication using a OIDC provider has been configured, the request goes through the [Istio Ingress Gateway](TO_DO), which forwards the incoming connections to the service. Jaeger Query passes the request to the [Keycloak Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper) for authorization. The Gatekeeper calls the identity provider to authenticate the user and the request, and grants further access if the authentication is successful.
 3. The Jaeger Deployment provides trace information.
