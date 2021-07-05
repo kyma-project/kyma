@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/hashstructure"
+	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +46,7 @@ const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
-	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
+	if hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil); err != nil {
 		return 0, err
 	} else {
 		return int64(hash), nil
@@ -112,7 +112,11 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	emsSubscription.WebhookUrl = urlTobeRegistered
 
 	// Events
-	for _, e := range subscription.Spec.Filter.Filters {
+	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
+	if err != nil {
+		return nil, errors.Wrap(err, "error deduplicating subscription filters")
+	}
+	for _, e := range uniqueFilters.Filters {
 		s := defaultNamespace
 		if e.EventSource.Value != "" {
 			s = e.EventSource.Value

@@ -3,13 +3,8 @@ package applications
 import (
 	"fmt"
 
-	"crypto/sha1"
-	"encoding/hex"
-	"regexp"
-	"strings"
-	"unicode"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 )
@@ -108,7 +103,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 
 	return v1alpha1.Service{
 		ID:                  service.ID,
-		Name:                createServiceName(service.DisplayName, service.ID),
+		Name:                normalization.NormalizeServiceNameWithId(service.DisplayName, service.ID),
 		DisplayName:         service.DisplayName,
 		Labels:              service.Labels,
 		Identifier:          service.Identifier,
@@ -138,28 +133,53 @@ func replaceService(id string, app *v1alpha1.Application, service v1alpha1.Servi
 	}
 }
 
-func ensureServiceExists(id string, app *v1alpha1.Application) apperrors.AppError {
-	if !serviceExists(id, app) {
+func checkServiceCanBeReplaced(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+	if !serviceExistsWithId(id, app) {
 		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
 
-	return nil
-}
+	if !serviceExistsWithNormalizedDisplayName(displayName, app) {
+		message := fmt.Sprintf("Cannot change service name to %s for service with ID %s", displayName, id)
 
-func ensureServiceNotExists(id string, app *v1alpha1.Application) apperrors.AppError {
-	if serviceExists(id, app) {
-		message := fmt.Sprintf("Service with ID %s already exists", id)
-
-		return apperrors.AlreadyExists(message)
+		return apperrors.WrongInput(message)
 	}
 
 	return nil
 }
 
-func serviceExists(id string, app *v1alpha1.Application) bool {
+func checkServiceCanBeAdded(id, displayName string, app *v1alpha1.Application) apperrors.AppError {
+	if serviceExistsWithId(id, app) {
+		message := fmt.Sprintf("Service with ID %s already exists", id)
+
+		return apperrors.AlreadyExists(message)
+	}
+
+	if serviceExistsWithNormalizedDisplayName(displayName, app) {
+		message := fmt.Sprintf("Service with name %s already exists", displayName)
+
+		return apperrors.WrongInput(message)
+	}
+
+	return nil
+}
+
+func serviceExistsWithId(id string, app *v1alpha1.Application) bool {
 	return getServiceIndex(id, app) != -1
+}
+
+func serviceExistsWithNormalizedDisplayName(displayName string, app *v1alpha1.Application) bool {
+
+	normalizedDisplayName := normalization.NormalizeName(displayName)
+
+	for _, service := range app.Spec.Services {
+		if normalization.NormalizeName(service.DisplayName) == normalizedDisplayName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func getServiceIndex(id string, app *v1alpha1.Application) int {
@@ -170,34 +190,4 @@ func getServiceIndex(id string, app *v1alpha1.Application) int {
 	}
 
 	return -1
-}
-
-var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
-// createServiceName creates the OSB Service Name for given Application Service.
-// The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
-//
-// Normalization rules:
-// - MUST only contain lowercase characters, numbers and hyphens (no spaces).
-// - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
-func createServiceName(serviceDisplayName, id string) string {
-	// generate 5 characters suffix from the id
-	sha := sha1.New()
-	sha.Write([]byte(id))
-	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
-	// remove all characters, which is not alpha numeric
-	serviceDisplayName = nonAlphaNumeric.ReplaceAllString(serviceDisplayName, "-")
-	// to lower
-	serviceDisplayName = strings.Map(unicode.ToLower, serviceDisplayName)
-	// trim dashes if exists
-	serviceDisplayName = strings.TrimSuffix(serviceDisplayName, "-")
-	if len(serviceDisplayName) > 57 {
-		serviceDisplayName = serviceDisplayName[:57]
-	}
-	// add suffix
-	serviceDisplayName = fmt.Sprintf("%s-%s", serviceDisplayName, suffix)
-	// remove dash prefix if exists
-	//  - can happen, if the name was empty before adding suffix empty or had dash prefix
-	serviceDisplayName = strings.TrimPrefix(serviceDisplayName, "-")
-	return serviceDisplayName
 }

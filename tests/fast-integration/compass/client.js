@@ -5,8 +5,18 @@ const {
     debug 
 } = require("../utils");
 const {
-    OAuthCredentials
+    OAuthCredentials,
+    OAuthToken
   } = require("../lib/oauth");
+
+const SCOPES = [
+    "application:read",
+    "application:write", 
+    "runtime:read",
+    "runtime:write", 
+    "label_definition:read", 
+    "label_definition:write"
+];
 
 /**
  * Class DirectorConfig represents configuration data for DirectorClient.
@@ -49,55 +59,14 @@ class DirectorClient {
      * @param {DirectorConfig} config 
      */
     constructor(config) {
+        this.token = new OAuthToken(
+            `https://oauth2.${config.host}/oauth2/token`, config.credentials);
         this.host = config.host;
-        this.credentials = config.credentials;
         this.tenantID = config.tenantID;
-
-        this._token = undefined;
-    }
-
-    async getToken() {
-        if (!this._token || this._token.expires_at < +new Date()) {
-            const scopes = [
-                "application:read",
-                "application:write", 
-                "runtime:read",
-                "runtime:write", 
-                "label_definition:read", 
-                "label_definition:write"
-            ];
-            const url = `https://oauth2.${this.host}/oauth2/token`;
-            const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
-            const params = {
-                auth: {
-                    username: this.credentials.clientID,
-                    password: this.credentials.clientSecret
-                },
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                }
-            };
-        
-            try {
-                const resp = await axios.post(url, body, params);
-                
-                this._token = resp.data;
-                this._token.expires_at = (+new Date() + this._token.expires_in * 1000);
-            } catch(err) {
-                const msg = "Error when requesting bearer token from compass"
-                if (err.response) {
-                    throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
-                } else {
-                    throw new Error(`${msg}: ${err.toString()}`);
-                }
-            }
-        }
-        
-        return this._token.access_token;
     }
 
     async callDirector(payload) {
-        const token = await this.getToken();
+        const token = await this.token.getToken(SCOPES);
         const url = `https://compass-gateway-auth-oauth.${this.host}/director/graphql`
         const body = `{"query":"${payload}"}`;
         const params = {
@@ -108,7 +77,6 @@ class DirectorClient {
             }
         };
 
-        const msg = "Error calling Director API"
         try {
             const resp = await axios.post(url, body, params);
             if(resp.data.errors) {
@@ -118,6 +86,7 @@ class DirectorClient {
             return resp.data.data.result;
         } catch(err) {
             debug(err);
+            const msg = "Error calling Director API"
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
             } else if(err.errors) {

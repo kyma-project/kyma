@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "992344de"
+  tag: "7ccdd889"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -34,7 +34,7 @@ config:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
-  serviceBlackList:
+  serviceBlockList:
     default:
       - kubernetes
     istio-system:
@@ -48,7 +48,7 @@ config:
     kyma-system:
       - apiserver-proxy
       - apiserver-proxy-ssl
-  domainWhiteList:
+  domainAllowList:
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
     allowOrigins:

@@ -6,11 +6,9 @@ require (
 	cloud.google.com/go v0.65.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/docker/docker v20.10.7+incompatible // indirect
-	github.com/emicklei/go-restful v2.9.6+incompatible // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/mattn/go-colorable v0.1.7 // indirect
-	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

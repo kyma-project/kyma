@@ -102,7 +102,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 						EventType: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "type",
-							Value:    controllertesting.EventTypeNotClean,
+							Value:    controllertesting.OrderCreatedEventTypeNotClean,
 						},
 					},
 				},

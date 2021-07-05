@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/external/grafana/loki
-  tag: 2.1.0
+  tag: 2.2.1
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -201,8 +201,9 @@ serviceAccount:
   create: true
   name:
   annotations: {}
+  automountServiceAccountToken: true
 
-terminationGracePeriodSeconds: 30
+terminationGracePeriodSeconds: 4800
 
 ## Tolerations for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
