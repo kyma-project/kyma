@@ -13,10 +13,4 @@ title: Logging Architecture
 3. The agent queries the [Kubernetes API Server](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/) for additional Pod metadata, such as Pod annotations and labels.
 4. The agent enriches log data with labels and sends them to the Loki server. To enable faster data processing, log data is organized in log chunks. A log chunk consists of metadata, such as labels, collected over a certain time period.
 5. The Loki server processes the log data and stores it in the log store. The data gets indexed on base of the passed labels
-6. The user queries the logs using the following tools:
-
-    * Grafana dashboards to analyze and visualize logs fetched and processed by Loki. 
-    * API clients to query log data using the [HTTP API](https://github.com/grafana/loki/blob/master/docs/sources/api/_index.md) for Loki.
-    * Log UI, accessed from the Kyma Console, to display and analyze logs.
-
-> **TIP:** Learn how to [access the logs](../../../04-operation-guides/operations/obsv-01-access-logs.md) and how to [access and expose Grafana](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
+6. The user queries the logs using Grafana dashboards to analyze and visualize logs fetched and processed by Loki. 

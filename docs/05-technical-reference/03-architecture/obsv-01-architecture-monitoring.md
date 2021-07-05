@@ -22,7 +22,6 @@ The diagram presents monitoring components and the way they interact with one an
 
 ![Monitoring components](./assets/obsv-monitoring-architecture.svg)
 
-
 1. [**Prometheus Operator**](https://github.com/coreos/prometheus-operator) creates a **Prometheus** instance, manages its deployment, and provides configuration for it. It also deploys **Alertmanager** and manages **ServiceMonitor** custom resources that specify monitoring definitions for groups of services.
 
 2. [**Prometheus**](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. Metrics specific to applications (like orders processed per second) are polled from the application pods. Metrics common for all applications are scraped from specialized pods like the **node-exporter**. 
