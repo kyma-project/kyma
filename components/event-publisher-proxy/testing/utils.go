@@ -21,10 +21,10 @@ import (
 
 const (
 	// binary cloudevent headers
-	CeIDHeader          = "CE-ID"
-	CeTypeHeader        = "CE-Type"
-	CeSourceHeader      = "CE-Source"
-	CeSpecVersionHeader = "CE-SpecVersion"
+	CeIDHeader          = "ce-id"
+	CeTypeHeader        = "ce-type"
+	CeSourceHeader      = "ce-source"
+	CeSpecVersionHeader = "ce-specversion"
 )
 
 func QuerySubscribedEndpoint(endpoint string) (*http.Response, error) {
