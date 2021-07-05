@@ -30,7 +30,7 @@ Kyma comes with tools that give you the most accurate and up-to-date monitoring,
 - For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
 - With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of the requests sent to and from your service. This information helps you to optimize the latency and performance of your solution.
 
-For more details, see [Observability](./observability/51-telemetry-observability-overview.md).
+For more details, see [Observability](./observability/obsv-01-telemetry-observability-overview.md).
 
 ### What is Serverless?
 
