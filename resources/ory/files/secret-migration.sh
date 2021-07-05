@@ -80,6 +80,7 @@ if [[ -z "${COOKIE}" ]]; then
   COOKIE=$(get_from_file "${SECRET_COOKIE_KEY}" || generateRandomString 32)
 fi
 
+{{- if contains .Values.postgresql.replication.enabled "true" }}
 DATA=$(cat << EOF
   ${DSN_KEY}: $(echo -n "${DSN}" | base64 -w 0)
   ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}" | base64 -w 0)
@@ -93,23 +94,23 @@ DATA=$(cat << EOF
   {{- end }}
 EOF
 )
+{{- else }}
+DATA=$(cat << EOF
+  ${DSN_KEY}: $(echo -n "${DSN}" | base64 -w 0)
+  ${SECRET_SYSTEM_KEY}: $(echo -n "${SYSTEM}" | base64 -w 0)
+  ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}" | base64 -w 0)
+  {{- if .Values.global.ory.hydra.persistence.enabled }}
+  ${PASSWORD_KEY}: $(echo -n "${PASSWORD}" | base64 -w 0)
+  {{- end }}
+  {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
+  ${SERVICE_ACCOUNT_KEY}: $(echo -n "${SERVICE_ACCOUNT}")
+  {{- end }}
+EOF
+)
+{{- end }}
 
 echo "Data to be applied:"
 echo "${DATA}"
-
-SECRET=$(cat <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${TARGET_SECRET_NAME}
-  namespace: ${NAMESPACE}
-  labels:
-    app.kubernetes.io/name: {{ include "ory.name" . }}
-type: Opaque
-data:
-${DATA}
-EOF
-)
 
 echo "Applying database secret"
 set -e
