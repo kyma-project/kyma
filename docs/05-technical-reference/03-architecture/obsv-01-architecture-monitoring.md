@@ -8,7 +8,7 @@ The monitoring flow in Kyma comes down to the following components and steps:
 
 ![End-to-end monitoring flow](./assets/obsv-monitoring-flow.svg)
 
-1. Upon Kyma installation on a cluster, **Prometheus Operator** creates a **Prometheus** instance with the default configuration.
+1. Upon Kyma installation on a cluster, **Prometheus Operator** creates a **Prometheus** and a **Alertmanager** instance with the default configuration.
 2. The Prometheus server periodically polls all metrics exposed on `/metrics` endpoints of <!-- ports specified in ServiceMonitor CRDs --> Pods. Prometheus stores these metrics in a time-series database.
 3. When Prometheus detects any metric values matching the logic of alerting rules, it triggers the alerts and passes them to **Alertmanager**.
 4. If you have configured a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
