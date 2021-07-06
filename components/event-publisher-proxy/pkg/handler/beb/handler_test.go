@@ -475,6 +475,15 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 
 func validateApplicationName(appName string) testingutils.Validator {
 	return func(r *http.Request) error {
+		// TODO Temporary for testing. Remove from here.
+		var keys []string
+		for key := range r.Header {
+			keys = append(keys, key)
+		}
+		if len(keys) > 0 {
+			return fmt.Errorf("DEBUG INFO request header keys are: [%s]", strings.Join(keys, " / "))
+		}
+		// TODO Original code. Remove till here.
 		if r.Header.Get(cev2http.ContentType) == cev2event.ApplicationCloudEventsJSON {
 			// CE structured mode
 			message := cev2http.NewMessageFromHttpRequest(r)
