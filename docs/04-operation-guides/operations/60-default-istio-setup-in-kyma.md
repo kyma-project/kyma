@@ -27,7 +27,7 @@ This list shows the available Istio components and the components enabled in Kym
 
 These configuration changes are applied to customize Istio for use with Kyma:
 
-- Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. You can [disable it](task-istio-disable-sidecar-injection).
+- Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. You can [disable it](60-istio-disable-sidecar-injection.md).
 - New resource requests for Istio sidecars are introduced: CPU: `20m`, memory: `32Mi`.
 - New resource limits for Istio sidecars are introduced: CPU: `200m`, memory: `128Mi`.
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.

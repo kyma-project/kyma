@@ -28,11 +28,11 @@ For example, to install Kyma with the evaluation profile, run the following comm
 
 >**NOTE:** You can check the values used for each component in respective folders of the [`resources`](https://github.com/kyma-project/kyma/tree/main/resources) directory. The `profile-evaluation.yaml` and `profile-production.yaml` files contain values used for the evaluation and production profiles respectively. If the component doesn't have files for the given profiles, the profile values are the same as default chart values defined in the `values.yaml` file.
 
-A profile is defined globally for the whole Kyma installation. It's not possible to install a profile only for the selected components. However, you can [change the settings](#03-change-kyma-config-values) by overriding the values set for the profile. The profile values have precedence over the default chart values, and override values have precedence over the applied profile.
+A profile is defined globally for the whole Kyma installation. It's not possible to install a profile only for the selected components. However, you can [change the settings](03-change-kyma-config-values.md) by overriding the values set for the profile. The profile values have precedence over the default chart values, and override values have precedence over the applied profile.
 
 ## Install specific configuration values
 
-- To install Kyma with different configuration values, use the `--values-file` and the `--value` flags. For details, see [Change Kyma settings](#03-change-kyma-config-values).
+- To install Kyma with different configuration values, use the `--values-file` and the `--value` flags. For details, see [Change Kyma settings](03-change-kyma-config-values.md).
 
 ## Install with custom domain
 
