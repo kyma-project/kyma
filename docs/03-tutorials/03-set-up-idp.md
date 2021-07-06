@@ -1,6 +1,5 @@
 ---
 title: Set up a custom identity provider
-type: Tutorials
 ---
 
 Kyma sits on top of Kubernetes and leverages [authentication strategies](https://kubernetes.io/docs/reference/access-authn-authz/authentication/) from it. The purpose of all of those authentication strategies is to associate the identity of the caller with the request to the API server and evaluate access based on roles (RBAC).
@@ -35,7 +34,7 @@ Configure a dedicated client (often referred to as an application) at your ident
 ### Configure your identity provider as the OIDC server
 
 In general, you have to add flags to the API server as described in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#configuring-the-api-server). You will do it in different ways depending on your Kubernetes distribution.
-For example, if you want to use  k3d, you need to pass additional `--k3s-server-arg` flags containing the OIDC server configuration when creating the cluster. See the [specification](https://k3d.io/usage/commands/k3d_cluster_create/) of the `k3d cluster create` command:
+For example, if you want to use k3d, you need to pass additional `--k3s-server-arg` flags containing the OIDC server configuration when creating the cluster. See the [specification](https://k3d.io/usage/commands/k3d_cluster_create/) of the `k3d cluster create` command:
 
 ```bash
 k3d cluster create kyma \
