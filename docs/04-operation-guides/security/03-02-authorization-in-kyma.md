@@ -28,18 +28,6 @@ The predefined roles are:
 
 To learn more about the default roles and how they are constructed, see the [`rbac-roles.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cluster-users/templates/rbac-roles.yaml) file.
 
-### Namespace-wide authorization
-
-To ensure that users can manage their Namespaces effectively and create bindings to suit their needs, a Permission Controller is deployed within the cluster.
-
-The Permission Controller is a Kubernetes controller which listens for new Namespaces and creates RoleBindings for the users of the specified group to the **kyma-namespace-admin** role within these Namespaces. The Controller uses a blacklist mechanism, which defines the Namespaces in which the users of the defined group are not assigned the **kyma-namespace-admin** role.
- 
-When the Controller is deployed in a cluster, it checks all existing Namespaces and assigns the roles accordingly.
-By default, the controller binds users of the **runtimeNamespaceAdmin** group to the **kyma-namespace-admin** role in the Namespaces they create. Additionally, the controller creates a RoleBinding for the static `namespace.admin@kyma.cx` user to the **kyma-admin** role in every Namespace that is not blacklisted. This allows clients to manage their Namespaces and create additional bindings to suit their needs. 
-
->**CAUTION:** To give a user the **kyma-developer** role permissions in a Namespace, create a [RoleBinding](#role-binding) to the **kyma-developer** cluster role in that Namespace. You can define a subject of the RoleBinding by specifying either a **Group**, or a **User**. If you decide to specify a **User**, provide a user email. 
-
-
 ### Role binding
 
 You can assign any of the predefined roles to a user or to a group of users in the context of:  
