@@ -30,7 +30,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Chart.Name }}
+  name: system:serviceaccount:{{ .Values.global.systemNamespace }}:{{ .Chart.Name }}
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
