@@ -108,23 +108,14 @@ func (r *Resolver) getBEBSourceName() (string, error) {
 }
 
 func (r *Resolver) createSpec(params gqlschema.EventSubscriptionSpecInput, namespace string, sourceName string) v1alpha1.SubscriptionSpec {
-	protocolSettings := &v1alpha1.ProtocolSettings{
-		ContentMode:     "",
-		ExemptHandshake: true,
-		Qos:             "AT-LEAST-ONCE",
-		WebhookAuth:     nil,
-	}
-
 	bebFilters := &v1alpha1.BebFilters{
 		Dialect: "beb,",
 		Filters: r.createBebFilters(params.Filters, sourceName),
 	}
 
 	spec := v1alpha1.SubscriptionSpec{
-		Protocol:         "BEB",
-		ProtocolSettings: protocolSettings,
-		Sink:             fmt.Sprintf("http://%s.%s.svc.cluster.local", params.OwnerRef.Name, namespace),
-		Filter:           bebFilters,
+		Sink:   fmt.Sprintf("http://%s.%s.svc.cluster.local", params.OwnerRef.Name, namespace),
+		Filter: bebFilters,
 	}
 	return spec
 }
