@@ -42,7 +42,7 @@ The Central Application Gateway has the following parameters:
 - **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone (legacy) mode. The default port is `8080`.
 - **proxyPortCompass** is the port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default port is `8082`.
 - **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
-- **namespace** is the Namespace in which the Central Application Gateway is deployed. The default Namespace is `kyma-system`.
+- **applicationSecretsNamespace** is the Namespace in which the Application secrets used by Central Application Gateway exist. The default Namespace is `kyma-integration`.
 - **requestTimeout** is the timeout for requests sent through the Central Application Gateway, expressed in seconds. The default value is `1`.
 - **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
@@ -63,7 +63,7 @@ If  **disableLegacyConnectivity** is `false`, the proxy API exposes the followin
 
 For instance, if the user registered the `cc-occ-commerce-webservices` service in the `ec` application using Application Registry, they can send a request to the following URL: 
 ```bash
-http://central-application-gateway:8080/ec/cc-occ-commerce-webservices/basesites
+http://central-application-gateway.kyma-system:8080/ec/cc-occ-commerce-webservices/basesites
 ```
 
 As a result, the Central Application Gateway:
@@ -81,7 +81,7 @@ If **disableLegacyConnectivity** is `true`, the proxy API exposes the following 
 
 For instance, if the user registered the `cc-occ` API bundle with the `commerce-webservices` API definition in the `ec` application, they can send a request to the following URL:
 ```bash
-http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites
+http://central-application-gateway.kyma-system:8082/ec/cc-occ/commerce-webservices/basesites
 ``` 
 
 As a result, the Central Application Gateway:

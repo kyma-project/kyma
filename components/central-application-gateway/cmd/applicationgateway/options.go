@@ -23,7 +23,7 @@ func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
 	proxyPort := flag.Int("proxyPort", 8080, "Proxy port for Kyma OS.")
 	proxyPortCompass := flag.Int("proxyPortCompass", 8088, "Proxy port for Kyma MPS.")
-	applicationSecretsNamespace := flag.String("applicationSecretsNamespace", "kyma-system", "Namespace where Application secrets used by the Application Gateway exist")
+	applicationSecretsNamespace := flag.String("applicationSecretsNamespace", "kyma-integration", "Namespace where Application secrets used by the Application Gateway exist")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	skipVerify := flag.Bool("skipVerify", false, "Flag for skipping certificate verification for proxy target.")
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
