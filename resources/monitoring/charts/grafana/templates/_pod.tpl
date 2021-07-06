@@ -11,7 +11,6 @@
   {{- end }}
   {{- end }}
 */ -}}
-
 {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
 schedulerName: "{{ .Values.schedulerName }}"
@@ -74,6 +73,11 @@ initContainers:
       - name: "{{ $key }}"
         value: "{{ $value }}"
 {{- end }}
+{{- if .Values.downloadDashboards.envFromSecret }}
+    envFrom:
+      - secretRef:
+          name: {{ tpl .Values.downloadDashboards.envFromSecret . }}
+{{- end }}
     volumeMounts:
       - name: config
         mountPath: "/etc/grafana/download_dashboards.sh"
@@ -102,10 +106,14 @@ initContainers:
         value: LIST
       - name: LABEL
         value: "{{ .Values.sidecar.datasources.label }}"
+      {{- if .Values.sidecar.datasources.labelValue }}
+      - name: LABEL_VALUE
+        value: {{ quote .Values.sidecar.datasources.labelValue }}
+      {{- end }}
       - name: FOLDER
         value: "/etc/grafana/provisioning/datasources"
       - name: RESOURCE
-        value: "both"
+        value: {{ quote .Values.sidecar.datasources.resource }}
       {{- if .Values.sidecar.enableUniqueFilenames }}
       - name: UNIQUE_FILENAMES
         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
@@ -144,7 +152,7 @@ initContainers:
       - name: FOLDER
         value: "/etc/grafana/provisioning/notifiers"
       - name: RESOURCE
-        value: "both"
+        value: {{ quote .Values.sidecar.notifiers.resource }}
       {{- if .Values.sidecar.enableUniqueFilenames }}
       - name: UNIQUE_FILENAMES
         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
@@ -190,10 +198,14 @@ containers:
         value: {{ .Values.sidecar.dashboards.watchMethod }}
       - name: LABEL
         value: "{{ .Values.sidecar.dashboards.label }}"
+      {{- if .Values.sidecar.dashboards.labelValue }}
+      - name: LABEL_VALUE
+        value: {{ quote .Values.sidecar.dashboards.labelValue }}
+      {{- end }}
       - name: FOLDER
         value: "{{ .Values.sidecar.dashboards.folder }}{{- with .Values.sidecar.dashboards.defaultFolderName }}/{{ . }}{{- end }}"
       - name: RESOURCE
-        value: "both"
+        value: {{ quote .Values.sidecar.dashboards.resource }}
       {{- if .Values.sidecar.enableUniqueFilenames }}
       - name: UNIQUE_FILENAMES
         value: "{{ .Values.sidecar.enableUniqueFilenames }}"
@@ -233,6 +245,10 @@ containers:
       - {{ . }}
     {{- end }}
   {{- end}}
+  {{- if .Values.containerSecurityContext }}
+    securityContext:
+{{- toYaml .Values.containerSecurityContext | nindent 6 }}
+{{- end }}
     volumeMounts:
       - name: config
         mountPath: "/etc/grafana/grafana.ini"
@@ -326,14 +342,14 @@ containers:
         containerPort: 3000
         protocol: TCP
     env:
-      {{- if not .Values.env.GF_SECURITY_ADMIN_USER }}
+      {{- if and (not .Values.env.GF_SECURITY_ADMIN_USER) (not .Values.env.GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION) }}
       - name: GF_SECURITY_ADMIN_USER
         valueFrom:
           secretKeyRef:
             name: {{ .Values.admin.existingSecret | default (include "grafana.fullname" .) }}
             key: {{ .Values.admin.userKey | default "admin-user" }}
       {{- end }}
-      {{- if and (not .Values.env.GF_SECURITY_ADMIN_PASSWORD) (not .Values.env.GF_SECURITY_ADMIN_PASSWORD__FILE) }}
+      {{- if and (not .Values.env.GF_SECURITY_ADMIN_PASSWORD) (not .Values.env.GF_SECURITY_ADMIN_PASSWORD__FILE) (not .Values.env.GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION) }}
       - name: GF_SECURITY_ADMIN_PASSWORD
         valueFrom:
           secretKeyRef:
@@ -373,16 +389,24 @@ containers:
       - name: GF_SERVER_ROOT_URL
         value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
       {{- end }}
+      - name: GF_PATHS_DATA
+        value: {{ (get .Values "grafana.ini").paths.data }}
+      - name: GF_PATHS_LOGS
+        value: {{ (get .Values "grafana.ini").paths.logs }}
+      - name: GF_PATHS_PLUGINS
+        value: {{ (get .Values "grafana.ini").paths.plugins }}
+      - name: GF_PATHS_PROVISIONING
+        value: {{ (get .Values "grafana.ini").paths.provisioning }}
     {{- range $key, $value := .Values.envValueFrom }}
       - name: {{ $key | quote }}
         valueFrom:
 {{ toYaml $value | indent 10 }}
     {{- end }}
-{{- range $key, $value := .Values.env }}
-{{- if $value }}
+    {{- range $key, $value := .Values.env }}
+    {{- if $value }}
       - name: "{{ tpl $key $ }}"
         value: "{{ tpl (print $value) $ }}"
-{{- end }}
+    {{- end }}
 {{- end }}
     {{- if .Values.envFromSecret }}
     envFrom:
@@ -400,10 +424,6 @@ containers:
 {{ toYaml .Values.readinessProbe | indent 6 }}
     resources:
 {{ toYaml .Values.resources | indent 6 }}
-{{- if .Values.securityContext }}
-    securityContext:
-{{ toYaml .Values.securityContext | indent 6 }}
-{{- end }}
 {{- with .Values.extraContainers }}
 {{ tpl . $ | indent 2 }}
 {{- end }}
@@ -463,7 +483,15 @@ volumes:
 # nothing
 {{- else }}
   - name: storage
+{{- if .Values.persistence.inMemory.enabled }}
+    emptyDir:
+      medium: Memory
+{{- if .Values.persistence.inMemory.sizeLimit }}
+      sizeLimit: {{ .Values.persistence.inMemory.sizeLimit }}
+{{- end -}}
+{{- else }}
     emptyDir: {}
+{{- end -}}
 {{- end -}}
 {{- if .Values.sidecar.dashboards.enabled }}
   - name: sc-dashboard-volume
@@ -498,8 +526,15 @@ volumes:
 {{- end }}
 {{- range .Values.extraVolumeMounts }}
   - name: {{ .name }}
+      {{- if .existingClaim }}
     persistentVolumeClaim:
       claimName: {{ .existingClaim }}
+    {{- else if .hostPath }}
+    hostPath:
+      path: {{ .hostPath }}
+    {{- else }}
+    emptyDir: {}
+    {{- end }}
 {{- end }}
 {{- range .Values.extraEmptyDirMounts }}
   - name: {{ .name }}

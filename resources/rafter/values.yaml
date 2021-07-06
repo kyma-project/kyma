@@ -32,7 +32,7 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: 6d342230
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -210,7 +210,7 @@ controller-manager:
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-deb4ee80
+      tag: RELEASE.2021-06-17T00-10-46Z-355e9c77
       repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
@@ -277,7 +277,7 @@ upload-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: a9c94fb7
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -383,7 +383,7 @@ front-matter-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: d999a403
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -419,7 +419,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: "49766840"
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:

@@ -17,6 +17,12 @@ type Cleaner interface {
 	Clean(eventType string) (string, error)
 }
 
+type CleanerFunc func(et string) (string, error)
+
+func (cf CleanerFunc) Clean(et string) (string, error) {
+	return cf(et)
+}
+
 type cleaner struct {
 	eventTypePrefix   string
 	applicationLister *application.Lister

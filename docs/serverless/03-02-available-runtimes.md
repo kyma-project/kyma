@@ -99,4 +99,30 @@ EOF
 ```
 
 </details>
+
+<details>
+  <summary label="python39">
+  Python 3.9
+  </summary>
+
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: test-function-python39
+spec:
+  runtime: python39
+  source: |
+    import requests
+
+    def main(event, context):
+        r = requests.get('https://swapi.dev/api/people/13')
+        return r.json()
+  deps: |
+    requests==2.24.0
+EOF
+```
+
+</details>
 </div>

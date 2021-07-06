@@ -10,7 +10,7 @@ func ValidateDependencies(runtime Runtime, dependencies string) error {
 	switch runtime {
 	case Nodejs12, Nodejs14:
 		return validateNodeJSDependencies(dependencies)
-	case Python38:
+	case Python38, Python39:
 		return nil
 	}
 
