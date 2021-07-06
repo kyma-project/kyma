@@ -18,7 +18,7 @@ data:
   tls.crt: {{ b64enc $cert.Cert }}
   tls.key: {{ b64enc $cert.Key }}
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: mutating.secrets 
@@ -31,6 +31,10 @@ webhooks:
       path: /mutate-v1-secret
       port: {{ .Values.services.manager.https.port }}
   failurePolicy: Fail
+  matchPolicy: Exact
+  timeoutSeconds: 30
+  sideEffects: None
+  admissionReviewVersions: ["v1", "v1beta1"]
   name: mutating.secret.serverless.k8s.io
   objectSelector:
     matchLabels:
