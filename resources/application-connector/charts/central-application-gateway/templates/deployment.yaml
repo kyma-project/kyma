@@ -39,7 +39,7 @@ spec:
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--namespace={{ .Values.global.systemNamespace }}"
+          - "--applicationSecretsNamespace={{ .Values.global.integrationNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"

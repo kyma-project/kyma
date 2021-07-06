@@ -49,7 +49,7 @@ func main() {
 	serviceDefinitionService, err := newServiceDefinitionService(
 		k8sConfig,
 		coreClientset,
-		options.namespace,
+		options.applicationSecretsNamespace,
 	)
 	if err != nil {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
