@@ -34,7 +34,6 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - Global tracing is set to use the Zipkin installation provided by Kyma.
 - Ingress Gateway is expanded to handle ports `80` and `443` for local Kyma deployments.
 - In local (Minikube) installation there is a DestinationRule that disables mTLS for the `istio-ingressgateway.istio-system.svc.cluster.local` service.
-`istio-ingressgateway.istio-system.svc.cluster.local` service.
 - The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the kube-system namespace and the timeout is set to 10 seconds.
 - All Istio components have decreased resource requests and limits.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
