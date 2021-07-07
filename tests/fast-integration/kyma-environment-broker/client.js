@@ -101,6 +101,9 @@ class KEBClient {
       },
       parameters: {
         name: name,
+        // "kymaVersion": "PR-11548"
+        // "kymaVersion": "1.23.1"
+        "kymaVersion": "1.24.0"
       },
     };
     const endpoint = `service_instances/${instanceID}`;
