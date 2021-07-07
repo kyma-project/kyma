@@ -1,6 +1,16 @@
 const {
   listResources,
+  getVirtualService,
+  sleep,
+  waitForDeployment,
+  retryPromise,
+  k8sApply,
+  toBase64,
+  patchDeployment,
+  k8sAppsApi,
 } = require("../utils");
+const k8s = require("@kubernetes/client-node");
+const { expect } = require("chai");
 
 const {
   queryPrometheus,
@@ -8,6 +18,7 @@ const {
 } = require("./client");
 
 const { assert } = require("chai");
+const { V1ServerAddressByClientCIDR } = require("@kubernetes/client-node");
 
 function shouldIgnoreTarget(target) {
   let podsToBeIgnored = [
@@ -111,17 +122,135 @@ async function assertTimeSeriesExist(metric, labels) {
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
 }
 
-async function assertGrafanaredirect() {
-  console.log("here")
-  let url  = "https://application-operator.rg-1.berlin.shoot.canary.k8s-hana.ondemand.com"
-  res = await queryGrafana(url)
-  console.log(res)
+async function retryUrl(url, redirectURL, httpStatus) {
+  let retries = 0
+  while (retries < 20) {
+    let res = await queryGrafana(url, redirectURL, httpStatus)
+    if (res === true) {
+      return res
+    }
+    await sleep(5*1000)
+    retries++
+  }
+  return false
 }
 
+async function assertGrafanaredirect(redirectURL) {
+  let vs = await getVirtualService("kyma-system", "monitoring-grafana")
+  let url = "https://"+vs
+  if (redirectURL.includes("https://dex.")) {
+    console.log("Checking redirect for dex")
+    return await retryUrl(url, redirectURL, 200)
+  }
+
+  if (redirectURL.includes("https://kyma-project.io/docs")) {
+    console.log("Checking redirect for kyma docs")
+    return await retryUrl(url, redirectURL, 403)
+  }
+
+  if (redirectURL.includes("https://accounts.google.com/signin/oauth")) {
+    console.log("Checking redirect for google")
+    return await retryUrl(url, redirectURL, 200)
+  }
+
+  if (redirectURL.includes("grafana")) {
+    console.log("Checking redirect for grafana")
+    return await retryUrl(url, redirectURL, 200)
+  }
+}
+
+async function createSecret() {
+  const sec = {
+    apiVersion: "v1",
+    kind: "Secret",
+    metadata: {
+      name: "monitoring-auth-proxy-grafana-user",
+      namespace: "kyma-system",
+    },
+    type: "Opaque",
+    data: {
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64("true")
+    },
+  }
+  console.log("Creating secret: monitoring-auth-proxy-grafana-user ")
+  await k8sApply([sec], "kyma-system");
+}
+
+async function updateProxyDeployment() {
+  const name = "monitoring-auth-proxy-grafana"
+  const ns = "kyma-system"
+
+  const deployment = await retryPromise(
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment(name, ns);
+    },
+    12,
+    5000
+  ).catch((err) => {
+    throw new Error(`Timeout: ${name} is not found`);
+  });
+
+  const reveseProxy = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes('--reverse-proxy=true')
+  );
+  expect(reveseProxy).to.not.equal(-1);
+
+  const patch = [
+    {
+      op: "replace",
+      path: `/spec/template/spec/containers/0/args/${reveseProxy}`,
+      value: "--trusted-ip=0.0.0.0/0",
+    },
+  ];
+
+  await patchDeployment(name, ns, patch)
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes('--trusted-ip=0.0.0.0/0')
+  )).to.not.equal(-1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
+}
+
+async function restartProxyPod() {
+  const name = "monitoring-auth-proxy-grafana"
+  const ns = "kyma-system"
+
+  const patchRep0 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 0,
+    },
+  ];
+  await patchDeployment(name, ns, patchRep0)
+  const patchedDeploymentRep0 = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeploymentRep0.body.spec.replicas).to.be.equal(0);
+
+  const patchRep1 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 1,
+    },
+  ];
+  await patchDeployment(name, ns, patchRep1)
+  const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
+}
 module.exports = {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
   buildScrapePoolSet,
   assertTimeSeriesExist,
   assertGrafanaredirect,
+  createSecret,
+  restartProxyPod,
+  updateProxyDeployment,
 };

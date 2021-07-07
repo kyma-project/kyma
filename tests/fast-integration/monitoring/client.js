@@ -49,28 +49,29 @@ async function get(path) {
     return responseBody;
 }
 
-async function queryGrafana(url) {
-    console.log("ggg: " + url)
-
+async function queryGrafana(url, redirectURL, httpErrorCode) {
     try {
-        console.log("ggg1")
-
-        const responseBody = await axios.get(url);
-        console.log("foo: ", responseBody)
-        return responseBody.data;
+        delete axios.defaults.headers.common["Accept"]
+        const res = await axios.get(url)
+        if (res.status === httpErrorCode ) {
+            if (res.request.res.responseUrl.includes(redirectURL)) {
+                return true
+            }
+        }
+        return false;
     } catch(err) {
-        console.log("ggg2")
-
-        const msg = "Error when querying Grafana";
+        const msg = "Error when querying Grafana: ";
         if (err.response) {
-            console.log("ggg3: " + err.response.statusText)
-        
-
-            throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}: ${err.response.data}`);
+            if (err.response.status === httpErrorCode) {
+                if (err.response.data.includes(redirectURL)) {
+                    return true
+                }
+            }
+            console.log(msg + err.response.status + " : " + err.response.data)
+            return false
         } else {
-            console.log("ggg4")
-
-            throw new Error(`${msg}: ${err.toString()}`);
+            console.log(`${msg}: ${err.toString()}`);
+            return false
         }
     }
 }
