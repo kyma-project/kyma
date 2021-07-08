@@ -79,7 +79,7 @@ This means that `{API_DEFINITION_NAME}` should be removed from the URL and its p
 ```
 {APPLICATION_NAME}/{API_BUNDLE_NAME}/{TARGET_API_PATH}
 ```
-**Invocation of service bundles configured with multiple API definitions will result in 400 Bad Request failure.**
+> **NOTE:** Invocation of service bundles configured with multiple API definitions will result in **400 Bad Request** failure.
 
 ### Compass mode
 The proxy API exposes the following endpoint:
