@@ -38,6 +38,7 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	}
 
 	python38Logger := logf.WithField(scenarioKey, "python38")
+	python39Logger := logf.WithField(scenarioKey, "python39")
 	nodejs12Logger := logf.WithField(scenarioKey, "nodejs12")
 	nodejs14Logger := logf.WithField(scenarioKey, "nodejs14")
 
@@ -57,6 +58,11 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 	python38Cfg, err := runtimes.NewFunctionSimpleConfig("python38", genericContainer.WithLogger(python38Logger))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating python38 config")
+	}
+
+	python39Cfg, err := runtimes.NewFunctionSimpleConfig("python39", genericContainer.WithLogger(python39Logger))
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating python39 config")
 	}
 
 	nodejs14Cfg, err := runtimes.NewFunctionSimpleConfig("nodejs14", genericContainer.WithLogger(nodejs14Logger))
@@ -95,10 +101,16 @@ func SimpleFunctionTest(restConfig *rest.Config, cfg testsuite.Config, logf *log
 		teststep.CreateSecret(logf, pkgCfgSecret, "Create package configuration secret", pkgCfgSecretData),
 		step.NewParallelRunner(logf, "fn_tests",
 			step.NewSerialTestRunner(python38Logger, "Python38 test",
-				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python38 Function", runtimes.BasicPythonFunction("Hello From python")),
+				teststep.CreateFunction(python38Logger, python38Cfg.Fn, "Create Python38 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha1.Python38)),
 				teststep.NewHTTPCheck(python38Logger, "Python38 pre update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From python"),
-				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python38 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python")),
+				teststep.UpdateFunction(python38Logger, python38Cfg.Fn, "Update Python38 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha1.Python38)),
 				teststep.NewHTTPCheck(python38Logger, "Python38 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python38Logger), "Hello From updated python"),
+			),
+			step.NewSerialTestRunner(python39Logger, "Python39 test",
+				teststep.CreateFunction(python39Logger, python39Cfg.Fn, "Create Python39 Function", runtimes.BasicPythonFunction("Hello From python", serverlessv1alpha1.Python39)),
+				teststep.NewHTTPCheck(python39Logger, "Python39 pre update simple check through service", python39Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From python"),
+				teststep.UpdateFunction(python39Logger, python39Cfg.Fn, "Update Python39 Function", runtimes.BasicPythonFunctionWithCustomDependency("Hello From updated python", serverlessv1alpha1.Python39)),
+				teststep.NewHTTPCheck(python39Logger, "Python39 post update simple check through service", python38Cfg.InClusterURL, poll.WithLogger(python39Logger), "Hello From updated python"),
 			),
 			step.NewSerialTestRunner(nodejs12Logger, "NodeJS12 test",
 				teststep.CreateFunction(nodejs12Logger, nodejs12Cfg.Fn, "Create NodeJS12 Function", runtimes.BasicNodeJSFunction("Hello From nodejs", serverlessv1alpha1.Nodejs12)),
