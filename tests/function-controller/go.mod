@@ -11,17 +11,18 @@ require (
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-project/helm-broker v1.1.0
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
-	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210415084126-ed2c688b52ab
+	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210708083136-5479837a0948
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/vrischmann/envconfig v1.3.0
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 	k8s.io/api v0.19.3
 	k8s.io/apimachinery v0.19.3
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
+	knative.dev/test-infra v0.0.0-20200921012245-37f1a12adbd3 // indirect
 	sigs.k8s.io/controller-runtime v0.6.5
 )
 
