@@ -52,7 +52,7 @@ The Central Application Gateway has the following parameters:
 ## API
 The Central Application Gateway exposes:
 - an external API implementing a health endpoint for liveness and readiness probes
-- 2 internal APIs implementing a proxy handler accessible via a service of type ClusterIP
+- 2 internal APIs implementing a proxy handler accessible via a service of type `ClusterIP`
 
 ### Standalone (legacy) mode
 The proxy API exposes the following endpoint:
