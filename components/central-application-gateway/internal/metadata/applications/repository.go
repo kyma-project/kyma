@@ -4,6 +4,7 @@ package applications
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
@@ -100,16 +101,24 @@ func (r *repository) get(appName string, predicate func(service v1alpha1.Service
 	if err != nil {
 		return Service{}, err
 	}
-
+	services := make([]Service, 0)
+	infos := make([]string, 0)
 	for _, service := range app.Spec.Services {
 		for _, entry := range service.Entries {
 			if predicate(service, entry) {
-				return convert(service, entry)
+				services = append(services, convert(service, entry))
+				infos = append(infos, fmt.Sprintf("service.ID: '%s', service.DisplayName: '%s', entry.Name: '%s'", service.ID, service.DisplayName, entry.Name))
 			}
 		}
 	}
 
-	return Service{}, apperrors.NotFound("service not found")
+	if len(services) == 1 {
+		return services[0], nil
+	} else if len(services) > 1 {
+		return Service{}, apperrors.WrongInput("multiple services found: %s", strings.Join(infos, " | "))
+	} else {
+		return Service{}, apperrors.NotFound("service not found")
+	}
 }
 
 func (r *repository) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
@@ -129,7 +138,7 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	return app, nil
 }
 
-func convert(service v1alpha1.Service, entry v1alpha1.Entry) (Service, apperrors.AppError) {
+func convert(service v1alpha1.Service, entry v1alpha1.Entry) Service {
 	api := &ServiceAPI{
 		TargetURL:                   entry.TargetUrl,
 		Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
@@ -144,7 +153,7 @@ func convert(service v1alpha1.Service, entry v1alpha1.Entry) (Service, apperrors
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,
 		API:                 api,
-	}, nil
+	}
 }
 
 func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credentials {

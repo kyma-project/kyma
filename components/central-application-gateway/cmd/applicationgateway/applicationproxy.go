@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
-	"sync"
+	"syscall"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -20,9 +23,15 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
+	"github.com/oklog/run"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+)
+
+const (
+	shutdownTimeout = 2 * time.Second
 )
 
 func main() {
@@ -36,7 +45,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	k8sConfig, err := restclient.InClusterConfig()
+	k8sConfig, err := clientcmd.BuildConfigFromFlags(options.apiServerURL, options.kubeConfig)
 	if err != nil {
 		log.Fatalf("Error reading in cluster config: %s", err.Error())
 	}
@@ -87,25 +96,54 @@ func main() {
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	// TODO: handle case when server fails
-	wg := &sync.WaitGroup{}
+	var g run.Group
 
-	wg.Add(2)
-	go func() {
-		log.Fatal(externalSrv.ListenAndServe())
-	}()
+	addHttpServerToRunGroup("external-api", &g, externalSrv)
+	addHttpServerToRunGroup("proxy-kyma-os", &g, internalSrv)
+	addHttpServerToRunGroup("proxy-kyma-mps", &g, internalSrvCompass)
+	addInterruptSignalToRunGroup(&g)
 
-	if options.disableLegacyConnectivity {
-		go func() {
-			log.Fatal(internalSrvCompass.ListenAndServe())
-		}()
-	} else {
-		go func() {
-			log.Fatal(internalSrv.ListenAndServe())
-		}()
+	err = g.Run()
+	if err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
 	}
+}
 
-	wg.Wait()
+func addHttpServerToRunGroup(name string, g *run.Group, srv *http.Server) {
+	log.Infof("Starting %s HTTP server on %s", name, srv.Addr)
+	ln, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		log.Fatalf("Unable to start %s HTTP server: '%s'", name, err.Error())
+	}
+	g.Add(func() error {
+		defer log.Infof("Server %s finished", name)
+		return srv.Serve(ln)
+	}, func(error) {
+		log.Infof("Shutting down %s HTTP server on %s", name, srv.Addr)
+
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		err = srv.Shutdown(ctx)
+		if err != nil && err != http.ErrServerClosed {
+			log.Warnf("HTTP server shutdown %s failed: %s", name, err.Error())
+		}
+	})
+}
+
+func addInterruptSignalToRunGroup(g *run.Group) {
+	cancelInterrupt := make(chan struct{})
+	g.Add(func() error {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case <-cancelInterrupt:
+		case sig := <-c:
+			log.Infof("received signal %s", sig)
+		}
+		return nil
+	}, func(error) {
+		close(cancelInterrupt)
+	})
 }
 
 func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
