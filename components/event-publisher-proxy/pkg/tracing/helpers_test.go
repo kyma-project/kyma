@@ -45,6 +45,14 @@ func TestAddTracingContextToCEExtensions(t *testing.T) {
 				b3SampledCEExtensionsKey:      "1",
 				b3FlagsCEExtensionsKey:        "1",
 			},
+		}, {
+			name: "headers without tracing headers",
+			headers: func() http.Header {
+				headers := http.Header{}
+				headers.Add("foo", "bar")
+				return headers
+			}(),
+			expectedExtensions: nil,
 		},
 	}
 
