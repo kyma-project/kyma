@@ -21,15 +21,7 @@ type Config struct {
 	StaticFilesDIR string        `envconfig:"optional"`
 	KubeconfigID   string        `envconfig:""`
 
-	OIDC OIDCConfig
-	UAA  UAAConfig
-}
-
-type OIDCConfig struct {
-	IssuerURL string `envconfig:"default=https://kyma.accounts.ondemand.com"`
-	ClientID  string `envconfig:"default=6667a34d-2ea0-43fa-9b13-5ada316e5393"`
-	Scope     string `envconfig:"default=openid"`
-	UsePKCE   bool   `envconfig:"default=false"`
+	UAA UAAConfig
 }
 
 type UAAConfig struct {
@@ -41,11 +33,7 @@ type UAAConfig struct {
 }
 
 type configOverrides struct {
-	BusolaURL     *string
-	OIDCIssuerURL *string
-	OIDCClientID  *string
-	OIDCScope     *string
-	OIDCUsePKCE   *bool
+	BusolaURL *string
 }
 
 func LoadConfig() Config {
@@ -75,40 +63,13 @@ func getOverrides() configOverrides {
 	if val, ok := os.LookupEnv("OVERRIDE_BUSOLA_URL"); ok {
 		overrides.BusolaURL = ptr.String(val)
 	}
-	if val, ok := os.LookupEnv("OVERRIDE_OIDC_ISSUER_URL"); ok {
-		overrides.OIDCIssuerURL = ptr.String(val)
-	}
-	if val, ok := os.LookupEnv("OVERRIDE_OIDC_CLIENT_ID"); ok {
-		overrides.OIDCClientID = ptr.String(val)
-	}
-	if val, ok := os.LookupEnv("OVERRIDE_OIDC_SCOPE"); ok {
-		overrides.OIDCScope = ptr.String(val)
-	}
-	if val, ok := os.LookupEnv("OVERRIDE_OIDC_USE_PKCE"); ok {
-		overrides.OIDCUsePKCE = ptr.BoolFromString(val)
-	}
-
 	return overrides
 }
 
 func applyOverrides(oldCfg Config, overrides configOverrides) Config {
 	newCfg := oldCfg
-
 	if overrides.BusolaURL != nil {
 		newCfg.BusolaURL = *overrides.BusolaURL
 	}
-	if overrides.OIDCIssuerURL != nil {
-		newCfg.OIDC.IssuerURL = *overrides.OIDCIssuerURL
-	}
-	if overrides.OIDCClientID != nil {
-		newCfg.OIDC.ClientID = *overrides.OIDCClientID
-	}
-	if overrides.OIDCScope != nil {
-		newCfg.OIDC.Scope = *overrides.OIDCScope
-	}
-	if overrides.OIDCUsePKCE != nil {
-		newCfg.OIDC.UsePKCE = *overrides.OIDCUsePKCE
-	}
-
 	return newCfg
 }
