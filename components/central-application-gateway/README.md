@@ -42,7 +42,7 @@ The Central Application Gateway has the following parameters:
 - **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone (legacy) mode. The default port is `8080`.
 - **proxyPortCompass** is the port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default port is `8082`.
 - **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
-- **applicationSecretsNamespace** is the Namespace in which the Application secrets used by Central Application Gateway exist. The default Namespace is `kyma-integration`.
+- **applicationSecretsNamespace** is the Namespace in which the Application secrets used by the Central Application Gateway exist. The default Namespace is `kyma-integration`.
 - **requestTimeout** is the timeout for requests sent through the Central Application Gateway, expressed in seconds. The default value is `1`.
 - **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
