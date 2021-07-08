@@ -101,8 +101,9 @@ As a result, the Central Application Gateway:
    ```
 
 #### Handling ambiguous API definition names
+
 A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CRD should be unique for a given application.
-Invocation of endpoints with duplicate names will result in **400 Bad Request** failure. In such a case one of the names should be changed to avoid ambiguity.
+Invocation of endpoints with duplicate names will result in a **400 Bad Request** failure. In such a case, one of the names should be changed to avoid ambiguity.
 
 ## Development
 
