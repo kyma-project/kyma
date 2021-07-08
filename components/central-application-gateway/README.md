@@ -75,7 +75,7 @@ As a result, the Central Application Gateway:
 #### Standalone mode for Compass - simplified API
 
 The standalone mode can also be used for Compass bundles with a single API definition.
-This means that `{API_DEFINITION_NAME}` should be removed from the URL and its pattern looks like
+This means that `{API_DEFINITION_NAME}` should be removed from the URL and its pattern looks like:
 ```
 {APPLICATION_NAME}/{API_BUNDLE_NAME}/{TARGET_API_PATH}
 ```
