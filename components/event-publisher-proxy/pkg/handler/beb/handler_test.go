@@ -490,12 +490,12 @@ func validateApplicationName(appName string) testingutils.Validator {
 			return fmt.Errorf("expected the event-type [%s] to contain the application name [%s] for structured mode", event.Type(), appName)
 		}
 		// Default CE binary mode
-		value, ok := r.Header[testingutils.CeTypeHeader]
-		if !ok {
-			return errors.New("event-type header is not found")
+		value := r.Header.Get(testingutils.CeTypeHeader)
+		if len(value) == 0 {
+			return errors.New("event-type header is not found or empty")
 		}
-		if !strings.Contains(value[0], appName) {
-			return fmt.Errorf("expected the event-type [%s] to contain the application name [%s] for binary mode", value[0], appName)
+		if !strings.Contains(value, appName) {
+			return fmt.Errorf("expected the event-type [%s] to contain the application name [%s] for binary mode", value, appName)
 		}
 		return nil
 	}
