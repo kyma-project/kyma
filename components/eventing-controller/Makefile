@@ -122,8 +122,8 @@ copy-crds: manifests-local
 
 copy-external-crds:
 	@echo "copying external CRDs to config/crd/external"
-	curl -L#o config/crd/external/apirules-gateway-kyma-project-io.yaml https://raw.githubusercontent.com/kyma-incubator/api-gateway/main/config/crd/bases/gateway.kyma-project.io_apirules.yaml
-	curl -L#o config/crd/external/hydra.ory.sh_oauth2clients.yaml https://raw.githubusercontent.com/ory/hydra-maester/master/config/crd/bases/hydra.ory.sh_oauth2clients.yaml
+	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
+	cp ../../installation/resources/crds/ory/oauth2clients.crd.yaml config/crd/external/hydra.ory.sh_oauth2clients.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary

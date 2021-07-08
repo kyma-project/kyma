@@ -16,163 +16,163 @@ spec:
     singular: apirule
   scope: Namespaced
   versions:
-  - name: v1alpha1
-    schema:
-      openAPIV3Schema:
-        description: APIRule is the Schema for the apis ApiRule
-        properties:
-          apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: APIRule is the Schema for the apis ApiRule
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this representation
               of an object. Servers should convert recognized schemas to the latest
               internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-            type: string
-          kind:
-            description: 'Kind is a string value representing the REST resource this
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this
               object represents. Servers may infer this from the endpoint the client
               submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: APIRuleSpec defines the desired state of ApiRule
-            properties:
-              gateway:
-                description: Gateway to be used
-                pattern: ^(?:[_a-z0-9](?:[_a-z0-9-]+[a-z0-9])?\.)+(?:[a-z](?:[a-z0-9-]+[a-z0-9])?)?$
-                type: string
-              rules:
-                description: Rules represents collection of Rule to apply
-                items:
-                  description: Rule .
-                  properties:
-                    accessStrategies:
-                      description: Set of access strategies for a single path
-                      items:
-                        description: Authenticator represents a handler that authenticates
-                          provided credentials.
-                        properties:
-                          config:
-                            description: Config configures the handler. Configuration
-                              keys vary per handler.
-                            type: object
-                            x-kubernetes-preserve-unknown-fields: true
-                          handler:
-                            description: Name is the name of a handler
-                            type: string
-                        required:
-                        - handler
-                        type: object
-                      minItems: 1
-                      type: array
-                    methods:
-                      description: Set of allowed HTTP methods
-                      items:
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: APIRuleSpec defines the desired state of ApiRule
+              properties:
+                gateway:
+                  description: Gateway to be used
+                  pattern: ^(?:[_a-z0-9](?:[_a-z0-9-]+[a-z0-9])?\.)+(?:[a-z](?:[a-z0-9-]+[a-z0-9])?)?$
+                  type: string
+                rules:
+                  description: Rules represents collection of Rule to apply
+                  items:
+                    description: Rule .
+                    properties:
+                      accessStrategies:
+                        description: Set of access strategies for a single path
+                        items:
+                          description: Authenticator represents a handler that authenticates
+                            provided credentials.
+                          properties:
+                            config:
+                              description: Config configures the handler. Configuration
+                                keys vary per handler.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            handler:
+                              description: Name is the name of a handler
+                              type: string
+                          required:
+                            - handler
+                          type: object
+                        minItems: 1
+                        type: array
+                      methods:
+                        description: Set of allowed HTTP methods
+                        items:
+                          type: string
+                        minItems: 1
+                        type: array
+                      mutators:
+                        description: Mutators to be used
+                        items:
+                          description: Mutator represents a handler that transforms
+                            the HTTP request before forwarding it.
+                          properties:
+                            config:
+                              description: Config configures the handler. Configuration
+                                keys vary per handler.
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            handler:
+                              description: Name is the name of a handler
+                              type: string
+                          required:
+                            - handler
+                          type: object
+                        type: array
+                      path:
+                        description: Path to be exposed
+                        pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
                         type: string
-                      minItems: 1
-                      type: array
-                    mutators:
-                      description: Mutators to be used
-                      items:
-                        description: Mutator represents a handler that transforms
-                          the HTTP request before forwarding it.
-                        properties:
-                          config:
-                            description: Config configures the handler. Configuration
-                              keys vary per handler.
-                            type: object
-                            x-kubernetes-preserve-unknown-fields: true
-                          handler:
-                            description: Name is the name of a handler
-                            type: string
-                        required:
-                        - handler
-                        type: object
-                      type: array
-                    path:
-                      description: Path to be exposed
-                      pattern: ^([0-9a-zA-Z./*()?!\\_-]+)
+                    required:
+                      - accessStrategies
+                      - methods
+                      - path
+                    type: object
+                  minItems: 1
+                  type: array
+                service:
+                  description: Definition of the service to expose
+                  properties:
+                    external:
+                      description: Defines if the service is internal (in cluster) or
+                        external
+                      type: boolean
+                    host:
+                      description: URL on which the service will be visible
+                      maxLength: 256
+                      minLength: 3
+                      pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                       type: string
+                    name:
+                      description: Name of the service
+                      type: string
+                    port:
+                      description: Port of the service to expose
+                      format: int32
+                      maximum: 65535
+                      minimum: 1
+                      type: integer
                   required:
-                  - accessStrategies
-                  - methods
-                  - path
+                    - host
+                    - name
+                    - port
                   type: object
-                minItems: 1
-                type: array
-              service:
-                description: Definition of the service to expose
-                properties:
-                  external:
-                    description: Defines if the service is internal (in cluster) or
-                      external
-                    type: boolean
-                  host:
-                    description: URL on which the service will be visible
-                    maxLength: 256
-                    minLength: 3
-                    pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
-                    type: string
-                  name:
-                    description: Name of the service
-                    type: string
-                  port:
-                    description: Port of the service to expose
-                    format: int32
-                    maximum: 65535
-                    minimum: 1
-                    type: integer
-                required:
-                - host
-                - name
-                - port
-                type: object
-            required:
-            - gateway
-            - rules
-            - service
-            type: object
-          status:
-            description: APIRuleStatus defines the observed state of ApiRule
-            properties:
-              APIRuleStatus:
-                description: APIRuleResourceStatus .
-                properties:
-                  code:
-                    description: StatusCode .
-                    type: string
-                  desc:
-                    type: string
-                type: object
-              accessRuleStatus:
-                description: APIRuleResourceStatus .
-                properties:
-                  code:
-                    description: StatusCode .
-                    type: string
-                  desc:
-                    type: string
-                type: object
-              lastProcessedTime:
-                format: date-time
-                type: string
-              observedGeneration:
-                format: int64
-                type: integer
-              virtualServiceStatus:
-                description: APIRuleResourceStatus .
-                properties:
-                  code:
-                    description: StatusCode .
-                    type: string
-                  desc:
-                    type: string
-                type: object
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
+              required:
+                - gateway
+                - rules
+                - service
+              type: object
+            status:
+              description: APIRuleStatus defines the observed state of ApiRule
+              properties:
+                APIRuleStatus:
+                  description: APIRuleResourceStatus .
+                  properties:
+                    code:
+                      description: StatusCode .
+                      type: string
+                    desc:
+                      type: string
+                  type: object
+                accessRuleStatus:
+                  description: APIRuleResourceStatus .
+                  properties:
+                    code:
+                      description: StatusCode .
+                      type: string
+                    desc:
+                      type: string
+                  type: object
+                lastProcessedTime:
+                  format: date-time
+                  type: string
+                observedGeneration:
+                  format: int64
+                  type: integer
+                virtualServiceStatus:
+                  description: APIRuleResourceStatus .
+                  properties:
+                    code:
+                      description: StatusCode .
+                      type: string
+                    desc:
+                      type: string
+                  type: object
+              type: object
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
 status:
   acceptedNames:
     kind: ""
