@@ -12,6 +12,7 @@ const {
     this.timeout(30 * 60 * 1000); // 30 min
     this.slow(5 * 1000);
 
+    console.log(process.env.KYMA_ALPHA);
     if (process.env.KYMA_ALPHA) {
       it("Checks grafana redirect to kyma docs", async () => {
         let res = await assertGrafanaredirect("https://kyma-project.io/docs")
