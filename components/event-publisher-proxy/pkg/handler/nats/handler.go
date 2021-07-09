@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
+
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -156,6 +158,9 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 	}
 
 	h.receive(ctx, event)
+
+	// Add tracing context to cloud events
+	tracing.AddTracingContextToCEExtensions(request.Header, event)
 
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
 	h.writeResponse(writer, statusCode, respBody)
