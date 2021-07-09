@@ -51,43 +51,13 @@ spec:
               value: {{ .Values.global.ingress.domainName | quote }}
             - name: APP_BUSOLA_URL
               value: {{ .Values.deployment.env.busolaURL | quote }}
-            - name: APP_OIDC_ISSUER_URL
-              value: {{ .Values.deployment.env.oidcIssuerURL | quote }}
-            - name: APP_OIDC_CLIENT_ID
-              value: {{ .Values.deployment.env.oidcClientId | quote }}
-            - name: APP_OIDC_SCOPE
-              value: {{ .Values.deployment.env.oidcScope | quote }}
-            - name: APP_OIDC_USE_PKCE
-              value: {{ .Values.deployment.env.oidcUsePKCE | quote }}
+            - name: APP_KUBECONFIG_ID
+              value: {{ .Values.deployment.env.kubeconfigID | quote }}
             - name: OVERRIDE_BUSOLA_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.config.secretName }}
                   key: busolaURL
-                  optional: true
-            - name: OVERRIDE_OIDC_ISSUER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.secretName }}
-                  key: oidcIssuerURL
-                  optional: true
-            - name: OVERRIDE_OIDC_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.secretName }}
-                  key: oidcClientID
-                  optional: true
-            - name: OVERRIDE_OIDC_SCOPE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.secretName }}
-                  key: oidcScope
-                  optional: true
-            - name: OVERRIDE_OIDC_USE_PKCE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.config.secretName }}
-                  key: oidcUsePKCE
                   optional: true
             - name: APP_UAA_URL
               valueFrom:
