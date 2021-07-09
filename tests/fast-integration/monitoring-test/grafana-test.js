@@ -12,7 +12,7 @@ const {
     this.timeout(30 * 60 * 1000); // 30 min
     this.slow(5 * 1000);
 
-    if (process.env.isKyma2 === "true") {
+    if (process.env.KYMA_ALPHA) {
       it("Checks grafana redirect to kyma docs", async () => {
         let res = await assertGrafanaredirect("https://kyma-project.io/docs")
         assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
