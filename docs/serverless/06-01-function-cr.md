@@ -114,7 +114,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.buildResources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
 | **spec.buildResources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
 | **spec.buildResources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
-| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs12`, `python38` and `nodejs14`. It is set to `nodejs14` unless specified otherwise.  |
+| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs12`, `nodejs14`, `python38`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.type**                          |      No       | Defines that you use a Git repository as the source of Function's code and dependencies. It must be set to `git`. |
 | **spec.source**                          |      Yes       | Provides the Function's full source code or the name of the Git directory in which the code and dependencies are stored.     |
 | **spec.baseDir**                          |      No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built​. |
