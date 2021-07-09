@@ -12,6 +12,9 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: 0.0.0.0/0
+        traffic.sidecar.istio.io/includeOutboundIPRanges: '*'
       labels: {{- include "nats-controller.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "nats-controller.fullname" . }}
