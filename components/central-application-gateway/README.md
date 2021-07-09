@@ -38,8 +38,7 @@ To start the Central Application Gateway, run this command:
 ```
 
 The Central Application Gateway has the following parameters:
-- **disableLegacyConnectivity** is the flag for disabling the default legacy mode and enabling the Compass mode. The default value is `false`.
-- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone (legacy) mode. The default port is `8080`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and Functions to an external solution in the default standalone (legacy) mode or Compass bundles with a single API definition. The default port is `8080`.
 - **proxyPortCompass** is the port that acts as a proxy for the calls from services and Functions to an external solution in the Compass mode. The default port is `8082`.
 - **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
 - **namespace** is the Namespace in which the Central Application Gateway is deployed. The default Namespace is `kyma-system`.
@@ -53,10 +52,10 @@ The Central Application Gateway has the following parameters:
 ## API
 The Central Application Gateway exposes:
 - an external API implementing a health endpoint for liveness and readiness probes
-- an internal API implementing a proxy handler accessible via a service of type ClusterIP
+- 2 internal APIs implementing a proxy handler accessible via a service of type `ClusterIP`
 
 ### Standalone (legacy) mode
-If  **disableLegacyConnectivity** is `false`, the proxy API exposes the following endpoint:
+The proxy API exposes the following endpoint:
 ```bash
 {APPLICATION_NAME}/{SERVICE_NAME}/{TARGET_API_PATH}
 ``` 
@@ -73,16 +72,25 @@ As a result, the Central Application Gateway:
    ```bash
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
 
+#### Standalone mode for Compass - simplified API
+
+The standalone mode can also be used for Compass bundles with a single API definition.
+This means that `{API_DEFINITION_NAME}` should be removed from the URL and its pattern looks like:
+```
+{APPLICATION_NAME}/{API_BUNDLE_NAME}/{TARGET_API_PATH}
+```
+> **NOTE:** Invocation of service bundles configured with multiple API definitions will result in **400 Bad Request** failure.
+
 ### Compass mode
-If **disableLegacyConnectivity** is `true`, the proxy API exposes the following endpoint:
+The proxy API exposes the following endpoint:
 ```bash
 {APPLICATION_NAME}/{API_BUNDLE_NAME}/{API_DEFINITION_NAME}/{TARGET_API_PATH}
-``` 
+```
 
 For instance, if the user registered the `cc-occ` API bundle with the `commerce-webservices` API definition in the `ec` application, they can send a request to the following URL:
 ```bash
 http://central-application-gateway:8082/ec/cc-occ/commerce-webservices/basesites
-``` 
+```
 
 As a result, the Central Application Gateway:
 1. Looks for the `cc-occ` service and the `commerce-webservices` entry in the `ec` Application CRD and extracts the target URL path along with the authentication configuration
@@ -90,6 +98,12 @@ As a result, the Central Application Gateway:
 3. Sends the request to the following path: 
    ```bash
    {TARGET_URL_EXTRACTED_FROM_APPLICATION_CRD}/basesites
+   ```
+
+#### Handling ambiguous API definition names
+
+A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CRD should be unique for a given application.
+Invocation of endpoints with duplicate names will result in a **400 Bad Request** failure. In such a case, one of the names should be changed to avoid ambiguity.
 
 ## Development
 
