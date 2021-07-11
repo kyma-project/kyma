@@ -964,6 +964,15 @@ async function patchDeployment(name, ns, patch) {
   );
 }
 
+async function isKyma2() {
+  try {
+    const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
+    return res.body.items.length === 0;
+  } catch(err) {
+    throw new Error(`Error while trying to get pods in kyma-installer namespace: ${err.toString()}`);
+  }
+}
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -1014,5 +1023,6 @@ module.exports = {
   eventingSubscription,
   getVirtualService,
   patchDeployment,
+  isKyma2
 };
 
