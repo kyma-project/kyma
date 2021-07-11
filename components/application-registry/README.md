@@ -1,6 +1,6 @@
 # Application Registry
 
-This is the repository for the Application Registry, which is a part of the Application Connector. See [this](../../docs/application-connector/) directory for more documentation for this component.
+This is the repository for the Application Registry, which is a part of the Application Connector. See [this](../../../../docs/01-overview/02-main-areas/application-connectivity) directory for more documentation for this component.
 
 ## Prerequisites
 
