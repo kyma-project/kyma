@@ -251,24 +251,19 @@ async function checkGrafanaRedirectsInKyma1() {
 }
 
 async function checkGrafanaRedirectsInKyma2() {
-  console.log("Checking grafana redirect to kyma docs");
+  // Checking grafana redirect to kyma docs
   let res = await assertGrafanaredirect("https://kyma-project.io/docs")
   assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
 
-  console.log("Creating secret for auth proxy redirect");
+  // Creating secret for auth proxy redirect
   await createSecret();
-
-  console.log("Restarting the proxy pod");
   await restartProxyPod();
-
-  console.log("Checking grafana redirect to OIDC provider");
+  // Checking grafana redirect to OIDC provider
   res = await assertGrafanaredirect("https://accounts.google.com/signin/oauth");
   assert.isTrue(res, "Grafana redirect to google does not work!");
 
-  console.log("Updating proxy deployment");
   await updateProxyDeployment();
-
-  console.log("Checks authentication works and redirects to grafana URL");
+  // Checking that authentication works and redirects to grafana URL
   res = await assertGrafanaredirect("https://grafana.");
   assert.isTrue(res, "Grafana redirect to grafana landing page does not work!");
 }
