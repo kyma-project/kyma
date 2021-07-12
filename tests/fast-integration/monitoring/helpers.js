@@ -122,10 +122,10 @@ async function assertTimeSeriesExist(metric, labels) {
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
 }
 
-async function retryUrl(url, redirectURL, httpStatus) {
+async function retryUrl(url, redirectURL, ignoreSSl, httpStatus) {
   let retries = 0
   while (retries < 20) {
-    let res = await queryGrafana(url, redirectURL, httpStatus)
+    let res = await queryGrafana(url, redirectURL, ignoreSSl, httpStatus)
     if (res === true) {
       return res
     }
@@ -137,25 +137,29 @@ async function retryUrl(url, redirectURL, httpStatus) {
 
 async function assertGrafanaredirect(redirectURL) {
   let vs = await getVirtualService("kyma-system", "monitoring-grafana")
+  let ignoreSSl = false
+  if (vs.includes("local.kyma.dev")) {
+    ignoreSSl = true
+  }
   let url = "https://"+vs
   if (redirectURL.includes("https://dex.")) {
     console.log("Checking redirect for dex")
-    return await retryUrl(url, redirectURL, 200)
+    return await retryUrl(url, redirectURL, ignoreSSl, 200)
   }
 
   if (redirectURL.includes("https://kyma-project.io/docs")) {
     console.log("Checking redirect for kyma docs")
-    return await retryUrl(url, redirectURL, 403)
+    return await retryUrl(url, redirectURL, ignoreSSl, 403)
   }
 
   if (redirectURL.includes("https://accounts.google.com/signin/oauth")) {
     console.log("Checking redirect for google")
-    return await retryUrl(url, redirectURL, 200)
+    return await retryUrl(url, redirectURL, ignoreSSl, 200)
   }
 
   if (redirectURL.includes("grafana")) {
     console.log("Checking redirect for grafana")
-    return await retryUrl(url, redirectURL, 200)
+    return await retryUrl(url, redirectURL, ignoreSSl, 200)
   }
 }
 

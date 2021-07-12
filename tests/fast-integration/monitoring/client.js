@@ -1,5 +1,7 @@
 const axios = require('axios');
 const axiosRetry = require('axios-retry');
+const https = require('https');
+
 
 const {
     kubectlPortForward,
@@ -49,11 +51,15 @@ async function get(path) {
     return responseBody;
 }
 
-async function queryGrafana(url, redirectURL, httpErrorCode) {
+async function queryGrafana(url, redirectURL, ignoreSSl, httpErrorCode) {
     try {
         delete axios.defaults.headers.common["Accept"]
-        const res = await axios.get(url)
-        if (res.status === httpErrorCode ) {
+        // Ignore SSL certificate for self signed certificates
+        const agent = new https.Agent({
+            rejectUnauthorized: !ignoreSSl
+        });
+        const res = await axios.get(url, { httpsAgent: agent })
+        if (res.status === httpErrorCode) {
             if (res.request.res.responseUrl.includes(redirectURL)) {
                 return true
             }
