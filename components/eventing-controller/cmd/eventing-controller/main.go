@@ -80,11 +80,11 @@ func main() {
 	}
 
 	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "setup health check failed: %v")
+		setupLogger.Error(err, "setup health check failed")
 		os.Exit(1)
 	}
 	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "setup ready check failed: %v")
+		setupLogger.Error(err, "setup ready check failed")
 		os.Exit(1)
 	}
 
