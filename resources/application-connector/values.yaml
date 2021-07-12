@@ -14,7 +14,8 @@ global:
   centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
   isLocalEnv: false
-  namespace: kyma-integration
+  integrationNamespace: kyma-integration
+  systemNamespace: kyma-system
   strictMode: disabled
   log:
     format: "json"
@@ -74,7 +75,7 @@ global:
   central_application_connectivity_validator:
     version: "PR-11558"
   central_application_gateway:
-    version: "PR-11624"
+    version: "PR-11631"
 
 application_connectivity_certs_setup_job:
   secrets:
