@@ -119,5 +119,4 @@ components:
   kyma deploy --component eventing --component istio@istio-system
   ```
 
-  To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
-  
+To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
