@@ -100,7 +100,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 
 	if len(secretList.Items) > 1 {
 		// This is not allowed!
-		r.namedLogger().Debugw("more than one secret with the label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue)
+		r.namedLogger().Debugw("more than one secret with the label exist", "key", BEBBackendSecretLabelKey, "value", BEBBackendSecretLabelValue, "count", len(secretList.Items))
 		currentBackend, err := r.getCurrentBackendCR(ctx)
 		if err != nil {
 			if k8serrors.IsNotFound(err) {
