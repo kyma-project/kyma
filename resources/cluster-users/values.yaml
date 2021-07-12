@@ -103,6 +103,7 @@ global:
     domainName: "kyma.local"
 
 users:
-  adminName: "admin@kyma.cx"
+  administrators:
+    - "admin@kyma.cx"
   adminGroup:
   bindStaticUsers: true
