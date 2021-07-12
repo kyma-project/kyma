@@ -6,7 +6,22 @@ You can simply use the default Kyma installation, or modify it as it fits your p
 
 ## Default installation
 
-If you use the `deploy` command without any flags, Kyma provides a default domain. 
+Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to run Kyma locally.
+### Prerequisites
+
+- [Kyma CLI](https://github.com/kyma-project/cli)
+- [Docker](https://docs.docker.com/get-docker/)
+- [k3d](https://k3d.io/#installation)
+
+### Provision and install
+
+You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster run:
+
+```bash
+kyma provision k3s
+```
+
+If you use the `deploy` command without any flags, Kyma provides a default domain.
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
 
   ```bash
@@ -36,8 +51,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install with custom domain
 
-To install Kyma using your own domain name, you must provide the certificate and key as files. 
-If you don't have a certificate yet, you can create a self-signed certificate and key:
+To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
 
   ```bash
   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out crt.pem -days 365
@@ -104,3 +118,6 @@ components:
   ```bash
   kyma deploy --component eventing --component istio@istio-system
   ```
+
+  To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
+  
