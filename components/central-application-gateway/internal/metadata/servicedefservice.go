@@ -78,5 +78,9 @@ func handleError(err apperrors.AppError, notFoundMessage, internalErrorMEssage s
 		return apperrors.NotFound(notFoundMessage)
 	}
 	log.Error(internalErrorMEssage)
+
+	if err.Code() == apperrors.CodeWrongInput {
+		return apperrors.WrongInput(internalErrorMEssage)
+	}
 	return apperrors.Internal(internalErrorMEssage)
 }

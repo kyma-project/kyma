@@ -9,12 +9,11 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/kyma-project/tpi/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.5.7-96ae36d3
+  tag: 1.5.7-a558c5c4
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
 serviceAccount:
   create: true
   annotations: {}
@@ -29,7 +28,8 @@ podSecurityPolicy:
 podSecurityContext:
   {}
   # fsGroup: 2000
-dnsConfig: {}
+dnsConfig:
+  {}
   # nameservers:
   #   - 1.2.3.4
   # searches:
@@ -42,9 +42,11 @@ dnsConfig: {}
 securityContext:
   allowPrivilegeEscalation: false
   privileged: false
-  # capabilities:
-  #   drop:
-  #   - ALL
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - FOWNER
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
@@ -52,7 +54,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 2020
-  labels:
+  labels: 
     {}
   annotations:
     {}
@@ -122,7 +124,8 @@ extraVolumeMounts: ""
 #   - name: volume
 #     mountPath: /var/tmp
 
-updateStrategy: {}
+updateStrategy:
+  {}
   # type: RollingUpdate
   # rollingUpdate:
   #   maxUnavailable: 1
@@ -138,7 +141,7 @@ prometheusRules:
 # Fluentbit configuration section
 # https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
 config:
-  # Secret values that will be included in a Secret mounted to the Fluent Bit Pods. 
+  # Secret values that will be included in a Secret mounted to the Fluent Bit Pods.
   secrets:
     #MY_ES_PASSWD: "1234"
   service:
@@ -156,11 +159,11 @@ config:
       enabled: true
       alias:
       tag: loki.*
-      tagRegex: 
+      tagRegex:
       path: /var/log/containers/*.log
       # If enabled, it appends the name of the monitored file as part of the record. The value assigned becomes the key in the map.
       pathKey:
-      excludePath: 
+      excludePath:
       #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
       bufferChunkSize:
       # Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
@@ -344,7 +347,7 @@ config:
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   parsers:
     additional: ""
-  
+
   # extra can be used to pass extra configuration to Fluent Bit. Find below a sample configuration.
   extra: #|
   #  [FILTER]
@@ -353,10 +356,9 @@ config:
   #  [OUTPUT]
   #      Name              test
   #      Match             *
-  
+
   script: #|
   # myScript() {}
-
 # Defines an entry to add an external service to the service mesh
 # By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)
 # A typical error message will look like 'routines:ssl3_get_record:wrong version number'. In such cases, add an entry for the external service like below

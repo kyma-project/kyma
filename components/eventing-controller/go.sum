@@ -668,6 +668,8 @@ github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5/go.mod h1:/wsWhb9smxS
 github.com/openzipkin/zipkin-go v0.1.6/go.mod h1:QgAqvLzwWbR/WpD4A3cGpPtJrZXNIiJc5AZX7/PBEpw=
 github.com/openzipkin/zipkin-go v0.2.1/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
 github.com/openzipkin/zipkin-go v0.2.2/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
+github.com/ory/hydra-maester v0.0.22 h1:f8XeVINk9FOSrLU89SPO/HJ3PiUeAgSVemQNbUaZkKk=
+github.com/ory/hydra-maester v0.0.22/go.mod h1:XcyPVld02QF8kqUhDtsn3WTVfxJZ4Z++8sMxpffWO2M=
 github.com/ory/hydra-maester v0.0.23 h1:ZL9NI24RarMZa5pQEgzRKWo2sFjSlBvWt44NDRcJk6o=
 github.com/ory/hydra-maester v0.0.23/go.mod h1:nU2hqu+VC1D42duwtTEXyJlvfDIOWyht57/jAX2FuW0=
 github.com/ory/oathkeeper-maester v0.1.0 h1:xqY4Px2ubPyAS/3bl0AcI6ctW2/lrXJUHHb5gXNz97U=
