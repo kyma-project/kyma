@@ -42,15 +42,15 @@ function installOptions(yargs) {
     'new-eventing': {
       describe: 'Install new eventing instead of knative'
     },
+    'central-application-connectivity': {
+      describe: 'Install Application Connectivity components as single cluster-wide instances'
+    },
     'with-compass': {
       describe: 'Install with compass-runtime-agent and disable legacy connectivity'
-    },
-    'with-central-application-gateway': {
-      describe: 'Install a single cluster-wide application gateway'
     }
   });
-
 }
+
 function uninstallOptions(yargs) {
   yargs.options({
     'skip-crd': {
@@ -69,7 +69,6 @@ function uninstallOptions(yargs) {
       describe: 'Install only these components (comma separated list)'
     }
   });
-
 }
 
 function verbose(argv) {
@@ -108,7 +107,7 @@ async function install(argv) {
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const newEventing = argv.newEventing;
   const withCompass = argv.withCompass;
-  const withCentralApplicationGateway = argv.withCentralApplicationGateway;
+  const centralApplicationConnectivity = argv.centralApplicationConnectivity;
   const useHelmTemplate = argv.useHelmTemplate;
 
   await installer.installKyma({
@@ -117,8 +116,8 @@ async function install(argv) {
     skipComponents,
     isUpgrade: !!argv.upgrade,
     newEventing,
+    centralApplicationConnectivity,
     withCompass,
-    withCentralApplicationGateway,
     useHelmTemplate
   });
   console.log('Kyma installed');
