@@ -20,7 +20,7 @@ const installer = require("../installer");
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
+  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false;
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
