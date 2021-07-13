@@ -80,7 +80,7 @@ func getQos(qosStr string) (types.Qos, error) {
 func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings, defaultNamespace string) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to apply default protocol settings")
+		return nil, errors.Wrap(err, "apply default protocol settings failed")
 	}
 	// Name
 	emsSubscription.Name = subscription.Name
@@ -107,14 +107,14 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	// WebhookUrl
 	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get exposed URL from APIRule")
+		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}
 	emsSubscription.WebhookUrl = urlTobeRegistered
 
 	// Events
 	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
 	if err != nil {
-		return nil, errors.Wrap(err, "error deduplicating subscription filters")
+		return nil, errors.Wrap(err, "deduplicate subscription filters failed")
 	}
 	for _, e := range uniqueFilters.Filters {
 		s := defaultNamespace
@@ -209,7 +209,7 @@ func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscript
 func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
 	unstructuredObj, err := toUnstructuredSub(sub)
 	if err != nil {
-		return errors.Wrap(err, "failed to convert subscription to unstructured")
+		return errors.Wrap(err, "convert subscription to unstructured failed")
 	}
 	_, err = dClient.
 		Resource(SubscriptionGroupVersionResource()).
