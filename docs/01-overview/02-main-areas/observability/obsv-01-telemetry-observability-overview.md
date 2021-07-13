@@ -12,7 +12,9 @@ Kyma collects telemetry data with several in-cluster components:
 
 > **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/02-main-areas/service-mesh/con-monitoring-istio.md).
 
-[Fluent Bit](https://fluentbit.io/) collects logs.
+[Fluent Bit](https://fluentbit.io/) collects logs. 
+
+Traces are getting to [Jaeger](https://www.jaegertracing.io/docs).
 
 The collected telemetry data are exposed so that you can view and analyze them with observability tools.
 
