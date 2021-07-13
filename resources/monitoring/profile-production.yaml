@@ -16,12 +16,6 @@ prometheus:
             requests:
               storage: 20Gi
 
-prometheus-istio:
-  server:
-    resources:
-      limits:
-        memory: 1000m
-
 prometheusOperator:
   resources:
     requests:
