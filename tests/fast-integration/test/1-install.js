@@ -7,7 +7,7 @@ describe("Installation", function () {
     const options = {
       skipComponents: ["dex","console"],
       newEventing: true,
-      withCentralApplicationGateway: process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false
+      withCentralApplicationConnectivity: process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false
     };
     await installKyma(options);
   });

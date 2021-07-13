@@ -24,7 +24,7 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false;
+  const withCentralApplicationConnectivity = process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false;
   const testNamespace = "test";
   const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;
@@ -43,9 +43,9 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).catch((err) => {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationConnectivity).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway);
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationConnectivity);
     });
   });
 
