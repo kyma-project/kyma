@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: {{ .Chart.Name }}-health-rule
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}

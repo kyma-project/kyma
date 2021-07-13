@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -52,7 +52,7 @@ spec:
           - "--appName={{ .Chart.Name }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"
-          - "--namespace={{ .Values.global.namespace }}"
+          - "--namespace={{ .Values.global.integrationNamespace }}"
           - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
           - "--appTokenExpirationMinutes={{ .Values.deployment.args.appTokenExpirationMinutes }}"
           - "--runtimeTokenExpirationMinutes={{ .Values.deployment.args.runtimeTokenExpirationMinutes }}"
