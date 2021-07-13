@@ -3,7 +3,7 @@ const {
   checkGrafanaRedirectsInKyma2
 } = require("../monitoring/helpers"); 
 const {
-  isKyma2
+  getEnvOrThrow
 } = require("../utils");
 
 
@@ -12,7 +12,7 @@ describe("Grafana test", async function () {
   this.slow(5 * 1000);
 
   it("Checking Grafana redirects", async () => {
-    const kyma2 = await isKyma2();
+    const kyma2 = getEnvOrThrow("KYMA_ALPHA");
     if (kyma2) {
       await checkGrafanaRedirectsInKyma2();
     } else {
