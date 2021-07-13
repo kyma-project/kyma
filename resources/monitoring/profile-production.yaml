@@ -22,6 +22,15 @@ prometheus-istio:
       limits:
         memory: 4Gi
 
+prometheusOperator:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
 alertmanager:
   alertmanagerSpec:
     retention: 240h
