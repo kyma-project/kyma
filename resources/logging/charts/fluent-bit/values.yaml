@@ -133,7 +133,7 @@ existingConfigMap: ""
 ## Custom configuration for Kyma alerting rules
 prometheusRules:
   ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
-  fluentBitAlertFilter: ""
+  fluentBitAlertFilter: "name='loki-output'"
 
 # Fluentbit configuration section
 # https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
@@ -230,7 +230,7 @@ config:
   outputs:
     loki:
       enabled: true
-      alias:
+      alias: "loki-output"
       match: "loki.*"
       serviceName: "logging-loki"
       servicePort: 3100
