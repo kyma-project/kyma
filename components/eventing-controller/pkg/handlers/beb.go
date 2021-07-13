@@ -165,7 +165,7 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// create a new EMS subscription
-	if err := b.createSubscription(subscription); err != nil {
+	if err := b.createSubscription(subscription, log); err != nil {
 		log.Errorw("create BEB subscription failed", "error", err)
 		return nil, 0, err
 	}
@@ -254,7 +254,7 @@ func (b *Beb) deleteSubscription(name string) error {
 	return nil
 }
 
-func (b *Beb) createSubscription(subscription *types.Subscription) error {
+func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.SugaredLogger) error {
 	createResponse, err := b.Client.Create(subscription)
 	if err != nil {
 		return fmt.Errorf("create subscription failed: %v", err)
@@ -262,6 +262,7 @@ func (b *Beb) createSubscription(subscription *types.Subscription) error {
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
 		return fmt.Errorf("create subscription failed: %v", createResponse)
 	}
+	log.Debug("create subscription succeeded")
 	return nil
 }
 

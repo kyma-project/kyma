@@ -181,6 +181,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 		result.Requeue = true
+		log.Debugw("update subscription status succeeded")
 	}
 
 	return result, nil
