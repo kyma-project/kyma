@@ -3,8 +3,6 @@ jobs:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
     tag: "20210610-d25e85b1"
-  installer:
-    namespace: kyma-installer
 
 global:
   isLocalEnv: false
