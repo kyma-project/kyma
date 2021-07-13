@@ -7,6 +7,7 @@ You can simply use the default Kyma installation, or modify it as it fits your p
 ## Default installation
 
 Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to run Kyma locally.
+
 ### Prerequisites
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
@@ -17,9 +18,9 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster run:
 
-```bash
-kyma provision k3s
-```
+  ```bash
+  kyma provision k3s
+  ```
 
 If you use the `deploy` command without any flags, Kyma provides a default domain.
 For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
@@ -51,6 +52,8 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install with custom domain
 
+If you install Kyma on a reamote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get 
+
 To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
 
   ```bash
@@ -68,6 +71,7 @@ To install Kyma using your own domain name, you must provide the certificate and
 ## Install from a specific source
 
 Optionally, you can specify from which source you want to deploy Kyma. For example, you can choose the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.
+
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
   ```bash
@@ -86,13 +90,13 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
 To deploy Kyma with only specific components, run:
 
-  ```bash
-  kyma deploy --components-file {COMPONENTS_FILE_PATH}
-  ```
+```bash
+kyma deploy --components-file {COMPONENTS_FILE_PATH}
+```
 
-  `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only eight components are deployed on the cluster:
+`{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only eight components are deployed on the cluster:
 
-  ```yaml
+```yaml
 prerequisites:
   - name: "cluster-essentials"
   - name: "istio"
@@ -105,10 +109,10 @@ components:
   - name: "kiali"
   - name: "monitoring"
   - name: "eventing"
-  ```
+```
 
 - Alternatively, you can specify single components instead of a file:
-  
+
   ```bash
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
@@ -119,4 +123,4 @@ components:
   kyma deploy --component eventing --component istio@istio-system
   ```
 
-To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
+> **TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
