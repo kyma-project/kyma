@@ -20,7 +20,7 @@ prometheus-istio:
   server:
     resources:
       limits:
-        memory: 4Gi
+        memory: 1000m
 
 prometheusOperator:
   resources:
@@ -34,3 +34,12 @@ prometheusOperator:
 alertmanager:
   alertmanagerSpec:
     retention: 240h
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
