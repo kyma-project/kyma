@@ -42,7 +42,7 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
   </summary>
 
   ```bash
-  kubectl -n kyma-system port-forward svc/tracing-jaeger-query 16686:16686 
+  kubectl -n kyma-system port-forward svc/tracing-jaeger-query 16686:16686
   ```
 
   </details>
@@ -64,10 +64,10 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
 1. Create a new OpenID Connect application for your identity provider. Set the callback URL to the `/oauth2/callback` path of your service, for example, `https://kiali.kyma.example.com/oauth2/callback`. Your identity provider will return a client ID, a client secret, and a token issuer URL.
 
-2. Create a `Secret` for the OAuth2 Proxy configuration [environment variables](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#environment-variables). 
-   
-   - For an OpenID Connect compliant provider, adapt the client ID, secret and token issuer to the values that were provided while creating the application. 
-   
+2. Create a `Secret` for the OAuth2 Proxy configuration [environment variables](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#environment-variables).
+
+   - For an OpenID Connect compliant provider, adapt the client ID, secret and token issuer to the values that were provided while creating the application.
+
    - To limit access to specific user groups, configure this with the `OAUTH2_PROXY_ALLOWED_GROUPS` variable and ensure that `OAUTH2_PROXY_OIDC_GROUPS_CLAIM` points to the groups attribute name that is used by your authentication service (`groups` is the default). To get the configuration flags required for other identity provider types, see [OAuth2 Proxy docs](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/).
 
 <div tabs>
@@ -126,7 +126,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
 >**NOTE:** By default, you are redirected to the documentation. To go to the service's UI instead, disable the OAuth2 Proxy provider button by setting `OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true`.
 
-6. Restart the OAuth2 Proxy pod:
+3. Restart the OAuth2 Proxy pod:
 
 <div tabs>
   <details>

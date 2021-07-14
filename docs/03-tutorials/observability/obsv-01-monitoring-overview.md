@@ -10,7 +10,7 @@ All the tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-
 
 ## Sequence of tasks
 
-The tutorial set consists of these tasks:
+The instructions cover the following tasks:
 
  ![Monitoring tutorials](./assets/monitoring-tutorials.svg)
 
