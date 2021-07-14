@@ -12,8 +12,8 @@ describe("Grafana test", async function () {
   this.slow(5 * 1000);
 
   it("Checking Grafana redirects", async () => {
-    const kyma2 = getEnvOrThrow("KYMA_ALPHA");
-    if (kyma2) {
+    const isKymaAlpha = getEnvOrThrow("KYMA_ALPHA");
+    if (isKymaAlpha === "true") {
       await checkGrafanaRedirectsInKyma2();
     } else {
       await checkGrafanaRedirectsInKyma1();
