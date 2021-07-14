@@ -42,7 +42,7 @@ global:
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "PR-11678"
+    version: "1683d7cf"
   application_connectivity_validator:
     version: "PR-11558"
   application_operator:
