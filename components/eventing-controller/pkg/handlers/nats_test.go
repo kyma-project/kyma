@@ -352,10 +352,6 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(1))
 }
 
-func checkIsValid(sub *nats.Subscription, t *testing.T) error {
-	return checkValidity(sub, true, t)
-}
-
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, false, t)
 }

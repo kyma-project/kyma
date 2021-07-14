@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -75,11 +77,8 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
 		IdleConnTimeout:     config.IdleConnTimeout,
 	}
-	protocol, err := cev2.NewHTTP(cev2.WithRoundTripper(transport))
-	if err != nil {
-		return nil, err
-	}
-	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
+
+	return cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
 }
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
@@ -188,7 +187,10 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
 
-		if result := n.client.Send(ctxWithCE, *ce); !cev2.IsACK(result) {
+		// Add tracing headers to the subsequent request
+		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
+
+		if result := n.client.Send(traceCtxWithCE, *ce); !cev2.IsACK(result) {
 			n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
