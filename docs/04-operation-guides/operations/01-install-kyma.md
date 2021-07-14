@@ -52,7 +52,7 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install with custom domain
 
-If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address **{load_balancer_IP}** and add the following line to the `hosts` file:
+If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address and add the following line to the `hosts` file:
 
   ```bash
   {load_balancer_IP} kiali.kyma.example.com grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com jaeger.kyma.example.com
