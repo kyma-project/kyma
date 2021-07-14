@@ -6,6 +6,7 @@ const {
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
+  getEnvOrThrow
 } = require("../utils");
 
 describe("Upgrade test tests", function () {
@@ -15,6 +16,12 @@ describe("Upgrade test tests", function () {
   const testNamespace = "test";
 
   it("Listing all pods in cluster", async function () {
+    const isKymaAlpha = getEnvOrThrow("KYMA_ALPHA");
+    if (isKymaAlpha === "true") {
+      console.log("Kyma 2 is installed");
+    } else {
+      console.log("Kyma 1 is installed");
+    }
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
