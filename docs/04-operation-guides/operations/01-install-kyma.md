@@ -52,7 +52,11 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install with custom domain
 
-If you install Kyma on a reamote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get 
+If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address **{load_balancer_IP}** and add the following line to the `hosts` file:
+
+  ```bash
+  {load_balancer_IP} kiali.kyma.example.com grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com jaeger.kyma.example.com
+  ```
 
 To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
 
@@ -84,7 +88,7 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
   kyma deploy --source=local
   ```
 
-  > **NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
+  >**NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
 
 ## Install specific components
 
@@ -123,4 +127,4 @@ components:
   kyma deploy --component eventing --component istio@istio-system
   ```
 
-> **TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
+>**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
