@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}-role
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -27,7 +27,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}-rolebinding
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -38,7 +38,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-role
@@ -78,7 +78,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-{{ .Values.secrets.caSecretName }}-role
@@ -119,7 +119,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-role

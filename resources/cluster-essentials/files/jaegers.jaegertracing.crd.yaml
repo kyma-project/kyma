@@ -18,21 +18,16 @@ spec:
     - name: v1
       served: true
       storage: true
-      additionalPrinterColumns:
-      - jsonPath: .status.phase
-        description: Jaeger instance's status
-        name: Status
-        type: string
-      - jsonPath: .status.version
-        description: Jaeger Version
-        name: Version
-        type: string
-      subresources:
-        status: {}
       schema:
         openAPIV3Schema:
-          description: Temp desc
           type: object
-          properties:
-            spec:
-              type: object
+          x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+        - jsonPath: .status.phase
+          description: Jaeger instance's status
+          name: Status
+          type: string
+        - jsonPath: .status.version
+          description: Jaeger Version
+          name: Version
+          type: string

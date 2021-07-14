@@ -39,7 +39,7 @@ func (l Lister) Get(name string) (*applicationv1alpha1.Application, error) {
 
 	applicationUnstructured, ok := object.(*unstructured.Unstructured)
 	if !ok {
-		return nil, errors.New("failed to convert runtime object to unstructured")
+		return nil, errors.New("convert runtime object to unstructured failed")
 	}
 
 	application := &applicationv1alpha1.Application{}
