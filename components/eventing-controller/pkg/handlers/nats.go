@@ -199,7 +199,7 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 	}
 }
 
-func (n *Nats) namedLogger() *zap.SugaredLogger {components/eventing-controller/pkg/handlers/nats.go
+func (n *Nats) namedLogger() *zap.SugaredLogger {
 	return n.logger.WithContext().Named(natsHandlerName)
 }
 
