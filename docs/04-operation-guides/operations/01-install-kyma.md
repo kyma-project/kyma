@@ -94,26 +94,26 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
 To deploy Kyma with only specific components, run:
 
-```bash
-kyma deploy --components-file {COMPONENTS_FILE_PATH}
-```
+  ```bash
+  kyma deploy --components-file {COMPONENTS_FILE_PATH}
+  ```
 
 `{COMPONENTS_FILE_PATH}` is the path to a YAML file containing the desired component list to be installed. In the following example, only eight components are deployed on the cluster:
 
-```yaml
-prerequisites:
-  - name: "cluster-essentials"
-  - name: "istio"
-    namespace: "istio-system"
-  - name: "certificates"
-    namespace: "istio-system"
-components:
-  - name: "logging"
-  - name: "tracing"
-  - name: "kiali"
-  - name: "monitoring"
-  - name: "eventing"
-```
+  ```yaml
+  prerequisites:
+    - name: "cluster-essentials"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "certificates"
+      namespace: "istio-system"
+  components:
+    - name: "logging"
+    - name: "tracing"
+    - name: "kiali"
+    - name: "monitoring"
+    - name: "eventing"
+  ```
 
 - Alternatively, you can specify single components instead of a file:
 
