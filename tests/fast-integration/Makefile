@@ -20,6 +20,11 @@ ci-skr:
 	npm install
 	npm run test-skr
 
+.PHONY: ci-skr-svcat-migration
+ci-skr-svcat-migration:
+	npm install
+	npm run test-skr-svcat-migration
+
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
 	npm install
