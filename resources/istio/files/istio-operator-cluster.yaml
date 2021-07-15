@@ -8,18 +8,6 @@ spec:
     egressGateways:
     - enabled: false
       k8s:
-        hpaSpec:
-          maxReplicas: 5
-          metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
-          minReplicas: 1
-          scaleTargetRef:
-            apiVersion: apps/v1
-            kind: Deployment
-            name: istio-egressgateway
         resources:
           limits:
             cpu: 2000m
@@ -32,7 +20,6 @@ spec:
     - enabled: true
       k8s:
         hpaSpec:
-          maxReplicas: 5
           metrics:
           - resource:
               name: cpu
@@ -42,11 +29,6 @@ spec:
               name: memory
               targetAverageUtilization: 80
             type: Resource
-          minReplicas: 1
-          scaleTargetRef:
-            apiVersion: apps/v1
-            kind: Deployment
-            name: istio-ingressgateway
         resources:
           limits:
             cpu: 2000m
@@ -61,38 +43,12 @@ spec:
         securityContext:
 {{- toYaml .Values.istio.securityContext | nindent 14 }}
       name: istio-ingressgateway
-    istiodRemote:
-      enabled: false
     pilot:
       enabled: true
       k8s:
         env:
         - name: PILOT_HTTP10
           value: "1"
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 1
-          periodSeconds: 3
-          timeoutSeconds: 5
-        hpaSpec:
-          maxReplicas: 5
-          minReplicas: 1
-          scaleTargetRef:
-            apiVersion: apps/v1
-            kind: Deployment
-            name: istiod
         resources:
           limits:
             cpu: 500m
@@ -100,17 +56,12 @@ spec:
           requests:
             cpu: 250m
             memory: 512Mi
-        strategy:
-          rollingUpdate:
-            maxSurge: 100%
-            maxUnavailable: 25%
         securityContext:
 {{- toYaml .Values.istio.securityContext | nindent 14 }}
   meshConfig:
     accessLogFile: /dev/stdout
     trustDomain: cluster.local
     defaultConfig:
-      proxyMetadata: {}
       tracing:
         # sampling: 1 # use the istio default (which is 1) to support override by pilot env variable at runtime
         zipkin:
