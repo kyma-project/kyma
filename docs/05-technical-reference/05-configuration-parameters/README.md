@@ -1,4 +1,8 @@
-This is the introductory document for this folder.
+---
+title: Configuration parameters
+---
+
+This section contains chart values that you can modify to [change the default Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
 ## Global Kyma chart and component sub-charts
 

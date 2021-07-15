@@ -1,6 +1,5 @@
 ---
-title: Service Catalog Resources Architecture
-type: Architecture
+title: Service Catalog resources
 ---
 
 Service Catalog uses a set of custom resources provided either by Kubernetes or by Kyma itself.
@@ -29,6 +28,6 @@ These are the native [Kubernetes resources](https://kubernetes.io/docs/concepts/
 
 These are the Service Catalog resources that Kyma provides:
 
-* [**ServiceBindingUsage**](#custom-resource-service-binding-usage) is a Kyma custom resource that allows Secret injection into a given application.
+* [**ServiceBindingUsage**](../../../05-technical-reference/06-custom-resources/smgt-01-sc-sbu.md) is a Kyma custom resource that allows Secret injection into a given application.
 
-* [**UsageKind**](#custom-resource-usage-kind) is a Kyma custom resource that defines which resources you can bind to the ServiceBinding and how to bind them.
+* [**UsageKind**](../../../05-technical-reference/06-custom-resources/smgt-02-sc-usage-kind.md) is a Kyma custom resource that defines which resources you can bind to the ServiceBinding and how to bind them.
