@@ -70,7 +70,7 @@ describe("CommerceMock tests", function () {
     await checkLokiLogs(testStartTimestamp);
   });
 
-  it("Test namespaces should be deleted", async function () {
-    await cleanMockTestFixture("mocks", testNamespace, true);
-  });
+  // it("Test namespaces should be deleted", async function () {
+  //   await cleanMockTestFixture("mocks", testNamespace, true);
+  // });
 });
