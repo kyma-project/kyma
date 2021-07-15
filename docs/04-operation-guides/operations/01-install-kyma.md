@@ -22,8 +22,10 @@ You can either use an out-of-the-box k3d cluster or choose any other cluster pro
   kyma provision k3s
   ```
 
-If you use the `deploy` command without any flags, Kyma provides a default domain.
-For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
+Use the `deploy` command to install Kyma.
+<!-- If you use the `deploy` command without any flags, Kyma provides a default domain.
+For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev` -->
+<!-- TODO: The URL https://console.local.kyma.dev is no longer used. Add new domain details. -->
 
   ```bash
   kyma deploy
