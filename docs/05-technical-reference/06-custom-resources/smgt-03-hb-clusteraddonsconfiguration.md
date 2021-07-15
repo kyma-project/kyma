@@ -12,7 +12,7 @@ kubectl get crd clusteraddonsconfiguration.addons.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample ClusterAddonsConfiguration which provides cluster-wide addons. If any of the **status** fields of the CR is marked as `Failed`, none of the addons registered with the CR is available in the Service Catalog.
+This is a sample ClusterAddonsConfiguration that provides cluster-wide addons. If any of the **status** fields of the CR is marked as `Failed`, none of the addons registered with the CR is available in the Service Catalog.
 
 >**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer that prevents the CR from deletion until the Controller completes the deletion logic successfully. If you don't set a finalizer, the Controller sets it automatically.
 
