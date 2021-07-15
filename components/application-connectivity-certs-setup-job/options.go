@@ -24,7 +24,7 @@ type options struct {
 	caCertificate string
 	caKey         string
 
-	caCertificateSecretToMigrate string
+	caCertificateSecretToMigrate types.NamespacedName
 
 	generatedValidityTime time.Duration
 }
@@ -36,7 +36,7 @@ func parseArgs() *options {
 	caCertificate := flag.String("caCertificate", "", "Base64 encoded pem CA certificate")
 	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
 
-	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
+	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "kyma-integration/connector-service-app-ca", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
 
 	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
 
@@ -52,7 +52,7 @@ func parseArgs() *options {
 		caCertificateSecret:          parseNamespacedName(*caCertificateSecret),
 		caCertificate:                *caCertificate,
 		caKey:                        *caKey,
-		caCertificateSecretToMigrate: *caCertificateSecretToMigrate,
+		caCertificateSecretToMigrate: parseNamespacedName(*caCertificateSecretToMigrate),
 		generatedValidityTime:        validityTime,
 	}
 }

@@ -26,6 +26,9 @@ func main() {
 		return coreClientset.CoreV1().Secrets(namespace)
 	})
 
+	migrator := NewMigrator(secretRepo)
+	migrator.Do(options.caCertificateSecretToMigrate, options.caCertificateSecret)
+
 	certSetupHandler := NewCertificateSetupHandler(options, secretRepo)
 
 	err = certSetupHandler.SetupApplicationConnectorCertificate()
