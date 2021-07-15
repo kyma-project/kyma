@@ -24,6 +24,8 @@ type options struct {
 	caCertificate string
 	caKey         string
 
+	caCertificateSecretToMigrate string
+
 	generatedValidityTime time.Duration
 }
 
@@ -33,6 +35,8 @@ func parseArgs() *options {
 
 	caCertificate := flag.String("caCertificate", "", "Base64 encoded pem CA certificate")
 	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
+
+	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
 
 	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
 
@@ -44,19 +48,22 @@ func parseArgs() *options {
 	}
 
 	return &options{
-		connectorCertificateSecret: parseNamespacedName(*connectorCertificateSecret),
-		caCertificateSecret:        parseNamespacedName(*caCertificateSecret),
-		caCertificate:              *caCertificate,
-		caKey:                      *caKey,
-		generatedValidityTime:      validityTime,
+		connectorCertificateSecret:   parseNamespacedName(*connectorCertificateSecret),
+		caCertificateSecret:          parseNamespacedName(*caCertificateSecret),
+		caCertificate:                *caCertificate,
+		caKey:                        *caKey,
+		caCertificateSecretToMigrate: *caCertificateSecretToMigrate,
+		generatedValidityTime:        validityTime,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--connectorCertificateSecret=%s --caCertificateSecret=%s "+
+		"-caCertificateSecretToMigrate=%s"+
 		"--generatedValidityTime=%s "+
 		"CA certificate provided: %t, CA key provided: %t",
 		o.connectorCertificateSecret, o.caCertificateSecret,
+		o.caCertificateSecretToMigrate,
 		o.generatedValidityTime.String(),
 		o.caCertificate != "", o.caKey != "")
 }
