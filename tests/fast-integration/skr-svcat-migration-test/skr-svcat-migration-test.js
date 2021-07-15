@@ -27,13 +27,13 @@ const {
   genRandom,
   initializeK8sClient,
 } = require("../utils");
-
 const { 
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
   checkAuditEventsThreshold
 } = require("../audit-log");
+const t = require("./install-helm-charts");
 
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
@@ -59,7 +59,13 @@ describe("SKR SVCAT migration test", function() {
     initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
 
-  // TODO: implement the test logic here
+  it(`Create SM instance and binding for BTP Operator`, async function() {
+    creds = await t.smInstanceBinding();
+  });
+
+  it(`Install helm charts`, async function() {
+    await t.installHelmCharts(creds);
+  });
    
   it("Deprovision SKR", async function() {
     await deprovisionSKR(keb, runtimeID);
