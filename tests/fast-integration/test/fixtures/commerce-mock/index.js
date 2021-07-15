@@ -330,7 +330,6 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
-
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
     "commerce",
@@ -339,6 +338,17 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     withCentralApplicationConnectivity ? prepareLastorderObjs('central-app-gateway') : prepareLastorderObjs());
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+
+  console.log(`DEBUG: withCentralApplicationConnectivity=${withCentralApplicationConnectivity}`)
+  if (withCentralApplicationConnectivity) {
+    await waitForDeployment('central-application-gateway', 'kyma-system');
+    await waitForDeployment('central-connectivity-validator', 'kyma-system');
+    await patchApplicationGateway('central-application-gateway', 'kyma-system');
+  } else {
+    await waitForDeployment(`mp-${appName}-application-gateway`, 'kyma-integration');
+    await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
+    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+  }
 
   const webServicesSC = await waitForServiceClass(
     "webservices",
