@@ -81,7 +81,7 @@ This table lists all possible parameters of a given resource together with their
 |----------------------------------------|:------------------:|------------------------|
 | **metadata.name**                      | Yes            | Specifies the name of the CR.         |
 | **metadata.namespace**                 | Yes            | Specifies the Namespace in which the CR is available.        |
-| **metadata.finalizers**                | Yes            | Specifies the finalizer which prevents the CR from deletion until the Controller completes the deletion logic. The default finalizer is `addons.kyma-project.io`.       |
+| **metadata.finalizers**                | Yes            | Specifies the finalizer that prevents the CR from deletion until the Controller completes the deletion logic. The default finalizer is `addons.kyma-project.io`.       |
 | **metadata.labels**                    | No            | Specifies a key-value pair that helps you to organize and filter your CRs. The label indicating the default addon configuration is `addons.kyma-project.io/managed: "true"`.       |
 | **spec.reprocessRequest**              | No             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.   |
 | **spec.repositories.url**              | Yes            | Provides the full URL to the index file of addons repositories.    |
