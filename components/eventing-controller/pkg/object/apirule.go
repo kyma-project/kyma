@@ -111,7 +111,7 @@ func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) Option {
 				continue
 			}
 			if hostURL.Path == "" {
-				paths = append(paths, "/")
+				paths = append(paths, "/.*")
 			} else {
 				paths = append(paths, hostURL.Path)
 			}
