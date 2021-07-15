@@ -20,6 +20,8 @@ spec:
     - enabled: true
       k8s:
         hpaSpec:
+          maxReplicas: 5
+          minReplicas: 1
           metrics:
           - resource:
               name: cpu
@@ -71,8 +73,6 @@ spec:
   values:
     global:
       imagePullPolicy: IfNotPresent
-      istioNamespace: istio-system
-      pilotCertProvider: istiod
       priorityClassName: "{{ .Values.global.priorityClassName }}"
       proxy:
         holdApplicationUntilProxyStarts: true
