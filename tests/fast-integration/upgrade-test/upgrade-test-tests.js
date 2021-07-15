@@ -6,7 +6,6 @@ const {
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
-  getEnvOrThrow
 } = require("../utils");
 
 describe("Upgrade test tests", function () {
