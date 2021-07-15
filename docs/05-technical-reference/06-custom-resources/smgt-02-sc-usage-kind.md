@@ -32,7 +32,7 @@ The ServiceBindingUsage Controller takes the value from the **spec.usedBy.kind**
 
 ### Finalizer
 
-Every UsageKind contains a finalizer which prevents deletion of the UsageKind in use. The ServiceBindingUsage Controller removes the finalizer only when the UsageKind is not used by any ServiceBindingUsage.
+Every UsageKind contains a finalizer that prevents deletion of the UsageKind in use. The ServiceBindingUsage Controller removes the finalizer only when the UsageKind is not used by any ServiceBindingUsage.
 
 ## Custom resource parameters
 
