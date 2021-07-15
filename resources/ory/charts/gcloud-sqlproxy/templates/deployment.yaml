@@ -100,8 +100,10 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
+{{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
