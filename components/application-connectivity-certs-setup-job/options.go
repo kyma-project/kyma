@@ -48,18 +48,18 @@ func parseArgs() *options {
 	}
 
 	return &options{
-		connectorCertificateSecret: parseNamespacedName(*connectorCertificateSecret),
-		caCertificateSecret:        parseNamespacedName(*caCertificateSecret),
-		caCertificate:              *caCertificate,
-		caKey:                      *caKey,
+		connectorCertificateSecret:   parseNamespacedName(*connectorCertificateSecret),
+		caCertificateSecret:          parseNamespacedName(*caCertificateSecret),
+		caCertificate:                *caCertificate,
+		caKey:                        *caKey,
 		caCertificateSecretToMigrate: *caCertificateSecretToMigrate,
-		generatedValidityTime:      validityTime,
+		generatedValidityTime:        validityTime,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--connectorCertificateSecret=%s --caCertificateSecret=%s "+
-		"-caCertificateSecretToMigrate=%s" +
+		"-caCertificateSecretToMigrate=%s"+
 		"--generatedValidityTime=%s "+
 		"CA certificate provided: %t, CA key provided: %t",
 		o.connectorCertificateSecret, o.caCertificateSecret,
