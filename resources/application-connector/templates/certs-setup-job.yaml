@@ -34,6 +34,7 @@ spec:
           - "--connectorCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.name }}"
           - "--caCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.name }}"
           - "--caCertificate={{ .Values.global.applicationConnectorCa }}"
+          - "--caKey={{ .Values.global.applicationConnectorCaKey }}"
           - "--caCertificateSecretToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.migration.from.name | default "" | quote }}"
           - "--generatedValidityTime={{ .Values.application_connectivity_certs_setup_job.certificate.validityTime }}"
         securityContext:
