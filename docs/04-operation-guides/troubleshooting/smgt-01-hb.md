@@ -1,5 +1,5 @@
 ---
-title: Helm Broker troubleshooting
+title: Helm Broker:`FAILED` status for created ServiceInstances
 ---
 
 ## Possible `FAILED` status for created ServiceInstances
