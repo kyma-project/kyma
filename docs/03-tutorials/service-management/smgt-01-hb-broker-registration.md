@@ -33,7 +33,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
      ```
 
 5. Register a broker:
-  * Run this command to register a ClusterServiceBroker:
+  * To register a ClusterServiceBroker, run:
      ```
     kubectl create -f ./contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
