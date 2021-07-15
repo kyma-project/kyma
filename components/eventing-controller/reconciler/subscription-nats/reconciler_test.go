@@ -30,7 +30,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -57,7 +59,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 
 		// print all subscriptions in the namespace for debugging purposes
 		if err := printSubscriptions(namespaceName); err != nil {
-			logf.Log.Error(err, "error while printing subscriptions")
+			logf.Log.Error(err, "print subscriptions failed")
 		}
 	})
 
@@ -225,7 +227,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			Name:      subscription.Name,
 		}
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
-			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
+			log.Printf("fetch subscription %s failed: %v", lookupKey.String(), err)
 			return &eventingv1alpha1.Subscription{}
 		}
 		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
@@ -242,7 +244,7 @@ func isSubscriptionDeleted(subscription *eventingv1alpha1.Subscription, ctx cont
 			Name:      subscription.Name,
 		}
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
-			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
+			log.Printf("fetch subscription %s failed: %v", lookupKey.String(), err)
 			return k8serrors.IsNotFound(err)
 		}
 		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
@@ -324,6 +326,9 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	Expect(err).To(BeNil())
+
 	defaultSubsConfig := &eventingv1alpha1.SubscriptionConfig{
 		MaxInFlightMessages: 1,
 	}
@@ -332,7 +337,7 @@ var _ = BeforeSuite(func(done Done) {
 		k8sManager.GetClient(),
 		applicationLister,
 		k8sManager.GetCache(),
-		ctrl.Log.WithName("nats-reconciler").WithName("Subscription"),
+		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
 		defaultSubsConfig,

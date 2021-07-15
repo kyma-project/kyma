@@ -44,7 +44,7 @@ func (e *skippableError) Error() string {
 // skip implements the skippable interface.
 func (*skippableError) skip() {}
 
-// skip implements the Wrapper interface.
+// Unwrap implements the Wrapper interface.
 func (e *skippableError) Unwrap() error {
 	return e.err
 }
