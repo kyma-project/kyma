@@ -54,7 +54,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   Self-signed certificate
   </summary>
 
-  The self-signed TLS certificate used in Kyma instances deployed with `xip.io` is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, regenerate the self-signed certificate.
+  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, regenerate the self-signed certificate.
 
   >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
 
@@ -86,7 +86,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
       ```bash
       tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-      && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
+      && kubectl get secret kyma-gateway-certs -n istio-system -o jsonpath='{.data.tls\.crt}' | base64 --decode > $tmpfile \
       && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
       && rm $tmpfile
       ```

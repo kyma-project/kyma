@@ -44,7 +44,7 @@ apiRules:
     - name: function-practical-filip5
       gateway: kyma-gateway.kyma-system.svc.cluster.local
       service:
-        host: path.34.90.136.181.xip.io
+        host: path.kyma.example.com
         port: 80
       rules:
         - methods:
