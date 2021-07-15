@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -112,7 +113,7 @@ type SubscriptionConfig struct {
 
 // MergeSubsConfigs returns a valid subscription config object based on the provided config,
 // complemented with default values, if necessary
-func MergeSubsConfigs(config, defaults *SubscriptionConfig) *SubscriptionConfig {
+func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscriptionConfig) *SubscriptionConfig {
 	merged := &SubscriptionConfig{
 		MaxInFlightMessages: defaults.MaxInFlightMessages,
 	}

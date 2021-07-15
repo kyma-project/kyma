@@ -51,7 +51,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 	controllertesting.WithService("foo-host", "foo-svc", apiRule)
 
 	// then
-	changed, err := beb.SyncSubscription(subscription, nil, apiRule)
+	changed, _, err := beb.SyncSubscription(subscription, nil, apiRule)
 	g.Expect(err).To(Not(BeNil()))
 	g.Expect(changed).To(BeFalse())
 }

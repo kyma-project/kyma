@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"github.com/go-logr/zapr"
 	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -635,7 +637,7 @@ func (t *TestCommander) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t *TestCommander) Start(_ *eventingv1alpha1.SubscriptionConfig, _ commander.Params) error {
+func (t *TestCommander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) error {
 	return t.startErr
 }
 

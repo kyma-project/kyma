@@ -76,7 +76,7 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, *eventingv1alpha1.SubscriptionConfig, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
@@ -91,13 +91,13 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
 	if err != nil {
 		log.Errorw("get Kyma subscription internal view failed", "error", err)
-		return false, err
+		return false, nil, err
 	}
 
 	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
 		log.Errorw("get Kyma subscription hash failed", "error", err)
-		return false, err
+		return false, nil, err
 	}
 
 	var bebSubscription *types.Subscription
@@ -107,7 +107,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		var newEMSHash int64
 		bebSubscription, newEMSHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 		subscription.Status.Ev2hash = newEv2Hash
 		subscription.Status.Emshash = newEMSHash
@@ -117,24 +117,24 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
 			log.Errorw("get BEB subscription failed", "error", err)
-			return false, err
+			return false, nil, err
 		}
 		// get the internal view for the EMS subscription
 		sEms, err := getInternalView4Ems(bebSubscription)
 		if err != nil {
 			log.Errorw("get BEB subscription internal view failed", "error", err)
-			return false, err
+			return false, nil, err
 		}
 		newEmsHash, err := getHash(sEms)
 		if err != nil {
 			log.Errorw("get BEB subscription hash failed", "error", err)
-			return false, err
+			return false, nil, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
 			// delete & create a new EMS subscription
 			bebSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			subscription.Status.Emshash = newEmsHash
 			statusChanged = true
@@ -143,7 +143,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	// set the status of bebSubscription in ev2Subscription
 	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
-	return statusChanged, nil
+	return statusChanged, nil, nil
 }
 
 // DeleteSubscription deletes the corresponding EMS subscription

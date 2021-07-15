@@ -35,7 +35,7 @@ type MessagingBackend interface {
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
 	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
 	// TODO: This should contain all the infos necessary for the handler to do its job.
-	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error)
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, *eventingv1alpha1.SubscriptionConfig, error)
 
 	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error

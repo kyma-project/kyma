@@ -81,7 +81,7 @@ func TestCleanup(t *testing.T) {
 
 	// create a BEB subscription from Kyma subscription
 	fakeCleaner := fake.Cleaner{}
-	_, err = bebCommander.Backend.SyncSubscription(subscription, &fakeCleaner, apiRule)
+	_, _, err = bebCommander.Backend.SyncSubscription(subscription, &fakeCleaner, apiRule)
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock

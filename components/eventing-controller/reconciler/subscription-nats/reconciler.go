@@ -39,7 +39,6 @@ type Reconciler struct {
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
-	defaultSubscriptionConfig *eventingv1alpha1.SubscriptionConfig
 }
 
 var (
@@ -56,8 +55,8 @@ const (
 	reconcilerName = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, defaultSubConf *eventingv1alpha1.SubscriptionConfig) *Reconciler {
-	natsHandler := handlers.NewNats(cfg, logger)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	natsHandler := handlers.NewNats(cfg, subsCfg, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -71,7 +70,6 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		logger:           logger,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
-		defaultSubscriptionConfig: defaultSubConf,
 	}
 }
 
@@ -208,9 +206,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return result, nil
 	}
 
-	appliedSubsConfig := eventingv1alpha1.MergeSubsConfigs(desiredSubscription.Spec.Config, r.defaultSubscriptionConfig)
-	desiredSubscription.Spec.Config = appliedSubsConfig
-	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, appliedSubsConfig, err := r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("sync subscription failed", "error", err)
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error(), nil); err != nil {

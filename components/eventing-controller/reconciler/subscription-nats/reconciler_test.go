@@ -3,7 +3,6 @@ package subscription_nats
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -329,7 +328,7 @@ var _ = BeforeSuite(func(done Done) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 
-	defaultSubsConfig := &eventingv1alpha1.SubscriptionConfig{
+	defaultSubsConfig := env.DefaultSubscriptionConfig{
 		MaxInFlightMessages: 1,
 	}
 	err = NewReconciler(
