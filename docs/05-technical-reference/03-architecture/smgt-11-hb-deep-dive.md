@@ -13,7 +13,7 @@ This document describes the Helm Broker workflow in details, including the logic
     - Checks for ID duplications under the **repositories** field.
     - Checks for ID conflicts with already registered addons.
 4. The Controller saves the fetched addons to the storage.
-5. When the first CR appears, the Controller creates a ClusterServiceBroker or a ServiceBroker, depending on the type of the CR. The ClusterServiceBroker or the ServiceBroker provides information about the Broker's endpoint which returns the list of all available services to the Service Catalog. There is always only one ClusterServiceBroker per cluster and one ServiceBroker per Namespace, no matter the number of existing CRs. Whenever the list of offered services changes, the Controller triggers the Service Catalog to fetch a new list of services from the ClusterServiceBroker or the ServiceBroker.
+5. When the first CR appears, the Controller creates a ClusterServiceBroker or a ServiceBroker, depending on the type of the CR. The ClusterServiceBroker or the ServiceBroker provides information about the Broker's endpoint, which returns the list of all available services to the Service Catalog. There is always only one ClusterServiceBroker per cluster and one ServiceBroker per Namespace, no matter the number of existing CRs. Whenever the list of offered services changes, the Controller triggers the Service Catalog to fetch a new list of services from the ClusterServiceBroker or the ServiceBroker.
 6. The Broker component fetches addons from the storage and exposes them to the Service Catalog.
 7. The Service Catalog calls the catalog endpoint of the ClusterServiceBroker or the ServiceBroker and creates Service Classes based on the list of registered services.
 
