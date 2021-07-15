@@ -13,14 +13,14 @@ require (
 	github.com/hashicorp/go-getter v1.4.1
 	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/vrischmann/envconfig v1.1.0
-	helm.sh/helm/v3 v3.5.2
-	k8s.io/api v0.20.2
-	k8s.io/apimachinery v0.20.2
-	k8s.io/cli-runtime v0.20.2
-	k8s.io/client-go v0.20.2
+	helm.sh/helm/v3 v3.6.3
+	k8s.io/api v0.21.0
+	k8s.io/apimachinery v0.21.0
+	k8s.io/cli-runtime v0.21.0
+	k8s.io/client-go v0.21.0
 )
 
 replace (
