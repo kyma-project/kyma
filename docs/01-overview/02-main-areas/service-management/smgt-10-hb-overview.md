@@ -2,7 +2,7 @@
 title: Helm Broker
 ---
 
-The Helm Broker is a [Service Broker](./smgt-02-brokers-overview.md) which exposes Helm charts as Service Classes in the [Service Catalog](./smgt-01-sc-overview.md). To do so, the Helm Broker uses the concept of addons. An addon is an abstraction layer over a Helm chart which provides all information required to convert the chart into a Service Class.
+The Helm Broker is a [Service Broker](./smgt-02-brokers-overview.md) that exposes Helm charts as Service Classes in the [Service Catalog](./smgt-01-sc-overview.md). To do so, the Helm Broker uses the concept of addons. An addon is an abstraction layer over a Helm chart which provides all information required to convert the chart into a Service Class.
 
 The Helm Broker fetches addons which contain a set of specific [files](./smgt-11-hb-create-addons.md). You must place your addons in a repository of an appropriate [format](./smgt-14-hb-create-addons-repo.md). The Helm Broker fetches default cluster-wide addons defined by the [helm-repos-urls](https://github.com/kyma-project/kyma/blob/main/resources/helm-broker/templates/default-addons-cfg.yaml) custom resource (CR). This CR contains URLs that point to the release of  [`addons`](https://github.com/kyma-project/addons/releases) repository compatible with a given [Kyma release](https://github.com/kyma-project/kyma/releases). You can also configure the Helm Broker to fetch addons definitions from other addons repositories.
 
