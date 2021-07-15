@@ -16,7 +16,7 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 ### Provision and install
 
-You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster run:
+You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
 
   ```bash
   kyma provision k3s
