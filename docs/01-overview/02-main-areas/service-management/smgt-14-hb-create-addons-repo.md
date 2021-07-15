@@ -189,7 +189,7 @@ The Helm Broker supports authentication with these protocols:
   HTTP/HTTPS
   </summary>
 
-To secure your addons repository with basic authentication credentials, create a Secret resource which contains credentials, and reference it in the repository URL definition using templating. Follow these steps:
+To secure your addons repository with basic authentication credentials, create a Secret resource that contains credentials, and reference it in the repository URL definition using templating. Follow these steps:
 
 1. Create a Secret:
 
