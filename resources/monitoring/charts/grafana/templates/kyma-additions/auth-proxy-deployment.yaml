@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values) . | sha256sum }}
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
