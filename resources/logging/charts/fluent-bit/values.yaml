@@ -23,7 +23,7 @@ rbac:
   create: true
 
 podSecurityPolicy:
-  create: false
+  create: true
 
 podSecurityContext:
   {}
