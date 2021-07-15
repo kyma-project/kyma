@@ -109,6 +109,6 @@ The `meta.yaml` file contains the specification of the ClusterAssetGroup or Asse
 | **docs[].template.sources[].url**      |   Yes   | Specifies the location of a file. |
 | **docs[].template.sources[].filter**   |   Yes   | Specifies the directory from which the documentation is fetched. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
 
->**NOTE:** Currently you can provide only one entry in the `docs` array.
+>**NOTE:** Currently, you can provide only one entry in the `docs` array.
 
 See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon. Read also how to [provide addons documentation](todo).
