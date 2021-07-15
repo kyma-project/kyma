@@ -29,10 +29,9 @@ type Manager interface {
 }
 
 // NewRepository creates a new secrets repository
-func NewRepository(secretsManager Manager, application string) Repository {
+func NewRepository(secretsManager Manager) Repository {
 	return &repository{
 		secretsManager: secretsManager,
-		application:    application,
 	}
 }
 

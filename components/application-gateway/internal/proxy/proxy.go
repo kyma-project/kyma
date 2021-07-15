@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,13 +12,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
@@ -27,7 +24,6 @@ import (
 )
 
 type proxy struct {
-	nameResolver                 k8sconsts.NameResolver
 	serviceDefService            metadata.ServiceDefinitionService
 	cache                        Cache
 	skipVerify                   bool
@@ -38,11 +34,12 @@ type proxy struct {
 	configRepository proxyconfig.TargetConfigProvider
 }
 
-type ProxyHandler interface {
+// Handler serves as a Reverse Proxy
+type Handler interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request)
 }
 
+// Config stores Proxy config
 type Config struct {
 	SkipVerify    bool
 	ProxyTimeout  int
@@ -56,9 +53,8 @@ func New(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config,
-	configRepository proxyconfig.TargetConfigProvider) ProxyHandler {
+	configRepository proxyconfig.TargetConfigProvider) Handler {
 	return &proxy{
-		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
 		cache:                        NewCache(config.ProxyCacheTTL),
 		skipVerify:                   config.SkipVerify,
@@ -77,9 +73,10 @@ func NewInvalidStateHandler(message string) http.Handler {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	id := p.nameResolver.ExtractServiceId(r.Host)
+	appName, id, path := extractAppInfo(r.URL.Path)
+	r.URL.Path = path
 
-	cacheEntry, err := p.getOrCreateCacheEntry(id)
+	cacheEntry, err := p.getOrCreateCacheEntry(appName, id)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -94,7 +91,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := p.addModifyResponseHandler(newRequest, id, cacheEntry, p.createCacheEntry); err != nil {
+	if err := p.addModifyResponseHandler(newRequest, appName, id, cacheEntry, p.createCacheEntry); err != nil {
 		handleErrors(w, err)
 		return
 	}
@@ -102,106 +99,34 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
-// ServeHTTPNamespaced proxies requests using data from secrets
-// serviceId is composed of secret name and API name in format: {SECRET_NAME}-{API_NAME}
-func (p *proxy) ServeHTTPNamespaced(w http.ResponseWriter, r *http.Request) {
-	log := logrus.WithField("handler", "proxy")
-
-	secretName, found := mux.Vars(r)["secret"]
-	if !found {
-		logAndHandleErrors(log, w, apperrors.WrongInput("secret name not specified"))
-		return
-	}
-	log = log.WithField("secret", secretName)
-
-	apiName, found := mux.Vars(r)["apiName"]
-	if !found {
-		logAndHandleErrors(log, w, apperrors.WrongInput("API name not specified"))
-		return
-	}
-	log = log.WithField("api", apiName)
-
-	log.Infof("Handling proxy request to %s", r.URL.Path)
-
-	serviceId := fmt.Sprintf("%s;%s", secretName, apiName)
-
-	cacheEntry, found := p.cache.Get(serviceId)
-	if !found {
-		log.Infof("Entry not found in cache")
-
-		var err apperrors.AppError
-		cacheEntry, err = p.createCacheEntryForNamespacedGateway(serviceId)
-		if err != nil {
-			logAndHandleErrors(log, w, err)
-			return
-		}
-	}
-
-	newRequest, cancel := p.setRequestTimeout(r)
-	defer cancel()
-
-	err := p.addAuthorization(newRequest, cacheEntry)
-	if err != nil {
-		logAndHandleErrors(log, w, err)
-		return
-	}
-
-	if err := p.addModifyResponseHandler(newRequest, serviceId, cacheEntry, p.createCacheEntryForNamespacedGateway); err != nil {
-		logAndHandleErrors(log, w, err)
-		return
-	}
-
-	cacheEntry.Proxy.ServeHTTP(w, newRequest)
-}
-
-func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
-	cacheObj, found := p.cache.Get(id)
+func (p *proxy) getOrCreateCacheEntry(appName, id string) (*CacheEntry, apperrors.AppError) {
+	cacheObj, found := p.cache.Get(appName, id)
 
 	if found {
 		return cacheObj, nil
 	}
 
-	return p.createCacheEntry(id)
+	return p.createCacheEntry(appName, id)
 }
 
-func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
-	serviceApi, err := p.serviceDefService.GetAPI(id)
+func (p *proxy) createCacheEntry(appName, id string) (*CacheEntry, apperrors.AppError) {
+	serviceAPI, err := p.serviceDefService.GetAPI(appName, id)
 	if err != nil {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceApi.TargetUrl, serviceApi.RequestParameters, id, p.skipVerify)
+	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}
 
-	authorizationStrategy := p.newAuthorizationStrategy(serviceApi.Credentials)
-	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceApi.Credentials)
+	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
+	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
 
-	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
+	return p.cache.Put(appName, id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
-// TODO: Temporary solution to use with response retrier - will be removed when droping previous functionality
-func (p *proxy) createCacheEntryForNamespacedGateway(id string) (*CacheEntry, apperrors.AppError) {
-	segments := strings.Split(id, ";")
-	if len(segments) < 2 {
-		return nil, apperrors.Internal("Failed to create cache entry for namespaced Gateway")
-	}
-
-	proxyConfig, err := p.configRepository.GetDestinationConfig(segments[0], segments[1])
-	if err != nil {
-		return nil, err
-	}
-
-	cacheEntry, err := p.cacheEntryFromProxyConfig(id, proxyConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return cacheEntry, nil
-}
-
-func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
+func (p *proxy) cacheEntryFromProxyConfig(appName, id string, config proxyconfig.ProxyDestinationConfig) (*CacheEntry, apperrors.AppError) {
 	proxy, err := makeProxy(config.TargetURL, config.Configuration.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
@@ -215,7 +140,7 @@ func (p *proxy) cacheEntryFromProxyConfig(id string, config proxyconfig.ProxyDes
 	authorizationStrategy := p.newAuthorizationStrategy(credentials)
 	csrfTokenStrategy := p.newCSRFTokenStrategyFromCSRFConfig(authorizationStrategy, config.Configuration.CSRFConfig)
 
-	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
+	return p.cache.Put(appName, id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
@@ -256,7 +181,7 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
+func (p *proxy) addModifyResponseHandler(r *http.Request, appName, id string, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	secondRequestBody, err := copyRequestBody(r)
 	if err != nil {
@@ -264,7 +189,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry 
 	}
 
 	modifyResponseFunction := func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(id, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
+		retrier := newUnauthorizedResponseRetrier(appName, id, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
 
@@ -316,4 +241,11 @@ func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorRespo
 	w.WriteHeader(code)
 
 	json.NewEncoder(w).Encode(body)
+}
+
+func extractAppInfo(path string) (appName, serviceID, finalPath string) {
+	split := strings.Split(path, "/")
+	appName = split[1]
+	serviceID = split[2]
+	return string(appName), string(serviceID), strings.Join(split[3:], "/")
 }

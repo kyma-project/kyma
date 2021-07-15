@@ -22,11 +22,11 @@ func TestGetServices(t *testing.T) {
 		managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(app, nil)
 
-		repository := applications.NewServiceRepository("production", managerMock)
+		repository := applications.NewServiceRepository(managerMock)
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("id1")
+		service, err := repository.Get("production", "id1")
 
 		// then
 		require.NotNil(t, service)
@@ -38,11 +38,11 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.API, &applications.ServiceAPI{
 			GatewayURL:  "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 			AccessLabel: "access-label-1",
-			TargetUrl:   "https://192.168.1.2",
+			TargetURL:   "https://192.168.1.2",
 			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "SecretName",
-				Url:        "www.example.com/token",
+				URL:        "www.example.com/token",
 			},
 		})
 	})
@@ -54,11 +54,11 @@ func TestGetServices(t *testing.T) {
 		reManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(app, nil)
 
-		repository := applications.NewServiceRepository("production", reManagerMock)
+		repository := applications.NewServiceRepository(reManagerMock)
 		require.NotNil(t, repository)
 
 		// when
-		service, err := repository.Get("not-existent")
+		service, err := repository.Get("production", "not-id")
 
 		// then
 		assert.Equal(t, applications.Service{}, service)

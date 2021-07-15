@@ -46,7 +46,7 @@ func NewService(secretsRepository secrets.Repository) Service {
 
 func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl: applicationAPI.TargetUrl,
+		TargetUrl: applicationAPI.TargetURL,
 	}
 
 	if applicationAPI.Credentials != nil {
@@ -86,7 +86,7 @@ func (sas defaultService) readCredentials(secret map[string][]byte, applicationA
 	credentialsType := applicationAPI.Credentials.Type
 
 	if credentialsType == TypeOAuth {
-		oAuthCredentials, err := getOAuthCredentials(secret, applicationAPI.Credentials.Url)
+		oAuthCredentials, err := getOAuthCredentials(secret, applicationAPI.Credentials.URL)
 		if err != nil {
 			return nil, err
 		}
