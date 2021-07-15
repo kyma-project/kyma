@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"k8s.io/client-go/dynamic"
@@ -16,7 +17,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 	return nil
 }
 
-func (c *Commander) Start(_ commander.Params) error {
+func (c *Commander) Start(_ *v1alpha1.SubscriptionConfig, _ commander.Params) error {
 	return nil
 }
 

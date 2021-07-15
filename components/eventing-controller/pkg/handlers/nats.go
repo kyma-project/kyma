@@ -119,7 +119,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 
 		//natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
-		for i := 0; i < queueSubscribers; i++ {
+		for i := 0; i < sub.Spec.Config.MaxInFlightMessages; i++ {
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
 			if subscribeErr != nil {
 				n.log.Error(subscribeErr, "failed to create a Nats subscription")

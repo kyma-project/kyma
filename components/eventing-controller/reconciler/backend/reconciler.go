@@ -61,9 +61,10 @@ type Reconciler struct {
 	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
 	//  already uses a cache internally (check manager.DefaultNewClient)
 	cache.Cache
-	logger *logger.Logger
-	record record.EventRecorder
-	cfg    env.BackendConfig
+	logger                    *logger.Logger
+	record                    record.EventRecorder
+	cfg                       env.BackendConfig
+	defaultSubscriptionConfig *eventingv1alpha1.SubscriptionConfig
 
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
@@ -80,6 +81,9 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 		logger:        logger,
 		record:        recorder,
 		cfg:           cfg,
+		defaultSubscriptionConfig: &eventingv1alpha1.SubscriptionConfig{
+			MaxInFlightMessages: cfg.DefaultSubscriptionConfig.MaxInFlightMessages,
+		},
 	}
 }
 
@@ -723,7 +727,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) startNATSController() error {
 	if !r.natsCommanderStarted {
-		if err := r.natsCommander.Start(commander.Params{}); err != nil {
+		if err := r.natsCommander.Start(r.defaultSubscriptionConfig, commander.Params{}); err != nil {
 			r.namedLogger().Errorw("failed to start the NATS commander", "error", err)
 			return err
 		}
@@ -748,7 +752,7 @@ func (r *Reconciler) stopNATSController() error {
 func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
 	if !r.bebCommanderStarted {
 		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
-		if err := r.bebCommander.Start(bebCommanderParams); err != nil {
+		if err := r.bebCommander.Start(r.defaultSubscriptionConfig, bebCommanderParams); err != nil {
 			r.namedLogger().Errorw("failed to start the BEB commander", "error", err)
 			return err
 		}

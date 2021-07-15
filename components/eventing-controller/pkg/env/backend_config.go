@@ -12,6 +12,8 @@ type BackendConfig struct {
 
 	BackendCRNamespace string `envconfig:"BACKEND_CR_NAMESPACE" default:"kyma-system"`
 	BackendCRName      string `envconfig:"BACKEND_CR_NAME" default:"eventing-backend"`
+
+	DefaultSubscriptionConfig DefaultSubscriptionConfig
 }
 
 type PublisherConfig struct {
@@ -25,6 +27,10 @@ type PublisherConfig struct {
 	RequestsMemory  string `envconfig:"PUBLISHER_REQUESTS_MEMORY" default:"64Mi"`
 	LimitsCPU       string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
 	LimitsMemory    string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
+}
+
+type DefaultSubscriptionConfig struct {
+	MaxInFlightMessages int `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"9"`
 }
 
 func GetBackendConfig() BackendConfig {

@@ -43,6 +43,14 @@ spec:
           spec:
             description: SubscriptionSpec defines the desired state of Subscription
             properties:
+              config:
+                description: Config defines the configurations that can be applied
+                  to the eventing backend when creating this subscription
+                properties:
+                  maxInFlightMessages:
+                    minimum: 1
+                    type: integer
+                type: object
               filter:
                 description: Filter defines the list of filters
                 properties:
@@ -179,6 +187,14 @@ spec:
                   - status
                   type: object
                 type: array
+              config:
+                description: Config defines the configurations that have been applied
+                  to the eventing backend when creating this subscription
+                properties:
+                  maxInFlightMessages:
+                    minimum: 1
+                    type: integer
+                type: object
               emsSubscriptionStatus:
                 description: EmsSubscriptionStatus defines the status of Subscription
                   in BEB

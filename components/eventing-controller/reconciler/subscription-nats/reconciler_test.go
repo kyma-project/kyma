@@ -3,6 +3,7 @@ package subscription_nats
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -323,6 +324,9 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
+	defaultSubsConfig := &eventingv1alpha1.SubscriptionConfig{
+		MaxInFlightMessages: 1,
+	}
 	err = NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
@@ -331,6 +335,7 @@ var _ = BeforeSuite(func(done Done) {
 		ctrl.Log.WithName("nats-reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
+		defaultSubsConfig,
 	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
