@@ -17,7 +17,7 @@ ci-compass:
 
 .PHONY: ci-skr
 ci-skr:
-	npm install
+	DEBUG=true npm install
 	npm run test-skr
 
 .PHONY: ci-pre-upgrade
