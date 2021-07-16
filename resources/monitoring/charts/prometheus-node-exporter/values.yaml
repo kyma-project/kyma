@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 image:
   repository: eu.gcr.io/kyma-project/tpi/node-exporter
-  tag: 1.0.1-1de56388
+  tag: 1.1.2-796699d6
   pullPolicy: IfNotPresent
 
 service:
@@ -20,6 +20,13 @@ prometheus:
     enabled: false
     additionalLabels: {}
     namespace: ""
+    scheme: http
+    bearerTokenFile:
+    tlsConfig: {}
+
+    ## proxyUrl: URL of a proxy that should be used for scraping.
+    ##
+    proxyUrl: ""
 
     relabelings: []
     scrapeTimeout: 10s
@@ -30,7 +37,8 @@ updateStrategy:
   rollingUpdate:
     maxUnavailable: 1
 
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -48,15 +56,16 @@ serviceAccount:
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
+  annotations: {}
   imagePullSecrets: []
 
-podSecurityContext:
+securityContext:
   fsGroup: 65534
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
 
-securityContext:
+containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
 
@@ -67,6 +76,7 @@ rbac:
   ## If true, create & use Pod Security Policy resources
   ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
   pspEnabled: true
+  pspAnnotations: {}
 
 # for deployments that have node_exporter deployed outside of the cluster, list
 # their addresses here
@@ -74,6 +84,10 @@ endpoints: []
 
 # Expose the service to the host network
 hostNetwork: true
+
+## If true, node-exporter pods mounts host / at /host/root
+##
+hostRootFsMount: true
 
 ## Assign a group of affinity scheduling rules
 ##
@@ -88,11 +102,25 @@ affinity: {}
 #                 - target-host-name
 
 # Annotations to be added to node exporter pods
-podAnnotations: {}
+podAnnotations:
+  # Fix for very slow GKE cluster upgrades
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
 
 # Extra labels to be added to node exporter pods
 podLabels:
   jobLabel: node-exporter
+
+# Custom DNS configuration to be added to prometheus-node-exporter pods
+dnsConfig: {}
+# nameservers:
+#   - 1.2.3.4
+# searches:
+#   - ns1.svc.cluster-domain.example
+#   - my.dns.search.suffix
+# options:
+#   - name: ndots
+#     value: "2"
+#   - name: edns0
 
 ## Assign a nodeSelector if operating a hybrid cluster
 ##
@@ -110,10 +138,10 @@ tolerations:
 ## Additional container arguments
 ##
 extraArgs:
-#   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
-#   - --collector.textfile.directory=/run/prometheus
-    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
-    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+  #   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
+  #   - --collector.textfile.directory=/run/prometheus
+  - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/) # TODO
+  - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$ # TODO
 
 ## Additional mounts from the host
 ##
@@ -129,7 +157,9 @@ extraHostVolumeMounts: []
 configmaps: []
 # - name: <configMapName>
 #   mountPath: <mountPath>
-
+secrets: []
+# - name: <secretName>
+#   mountPath: <mountPatch>
 ## Override the deployment namespace
 ##
 namespaceOverride: ""
@@ -146,3 +176,7 @@ sidecarVolumeMount: []
 ##  - name: collector-textfiles
 ##    mountPath: /run/prometheus
 ##    readOnly: false
+
+## Additional InitContainers to initialize the pod
+##
+extraInitContainers: []
