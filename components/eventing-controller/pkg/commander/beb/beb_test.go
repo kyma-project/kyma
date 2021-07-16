@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (
@@ -28,7 +28,6 @@ func TestCleanup(t *testing.T) {
 
 	// When
 	ctx := context.Background()
-	log := ctrl.Log.WithName("test-cleaner-beb")
 
 	// create a Kyma subscription
 	subscription := controllertesting.NewSubscription("test-"+controllertesting.TestCommanderSuffix, "test",
@@ -59,9 +58,12 @@ func TestCleanup(t *testing.T) {
 		ClientSecret: "webhook_client_secret",
 	}
 
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(gomega.BeNil())
+
 	// create a BEB handler to connect to BEB Mock
-	bebHandler := handlers.NewBEB(credentials, log)
-	err := bebHandler.Initialize(envConf)
+	bebHandler := handlers.NewBEB(credentials, defaultLogger)
+	err = bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.Backend = bebHandler
 
@@ -100,7 +102,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(unstructuredApiRuleBeforeCleanup).ToNot(gomega.BeNil())
 
 	// Then
-	err = cleanup(bebCommander.Backend, bebCommander.Client)
+	err = cleanup(bebCommander.Backend, bebCommander.Client, defaultLogger.WithContext())
 	g.Expect(err).To(gomega.BeNil())
 
 	// Expect

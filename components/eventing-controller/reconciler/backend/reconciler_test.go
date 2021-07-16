@@ -577,7 +577,7 @@ func eventuallyPublisherProxySecret(ctx context.Context) AsyncAssertion {
 		}
 		secret := new(corev1.Secret)
 		if err := k8sClient.Get(ctx, lookupKey, secret); err != nil {
-			defaultLogger.WithContext().Errorf("failed to fetch publisher proxy secret(%s): %v", lookupKey.String(), err)
+			defaultLogger.WithContext().Errorf("fetch publisher proxy secret %s failed: %v", lookupKey.String(), err)
 			return nil
 		}
 		return secret
