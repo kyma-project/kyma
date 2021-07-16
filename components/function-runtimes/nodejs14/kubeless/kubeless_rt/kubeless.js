@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const client = require('prom-client');
 const express = require('express');
 const helper = require('./lib/helper');
+const eventBase = require('./lib/event');
 const morgan = require('morgan');
 
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
@@ -154,7 +155,7 @@ app.all('*', (req, res) => {
             __filename: modPath,
             __dirname: modRootPath,
             module: new Module(modPath, null),
-            require: (p) => modRequire(p, req, res, end),
+            require: (p) => modRequire(p, eventBase.newEventBase(req), res, end),
         });
 
         try {

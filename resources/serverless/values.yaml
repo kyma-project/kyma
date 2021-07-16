@@ -89,7 +89,7 @@ images:
       tag: "6b4289ab"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "6b4289ab"
+      tag: "PR-11697"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
       tag: "6b4289ab"
