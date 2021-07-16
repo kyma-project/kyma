@@ -7,4 +7,4 @@ The API Gateway Controller uses a blocklist of services for which it does not cr
 
 >**TIP:** For more information, read about the [Api CR statuses](#custom-resource-api-rule-status-codes).
 
-The blocklist works as a security measure and prevents users from exposing vital internal services of Kubernetes, Istio, and API Server Proxy.
+The blocklist works as a security measure and prevents users from exposing vital internal services of Kubernetes and Istio.

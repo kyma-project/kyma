@@ -34,8 +34,6 @@ spec:
     - name: "istio"
       namespace: "istio-system"
     - name: "provision-bundles"
-    - name: "dex"
-      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
 ```
