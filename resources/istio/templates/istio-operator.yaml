@@ -1,0 +1,37 @@
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: default-operator
+spec:
+  hub: {{ .Values.global.image }}
+  tag: {{ .Chart.Version }}
+  profile: default
+  components:
+    egressGateways:
+    - enabled: {{ .Values.egressGateways.enabled }}
+      k8s:
+{{- toYaml .Values.egressGateways.config | nindent 10}}
+      name: istio-egressgateway
+    ingressGateways:
+    - enabled: {{ .Values.ingressGateways.enabled }}
+      k8s:
+{{- toYaml .Values.egressGateways.config | nindent 10}}
+      name: istio-ingressgateway
+    pilot:
+      enabled: {{ .Values.pilot.enabled }}
+      k8s:
+{{- toYaml .Values.pilot.config | nindent 10}}
+  meshConfig:
+{{- toYaml .Values.global.meshConfig | nindent 4 }}
+  values:
+    global:
+      imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      proxy:
+{{- toYaml .Values.proxy | nindent 10 }}
+      proxy_init:
+{{- toYaml .Values.proxyInit | nindent 10 }}
+    sidecarInjectorWebhook:
+{{- toYaml .Values.sidecarInjectorWebhook | nindent 10 }}

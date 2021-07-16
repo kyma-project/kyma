@@ -1,43 +1,106 @@
 ---
 global:
-  isLocalEnv: false
-  tracing:
-    enabled: true
-    zipkinAddress: "zipkin.kyma-system:9411"
+  image: eu.gcr.io/kyma-project/external/istio
+  imagePullPolicy: IfNotPresent
+  meshConfig:
+    accessLogFile: /dev/stdout
+    trustDomain: cluster.local
+    defaultConfig:
+      tracing:
+        sampling: 1
+      zipkin:
+        address: "zipkin.kyma-system:9411"
+    enablePrometheusMerge: false
+    enableTracing: true
 
-kyma:
-  namespaces2Label:
-    - istio-system
-    - kube-system
-  labelJob:
-    image: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
-  proxyResetJob:
-    commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
-    retriesCount: 5
-    dryRun: false
-    sleepAfterPodDeleted: 1
-    exitCode: 0
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-      - ALL
-    privileged: false
-    runAsGroup: 65534
-    runAsNonRoot: true
-    runAsUser: 65534
-  podSecurityPolicy:
-    enabled: true
+egressGateways:
+  enabled: false
+  config:
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 1024Mi
+      requests:
+        cpu: 100m
+        memory: 120Mi
 
-istio:
-  installer:
-    image: eu.gcr.io/kyma-project/istio-installer
-    tag: 3055a94c
-  securityContext:
-    runAsUser: 65534
-    runAsNonRoot: true
-    runAsGroup: 65534
+ingressGateways:
+  enabled: true
+  config:
+    hpaSpec:
+      maxReplicas: 5
+      minReplicas: 1
+      metrics:
+        - resource:
+            name: cpu
+            targetAverageUtilization: 80
+          type: Resource
+        - resource:
+            name: memory
+            targetAverageUtilization: 80
+          type: Resource
+    securityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+      runAsGroup: 65534
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 1024Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    strategy:
+      rollingUpdate:
+        maxSurge: 100%
+        maxUnavailable: 0
+
+pilot:
+  enabled: true
+  config:
+    env:
+      - name: PILOT_HTTP10
+        value: "1"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    securityContext:
+      runAsUser: 65534
+      runAsNonRoot: true
+      runAsGroup: 65534
+
+proxy:
+  holdApplicationUntilProxyStarts: true
+  readinessFailureThreshold: 40
+  readinessInitialDelaySeconds: 5
+  readinessPeriodSeconds: 5
+  resources:
+    requests:
+      cpu: 75m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+proxyInit:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 50Mi
+    requests:
+      cpu: 10m
+      memory: 10Mi
+
+sidecarInjectorWebhook:
+  enableNamespacesByDefault: true
+  objectSelector:
+    autoInject: true
+    enabled: false
+  rewriteAppHTTPProbe: true
 
 monitoring:
   enabled: true
@@ -59,6 +122,3 @@ test:
     runAsUser: 65534
     runAsNonRoot: true
     runAsGroup: 65534
-
-istio_operator_cluster_file: istio-operator-cluster.yaml
-istio_operator_minikube_file: istio-operator-minikube.yaml
