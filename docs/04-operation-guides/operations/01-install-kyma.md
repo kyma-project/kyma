@@ -6,8 +6,26 @@ You can simply use the default Kyma installation, or modify it as it fits your p
 
 ## Default installation
 
-If you use the `deploy` command without any flags, Kyma provides a default domain. 
-For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev`.
+Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to run Kyma locally.
+
+### Prerequisites
+
+- [Kyma CLI](https://github.com/kyma-project/cli)
+- [Docker](https://docs.docker.com/get-docker/)
+- [k3d](https://k3d.io/#installation)
+
+### Provision and install
+
+You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
+
+  ```bash
+  kyma provision k3s
+  ```
+
+Use the `deploy` command to install Kyma.
+<!-- If you use the `deploy` command without any flags, Kyma provides a default domain.
+For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev` -->
+<!-- TODO: The URL https://console.local.kyma.dev is no longer used. Add new domain details. -->
 
   ```bash
   kyma deploy
@@ -36,8 +54,13 @@ A profile is defined globally for the whole Kyma installation. It's not possible
 
 ## Install with custom domain
 
-To install Kyma using your own domain name, you must provide the certificate and key as files. 
-If you don't have a certificate yet, you can create a self-signed certificate and key:
+If you install Kyma on a remote cluster, you can use the out-of-the box `kyma.example.com` domain. All you need to do is get your load balancer IP address and add the following line to the `hosts` file:
+
+  ```bash
+  {load_balancer_IP} kiali.kyma.example.com grafana.kyma.example.com oauth2.kyma.example.com registry.kyma.example.com jaeger.kyma.example.com connector-service.kyma.example.com gateway.kyma.example.com
+  ```
+
+To install Kyma using your own domain name, you must provide the certificate and key as files. If you don't have a certificate yet, you can create a self-signed certificate and key:
 
   ```bash
   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out crt.pem -days 365
@@ -54,6 +77,7 @@ If you don't have a certificate yet, you can create a self-signed certificate an
 ## Install from a specific source
 
 Optionally, you can specify from which source you want to deploy Kyma. For example, you can choose the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.
+
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
   ```bash
@@ -66,7 +90,7 @@ For example, to install Kyma from a specific version, such as `1.19.1`, run:
   kyma deploy --source=local
   ```
 
-  > **NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
+  >**NOTE:** By default, Kyma expects to find local sources in the `$GOPATH/src/github.com/kyma-project/kyma` folder. To adjust the path, set the `-w ${PATH_TO_KYMA_SOURCES}` parameter.
 
 ## Install specific components
 
@@ -94,7 +118,7 @@ components:
   ```
 
 - Alternatively, you can specify single components instead of a file:
-  
+
   ```bash
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
@@ -104,3 +128,5 @@ components:
   ```bash
   kyma deploy --component eventing --component istio@istio-system
   ```
+
+>**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.
