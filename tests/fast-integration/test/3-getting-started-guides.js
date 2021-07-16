@@ -39,7 +39,7 @@ describe("Getting Started Guide Tests", function () {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  it("Namespace should be deleted", async function () {
-    await cleanGettingStartedTestFixture(false);
-  });
+  // it("Namespace should be deleted", async function () {
+  //   await cleanGettingStartedTestFixture(false);
+  // });
 });
