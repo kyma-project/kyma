@@ -706,7 +706,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *Reconciler) startNATSController() error {
 	if !r.natsCommanderStarted {
-		if err := r.natsCommander.Start(commander.Params{}); err != nil {
+		if err := r.natsCommander.Start(r.cfg.DefaultSubscriptionConfig, commander.Params{}); err != nil {
 			r.namedLogger().Errorw("start NATS commander failed", "error", err)
 			return err
 		}
@@ -731,7 +731,7 @@ func (r *Reconciler) stopNATSController() error {
 func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
 	if !r.bebCommanderStarted {
 		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
-		if err := r.bebCommander.Start(bebCommanderParams); err != nil {
+		if err := r.bebCommander.Start(r.cfg.DefaultSubscriptionConfig, bebCommanderParams); err != nil {
 			r.namedLogger().Errorw("start BEB commander failed", "error", err)
 			return err
 		}

@@ -328,6 +328,9 @@ var _ = BeforeSuite(func(done Done) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 
+	defaultSubsConfig := env.DefaultSubscriptionConfig{
+		MaxInFlightMessages: 1,
+	}
 	err = NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
@@ -336,6 +339,7 @@ var _ = BeforeSuite(func(done Done) {
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
+		defaultSubsConfig,
 	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

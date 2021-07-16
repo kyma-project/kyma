@@ -55,8 +55,8 @@ const (
 	reconcilerName = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
-	natsHandler := handlers.NewNats(cfg, logger)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	natsHandler := handlers.NewNats(cfg, subsCfg, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -173,7 +173,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
 		log.Errorw("parse sink URL failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 		// No point in reconciling as the sink is invalid
@@ -183,7 +183,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Clean up the old subscriptions
 	if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
 		log.Errorw("delete subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
@@ -206,10 +206,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return result, nil
 	}
 
-	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, appliedSubsConfig, err := r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("sync subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error(), nil); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
@@ -217,7 +217,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Debug("create NATS subscriptions succeeded")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, "", appliedSubsConfig); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -225,7 +225,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // syncSubscriptionStatus syncs Subscription status
-func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, message string) error {
+// subsConfig is the subscription configuration that was applied to the subscription. It is set only if the
+// isNatsSubReady is true.
+func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, message string, subsConfig *eventingv1alpha1.SubscriptionConfig) error {
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
@@ -252,6 +254,9 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	}
 	desiredSubscription.Status.Conditions = desiredConditions
 	desiredSubscription.Status.Ready = isNatsSubReady
+	if isNatsSubReady {
+		desiredSubscription.Status.Config = subsConfig
+	}
 
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
@@ -285,7 +290,7 @@ func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result,
 			continue
 		}
 		// mark the subscription to be not ready, it will throw a new reconcile call
-		if err := r.syncSubscriptionStatus(ctx, sub, false, "invalid subscription"); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, sub, false, "invalid subscription", nil); err != nil {
 			r.namedLogger().Errorw("sync status for invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
 			return ctrl.Result{}, err
 		}

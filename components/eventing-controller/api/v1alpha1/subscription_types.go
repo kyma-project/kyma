@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -104,6 +105,27 @@ func (bf *BebFilters) Deduplicate() (*BebFilters, error) {
 	return result, nil
 }
 
+type SubscriptionConfig struct {
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MaxInFlightMessages int `json:"maxInFlightMessages,omitempty"`
+}
+
+// MergeSubsConfigs returns a valid subscription config object based on the provided config,
+// complemented with default values, if necessary
+func MergeSubsConfigs(config *SubscriptionConfig, defaults *env.DefaultSubscriptionConfig) *SubscriptionConfig {
+	merged := &SubscriptionConfig{
+		MaxInFlightMessages: defaults.MaxInFlightMessages,
+	}
+	if config == nil {
+		return merged
+	}
+	if config.MaxInFlightMessages >= 1 {
+		merged.MaxInFlightMessages = config.MaxInFlightMessages
+	}
+	return merged
+}
+
 // SubscriptionSpec defines the desired state of Subscription
 type SubscriptionSpec struct {
 	// ID is the unique identifier of Subscription, read-only.
@@ -123,6 +145,10 @@ type SubscriptionSpec struct {
 
 	// Filter defines the list of filters
 	Filter *BebFilters `json:"filter"`
+
+	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
+	// +optional
+	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 type EmsSubscriptionStatus struct {
@@ -180,6 +206,10 @@ type SubscriptionStatus struct {
 	// EmsSubscriptionStatus defines the status of Subscription in BEB
 	// +optional
 	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+
+	// Config defines the configurations that have been applied to the eventing backend when creating this subscription
+	// +optional
+	Config *SubscriptionConfig `json:"config,omitempty"`
 }
 
 // +kubebuilder:object:root=true

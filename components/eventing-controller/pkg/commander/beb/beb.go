@@ -82,7 +82,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the manager.
-func (c *Commander) Start(params commander.Params) error {
+func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
