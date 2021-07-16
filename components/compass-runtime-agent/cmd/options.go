@@ -29,8 +29,8 @@ type Config struct {
 	MetricsLoggingTimeInterval   time.Duration `envconfig:"default=30m"`
 	HealthPort                   string        `envconfig:"default=8090"`
 	IntegrationNamespace         string        `envconfig:"default=kyma-integration"`
-	CaCertSecretToMigrate 		string  `envconfig:"default=''"`
-	Runtime director.RuntimeURLsConfig
+	CaCertSecretToMigrate        string        `envconfig:"default=''"`
+	Runtime                      director.RuntimeURLsConfig
 }
 
 func (o *Config) String() string {
