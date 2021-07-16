@@ -30,7 +30,7 @@ type PublisherConfig struct {
 }
 
 type DefaultSubscriptionConfig struct {
-	MaxInFlightMessages int `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"1"`
+	MaxInFlightMessages int `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"10"`
 }
 
 func GetBackendConfig() BackendConfig {

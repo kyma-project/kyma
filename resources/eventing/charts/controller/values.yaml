@@ -61,7 +61,7 @@ clusterRoleBindingSuffix: ""
 
 eventingBackend:
   name: eventing-backend
-  defaultMaxInflightMessages: 1
+  defaultMaxInflightMessages: 10
 
 healthProbe:
   port: 8081
