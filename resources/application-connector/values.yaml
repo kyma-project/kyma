@@ -43,7 +43,7 @@ global:
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "1683d7cf"
+    version: "PR-11678"
   application_connectivity_validator:
     version: "PR-11558"
   application_operator:
@@ -83,22 +83,13 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: app-connector-certs
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
+      migration:
+        from:
+          name: app-connector-certs
   certificate:
     validityTime: 92d
-
-application_connectivity_certs_sync:
-  secrets:
-    caCertificateSecret:
-      name: app-connector-certs
-      namespace: istio-system
-    tlsCertificateSecret:
-      name: kyma-gateway-certs
-      namespace: istio-system
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
 
 tests:
   application_connector_tests:

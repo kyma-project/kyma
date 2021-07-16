@@ -66,6 +66,8 @@ spec:
               value: {{ .Values.compassRuntimeAgent.director.proxy.insecureSkipVerify | quote }}
             - name: APP_HEALTH_PORT
               value: {{ .Values.compassRuntimeAgent.healthCheck.port | quote }}
+            - name: APP_CA_CERT_SECRET_TO_MIGRATE
+              value: {{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.from.name | default "" | quote }}
           livenessProbe:
             httpGet:
               port: {{ .Values.compassRuntimeAgent.healthCheck.port }}

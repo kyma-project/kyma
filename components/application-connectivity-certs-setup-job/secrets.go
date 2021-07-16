@@ -16,17 +16,21 @@ import (
 type ManagerConstructor func(namespace string) Manager
 
 // Manager contains operations for managing k8s secrets
+//go:generate mockery -name=Manager
 type Manager interface {
 	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
 	Create(ctx context.Context, secret *v1.Secret, options metav1.CreateOptions) (*v1.Secret, error)
 	Update(ctx context.Context, secret *v1.Secret, options metav1.UpdateOptions) (*v1.Secret, error)
+	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error
 }
 
 // SecretRepository contains operations for managing secrets
+//go:generate mockery -name=SecretRepository
 type SecretRepository interface {
 	Get(name types.NamespacedName) (map[string][]byte, error)
 	Upsert(name types.NamespacedName, data map[string][]byte) error
 	ValuesProvided(secretName types.NamespacedName, keys []string) (bool, error)
+	Delete(secretName types.NamespacedName) error
 }
 
 type repository struct {
@@ -107,6 +111,11 @@ func (r *repository) upsert(name types.NamespacedName, data map[string][]byte) e
 		return errors.Wrapf(err, fmt.Sprintf("Updating %s secret failed while upserting", name))
 	}
 	return nil
+}
+
+func (r *repository) Delete(name types.NamespacedName) error {
+	secretManager := r.secretsManagerConstructor(name.Namespace)
+	return secretManager.Delete(r.ctx, name.Name, metav1.DeleteOptions{})
 }
 
 func makeSecret(name types.NamespacedName, data map[string][]byte) *v1.Secret {

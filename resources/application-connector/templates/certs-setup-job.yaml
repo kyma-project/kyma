@@ -4,9 +4,6 @@ kind: Job
 metadata:
   name: {{ .Chart.Name }}-certs-setup-job
   namespace: kyma-integration
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -38,6 +35,7 @@ spec:
           - "--caCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.name }}"
           - "--caCertificate={{ .Values.global.applicationConnectorCa }}"
           - "--caKey={{ .Values.global.applicationConnectorCaKey }}"
+          - "--caCertificateSecretToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.migration.from.name | default "" }}"
           - "--generatedValidityTime={{ .Values.application_connectivity_certs_setup_job.certificate.validityTime }}"
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
