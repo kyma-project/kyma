@@ -20,7 +20,7 @@ func NewMigrator(secretRepository SecretRepository) migrator {
 }
 
 func (m migrator) Do(source, target types.NamespacedName) error {
-	if source.String() == "" {
+	if source.Name == "" {
 		return nil
 	}
 
