@@ -1,0 +1,41 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+{{- if .Values.test.istio_kyma_validate.enabled }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-kyma-validate
+  labels:
+    app: {{ .Chart.Name }}-kyma-validate
+    app.kubernetes.io/name: {{ .Chart.Name }}-kyma-validate
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.test.istio_kyma_validate.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-kyma-validate
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-kyma-validate
+      containers:
+        - name: tests
+          image: {{ .Values.test.istio_kyma_validate.image }}:{{ .Values.test.istio_kyma_validate.tag }}
+          imagePullPolicy: Always
+          command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/istio-kyma-validate-test.sh" | printf "%s" | indent 16}}
+          env:
+          - name: CONFIG_DIR
+            value: /etc/config
+          - name: REQUIRED_ISTIO_VERSION
+            value: {{ .Chart.Version }}
+          securityContext:
+{{- toYaml .Values.test.securityContext | nindent 12 }}
+      restartPolicy: Never
+  {{- end }}
+  {{- end }}
