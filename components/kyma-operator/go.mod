@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/kyma-operator
 
-go 1.14
+go 1.16
 
 require (
 	github.com/Azure/azure-sdk-for-go v38.2.0+incompatible
@@ -23,9 +23,6 @@ require (
 	k8s.io/client-go v0.21.0
 )
 
-replace (
-	// There is a problem with Helm in version 3.5.2 - see more: https://github.com/helm/helm/issues/9354
-	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
-	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
-	golang.org/x/crypto/ssh => golang.org/x/crypto/ssh v0.0.0-20201216223049-8b5274cf687f
-)
+//github.com/asaskevich/govalidator => github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
+// There is a problem with Helm in version 3.5.2 - see more: https://github.com/helm/helm/issues/9354
+replace github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
