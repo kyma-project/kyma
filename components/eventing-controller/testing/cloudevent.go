@@ -12,7 +12,7 @@ import (
 func NewCloudEvent(data, id, source, eventTime, eventType string, t *testing.T) cev2event.Event {
 	timeInRFC3339, err := time.Parse(time.RFC3339, eventTime)
 	if err != nil {
-		t.Fatalf("failed to parse time: %v", err)
+		t.Fatalf("parse time failed: %v", err)
 	}
 	dataContentType := "application/json"
 	return cev2event.Event{

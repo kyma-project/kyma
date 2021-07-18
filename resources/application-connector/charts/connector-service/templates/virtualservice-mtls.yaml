@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ .Chart.Name }}-mtls
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}

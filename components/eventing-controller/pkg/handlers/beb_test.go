@@ -6,9 +6,10 @@ import (
 
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -21,7 +22,9 @@ func Test_SyncBebSubscription(t *testing.T) {
 		ClientSecret: "foo-client-secret",
 	}
 	// given
-	beb := NewBEB(credentials, ctrl.Log)
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
+	beb := NewBEB(credentials, defaultLogger)
 	clientId := "client-id"
 	clientSecret := "client-secret"
 	tokenEndpoint := "token-endpoint"
@@ -30,7 +33,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 		ClientSecret:  clientSecret,
 		TokenEndpoint: tokenEndpoint,
 	}
-	err := os.Setenv("CLIENT_ID", clientId)
+	err = os.Setenv("CLIENT_ID", clientId)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	err = os.Setenv("CLIENT_SECRET", clientSecret)
 	g.Expect(err).ShouldNot(HaveOccurred())
@@ -102,7 +105,7 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 						EventType: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "type",
-							Value:    controllertesting.EventTypeNotClean,
+							Value:    controllertesting.OrderCreatedEventTypeNotClean,
 						},
 					},
 				},

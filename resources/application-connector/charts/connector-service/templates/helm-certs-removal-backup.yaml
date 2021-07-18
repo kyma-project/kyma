@@ -36,6 +36,13 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-backup
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 20m
+            limits:
+              memory: 256Mi
+              cpu: 100m
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}
@@ -83,6 +90,13 @@ spec:
       containers:
         - name: connector-service-app-ca-helm-certs-removal-restore
           image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 20m
+            limits:
+              memory: 256Mi
+              cpu: 100m
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}

@@ -12,7 +12,16 @@ spec:
   requiredDropCapabilities:
     - ALL
   volumes:
-    - '*'
+    - 'configMap'
+    - 'secret'
+    - 'hostPath'
+  allowedHostPaths:
+    - pathPrefix: "/var/log"
+    - pathPrefix: "/var/lib/docker/containers"
+      readOnly: true
+  hostPorts:
+  - max: 65535
+    min: 1024
   hostNetwork: false
   hostIPC: false
   hostPID: false

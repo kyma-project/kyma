@@ -15,6 +15,7 @@ const {
   sleep,
   k8sApply,
   waitForServiceClass,
+  waitForServicePlanByServiceClass,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,
@@ -69,10 +70,10 @@ function prepareLastorderObjs(type='standard', appName='commerce') {
   switch (type) {
     case "central-app-gateway":
       return k8s.loadAllYaml(lastorderFunctionYaml.toString()
-        .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
     case "central-app-gateway-compass":
       return k8s.loadAllYaml(lastorderFunctionYaml.toString()
-        .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
         .replace('%%APP_NAME%%', appName));
     default:
       return k8s.loadAllYaml(lastorderFunctionYaml.toString()
@@ -273,9 +274,9 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
   await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
-
-  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   
+  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+  await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
   await retryPromise(
     () => k8sApply([serviceInstanceObj("commerce", commerceSC.spec.externalName)], targetNamespace, false),
     5,
@@ -285,7 +286,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 
   await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   if (withCentralApplicationGateway) {
-    await patchApplicationGateway('central-application-gateway', 'kyma-integration');
+    await patchApplicationGateway('central-application-gateway', 'kyma-system');
   }
 
   const serviceBinding = {
@@ -357,7 +358,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await waitForServiceInstance("commerce-events", targetNamespace);
 
   if (withCentralApplicationGateway) {
-    await patchApplicationGateway('central-application-gateway', 'kyma-integration');
+    await patchApplicationGateway('central-application-gateway', 'kyma-system');
   }
 
   const serviceBinding = {

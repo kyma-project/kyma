@@ -159,7 +159,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     * For GCP:
       * Create a project in Gardener.
-      * Add a [new service account and roles](https://gardener.cloud/documentation/guides/administer_shoots/gardener_gcp).
+      * Add a [new service account and roles](https://gardener.cloud/docs/guides/administer_shoots/gardener_gcp).
       * Add the GCP Secret under **Secrets** in the Gardener dashboard.
       * Add the service account and download Gardener's `kubeconfig` file.
 

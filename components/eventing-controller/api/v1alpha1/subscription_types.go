@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -72,12 +73,35 @@ type BebFilter struct {
 	EventType *Filter `json:"eventType"`
 }
 
+func (bf *BebFilter) hash() (uint64, error) {
+	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
+}
+
 // BebFilters defines the list of BEB filters
 type BebFilters struct {
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
 	Filters []*BebFilter `json:"filters"`
+}
+
+// Deduplicate returns a deduplicated copy of BebFilters
+func (bf *BebFilters) Deduplicate() (*BebFilters, error) {
+	seen := map[uint64]struct{}{}
+	result := &BebFilters{
+		Dialect: bf.Dialect,
+	}
+	for _, f := range bf.Filters {
+		h, err := f.hash()
+		if err != nil {
+			return nil, err
+		}
+		if _, exists := seen[h]; !exists {
+			result.Filters = append(result.Filters, f)
+			seen[h] = struct{}{}
+		}
+	}
+	return result, nil
 }
 
 // SubscriptionSpec defines the desired state of Subscription

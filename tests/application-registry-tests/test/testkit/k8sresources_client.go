@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -56,15 +57,15 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 }
 
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (*v1core.Service, error) {
-	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
+	return c.coreClient.CoreV1().Services(c.namespace).Get(context.Background(), name, options)
 }
 
 func (c *k8sResourcesClient) GetSecret(name string, options v1.GetOptions) (*v1core.Secret, error) {
-	return c.coreClient.CoreV1().Secrets(c.namespace).Get(name, options)
+	return c.coreClient.CoreV1().Secrets(c.namespace).Get(context.Background(), name, options)
 }
 
 func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), name, options)
 }
 
 func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error) {
@@ -81,7 +82,8 @@ func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, options v
 		Spec:       spec,
 	}
 
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().
+		Create(context.Background(), dummyApp, v1.CreateOptions{})
 }
 
 func addRandomPostfix(s string) string {
@@ -89,5 +91,6 @@ func addRandomPostfix(s string) string {
 }
 
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Delete(name, options)
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().
+		Delete(context.Background(), name, *options)
 }

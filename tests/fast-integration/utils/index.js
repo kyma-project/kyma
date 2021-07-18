@@ -343,7 +343,7 @@ function waitForSubscription(name, namespace = "default", timeout = 90000) {
       );
     },
     timeout,
-    `Waiting for ${name} function timeout (${timeout} ms)`
+    `Waiting for ${name} subscription timeout (${timeout} ms)`
   );
 }
 
@@ -356,6 +356,18 @@ function waitForServiceClass(name, namespace = "default", timeout = 90000) {
     },
     timeout,
     `Waiting for ${name} service class timeout (${timeout} ms)`
+  );
+}
+
+function waitForServicePlanByServiceClass(serviceClassName, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceplans`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.spec.serviceClassRef.name.includes(serviceClassName);
+    },
+    timeout,
+    `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`
   );
 }
 
@@ -955,6 +967,7 @@ module.exports = {
   k8sDelete,
   waitForK8sObject,
   waitForServiceClass,
+  waitForServicePlanByServiceClass,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,

@@ -19,11 +19,11 @@ func Test_NewSkippable(t *testing.T) {
 	for _, tc := range testCases {
 		skippableErr := NewSkippable(tc.error)
 		if skippableErr == nil {
-			t.Errorf("Test NewSkippable retuned nil error")
+			t.Errorf("test NewSkippable retuned nil error")
 			continue
 		}
 		if err := errors.Unwrap(skippableErr); tc.error != err {
-			t.Errorf("Test NewSkippable failed, want: %#v but got: %#v", tc.error, err)
+			t.Errorf("test NewSkippable failed, want: %#v but got: %#v", tc.error, err)
 		}
 	}
 }
@@ -59,7 +59,7 @@ func Test_IsSkippable(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if gotSkippable := IsSkippable(tc.givenError); tc.wantSkippable != gotSkippable {
-				t.Errorf("Test skippable failed, want: %v but got: %v", tc.wantSkippable, gotSkippable)
+				t.Errorf("test skippable failed, want: %v but got: %v", tc.wantSkippable, gotSkippable)
 			}
 		})
 	}
