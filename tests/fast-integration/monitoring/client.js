@@ -53,6 +53,7 @@ async function get(path) {
 
 async function queryGrafana(url, redirectURL, ignoreSSl, httpErrorCode) {
     try {
+        // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
         delete axios.defaults.headers.common["Accept"]
         // Ignore SSL certificate for self signed certificates
         const agent = new https.Agent({
