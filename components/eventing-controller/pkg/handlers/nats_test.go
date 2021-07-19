@@ -133,12 +133,12 @@ func TestSubscription(t *testing.T) {
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
 	sub.Spec.Sink = subscriberReceiveURL
-	_, appliedSubConfig, err := natsClient.SyncSubscription(sub, cleaner)
+	_, err = natsClient.SyncSubscription(sub, cleaner)
 	if err != nil {
 		t.Fatalf("sync subscription failed: %v", err)
 	}
-	g.Expect(appliedSubConfig).NotTo(BeNil())
-	g.Expect(appliedSubConfig.MaxInFlightMessages).To(Equal(defaultMaxInflight))
+	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
 
 	data := "sampledata"
 	// Send an event
@@ -235,7 +235,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	}
 	sub.Spec.Sink = subscriberReceiveURL
 	idFunc := func(et string) (string, error) { return et, nil }
-	if _, _, err := natsClient.SyncSubscription(sub, eventtype.CleanerFunc(idFunc)); err != nil {
+	if _, err := natsClient.SyncSubscription(sub, eventtype.CleanerFunc(idFunc)); err != nil {
 		t.Fatalf("sync subscription failed: %s", err.Error())
 	}
 
@@ -291,7 +291,7 @@ func TestIsValidSubscription(t *testing.T) {
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
 	sub.Spec.Sink = subscriberReceiveURL
-	_, appliedConfig, err := natsClient.SyncSubscription(sub, cleaner)
+	_, err = natsClient.SyncSubscription(sub, cleaner)
 	if err != nil {
 		t.Fatalf("sync subscription failed: %v", err)
 	}
@@ -302,13 +302,13 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
-	g.Expect(appliedConfig).NotTo(BeNil())
-	g.Expect(appliedConfig.MaxInFlightMessages).To(Equal(defaultSubsConfig.MaxInFlightMessages))
+	g.Expect(sub.Status.Config).NotTo(BeNil())
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 
 	// get internal key
 	var key string
 	var natsSub *nats.Subscription
-	for i := 0; i < appliedConfig.MaxInFlightMessages; i++ {
+	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
 		key = createKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
 		natsSub = natsClient.subscriptions[key]
@@ -341,7 +341,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// check that only one invalid subscription exist
 	invalidNsn = natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(appliedConfig.MaxInFlightMessages))
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(sub.Status.Config.MaxInFlightMessages))
 
 	// restart NATS server
 	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
@@ -349,7 +349,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// check that only one invalid subscription still exist, the controller is not running...
 	invalidNsn = natsClient.GetInvalidSubscriptions()
-	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(appliedConfig.MaxInFlightMessages))
+	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(sub.Status.Config.MaxInFlightMessages))
 
 }
 

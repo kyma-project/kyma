@@ -90,13 +90,12 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, *eventingv1alpha1.SubscriptionConfig, error) {
-	var subsConfig *eventingv1alpha1.SubscriptionConfig
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BebFilter
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return false, subsConfig, errors.Wrap(err, "deduplicate subscription filters failed")
+			return false, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -104,12 +103,13 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
+	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
 		if err != nil {
 			log.Errorw("create NATS subject failed", "error", err)
-			return false, subsConfig, err
+			return false, err
 		}
 
 		callback := n.getCallback(sub.Spec.Sink)
@@ -117,22 +117,22 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(env.Config{}); err != nil {
 				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
-				return false, subsConfig, err
+				return false, err
 			}
 		}
 
-		subsConfig = eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
 			if subscribeErr != nil {
 				log.Errorw("create NATS subscription failed", "error", err)
-				return false, subsConfig, subscribeErr
+				return false, subscribeErr
 			}
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
 	}
+	sub.Status.Config = subsConfig
 
-	return false, subsConfig, nil
+	return false, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription

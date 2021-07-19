@@ -70,7 +70,7 @@ func TestCleanup(t *testing.T) {
 	fakeCleaner := fake.Cleaner{}
 
 	// Create NATS subscription
-	_, _, err = natsCommander.Backend.SyncSubscription(testSub, &fakeCleaner)
+	_, err = natsCommander.Backend.SyncSubscription(testSub, &fakeCleaner)
 	g.Expect(err).To(gomega.BeNil())
 
 	// Make sure subscriber works
