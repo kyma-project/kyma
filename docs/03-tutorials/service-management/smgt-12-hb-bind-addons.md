@@ -1,5 +1,5 @@
 ---
-title: Bind addons
+title: Create addons for bindable plans
 ---
 
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
