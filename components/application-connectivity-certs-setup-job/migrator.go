@@ -2,45 +2,57 @@ package main
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 type migrator struct {
-	ctx              context.Context
-	secretRepository SecretRepository
+	ctx                  context.Context
+	secretRepository     SecretRepository
+	includeSourceKeyFunc IncludeKeyFunc
 }
 
-func NewMigrator(secretRepository SecretRepository) migrator {
+func NewMigrator(secretRepository SecretRepository, includeSourceKeyFunc IncludeKeyFunc) migrator {
 	return migrator{
-		ctx:              context.Background(),
-		secretRepository: secretRepository,
+		ctx:                  context.Background(),
+		secretRepository:     secretRepository,
+		includeSourceKeyFunc: includeSourceKeyFunc,
 	}
 }
 
+type IncludeKeyFunc func(string) bool
+
 func (m migrator) Do(source, target types.NamespacedName) error {
+	logrus.Infof("Migrating secret. Source: %s , target=%s \n", source.String(), target.String())
+
 	if source.Name == "" {
+		logrus.Infof("Skipping secret migration. Secret name is empty.")
 		return nil
 	}
 
 	sourceData, sourceExists, err := m.getSecret(source)
 	if err != nil {
+		logrus.Errorf("Failed to read source secret: %v", err)
 		return err
 	}
 
 	if !sourceExists {
+		logrus.Info("Skipping secret migration. Source secret doesn't exist.")
 		return nil
 	}
 
 	_, targetExists, err := m.getSecret(target)
 	if err != nil {
+		logrus.Errorf("Failed to read target secret: %v", err)
 		return err
 	}
 
 	if !targetExists {
-		err = m.createSecret(target, sourceData)
+		err = m.createSecret(target, filterOut(sourceData, m.includeSourceKeyFunc))
 		if err != nil {
+			logrus.Errorf("Failed to create target secret: %v", err)
 			return err
 		}
 	}
@@ -67,4 +79,16 @@ func (m migrator) createSecret(name types.NamespacedName, data map[string][]byte
 
 func (m migrator) deleteSecret(name types.NamespacedName) error {
 	return m.secretRepository.Delete(name)
+}
+
+func filterOut(data map[string][]byte, includeKeyFunc IncludeKeyFunc) map[string][]byte {
+	newData := make(map[string][]byte)
+
+	for k, v := range data {
+		if includeKeyFunc(k) {
+			newData[k] = v
+		}
+	}
+
+	return newData
 }

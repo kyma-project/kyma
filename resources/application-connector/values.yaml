@@ -87,6 +87,7 @@ application_connectivity_certs_setup_job:
       migration:
         from:
           name: app-connector-certs
+          keys: ["cacert"]
   certificate:
     validityTime: 92d
 

@@ -24,7 +24,11 @@ type options struct {
 	caCertificate string
 	caKey         string
 
-	caCertificateSecretToMigrate types.NamespacedName
+	caCertificateSecretToMigrate     types.NamespacedName
+	caCertificateSecretKeysToMigrate string
+
+	connectorCertificateSecretToMigrate     types.NamespacedName
+	connectorCertificateSecretKeysToMigrate string
 
 	generatedValidityTime time.Duration
 }
@@ -37,6 +41,7 @@ func parseArgs() *options {
 	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
 
 	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "kyma-integration/connector-service-app-ca", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
+	caCertificateSecretKeysToMigrate := flag.String("caCertificateSecretKeysToMigrate", "cacert", "List of keys to be migrated")
 
 	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
 
@@ -48,22 +53,24 @@ func parseArgs() *options {
 	}
 
 	return &options{
-		connectorCertificateSecret:   parseNamespacedName(*connectorCertificateSecret),
-		caCertificateSecret:          parseNamespacedName(*caCertificateSecret),
-		caCertificate:                *caCertificate,
-		caKey:                        *caKey,
-		caCertificateSecretToMigrate: parseNamespacedName(*caCertificateSecretToMigrate),
-		generatedValidityTime:        validityTime,
+		connectorCertificateSecret:       parseNamespacedName(*connectorCertificateSecret),
+		caCertificateSecret:              parseNamespacedName(*caCertificateSecret),
+		caCertificate:                    *caCertificate,
+		caKey:                            *caKey,
+		caCertificateSecretToMigrate:     parseNamespacedName(*caCertificateSecretToMigrate),
+		caCertificateSecretKeysToMigrate: *caCertificateSecretKeysToMigrate,
+		generatedValidityTime:            validityTime,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--connectorCertificateSecret=%s --caCertificateSecret=%s "+
-		"-caCertificateSecretToMigrate=%s"+
+		"-caCertificateSecretToMigrate=%s --caCertificateSecretKeysToMigrate=%s"+
 		"--generatedValidityTime=%s "+
 		"CA certificate provided: %t, CA key provided: %t",
 		o.connectorCertificateSecret, o.caCertificateSecret,
 		o.caCertificateSecretToMigrate,
+		o.caCertificateSecretKeysToMigrate,
 		o.generatedValidityTime.String(),
 		o.caCertificate != "", o.caKey != "")
 }
