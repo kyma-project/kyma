@@ -13,7 +13,7 @@ describe("Getting Started Guide Tests", function () {
   this.slow(5000);
 
   if (process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY) {
-    console.log("Getting Started Guide test for Central Application Gateway not implemented. Omitting...");
+    console.log("Getting Started Guide test for Central Application Connectivity not implemented. Omitting...");
     return;
   }
 
@@ -39,7 +39,8 @@ describe("Getting Started Guide Tests", function () {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  // it("Namespace should be deleted", async function () {
-  //   await cleanGettingStartedTestFixture(false);
-  // });
+  await new Promise(r => setTimeout(r, 3600*1000));
+  it("Namespace should be deleted", async function () {
+    await cleanGettingStartedTestFixture(false);
+  });
 });
