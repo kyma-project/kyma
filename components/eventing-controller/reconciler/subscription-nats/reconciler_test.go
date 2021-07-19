@@ -83,6 +83,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 					eventingv1alpha1.ConditionSubscriptionActive,
 					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 					v1.ConditionTrue, "")),
+				reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+					MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+				}),
 			))
 
 			// publish a message
@@ -159,6 +162,71 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 				received := string(<-result)
 				return sent == received
 			}).Should(BeTrue())
+		})
+	})
+
+	When("Changing subscription configuration", func() {
+		It("Should reflect the new config in the subscription status", func() {
+			By("Creating the subscription using the default config")
+			ctx := context.Background()
+			subscriptionName := fmt.Sprintf("sub-%d", testId)
+
+			// create subscriber
+			result := make(chan []byte)
+			url, shutdown := newSubscriber(result)
+			defer shutdown()
+
+			// create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookForNats)
+			givenSubscription.Spec.Sink = url
+			ensureSubscriptionCreated(givenSubscription, ctx)
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")),
+				reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+					MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+				}),
+			))
+
+			By("Updating the subscription configuration in the spec")
+
+			newMaxInFlight := defaultSubsConfig.MaxInFlightMessages + 1
+			givenSubscription.Spec.Config = &eventingv1alpha1.SubscriptionConfig{
+				MaxInFlightMessages: newMaxInFlight,
+			}
+			err := k8sClient.Update(ctx, givenSubscription)
+			Expect(err).NotTo(HaveOccurred())
+
+			getSubscription(givenSubscription, ctx).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")),
+				reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+					MaxInFlightMessages: newMaxInFlight,
+				}),
+			))
+
+			// publish a message
+			connection, err := connectToNats(natsUrl)
+			Expect(err).ShouldNot(HaveOccurred())
+			err = connection.Publish(reconcilertesting.OrderCreatedEventType, []byte(reconcilertesting.StructuredCloudEvent))
+			Expect(err).ShouldNot(HaveOccurred())
+
+			// make sure that the subscriber received the message
+			Eventually(func() bool {
+				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+				received := string(<-result)
+				return sent == received
+			}).Should(BeTrue())
+
+			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+			isSubscriptionDeleted(givenSubscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 
@@ -270,6 +338,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var natsServer *natsserver.Server
+var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1}
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -328,9 +397,6 @@ var _ = BeforeSuite(func(done Done) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 
-	defaultSubsConfig := env.DefaultSubscriptionConfig{
-		MaxInFlightMessages: 1,
-	}
 	err = NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
