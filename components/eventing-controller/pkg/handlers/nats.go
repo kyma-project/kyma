@@ -121,7 +121,6 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		//natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
 		subsConfig = eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
@@ -129,7 +128,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 				log.Errorw("create NATS subscription failed", "error", err)
 				return false, subsConfig, subscribeErr
 			}
-			n.subscriptions[createKey(sub, subject+string(types.Separator)+strconv.Itoa(i))] = natsSub
+			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
 	}
 
@@ -236,8 +235,12 @@ func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	return fmt.Sprintf("%s", namespacedName.String())
 }
 
-func createKey(sub *eventingv1alpha1.Subscription, subject string) string {
-	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), subject)
+func createKeySuffix(subject string, queueGoupInstanceNo int) string {
+	return subject + string(types.Separator) + strconv.Itoa(queueGoupInstanceNo)
+}
+
+func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInstanceNo int) string {
+	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
 func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {

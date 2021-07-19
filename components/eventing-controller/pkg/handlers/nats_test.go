@@ -4,16 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/nats-io/nats.go"
-	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/types"
-
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -23,6 +18,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/nats-io/nats.go"
+	. "github.com/onsi/gomega"
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -312,7 +309,7 @@ func TestIsValidSubscription(t *testing.T) {
 	var key string
 	var natsSub *nats.Subscription
 	for i := 0; i < appliedConfig.MaxInFlightMessages; i++ {
-		key = createKey(sub, subject+string(types.Separator)+strconv.Itoa(i))
+		key = createKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
 		natsSub = natsClient.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))
