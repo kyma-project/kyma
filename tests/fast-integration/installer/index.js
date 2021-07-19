@@ -26,7 +26,7 @@ const {
 } = require("../utils");
 const notDeployed = "not-deployed";
 const kymaCrds = require("./kyma-crds");
-const defaultIstioVersion = "1.8.2";
+const defaultIstioVersion = "1.10.0";
 
 
 async function waitForNodesToBeReady(timeout = "180s") {
@@ -106,7 +106,7 @@ function skipHelmTest(r) {
   return !(r.metadata.annotations && r.metadata.annotations["helm.sh/hook"] && r.metadata.annotations["helm.sh/hook"].includes("test-success"));
 }
 function skipNull(r) {
-  return (r!=null);
+  return (r != null);
 }
 
 async function applyRelease(
@@ -184,6 +184,8 @@ async function chartList(options) {
   if (isGardener == "true") {
     registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
   }
+  const kialiOverrides = overrides + ',kiali.kcproxy.enabled=false,kiali.virtualservice.enabled=false';
+  const tracingOverrides = overrides + ',tracing.kcproxy.enabled=false,tracing.virtualservice.enabled=false';
 
   const kymaCharts = [
     {
@@ -255,12 +257,12 @@ async function chartList(options) {
     {
       release: "kiali",
       namespace: "kyma-system",
-      values: `${overrides}`,
+      values: `${kialiOverrides}`,
     },
     {
       release: "tracing",
       namespace: "kyma-system",
-      values: `${overrides}`,
+      values: `${tracingOverrides}`,
     },
     {
       release: "logging",
