@@ -255,6 +255,90 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g.Expect(err).Should(HaveOccurred())
 }
 
+func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
+	g := NewWithT(t)
+
+	natsPort := 5223
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+
+	// Start NATS server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer eventingtesting.ShutDownNATSServer(natsServer)
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	if err != nil {
+		t.Fatalf("initialize logger failed: %v", err)
+	}
+
+	natsConfig := env.NatsConfig{
+		Url:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+
+	if err := natsBackend.Initialize(env.Config{}); err != nil {
+		t.Fatalf("connect to NATS server failed: %v", err)
+	}
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	if err != nil {
+		t.Fatalf("sync subscription failed: %v", err)
+	}
+
+	filter := sub.Spec.Filter.Filters[0]
+	subject, err := createSubject(filter, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(subject).To(Not(BeEmpty()))
+
+	g.Expect(sub.Status.Config).NotTo(BeNil())
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultSubsConfig.MaxInFlightMessages))
+
+	// get internal key
+	var key string
+	var natsSub *nats.Subscription
+	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
+		key = createKey(sub, subject, i)
+		natsSub = natsBackend.subscriptions[key]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+	}
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
+
+	// check that no invalid subscriptions exist
+	invalidNsn := natsBackend.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeZero())
+
+	sub.Spec.Config = &eventingv1alpha1.SubscriptionConfig{MaxInFlightMessages: 7}
+	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	if err != nil {
+		t.Fatalf("sync subscription failed: %v", err)
+	}
+
+	g.Expect(sub.Status.Config).NotTo(BeNil())
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(sub.Spec.Config.MaxInFlightMessages))
+	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
+		key = createKey(sub, subject, i)
+		natsSub = natsBackend.subscriptions[key]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+	}
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(sub.Spec.Config.MaxInFlightMessages))
+	// check that no invalid subscriptions exist
+	invalidNsn = natsBackend.GetInvalidSubscriptions()
+	g.Expect(len(*invalidNsn)).To(BeZero())
+}
+
 func TestIsValidSubscription(t *testing.T) {
 	g := NewWithT(t)
 
