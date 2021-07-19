@@ -2,8 +2,7 @@
 title: Service Mesh
 ---
 
-Kyma Service Mesh is the component responsible for service-to-service communication, proxying, service discovery, traceability, and security.
-To deliver this functionality, Kyma Service Mesh uses [Istio](https://istio.io/docs/concepts/what-is-istio/) open platform.
+Kyma Service Mesh is the component responsible for service-to-service communication, proxying, service discovery, traceability, and security. To deliver this functionality, Kyma Service Mesh uses [Istio](https://istio.io/docs/concepts/what-is-istio/) open platform.
 
 The main principle of Kyma Service Mesh is to inject Pods of every service with the Envoy sidecar proxy. Envoy intercepts the communication between the services and regulates it by applying and enforcing the rules you create.
 

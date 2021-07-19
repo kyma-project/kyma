@@ -1,6 +1,5 @@
 ---
 title: Expose a service
-type: Tutorials
 ---
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.

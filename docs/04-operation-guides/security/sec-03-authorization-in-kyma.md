@@ -1,12 +1,10 @@
 ---
 title: Authorization in Kyma
-type: Details
 ---
 
 ## User authorization
 
 Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through the Kyma Console or using kubectl, you must be authenticated with a JWT token. This token collects user information such as username, email, or `groups` claim for the system to determine whether you have access to perform certain operations.
-
 
 ### Cluster-wide authorization
 
