@@ -21,6 +21,8 @@ spec:
                   required:
                   - "authentication"
                   properties:
+                    applicationId:
+                      type: string
                     authentication:
                       type: object
                       required:
@@ -34,6 +36,29 @@ spec:
                   type: string
                   maxLength: 63
                   pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+                description:
+                  type: string
+                skipInstallation:
+                  type: boolean
+                labels:
+                  additionalProperties:
+                    type: string
+                  type: object
+                tenant:
+                  type: string
+                group:
+                  type: string
+                tags:
+                  description: New fields used by V2 version
+                  items:
+                    type: string
+                  type: array
+                displayName:
+                  type: string
+                providerDisplayName:
+                  type: string
+                longDescription:
+                  type: string
                 services:
                   type: array
                   items:
@@ -52,6 +77,11 @@ spec:
                         type: string
                       identifier:
                         type: string
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: Deprecated
+                        type: object
                       displayName:
                         type: string
                       description:
@@ -60,6 +90,9 @@ spec:
                         type: string
                       providerDisplayName:
                         type: string
+                      authCreateParameterSchema:
+                        description: New fields used by V2 version
+                        type: string
                       entries:
                         type: array
                         items:
@@ -67,6 +100,8 @@ spec:
                           required:
                           - "type"
                           properties:
+                            apiType:
+                              type: string
                             type:
                               type: string
                               enum:
@@ -79,6 +114,18 @@ spec:
                               maxLength: 63
                               pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
                             targetUrl:
+                              type: string
+                            gatewayUrl:
+                              description: Deprecated
+                              type: string
+                            id:
+                              type: string
+                            name:
+                              description: New fields used by V2 version
+                              type: string
+                            requestParametersSecretName:
+                              type: string
+                            specificationUrl:
                               type: string
                             credentials:
                               type: object
@@ -103,6 +150,21 @@ spec:
                         type: array
                         items:
                           type: string
+              type: object
+            status:
+              properties:
+                installationStatus:
+                  description: Represents the status of Application release installation
+                  properties:
+                    description:
+                      type: string
+                    status:
+                      type: string
+                  required:
+                  - status
+                  type: object
+              required:
+              - installationStatus
               type: object
   scope: Cluster
   names:
