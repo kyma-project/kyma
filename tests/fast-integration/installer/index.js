@@ -22,7 +22,9 @@ const {
   deleteAllK8sResources,
   deleteNamespaces,
   getAllCRDs,
-  k8sApply
+  k8sApply,
+  waitForDeployment,
+  waitForStatefulSet
 } = require("../utils");
 const notDeployed = "not-deployed";
 const kymaCrds = require("./kyma-crds");
@@ -118,9 +120,18 @@ async function applyRelease(
   isUpgrade
 ) {
   const { stdout } = await helmTemplate(release, chart, namespace, values, profile);
-  const yamls = k8s.loadAllYaml(stdout);
-
-  await k8sApply(yamls.filter(skipNull).filter(skipHelmTest), namespace);
+  const yamls = k8s.loadAllYaml(stdout).filter(skipNull).filter(skipHelmTest);
+  const deployments = yamls.filter((r) => r.kind === 'Deployment');
+  const statefulsets = yamls.filter((r) => r.kind === 'StatefulSet');
+  await k8sApply(yamls, namespace);
+  for (let deployment of deployments) {
+    console.log("Waitng for deployment: ", deployment)
+    await waitForDeployment(deployment.metadata.name, deployment.metadata.namespace || namespace);
+  }
+  for (let ss of statefulsets) {
+    console.log("Waitng for StatefulSet: ", ss)
+    await waitForStatefulSet(ss.metadata.name, ss.metadata.namespace || namespace);
+  }
 }
 
 async function installRelease(
@@ -184,8 +195,8 @@ async function chartList(options) {
   if (isGardener == "true") {
     registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
   }
-  const kialiOverrides = overrides + ',kiali.kcproxy.enabled=false,kiali.virtualservice.enabled=false';
-  const tracingOverrides = overrides + ',tracing.kcproxy.enabled=false,tracing.virtualservice.enabled=false';
+  const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
+  const tracingOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
 
   const kymaCharts = [
     {
