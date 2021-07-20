@@ -3,10 +3,3 @@ appVersion: 0.1.0
 description: Helm chart for installing the Webhook for the Function Controller
 name: webhook
 version: 0.1.0
-maintainers:
-  - name: aerfio
-    email: "mati6095@gmail.com"
-  - name: pPrecel
-    email: "filip.strozik@outlook.com"
-  - name: magicmatatjahu
-    email: "urbanczyk.maciej.95@gmail.com"

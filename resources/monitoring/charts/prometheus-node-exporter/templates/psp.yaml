@@ -31,7 +31,7 @@ spec:
   hostIPC: false
   hostPID: true
   hostPorts:
-    - min: 1024 # TODO :0?
+    - min: 1024
       max: 65535
   runAsUser:
     # Permits the container to run with root privileges as well.

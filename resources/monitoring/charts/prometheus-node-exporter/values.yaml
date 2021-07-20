@@ -59,7 +59,7 @@ serviceAccount:
   annotations: {}
   imagePullSecrets: []
 
-securityContext:
+podSecurityContext:
   fsGroup: 65534
   runAsGroup: 65534
   runAsNonRoot: true
@@ -140,8 +140,8 @@ tolerations:
 extraArgs:
   #   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
   #   - --collector.textfile.directory=/run/prometheus
-  - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/) # TODO
-  - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$ # TODO
+  - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+  - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
 
 ## Additional mounts from the host
 ##
