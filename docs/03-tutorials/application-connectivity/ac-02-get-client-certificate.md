@@ -17,7 +17,7 @@ how to [revoke the client certificate](../../03-tutorials/application-connectivi
 
 To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
-- Create a TokenRequest CR. The CR name must match the name of the Application for which you want to get the configuration details. Run:
+1. Create a TokenRequest CR. The CR name must match the name of the Application for which you want to get the configuration details. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -28,7 +28,7 @@ To get the configuration URL which allows you to fetch the required configuratio
    EOF
    ```
 
-- Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
+2. Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
 
    ```bash
    kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
@@ -87,29 +87,28 @@ A successful call returns the following response:
 
 ## Generate a CSR and send it to Kyma
 
-Generate a CSR using the certificate subject data obtained in the previous step:
+1. Generate a CSR using the certificate subject data obtained in the previous step:
 
-```bash
-openssl genrsa -out generated.key 2048
-openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
-openssl base64 -in generated.csr
-```
+   ```bash
+   openssl genrsa -out generated.key 2048
+   openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
+   openssl base64 -in generated.csr
+   ```
+2. Send the encoded CSR to Kyma. Run:
 
-Send the encoded CSR to Kyma. Run:
+   ```bash
+   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
+   ```
 
-```bash
-curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
-```
-
-The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
-
-```json
-{
-    "crt":"BASE64_ENCODED_CRT_CHAIN",
-    "clientCrt":"BASE64_ENCODED_CLIENT_CRT",
-    "caCrt":"BASE64_ENCODED_CA_CRT"
-}
-```
+   The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
+   
+   ```json
+   {
+       "crt":"BASE64_ENCODED_CRT_CHAIN",
+       "clientCrt":"BASE64_ENCODED_CLIENT_CRT",
+       "caCrt":"BASE64_ENCODED_CA_CRT"
+   }
+   ```
 
 After you receive the certificates, decode the certificate chain and use it in your Application.
 

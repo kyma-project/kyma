@@ -8,7 +8,7 @@ This tutorial shows how to configure Runtime Agent with Compass.
 
 - [Compass](https://github.com/kyma-incubator/compass)
 - Runtime connected to Compass and the Runtime ID
-- [Connector URL](../../03-tutorials/application-connectivity/ra-02-establish-secure-connection-with-compass.md)
+- [Connector URL](ra-01-establish-secure-connection-with-compass.md)
 - One-time token from the Connector
 - Tenant ID
 

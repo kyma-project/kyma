@@ -73,10 +73,6 @@ Additionally, Application Gateway supports cross-site request forgery (CSRF) tok
 
 The Access Service exposes Application Gateway and manages the access from the Functions and services deployed in Kyma to the external APIs over Application Gateway.
 
-## Rafter
-
-Rafter stores the documentation of the connected external solution's registered APIs and event catalogs.
-
 ## Kubernetes Secret
 
 The Kubernetes Secret is a Kubernetes object which stores sensitive data, such as the OAuth credentials.

@@ -4,7 +4,7 @@ title: Renew a client certificate
 
 By default, a client certificate you generate when you connect an external solution to Kyma is valid for 92 days. Follow this tutorial to renew a client certificate.
  
-> **NOTE:** You, as the user, are responsible for rotating and renewing the certificates.
+>**NOTE:** You, as the user, are responsible for rotating and renewing the certificates.
 
 >**NOTE:** You can only renew client certificates that are still valid. If your client certificate is expired or revoked, you must generate a new one.
 
@@ -22,7 +22,7 @@ By default, a client certificate you generate when you connect an external solut
 
 3. Send a request to the Connector Service to renew the certificate. Use the certificate renewal endpoint.
 
-   > **NOTE:** To get the URL to the certificate renewal endpoint, see the tutorial on how to [call the metadata endpoint](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md#call-the-metadata-endpoint).
+   >**NOTE:** To get the URL to the certificate renewal endpoint, see the tutorial on how to [call the metadata endpoint](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md#call-the-metadata-endpoint).
 
    ```bash
    curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals -d '{"csr":"BASE64_ENCODED_CSR"}' -k --cert {PATH_TO_OLD_CRT} --key {PATH_TO_KEY}

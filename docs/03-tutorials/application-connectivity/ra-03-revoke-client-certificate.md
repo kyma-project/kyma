@@ -12,9 +12,9 @@ After you have established a secure connection with Compass and generated a clie
 - [Compass](https://github.com/kyma-incubator/compass)
 - Registered Application
 - Runtime connected to Compass
-- [Established secure connection with Compass](../../03-tutorials/application-connectivity/ra-02-establish-secure-connection-with-compass.md)
+- [Established secure connection with Compass](ra-01-establish-secure-connection-with-compass.md)
 
-> **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](../../03-tutorials/application-connectivity/ra-03-maintain-secure-connection-with-compass.md).
+> **NOTE**: See how to [maintain a secure connection with Compass and renew a client certificate](ra-02-maintain-secure-connection-with-compass.md).
 
 ## Steps
 

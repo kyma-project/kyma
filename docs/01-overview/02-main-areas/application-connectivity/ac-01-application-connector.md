@@ -4,7 +4,9 @@ title: Application Connector
 
 Application Connector (AC) is a custom, in-house built Kyma component that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process does not change, which allows to avoid any configuration or network-related problems.
 
-The external solution you connect to Kyma using the AC is represented as an Application. There is always a one-to-one relationship between a connected solution and an Application, which helps to ensure the highest level of security and separation. This means that you must create five separate Applications in your cluster to connect five different external solutions and use their APIs and event catalogs in Kyma.
+The external solution you connect to Kyma using AC is represented as an Application. There is always a one-to-one relationship between a connected solution and an Application, which helps to ensure the highest level of security and separation. This means that you must create five separate Applications in your cluster to connect five different external solutions and use their APIs and event catalogs in Kyma.
+
+Application Connector is secured with a client certificate verified by the Istio Ingress Gateway. The certificates are generated and stored as Kubernetes Secrets by Application Connector Certs Setup job. By default, the server key and certificate are automatically generated, but you can [provide a custom server certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md) during installation.
 
 Application Connector:
 
@@ -18,10 +20,9 @@ Application Connector:
 
 All of the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
 
-
 ## Supported APIs
 
-Application Connector allows you to register secured REST APIs exposed by the connected external solution. Application Connector supports a variety of authentication methods to ensure smooth integration with a wide range of APIs.
+Application Connector allows you to [register secured REST APIs](../../../04-operation-guides/operations/ac-02-api-registration.md) exposed by the connected external solution. Application Connector supports a variety of authentication methods to ensure smooth integration with a wide range of APIs.
 
 You can register an API secured with one of the following authentication methods:
 
