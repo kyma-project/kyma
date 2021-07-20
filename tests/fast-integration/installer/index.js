@@ -172,10 +172,7 @@ async function installRelease(
   debug(`Release ${release} deployed`);
 }
 
-async function chartList(options) {
-  console.debug("DEBUG chartList()");
-  console.dir(options);
-  
+async function chartList(options) {  
   const gardenerDomain = await getGardenerDomain();
   const domain = process.env["KYMA_DOMAIN"] || gardenerDomain || "local.kyma.dev";
 
@@ -195,9 +192,6 @@ async function chartList(options) {
     `global.ingress.domainName=${domain}`,
     `global.tlsCrt=ZHVtbXkK`
   ].join(',');
-
-  console.debug("DEBUG overrides");
-  console.log(overrides);
 
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides;
@@ -401,8 +395,6 @@ async function uninstallKyma(options) {
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
-  console.debug("DEBUG installKyma()");
-  console.dir(options);
   options = options || {};
   const installLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "resources");
   const crdLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "installation", "resources", "crds");
