@@ -1,5 +1,5 @@
 ---
-title: FAILED status for created ServiceInstances
+title: "FAILED" status for created ServiceInstances
 ---
 
 ## Symptom

@@ -11,3 +11,5 @@ ServiceClasses are visible in Service Catalog but provisioning action is blocked
 Different Service Brokers registered ClusterServiceClasses or ServiceClasses with the same ID.
 
 ## Remedy
+
+Make sure that the addons IDs you provide in your ClusterAddonsConfiguration or AddonsConfiguration CRs are uniqe. Read about the [addons registration rules](../../03-tutorials/service-management/smgt-16-hb-register-addons-sc.md#registration-rules) for more information.
