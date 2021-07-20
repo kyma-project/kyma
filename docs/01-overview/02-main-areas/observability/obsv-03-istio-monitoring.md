@@ -1,0 +1,50 @@
+---
+title: Istio monitoring
+---
+
+## Default setup
+
+The monitoring chart is pre-configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh, including the proxy-level, service-level, and control-plane metrics.
+
+The concept of collecting the [service-level](https://istio.io/latest/docs/concepts/observability/#service-level-metrics) metrics is built around the Istio Proxy implemented by Envoy. Istio Proxy collects all communication details inside the service mesh in a decentralized way. After scraping these high-cardinality metrics from the envoys, the metrics must be aggregated on a service level to get the final service-related details.
+
+Following the [Istio's observability best practice](https://istio.io/latest/docs/ops/best-practices/observability/), the scraping and aggregation of the service-level metrics is done in a dedicated Prometheus instance. That instance is configured with the smallest possible data retention time because the raw metrics scraped from the Istio Proxies have high-cardinality and don't need to be kept further. Instead, the main Prometheus instance scrapes the aggregated metrics through the `/federate` endpoint.
+
+The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`. Do not change the short data retention time and hardcoded configuration of this instance. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
+
+## Istio minitoring flow
+
+See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
+
+![Istio Monitoring](./assets/monitoring-istio.svg)
+
+## Enable Grafana vizualization
+
+By default, `monitoring-prometheus-istio-server` is not provided as a data source in Grafana.
+
+1. To enable `monitoring-prometheus-istio-server` as a data source in Grafana, override the values:
+
+  ```bash
+  cat <<EOF | kubectl apply -f -
+  ---
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: monitoring-overrides
+    namespace: kyma-installer
+    labels:
+      installer: overrides
+      component: monitoring
+      kyma-project.io/installation: ""
+  data:
+      prometheus-istio.grafana.datasource.enabled: "true"
+  EOF
+  ```
+
+2. Upgrade the [Kyma cluster](../../../04-operation-guides/operations/05-upgrade-kyma.md).
+
+3. Restart the Grafana deployment with the following command:
+
+  ```bash
+  kubectl rollout restart -n kyma-system deployment monitoring-grafana
+  ```
