@@ -166,6 +166,8 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      functionPublisherProxyAddress:
+        "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:

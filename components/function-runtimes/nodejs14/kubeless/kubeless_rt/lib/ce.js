@@ -2,7 +2,7 @@
 
 const axios = require('axios');
 
-const publishProxyAddress = (process.env.PUBLISHER_PROXY_ADDRESS); // "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
+const publishProxyAddress = (process.env.PUBLISHER_PROXY_ADDRESS);
 
 module.exports = {
     buildEvent
