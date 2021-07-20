@@ -65,6 +65,10 @@ spec:
           httpGet:
             path: /ping
             port: http
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
         {{- if .Values.kyma.authProxy.securityContext }}
         securityContext:
 {{ toYaml .Values.kyma.authProxy.securityContext | nindent 10 }}
