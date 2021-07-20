@@ -6,7 +6,7 @@ Addons which Helm Broker uses must have a specific structure. To create an addon
 
 1. Add the `meta.yaml` file.
 
-   The `meta.yaml` file contains information about the addon. Define the fields specified in the [Specifications for the meta.yaml files](##specifications-for-the-meta.yaml-files) section to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
+   The `meta.yaml` file contains information about the addon. Define the fields specified in the [Specifications for the meta.yaml files](#specifications-for-the-metayaml-files) section to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
 2. Add the `chart` directory.
 
@@ -18,7 +18,7 @@ Addons which Helm Broker uses must have a specific structure. To create an addon
 
    The `plans` directory must contain at least one plan. Each plan must contain the `meta.yaml` file. Other files are not mandatory.
 
-   * `meta.yaml` file - contains information about a given plan. Define the fields specified in the [Specifications for the meta.yaml files](##specifications-for-the-meta.yaml-files) section to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
+   * `meta.yaml` file - contains information about a given plan. Define the fields specified in the [Specifications for the meta.yaml files](#specifications-for-the-metayaml-files) section to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
 
    * `bind.yaml` file - contains information about the binding operation in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information, read about [binding addons](./smgt-12-hb-bind-addons.md).
 
@@ -34,7 +34,7 @@ Addons which Helm Broker uses must have a specific structure. To create an addon
 
 4. Add the `docs` directory.
 
-   In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded. Because you can install Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/18-clusterassetgroup-cr.md) or [AssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/17-assetgroup-cr.md) custom resources, respectively. See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon.
+   In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded. Define the fields specified in the [Specifications for the meta.yaml files](#specifications-for-the-metayaml-files) section to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object). Because you can install Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/18-clusterassetgroup-cr.md) or [AssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/17-assetgroup-cr.md) custom resources, respectively. See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon.
 
 These are all the possible files that you can include in your addons:
 
