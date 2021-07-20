@@ -86,8 +86,6 @@ DATA=$(cat << EOF
   ${SECRET_COOKIE_KEY}: $(echo -n "${COOKIE}" | base64 -w 0)
   {{- if .Values.global.ory.hydra.persistence.enabled }}
   ${PASSWORD_KEY}: $(echo -n "${PASSWORD}" | base64 -w 0)
-  {{- end }}
-  {{- if .Values.postgresql.replication.enabled }}
   ${PASSWORD_R_KEY}: $(echo -n "${PASSWORDR}" | base64 -w 0)
   {{- end }}
   {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
