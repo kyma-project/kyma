@@ -24,7 +24,7 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  const withCentralApplicationConnectivity = process.env.WITH_CENTRAL_APPLICATION_CONNECTIVITY || false;
+  const withCentralApplicationConnectivity = process.env.CENTRAL_APPLICATION_CONNECTIVITY || false;
   const testNamespace = "test";
   const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;

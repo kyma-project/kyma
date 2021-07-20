@@ -173,16 +173,47 @@ async function installRelease(
 }
 
 async function chartList(options) {
-  const gardernerDomain = await getGardenerDomain();
-  const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
-  const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
+  console.debug("DEBUG chartList()");
+  console.dir(options);
+  
+  const gardenerDomain = await getGardenerDomain();
+  const domain = process.env["KYMA_DOMAIN"] || gardenerDomain || "local.kyma.dev";
+
+  const isGardener = (gardenerDomain ? true : false) || (process.env["GARDENER"] === "true");
   const isCompassEnabled = !!options.withCompass;
   const isCentralApplicationConnectivityEnabled = !!options.centralApplicationConnectivity;
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.disableLegacyConnectivity=${isCompassEnabled},central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled},central_application_connectivity_validator=${isCentralApplicationConnectivityEnabled},authProxy.config.useDex=false`;
+  const disableLegacyConnectivity = isCompassEnabled || isCentralApplicationConnectivityEnabled;
+
+  const overrides = [
+    `authProxy.config.useDex=false`,
+    `central_application_connectivity_validator.enabled=${isCentralApplicationConnectivityEnabled}`,
+    `central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled}`,
+    `global.disableLegacyConnectivity=${disableLegacyConnectivity}`,
+    `global.domainName=${domain}`,
+    `global.environment.gardener=${isGardener}`,
+    `global.isLocalEnv=false`,
+    `global.ingress.domainName=${domain}`,
+    `global.tlsCrt=ZHVtbXkK`
+  ].join(',');
+
+  console.debug("DEBUG overrides");
+  console.log(overrides);
+
   // https://github.com/kyma-project/test-infra/pull/2967
-  let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
-  if (isGardener == "true") {
-    registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
+  let registryOverrides;
+  if (isGardener == true) {
+    registryOverrides = [
+      `dockerRegistry.enableInternal=true`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');
+  } else {
+    registryOverrides = [
+      `containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
+      `dockerRegistry.enableInternal=false`,
+      `dockerRegistry.registryAddress=registry.localhost:5000`,
+      `dockerRegistry.serverAddress=registry.localhost:5000`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');  
   }
 
   const kymaCharts = [
@@ -370,6 +401,8 @@ async function uninstallKyma(options) {
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
+  console.debug("DEBUG installKyma()");
+  console.dir(options);
   options = options || {};
   const installLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "resources");
   const crdLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "installation", "resources", "crds");
