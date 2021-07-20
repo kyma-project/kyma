@@ -1,7 +1,6 @@
 # Default values for prometheus-node-exporter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 image:
   repository: eu.gcr.io/kyma-project/tpi/node-exporter
   tag: 1.0.1-1de56388
