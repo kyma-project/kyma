@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const client = require('prom-client');
 const express = require('express');
 const helper = require('./lib/helper');
-const eventBase = require('./lib/event');
+const ce = require('./lib/ce');
 const morgan = require('morgan');
 
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
@@ -81,24 +81,7 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        let data = req.body;
-        if (!req.is('multipart/*') && req.body.length > 0) {
-            if (req.is('application/json')) {
-                data = JSON.parse(req.body.toString('utf-8'))
-            } else {
-                data = req.body.toString('utf-8')
-            }
-        }
-        const event = {
-            'ce-type': req.get('ce-type'),
-            'ce-source': req.get('ce-source'),
-            'ce-eventtypeversion': req.get('ce-eventtypeversion'),
-            'ce-specversion': req.get('ce-specversion'),
-            'ce-id': req.get('ce-id'),
-            'ce-time': req.get('ce-time'),
-            data,
-            'extensions': { request: req, response: res },
-        };
+        let event = ce.buildEvent(req, res);
         Promise.resolve(func(event, context))
         // Finalize
             .then(rval => modFinalize(rval, res, end))
@@ -150,12 +133,12 @@ app.all('*', (req, res) => {
         const label = funcLabel(req);
         const end = timeHistogram.labels(label).startTimer();
         callsCounter.labels(label).inc();
-
+        
         const sandbox = Object.assign({}, global, {
             __filename: modPath,
             __dirname: modRootPath,
             module: new Module(modPath, null),
-            require: (p) => modRequire(p, eventBase.newEventBase(req), res, end),
+            require: (p) => modRequire(p, req, res, end),
         });
 
         try {
