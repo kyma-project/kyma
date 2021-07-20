@@ -1,6 +1,5 @@
 ---
 title: Issues with Istio sidecar injection
-type: Troubleshooting
 ---
 
 

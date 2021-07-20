@@ -1,6 +1,5 @@
 ---
 title: '"403 Forbidden" in the Console'
-type: Troubleshooting
 ---
 
 If you log to the Console and get the `403 Forbidden` error, do the following:

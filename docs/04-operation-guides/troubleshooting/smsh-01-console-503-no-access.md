@@ -1,6 +1,5 @@
 ---
 title: Can't access Console UI or other endpoints
-type: Troubleshooting
 ---
 
 The `503` status code received when you try to access the Console UI or any other endpoint in Kyma can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.

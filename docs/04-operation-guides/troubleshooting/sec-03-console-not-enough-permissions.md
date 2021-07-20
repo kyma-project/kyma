@@ -1,6 +1,5 @@
 ---
 title: '"Not enough permissions" error'
-type: Troubleshooting
 ---
 
 If you log in to the Kyma Console and receive `Not enough permissions` error message:
