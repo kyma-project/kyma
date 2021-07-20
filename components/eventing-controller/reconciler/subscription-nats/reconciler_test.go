@@ -228,7 +228,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
 				received := string(<-result)
 				return sent == received
-			}).Should(BeTrue())
+			}, timeOut, pollingInterval).Should(BeTrue())
 
 			Expect(k8sClient.Delete(ctx, sub)).Should(BeNil())
 			isSubscriptionDeleted(sub, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
