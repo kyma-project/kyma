@@ -43,7 +43,7 @@ const (
 	smallPollingInterval = 1 * time.Second
 
 	timeOut         = 60 * time.Second
-	pollingInterval = 3 * time.Second
+	pollingInterval = 5 * time.Second
 )
 
 var _ = Describe("NATS Subscription Reconciliation Tests", func() {
@@ -217,18 +217,23 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 					}),
 				))
 
-			// publish a message
 			connection, err := connectToNats(natsUrl)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = connection.Publish(reconcilertesting.OrderCreatedEventType, []byte(reconcilertesting.StructuredCloudEvent))
-			Expect(err).ShouldNot(HaveOccurred())
-
-			// make sure that the subscriber received the message
-			Eventually(func() bool {
-				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
-				received := string(<-result)
-				return sent == received
-			}, timeOut, pollingInterval).Should(BeTrue())
+			toSend := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+			msgData := []byte(reconcilertesting.StructuredCloudEvent)
+			Eventually(func() (string, error) {
+				// publish the message
+				if err = connection.Publish(reconcilertesting.OrderCreatedEventType, msgData); err != nil {
+					return "", err
+				}
+				// make sure that the subscriber received the message
+				select {
+				case received := <-result:
+					return string(received), nil
+				case <-time.After(smallPollingInterval):
+					return "", fmt.Errorf("no message received")
+				}
+			}, timeOut, pollingInterval).Should(Equal(toSend))
 
 			Expect(k8sClient.Delete(ctx, sub)).Should(BeNil())
 			isSubscriptionDeleted(sub, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
