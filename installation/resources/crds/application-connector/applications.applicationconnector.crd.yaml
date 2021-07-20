@@ -41,6 +41,7 @@ spec:
                 skipInstallation:
                   type: boolean
                 labels:
+                  nullable: true
                   additionalProperties:
                     type: string
                   type: object
@@ -49,6 +50,7 @@ spec:
                 group:
                   type: string
                 tags:
+                  nullable: true
                   description: New fields used by V2 version
                   items:
                     type: string
@@ -78,6 +80,7 @@ spec:
                       identifier:
                         type: string
                       labels:
+                        nullable: true
                         additionalProperties:
                           type: string
                         description: Deprecated
@@ -114,9 +117,6 @@ spec:
                               maxLength: 63
                               pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
                             targetUrl:
-                              type: string
-                            gatewayUrl:
-                              description: Deprecated
                               type: string
                             id:
                               type: string
