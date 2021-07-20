@@ -5,10 +5,20 @@ title: Useful links
 If you're interested in learning more about the Service Management area, follow these links to:
 
 - Perform some simple and more advances tasks:
-  - [Register a broker in the Service Catalog](../../../03-tutorials/service-management/smgt-01-hb-broker-registration.md)
+  - [Provision and bind a service](../../../03-tutorials/service-management/smgt-01-sc-provisioning.md)
+  - [Unbind and deprovision a service](../../../03-tutorials/service-management/smgt-02-sc-deprovisioning.md)
+  - [Register a broker in Service Catalog](../../../03-tutorials/service-management/smgt-01-hb-broker-registration.md)
+  - [Create addons](../../../03-tutorials/service-management/smgt-11-hb-create-addons.md)
+  - [Create addons for bindable plans](../../../03-tutorials/service-management/smgt-12-hb-bind-addons.md)
+  - [Test addons](../../../03-tutorials/service-management/smgt-13-hb-test-addons.md)
+  - [Create addons repository](../../../03-tutorials/service-management/smgt-14-hb-create-addons-repo.md)
+  - [Check addons](../../../03-tutorials/service-management/smgt-15-hb-check-addons.md)
+  - [Register addons in Service Catalog](../../../03-tutorials/service-management/smgt-16-hb-register-addons-sc.md)
+  - [Provision and bind your addons](../../../03-tutorials/service-management/smgt-17-hb-provision-addons-sc.md)
 
 - Troubleshoot Service Management-related issues:
-  - [Helm Broker troubleshooting](../../../04-operation-guides/troubleshooting/smgt-01-hb.md)
+  - ["FAILED" status for created ServiceInstances](../../../04-operation-guides/troubleshooting/smgt-01-instance-failed-status.md)
+  - ["Found more that one class" error](../../../04-operation-guides/troubleshooting/smgt-02-id-conflict.md)
 
 - Analyze configuration parameters related to the Service Management components:
   - [Service Catalog - Catalog sub-chart](../../../05-technical-reference/05-configuration-parameters/smgt-01-sc-catalog-subchart.md)

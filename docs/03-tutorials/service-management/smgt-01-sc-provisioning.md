@@ -1,5 +1,5 @@
 ---
-title: Provisioning and binding flow
+title: Provision and bind a service
 ---
 
 The diagram shows an overview of interactions between all resources related to the processes of provisioning and binding:

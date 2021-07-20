@@ -181,7 +181,7 @@ The URL renders as follows:
 https://github.com/kyma-project/addons/addons/index.yaml
 ```
 
-The Helm Broker supports authentication with these protocols:
+Helm Broker supports authentication with these protocols:
 
 <div tabs>
   <details>

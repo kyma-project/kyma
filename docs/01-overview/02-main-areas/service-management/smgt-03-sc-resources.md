@@ -9,13 +9,13 @@ These are the native [Kubernetes resources](https://kubernetes.io/docs/concepts/
 
 * **ClusterServiceBroker** is an endpoint for a set of managed services that a third party offers and maintains.
 
-* **ClusterServiceClass** is a managed service exposed by a given ClusterServiceBroker. When a cluster administrator registers a new Service Broker in the Service Catalog, the Service Catalog controller obtains new services exposed by the Service Broker and renders them in the cluster as ClusterServiceClasses. A ClusterServiceClass is synonymous with a service in the Service Catalog.
+* **ClusterServiceClass** is a managed service exposed by a given ClusterServiceBroker. When a cluster administrator registers a new Service Broker in Service Catalog, the Service Catalog controller obtains new services exposed by the Service Broker and renders them in the cluster as ClusterServiceClasses. A ClusterServiceClass is synonymous with a service in Service Catalog.
 
 * **ClusterServicePlan** is a variation of a ClusterServiceClass that offers different levels of quality, configuration options, and the cost of a given service. Contrary to the ClusterServiceClass, which is purely descriptive, the ClusterServicePlan provides technical information to the ClusterServiceBroker on this part of the service that the ClusterServiceBroker can expose.
 
 * **ServiceBroker** is any Service Broker registered in a given Namespace where it exposes ServiceClasses and ServicePlans that are available only in that Namespace.
 
-* **ServiceClass**  is a Namespace-scoped representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
+* **ServiceClass**  is a Namespace-scoped representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in Service Catalog.
 
 * **ServicePlan** is a Namespace-scoped representation of a ClusterServicePlan.
 

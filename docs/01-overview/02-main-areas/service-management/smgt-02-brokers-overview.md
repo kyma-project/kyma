@@ -4,15 +4,15 @@ title: Service Brokers
 
 ## What are Service Brokers
 
-A Service Broker is a server compatible with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. Each Service Broker registered in Kyma presents the services it offers to the Service Catalog and manages their lifecycle.
+A Service Broker is a server compatible with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. Each Service Broker registered in Kyma presents the services it offers to Service Catalog and manages their lifecycle.
 
-The Service Catalog lists all services that Service Brokers offer. Use the Service Brokers to:
+Service Catalog lists all services that Service Brokers offer. Use the Service Brokers to:
 * Provision and deprovision an instance of a service.
 * Create and delete a ServiceBinding to link a ServiceInstance to an application.
 
 ## Service Brokers in Kyma
 
-Each of the Service Brokers available in Kyma performs these operations in a different way. See the documentation of a given Service Broker to learn how it operates. The Service Catalog provided by Kyma is currently integrated with the following Service Brokers:
+Each of the Service Brokers available in Kyma performs these operations in a different way. See the documentation of a given Service Broker to learn how it operates. Service Catalog provided by Kyma is currently integrated with the following Service Brokers:
 
 * [Application Broker](../../../05-technical-reference/03-architecture/ac-01-application-connector-components.md#application-broker)
 * [Helm Broker](./smgt-10-hb-overview.md)
@@ -27,12 +27,12 @@ You can also use Helm Broker addons to install these third-party brokers:
   Azure Service Broker
   </summary>
 
-  The Microsoft Azure Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Microsoft Azure public cloud. Kyma provides the Namespace-scoped Azure Service Broker. In each Namespace, you can configure the Azure Service Broker against different subscriptions. Install the Azure Service Broker by provisioning the **Azure Service Broker** class provided by the Helm Broker.
+  Microsoft Azure Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Microsoft Azure public cloud. Kyma provides Namespace-scoped Azure Service Broker. In each Namespace, you can configure Azure Service Broker against different subscriptions. Install Azure Service Broker by provisioning the **Azure Service Broker** class provided by Helm Broker.
 
   ![azure broker class](./assets/azure-service-broker-class.png)
 
   Once you provision the **Azure Service Broker** class, the Azure Service Broker classes are available in the Service Catalog view in a given Namespace.
-  The Azure Service Broker provides these ServiceClasses to use with the Service Catalog:
+  Azure Service Broker provides these ServiceClasses to use with Service Catalog:
 
   * Azure SQL Database
   * Azure Database for MySQL
@@ -48,20 +48,18 @@ You can also use Helm Broker addons to install these third-party brokers:
   * Azure Storage
   * Azure Text Analytics
 
-  See the details of each ServiceClass and its specification in the Service Catalog UI.
-
   </details>
   <details>
   <summary label="aws-service-broker">
   AWS Service Broker
   </summary>
 
-  The AWS Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the AWS public cloud. Kyma provides the Namespace-scoped AWS Service Broker. In each Namespace, you can configure the AWS Service Broker against different subscriptions. Install the AWS Service Broker by provisioning the **AWS Service Broker** class provided by the Helm Broker.
+  AWS Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the AWS public cloud. Kyma provides Namespace-scoped AWS Service Broker. In each Namespace, you can configure AWS Service Broker against different subscriptions. Install AWS Service Broker by provisioning the **AWS Service Broker** class provided by Helm Broker.
 
   ![aws broker class](./assets/aws-class.png)
 
-  Once you provision the **AWS Service Broker** class, the AWS Service Broker classes are available in the Service Catalog view in a given Namespace.
-  The AWS Service Broker provides these ServiceClasses to use with the Service Catalog:
+  Once you provision the **AWS Service Broker** class, the AWS Service Broker classes are available in Service Catalog view in a given Namespace.
+  AWS Service Broker provides these ServiceClasses to use with Service Catalog:
 
   * Amazon Athena
   * Amazon EMR
@@ -89,9 +87,9 @@ You can also use Helm Broker addons to install these third-party brokers:
   * Amazon Aurora PostgreSQL
   * Amazon Aurora MySQL
 
-  See the [documentation for each ServiceClass](https://github.com/awslabs/aws-servicebroker/tree/v1.0.0/templates). You can also see the details and specification of each ServiceClass in the Service Catalog UI, after provisioning a given class.
+  See the [documentation for each ServiceClass](https://github.com/awslabs/aws-servicebroker/tree/v1.0.0/templates).
 
-  >**NOTE:** Kyma uses the AWS Service Broker open-source project. To ensure the best performance and stability of the product, Kyma uses a version of the AWS Service Broker that precedes the newest version released by Amazon.
+  >**NOTE:** Kyma uses the AWS Service Broker open-source project. To ensure the best performance and stability of the product, Kyma uses a version of AWS Service Broker that precedes the newest version released by Amazon.
 
   </details>
   <details>
@@ -99,12 +97,12 @@ You can also use Helm Broker addons to install these third-party brokers:
   GCP Service Broker
   </summary>
 
-  The GCP Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Google Cloud Platform public cloud. Kyma provides the Namespace-scoped GCP Service Broker. In each Namespace, you can configure the GCP Service Broker against different subscriptions. Install the GCP Service Broker by provisioning the **GCP Service Broker** class provided by the Helm Broker.
+  GCP Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Google Cloud Platform public cloud. Kyma provides Namespace-scoped GCP Service Broker. In each Namespace, you can configure GCP Service Broker against different subscriptions. Install GCP Service Broker by provisioning the **GCP Service Broker** class provided by Helm Broker.
 
   ![gcp broker class](./assets/gcp-class.png)
 
-  Once you provision the **GCP Service Broker** class, the GCP Service Broker classes are available in the **Service Catalog** view in the given Namespace.
-  The GCP Service Broker provides these ServiceClasses to use with the Service Catalog:
+  Once you provision the **GCP Service Broker** class, the GCP Service Broker classes are available in **Service Catalog** view in the given Namespace.
+  GCP Service Broker provides these ServiceClasses to use with Service Catalog:
 
   * Google BigQuery
   * Google Bigtable
@@ -124,8 +122,6 @@ You can also use Helm Broker addons to install these third-party brokers:
   * Stackdriver Profiler
   * Stackdriver Trace
   * Google Cloud Storage
-
-  See the details of each ServiceClass and its specification in the Service Catalog UI.
 
    </details>
 </div>

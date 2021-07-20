@@ -2,7 +2,7 @@
 title: Create addons
 ---
 
-Addons which the Helm Broker uses must have a specific structure. To create an addon, provide such elements inside your addons directory:
+Addons which Helm Broker uses must have a specific structure. To create an addon, provide such elements inside your addons directory:
 
 1. Add the `meta.yaml` file.
 
@@ -12,7 +12,7 @@ Addons which the Helm Broker uses must have a specific structure. To create an a
 
    In the `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports Helm version 2.6.
 
-   > **NOTE:** The Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
+   > **NOTE:** Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
 
 3. Add the `plans` directory.
 
@@ -34,7 +34,7 @@ Addons which the Helm Broker uses must have a specific structure. To create an a
 
 4. Add the `docs` directory.
 
-   In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded. Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/18-clusterassetgroup-cr.md) or [AssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/17-assetgroup-cr.md) custom resources, respectively. See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon.
+   In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded. Because you can install Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterAssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/18-clusterassetgroup-cr.md) or [AssetGroups](https://github.com/kyma-project/rafter/blob/main/docs/17-assetgroup-cr.md) custom resources, respectively. See the [example](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) of the `docs` directory with documentation for the testing addon.
 
 These are all the possible files that you can include in your addons:
 

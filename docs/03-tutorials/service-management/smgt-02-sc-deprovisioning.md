@@ -1,5 +1,5 @@
 ---
-title: Unbinding and deprovisioning flow
+title: Unbind and deprovision a service
 ---
 
 Unbinding and deprovisioning are processes reverse to provisioning and binding. The diagram shows an overview of interactions between all resources related to the processes of unbinding and deprovisioning a service:

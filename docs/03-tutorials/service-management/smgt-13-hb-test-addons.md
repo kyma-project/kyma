@@ -10,4 +10,4 @@ The `--debug` option prints the generated manifests. As a prerequisite, you must
  helm install --dry-run {path-to-chart} --debug
 ```
 
-You can also use this option for the basic debugging purposes, when your addons are installed but you fail to provision ServiceInstances from them. For more details, read the Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).
+You can also use this option for the basic debugging purposes, when your addons are installed but you fail to provision ServiceInstances from them. For more details, read Helm [official documentation](https://helm.sh/docs/chart_template_guide/debugging/).
