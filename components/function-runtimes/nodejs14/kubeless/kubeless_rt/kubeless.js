@@ -133,7 +133,7 @@ app.all('*', (req, res) => {
         const label = funcLabel(req);
         const end = timeHistogram.labels(label).startTimer();
         callsCounter.labels(label).inc();
-        
+
         const sandbox = Object.assign({}, global, {
             __filename: modPath,
             __dirname: modRootPath,
