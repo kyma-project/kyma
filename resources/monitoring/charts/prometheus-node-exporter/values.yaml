@@ -64,10 +64,10 @@ securityContext:
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
-
-containerSecurityContext:
   allowPrivilegeEscalation: false
   privileged: false
+
+containerSecurityContext: {}
 
 rbac:
   ## If true, create & use RBAC resources
