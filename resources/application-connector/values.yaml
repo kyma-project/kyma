@@ -81,13 +81,14 @@ application_connectivity_certs_setup_job:
     connectorCertificateSecret:
       name: connector-service-app-ca
       namespace: kyma-integration
+      migration:
+        name: eee
     caCertificateSecret:
       name: kyma-gateway-certs-cacert
       namespace: istio-system
       migration:
-        from:
-          name: app-connector-certs
-          keys: ["cacert"]
+        name: app-connector-certs
+        keys: ["cacert"]
   certificate:
     validityTime: 92d
 

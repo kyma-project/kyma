@@ -45,16 +45,22 @@ func TestMigrator(t *testing.T) {
 		sourceSecret := types.NamespacedName{Name: "source", Namespace: namespace}
 		targetSecret := types.NamespacedName{Name: "target", Namespace: namespace}
 
-		secret := map[string][]byte{"key": []byte("value")}
+		secret := map[string][]byte{"key1": []byte("value1"), "key2": []byte("value2")}
 
 		secretsRepositoryMock := &mocks.SecretRepository{}
 		secretsRepositoryMock.On("Get", sourceSecret).Return(secret, nil)
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "target"))
-		secretsRepositoryMock.On("Upsert", targetSecret, secret).Return(nil)
+		secretsRepositoryMock.On("Upsert", targetSecret, map[string][]byte{"key2": []byte("value2")}).Return(nil)
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(nil)
 
 		// when
-		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
+		migrator := NewMigrator(secretsRepositoryMock, func(key string) bool {
+			if key == "key2" {
+				return true
+			}
+
+			return false
+		})
 		err := migrator.Do(sourceSecret, targetSecret)
 
 		// then

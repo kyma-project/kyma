@@ -40,8 +40,11 @@ func parseArgs() *options {
 	caCertificate := flag.String("caCertificate", "", "Base64 encoded pem CA certificate")
 	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
 
-	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "kyma-integration/connector-service-app-ca", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
-	caCertificateSecretKeysToMigrate := flag.String("caCertificateSecretKeysToMigrate", "cacert", "List of keys to be migrated")
+	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
+	caCertificateSecretKeysToMigrate := flag.String("caCertificateSecretKeysToMigrate", `["cacert"]`, "List of keys from certificate secret to be migrated")
+
+	connectorCertificateSecretToMigrate := flag.String("connectorCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
+	connectorCertificateSecretKeysToMigrate := flag.String("connectorCertificateSecretKeysToMigrate", `["ca.crt", "ca.key", "cacert"]`, "List of keys from certificate secret to be migrated")
 
 	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
 
@@ -53,13 +56,15 @@ func parseArgs() *options {
 	}
 
 	return &options{
-		connectorCertificateSecret:       parseNamespacedName(*connectorCertificateSecret),
-		caCertificateSecret:              parseNamespacedName(*caCertificateSecret),
-		caCertificate:                    *caCertificate,
-		caKey:                            *caKey,
-		caCertificateSecretToMigrate:     parseNamespacedName(*caCertificateSecretToMigrate),
-		caCertificateSecretKeysToMigrate: *caCertificateSecretKeysToMigrate,
-		generatedValidityTime:            validityTime,
+		connectorCertificateSecret:              parseNamespacedName(*connectorCertificateSecret),
+		caCertificateSecret:                     parseNamespacedName(*caCertificateSecret),
+		caCertificate:                           *caCertificate,
+		caKey:                                   *caKey,
+		caCertificateSecretToMigrate:            parseNamespacedName(*caCertificateSecretToMigrate),
+		caCertificateSecretKeysToMigrate:        *caCertificateSecretKeysToMigrate,
+		connectorCertificateSecretToMigrate:     parseNamespacedName(*connectorCertificateSecretToMigrate),
+		connectorCertificateSecretKeysToMigrate: *connectorCertificateSecretKeysToMigrate,
+		generatedValidityTime:                   validityTime,
 	}
 }
 
