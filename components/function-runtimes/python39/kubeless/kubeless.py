@@ -5,9 +5,46 @@ import io
 import os
 import sys
 import threading
+import requests
 import bottle
 import prometheus_client as prom
 import queue
+
+# The reason this file has an underscore prefix in its name is to avoid a
+# name collision with the user-defined module.
+module_name = os.getenv('MOD_NAME')
+if module_name is None:
+    print('MOD_NAME have to be provided', flush=True)
+    exit(1)
+current_mod = os.path.basename(__file__).split('.')[0]
+if module_name == current_mod:
+    print('Module cannot be named {} as current module'.format(current_mod), flush=True)
+    exit(2)
+
+sys.path.append('/kubeless')
+
+mod = importlib.import_module(module_name)
+func_name = os.getenv('FUNC_HANDLER')
+if func_name is None:
+    print('FUNC_HANDLER have to be provided', flush=True)
+    exit(3)
+
+func = getattr(mod, os.getenv('FUNC_HANDLER'))
+
+func_port = os.getenv('FUNC_PORT', 8080)
+timeout = float(os.getenv('FUNC_TIMEOUT', 180))
+memfile_max = int(os.getenv('FUNC_MEMFILE_MAX', 100 * 1024 * 1024))
+publisher_proxy_address = os.getenv('PUBLISHER_PROXY_ADDRESS')
+bottle.BaseRequest.MEMFILE_MAX = memfile_max
+
+app = application = bottle.app()
+
+function_context = {
+    'function-name': func.__name__,
+    'timeout': timeout,
+    'runtime': os.getenv('FUNC_RUNTIME'),
+    'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
+}
 
 
 class PicklableBottleRequest(bottle.BaseRequest):
@@ -53,6 +90,7 @@ class Event:
         if req.get_header('content-type') == 'application/json':
             data = req.json
 
+        self.req = req
         self.ceHeaders = {
             'data': data,
             'ce-type': req.get_header('ce-type'),
@@ -70,56 +108,22 @@ class Event:
     def __setitem__(self, name, value):
         self.ceHeaders[name] = value
 
-    def setResponseHeader(self):
-        return "hello setResponseHeader"
+    def publishCloudEvent(self, data):
+        return requests.post(
+            publisher_proxy_address, 
+            data = data,
+            headers = {"Content-Type": "application/cloudevents+json"}
+            )
     
-    def setResponseContentType(self):
-        return "hello setResponseContentType"
-    
-    def setResponseStatus(self):
-        return "hello setResponseStatus"
-
-    def publishCloudEvent(self):
-        return "hello publishCloudEvent"
-    
-    def buildCloudEvent(self):
-        return "hello buildCloudEvent"
-
-
-# The reason this file has an underscore prefix in its name is to avoid a
-# name collision with the user-defined module.
-module_name = os.getenv('MOD_NAME')
-if module_name is None:
-    print('MOD_NAME have to be provided', flush=True)
-    exit(1)
-current_mod = os.path.basename(__file__).split('.')[0]
-if module_name == current_mod:
-    print('Module cannot be named {} as current module'.format(current_mod), flush=True)
-    exit(2)
-
-sys.path.append('/kubeless')
-
-mod = importlib.import_module(module_name)
-func_name = os.getenv('FUNC_HANDLER')
-if func_name is None:
-    print('FUNC_HANDLER have to be provided', flush=True)
-    exit(3)
-
-func = getattr(mod, os.getenv('FUNC_HANDLER'))
-
-func_port = os.getenv('FUNC_PORT', 8080)
-timeout = float(os.getenv('FUNC_TIMEOUT', 180))
-memfile_max = int(os.getenv('FUNC_MEMFILE_MAX', 100 * 1024 * 1024))
-bottle.BaseRequest.MEMFILE_MAX = memfile_max
-
-app = application = bottle.app()
-
-function_context = {
-    'function-name': func.__name__,
-    'timeout': timeout,
-    'runtime': os.getenv('FUNC_RUNTIME'),
-    'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
-}
+    def buildCloudEvent(self, event_id, event_type, event_data):
+        return {
+            'type': event_type,
+            'source': self.ceHeaders['ce-source'],
+            'eventtypeversion': self.ceHeaders['ce-eventtypeversion'],
+            'specversion': self.ceHeaders['ce-specversion'],
+            'id': event_id,
+            'data': event_data
+        }
 
 
 @app.get('/healthz')
