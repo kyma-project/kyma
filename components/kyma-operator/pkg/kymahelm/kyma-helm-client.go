@@ -224,8 +224,9 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideVal
 	install.ReleaseName = nn.Name
 	install.Namespace = nn.Namespace
 	install.Atomic = false
-	install.Wait = true
+	install.Wait = false
 	install.CreateNamespace = true
+	install.Timeout = 0 * time.Second
 
 	comboValues, err := GetProfileValues(*chart, profile)
 	if err != nil {
