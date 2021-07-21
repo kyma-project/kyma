@@ -8,7 +8,7 @@ The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/doc
 
 Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes objects to avoid any manual steps.
 
->**CAUTION:** Automatic backup does not include Kubernetes volumes. Back up your volumes periodically either on demand, or set up a periodic job.
+>**CAUTION:** Automatic backup doesn't include Kubernetes volumes. Back up your volumes periodically either on demand, or set up a periodic job.
 
 ### Object backup
 
@@ -20,13 +20,14 @@ If the etcd database experiences any problems, Gardener automatically restores t
 
 ### Volume backup
 
-You should back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume pre-populated with the snapshot data or restore the existing volume to the state represented by the snapshot.
+We recommend that you back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
 
-Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/) which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
+Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
 ## Back up resources using Velero
 
-You can back up and restore individual resources manually or automatically using [Velero](https://velero.io/docs/). Be aware that a full backup of a Kyma cluster is not supported. Start with the existing Kyma installation and restore specific resources individually.
+You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/). 
+Be aware that a full backup of a Kyma cluster isn't supported. Start with the existing Kyma installation and restore specific resources individually.
 
 ## Create on-demand volume snapshots
 
@@ -34,9 +35,9 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
 ### Prerequisites
 
-You must use CSI-enabled StorageClass to create a PVC, otherwise it won't be backed up.
+You must use CSI-enabled StorageClass to create a PVC; otherwise it isn't be backed up.
 
-As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which you have created using a CSI-enabled StorageClass.
+As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which you've created using a CSI-enabled StorageClass.
 
 ### Steps
 
@@ -73,11 +74,13 @@ As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which 
       apiGroup: snapshot.storage.k8s.io
   ```
 
-  This creates a new `pvc-restored` PVC with pre-populated data from the snapshot.
+  A new `pvc-restored` PVC is created with prepopulated data from the snapshot.
 
-## Create a volume snapshot for cloud providers
+## Create volume snapshots for cloud providers
 
-The following instructions show how to create on-demand volume snapshots for cloud providers. Before you proceed, read the aforementioned instructions on creating volume snapshots.
+You can also create on-demand volume snapshots for cloud providers (AKS, GKE, and on Gardener, GCP, AWS, and Azure). Before you proceed, read the previously mentioned instructions on creating volume snapshots.
+
+<!-- why and what exaclty should I read in the aforementioned instructions?? -->
 
 <div tabs name="backup-providers">
   <details>
@@ -118,8 +121,9 @@ The minimum supported Kubernetes version is 1.14.
 
 ### Prerequisites
 
-As of Kubernetes version 1.18, Gardener GCP and AWS use CSI drivers by default and supports taking volume snapshots out of the box.
-Gardener Azure does not currently support CSI drivers, that's why you cannot use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
+As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
+Gardener **Azure** does not support CSI drivers, that's why you can't use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
+<!-- The linked issue implies that with 1.21 it's now supported in Azure too - pls confirm  -->
 
 ### Steps
 
