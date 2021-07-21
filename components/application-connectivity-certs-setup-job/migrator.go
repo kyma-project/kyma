@@ -41,7 +41,7 @@ func (m migrator) Do(source, target types.NamespacedName) error {
 	}
 
 	if !sourceExists {
-		logrus.Info("Skipping secret migration. Source secret %s doesn't exist in %s namespace.", source.Name, source.Namespace)
+		logrus.Infof("Skipping secret migration. Source secret %s doesn't exist in %s namespace./n", source.Name, source.Namespace)
 		return nil
 	}
 
