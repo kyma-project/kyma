@@ -22,26 +22,17 @@ See the diagram for a broader view of how the Istio-related instance fits into t
 
 By default, `monitoring-prometheus-istio-server` is not provided as a data source in Grafana.
 
-1. To enable `monitoring-prometheus-istio-server` as a data source in Grafana, override the values:
+1. To enable `monitoring-prometheus-istio-server` as a data source in Grafana, provide a YAML file with the following values:
 
-  ```bash
-  cat <<EOF | kubectl apply -f -
-  ---
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: monitoring-overrides
-    namespace: kyma-installer
-    labels:
-      installer: overrides
-      component: monitoring
-      kyma-project.io/installation: ""
-  data:
-      prometheus-istio.grafana.datasource.enabled: "true"
-  EOF
+  ```yaml
+  monitoring  
+    prometheus-istio:
+      grafana:
+        datasource:
+          enabled: "true"
   ```
 
-2. Upgrade the [Kyma cluster](../../../04-operation-guides/operations/05-upgrade-kyma.md).
+2. [Deploy](../../../04-operation-guides/operations/03-change-kyma-config-values.md) the values YAML file.
 
 3. Restart the Grafana deployment with the following command:
 
