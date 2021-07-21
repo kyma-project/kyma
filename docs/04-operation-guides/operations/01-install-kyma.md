@@ -23,13 +23,12 @@ You can either use an out-of-the-box k3d cluster or choose any other cluster pro
   ```
 
 Use the `deploy` command to install Kyma.
-<!-- If you use the `deploy` command without any flags, Kyma provides a default domain.
-For example, if you install Kyma on a local cluster, the default URL is `https://console.local.kyma.dev` -->
-<!-- TODO: The URL https://console.local.kyma.dev is no longer used. Add new domain details. -->
 
   ```bash
   kyma deploy
   ```
+
+With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard --local`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. With Kyma installed on a remote cluster, access the Dashboard at [`https://dashboard.kyma-project.io`](https://dashboard.kyma-project.io).
 
 ## Choose resource consumption
 
