@@ -74,7 +74,7 @@ describe("SKR SVCAT migration test", function() {
     creds = await t.smInstanceBinding(URL, clientID, clientSecret, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
   it(`Should install helm charts`, async function() {
-    await t.installHelmCharts(k8sCoreV1Api, creds);
+    await t.installHelmCharts(creds);
   });
   it(`Should deprovision SKR`, async function() {
     await deprovisionSKR(keb, runtimeID);

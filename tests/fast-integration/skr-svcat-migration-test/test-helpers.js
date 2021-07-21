@@ -2,21 +2,18 @@ const installer = require("../installer/helm");
 const k8s = require("@kubernetes/client-node");
 const execa = require("execa");
 
-async function installHelmCharts(corev1, creds) {
+async function installHelmCharts(creds) {
   const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.9-custom/sap-btp-operator-custom-0.1.9.tar.gz";
   const btp = "sap-btp-operator";
   const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${creds.clusterId}`
-  const namespace = {
-    metadata: {
-      name: btp,
-    },
-  };
   try {
-    await corev1.createNamespace(namespace);
-  } catch(err) {
-    throw new Error(`failed to create namespace: ${btp} - received ${err.statusCode}\n${err}`);
+    await installer.helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
+  } catch(error) {
+    if (error.stderr === undefined) {
+      throw new Error(`failed to install btp-operator: ${error}`);
+    }
+    throw new Error(`failed to install btp-operator: ${error.stderr}`);
   }
-  await installer.helmInstallUpgrade(btp, btpChart, btp, btpValues, null);
 }
 
 async function smInstanceBinding(url, clientid, clientsecret, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
@@ -39,11 +36,10 @@ async function smInstanceBinding(url, clientid, clientsecret, svcatPlatform, btp
     //TODO figure out how to find clusterid
     return {clientId:c.clientid,clientSecret:c.clientsecret,smURL:c.sm_url,url:c.url,clusterId:"TODO"};
   } catch(error) {
-    console.log(error);
     if (error.stderr === undefined) {
       throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
     }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`);
+    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
   }
 }
 
