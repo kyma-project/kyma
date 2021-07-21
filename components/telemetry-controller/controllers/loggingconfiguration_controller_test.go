@@ -137,7 +137,10 @@ var _ = Describe("LoggingConfiguration controller", func() {
 					Namespace: ControllerNamespace,
 				}
 				var updatedLoggingConfiguration telemetryv1alpha1.LoggingConfiguration
-				k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLoggingConfiguration)
+				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLoggingConfiguration)
+				if err != nil {
+					return []string{err.Error()}
+				}
 				return updatedLoggingConfiguration.Finalizers
 			}, timeout, interval).Should(ContainElement(configMapFinalizer))
 

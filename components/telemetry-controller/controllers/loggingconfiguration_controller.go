@@ -264,7 +264,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 						controllerutil.AddFinalizer(config, environmentFinalizer)
 						changed = true
 					} else {
-						if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Compare(oldEnv, v) == 0 {
+						if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Equal(oldEnv, v) {
 							continue
 						}
 						secret.Data[k] = v
