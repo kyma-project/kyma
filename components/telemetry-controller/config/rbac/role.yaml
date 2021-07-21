@@ -21,6 +21,12 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - daemonsets
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
   - delete

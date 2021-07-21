@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,6 +58,7 @@ type LoggingConfigurationReconciler struct {
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=pods,verbs=list;delete
+//+kubebuilder:rbac:groups="",resources=daemonsets,verbs=get
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -286,21 +288,23 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 }
 
 func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
-	var fluentBitPods corev1.PodList
-	podLabels := client.MatchingLabels{
-		"app.kubernetes.io/instance": "logging",
-		"app.kubernetes.io/name":     "fluent-bit",
+	var fluentBitDs appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
+		log.Error(err, "cannot get Fluent Bit DaemonSet")
 	}
-	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), podLabels); err != nil {
+
+	var fluentBitPods corev1.PodList
+	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
 		log.Error(err, "cannot list fluent bit pods")
 		return err
 	}
+
+	log.Info("restarting Fluent Bit pods")
 	for _, pod := range fluentBitPods.Items {
 		if err := r.Delete(ctx, &pod); err != nil {
 			log.Error(err, "cannot delete pod "+pod.Name)
 		}
 	}
-	log.Info("restarting Fluent Bit pods")
 	return nil
 }
 
