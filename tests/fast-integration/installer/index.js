@@ -184,8 +184,8 @@ async function chartList(options) {
   if (isGardener == "true") {
     registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
   }
-  const kialiOverrides = overrides + ',kiali.kcproxy.enabled=false,kiali.virtualservice.enabled=false';
-  const tracingOverrides = overrides + ',tracing.kcproxy.enabled=false,tracing.virtualservice.enabled=false';
+  const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
+  const tracingOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
 
   const kymaCharts = [
     {
