@@ -23,6 +23,9 @@ require (
 	k8s.io/client-go v0.21.0
 )
 
-//github.com/asaskevich/govalidator => github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
-// There is a problem with Helm in version 3.5.2 - see more: https://github.com/helm/helm/issues/9354
-replace github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
+replace (
+	// There is a problem with Helm in version 3.5.2 - see more: https://github.com/helm/helm/issues/9354
+	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
+	github.com/docker/docker => github.com/docker/docker v20.10.7+incompatible
+	golang.org/x/crypto/ssh => golang.org/x/crypto/ssh v0.0.0-20201216223049-8b5274cf687f
+)
