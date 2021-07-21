@@ -27,7 +27,9 @@ import (
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-controller/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("LoggingConfiguration controller", func() {
@@ -58,6 +60,59 @@ var _ = Describe("LoggingConfiguration controller", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, secret)).Should(Succeed())
+
+			podLabels := map[string]string{
+				"app.kubernetes.io/instance": "logging",
+				"app.kubernetes.io/name":     "fluent-bit",
+			}
+			container := corev1.Container{
+				Name:  "fluent-bit",
+				Image: "fluent-bit",
+			}
+			fluentBitDs := &appsv1.DaemonSet{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "apps/v1",
+					Kind:       "DaemonSet",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      FluentBitDaemonSet,
+					Namespace: ControllerNamespace,
+				},
+				Spec: appsv1.DaemonSetSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: podLabels,
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: podLabels,
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								container,
+							},
+						},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, fluentBitDs)).Should(Succeed())
+
+			fluentBitPod := &corev1.Pod{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "v1",
+					Kind:       "Pod",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      FluentBitDaemonSet + "-123",
+					Namespace: ControllerNamespace,
+					Labels:    podLabels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						container,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, fluentBitPod)).Should(Succeed())
 
 			file := telemetryv1alpha1.FileMount{
 				Name:    "myFile",
@@ -145,6 +200,16 @@ var _ = Describe("LoggingConfiguration controller", func() {
 			}, timeout, interval).Should(ContainElement(configMapFinalizer))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
+
+			// Fluent Bit pods should have been deleted for restart
+			Eventually(func() int {
+				var fluentBitPods corev1.PodList
+				err := k8sClient.List(ctx, &fluentBitPods, client.InNamespace(ControllerNamespace), client.MatchingLabels(podLabels))
+				if err != nil {
+					return 1
+				}
+				return len(fluentBitPods.Items)
+			}, timeout, interval).Should(Equal(0))
 		})
 	})
 })
