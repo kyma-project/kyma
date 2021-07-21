@@ -26,12 +26,13 @@ func NewMigrator(secretRepository SecretRepository, includeSourceKeyFunc Include
 type IncludeKeyFunc func(string) bool
 
 func (m migrator) Do(source, target types.NamespacedName) error {
-	logrus.Infof("Migrating secret. Source: %s , target=%s \n", source.String(), target.String())
-
+	logrus.Info("Checking if secret needs to be migrated.")
 	if source.Name == "" {
-		logrus.Infof("Skipping secret migration. Secret name is empty.")
+		logrus.Infof("Skipping secret migration. Source secret name is empty. /n")
 		return nil
 	}
+
+	logrus.Infof("Migrating secret. Source: %s , target=%s /n", source.String(), target.String())
 
 	sourceData, sourceExists, err := m.getSecret(source)
 	if err != nil {
@@ -40,7 +41,7 @@ func (m migrator) Do(source, target types.NamespacedName) error {
 	}
 
 	if !sourceExists {
-		logrus.Info("Skipping secret migration. Source secret doesn't exist.")
+		logrus.Info("Skipping secret migration. Source secret %s doesn't exist in %s namespace.", source.Name, source.Namespace)
 		return nil
 	}
 

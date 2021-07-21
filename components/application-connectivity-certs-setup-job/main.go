@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/types"
@@ -17,7 +22,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	k8sConfig, err := restclient.InClusterConfig()
+	k8sConfig, err := initKubeConfig()
 	if err != nil {
 		log.Fatalf("Failed to get in cluster config, %s", err.Error())
 	}
@@ -44,6 +49,28 @@ func main() {
 	}
 
 	log.Info("Certificates set up successfully")
+}
+
+// Returns intiliazed config, allows local usage (outside cluster) based on provided kubeconfig or in-cluter
+func initKubeConfig() (*restclient.Config, error) {
+
+	kubeConfig, err := restclient.InClusterConfig()
+	if err == nil {
+		return kubeConfig, nil
+	}
+
+	log.Warnf("Failed to read in-cluster go client configuration")
+	var kubeconfig string
+
+	if kubeconfigPath := os.Getenv("KUBECONFIG"); kubeconfigPath != "" {
+		kubeconfig = kubeconfigPath
+	} else if home := homedir.HomeDir(); home != "" {
+		kubeconfig = filepath.Join(home, ".kube", "config")
+	} else {
+		return nil, errors.New("cannot find kubeconfig file")
+	}
+
+	return clientcmd.BuildConfigFromFlags("", kubeconfig)
 }
 
 func migrateSecrets(secretRepo SecretRepository, options options) error {

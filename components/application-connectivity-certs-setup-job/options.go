@@ -35,18 +35,18 @@ type options struct {
 
 func parseArgs() *options {
 	connectorCertificateSecret := flag.String("connectorCertificateSecret", "kyma-integration/connector-service-app-ca", "Secret namespace/name used by the Connector Service")
-	caCertificateSecret := flag.String("caCertificateSecret", "istio-system/ca-certificates", "Secret namespace/name where CA certificate is kept")
+	caCertificateSecret := flag.String("caCertificateSecret", "istio-system/kyma-gateway-certs-cacert", "Secret namespace/name where CA certificate is kept")
 
 	caCertificate := flag.String("caCertificate", "", "Base64 encoded pem CA certificate")
 	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
 
-	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
+	caCertificateSecretToMigrate := flag.String("caCertificateSecretToMigrate", "istio-system/app-connector-certs", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
 	caCertificateSecretKeysToMigrate := flag.String("caCertificateSecretKeysToMigrate", `["cacert"]`, "List of keys from certificate secret to be migrated")
 
 	connectorCertificateSecretToMigrate := flag.String("connectorCertificateSecretToMigrate", "", "Name of the secret containing CA root to be migrated. Use when there is a need to rename a secret.")
 	connectorCertificateSecretKeysToMigrate := flag.String("connectorCertificateSecretKeysToMigrate", `["ca.crt", "ca.key", "cacert"]`, "List of keys from certificate secret to be migrated")
 
-	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
+	generatedValidityTime := flag.String("generatedValidityTime", "30d", "Validity time of the generated certificate")
 
 	flag.Parse()
 
