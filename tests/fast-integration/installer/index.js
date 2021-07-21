@@ -193,6 +193,9 @@ async function chartList(options) {
     `global.tlsCrt=ZHVtbXkK`
   ].join(',');
 
+  console.log("DEBUG overrides");
+  console.log(overrides);
+
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides;
   if (isGardener == true) {
@@ -207,7 +210,7 @@ async function chartList(options) {
       `dockerRegistry.registryAddress=registry.localhost:5000`,
       `dockerRegistry.serverAddress=registry.localhost:5000`,
       `global.ingress.domainName=${domain}`
-    ].join(',');  
+    ].join(',');
   }
 
   const kymaCharts = [
