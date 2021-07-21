@@ -1,6 +1,5 @@
 ---
 title: Disable Istio Sidecar Proxy Injection
-type: Istio
 ---
 
 By default, `istiod` watches all Pod creation operations on all Namespaces and injects the newly created Pods with a sidecar proxy.

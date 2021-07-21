@@ -1,6 +1,5 @@
 ---
 title: Incompatible Istio sidecar version after Kyma upgrade
-type: Troubleshooting
 ---
 
 

@@ -1,6 +1,5 @@
 ---
 title: Cluster Users chart
-type: Configuration
 ---
 
 To configure the Cluster Users chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.

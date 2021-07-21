@@ -1,6 +1,5 @@
 ---
 title: Update TLS certificate
-type: Security
 ---
 
 The TLS certificate is a vital security element. Follow this tutorial to update the TLS certificate in Kyma.

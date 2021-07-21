@@ -1,11 +1,10 @@
 ---
 title: Cannot connect to a service exposed by an APIRule
-type: Troubleshooting
 ---
 
-##  Basic diagnostics
+## Basic diagnostics
 
-API Gateway is a Kubernetes controller which operates on APIRule custom resources. To diagnose the problems, inspect the [`status`](#custom-resource-api-rule-status-codes) field of the APIRule CR:
+API Gateway is a Kubernetes controller, which operates on APIRule custom resources. To diagnose the problems, inspect the [`status`](#custom-resource-api-rule-status-codes) field of the APIRule CR:
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
