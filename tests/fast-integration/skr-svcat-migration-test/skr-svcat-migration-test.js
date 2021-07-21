@@ -84,6 +84,6 @@ describe("SKR SVCAT migration test", function() {
     await deprovisionSKR(keb, runtimeID);
   });
   it(`Should cleanup SM instances and bindings`, async function() {
-    await t.cleanupInstanceBinding(svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+    await t.cleanupInstanceBinding(URL, clientID, clientSecret, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
 });

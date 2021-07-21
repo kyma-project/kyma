@@ -43,9 +43,16 @@ async function smInstanceBinding(url, clientid, clientsecret, svcatPlatform, btp
   }
 }
 
-async function cleanupInstanceBinding(svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
+async function cleanupInstanceBinding(url, clientid, clientsecret, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
   let errors = [];
   let args = [];
+  try {
+    args = [`login`, `-a`, url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
+    await execa(`smctl`, args.concat([`--client-id`, clientid, `--client-secret`, clientsecret]));
+  } catch(error) {
+    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+  }
+
   try {
     args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`];
     let x = await execa(`smctl`, args);
