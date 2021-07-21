@@ -1,6 +1,5 @@
 ---
 title: OAuth2 server customization and operations
-type: Configuration
 ---
 
 ## Credentials backup
@@ -13,7 +12,7 @@ kubectl get secret -n kyma-system ory-hydra-credentials -o yaml > ory-hydra-cred
 
 ## Postgres password update
 
-If Hydra is installed with the default settings, a Postgres-based database is provided out-of-the-box. If no password has been specified, one is generated and set for the Hydra user. This behavior may not always be desired, so in some cases you may want to modify this password. 
+If Hydra is installed with the default settings, a Postgres-based database is provided out-of-the-box. If no password has been specified, one is generated and set for the Hydra user. This behavior may not always be desired, so in some cases you may want to modify this password.
 
 In order to set a custom password, provide the `.Values.global.postgresql.postgresqlPassword` override during installation.
 
