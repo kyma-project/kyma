@@ -18,13 +18,29 @@ function buildEvent(req, res) {
         }
     }
 
-    return Object.assign( getCeHeaders(req), {
+    return Object.assign( 
+        buildCeHeaders(req), {
+        setHeaders,
         data,
         'extensions': { request: req, response: res },
-        sendRespondEvent: (event) => sendRespondEvent(req, event),
+        setResponseHeader: (key, value) => setResponseHeader(res, key, value),
+        setResponseContentType: (type) => setResponseContentType(res, type),
+        setResponseStatus: (status) => setResponseStatus(res, status),
         publishCloudEvent: (data) => publishCloudEvent(data),
         buildCloudEvent: (id, type, data) => buildCloudEvent(req, id, type, data)
     });
+}
+
+function setResponseHeader(res, key, value) {
+    res.setHeaders(key, value);
+}
+
+function setResponseContentType(res, type) {
+    setResponseHeader(res, 'content-type', type);
+}
+
+function setResponseStatus(res, status) {
+    res.status(status);
 }
 
 function publishCloudEvent(data) {
@@ -38,15 +54,6 @@ function publishCloudEvent(data) {
     });
 }
 
-function sendRespondEvent(ce, data) {
-    let response = ce.res;
-    for (let [key, val] of Object.entries(getCeHeaders(ce))) {
-        response.set(key, val);
-    }
-
-    response.send(data);
-}
-
 function buildCloudEvent(req, id, type, data) {
     return {
         'type': type,
@@ -58,7 +65,7 @@ function buildCloudEvent(req, id, type, data) {
     };
 }
 
-function getCeHeaders(req) {
+function buildCeHeaders(req) {
     return {
         'ce-type': req.get('ce-type'),
         'ce-source': req.get('ce-source'),
