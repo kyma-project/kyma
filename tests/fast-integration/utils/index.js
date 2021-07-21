@@ -464,6 +464,21 @@ function waitForDeployment(name, namespace = "default", timeout = 90000) {
   );
 }
 
+function waitForStatefulSet(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status.readyReplicas>0
+      );
+    },
+    timeout,
+    `Waiting for StatefulSet ${name} timeout (${timeout} ms)`
+  );
+}
+
 function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = {
@@ -973,6 +988,7 @@ module.exports = {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForStatefulSet,
   waitForTokenRequest,
   waitForCompassConnection,
   waitForFunction,
