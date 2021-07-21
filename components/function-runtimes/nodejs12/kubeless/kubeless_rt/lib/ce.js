@@ -20,7 +20,6 @@ function buildEvent(req, res) {
 
     return Object.assign( 
         buildCeHeaders(req), {
-        setHeaders,
         data,
         'extensions': { request: req, response: res },
         setResponseHeader: (key, value) => setResponseHeader(res, key, value),
@@ -32,11 +31,11 @@ function buildEvent(req, res) {
 }
 
 function setResponseHeader(res, key, value) {
-    res.setHeaders(key, value);
+    res.set(key, value);
 }
 
 function setResponseContentType(res, type) {
-    setResponseHeader(res, 'content-type', type);
+    res.type(type);
 }
 
 function setResponseStatus(res, status) {
