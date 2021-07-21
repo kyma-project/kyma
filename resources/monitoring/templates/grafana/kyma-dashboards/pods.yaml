@@ -96,7 +96,7 @@ data:
                                 "expr": "sum by(name, container) (container_memory_working_set_bytes{job=\"kubelet\", cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container=~\"$container\", container!=\"POD\"})",
                                 "format": "time_series",
                                 "intervalFactor": 2,
-                                "legendFormat": "Current: {{`{{ name }}`}}",
+                                "legendFormat": "Current: {{`{{ container }}`}}",
                                 "refId": "A"
                             },
                             {

@@ -114,9 +114,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(name, container) (container_memory_working_set_bytes{namespace=\"$namespace\", pod=\"$pod\", container_name!=\"POD\",container!=\"\"})",
+              "expr": "sum by(name, container) (container_memory_working_set_bytes{namespace=\"$namespace\", pod=\"$pod\", container!=\"POD\",container!=\"\"})",
               "interval": "",
-              "legendFormat": "Current: {{`{{container_name}}`}}",
+              "legendFormat": "Current: {{`{{container}}`}}",
               "refId": "A"
             },
             {

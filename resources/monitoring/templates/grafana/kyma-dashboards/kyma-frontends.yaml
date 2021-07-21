@@ -116,7 +116,7 @@ data:
             {
               "expr": "sum by(name, container) (container_memory_working_set_bytes{namespace=\"$namespace\", pod=\"$pod\", container_name!=\"POD\",container!=\"\"})",
               "interval": "",
-              "legendFormat": "Current: {{`{{name}}`}}",
+              "legendFormat": "Current: {{`{{container}}`}}",
               "refId": "A"
             },
             {
