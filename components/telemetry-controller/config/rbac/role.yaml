@@ -30,7 +30,6 @@ rules:
   - pods
   verbs:
   - delete
-  - list
 - apiGroups:
   - ""
   resources:
