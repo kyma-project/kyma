@@ -43,6 +43,7 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 )
 
+//nolint:gochecknoinits
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 

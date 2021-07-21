@@ -256,6 +256,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 					if _, hasKey := secret.Data[k]; hasKey {
 						delete(secret.Data, k)
 						controllerutil.RemoveFinalizer(config, environmentFinalizer)
+						//nolint:ineffassign
 						changed = true
 					}
 				} else {
@@ -264,6 +265,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 						data[k] = v
 						secret.Data = data
 						controllerutil.AddFinalizer(config, environmentFinalizer)
+						//nolint:ineffassign
 						changed = true
 					} else {
 						if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Equal(oldEnv, v) {
@@ -271,6 +273,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 						}
 						secret.Data[k] = v
 						controllerutil.AddFinalizer(config, environmentFinalizer)
+						//nolint:ineffassign
 						changed = true
 					}
 				}
@@ -300,9 +303,9 @@ func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context
 	}
 
 	log.Info("restarting Fluent Bit pods")
-	for _, pod := range fluentBitPods.Items {
-		if err := r.Delete(ctx, &pod); err != nil {
-			log.Error(err, "cannot delete pod "+pod.Name)
+	for i := range fluentBitPods.Items {
+		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
+			log.Error(err, "cannot delete pod "+fluentBitPods.Items[i].Name)
 		}
 	}
 	return nil
