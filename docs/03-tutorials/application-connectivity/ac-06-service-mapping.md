@@ -4,7 +4,7 @@ title: Bind a service to a Namespace
 
 This guide shows how to bind a service provided by an external solution to a Namespace in Kyma. To execute the binding, provision a Service Instance for the registered service in the Namespace. Follow the instructions to bind your service to the desired Namespace.
 
-> **NOTE:** To learn more about Service Instances and the Service Catalog domain in Kyma, see the [Service Catalog](../../01-overview/02-main-areas/service-management/01-01-service-catalog.md) topic.
+> **NOTE:** To learn more about Service Instances and the Service Catalog domain in Kyma, see the [Service Catalog](../../01-overview/02-main-areas/service-management/smgt-01-sc-overview.md) topic.
 
 ## Prerequisites
 

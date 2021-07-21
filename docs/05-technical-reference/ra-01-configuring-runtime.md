@@ -4,7 +4,7 @@ title: Configuring the Runtime
 
 > **NOTE:** To represent API and Event Definitions of the Applications connected to a Runtime, Open Service Broker API usage is recommended.
 
-In a Kyma Runtime, during Runtime configuration, Application's Bundles are integrated into [Service Catalog](../01-overview/02-main-areas/service-management/01-01-service-catalog.md) using [Application](06-custom-resources/ac-01-application.md) custom resources and [Application Broker](03-architecture/ac-04-application-broker.md).
+In a Kyma Runtime, during Runtime configuration, Application's Bundles are integrated into [Service Catalog](../01-overview/02-main-areas/service-management/smgt-01-sc-overview.md) using [Application](06-custom-resources/ac-01-application.md) custom resources and [Application Broker](03-architecture/ac-04-application-broker.md).
 By default, a single Application is represented as a [ServiceClass](../01-overview/02-main-areas/service-management/smgt-03-sc-resources.md), and a single Bundle is represented as a [ServicePlan](../01-overview/02-main-areas/service-management/smgt-03-sc-resources.md) in Service Catalog.
 Refer to the documentation to learn more about [API Bundles](https://github.com/kyma-incubator/compass/blob/master/docs/compass/03-bundles-api.md).
 
