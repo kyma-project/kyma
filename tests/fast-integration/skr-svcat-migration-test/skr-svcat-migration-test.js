@@ -36,6 +36,8 @@ const {
   checkAuditEventsThreshold
 } = require("../audit-log");
 const t = require("./test-helpers");
+const fs = require('fs');
+const os = require('os');
 
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
@@ -64,7 +66,9 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
+    fs.mkdirSync(`${os.homedir()}/.kube`, true);
     skr = await provisionSKR(keb, gardener, runtimeID, runtimeName);
+    fs.writeFileSync(`${os.homedir()}/.kube/config`, skr.shoot.kubeconfig);
   });
   it(`Should initialize K8s`, async function() {
     await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
