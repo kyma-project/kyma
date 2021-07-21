@@ -1,3 +1,4 @@
+---
 title: Prometheus Istio Server restarting or in crashback loop
 ---
 
@@ -9,7 +10,7 @@ Prometheus Istio Server is restarting or in a crashback loop.
 
 ## Cause
 
-Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash because of OOM when the cardinality of the Istio metrics increases too much. This usually happens when a high amount of workloads perform a lot of communication to other workloads.
+Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash because of OOM when the cardinality of the Istio metrics increases too much. This usually happens when a high number of workloads perform a lot of communication to other workloads.
 
 ## Remedy
 
