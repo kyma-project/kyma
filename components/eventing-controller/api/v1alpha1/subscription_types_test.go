@@ -3,6 +3,8 @@ package v1alpha1
 import (
 	"reflect"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 const (
@@ -81,6 +83,44 @@ func TestBebFilters_Deduplicate(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("Deduplicate() got = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMergeSubsConfigs(t *testing.T) {
+	defaultConf := &env.DefaultSubscriptionConfig{MaxInFlightMessages: 4}
+	tests := []struct {
+		caseName       string
+		inputConf      *SubscriptionConfig
+		inputDefaults  *env.DefaultSubscriptionConfig
+		expectedOutput *SubscriptionConfig
+	}{
+		{
+			caseName:       "nil input config",
+			inputConf:      nil,
+			inputDefaults:  defaultConf,
+			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 4},
+		},
+		{
+			caseName:       "default is overridden",
+			inputConf:      &SubscriptionConfig{MaxInFlightMessages: 10},
+			inputDefaults:  defaultConf,
+			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 10},
+		},
+		{
+			caseName:       "provided input is invalid",
+			inputConf:      &SubscriptionConfig{MaxInFlightMessages: 0},
+			inputDefaults:  defaultConf,
+			expectedOutput: &SubscriptionConfig{MaxInFlightMessages: 4},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.caseName, func(t *testing.T) {
+			got := MergeSubsConfigs(tt.inputConf, tt.inputDefaults)
+			if !reflect.DeepEqual(got, tt.expectedOutput) {
+				t.Errorf("MergeSubsConfigs() got = %v, want = %v", got, tt.expectedOutput)
 			}
 		})
 	}

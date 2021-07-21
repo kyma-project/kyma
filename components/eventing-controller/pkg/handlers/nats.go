@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"k8s.io/apimachinery/pkg/types"
 
@@ -22,29 +24,34 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-)
-
-const (
-	period          = time.Minute
-	maxTries        = 5
-	natsHandlerName = "nats-handler"
 )
 
 // compile time check
 var _ MessagingBackend = &Nats{}
 
 type Nats struct {
-	config        env.NatsConfig
-	logger        *logger.Logger
-	client        cev2.Client
-	connection    *nats.Conn
-	subscriptions map[string]*nats.Subscription
+	config            env.NatsConfig
+	defaultSubsConfig env.DefaultSubscriptionConfig
+	logger            *logger.Logger
+	client            cev2.Client
+	connection        *nats.Conn
+	subscriptions     map[string]*nats.Subscription
 }
 
-func NewNats(config env.NatsConfig, logger *logger.Logger) *Nats {
-	return &Nats{config: config, logger: logger, subscriptions: make(map[string]*nats.Subscription)}
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
+	return &Nats{
+		config:            config,
+		logger:            logger,
+		subscriptions:     make(map[string]*nats.Subscription),
+		defaultSubsConfig: subsConfig,
+	}
 }
+
+const (
+	period          = time.Minute
+	maxTries        = 5
+	natsHandlerName = "nats-handler"
+)
 
 // Initialize creates a connection to NATS.
 func (n *Nats) Initialize(env.Config) (err error) {
@@ -96,6 +103,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
+	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
@@ -104,6 +112,8 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			return false, err
 		}
 
+		callback := n.getCallback(sub.Spec.Sink)
+
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(env.Config{}); err != nil {
 				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
@@ -111,14 +121,16 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		callback := n.getCallback(sub.Spec.Sink)
-		if natsSub, err := n.connection.Subscribe(subject, callback); err != nil {
-			log.Errorw("create NATS subscription failed", "error", err)
-			return false, err
-		} else {
-			n.subscriptions[createKey(sub, subject)] = natsSub
+		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
+			if subscribeErr != nil {
+				log.Errorw("create NATS subscription failed", "error", err)
+				return false, subscribeErr
+			}
+			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
 	}
+	sub.Status.Config = subsConfig
 
 	return false, nil
 }
@@ -223,8 +235,12 @@ func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	return fmt.Sprintf("%s", namespacedName.String())
 }
 
-func createKey(sub *eventingv1alpha1.Subscription, subject string) string {
-	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), subject)
+func createKeySuffix(subject string, queueGoupInstanceNo int) string {
+	return subject + string(types.Separator) + strconv.Itoa(queueGoupInstanceNo)
+}
+
+func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInstanceNo int) string {
+	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
 func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
@@ -239,8 +255,8 @@ func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner
 
 func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
 	nsn := types.NamespacedName{}
-	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
+	nnvalues := strings.Split(key, string(types.Separator))
 	nsn.Namespace = nnvalues[0]
-	nsn.Name = nnvalues[1]
+	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
 	return nsn
 }
