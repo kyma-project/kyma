@@ -1,4 +1,3 @@
----
 title: Prometheus Istio Server restarting or in crashback loop
 ---
 
@@ -35,7 +34,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 
 2. Drop labels for the Istio metrics.
 
-   Edit the ConfigMap for `prometheus-istio server`:
+   Edit the values for `prometheus-istio server`:
 
    ```bash
     kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
@@ -67,29 +66,19 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 
 <!-- why is there suddenly a sub-headline when the previous steps had no separate headline? -->
 
-### Create an override
+### Override the configuration
 
-Follow these steps to [override](TO_DO) the existing configuration
+[Change the configuration](../../.../04-operation-guides/operations/03-change-kyma-config-values.md) with a values YAML file. You can set the value for the **memory limit** attribute to 4Gi, and/or **drop the labels** from Istio metrics.
 
-<!-- why "these steps" when it's just one"? -->
+> **CAUTION:** If you drop additional labels with `prometheus-istio.envoyStats.labeldropRegex`, graphs in Kiali will not work.
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **memory limit** attribute to 4Gi and/or **drop the labels** from Istio metrics.
-
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: monitoring-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: monitoring
-    kyma-project.io/installation: ""
-data:
-  prometheus-istio.envoyStats.labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
-  prometheus-istio.server.resources.limits.memory: "4Gi"
-EOF
+```yaml
+monitoring
+  prometheus-istio:
+    envoyStats:
+      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
+    server:
+      resources:
+        limits:
+          memory: "4Gi"
 ```
-
-> **CAUTION:** The side effect of the change to `prometheus-istio.envoyStats.labeldropRegex` (to drop additional labels ) is graphs in Kiali will not work.
