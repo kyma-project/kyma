@@ -1,5 +1,5 @@
 ---
-title: "Found more that one class" error
+title: '"Found more that one class" error'
 ---
 
 ## Symptom
