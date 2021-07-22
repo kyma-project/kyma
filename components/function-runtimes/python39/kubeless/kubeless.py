@@ -145,13 +145,13 @@ def exception_handler():
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
-    event_base = Event(req)
+    event = Event(req)
     method = req.method
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
             que = queue.Queue()
-            t = threading.Thread(target=lambda q, e: q.put(func(e,function_context)), args=(que,event_base))
+            t = threading.Thread(target=lambda q, e: q.put(func(e,function_context)), args=(que,event))
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
