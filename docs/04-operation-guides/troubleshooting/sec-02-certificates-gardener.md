@@ -32,7 +32,7 @@ The result describes the reason for the failure of issuing a domain SSL certific
   Error during the installation
   </summary>
 
-1. Make sure the domain name provided in the `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements.
+1. Make sure the domain name <!--provided in the`net-global-overrides` ConfigMap - wywalic bo sa dwa sposoby i chemy byc bardziej general--> is proper and it meets the Gardener requirements.
 2. Check if the `istio-ingressgateway` Service in the `istio-system` Namespace contains proper annotations:
 
     ```yaml
@@ -40,12 +40,12 @@ The result describes the reason for the failure of issuing a domain SSL certific
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
    
-3. Check if the `apiserver-proxy-ssl` Service in the `kyma-system` Namespace contains proper annotations:
+<!--3. Check if the `apiserver-proxy-ssl` Service in the `kyma-system` Namespace contains proper annotations:
     
     ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
-    ```
+    ``` usunąć-->
 
   </details>
   <details>
