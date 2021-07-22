@@ -42,16 +42,16 @@ spec:
           httpGet:
             port: {{ .Values.controller.args.healthPort }}
             path: "/healthz"
-          initialDelaySeconds: 50
-          timeoutSeconds: 1
-          periodSeconds: 10
+          initialDelaySeconds: {{ .Values.controller.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.livenessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.livenessProbe.periodSeconds }}
         readinessProbe:
           httpGet:
             port: {{ .Values.controller.args.healthPort }}
             path: "/healthz"
-          initialDelaySeconds: 10
-          timeoutSeconds: 1
-          periodSeconds: 2
+          initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
