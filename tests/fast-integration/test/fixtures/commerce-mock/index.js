@@ -276,7 +276,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-connectivity-validator', 'kyma-system');
+    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
     await patchApplicationGateway('central-application-gateway', 'kyma-system');
   } else {
     await waitForDeployment(`${targetNamespace}-gateway`, 'kyma-integration');
@@ -341,7 +341,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-connectivity-validator', 'kyma-system');
+    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
     await patchApplicationGateway('central-application-gateway', 'kyma-system');
   }
 
