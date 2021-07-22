@@ -3,7 +3,7 @@
 ## Overview
 
 An Application is a representation of an external solution connected to Kyma. The Application Connector manages the traffic, connection, security, and Events of Applications. It is a proprietary implementation that consists of four services.
-Read the [Application Connector documentation](../../../../docs/application-connector/01-01-application-connector.md) for more details regarding the implementation.
+Read the [Application Connector documentation](../../../../docs/01-overview/02-main-areas/application-connectivity) for more details regarding the implementation.
 
 ## Details
 
