@@ -83,6 +83,7 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
  ## Run tests.
 test-local: manifests-local generate-local fmt vet
 	mkdir -p ${ENVTEST_ASSETS_DIR}
@@ -117,7 +118,7 @@ install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+deploy-local: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
