@@ -190,13 +190,12 @@ async function chartList(options) {
   const isGardener = (gardenerDomain ? true : false) || (process.env["GARDENER"] === "true");
   const isCompassEnabled = !!options.withCompass;
   const isCentralApplicationConnectivityEnabled = !!options.centralApplicationConnectivity;
-  const disableLegacyConnectivity = isCompassEnabled || isCentralApplicationConnectivityEnabled;
 
   const overrides = [
     `authProxy.config.useDex=false`,
     `central_application_connectivity_validator.enabled=${isCentralApplicationConnectivityEnabled}`,
     `central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled}`,
-    `global.disableLegacyConnectivity=${disableLegacyConnectivity}`,
+    `global.disableLegacyConnectivity=${isCompassEnabled}`,
     `global.domainName=${domain}`,
     `global.environment.gardener=${isGardener}`,
     `global.isLocalEnv=false`,
