@@ -6,6 +6,9 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+## Maybe needed
+##override ENTRYPOINT = main.go
+
 NAMESPACE = "telemetry"
 
 # Image URL to use all building/pushing image targets
@@ -103,13 +106,9 @@ build: generate fmt vet ## Build manager binary.
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
 
-docker-build: test ## Build docker image with the manager.
-	docker build -t ${IMG} .
-
-docker-push: ## Push docker image with the manager.
-	docker push ${IMG}
-
 ##@ Deployment
+
+release: resolve generate verify build-image push-image copy-external-crds
 
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
