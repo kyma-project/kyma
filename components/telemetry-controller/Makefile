@@ -108,6 +108,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 
 ##@ Deployment
 
+## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image copy-external-crds
 
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
