@@ -38,14 +38,14 @@ spec:
         ports:
           - containerPort: {{ .Values.controller.args.healthPort }}
             name: http-health
-      livenessProbe:
-        httpGet:
-          port: {{ .Values.controller.args.healthPort }}
-          path: "/healthz"
-      readinessProbe:
-        httpGet:
-          port: {{ .Values.controller.args.healthPort }}
-          path: "/healthz"
+        livenessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
+        readinessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
