@@ -21,15 +21,11 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - daemonsets
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
   - pods
   verbs:
   - delete
+  - list
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -41,6 +37,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - telemetry.kyma-project.io

@@ -57,8 +57,8 @@ type LoggingConfigurationReconciler struct {
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=loggingconfigurations/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=pods,verbs=delete
-//+kubebuilder:rbac:groups="",resources=daemonsets,verbs=get
+//+kubebuilder:rbac:groups="",resources=pods,verbs=delete;list;watch
+//+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
