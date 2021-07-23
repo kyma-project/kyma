@@ -11,6 +11,7 @@ metadata:
 {{- end }}
 {{- with .Values.annotations }}
   annotations:
+    checksum/config: {{ tpl (toYaml .Values) . | sha256sum }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
