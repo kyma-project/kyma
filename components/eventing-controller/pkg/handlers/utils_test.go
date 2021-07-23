@@ -83,7 +83,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should be overriden by the given values in subscription
 		expectedBEBSubscription := types.Subscription{
-			Name:            subscription.Name,
+			Name:            CreateBebSubscriptionNameForKymaSubscription(subscription),
 			ContentMode:     *givenProtocolSettings.ContentMode,
 			Qos:             types.QosAtLeastOnce,
 			ExemptHandshake: *givenProtocolSettings.ExemptHandshake,
@@ -121,7 +121,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should retain defaults
 		expectedBEBSubscription := types.Subscription{
-			Name: subscription.Name,
+			Name: CreateBebSubscriptionNameForKymaSubscription(subscription),
 			Events: types.Events{
 				{
 					Source: defaultNamespace,

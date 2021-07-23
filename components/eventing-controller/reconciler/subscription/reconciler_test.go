@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -30,11 +32,6 @@ import (
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -46,8 +43,11 @@ import (
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 )
 
 const (
@@ -163,7 +163,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Sending at least one creation requests for the Subscription")
-			_, postRequests, _ := countBebRequests(subscriptionName)
+			_, postRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -240,7 +240,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
-						return subscriptionName == receivedSubscriptionName
+						return handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription) == receivedSubscriptionName
 					}
 				}
 				return false
@@ -334,11 +334,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(subscription1Name)
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(subscription1))
 			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(subscription2Name)
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(subscription2))
 			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -415,7 +415,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
-						return subscriptionName == receivedSubscriptionName
+						return handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription) == receivedSubscriptionName
 					}
 				}
 				return false
@@ -444,7 +444,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -481,7 +481,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
-						"Name":       BeEquivalentTo(readySubscription.Name),
+						"Name":       BeEquivalentTo(handlers.CreateBebSubscriptionNameForKymaSubscription(readySubscription)),
 						"WebhookUrl": ContainSubstring(*apiRuleNew.Spec.Service.Host),
 					},
 				))))
@@ -490,7 +490,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(apiRule, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -536,11 +536,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countBebRequests(subscriptionName1)
+			_, creationRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(subscription1))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
 			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countBebRequests(subscriptionName2)
+			_, creationRequests, _ = countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(subscription2))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -595,7 +595,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -617,12 +617,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
 				// until the BEB subscription creation call was performed, send successful get requests
 				if !isBebSubscriptionCreated {
-					reconcilertesting.BebGetSuccess(w, subscriptionName)
+					reconcilertesting.BebGetSuccess(w, handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 				} else {
 					// after the BEB subscription was created, set the status to paused
 					w.WriteHeader(http.StatusOK)
 					s := bebtypes.Subscription{
-						Name: subscriptionName,
+						Name: handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription),
 						// ups ... BEB Subscription status is now paused
 						SubscriptionStatus: bebtypes.SubscriptionStatusPaused,
 					}
@@ -670,7 +670,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -710,7 +710,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							bebSubscription = payloadObject.(bebtypes.Subscription)
 							receivedSubscriptionName := bebSubscription.Name
 							// ensure the correct subscription was created
-							return subscriptionName == receivedSubscriptionName
+							return handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription) == receivedSubscriptionName
 						}
 						processedBebRequests++
 					}
@@ -756,7 +756,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
 			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countBebRequests(subscriptionName)
+			_, creationRequests, deletionRequests := countBebRequests(handlers.CreateBebSubscriptionNameForKymaSubscription(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})

@@ -148,7 +148,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 // DeleteSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	return b.deleteSubscription(subscription.Name)
+	return b.deleteSubscription(CreateBebSubscriptionNameForKymaSubscription(subscription))
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
