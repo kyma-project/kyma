@@ -32,20 +32,14 @@ The result describes the reason for the failure of issuing a domain SSL certific
   Error during the installation
   </summary>
 
-1. Make sure the domain name <!--provided in the`net-global-overrides` ConfigMap - wywalic bo sa dwa sposoby i chemy byc bardziej general--> is proper and it meets the Gardener requirements.
+1. Make sure the provided domain name is proper and meets the Gardener requirements.
+
 2. Check if the `istio-ingressgateway` Service in the `istio-system` Namespace contains proper annotations:
 
     ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
     ```
-   
-<!--3. Check if the `apiserver-proxy-ssl` Service in the `kyma-system` Namespace contains proper annotations:
-    
-    ```yaml
-    dns.gardener.cloud/class=garden
-    dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
-    ``` usunąć-->
 
   </details>
   <details>
@@ -65,7 +59,7 @@ You can create a new Certificate resource applying suggestions from the error me
 
 3. Apply the fixed Certificate.
 
->**NOTE:** If you upgrade Kyma, you may need to perform steps from **Error during the installation** tab.
+>**NOTE:** If you upgrade Kyma, you may need to perform steps from the **Error during the installation** tab.
 
   </details>
 </div>
