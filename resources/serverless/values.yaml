@@ -102,6 +102,14 @@ deployment:
   labels: {}
   annotations: {}
   extraProperties: {}
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 pod:
   labels: {}
