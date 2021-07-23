@@ -4,6 +4,7 @@ import importlib
 import io
 import os
 import sys
+import json
 import threading
 import requests
 import bottle
@@ -110,8 +111,8 @@ class Event:
 
     def publishCloudEvent(self, data):
         return requests.post(
-            publisher_proxy_address, 
-            data = data,
+            publisher_proxy_address,
+            data = json.dumps(data),
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     
