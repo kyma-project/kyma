@@ -55,8 +55,8 @@ const (
 	reconcilerName = "nats-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
-	natsHandler := handlers.NewNats(cfg, logger)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	natsHandler := handlers.NewNats(cfg, subsCfg, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -216,6 +216,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 	log.Debug("create NATS subscriptions succeeded")
 
+	actualSubscription.Status.Config = desiredSubscription.Status.Config
 	// Update status
 	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
 		return ctrl.Result{}, err
@@ -225,6 +226,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // syncSubscriptionStatus syncs Subscription status
+// subsConfig is the subscription configuration that was applied to the subscription. It is set only if the
+// isNatsSubReady is true.
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, message string) error {
 	desiredSubscription := sub.DeepCopy()
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)

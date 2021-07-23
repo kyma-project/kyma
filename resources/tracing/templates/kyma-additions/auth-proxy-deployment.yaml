@@ -61,6 +61,10 @@ spec:
           httpGet:
             path: /ping
             port: http
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
         {{- if .Values.authProxy.securityContext }}
         securityContext:
 {{ toYaml .Values.authProxy.securityContext | nindent 10 }}

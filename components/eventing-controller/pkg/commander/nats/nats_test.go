@@ -56,7 +56,8 @@ func TestCleanup(t *testing.T) {
 		ReconnectWait:   time.Second,
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
-	natsBackend := handlers.NewNats(envConf, defaultLogger)
+	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
+	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
 	natsCommander.Backend = natsBackend
 	err = natsCommander.Backend.Initialize(env.Config{})
 	g.Expect(err).To(gomega.BeNil())
