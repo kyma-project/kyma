@@ -84,7 +84,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		return nil, errors.Wrap(err, "apply default protocol settings failed")
 	}
 	// Name
-	emsSubscription.Name = subscription.Name
+	emsSubscription.Name = CreateBebSubscriptionNameForKymaSubscription(subscription)
 
 	// Applying protocol settings if provided in subscription CR
 	if subscription.Spec.ProtocolSettings != nil {
@@ -255,4 +255,12 @@ func APIRuleGroupVersionResource() schema.GroupVersionResource {
 		Group:    apigatewayv1alpha1.GroupVersion.Group,
 		Resource: "apirules",
 	}
+}
+
+// CreateBebSubscriptionNameForKymaSubscription returns the BEB subscription name for a Kyma subscription instance
+func CreateBebSubscriptionNameForKymaSubscription(kymaSubscription *eventingv1alpha1.Subscription) string {
+	// TODO get the eral shootName for a SKR, empty for OSS
+	shootName := "shootName"
+	// TODO truncate it to 50 chars
+	return shootName + "/" + kymaSubscription.GetNamespace() + "/" + kymaSubscription.GetName()
 }
