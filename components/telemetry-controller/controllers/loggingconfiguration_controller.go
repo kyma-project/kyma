@@ -110,24 +110,30 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 	return ctrl.Result{}, nil
 }
 
-func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
 	var cm corev1.ConfigMap
-
-	// Get or create ConfigMap
-	if err := r.Get(ctx, r.FluentBitConfigMap, &cm); err != nil {
+	if err := r.Get(ctx, name, &cm); err != nil {
 		if errors.IsNotFound(err) {
 			cm = corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      r.FluentBitConfigMap.Name,
-					Namespace: r.FluentBitConfigMap.Namespace,
+					Name:      name.Name,
+					Namespace: name.Namespace,
 				},
 			}
 			if err := r.Create(ctx, &cm); err != nil {
-				return false, err
+				return cm, err
 			}
 		} else {
-			return false, err
+			return cm, err
 		}
+	}
+	return cm, nil
+}
+
+func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitConfigMap)
+	if err != nil {
+		return false, err
 	}
 	cmKey := config.Name + ".conf"
 
@@ -162,25 +168,10 @@ func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, conf
 }
 
 func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
-	var cm corev1.ConfigMap
 	changed := false
-
-	// Get or create ConfigMap
-	if err := r.Get(ctx, r.FluentBitFilesConfigMap, &cm); err != nil {
-		if errors.IsNotFound(err) {
-			cm = corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      r.FluentBitFilesConfigMap.Name,
-					Namespace: r.FluentBitFilesConfigMap.Namespace,
-				},
-			}
-			if err := r.Create(ctx, &cm); err != nil {
-				return false, err
-			}
-			changed = true
-		} else {
-			return false, err
-		}
+	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitFilesConfigMap)
+	if err != nil {
+		return false, err
 	}
 
 	// Sync files from every section
