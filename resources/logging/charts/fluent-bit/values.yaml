@@ -47,7 +47,7 @@ securityContext:
       - ALL
     add:
       - FOWNER
-  # readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
 
@@ -177,7 +177,7 @@ config:
       # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
       skipLongLines: "On"
       # Specify the database file to keep track of monitored files and offsets.
-      db: /var/log/flb_kube_loki.db
+      db: /data/flb_kube_loki.db
       # Set a default synchronization (I/O) method. Values: Extra, Full, Normal, Off. This flag affects how the internal SQLite engine do synchronization to disk, for more details about each option please refer to this section.  Most of workload scenarios will be fine with normal mode, but if you really need full synchronization after every write operation you should set full mode. Note that full has a high I/O performance cost.
       dbSync: normal
       # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
