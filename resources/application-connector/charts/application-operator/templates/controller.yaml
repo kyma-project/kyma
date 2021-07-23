@@ -36,8 +36,22 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         ports:
-          - containerPort: 8090
+          - containerPort: {{ .Values.controller.args.healthPort }}
             name: http-health
+        livenessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
+          initialDelaySeconds: {{ .Values.controller.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.livenessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.livenessProbe.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
+          initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
