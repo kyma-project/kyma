@@ -30,6 +30,7 @@ type Config struct {
 	HealthPort                   string        `envconfig:"default=8090"`
 	IntegrationNamespace         string        `envconfig:"default=kyma-integration"`
 	CaCertSecretToMigrate        string        `envconfig:"default=''"`
+	CaCertSecretKeysToMigrate    string        `envconfig:"default='cacert'"`
 	Runtime                      director.RuntimeURLsConfig
 }
 
@@ -40,14 +41,14 @@ func (o *Config) String() string {
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
-		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s",
+		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s",
 		o.AgentConfigurationSecret,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.SkipCompassTLSVerify, o.GatewayPort, o.UploadServiceUrl,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
-		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace)
+		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

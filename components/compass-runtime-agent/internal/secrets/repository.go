@@ -30,6 +30,7 @@ type Repository interface {
 	Get(name types.NamespacedName) (map[string][]byte, error)
 	UpsertWithReplace(name types.NamespacedName, data map[string][]byte) error
 	UpsertWithMerge(name types.NamespacedName, data map[string][]byte) error
+	Delete(secretName types.NamespacedName) error
 }
 
 type repository struct {
@@ -102,6 +103,11 @@ func (r *repository) UpsertWithMerge(name types.NamespacedName, data map[string]
 
 	mergedData := mergeSecretData(existingData, data)
 	return r.upsert(name, mergedData)
+}
+
+func (r *repository) Delete(name types.NamespacedName) error {
+	secretManager := r.secretsManagerConstructor(name.Namespace)
+	return secretManager.Delete(context.Background(), name.Name, metav1.DeleteOptions{})
 }
 
 func (r *repository) upsert(name types.NamespacedName, data map[string][]byte) error {

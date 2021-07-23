@@ -42,8 +42,8 @@ compassRuntimeAgent:
         name: kyma-gateway-certs-cacert
         namespace: istio-system
         migration:
-          from:
-            name: app-connector-certs
+          name: app-connector-certs
+          keys: ["cacert"]
   compass:
     skipTLSVerification: true
   director:
