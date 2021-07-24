@@ -156,3 +156,49 @@ To test if the Subscription CR is properly connected to the Function:
     ```text
     User created: 123456789
     ```
+
+## Publish a Cloud Event
+
+This section shows how to publish a Cloud Event using the Functions SDK based on the previous steps.
+
+1. Change the Function's code and replace `<event type>` with a destination event type:​
+
+    ```js
+    module.exports = {
+      main: function (event, context) {
+        console.log("publish an event");
+        let ce = event.buildCloudEvent(
+          "A234-4321-4321",
+          "<event type>",
+          "sample event data"
+        );
+
+        event.publishCloudEvent(ce);
+        console.log("done");
+      }
+    }
+    ```
+
+2. Send an event manually to trigger the Function:
+
+    ```bash
+    curl -v -H "Content-Type: application/cloudevents+json" https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/events -k --cert {CERT_FILE_NAME} --key {KEY_FILE_NAME} -d \
+      '{
+        "ce-specversion": "1.0",
+        "ce-source": "{APP_NAME}",
+        "ce-type": "sap.kyma.custom.$APP_NAME.$EVENT_TYPE.v1",
+        "ce-eventtypeversion": "v1",
+        "ce-id": "A234-1234-1234",
+        "data": "123456789",
+        "datacontenttype": "application/json"
+      }'
+    ```
+
+3. After sending an event, you should get this result from logs of your Function's latest Pod:
+
+    ```text
+    publish an event
+    done
+    ```
+
+    > This log shows that everything is ok and the Cloud Event is sent properly
