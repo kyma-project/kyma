@@ -29,7 +29,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock := &mocks.Repository{}
 		secretsRepositoryMock.On("Get", sourceSecret).Return(secret, nil)
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "target"))
-		secretsRepositoryMock.On("Upsert", targetSecret, secret).Return(nil)
+		secretsRepositoryMock.On("UpsertWithReplace", targetSecret, secret).Return(nil)
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(nil)
 
 		// when
@@ -52,7 +52,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock := &mocks.Repository{}
 		secretsRepositoryMock.On("Get", sourceSecret).Return(secret, nil)
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "target"))
-		secretsRepositoryMock.On("Upsert", targetSecret, map[string][]byte{"key2": []byte("value2")}).Return(nil)
+		secretsRepositoryMock.On("UpsertWithReplace", targetSecret, map[string][]byte{"key2": []byte("value2")}).Return(nil)
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(nil)
 
 		// when
@@ -151,7 +151,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock := &mocks.Repository{}
 		secretsRepositoryMock.On("Get", sourceSecret).Return(secret, nil)
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "target"))
-		secretsRepositoryMock.On("Upsert", targetSecret, secret).Return(errors.New("failed to upsert"))
+		secretsRepositoryMock.On("UpsertWithReplace", targetSecret, secret).Return(errors.New("failed to upsert"))
 
 		// when
 		migrator := NewMigrator(secretsRepositoryMock, includeAllSourceKeysFunc)
@@ -172,7 +172,7 @@ func TestMigrator(t *testing.T) {
 		secretsRepositoryMock := &mocks.Repository{}
 		secretsRepositoryMock.On("Get", sourceSecret).Return(secret, nil)
 		secretsRepositoryMock.On("Get", targetSecret).Return(map[string][]byte{}, k8serrors.NewNotFound(schema.GroupResource{}, "target"))
-		secretsRepositoryMock.On("Upsert", targetSecret, secret).Return(nil)
+		secretsRepositoryMock.On("UpsertWithReplace", targetSecret, secret).Return(nil)
 		secretsRepositoryMock.On("Delete", sourceSecret).Return(errors.New("failed to upsert"))
 
 		// when
