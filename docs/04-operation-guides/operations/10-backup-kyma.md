@@ -73,8 +73,8 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
 ### Prerequisites
 
-  As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
-  Gardener **Azure** supports CSI drivers of Kubernetes version 1.21.
+  - As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
+  - Gardener **Azure** supports CSI drivers as of Kubernetes version 1.21.
 
 ### Steps
 
