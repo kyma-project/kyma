@@ -167,7 +167,16 @@ This section shows how to publish a Cloud Event using the Functions SDK based on
     module.exports = {
       main: function (event, context) {
         console.log("publish an event");
-        let ce = event.buildCloudEvent(
+        // Alternatively, you can build a Cloud Event object manually to get more control over object's fields:
+        // let ce = {
+        //   'eventtypeversion': <event eventtypeversion>,
+        //   'specversion': <event specversion>,
+        //   'source': <event source>,
+        //   'data': <event data>,
+        //   'type': <event type>,
+        //   'id': <event id>,
+        //  };
+        let ce = event.buildResponseCloudEvent(
           "A234-4321-4321",
           "<event type>",
           "sample event data"
