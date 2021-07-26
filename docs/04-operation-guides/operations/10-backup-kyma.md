@@ -26,13 +26,12 @@ Taking volume snapshots is possible thanks to [Container Storage Interface (CSI)
 
 ## Back up resources using Velero
 
-You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/). 
+You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/).
 Be aware that a full backup of a Kyma cluster isn't supported. Start with the existing Kyma installation and restore specific resources individually.
 
 ## Create on-demand volume snapshots
 
 You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
-
 
 <div tabs name="backup-providers">
   <details>
@@ -42,7 +41,7 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
 ### Prerequisites
 
-  The minimum supported Kubernetes version is 1.17, which supports CSI-enabled StorageClass to create a PVC.
+  The minimum supported Kubernetes version is 1.17.
 
 ### Steps
 
@@ -79,7 +78,7 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
 ### Steps
 
-1. Create a VolumeSnapshotClass:
+  1. Create a VolumeSnapshotClass:
 
   ```yaml
   apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -94,7 +93,7 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
   Driver for GCP must be `pd.csi.storage.gke.io`, for AWS it's `ebs.csi.aws.com`.
   
-2. Create a VolumeSnapshot resource:
+  2. Create a VolumeSnapshot resource:
 
   ```yaml
   apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -106,10 +105,30 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
       persistentVolumeClaimName: {PVC_NAME}
   ```
 
-3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
+  3. Wait until the **READYTOUSE** field has the `true` status to verify that the snapshot was taken successfully:
 
   ```bash
   kubectl get volumesnapshot -w
+  ```
+
+  4. Use this snapshot as a datasource to create a PVC:
+  
+  ```yaml
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: pvc-restored
+  spec:
+    accessModes:
+     - ReadWriteOnce
+    storageClassName: snapshot-class
+    resources:
+      requests:
+        storage: {SIZE_OF_ORIGINAL_PVC}
+    dataSource:
+      name: snapshot
+      kind: VolumeSnapshot
+      apiGroup: snapshot.storage.k8s.io
   ```
 
   </details>
