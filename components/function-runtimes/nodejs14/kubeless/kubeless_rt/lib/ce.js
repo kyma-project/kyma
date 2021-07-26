@@ -26,7 +26,7 @@ function buildEvent(req, res) {
         setResponseContentType: (type) => setResponseContentType(res, type),
         setResponseStatus: (status) => setResponseStatus(res, status),
         publishCloudEvent: (data) => publishCloudEvent(data),
-        buildCloudEvent: (id, type, data) => buildCloudEvent(req, id, type, data)
+        buildResponseCloudEvent: (id, type, data) => buildResponseCloudEvent(req, id, type, data)
     });
 }
 
@@ -53,7 +53,7 @@ function publishCloudEvent(data) {
     });
 }
 
-function buildCloudEvent(req, id, type, data) {
+function buildResponseCloudEvent(req, id, type, data) {
     return {
         'type': type,
         'source': req.get('ce-source'),

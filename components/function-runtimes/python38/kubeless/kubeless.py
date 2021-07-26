@@ -116,7 +116,7 @@ class Event:
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     
-    def buildCloudEvent(self, event_id, event_type, event_data):
+    def buildResponseCloudEvent(self, event_id, event_type, event_data):
         return {
             'type': event_type,
             'source': self.ceHeaders['ce-source'],
