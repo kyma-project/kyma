@@ -33,54 +33,6 @@ Be aware that a full backup of a Kyma cluster isn't supported. Start with the ex
 
 You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
 
-### Prerequisites
-
-You must use CSI-enabled StorageClass to create a PVC; otherwise it isn't be backed up.
-
-As an example, assume you have the `pvc-to-backup` PersistentVolumeClaim, which you've created using a CSI-enabled StorageClass.
-
-### Steps
-
-1. Trigger a snapshot by creating a VolumeSnapshot object:
-
-  ```yaml
-  apiVersion: snapshot.storage.k8s.io/v1beta1
-  kind: VolumeSnapshot
-  metadata:
-    name: volume-snapshot
-  spec:
-    volumeSnapshotClassName: csi-snapshot-class
-    source:
-      persistentVolumeClaimName: pvc-to-backup
-  ```
-
-2. Recreate the PVC using the snapshot as the data source:
-
-  ```yaml
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: pvc-restored
-  spec:
-    accessModes:
-     - ReadWriteOnce
-    storageClassName: csi-storage-class
-    resources:
-      requests:
-        storage: 10Gi
-    dataSource:
-      name: volume-snapshot
-      kind: VolumeSnapshot
-      apiGroup: snapshot.storage.k8s.io
-  ```
-
-  A new `pvc-restored` PVC is created with prepopulated data from the snapshot.
-
-## Create volume snapshots for cloud providers
-
-You can also create on-demand volume snapshots for cloud providers (AKS, GKE, and on Gardener, GCP, AWS, and Azure). Before you proceed, read the previously mentioned instructions on creating volume snapshots.
-
-<!-- why and what exaclty should I read in the aforementioned instructions?? -->
 
 <div tabs name="backup-providers">
   <details>
@@ -90,14 +42,15 @@ You can also create on-demand volume snapshots for cloud providers (AKS, GKE, an
 
 ### Prerequisites
 
-The minimum supported Kubernetes version is 1.17.
+  The minimum supported Kubernetes version is 1.17, which supports CSI-enabled StorageClass to create a PVC.
 
 ### Steps
 
-1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
+  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
+  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
 
   </details>
+  
   <details>
   <summary label="GKE">
   GKE
@@ -105,12 +58,12 @@ The minimum supported Kubernetes version is 1.17.
 
 ### Prerequisites
 
-The minimum supported Kubernetes version is 1.14.
+  The minimum supported Kubernetes version is 1.14.
 
 ### Steps
 
-1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
+  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
+  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
 
   </details>
 
@@ -121,9 +74,8 @@ The minimum supported Kubernetes version is 1.14.
 
 ### Prerequisites
 
-As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
-Gardener **Azure** does not support CSI drivers, that's why you can't use volume snapshots. This support is planned for Kubernetes 1.19. For details, see [this issue](https://github.com/gardener/gardener-extension-provider-azure/issues/3).
-<!-- The linked issue implies that with 1.21 it's now supported in Azure too - pls confirm  -->
+  As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
+  Gardener **Azure** supports CSI drivers of Kubernetes version 1.21.
 
 ### Steps
 
