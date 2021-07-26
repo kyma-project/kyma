@@ -40,6 +40,9 @@ func main() {
 	exitOnError(err, "Failed to set up client config")
 
 	log.Info("Migrating certificate if needed")
+	k8sResourceClientSets, err := k8sResourceClients(cfg)
+	exitOnError(err, "Failed to initialize K8s resource clients")
+
 	secretsManagerConstructor := func(namespace string) secrets.Manager {
 		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
 	}
@@ -49,7 +52,7 @@ func main() {
 	caCertSecretToMigrate := parseNamespacedName(options.CaCertSecretToMigrate)
 	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
 
-	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.caCertificateSecretKeysToMigrate)
+	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.CaCertSecretKeysToMigrate)
 	exitOnError(err, "Failed to migrate ")
 
 	log.Info("Setting up manager")
@@ -62,9 +65,6 @@ func main() {
 	exitOnError(err, "Failed to add APIs to scheme")
 
 	log.Info("Registering Components.")
-
-	k8sResourceClientSets, err := k8sResourceClients(cfg)
-	exitOnError(err, "Failed to initialize K8s resource clients")
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
 
