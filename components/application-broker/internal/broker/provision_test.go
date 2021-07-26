@@ -41,7 +41,6 @@ func TestProvisionAsync(t *testing.T) {
 		expectedEventActivationCreated bool
 		expectedAPIPackageCredsCreated bool
 		expectedInstanceState          internal.InstanceState
-		newEventingFlow                bool
 	}
 
 	for _, tc := range []testCase{
@@ -56,7 +55,6 @@ func TestProvisionAsync(t *testing.T) {
 			expectedEventActivationCreated: true,
 			expectedAPIPackageCredsCreated: true,
 			expectedInstanceState:          internal.InstanceStateSucceeded,
-			newEventingFlow:                true,
 		},
 		{
 			name:                           "cannot provision",
@@ -133,7 +131,7 @@ func TestProvisionAsync(t *testing.T) {
 				mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(),
 				istioCli.SecurityV1beta1(), mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false}, apiPkgCredsCreatorMock,
-				validateProvisionRequestV2, tc.newEventingFlow)
+				validateProvisionRequestV2)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -203,7 +201,7 @@ func TestProvisionProcessWithNewEventing(t *testing.T) {
 	provisioner := NewProvisioner(mockInstanceStorage, nil, mockOperationStorage, mockOperationStorage,
 		mockAccessChecker, mockAppFinder, eaCli.ApplicationconnectorV1alpha1(),
 		istioCli.SecurityV1beta1(), mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(),
-		&IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2, true)
+		&IDSelector{false}, apiPkgCredsCreatorMock, validateProvisionRequestV2)
 
 	asyncFinished := make(chan struct{}, 0)
 	provisioner.asyncHook = func() {
@@ -240,7 +238,7 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 
 	sut := NewProvisioner(nil, mockStateGetter, nil, nil, nil,
 		nil, nil, nil, nil, nil, spy.NewLogDummy(),
-		nil, nil, validateProvisionRequestV2, false)
+		nil, nil, validateProvisionRequestV2)
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -259,7 +257,7 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 
 	sut := NewProvisioner(nil, mockStateGetter, nil, nil, nil,
 		nil, nil, nil, nil, nil, spy.NewLogDummy(),
-		nil, nil, validateProvisionRequestV2, false)
+		nil, nil, validateProvisionRequestV2)
 
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -373,7 +371,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				mockAccessChecker, mockAppFinder, clientset.ApplicationconnectorV1alpha1(),
 				fakeistioclientset.NewSimpleClientset().SecurityV1beta1(),
 				mockInstanceStorage, mockOperationIDProvider, spy.NewLogDummy(), &IDSelector{false},
-				apiPkgCredsCreatorMock, validateProvisionRequestV2, false)
+				apiPkgCredsCreatorMock, validateProvisionRequestV2)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -402,7 +400,7 @@ func TestProvisionErrorOnCheckingIfProvisioned(t *testing.T) {
 
 	sut := NewProvisioner(nil, mockStateGetter, nil, nil, nil,
 		nil, nil, nil, nil, nil, spy.NewLogDummy(),
-		nil, nil, validateProvisionRequestV2, false)
+		nil, nil, validateProvisionRequestV2)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -419,7 +417,7 @@ func TestProvisionErrorOnCheckingIfProvisionInProgress(t *testing.T) {
 
 	sut := NewProvisioner(nil, mockStateGetter, nil, nil, nil,
 		nil, nil, nil, nil, nil, spy.NewLogDummy(),
-		nil, nil, validateProvisionRequestV2, false)
+		nil, nil, validateProvisionRequestV2)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -444,7 +442,7 @@ func TestProvisionErrorOnIDGeneration(t *testing.T) {
 	sut := NewProvisioner(nil, mockStateGetter, nil, nil, nil,
 		nil, nil, nil, nil,
 		mockOperationIDProvider, spy.NewLogDummy(), nil, nil,
-		validateProvisionRequestV2, false)
+		validateProvisionRequestV2)
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 	// THEN
@@ -475,7 +473,7 @@ func TestProvisionErrorOnInsertingOperation(t *testing.T) {
 	sut := NewProvisioner(nil, mockStateGetter, mockOperationStorage, mockOperationStorage,
 		nil, nil, nil, nil, nil,
 		mockOperationIDProvider, spy.NewLogDummy(), nil, nil,
-		validateProvisionRequestV2, false)
+		validateProvisionRequestV2)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -518,7 +516,7 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 	sut := NewProvisioner(mockInstanceStorage, mockStateGetter, mockOperationStorage, mockOperationStorage,
 		nil, mockAppFinder, nil, nil, nil, mockOperationIDProvider,
 		spy.NewLogDummy(), &IDSelector{false}, nil,
-		validateProvisionRequestV2, false)
+		validateProvisionRequestV2)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{BrokerNamespace: string(fixNs())}, fixProvisionRequest())
@@ -602,7 +600,7 @@ func TestDoAPIPackageCredentialsProvision(t *testing.T) {
 			provisioner := NewProvisioner(nil, nil, mockOperationStorage,
 				mockOperationStorage, mockAccessChecker, nil, nil, nil,
 				mockInstanceStorage, nil, spy.NewLogDummy(), nil, apiPkgCredsCreatorMock,
-				validateProvisionRequestV2, false)
+				validateProvisionRequestV2)
 
 			// WHEN
 			provisioner.do(fixProvisionRequest().Parameters, iID, opID, appName, appID, appSvcID, appNs, eventProvider, tC.apiProvider, displayName)
