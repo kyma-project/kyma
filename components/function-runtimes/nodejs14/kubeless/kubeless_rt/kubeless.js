@@ -1,34 +1,35 @@
 'use strict';
 
-const { diag, DiagConsoleLogger, DiagLogLevel } = require("@opentelemetry/api");
+// Require dependencies
 const { NodeTracerProvider } = require("@opentelemetry/node");
 const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
-const { ZipkinExporter } = require("@opentelemetry/exporter-zipkin");
-const { registerInstrumentations } = require("@opentelemetry/instrumentation");
-const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
-const { GrpcInstrumentation } = require("@opentelemetry/instrumentation-grpc");
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
 
+// Create a tracer provider
 const provider = new NodeTracerProvider();
 
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
+const zipkinExporter = new ZipkinExporter({
+    url: 'http://tracing-jaeger-collector.kyma-system.svc.cluster.local:9411/api/v2/spans',
+    serviceName: 'service-hello'
+});
 
-provider.addSpanProcessor(
-  new SimpleSpanProcessor(
-    new ZipkinExporter({
-      serviceName: "function1",
-      url: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:9411/api/v2/spans",
-    })
-  )
-);
+// The simple span processor sends spans to the exporter as soon as they are ended.
+const processor = new SimpleSpanProcessor(zipkinExporter);
+provider.addSpanProcessor(processor);
 
+// The provider must be registered in order to
+// be used by the OpenTelemetry API and instrumentations
 provider.register();
 
+// This will automatically enable all instrumentations
 registerInstrumentations({
   instrumentations: [
     new HttpInstrumentation(),
-    new GrpcInstrumentation(),
+    new ExpressInstrumentation(),
   ],
-  tracerProvider: provider,
 });
 
 console.log("tracing initialized");
