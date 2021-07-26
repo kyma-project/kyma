@@ -113,7 +113,7 @@ func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 }
 
 func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
-	req, err := c.httpClient.NewRequest(http.MethodGet, url.PathEscape(fmt.Sprintf(c.config.GetURLFormat, name)), nil)
+	req, err := c.httpClient.NewRequest(http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, url.PathEscape(name)), nil)
 	if err != nil {
 		return nil, nil, err
 	}
