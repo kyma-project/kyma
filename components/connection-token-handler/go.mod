@@ -3,8 +3,6 @@ module github.com/kyma-project/kyma/components/connection-token-handler
 go 1.16
 
 require (
-	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/go-logr/zapr v0.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
