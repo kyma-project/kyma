@@ -24,6 +24,8 @@ We recommend that you back up your volumes periodically with the [VolumeSnapshot
 
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
+You can create on-demand volume snapshots manually, or set up a periodic job that takes automatic snapshots periodically.
+
 ## Back up resources using Velero
 
 You can back up and restore individual resources manually or automatically with Velero. For more information, read the [Velero documentation](https://velero.io/docs/).
@@ -31,7 +33,7 @@ Be aware that a full backup of a Kyma cluster isn't supported. Start with the ex
 
 ## Create on-demand volume snapshots
 
-You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one. Optionally, a periodic job can create snapshots automatically.
+You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one.
 
 <div tabs name="backup-providers">
   <details>
