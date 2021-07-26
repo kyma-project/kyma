@@ -116,7 +116,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("get BEB subscription failed", "error", err)
+			log.Errorw("get BEB subscription failed", "bebSubscriptionName", sEv2.Name, "error", err)
 			return false, err
 		}
 		// get the internal view for the EMS subscription
@@ -154,7 +154,7 @@ func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) er
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", "error", err)
+		log.Errorw("delete BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
@@ -166,14 +166,14 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", "error", err)
+		log.Errorw("create BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", "error", err)
+		log.Errorw("get BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
