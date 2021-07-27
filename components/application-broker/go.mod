@@ -3,6 +3,9 @@ module github.com/kyma-project/kyma/components/application-broker
 go 1.16
 
 require (
+	contrib.go.opencensus.io/exporter/ocagent v0.7.0 // indirect
+	contrib.go.opencensus.io/exporter/prometheus v0.3.0 // indirect
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.8 // indirect
 	github.com/99designs/gqlgen v0.10.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/davecgh/go-spew v1.1.1
@@ -47,4 +50,6 @@ replace (
 	k8s.io/api => k8s.io/api v0.16.10
 	k8s.io/apimachinery => k8s.io/apimachinery v0.16.10
 	k8s.io/client-go => k8s.io/client-go v0.16.10
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410163147-594e756bea31
+	knative.dev/pkg => knative.dev/pkg v0.0.0-20200113182502-b8dc5fbc6d2f
 )
