@@ -2,7 +2,7 @@
 title: '"Not enough permissions" error'
 ---
 
-If you log in to the Kyma Dashboard and receive `Not enough permissions` error message:
+If you log in to Kyma Dashboard and receive `Not enough permissions` error message:
 
 1. Fetch the ID Token. For example, use [Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools) and search for the token in the sent requests authorization header.
 2. Decode the ID Token. For example, use the [jwt.io](https://jwt.io/) page.

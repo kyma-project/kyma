@@ -4,7 +4,7 @@ title: Authorization in Kyma
 
 ## User authorization
 
-Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through the Kyma Console or using kubectl, you must be authenticated with a JWT token. This token collects user information such as username, email, or `groups` claim for the system to determine whether you have access to perform certain operations.
+Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you must be authenticated with a JWT token. This token collects user information such as username, email, or `groups` claim for the system to determine whether you have access to perform certain operations.
 
 ### Cluster-wide authorization
 
@@ -44,7 +44,7 @@ You can assign any of the predefined roles to a user or to a group of users in t
 - The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 - A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 
->**TIP:** The **Global permissions** view in the **Settings** section of the Kyma Dashboard allows you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to the **Configuration** section of the **Permissions** view.
+>**TIP:** The **Global permissions** view in the **Settings** section of Kyma Dashboard allows you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to the **Configuration** section of the **Permissions** view.
 
 >**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
@@ -54,7 +54,7 @@ The RoleBinding or ClusterRoleBinding must have a group specified as their subje
 
 ## Service-to-service authorization
 
-As Kyma is built on top of the Istio Service Mesh, it supports the native [Istio RBAC](https://archive.istio.io/v1.4/docs/reference/config/security/istio.rbac.v1alpha1/) mechanism the mesh provides. The RBAC enabled the creation of `ServiceRoles` and `ServiceRoleBindings` which employ a fine-grained method of restricting access to services inside the kubernetes cluster. For more details, see [Istio RBAC configuration](/components/service-mesh/#details-istio-rbac-configuration).
+Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh. For more details, see [Istio Authorization Policy configuration](https://istio.io/latest/docs/reference/config/security/authorization-policy/).
 
 ## User-to-service authorization
 

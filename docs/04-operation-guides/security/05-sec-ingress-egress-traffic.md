@@ -32,6 +32,7 @@ During installation, the values are propagated in the cluster to all components 
 You can install Kyma on top of [Gardener](https://gardener.cloud/) managed instances that use the already present certificate management service. Because Gardener creates the certificates or domain, you don't have to provide them. The certificate is a Custom Resource managed by Gardener, and is a wildcard certificate for the whole domain.
 
 ## Egress
+
 Currently no Egress limitations are implemented, meaning that all applications deployed in the Kyma cluster can access outside resources without limitations.
 
 >**NOTE:** In the case of connection problems with external services, it may be required to create an [Service Entry](https://istio.io/latest/docs/reference/config/networking/service-entry/) object to register the service.

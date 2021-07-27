@@ -38,12 +38,6 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
     
       The process is complete when you see the `Kyma installed` message.
 
-  3. Restart the Console Backend Service to propagate the new certificate. Run:
-      ```bash
-      kubectl delete pod -n kyma-system -l app=backend
-      ```
-<!--Step 3 Invalid – consult KK-->
-
   </details>
 
   <details>
@@ -51,9 +45,9 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   Self-signed certificate
   </summary>
 
-  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to Kyma Dashboard, regenerate the self-signed certificate. <!--consult KK-->
+  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to Kyma Dashboard, regenerate the self-signed certificate. <!--consult Valentin-->  
 
-  >>**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on. <!--consult with KK-->
+  >>**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on. <!--consult Valentin-->
 
   1. Delete the Secret that stores the expired Kyma TLS certificate. Run:
 
@@ -78,14 +72,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 
       The process is complete when you see the `Kyma installed` message.
 
-  3. Restart the Console Backend Service to propagate the new certificate. Run:
-
-      ```bash
-      kubectl delete pod -n kyma-system -l app=backend
-      ```
-      <!--step 3 probably invalid - consult KK-->
-
-  4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
+  3. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
   
       ```bash
       tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \

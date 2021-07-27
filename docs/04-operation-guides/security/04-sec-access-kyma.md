@@ -8,7 +8,7 @@ As a user, you can access Kyma using the following:
 - [Kubernetes-native CLI (kubectl)](https://kubernetes.io/docs/reference/kubectl/overview/) which allows you to manage your resources using a command-line interface. To access and manage your resources, you need a config file that includes the JWT token required for authentication. You have two options:
 
   - Cluster config file that you can obtain directly from your cloud provider. It allows you to directly access the Kubernetes API server, usually as the admin user. Kyma does not manage this config in any way.
-  - Kyma-generated config file that you can download using Kyma Dashboard.
+  - Kyma-generated config file that you can download using Kyma Dashboard. <!--Consult Valentin>
 
 ## Kyma Dashboard
 
