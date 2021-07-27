@@ -6,35 +6,15 @@ const {
   deprovisionSKR,
 } = require("../kyma-environment-broker");
 const {
-  DirectorConfig,
-  DirectorClient,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
-  unregisterKymaFromCompass,
-} = require("../compass");
-const {
   GardenerConfig,
   GardenerClient
 } = require("../gardener");
-const {
-  ensureCommerceMockWithCompassTestFixture,
-  checkAppGatewayResponse,
-  sendEventAndCheckResponse,
-  deleteMockTestFixture,
-} = require("../test/fixtures/commerce-mock");
 const {
   debug,
   genRandom,
   getEnvOrThrow,
   initializeK8sClient,
-  k8sCoreV1Api,
 } = require("../utils");
-const { 
-  AuditLogCreds,
-  AuditLogClient,
-  checkAuditLogs,
-  checkAuditEventsThreshold
-} = require("../audit-log");
 const t = require("./test-helpers");
 const fs = require('fs');
 const os = require('os');

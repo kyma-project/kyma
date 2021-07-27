@@ -1,5 +1,4 @@
 const installer = require("../installer/helm");
-const k8s = require("@kubernetes/client-node");
 const execa = require("execa");
 
 async function installHelmCharts(creds) {
