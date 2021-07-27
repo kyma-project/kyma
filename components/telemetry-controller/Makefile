@@ -1,7 +1,7 @@
 
 APP_NAME = telemetry-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20210723-91c9654f
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
@@ -26,8 +26,6 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-all: build
-
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -50,12 +48,7 @@ help: ## Display this help.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
-## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-
- ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-generate: controller-gen
+generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 resolve-local:
@@ -80,38 +73,29 @@ test-local: manifests-local generate-local fmt-local vet-local
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
- ## Run tests.
-test: manifests generate fmt vet
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
-
-##@ Build
-
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
 	go run ./main.go
 
-##@ Deployment
-
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image copy-external-crds
 
-install-local: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+##@ Deployment
 
-uninstall-local: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+install-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	kustomize build config/crd | kubectl apply -f -
 
-deploy-local: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | kubectl apply -f -
+uninstall-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+	kustomize build config/crd | kubectl delete -f -
+
+deploy-local: manifests-local ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && kustomize edit set image controller=${IMG}
+	kustomize build config/default | kubectl apply -f -
 
 undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/default | kubectl delete -f -
+	kustomize build config/default | kubectl delete -f -
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -133,9 +117,23 @@ else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-KUSTOMIZE = $(shell pwd)/bin/kustomize
-kustomize: ## Download kustomize locally if necessary.
-	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+.PHONY: controller-gen
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	if [ ! $(which go) ]; then \
+		go mod init tmp ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ; \
+		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
+	fi; \
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
