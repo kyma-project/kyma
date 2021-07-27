@@ -50,28 +50,28 @@
 /resources/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # The `application-connector` chart
-/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `values.yaml` file for `application-connector` chart
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `connection-token-handler` subchart
-/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `application-operator` subchart
-/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @strekm @Tomasz-Smelcerz-SAP @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector-helper/ @strekm @Tomasz-Smelcerz-SAP @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `console` subchart
 /resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -143,7 +143,7 @@
 /resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # The `kiali` chart
 /resources/kiali/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl
@@ -194,25 +194,25 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/console-backend-service/internal/domain/rafter @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Component
-/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Registry Component
-/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Operator Component
-/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Gateway Component
-/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Connectivity Validator Component
-/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Connectivity Certs Setup Job Component
-/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # UAA Component
 /components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @jasiu001
@@ -233,7 +233,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/function-runtimes/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Event Publisher Proxy
 /components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi
@@ -248,10 +248,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Central Application Gateway
-/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio @ralikio @everesio
 
 # Central Connectivity Validator
-/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio @ralikio @everesio
 
 # Tests
 # Service Catalog acceptance tests
@@ -282,28 +282,28 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Tests
-/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Registry Tests
-/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Gateway Legacy Tests
-/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Operator Tests
-/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Application Connector Tests
-/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Connection Token Handler Tests
-/tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659
+/tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @eversio
 
 # Fast Integration Tests
 /tests/fast-integration/ @crabtree @pbochynski @adamwalach
