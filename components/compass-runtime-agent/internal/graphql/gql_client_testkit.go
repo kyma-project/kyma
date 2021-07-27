@@ -9,26 +9,32 @@ import (
 )
 
 type QueryAssertClient struct {
-	t                  *testing.T
-	expectedRequests   []*graphql.Request
-	shouldFail         bool
-	modifyResponseFunc ModifyResponseFunc
+	t             *testing.T
+	responseMocks []ResponseMock
+	shouldFail    bool
 }
 
 type ModifyResponseFunc func(t *testing.T, r interface{})
 
+type ResponseMock struct {
+	ModifyResponseFunc func(t *testing.T, r interface{})
+	ExpectedReq        *graphql.Request
+}
+
 func (c *QueryAssertClient) Do(req *graphql.Request, res interface{}) error {
-	if len(c.expectedRequests) == 0 {
+	if len(c.responseMocks) == 0 {
 		return errors.New("no more requests were expected")
 	}
 
-	assert.Equal(c.t, c.expectedRequests[0], req)
-	if len(c.expectedRequests) > 1 {
-		c.expectedRequests = c.expectedRequests[1:]
+	currentResponseMock := c.responseMocks[0]
+
+	assert.Equal(c.t, currentResponseMock.ExpectedReq.Query(), req.Query())
+	if len(c.responseMocks) > 1 {
+		c.responseMocks = c.responseMocks[1:]
 	}
 
 	if !c.shouldFail {
-		c.modifyResponseFunc(c.t, res)
+		currentResponseMock.ModifyResponseFunc(c.t, res)
 
 		return nil
 	}
@@ -36,11 +42,10 @@ func (c *QueryAssertClient) Do(req *graphql.Request, res interface{}) error {
 	return errors.New("error")
 }
 
-func NewQueryAssertClient(t *testing.T, shouldFail bool, modifyResponseFunc func(t *testing.T, r interface{}), expectedReq ...*graphql.Request) Client {
+func NewQueryAssertClient(t *testing.T, shouldFail bool, responseMocks ...ResponseMock) Client {
 	return &QueryAssertClient{
-		t:                  t,
-		expectedRequests:   expectedReq,
-		shouldFail:         shouldFail,
-		modifyResponseFunc: modifyResponseFunc,
+		t:             t,
+		responseMocks: responseMocks,
+		shouldFail:    shouldFail,
 	}
 }

@@ -6,10 +6,22 @@ type queryProvider struct{}
 
 func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
-	result: applicationsForRuntime(runtimeID: "%s") {
-		%s
-	}
-}`, runtimeID, applicationsQueryData())
+		result: applicationsForRuntime(runtimeID: "%s") {
+			%s
+		}
+	}`, runtimeID, applicationsQueryData())
+}
+
+func (qp queryProvider) getRuntimeLabelsQuery(runtimeID string) string {
+	return fmt.Sprintf(`query {
+		result: runtime(id: "%s") {
+			%s
+		}
+	}`, runtimeID, labels())
+}
+
+func labels() string {
+	return `labels`
 }
 
 func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {

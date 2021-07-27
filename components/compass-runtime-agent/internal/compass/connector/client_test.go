@@ -57,12 +57,15 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 			ManagementPlaneInfo: &gqlschema.ManagementPlaneInfo{},
 		}
 
-		gqlClient := graphql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
-			config, ok := r.(*ConfigurationResponse)
-			require.True(t, ok)
-			assert.Empty(t, config)
-			config.Result = expectedResponse
-		}, expectedRequest)
+		gqlClient := graphql.NewQueryAssertClient(t, false, graphql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				config, ok := r.(*ConfigurationResponse)
+				require.True(t, ok)
+				assert.Empty(t, config)
+				config.Result = expectedResponse
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		certSecuredClient := NewConnectorClient(gqlClient)
 
@@ -76,11 +79,14 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 
 	t.Run("should return error when failed to fetch config", func(t *testing.T) {
 		// given
-		gqlClient := graphql.NewQueryAssertClient(t, true, func(t *testing.T, r interface{}) {
-			config, ok := r.(*ConfigurationResponse)
-			require.True(t, ok)
-			assert.Empty(t, config)
-		}, expectedRequest)
+		gqlClient := graphql.NewQueryAssertClient(t, true, graphql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				config, ok := r.(*ConfigurationResponse)
+				require.True(t, ok)
+				assert.Empty(t, config)
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		certSecuredClient := NewConnectorClient(gqlClient)
 
@@ -106,12 +112,15 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 			CaCertificate:     "caCert",
 		}
 
-		gqlClient := graphql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
-			config, ok := r.(*CertificationResponse)
-			require.True(t, ok)
-			assert.Empty(t, config)
-			config.Result = expectedResponse
-		}, expectedRequest)
+		gqlClient := graphql.NewQueryAssertClient(t, false, graphql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				config, ok := r.(*CertificationResponse)
+				require.True(t, ok)
+				assert.Empty(t, config)
+				config.Result = expectedResponse
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		certSecuredClient := NewConnectorClient(gqlClient)
 
@@ -125,11 +134,14 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 
 	t.Run("should return error when failed to sign CSR", func(t *testing.T) {
 		// given
-		gqlClient := graphql.NewQueryAssertClient(t, true, func(t *testing.T, r interface{}) {
-			config, ok := r.(*CertificationResponse)
-			require.True(t, ok)
-			assert.Empty(t, config)
-		}, expectedRequest)
+		gqlClient := graphql.NewQueryAssertClient(t, true, graphql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				config, ok := r.(*CertificationResponse)
+				require.True(t, ok)
+				assert.Empty(t, config)
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		certSecuredClient := NewConnectorClient(gqlClient)
 

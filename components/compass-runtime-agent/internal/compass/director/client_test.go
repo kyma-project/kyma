@@ -21,8 +21,8 @@ const (
 	runtimeId = "runtimeId"
 
 	expectedAppsForRuntimeQuery = `query {
-	result: applicationsForRuntime(runtimeID: "runtimeId") {
-		data {
+		result: applicationsForRuntime(runtimeID: "runtimeId") {
+			data {
 		id
 		name
 		providerName
@@ -122,8 +122,14 @@ const (
 		hasNextPage}
 	totalCount
 	
-	}
-}`
+		}
+	}`
+
+	expectedGetLabelsQuery = `query {
+		result: runtime(id: "runtimeId") {
+			labels
+		}
+	}`
 
 	expectedSetEventsURLLabelQuery = `mutation {
 		result: setRuntimeLabel(runtimeID: "runtimeId", key: "runtime_eventServiceUrl", value: "https://gateway.kyma.local") {
@@ -147,7 +153,6 @@ var (
 )
 
 func TestConfigClient_FetchConfiguration(t *testing.T) {
-
 	expectedRequest := gcli.NewRequest(expectedAppsForRuntimeQuery)
 	expectedRequest.Header.Set(TenantHeader, tenant)
 
@@ -191,12 +196,15 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 			},
 		}
 
-		gqlClient := gql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*ApplicationsForRuntimeResponse)
-			require.True(t, ok)
-			assert.Empty(t, cfg.Result)
-			cfg.Result = expectedResponse
-		}, expectedRequest)
+		gqlClient := gql.NewQueryAssertClient(t, false, gql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				cfg, ok := r.(*ApplicationsForRuntimeResponse)
+				require.True(t, ok)
+				assert.Empty(t, cfg.Result)
+				cfg.Result = expectedResponse
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
@@ -216,12 +224,15 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 			TotalCount: 0,
 		}
 
-		gqlClient := gql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*ApplicationsForRuntimeResponse)
-			require.True(t, ok)
-			assert.Empty(t, cfg.Result)
-			cfg.Result = expectedResponse
-		}, expectedRequest)
+		gqlClient := gql.NewQueryAssertClient(t, false, gql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				cfg, ok := r.(*ApplicationsForRuntimeResponse)
+				require.True(t, ok)
+				assert.Empty(t, cfg.Result)
+				cfg.Result = expectedResponse
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
@@ -235,12 +246,15 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	t.Run("should return error when result is nil", func(t *testing.T) {
 		// given
-		gqlClient := gql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*ApplicationsForRuntimeResponse)
-			require.True(t, ok)
-			assert.Empty(t, cfg.Result)
-			cfg.Result = nil
-		}, expectedRequest)
+		gqlClient := gql.NewQueryAssertClient(t, false, gql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				cfg, ok := r.(*ApplicationsForRuntimeResponse)
+				require.True(t, ok)
+				assert.Empty(t, cfg.Result)
+				cfg.Result = nil
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
@@ -254,11 +268,14 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	t.Run("should return error when failed to fetch Applications", func(t *testing.T) {
 		// given
-		gqlClient := gql.NewQueryAssertClient(t, true, func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*ApplicationsForRuntimeResponse)
-			require.True(t, ok)
-			assert.Empty(t, cfg.Result)
-		}, expectedRequest)
+		gqlClient := gql.NewQueryAssertClient(t, true, gql.ResponseMock{
+			ModifyResponseFunc: func(t *testing.T, r interface{}) {
+				cfg, ok := r.(*ApplicationsForRuntimeResponse)
+				require.True(t, ok)
+				assert.Empty(t, cfg.Result)
+			},
+			ExpectedReq: expectedRequest,
+		})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
@@ -271,107 +288,196 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 	})
 }
 
-func TestConfigClient_SetURLsLabels(t *testing.T) {
-
+func TestConfigClient_ReconcileURLsLabels(t *testing.T) {
 	runtimeURLsConfig := RuntimeURLsConfig{
 		EventsURL:  "https://gateway.kyma.local",
 		ConsoleURL: "https://console.kyma.local",
 	}
 
+	expectedGetLabelsRequest := gcli.NewRequest(expectedGetLabelsQuery)
+	expectedGetLabelsRequest.Header.Set(TenantHeader, tenant)
 	expectedSetEventsURLRequest := gcli.NewRequest(expectedSetEventsURLLabelQuery)
 	expectedSetEventsURLRequest.Header.Set(TenantHeader, tenant)
 	expectedSetConsoleURLRequest := gcli.NewRequest(expectedSetConsoleURLLabelQuery)
 	expectedSetConsoleURLRequest.Header.Set(TenantHeader, tenant)
 
-	newSetExpectedLabelFunc := func(expectedResponses []*graphql.Label) func(t *testing.T, r interface{}) {
-		var responseIndex = 0
+	newGetExpectedLabelsFunc := func(expectedResponses graphql.Labels) func(t *testing.T, r interface{}) {
+		return func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*GetRuntimeLabelsResponse)
+			assert.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = &Labels{expectedResponses}
+		}
+	}
 
+	newSetExpectedLabelFunc := func(expectedResponses *graphql.Label) func(t *testing.T, r interface{}) {
 		return func(t *testing.T, r interface{}) {
 			cfg, ok := r.(*SetRuntimeLabelResponse)
 			require.True(t, ok)
 			assert.Empty(t, cfg.Result)
-			cfg.Result = expectedResponses[responseIndex]
-			responseIndex++
+			cfg.Result = expectedResponses
 		}
 	}
 
-	t.Run("should set URLs as labels", func(t *testing.T) {
+	eventsURLLabel := &graphql.Label{
+		Key:   eventsURLLabelKey,
+		Value: runtimeURLsConfig.EventsURL,
+	}
 
-		expectedResponses := []*graphql.Label{
-			{
-				Key:   eventsURLLabelKey,
-				Value: runtimeURLsConfig.EventsURL,
-			},
-			{
-				Key:   consoleURLLabelKey,
-				Value: runtimeURLsConfig.ConsoleURL,
-			},
-		}
+	consoleURLLabel := &graphql.Label{
+		Key:   consoleURLLabelKey,
+		Value: runtimeURLsConfig.ConsoleURL,
+	}
 
-		gqlClient := gql.NewQueryAssertClient(t, false, newSetExpectedLabelFunc(expectedResponses), expectedSetEventsURLRequest, expectedSetConsoleURLRequest)
+	t.Run("should set URLs as labels if no labels are set", func(t *testing.T) {
+		labelsResponse := graphql.Labels{}
+
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: newGetExpectedLabelsFunc(labelsResponse),
+				ExpectedReq:        expectedGetLabelsRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
+				ExpectedReq:        expectedSetEventsURLRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
+				ExpectedReq:        expectedSetConsoleURLRequest,
+			})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
 		// when
-		labels, err := configClient.SetURLsLabels(runtimeURLsConfig)
+		reconciledLabels, err := configClient.ReconcileLabels(runtimeURLsConfig)
 
 		// then
 		require.NoError(t, err)
-		assert.Equal(t, runtimeURLsConfig.EventsURL, labels[eventsURLLabelKey])
-		assert.Equal(t, runtimeURLsConfig.ConsoleURL, labels[consoleURLLabelKey])
+		assert.Equal(t, 2, len(reconciledLabels))
+		assert.Equal(t, runtimeURLsConfig.EventsURL, reconciledLabels[eventsURLLabelKey])
+		assert.Equal(t, runtimeURLsConfig.ConsoleURL, reconciledLabels[consoleURLLabelKey])
 	})
 
-	t.Run("should return error if setting Console URL as label returned nil response", func(t *testing.T) {
-		expectedResponses := []*graphql.Label{
-			{
-				Key:   eventsURLLabelKey,
-				Value: runtimeURLsConfig.EventsURL,
+	t.Run("should not set URLs as labels if there are already set and they're the same", func(t *testing.T) {
+		labelsResponse := graphql.Labels{}
+		labelsResponse[eventsURLLabelKey] = runtimeURLsConfig.EventsURL
+		labelsResponse[consoleURLLabelKey] = runtimeURLsConfig.ConsoleURL
+
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: newGetExpectedLabelsFunc(labelsResponse),
+				ExpectedReq:        expectedGetLabelsRequest,
+			})
+
+		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+
+		// when
+		reconciledLabels, err := configClient.ReconcileLabels(runtimeURLsConfig)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, 0, len(reconciledLabels))
+	})
+
+	t.Run("should override URLs if there are already set but are different", func(t *testing.T) {
+		labelsResponse := graphql.Labels{}
+		labelsResponse[eventsURLLabelKey] = runtimeURLsConfig.EventsURL + " something different"
+		labelsResponse[consoleURLLabelKey] = runtimeURLsConfig.ConsoleURL + " something different"
+
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: newGetExpectedLabelsFunc(labelsResponse),
+				ExpectedReq:        expectedGetLabelsRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
+				ExpectedReq:        expectedSetEventsURLRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
+				ExpectedReq:        expectedSetConsoleURLRequest,
+			})
+
+		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+
+		// when
+		reconciledLabels, err := configClient.ReconcileLabels(runtimeURLsConfig)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, 2, len(reconciledLabels))
+		assert.Equal(t, runtimeURLsConfig.EventsURL, reconciledLabels[eventsURLLabelKey])
+		assert.Equal(t, runtimeURLsConfig.ConsoleURL, reconciledLabels[consoleURLLabelKey])
+	})
+
+	t.Run("should set only missing URLs as labels", func(t *testing.T) {
+		labelsResponse := graphql.Labels{}
+		labelsResponse[eventsURLLabelKey] = runtimeURLsConfig.EventsURL
+
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: newGetExpectedLabelsFunc(labelsResponse),
+				ExpectedReq:        expectedGetLabelsRequest,
 			},
-			nil,
-		}
-
-		gqlClient := gql.NewQueryAssertClient(t, false, newSetExpectedLabelFunc(expectedResponses), expectedSetEventsURLRequest, expectedSetConsoleURLRequest)
+			gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
+				ExpectedReq:        expectedSetConsoleURLRequest,
+			})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
 		// when
-		labels, err := configClient.SetURLsLabels(runtimeURLsConfig)
+		reconciledLabels, err := configClient.ReconcileLabels(runtimeURLsConfig)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(reconciledLabels))
+		assert.Equal(t, runtimeURLsConfig.ConsoleURL, reconciledLabels[consoleURLLabelKey])
+	})
+
+	t.Run("should return error if getting labels returns nil response", func(t *testing.T) {
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: func(t *testing.T, r interface{}) {
+					cfg, ok := r.(*GetRuntimeLabelsResponse)
+					assert.True(t, ok)
+					assert.Empty(t, cfg.Result)
+				},
+				ExpectedReq: expectedGetLabelsRequest,
+			})
+
+		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+
+		// when
+		labels, err := configClient.ReconcileLabels(runtimeURLsConfig)
 
 		// then
 		require.Error(t, err)
 		assert.Nil(t, labels)
 	})
 
-	t.Run("should return error if setting Console URL as label returned nil response", func(t *testing.T) {
-		expectedResponses := []*graphql.Label{nil, nil}
+	t.Run("should return error if setting label returned nil response", func(t *testing.T) {
+		labelsResponse := graphql.Labels{}
 
-		gqlClient := gql.NewQueryAssertClient(t, false, newSetExpectedLabelFunc(expectedResponses), expectedSetEventsURLRequest, expectedSetConsoleURLRequest)
+		gqlClient := gql.NewQueryAssertClient(t, false,
+			gql.ResponseMock{
+				ModifyResponseFunc: newGetExpectedLabelsFunc(labelsResponse),
+				ExpectedReq:        expectedGetLabelsRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
+				ExpectedReq:        expectedSetEventsURLRequest,
+			}, gql.ResponseMock{
+				ModifyResponseFunc: func(t *testing.T, r interface{}) {
+					cfg, ok := r.(*SetRuntimeLabelResponse)
+					assert.True(t, ok)
+					assert.Empty(t, cfg.Result)
+				},
+				ExpectedReq: expectedSetConsoleURLRequest,
+			})
 
 		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
 
 		// when
-		labels, err := configClient.SetURLsLabels(runtimeURLsConfig)
+		labels, err := configClient.ReconcileLabels(runtimeURLsConfig)
 
 		// then
 		require.Error(t, err)
 		assert.Nil(t, labels)
 	})
-
-	t.Run("should return error if failed to set labels", func(t *testing.T) {
-		gqlClient := gql.NewQueryAssertClient(t, true, func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*SetRuntimeLabelResponse)
-			require.True(t, ok)
-			assert.Empty(t, cfg.Result)
-		}, expectedSetEventsURLRequest, expectedSetConsoleURLRequest)
-
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
-
-		// when
-		labels, err := configClient.SetURLsLabels(runtimeURLsConfig)
-
-		// then
-		require.Error(t, err)
-		assert.Nil(t, labels)
-	})
-
 }

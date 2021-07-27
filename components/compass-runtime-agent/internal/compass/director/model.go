@@ -8,6 +8,10 @@ type ApplicationsForRuntimeResponse struct {
 	Result *ApplicationPage `json:"result"`
 }
 
+type GetRuntimeLabelsResponse struct {
+	Result *Labels `json:"result"`
+}
+
 type SetRuntimeLabelResponse struct {
 	Result *graphql.Label `json:"result"`
 }
@@ -23,9 +27,11 @@ type Application struct {
 	Name         string                  `json:"name"`
 	ProviderName *string                 `json:"providerName"`
 	Description  *string                 `json:"description"`
-	Labels       Labels                  `json:"labels"`
+	Labels       map[string]interface{}  `json:"labels"`
 	Auths        []*graphql.SystemAuth   `json:"auths"`
 	Packages     *graphql.PackagePageExt `json:"packages"`
 }
 
-type Labels map[string]interface{}
+type Labels struct {
+	Labels map[string]interface{} `json:"labels"`
+}

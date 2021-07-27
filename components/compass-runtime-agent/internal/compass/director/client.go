@@ -24,7 +24,7 @@ type RuntimeURLsConfig struct {
 //go:generate mockery --name=DirectorClient
 type DirectorClient interface {
 	FetchConfiguration() ([]kymamodel.Application, error)
-	SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)
+	ReconcileLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
@@ -68,21 +68,58 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) 
 	return applications, nil
 }
 
-func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
-	eventsURLLabel, err := cc.setURLLabel(eventsURLLabelKey, urlsCfg.EventsURL)
+func (cc *directorClient) ReconcileLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
+	actualLabels, err := cc.getLabels()
 	if err != nil {
 		return nil, err
 	}
 
-	consoleURLLabel, err := cc.setURLLabel(consoleURLLabelKey, urlsCfg.ConsoleURL)
-	if err != nil {
-		return nil, err
+	targetLabels := []struct {
+		key string
+		val string
+	}{
+		{
+			key: eventsURLLabelKey,
+			val: urlsCfg.EventsURL,
+		},
+		{
+			key: consoleURLLabelKey,
+			val: urlsCfg.ConsoleURL,
+		},
 	}
 
-	return graphql.Labels{
-		eventsURLLabel.Key:  eventsURLLabel.Value,
-		consoleURLLabel.Key: consoleURLLabel.Value,
-	}, nil
+	reconciledLabels := make(map[string]interface{})
+	for _, tl := range targetLabels {
+		if val, ok := actualLabels[tl.key]; !ok || val != tl.val {
+			l, err := cc.setURLLabel(tl.key, tl.val)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", tl.key, tl.val)
+			}
+
+			reconciledLabels[l.Key] = l.Value
+		}
+	}
+
+	return reconciledLabels, nil
+}
+
+func (cc *directorClient) getLabels() (graphql.Labels, error) {
+	response := GetRuntimeLabelsResponse{}
+
+	getLabelsQuery := cc.queryProvider.getRuntimeLabelsQuery(cc.runtimeConfig.RuntimeId)
+	req := gcli.NewRequest(getLabelsQuery)
+	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
+
+	err := cc.gqlClient.Do(req, &response)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "Failed to get labels for Runtime %s", cc.runtimeConfig.RuntimeId)
+	}
+
+	if response.Result == nil {
+		return nil, errors.Errorf("Failed to get labels for Runtime %s. Received nil response.", cc.runtimeConfig.RuntimeId)
+	}
+
+	return response.Result.Labels, nil
 }
 
 func (cc *directorClient) setURLLabel(key, value string) (*graphql.Label, error) {
