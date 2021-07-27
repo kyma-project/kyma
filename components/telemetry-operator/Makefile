@@ -1,5 +1,5 @@
 
-APP_NAME = telemetry-controller
+APP_NAME = telemetry-operator
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20210723-91c9654f
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
