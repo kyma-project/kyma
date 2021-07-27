@@ -31,5 +31,5 @@ replace (
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
 
-	k8s.io/client-go => k8s.io/client-go v0.18.8
+	k8s.io/client-go => k8s.io/client-go v0.21.2
 )
