@@ -45,9 +45,9 @@ global:
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "1683d7cf"
+    version: "da9a13cf"
   application_operator:
-    version: "b11a4b7b"
+    version: "4fa15f87"
   application_operator_tests:
     version: "68baa911"
   application_gateway:
