@@ -3,19 +3,20 @@
 ## Overview
 
 The Central Application Connectivity Validator validates client certificate subjects.
-It proxies the requests to the Event Service and the Application Registry.
+It proxies the requests to the Eventing Publisher Proxy and the Application Registry.
 
 ## Usage
 
 The Central Application Connectivity Validator has the following parameters:
 - **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
 - **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
-- **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/{APP_NAME}/v1/events`.
-- **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/{APP_NAME}/v2/events`.
-- **eventMeshHost** is the host and the port of the Event Mesh adapter. The default value is `eventing-event-publisher-proxy.kyma-system`.
-- **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/publish`.
+- **eventingPathPrefixV1** is the path prefix for which requests are forwarded to the Eventing Publisher V1 API. The default value is `/v1/events`.
+- **eventingPathPrefixV2** is the path prefix for which requests are forwarded to the Eventing Publisher V2 API. The default value is `/v2/events`.
+- **eventingPublisherHost** is the host and the port of the Eventing Publisher. The default value is `events-api:8080`.
+- **eventingDestinationPath** is the destination path for the requests coming to the Eventing. The default value is `/`.
+- **eventingPathPrefixEvents** is the prefix of paths that will be directed to the Cloud Events based Eventing. The default value is `/events`.
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/{APP_NAME}/v1/metadata`.
-- **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
+- **appRegistryHost** is the host and the port of the Eventing Publisher Proxy. The default value is `application-registry-external-api:8081`.
 - **appNamePlaceholder**  is the path URL placeholder used for the application name. The default value is `%%APP_NAME%%`.
 - **cacheExpirationSeconds** is the expiration time for client IDs stored in cache expressed in seconds. The default value is `90`.
 - **cacheCleanupIntervalSeconds** is the clean-up interval controlling how often the client IDs stored in cache are removed. The default value is `15`.
@@ -25,7 +26,7 @@ The Central Application Connectivity Validator has the following parameters:
 
 ### Application name placeholder
 
-If the `appNamePlaceholder` parameter is not empty, it defines a placeholder for the application name in the parameters `eventServicePathPrefixV1`, `eventServicePathPrefixV2`, `eventMeshPathPrefix` and `appRegistryPathPrefix`. This placeholder is replaced on every proxy request
+If the `appNamePlaceholder` parameter is not empty, it defines a placeholder for the application name in the parameters `eventingPathPrefixV1`, `eventingPathPrefixV2`, `eventingPathPrefixEvents` and `appRegistryPathPrefix`. This placeholder is replaced on every proxy request
 with the value from the certificate Common Name (CN).
 
 ### Local cache refresh

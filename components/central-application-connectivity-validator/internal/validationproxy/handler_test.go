@@ -27,12 +27,12 @@ const (
 	applicationMetaName = "test-application-meta"
 	applicationID       = "test-application-id"
 
-	appNamePlaceholder       = "%%APP_NAME%%"
-	eventServicePathPrefixV1 = "/%%APP_NAME%%/v1/events"
-	eventServicePathPrefixV2 = "/%%APP_NAME%%/v2/events"
-	eventMeshPathPrefix      = "/%%APP_NAME%%/events"
-	appRegistryPathPrefix    = "/%%APP_NAME%%/v1/metadata"
-	eventMeshDestinationPath = "/publish"
+	appNamePlaceholder             = "%%APP_NAME%%"
+	eventingPathPrefixV1           = "/%%APP_NAME%%/v1/events"
+	eventingPathPrefixV2           = "/%%APP_NAME%%/v2/events"
+	eventingPathPrefixEvents       = "/%%APP_NAME%%/events"
+	appRegistryPathPrefix          = "/%%APP_NAME%%/v1/metadata"
+	eventingDestinationPathPublish = "/publish"
 )
 
 type event struct {
@@ -161,14 +161,28 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	}
 
 	t.Run("should proxy requests", func(t *testing.T) {
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		const mockIncomingRequestHost = "fake.istio.gateway"
+		const eventTitle = "my-event"
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		// publish handler which will be overwritten in the tests
 		var publishHandler http.HandlerFunc
-		eventMeshHandler.Path(eventMeshDestinationPath).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		eventPublisherProxyHandler.Path(eventingPathPrefixEvents).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			publishHandler.ServeHTTP(writer, request)
+		})
+
+		eventPublisherProxyHandler.PathPrefix(eventingDestinationPathPublish).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var receivedEvent event
+
+			err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+			require.NoError(t, err)
+			assert.Equal(t, eventTitle, receivedEvent.Title)
+
+			assert.NotEqual(t, mockIncomingRequestHost, r.Host, "proxy should rewrite Host field")
+
+			w.WriteHeader(http.StatusOK)
 		})
 
 		appRegistryHandler := mux.NewRouter()
@@ -186,20 +200,20 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPathPrefixEvents,
+				eventPublisherProxyHost,
+				eventingDestinationPathPublish,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
 				log)
 
-			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
+			t.Run("should proxy eventing V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
 
-				eventMeshHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				eventPublisherProxyHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
 					assert.Equal(t, testCase.application.Name, appName, `Error reading "application" route variable from request context`)
 
@@ -229,18 +243,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				assert.Equal(t, testCase.expectedStatus, recorder.Code)
 			})
 
-			t.Run("should proxy event service V2 request when "+testCase.caseDescription, func(t *testing.T) {
-				eventTitle := "my-event-2"
-				publishHandler = func(w http.ResponseWriter, r *http.Request) {
-					var receivedEvent event
-
-					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
-					require.NoError(t, err)
-					assert.Equal(t, eventTitle, receivedEvent.Title)
-
-					w.WriteHeader(http.StatusOK)
-				}
-
+			t.Run("should proxy eventing V2 request when "+testCase.caseDescription, func(t *testing.T) {
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
 
@@ -258,21 +261,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				assert.Equal(t, testCase.expectedStatus, recorder.Code)
 			})
 
-			t.Run("should proxy event mesh request when "+testCase.caseDescription, func(t *testing.T) {
-				const eventTitle = "my-event"
-				const mockIncomingRequestHost = "fake.istio.gateway"
-
-				publishHandler = func(w http.ResponseWriter, r *http.Request) {
-					var receivedEvent event
-
-					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
-					require.NoError(t, err)
-					assert.Equal(t, eventTitle, receivedEvent.Title)
-
-					assert.NotEqual(t, mockIncomingRequestHost, r.Host, "proxy should rewrite Host field")
-
-					w.WriteHeader(http.StatusOK)
-				}
+			t.Run("should proxy eventing request when "+testCase.caseDescription, func(t *testing.T) {
 
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
@@ -318,9 +307,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -337,11 +326,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPathPrefixEvents,
+				eventingPublisherHost,
+				eventingDestinationPathPublish,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
@@ -370,9 +359,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -384,11 +373,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 			proxyHandler := NewProxyHandler(
 				appNamePlaceholder,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPathPrefixEvents,
+				eventingPublisherHost,
+				eventingDestinationPathPublish,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
@@ -409,9 +398,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 400 when application not specified in path", func(t *testing.T) {
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -425,11 +414,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		proxyHandler := NewProxyHandler(
 			appNamePlaceholder,
-			eventServicePathPrefixV1,
-			eventServicePathPrefixV2,
-			eventMeshPathPrefix,
-			eventMeshHost,
-			eventMeshDestinationPath,
+			eventingPathPrefixV1,
+			eventingPathPrefixV2,
+			eventingPathPrefixEvents,
+			eventingPublisherHost,
+			eventingDestinationPathPublish,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			idCache,
@@ -448,9 +437,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 404 when path is invalid", func(t *testing.T) {
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -468,11 +457,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		proxyHandler := NewProxyHandler(
 			appNamePlaceholder,
-			eventServicePathPrefixV1,
-			eventServicePathPrefixV2,
-			eventMeshPathPrefix,
-			eventMeshHost,
-			eventMeshDestinationPath,
+			eventingPathPrefixV1,
+			eventingPathPrefixV2,
+			eventingPathPrefixEvents,
+			eventingPublisherHost,
+			eventingDestinationPathPublish,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			idCache,
@@ -496,9 +485,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
 		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventPublisherProxyHandler := mux.NewRouter()
+		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
 		for _, testCase := range testCases {
 			// given
@@ -513,18 +502,18 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					eventMeshPathPrefix,
-					eventMeshHost,
-					eventMeshDestinationPath,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventingPathPrefixEvents,
+					eventingPublisherHost,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
 					log)
 				eventTitle := "my-event-1"
 
-				eventMeshHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				eventPublisherProxyHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
 					assert.Equal(t, testCase.application.Name, appName, `Error reading "application" route variable from request context`)
 
@@ -563,11 +552,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					eventMeshPathPrefix,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
-					eventMeshDestinationPath,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
@@ -609,11 +598,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 				proxyHandlerBEB := NewProxyHandler(
 					appNamePlaceholder,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					eventMeshPathPrefix,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventingPathPrefixEvents,
 					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
-					eventMeshDestinationPath,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
@@ -664,9 +653,9 @@ func TestProxyHandler_ReplaceAppNamePlaceholder(t *testing.T) {
 
 	ph := NewProxyHandler(
 		appNamePlaceholder,
-		eventServicePathPrefixV1,
-		eventServicePathPrefixV2,
-		eventMeshPathPrefix,
+		eventingPathPrefixV1,
+		eventingPathPrefixV2,
+		eventingPathPrefixEvents,
 		"N/A",
 		"N/A",
 		appRegistryPathPrefix,
@@ -674,8 +663,8 @@ func TestProxyHandler_ReplaceAppNamePlaceholder(t *testing.T) {
 		idCache,
 		log)
 
-	assert.Equal(t, "/commerce-mock/v1/events", ph.getApplicationPrefix(ph.eventServicePathPrefixV1, "commerce-mock"))
-	assert.Equal(t, "/commerce-mock/v2/events", ph.getApplicationPrefix(ph.eventServicePathPrefixV2, "commerce-mock"))
-	assert.Equal(t, "/commerce-mock/events", ph.getApplicationPrefix(ph.eventMeshPathPrefix, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/v1/events", ph.getApplicationPrefix(ph.eventingPathPrefixV1, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/v2/events", ph.getApplicationPrefix(ph.eventingPathPrefixV2, "commerce-mock"))
+	assert.Equal(t, "/commerce-mock/events", ph.getApplicationPrefix(ph.eventingPathPrefixEvents, "commerce-mock"))
 	assert.Equal(t, "/commerce-mock/v1/metadata", ph.getApplicationPrefix(ph.appRegistryPathPrefix, "commerce-mock"))
 }

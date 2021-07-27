@@ -31,7 +31,6 @@ const (
 )
 
 type appImagesConfig struct {
-	eventServiceImage          string
 	appGatewayImage            string
 	connectivityValidatorImage string
 }
