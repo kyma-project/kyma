@@ -6,11 +6,11 @@ title: Back up Kyma
 
 The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/) and [volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
 
+### Object backup
+
 Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes objects to avoid any manual steps.
 
 >**CAUTION:** Automatic backup doesn't include Kubernetes volumes. Back up your volumes periodically either on demand, or set up a periodic job.
-
-### Object backup
 
 For example, Gardener uses [etcd](https://etcd.io/) as the Kubernetes backing store for all cluster data. Gardener runs periodic jobs to take major and minor snapshots of the etcd database to include Kubernetes objects in the backup.
 
@@ -33,7 +33,7 @@ Be aware that a full backup of a Kyma cluster isn't supported. Start with the ex
 
 ## Create on-demand volume snapshots
 
-You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) to provision a new volume or restore the existing one.
+If you want to provision a new volume or restore the existing one, create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/):
 
 <div tabs name="backup-providers">
   <details>
@@ -80,7 +80,10 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
 
 ### Steps
 
-  1. Create a VolumeSnapshotClass:
+  1. Create a VolumeSnapshotClass with the correct driver:
+    - for GCP: `pd.csi.storage.gke.io`
+    - for AWS: `ebs.csi.aws.com`
+    - for Azure: `disk.csi.azure.com`
 
   ```yaml
   apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -89,11 +92,9 @@ You can create on-demand [volume snapshots](https://kubernetes.io/docs/concepts/
     annotations:
       snapshot.storage.kubernetes.io/is-default-class: "true"
     name: snapshot-class
-  driver: <differs for GCP and AWS>
+  driver: <enter correct one for cloud provider>
   deletionPolicy: Delete
   ```
-
-  Driver for GCP must be `pd.csi.storage.gke.io`, for AWS it's `ebs.csi.aws.com`.
   
   2. Create a VolumeSnapshot resource:
 
