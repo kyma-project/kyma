@@ -157,11 +157,11 @@ To test if the Subscription CR is properly connected to the Function:
     User created: 123456789
     ```
 
-## Publish a Cloud Event
+## Publish CloudEvents
 
-This section shows how to publish a Cloud Event using the Functions SDK based on the previous steps.
+This section shows how to publish CloudEvents using the Functions SDK based on the previous steps.
 
-1. Change the Function's code and replace `<event type>` with a destination event type:​
+1. Change the Function's code and replace `<event type>` with the desired event type:​
 
     ```js
     module.exports = {
@@ -203,11 +203,9 @@ This section shows how to publish a Cloud Event using the Functions SDK based on
       }'
     ```
 
-3. After sending an event, you should get this result from logs of your Function's latest Pod:
+The following message in the logs of your Function's latest Pod confirms that your CloudEvents is sent properly:
 
     ```text
     publish an event
     done
     ```
-
-    > This log shows that everything is ok and the Cloud Event is sent properly
