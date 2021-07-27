@@ -74,6 +74,7 @@ type LoggingConfigurationList struct {
 	Items           []LoggingConfiguration `json:"items"`
 }
 
+//nolint:gochecknoinits
 func init() {
 	SchemeBuilder.Register(&LoggingConfiguration{}, &LoggingConfigurationList{})
 }
