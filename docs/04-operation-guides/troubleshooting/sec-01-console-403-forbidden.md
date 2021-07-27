@@ -1,5 +1,5 @@
 ---
-title: '"403 Forbidden" in the Console'
+title: '"403 Forbidden" in Kyma Dashboard'
 ---
 
 If you log to the Console and get the `403 Forbidden` error, do the following:

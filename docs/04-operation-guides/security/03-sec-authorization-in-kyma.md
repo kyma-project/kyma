@@ -54,7 +54,7 @@ The RoleBinding or ClusterRoleBinding must have a group specified as their subje
 
 ## Service-to-service authorization
 
-Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh. For more details, see [Istio Authorization Policy configuration](https://istio.io/latest/docs/reference/config/security/authorization-policy/).
+Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh.
 
 ## User-to-service authorization
 
