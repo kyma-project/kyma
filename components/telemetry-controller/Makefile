@@ -46,6 +46,10 @@ help: ## Display this help.
 
 ##@ Development
 
+# Generate manifests e.g. CRD, RBAC etc.
+manifests-local: controller-gen-local
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
 ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -71,26 +75,24 @@ mod-verify-local:
 
 ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
  ## Run tests.
-test-local: manifests generate fmt vet
+test-local: manifests-local generate-local fmt-local vet-local
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
 
-
-##@ Helpers
-fmt: ## Run go fmt against code.
-	go fmt ./...
-
-vet: ## Run go vet against code.
-	go vet ./...
-
+ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
+ ## Run tests.
+test: manifests generate fmt vet
+	mkdir -p ${ENVTEST_ASSETS_DIR}
+	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
 
 ##@ Build
 
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-run-local: manifests generate-local fmt vet ## Run a controller from your host.
+run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
 	go run ./main.go
 
 ##@ Deployment
@@ -111,10 +113,25 @@ deploy-local: manifests kustomize ## Deploy controller to the K8s cluster specif
 undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
-
-CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
-controller-gen: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+# find or download controller-gen
+# download controller-gen if necessary
+.PHONY: controller-gen-local
+controller-gen-local:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	if [ ! $(which go) ]; then \
+		go mod init tmp ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ; \
+		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
+	fi; \
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
 
 KUSTOMIZE = $(shell pwd)/bin/kustomize
 kustomize: ## Download kustomize locally if necessary.
