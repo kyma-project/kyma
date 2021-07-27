@@ -2,7 +2,7 @@
 
 // Require dependencies
 const { NodeTracerProvider } = require("@opentelemetry/node");
-const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
+const { SimpleSpanProcessor, ConsoleSpanExporter } = require("@opentelemetry/tracing");
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { ZipkinExporter } = require('@opentelemetry/exporter-zipkin');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
@@ -11,9 +11,11 @@ const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-expre
 // Create a tracer provider
 const provider = new NodeTracerProvider();
 
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
 const zipkinExporter = new ZipkinExporter({
     url: 'http://tracing-jaeger-collector.kyma-system.svc.cluster.local:9411/api/v2/spans',
-    serviceName: 'service-hello'
+    serviceName: 'the-service'
 });
 
 // The simple span processor sends spans to the exporter as soon as they are ended.
@@ -56,6 +58,7 @@ const bodParserOptions = {
     type: req => !req.is('multipart/*'),
     limit: `${bodySizeLimit}mb`,
 };
+
 app.use(bodyParser.raw(bodParserOptions));
 app.use(bodyParser.json({ limit: `${bodySizeLimit}mb` }));
 app.use(bodyParser.urlencoded({ limit: `${bodySizeLimit}mb`, extended: true }));
