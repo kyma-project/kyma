@@ -45,8 +45,8 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile, ad
     release,
     chart,
   ];
-  if (additionalArgs && Array.isArray(additionalArgs)) {
-    args.push.apply(args, additionalArgs);
+  if (Array.isArray(additionalArgs)) {
+    args.push(...additionalArgs);
   }
 
   if (!!profile) {
