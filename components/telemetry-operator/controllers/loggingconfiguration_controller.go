@@ -112,6 +112,7 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 	return ctrl.Result{}, nil
 }
 
+// Get fetch ConfigMap from Kubernetes API or create new one if not existing.
 func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
 	var cm corev1.ConfigMap
 	if err := r.Get(ctx, name, &cm); err != nil {
@@ -132,6 +133,7 @@ func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Contex
 	return cm, nil
 }
 
+// Synchronize LoggingConfiguration with Fluent Bit ConfigMap.
 func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
 	log := log.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitConfigMap)
@@ -171,6 +173,7 @@ func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, conf
 	return true, nil
 }
 
+// Synchronize file references with Fluent Bit files ConfigMap.
 func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
 	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitFilesConfigMap)
@@ -215,6 +218,7 @@ func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *
 	return changed, nil
 }
 
+// Copy referenced secrets to global Fluent Bit environment secret.
 func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
 	log := log.FromContext(ctx)
 	var secret corev1.Secret
@@ -285,6 +289,7 @@ func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, con
 	return changed, nil
 }
 
+// Delete all Fluent Bit pods to apply new configuration.
 func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
@@ -306,6 +311,7 @@ func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context
 	return nil
 }
 
+// Merge list of Sections to single FluentBit configuration.
 func generateFluentBitConfig(sections []telemetryv1alpha1.Section) string {
 	var result string
 	for _, section := range sections {

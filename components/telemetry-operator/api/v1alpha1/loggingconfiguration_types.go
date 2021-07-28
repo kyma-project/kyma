@@ -23,31 +23,31 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// LoggingConfigurationSpec defines the desired state of LoggingConfiguration
+// LoggingConfigurationSpec defines the desired state of LoggingConfiguration.
 type LoggingConfigurationSpec struct {
 	Sections []Section `json:"sections,omitempty"`
 }
 
-// Section describes a Fluent Bit configuration section
+// Section describes a Fluent Bit configuration section.
 type Section struct {
 	Content    string            `json:"content,omitempty"`
 	SecretRefs []SecretReference `json:"secretRefs,omitempty"`
 	Files      []FileMount       `json:"files,omitempty"`
 }
 
-// FileMount provides file content to be consumed by a Section configuration
+// FileMount provides file content to be consumed by a Section configuration.
 type FileMount struct {
 	Name    string `json:"name,omitempty"`
 	Content string `json:"content,omitempty"`
 }
 
-// SecretReference is a pointer to a Kubernetes secret that should be provided as environment to Fluent Bit
+// SecretReference is a pointer to a Kubernetes secret that should be provided as environment to Fluent Bit.
 type SecretReference struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 }
 
-// LoggingConfigurationStatus defines the observed state of LoggingConfiguration
+// LoggingConfigurationStatus defines the observed state of LoggingConfiguration.
 type LoggingConfigurationStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -57,7 +57,7 @@ type LoggingConfigurationStatus struct {
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 
-// LoggingConfiguration is the Schema for the loggingconfigurations API
+// LoggingConfiguration is the Schema for the loggingconfigurations API.
 type LoggingConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -68,7 +68,7 @@ type LoggingConfiguration struct {
 
 //+kubebuilder:object:root=true
 
-// LoggingConfigurationList contains a list of LoggingConfiguration
+// LoggingConfigurationList contains a list of LoggingConfiguration.
 type LoggingConfigurationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
