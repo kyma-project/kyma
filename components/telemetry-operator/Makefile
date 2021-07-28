@@ -6,8 +6,6 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# Image URL to use all building/pushing image targets
-IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
@@ -91,7 +89,7 @@ uninstall-local: manifests-local ## Uninstall CRDs from the K8s cluster specifie
 	kustomize build config/crd | kubectl delete -f -
 
 deploy-local: manifests-local ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && kustomize edit set image controller=${IMG}
+	cd config/manager && kustomize edit set image controller=${IMG_NAME}:${TAG}
 	kustomize build config/default | kubectl apply -f -
 
 undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
