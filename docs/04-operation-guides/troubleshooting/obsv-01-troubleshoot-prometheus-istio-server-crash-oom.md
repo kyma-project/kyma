@@ -2,7 +2,7 @@
 title: Prometheus Istio Server restarting or in crashback loop
 ---
 
-<!-- the entire content needs update: values files instead of configmaps -->
+*work in progress*
 
 ## Condition
 
@@ -10,9 +10,22 @@ Prometheus Istio Server is restarting or in a crashback loop.
 
 ## Cause
 
-Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash because of OOM when the cardinality of the Istio metrics increases too much. This usually happens when a high number of workloads perform a lot of communication to other workloads.
+Prometheus Istio Server scrapes metrics from all envoy side cars.
+
+Because Istio telemetry V2 currently doesn't support the concept of metric expiry, the cardinality of the Istio metrics increases too much. This causes the container to be killed because of OOM.
+
+For example, this may happen when a high number of workloads perform a lot of communication to other workloads, or when workloads are created and deleted dynamically.
+
+There may be other causes for the Prometheus Istio Server to restart or crash, but the following steps only explain how to fix the OOM issue.
 
 ## Remedy
+
+There are two ways to fix this:
+
+- You can fix it on the Helm side
+- You can configure your Kyma cluster with a specific values YAML file.
+
+### Change the Helm configuration
 
 1. Increase the memory for `prometheus-istio-server`:
 
@@ -21,7 +34,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 
     ```
 
-    Increase the limits for memory:
+2. In your deployment resource, increase the limits for memory:
 
     ```yaml
     resources:
@@ -33,11 +46,11 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
         memory: 200Mi
     ```
 
-2. Drop labels for the Istio metrics.
+3. Drop labels for the Istio metrics.
 
    Edit the values for `prometheus-istio server`:
 
-   ```bash
+    ```bash
     kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
     ```
 
@@ -65,9 +78,7 @@ Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash
 
     > **CAUTION:** The side effect of this change is graphs in Kiali will not work.
 
-<!-- why is there suddenly a sub-headline when the previous steps had no separate headline? -->
-
-### Override the configuration
+### Change the Kyma configuration
 
 [Change the configuration](../../.../04-operation-guides/operations/03-change-kyma-config-values.md) with a values YAML file. You can set the value for the **memory limit** attribute to 4Gi, and/or **drop the labels** from Istio metrics.
 

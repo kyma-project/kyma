@@ -137,7 +137,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   </details>
  </div>
 
-## Create periodic snapshot job
+## Create a periodic snapshot job
 
 You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
 
