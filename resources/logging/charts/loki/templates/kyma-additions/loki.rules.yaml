@@ -9,30 +9,27 @@ spec:
   groups:
   - name: loki.rules
     rules:
-    - alert: LoggingKBPSHigh
-      expr: rate(loki_distributor_bytes_received_total[5m])/1024 > 1024
-      for: 30m
-      labels:
-        severity: critical
-      annotations:
-        description: 'Data throughput for logging is too high: {{ `{{$value}}` }} KB/s'  
-    - alert: LokiRequestLatencyHigh
-      expr: namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*"} > 1
+    - alert: LokiRequestErrors
+      expr: >
+            100 * sum(rate(loki_request_duration_seconds_count{status_code=~"5.."}[1m])) by (namespace, job, route)
+            /
+            sum(rate(loki_request_duration_seconds_count[1m])) by (namespace, job, route)
+            > 10
       for: 15m
-      annotations:
-        description: The {{ `{{ $labels.job }}` }} {{ `{{ $labels.route }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}s 99th percentile latency.
-      labels:
-        severity: critical
-    - alert: LoggingFailedRequestPercentage
-      expr: rate(loki_request_duration_seconds_sum{route="api_prom_push",status_code!~"2.*"}[5m]) / rate(loki_request_duration_seconds_sum{route="api_prom_push"}[5m]) * 100 > 30
-      for: 30m
       labels:
         severity: critical
       annotations:
-        description: 'High percentage of failing requests for logging: Number of requests is {{`{{$value}}`}}%'  
+        message: {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+    - alert: LokiRequestLatency
+      expr: namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*"} > 1
+      for: 15ms
+      labels:
+        severity: critical
+      annotations:
+        message: The {{ `{{ $labels.job }}` }} {{ `{{ $labels.route }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}s 99th percentile latency.
     - alert: LokiRequestPanics
       expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
       annotations:
-        description: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
+        message: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
       labels:
         severity: critical
