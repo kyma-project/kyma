@@ -41,7 +41,7 @@ This ServiceClass has a **bindable** parameter set to `false` which means that a
 4. The Application sends an event to Application Connector.
 5. When the Trigger receives the event, it triggers the Function based on the parameters defined for a Trigger.
 
-For more information, read about [event processing and delivery](evnt-02-event-processing.md).
+For more information, read about [event processing and delivery](../evnt-01-event-processing.md).
 
 ![Event Service Class](assets/ac-AB-event-service-class.svg)
 
