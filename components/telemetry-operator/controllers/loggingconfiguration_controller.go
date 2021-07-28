@@ -37,9 +37,10 @@ import (
 )
 
 const (
-	configMapFinalizer   = "FLUENT_BIT_CONFIG_MAP"
-	environmentFinalizer = "FLUENT_BIT_ENV"
-	filesFinalizer       = "FLUENT_BIT_FILES"
+	configMapFinalizer = "FLUENT_BIT_CONFIG_MAP"
+	//nolint:gosec
+	secretRefsFinalizer = "FLUENT_BIT_SECRETS"
+	filesFinalizer      = "FLUENT_BIT_FILES"
 )
 
 // LoggingConfigurationReconciler reconciles a LoggingConfiguration object
@@ -70,7 +71,7 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 
 	var config telemetryv1alpha1.LoggingConfiguration
 	if err := r.Get(ctx, req.NamespacedName, &config); err != nil {
-		log.Error(err, "unable to fetch LoggingConfiguration")
+		log.Info("Ignoring deleted LoggingConfiguration")
 		// we'll ignore not-found errors, since they can't be fixed by an immediate
 		// requeue (we'll need to wait for a new notification), and we can get them
 		// on deleted requests.
@@ -79,30 +80,31 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 
 	updatedCm, err := r.syncConfigMap(ctx, &config)
 	if err != nil {
-		log.Error(err, "failed to sync ConfigMap")
+		log.Error(err, "Failed to sync ConfigMap")
 		return ctrl.Result{}, err
 	}
 
 	updatedFiles, err := r.syncFiles(ctx, &config)
 	if err != nil {
-		log.Error(err, "failed to sync mounted files")
+		log.Error(err, "Failed to sync mounted files")
 		return ctrl.Result{}, err
 	}
 
-	updatedEnv, err := r.syncEnvironment(ctx, &config)
+	updatedEnv, err := r.syncSecretRefs(ctx, &config)
 	if err != nil {
-		log.Error(err, "failed to sync environment variables")
+		log.Error(err, "Failed to sync secret references")
 		return ctrl.Result{}, err
 	}
 
 	if updatedCm || updatedFiles || updatedEnv {
+		log.Info("Updated fluent bit configuration")
 		if err := r.Update(ctx, &config); err != nil {
-			log.Error(err, "cannot update LoggingConfiguration")
+			log.Error(err, "Cannot update LoggingConfiguration")
 			return ctrl.Result{}, err
 		}
 
 		if err := r.deleteFluentBitPods(ctx, log); err != nil {
-			log.Error(err, "cannot delete fluent bit pods")
+			log.Error(err, "Cannot delete fluent bit pods")
 			return ctrl.Result{}, err
 		}
 	}
@@ -131,6 +133,7 @@ func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Contex
 }
 
 func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+	log := log.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitConfigMap)
 	if err != nil {
 		return false, err
@@ -140,6 +143,7 @@ func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, conf
 	// Add or remove Fluent Bit configuration sections
 	if config.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(config, configMapFinalizer) {
+			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(config, configMapFinalizer)
 		}
@@ -211,7 +215,7 @@ func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *
 	return changed, nil
 }
 
-func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
 	log := log.FromContext(ctx)
 	var secret corev1.Secret
 	changed := false
@@ -236,17 +240,17 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 
 	//Sync environment from referenced Secrets to Fluent Bit Secret
 	for _, section := range config.Spec.Sections {
-		for _, secretRef := range section.Environment {
+		for _, secretRef := range section.SecretRefs {
 			var referencedSecret corev1.Secret
 			if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
-				log.Error(err, "cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
+				log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
 				continue
 			}
 			for k, v := range referencedSecret.Data {
 				if config.DeletionTimestamp != nil {
 					if _, hasKey := secret.Data[k]; hasKey {
 						delete(secret.Data, k)
-						controllerutil.RemoveFinalizer(config, environmentFinalizer)
+						controllerutil.RemoveFinalizer(config, secretRefsFinalizer)
 						//nolint:ineffassign
 						changed = true
 					}
@@ -255,7 +259,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 						data := make(map[string][]byte)
 						data[k] = v
 						secret.Data = data
-						controllerutil.AddFinalizer(config, environmentFinalizer)
+						controllerutil.AddFinalizer(config, secretRefsFinalizer)
 						//nolint:ineffassign
 						changed = true
 					} else {
@@ -263,7 +267,7 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 							continue
 						}
 						secret.Data[k] = v
-						controllerutil.AddFinalizer(config, environmentFinalizer)
+						controllerutil.AddFinalizer(config, secretRefsFinalizer)
 						//nolint:ineffassign
 						changed = true
 					}
@@ -284,19 +288,19 @@ func (r *LoggingConfigurationReconciler) syncEnvironment(ctx context.Context, co
 func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
-		log.Error(err, "cannot get Fluent Bit DaemonSet")
+		log.Error(err, "Cannot get Fluent Bit DaemonSet")
 	}
 
 	var fluentBitPods corev1.PodList
 	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "cannot list fluent bit pods")
+		log.Error(err, "Cannot list fluent bit pods")
 		return err
 	}
 
-	log.Info("restarting Fluent Bit pods")
+	log.Info("Restarting Fluent Bit pods")
 	for i := range fluentBitPods.Items {
 		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "cannot delete pod "+fluentBitPods.Items[i].Name)
+			log.Error(err, "Cannot delete pod "+fluentBitPods.Items[i].Name)
 		}
 	}
 	return nil

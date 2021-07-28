@@ -123,9 +123,9 @@ var _ = Describe("LoggingConfiguration controller", func() {
 				Namespace: ControllerNamespace,
 			}
 			section := telemetryv1alpha1.Section{
-				Content:     FluentBitOutputConfig,
-				Files:       []telemetryv1alpha1.FileMount{file},
-				Environment: []telemetryv1alpha1.SecretReference{secretRef},
+				Content:    FluentBitOutputConfig,
+				Files:      []telemetryv1alpha1.FileMount{file},
+				SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
 			}
 			loggingConfiguration := &telemetryv1alpha1.LoggingConfiguration{
 				TypeMeta: metav1.TypeMeta{

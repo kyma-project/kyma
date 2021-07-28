@@ -30,9 +30,9 @@ type LoggingConfigurationSpec struct {
 
 // Section describes a Fluent Bit configuration section
 type Section struct {
-	Content     string            `json:"content,omitempty"`
-	Environment []SecretReference `json:"environment,omitempty"`
-	Files       []FileMount       `json:"files,omitempty"`
+	Content    string            `json:"content,omitempty"`
+	SecretRefs []SecretReference `json:"secretRefs,omitempty"`
+	Files      []FileMount       `json:"files,omitempty"`
 }
 
 // FileMount provides file content to be consumed by a Section configuration

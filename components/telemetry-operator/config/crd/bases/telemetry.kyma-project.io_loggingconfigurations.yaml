@@ -43,18 +43,6 @@ spec:
                   properties:
                     content:
                       type: string
-                    environment:
-                      items:
-                        description: SecretReference is a pointer to a Kubernetes
-                          secret that should be provided as environment to Fluent
-                          Bit
-                        properties:
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                        type: object
-                      type: array
                     files:
                       items:
                         description: FileMount provides file content to be consumed
@@ -63,6 +51,18 @@ spec:
                           content:
                             type: string
                           name:
+                            type: string
+                        type: object
+                      type: array
+                    secretRefs:
+                      items:
+                        description: SecretReference is a pointer to a Kubernetes
+                          secret that should be provided as environment to Fluent
+                          Bit
+                        properties:
+                          name:
+                            type: string
+                          namespace:
                             type: string
                         type: object
                       type: array
