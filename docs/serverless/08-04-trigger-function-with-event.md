@@ -205,7 +205,7 @@ This section shows how to publish CloudEvents using the Functions SDK based on t
 
 The following message in the logs of your Function's latest Pod confirms that your CloudEvents is sent properly:
 
-    ```text
-    publish an event
-    done
-    ```
+  ```text
+  publish an event
+  done
+  ```
