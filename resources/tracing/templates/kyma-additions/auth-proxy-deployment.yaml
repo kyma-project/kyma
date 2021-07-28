@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
         app.kubernetes.io/component: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
