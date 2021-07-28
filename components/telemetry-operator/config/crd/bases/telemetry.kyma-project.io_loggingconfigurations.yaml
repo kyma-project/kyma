@@ -14,7 +14,7 @@ spec:
     listKind: LoggingConfigurationList
     plural: loggingconfigurations
     singular: loggingconfiguration
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1alpha1
     schema:

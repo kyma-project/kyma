@@ -133,8 +133,7 @@ var _ = Describe("LoggingConfiguration controller", func() {
 					Kind:       "LoggingConfiguration",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      LoggingConfigurationName,
-					Namespace: ControllerNamespace,
+					Name: LoggingConfigurationName,
 				},
 				Spec: telemetryv1alpha1.LoggingConfigurationSpec{
 					Sections: []telemetryv1alpha1.Section{section},

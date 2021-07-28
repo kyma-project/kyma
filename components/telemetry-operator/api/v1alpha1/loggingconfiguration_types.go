@@ -54,6 +54,7 @@ type LoggingConfigurationStatus struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
 
 // LoggingConfiguration is the Schema for the loggingconfigurations API
