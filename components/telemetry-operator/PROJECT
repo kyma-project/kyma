@@ -1,0 +1,16 @@
+domain: kyma-project.io
+layout:
+- go.kubebuilder.io/v3
+projectName: telemetry-operator
+repo: github.com/kyma-project/kyma/components/telemetry-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: false
+  controller: true
+  domain: kyma-project.io
+  group: telemetry
+  kind: LoggingConfiguration
+  path: github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1
+  version: v1alpha1
+version: "3"
