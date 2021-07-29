@@ -4,7 +4,7 @@
 
 The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more `LoggingConfiguration` custom resources. The controller ensures that all Fluent Bit pods run the current configuration by deleting pods after the configuration has changed. Find all CRD attributes [here](api/v1alpha1/loggingconfiguration_types.go) and an example [here](config/samples/telemetry_v1alpha1_loggingconfiguration.yaml).
 
-Creating Fluent Bit pods is for now out of scope of the operator and an existing Fluent Bit DaemonSet is expected.
+For now, creating Fluent Bit pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
 The generated ConfigMap (`logging-fluent-bit-sections` in the `kyma-system` namespace by default) has to be mounted to the Fluent Bit pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). File references and environment variables are available in an additional ConfigMap or Secret.
 
