@@ -11,10 +11,13 @@
   "dependencies": {
     "@opentelemetry/api": "^1.0.1",
     "@opentelemetry/auto-instrumentations-node": "^0.23.0",
+    "@opentelemetry/core": "^0.23.0",
     "@opentelemetry/exporter-zipkin": "^0.23.0",
+    "@opentelemetry/instrumentation-express": "^0.23.0",
     "@opentelemetry/instrumentation-http": "^0.23.0",
     "@opentelemetry/node": "^0.23.0",
     "@opentelemetry/plugin-express": "^0.15.0",
+    "@opentelemetry/propagator-b3": "^0.23.0",
     "@opentelemetry/tracing": "^0.23.0",
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
