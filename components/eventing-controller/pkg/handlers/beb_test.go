@@ -26,7 +26,10 @@ func Test_SyncBebSubscription(t *testing.T) {
 	// given
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
-	beb := NewBEB(credentials, defaultLogger)
+
+	nameMapper := NewBebSubscriptionNameMapper("shoot001", MaxBEBSubscriptionNameLength, BebSubscriptionNameSeparator)
+
+	beb := NewBEB(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock
 	bebMock := startBebMock()

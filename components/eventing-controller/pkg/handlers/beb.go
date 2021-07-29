@@ -19,7 +19,9 @@ import (
 )
 
 const (
-	bebHandlerName = "beb-handler"
+	bebHandlerName               = "beb-handler"
+	MaxBEBSubscriptionNameLength = 50
+	BebSubscriptionNameSeparator = "/"
 )
 
 // compile time check
@@ -30,8 +32,12 @@ type OAuth2ClientCredentials struct {
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, logger *logger.Logger) *Beb {
-	return &Beb{OAth2credentials: credentials, logger: logger}
+func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *Beb {
+	return &Beb{
+		OAth2credentials: credentials,
+		logger:           logger,
+		SubNameMapper:    mapper,
+	}
 }
 
 type Beb struct {
@@ -40,6 +46,7 @@ type Beb struct {
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
+	SubNameMapper    NameMapper
 	logger           *logger.Logger
 }
 
@@ -88,7 +95,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("get Kyma subscription internal view failed", "error", err)
 		return false, err
@@ -148,7 +155,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 // DeleteSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	return b.deleteSubscription(CreateBebSubscriptionNameForKymaSubscription(subscription))
+	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {

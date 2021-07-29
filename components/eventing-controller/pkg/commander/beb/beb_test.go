@@ -62,7 +62,8 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	// create a BEB handler to connect to BEB Mock
-	bebHandler := handlers.NewBEB(credentials, defaultLogger)
+	nameMapper := handlers.NewBebSubscriptionNameMapper("shoot001", handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
+	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
 	err = bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.Backend = bebHandler
@@ -85,7 +86,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, handlers.CreateBebSubscriptionNameForKymaSubscription(subscription))
+	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
 	resp, err := http.Get(getSubscriptionUrl)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))

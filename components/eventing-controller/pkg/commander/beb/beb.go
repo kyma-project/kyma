@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+
 	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -29,6 +31,10 @@ import (
 
 const (
 	commanderName = "beb-commander"
+
+	shootInfoConfigMapNamespace = "kube-system"
+	shootInfoConfigMapName      = "shoot-info"
+	shootNameConfigMapKey       = "shootName"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -92,6 +98,11 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 		return errors.Wrap(err, "get oauth2client credentials failed")
 	}
 
+	shootName, err := utils.GetShootName(ctx, c.mgr.GetClient(), shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
+	if err != nil {
+		return errors.Wrap(err, "error getting shoot name")
+	}
+	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
 	reconciler := subscription.NewReconciler(
@@ -103,6 +114,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
 		oauth2credential,
+		nameMapper,
 	)
 
 	c.backend = reconciler.Backend
