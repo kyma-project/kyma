@@ -122,7 +122,7 @@ func TestCompassConnectionController(t *testing.T) {
 	// Director config client
 	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
-	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
+	configurationClientMock.On("ReconcileLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
 	// Director proxy configurator
 	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
 	directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
@@ -257,11 +257,11 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, apperrors.Internal("error"))
+		configurationClientMock.On("ReconcileLabels", runtimeURLsConfig).Return(runtimeLabels, apperrors.Internal("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", runtimeURLsConfig)
+			return mockFunctionCalled(&configurationClientMock.Mock, "ReconcileLabels", runtimeURLsConfig)
 		})
 
 		// then
