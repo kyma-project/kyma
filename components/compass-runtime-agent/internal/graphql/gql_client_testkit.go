@@ -28,7 +28,7 @@ func (c *QueryAssertClient) Do(req *graphql.Request, res interface{}) error {
 
 	currentResponseMock := c.responseMocks[0]
 
-	assert.Equal(c.t, currentResponseMock.ExpectedReq.Query(), req.Query())
+	assert.Equal(c.t, currentResponseMock.ExpectedReq, req)
 	if len(c.responseMocks) > 1 {
 		c.responseMocks = c.responseMocks[1:]
 	}
