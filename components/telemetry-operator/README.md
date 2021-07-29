@@ -20,9 +20,9 @@ The operator has been bootstrapped with [Kubebuilder](https://github.com/kuberne
 - Install [Golang 1.16](https://golang.org/dl/) or newer (for local execution)
 - Install [Docker](https://www.docker.com/get-started)
 
-### Usage
+### Available Commands
 
-You can do the following:
+For development, you can use the following commands:
 
 - Run all tests and validation
 
