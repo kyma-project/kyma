@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -23,6 +24,14 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
+)
+
+const (
+	commanderName = "beb-commander"
+
+	shootInfoConfigMapNamespace = "kube-system"
+	shootInfoConfigMapName      = "shoot-info"
+	shootNameConfigMapKey       = "shootName"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -77,6 +86,11 @@ func (c *Commander) Start() error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
+	shootName, err := utils.GetShootName(ctx, c.mgr.GetClient(), shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
+	if err != nil {
+		return errors.Wrap(err, "error getting shoot name")
+	}
+	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
 	reconciler := subscription.NewReconciler(
@@ -87,6 +101,7 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		nameMapper,
 	)
 
 	c.backend = reconciler.Backend
