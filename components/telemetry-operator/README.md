@@ -8,7 +8,7 @@ For now, creating Fluent Bit pods is out of scope of the operator. An existing F
 
 The generated ConfigMap (by default, `logging-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). File references and environment variables are available in an additional ConfigMap or Secret.
 
-See the flags the configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
+See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 
 The operator has been bootstrapped with [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) 3.1.0. Additional APIs can also be [added by Kubebuilder](https://book.kubebuilder.io/cronjob-tutorial/new-api.html).
 
