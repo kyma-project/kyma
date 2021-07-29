@@ -306,7 +306,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # Fast Integration Tests
-/tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @wozniakjan
+/tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @wozniakjan @piotrmiskiewicz
 
 # Tools
 
