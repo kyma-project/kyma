@@ -66,12 +66,15 @@ const (
 	externalSinkScheme    = "https"
 	apiRuleNamePrefix     = "webhook-"
 	clusterLocalURLSuffix = "svc.cluster.local"
+	reconcilerName        = "beb-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
-	bebHandler := &handlers.Beb{Log: log}
-	bebHandler.Initialize(cfg)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config, mapper handlers.NameMapper) *Reconciler {
+	bebHandler := handlers.NewBEB(mapper, log)
+	if err := bebHandler.Initialize(cfg); err != nil {
+		log.Error(err, "start reconciler failed", "name", reconcilerName)
+		panic(err)
+	}
 
 	return &Reconciler{
 		ctx:              ctx,

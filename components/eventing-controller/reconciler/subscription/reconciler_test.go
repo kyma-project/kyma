@@ -5,17 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
@@ -43,8 +40,12 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 )
 
 const (
@@ -62,6 +63,7 @@ var (
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
 	var namespaceName string
+	var testId = 0
 	var ctx context.Context
 
 	// enable me for debugging
@@ -69,7 +71,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	// SetDefaultEventuallyPollingInterval(time.Second)
 
 	BeforeEach(func() {
-		namespaceName = getUniqueNamespaceName()
+		namespaceName = fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testId)
 		// we need to reset the http requests which the mock captured
 		beb.Reset()
 
@@ -92,6 +94,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		if err := printSubscriptions(namespaceName); err != nil {
 			logf.Log.Error(err, "error while printing subscriptions")
 		}
+		testId++
 	})
 
 	When("Creating a Subscription with invalid Sink and fixing it", func() {
@@ -160,7 +163,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Sending at least one creation requests for the Subscription")
-			_, postRequests, _ := countBebRequests(subscriptionName)
+			_, postRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -237,7 +240,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
-						return subscriptionName == receivedSubscriptionName
+						return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 					}
 				}
 				return false
@@ -331,11 +334,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(subscription1Name)
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(nameMapper.MapSubscriptionName(subscription1))
 			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(subscription2Name)
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(nameMapper.MapSubscriptionName(subscription2))
 			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -412,7 +415,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
-						return subscriptionName == receivedSubscriptionName
+						return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 					}
 				}
 				return false
@@ -441,7 +444,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).Should(reconcilertesting.HaveSubscriptionReady())
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -478,7 +481,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
-						"Name":       BeEquivalentTo(readySubscription.Name),
+						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription)),
 						"WebhookUrl": ContainSubstring(*apiRuleNew.Spec.Service.Host),
 					},
 				))))
@@ -487,7 +490,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(apiRule, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -533,11 +536,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(apiRule1, ctx).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countBebRequests(subscriptionName1)
+			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(subscription1))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
 			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countBebRequests(subscriptionName2)
+			_, creationRequests, _ = countBebRequests(nameMapper.MapSubscriptionName(subscription2))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -592,7 +595,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -614,12 +617,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
 				// until the BEB subscription creation call was performed, send successful get requests
 				if !isBebSubscriptionCreated {
-					reconcilertesting.BebGetSuccess(w, subscriptionName)
+					reconcilertesting.BebGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
 				} else {
 					// after the BEB subscription was created, set the status to paused
 					w.WriteHeader(http.StatusOK)
 					s := bebtypes.Subscription{
-						Name: subscriptionName,
+						Name: nameMapper.MapSubscriptionName(givenSubscription),
 						// ups ... BEB Subscription status is now paused
 						SubscriptionStatus: bebtypes.SubscriptionStatusPaused,
 					}
@@ -667,7 +670,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(givenSubscription, ctx).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(subscriptionName)
+			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -707,7 +710,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							bebSubscription = payloadObject.(bebtypes.Subscription)
 							receivedSubscriptionName := bebSubscription.Name
 							// ensure the correct subscription was created
-							return subscriptionName == receivedSubscriptionName
+							return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 						}
 						processedBebRequests++
 					}
@@ -753,7 +756,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
 			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countBebRequests(subscriptionName)
+			_, creationRequests, deletionRequests := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -789,6 +792,59 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			}()),
 	)
 })
+
+var _ = Describe("Testing GetShootName", func() {
+	ctx := context.Background()
+	When("No ConfigMap is found", func() {
+		It("Should return an empty shoot name", func() {
+			Eventually(func() (string, error) {
+				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
+			}, smallTimeOut, smallPollingInterval).Should(Equal(""))
+		})
+	})
+	When("A ConfigMap is found, but has no shoot name entry", func() {
+		It("Should return an empty shoot name", func() {
+			By("Creating a configMap with no shootName entry")
+			ensureConfigMapCreated(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace, map[string]string{})
+			Eventually(func() (string, error) {
+				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
+			}, smallTimeOut, smallPollingInterval).Should(Equal(""))
+			ensureConfigMapDeleted(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace)
+		})
+	})
+	When("A ConfigMap is found with shootName entry", func() {
+		It("Should return the shoot name", func() {
+			By("Creating a configMap with shootName entry")
+			entries := map[string]string{shootNameConfigMapKey: shootName}
+			ensureConfigMapCreated(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace, entries)
+			Eventually(func() (string, error) {
+				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
+			}, smallTimeOut, smallPollingInterval).Should(Equal(shootName))
+			ensureConfigMapDeleted(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace)
+		})
+	})
+})
+
+func ensureConfigMapDeleted(ctx context.Context, name, namespace string) {
+	cm := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+	Expect(k8sClient.Delete(ctx, cm)).ToNot(HaveOccurred())
+}
+
+func ensureConfigMapCreated(ctx context.Context, name, namespace string, entries map[string]string) {
+	cm := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Data: entries,
+	}
+	Expect(k8sClient.Create(ctx, cm)).ToNot(HaveOccurred())
+}
 
 func updateAPIRuleStatus(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
 	return Eventually(func() error {
@@ -955,18 +1011,6 @@ func printSubscriptions(namespace string) error {
 	return nil
 }
 
-func generateTestSuiteID() int {
-	var seededRand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
-	return seededRand.Int()
-}
-
-func getUniqueNamespaceName() string {
-	testSuiteID := generateTestSuiteID()
-	namespaceName := fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testSuiteID)
-	return namespaceName
-}
-
 func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
 	return Eventually(func() apigatewayv1alpha1.APIRule {
 		lookUpKey := types.NamespacedName{
@@ -1029,14 +1073,19 @@ func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context
 
 // TODO: make configurable
 const (
-	useExistingCluster       = false
-	attachControlPlaneOutput = false
+	useExistingCluster          = false
+	attachControlPlaneOutput    = false
+	shootName                   = "my-cluster"
+	shootInfoConfigMapNamespace = "kube-system"
+	shootInfoConfigMapName      = "shoot-info"
+	shootNameConfigMapKey       = "shootName"
 )
 
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var beb *reconcilertesting.BebMock
+var nameMapper handlers.NameMapper
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -1102,6 +1151,8 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
+	nameMapper = handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
+
 	err = NewReconciler(
 		context.Background(),
 		k8sManager.GetClient(),
@@ -1110,6 +1161,7 @@ var _ = BeforeSuite(func(done Done) {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		k8sManager.GetEventRecorderFor("eventing-controller"),
 		envConf,
+		nameMapper,
 	).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

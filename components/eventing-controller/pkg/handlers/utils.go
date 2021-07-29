@@ -43,6 +43,36 @@ type MessagingBackend interface {
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
+type NameMapper interface {
+	MapSubscriptionName(sub *eventingv1alpha1.Subscription) string
+}
+
+type bebSubscriptionNameMapper struct {
+	prefix    string
+	maxLength int
+	separator string
+}
+
+func NewBebSubscriptionNameMapper(prefix string, maxNameLength int, separator string) *bebSubscriptionNameMapper {
+	p := strings.TrimSpace(prefix)
+	if len(p) > 0 {
+		p += separator
+	}
+	return &bebSubscriptionNameMapper{
+		prefix:    p,
+		maxLength: maxNameLength,
+		separator: separator,
+	}
+}
+
+func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
+	fullName := m.prefix + sub.GetNamespace() + m.separator + sub.GetName()
+	if len(fullName) > m.maxLength && m.maxLength > 0 {
+		return fullName[0:m.maxLength]
+	}
+	return fullName
+}
+
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
@@ -77,13 +107,15 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings, defaultNamespace string) (*types.Subscription, error) {
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
+	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
+	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to apply default protocol settings")
 	}
 	// Name
-	emsSubscription.Name = subscription.Name
+	emsSubscription.Name = nameMapper.MapSubscriptionName(subscription)
 
 	// Applying protocol settings if provided in subscription CR
 	if subscription.Spec.ProtocolSettings != nil {

@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 	"testing"
+
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -45,6 +48,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
+
+	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50, "/")
+
 	defaultNamespace := "defaultNS"
 	svcName := "foo-svc"
 	host := "foo-host"
@@ -83,7 +89,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should be overriden by the given values in subscription
 		expectedBEBSubscription := types.Subscription{
-			Name:            subscription.Name,
+			Name:            defaultNameMapper.MapSubscriptionName(subscription),
 			ContentMode:     *givenProtocolSettings.ContentMode,
 			Qos:             types.QosAtLeastOnce,
 			ExemptHandshake: *givenProtocolSettings.ExemptHandshake,
@@ -107,7 +113,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "")
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "", defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -121,7 +127,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should retain defaults
 		expectedBEBSubscription := types.Subscription{
-			Name: subscription.Name,
+			Name: defaultNameMapper.MapSubscriptionName(subscription),
 			Events: types.Events{
 				{
 					Source: defaultNamespace,
@@ -139,7 +145,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace)
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -196,5 +202,49 @@ func TestGetRandSuffix(t *testing.T) {
 			t.Fatalf("generated string already exists: %s", result)
 		}
 		results[result] = true
+	}
+}
+
+func TestBebSubscriptionNameMapper(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	s1 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "subscription1",
+			Namespace: "loooong-loooong-namespace",
+		},
+	}
+
+	tests := []struct {
+		shootName  string
+		maxLen     int
+		inputSub   *eventingv1alpha1.Subscription
+		outputName string
+	}{
+		{
+			shootName:  "my-shoot-name",
+			maxLen:     40,
+			inputSub:   s1,
+			outputName: fmt.Sprintf("%s/%s/%s", "my-shoot-name", s1.Namespace, s1.Name),
+		},
+		{
+			shootName:  "   ",
+			maxLen:     40,
+			inputSub:   s1,
+			outputName: fmt.Sprintf("%s/%s", s1.Namespace, s1.Name),
+		},
+		{
+			shootName:  "",
+			maxLen:     20,
+			inputSub:   s1,
+			outputName: fmt.Sprintf("%s/%s", s1.Namespace, s1.Name),
+		},
+	}
+	for _, test := range tests {
+		mapper := NewBebSubscriptionNameMapper(test.shootName, test.maxLen, "/")
+		s := mapper.MapSubscriptionName(test.inputSub)
+		g.Expect(strings.HasPrefix(test.outputName, s)).To(BeTrue())
+		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
+		g.Expect(len(s)).To(BeNumerically("<=", len(test.outputName)))
 	}
 }

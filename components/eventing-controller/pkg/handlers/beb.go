@@ -16,14 +16,28 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
+const (
+	bebHandlerName               = "beb-handler"
+	MaxBEBSubscriptionNameLength = 50
+	BebSubscriptionNameSeparator = "/"
+)
+
 // compile time check
 var _ MessagingBackend = &Beb{}
+
+func NewBEB(mapper NameMapper, logger logr.Logger) *Beb {
+	return &Beb{
+		Log:           logger,
+		SubNameMapper: mapper,
+	}
+}
 
 type Beb struct {
 	Client           *client.Client
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
+	SubNameMapper    NameMapper
 	Log              logr.Logger
 }
 
@@ -69,7 +83,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err
@@ -127,7 +141,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 // DeleteSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	return b.deleteSubscription(subscription.Name)
+	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner) (*types.Subscription, int64, error) {
