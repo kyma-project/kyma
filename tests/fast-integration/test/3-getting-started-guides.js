@@ -39,10 +39,6 @@ describe("Getting Started Guide Tests", function () {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  sleep(3600*1000);
   it("Namespace should be deleted", async function () {
     await cleanGettingStartedTestFixture(false);
   });
