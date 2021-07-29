@@ -11,7 +11,7 @@ data:
   loki-dashboard.json: |-
     {
     "annotations": {
-    list": [
+    "list": [
         {
           "builtIn": 1,
           "datasource": "-- Grafana --",
@@ -2165,7 +2165,7 @@ data:
       "targets": [
         {
           "exemplar": true,
-          "expr": "topk(10, sum by (tenant) (rate(loki_ingester_streams_created_total[1m])  0))",
+          "expr": "topk(10, sum by (tenant) (rate(loki_ingester_streams_created_total[1m]) >  0))",
           "interval": "",
           "legendFormat": "{{ `{{tenant}}` }}",
           "refId": "A"
