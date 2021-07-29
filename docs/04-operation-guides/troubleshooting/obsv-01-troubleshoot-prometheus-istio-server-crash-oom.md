@@ -84,7 +84,7 @@ There are two ways to prevent the OOM issues:
 You can set the value for the **memory limit** attribute to 4Gi, and/or **drop the labels** from Istio metrics.
 
 ```yaml
-monitoring
+monitoring:
   prometheus-istio:
     envoyStats:
       labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
