@@ -27,7 +27,8 @@ describe("Kyma with Compass test", async function() {
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
 
-  componentsToSkip = ["dex","tracing","monitoring","console","kiali","logging"];
+  const testNS = "compass-test";
+  const componentsToSkip = ["dex","tracing","monitoring","console","kiali","logging"];
 
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
