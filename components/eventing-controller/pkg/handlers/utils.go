@@ -33,6 +33,7 @@ type MessagingBackend interface {
 
 	// SyncSubscription should synchronize the Kyma eventing susbscription with the susbcriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
+	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
 	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
 	// TODO: This should contain all the infos necessary for the handler to do its job.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error)

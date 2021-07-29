@@ -6,7 +6,6 @@ describe("Installation", function () {
   it("Kyma should successfully install", async function () {
     const options = {
       skipComponents: ["dex","console"],
-      newEventing: true,
       centralApplicationConnectivity: (process.env.CENTRAL_APPLICATION_CONNECTIVITY === "true")
     };
     await installKyma(options);

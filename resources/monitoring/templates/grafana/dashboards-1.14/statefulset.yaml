@@ -1,6 +1,7 @@
 {{- /*
   Customization:
   * Unset the timezone
+  * metric container_memory_usage_bytes -> container_memory_working_set_bytes
 */ -}}
 {{- /*
 Generated from 'statefulset' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
@@ -193,7 +194,7 @@ data:
                         "tableColumn": "",
                         "targets": [
                             {
-                                "expr": "sum(container_memory_usage_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"$statefulset.*\"}) / 1024^3",
+                                "expr": "sum(container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", cluster=\"$cluster\", namespace=\"$namespace\", pod=~\"$statefulset.*\"}) / 1024^3",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "",

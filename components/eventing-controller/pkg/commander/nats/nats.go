@@ -73,7 +73,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 }
 
 // Start implements the Commander interface and starts the commander.
-func (c *Commander) Start(_ commander.Params) error {
+func (c *Commander) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ commander.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c.cancel = cancel
@@ -87,6 +87,7 @@ func (c *Commander) Start(_ commander.Params) error {
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
 		c.envCfg,
+		defaultSubsConfig,
 	)
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {

@@ -402,7 +402,6 @@ async function uninstallKyma(options) {
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
- * @param {boolean} options.newEventing Use new eventing
  * @param {boolean} options.centralApplicationConnectivity Install Application Connectivity as single cluster-wide instances
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install

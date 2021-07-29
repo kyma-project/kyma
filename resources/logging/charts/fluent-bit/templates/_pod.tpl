@@ -58,8 +58,15 @@ containers:
       - name: config
         mountPath: /fluent-bit/etc/
     {{- if eq .Values.kind "DaemonSet" }}
-      - name: varlog
-        mountPath: /var/log
+      - name: varfluentbit
+        mountPath: /data
+        readOnly: false
+      - name: varlogpods
+        mountPath: /var/log/pods
+        readOnly: true
+      - name: varlogcontainers
+        mountPath: /var/log/containers
+        readOnly: true
       - name: varlibdockercontainers
         mountPath: /var/lib/docker/containers
         readOnly: true
@@ -116,9 +123,15 @@ volumes:
     configMap:
       name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ include "fluent-bit.fullname" . }}{{- end }}
 {{- if eq .Values.kind "DaemonSet" }}
-  - name: varlog
+  - name: varfluentbit
     hostPath:
-      path: /var/log
+      path: /var/fluent-bit
+  - name: varlogcontainers
+    hostPath:
+      path: /var/log/containers
+  - name: varlogpods
+    hostPath:
+      path: /var/log/pods
   - name: varlibdockercontainers
     hostPath:
       path: /var/lib/docker/containers
