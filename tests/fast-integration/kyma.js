@@ -103,7 +103,7 @@ async function install(argv) {
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const withCompass = argv.withCompass;
-  const centralApplicationConnectivity = argv.centralApplicationConnectivity;
+  const withCentralAppConnectivity = argv.centralAppConnectivity;
   const useHelmTemplate = argv.useHelmTemplate;
 
   await installer.installKyma({
@@ -111,7 +111,7 @@ async function install(argv) {
     components,
     skipComponents,
     isUpgrade: !!argv.upgrade,
-    centralApplicationConnectivity,
+    centralApplicationConnectivity: withCentralAppConnectivity,
     withCompass,
     useHelmTemplate
   });
