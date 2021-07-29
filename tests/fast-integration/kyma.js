@@ -111,7 +111,7 @@ async function install(argv) {
     components,
     skipComponents,
     isUpgrade: !!argv.upgrade,
-    centralApplicationConnectivity: withCentralAppConnectivity,
+    withCentralAppConnectivity: withCentralAppConnectivity,
     withCompass,
     useHelmTemplate
   });

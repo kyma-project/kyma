@@ -189,7 +189,7 @@ async function chartList(options) {
 
   const isGardener = (gardenerDomain ? true : false) || (process.env["GARDENER"] === "true");
   const isCompassEnabled = !!options.withCompass;
-  const isCentralApplicationConnectivityEnabled = !!options.centralApplicationConnectivity;
+  const isCentralApplicationConnectivityEnabled = !!options.withCentralAppConnectivity;
 
   const overrides = [
     `authProxy.config.useDex=false`,
@@ -399,7 +399,7 @@ async function uninstallKyma(options) {
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
- * @param {boolean} options.centralApplicationConnectivity Install Application Connectivity as single cluster-wide instances
+ * @param {boolean} options.withCentralAppConnectivity Install Application Connectivity as single cluster-wide instances
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install
  * @param {boolean} options.isCompassEnabled
