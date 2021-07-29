@@ -8,6 +8,9 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 
+resolve-local:
+	GO111MODULE=on go mod vendor -v
+
 release:
 	$(MAKE) gomod-release-local
 

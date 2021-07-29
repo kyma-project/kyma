@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
 )
 
-func BasicPythonFunction(msg string) *function.FunctionData {
+func BasicPythonFunction(msg string, runtime serverlessv1alpha1.Runtime) *function.FunctionData {
 	return &function.FunctionData{
 		Body: fmt.Sprintf(
 			`import arrow
@@ -18,11 +18,11 @@ def main(event, context):
 arrow==0.15.8`,
 		MinReplicas: 1,
 		MaxReplicas: 1,
-		Runtime:     serverlessv1alpha1.Python38,
+		Runtime:     runtime,
 	}
 }
 
-func BasicPythonFunctionWithCustomDependency(msg string) *function.FunctionData {
+func BasicPythonFunctionWithCustomDependency(msg string, runtime serverlessv1alpha1.Runtime) *function.FunctionData {
 	return &function.FunctionData{
 		Body: fmt.Sprintf(
 			`import arrow
@@ -33,6 +33,6 @@ arrow==0.15.8
 kyma-pypi-test==1.0.0`,
 		MinReplicas: 1,
 		MaxReplicas: 1,
-		Runtime:     serverlessv1alpha1.Python38,
+		Runtime:     runtime,
 	}
 }

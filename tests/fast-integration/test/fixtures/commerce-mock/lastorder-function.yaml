@@ -17,7 +17,7 @@ spec:
     const axios = require('axios');
     function sendEvent(type, data) {
         const payload = {       
-          source: "kyma",
+          source: "/default/sap.kyma/tunas-prow",
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",

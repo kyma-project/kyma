@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ .Chart.Name }}-clusterrole
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -27,7 +27,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}-clusterrolebinding
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -38,7 +38,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-clusterrole

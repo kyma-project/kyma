@@ -173,7 +173,7 @@ func TestApiRuleEqual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			testAPIRule := tc.prep()
 			if apiRuleEqual(&apiRule, testAPIRule) != tc.expect {
-				t.Errorf("Expected output to be %t", tc.expect)
+				t.Errorf("expected output to be %t", tc.expect)
 			}
 		})
 	}
@@ -222,7 +222,7 @@ func TestEventingBackendEqual(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			if eventingBackendEqual(tc.getBackend1(), tc.getBackend2()) != tc.expectedResult {
-				t.Errorf("Expected output to be %t", tc.expectedResult)
+				t.Errorf("expected output to be %t", tc.expectedResult)
 			}
 		})
 	}
@@ -274,7 +274,7 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			if eventingBackendStatusEqual(&tc.backendStatus1, &tc.backendStatus2) != tc.expectedResult {
-				t.Errorf("Expected output to be %t", tc.expectedResult)
+				t.Errorf("expected output to be %t", tc.expectedResult)
 			}
 		})
 	}
@@ -361,7 +361,7 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			if publisherProxyDeploymentEqual(tc.getPublisher1(), tc.getPublisher2()) != tc.expectedResult {
-				t.Errorf("Expected output to be %t", tc.expectedResult)
+				t.Errorf("expected output to be %t", tc.expectedResult)
 			}
 		})
 	}

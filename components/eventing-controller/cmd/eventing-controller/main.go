@@ -23,18 +23,18 @@ func main() {
 
 	opts := options.New()
 	if err := opts.Parse(); err != nil {
-		setupLogger.Error(err, "failed to parse options")
+		setupLogger.Error(err, "parse options failed")
 		os.Exit(1)
 	}
 
 	ctrLogger, err := logger.New(opts.LogFormat, opts.LogLevel)
 	if err != nil {
-		setupLogger.Error(err, "failed to initialize logger")
+		setupLogger.Error(err, "initialize logger failed")
 		os.Exit(1)
 	}
 	defer func() {
 		if err := ctrLogger.WithContext().Sync(); err != nil {
-			setupLogger.Error(err, "failed to flush logger")
+			setupLogger.Error(err, "flush logger failed")
 		}
 	}()
 
@@ -44,11 +44,11 @@ func main() {
 	// Add schemes.
 	scheme := runtime.NewScheme()
 	if err := beb.AddToScheme(scheme); err != nil {
-		setupLogger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "start manager failed")
 		os.Exit(1)
 	}
 	if err := nats.AddToScheme(scheme); err != nil {
-		setupLogger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "start manager failed")
 		os.Exit(1)
 	}
 
@@ -62,29 +62,29 @@ func main() {
 		SyncPeriod:             &opts.ReconcilePeriod, // CHECK Only used in BEB so far.
 	})
 	if err != nil {
-		setupLogger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "start manager failed")
 		os.Exit(1)
 	}
 
 	// Instantiate and initialize all the subscription commanders.
-	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait)
+	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
 	if err := natsCommander.Init(mgr); err != nil {
-		setupLogger.Error(err, "unable to initialize the NATS commander")
+		setupLogger.Error(err, "initialize NATS commander failed")
 		os.Exit(1)
 	}
 
-	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod)
+	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err := bebCommander.Init(mgr); err != nil {
-		setupLogger.Error(err, "unable to initialize the BEB commander")
+		setupLogger.Error(err, "initialize BEB commander failed")
 		os.Exit(1)
 	}
 
 	if err := mgr.AddHealthzCheck(opts.HealthEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "unable to set up health check: %v")
+		setupLogger.Error(err, "setup health check failed")
 		os.Exit(1)
 	}
 	if err := mgr.AddReadyzCheck(opts.ReadyEndpoint, healthz.Ping); err != nil {
-		setupLogger.Error(err, "unable to set up ready check: %v")
+		setupLogger.Error(err, "setup ready check failed")
 		os.Exit(1)
 	}
 
@@ -93,14 +93,14 @@ func main() {
 	recorder := mgr.GetEventRecorderFor("backend-controller")
 	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
-		setupLogger.Error(err, "unable to start the backend controller")
+		setupLogger.Error(err, "start backend controller failed")
 		os.Exit(1)
 	}
 
 	// Start the manager.
-	ctrLogger.WithContext().With("options", opts).Info("starting manager")
+	ctrLogger.WithContext().With("options", opts).Info("start manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLogger.Error(err, "unable to start manager")
+		setupLogger.Error(err, "start manager failed")
 		os.Exit(1)
 	}
 }

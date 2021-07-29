@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.global.systemNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -35,11 +35,10 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"
-          - "--disableLegacyConnectivity={{ .Values.global.disableLegacyConnectivity }}"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--namespace={{ .Release.Namespace }}"
+          - "--applicationSecretsNamespace={{ .Values.global.integrationNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
@@ -65,12 +64,9 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         ports:
-      {{- if .Values.global.disableLegacyConnectivity }}
-          - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
-            name: http-proxy
-      {{- else}}
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: http-proxy
-      {{- end }}
+          - containerPort: {{ .Values.deployment.args.proxyPortCompass }}
+            name: http-proxy-mps
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port

@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ .Chart.Name }}-role
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -36,7 +36,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Values.global.namespace }}:default
+  name: system:serviceaccount:{{ .Values.global.integrationNamespace }}:default
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole

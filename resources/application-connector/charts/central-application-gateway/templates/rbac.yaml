@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{.Chart.Name }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.global.systemNamespace }}
   labels:
     app: {{.Chart.Name }}
     release: {{ .Release.Name }}
@@ -12,47 +12,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-rules:
-- apiGroups: ["*"]
-  resources: ["secrets"]
-  verbs: ["get"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-subjects:
-  - kind: ServiceAccount
-    name: {{ .Chart.Name }}
-roleRef:
-  kind: Role
-  name: {{ .Chart.Name }}
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ .Chart.Name }}-role
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.global.systemNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -63,6 +26,9 @@ metadata:
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications"]
+  verbs: ["get"]
+- apiGroups: ["*"]
+  resources: ["secrets"]
   verbs: ["get"]
 ---
 kind: ClusterRoleBinding
@@ -78,7 +44,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Chart.Name }}
+  name: system:serviceaccount:{{ .Values.global.systemNamespace }}:{{ .Chart.Name }}
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole

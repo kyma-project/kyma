@@ -12,14 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,20 +23,29 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -92,7 +93,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 		// print all subscriptions in the namespace for debugging purposes
 		if err := printSubscriptions(namespaceName); err != nil {
-			logf.Log.Error(err, "error while printing subscriptions")
+			logf.Log.Error(err, "print subscriptions failed")
 		}
 	})
 
@@ -806,7 +807,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 			Name:      subscription.Name,
 		}
 		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
-			log.Printf("failed to fetch subscription(%s): %v", lookupKey.String(), err)
+			log.Printf("fetch subscription %s failed: %v", lookupKey.String(), err)
 			return &eventingv1alpha1.Subscription{}
 		}
 		log.Printf("[Subscription] name:%s ns:%s apiRule:%s", subscription.Name, subscription.Namespace, subscription.Status.APIRuleName)
@@ -976,7 +977,7 @@ func getAPIRule(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncA
 			Name:      apiRule.Name,
 		}
 		if err := k8sClient.Get(ctx, lookUpKey, apiRule); err != nil {
-			log.Printf("failed to fetch APIRule(%s): %v", lookUpKey.String(), err)
+			log.Printf("fetch APIRule %s failed: %v", lookUpKey.String(), err)
 			return apigatewayv1alpha1.APIRule{}
 		}
 		return *apiRule
@@ -1107,8 +1108,10 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
-	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(),
-		ctrl.Log.WithName("reconciler").WithName("Subscription"),
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	Expect(err).To(BeNil())
+
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(), defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
@@ -147,11 +147,16 @@ func TestCleaner(t *testing.T) {
 		},
 	}
 
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	if err != nil {
+		t.Fatalf("initialize logger failed: %v", err)
+	}
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, ctrl.Log.WithName("cleaner"))
+			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, defaultLogger)
 			gotEventType, err := cleaner.Clean(tc.givenEventType)
 
 			if tc.wantError == true && err == nil {

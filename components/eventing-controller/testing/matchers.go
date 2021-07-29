@@ -40,6 +40,12 @@ func HaveNotFoundSubscription(isReallyDeleted bool) GomegaMatcher {
 	return WithTransform(func(isDeleted bool) bool { return isDeleted }, Equal(isReallyDeleted))
 }
 
+func HaveSubsConfiguration(subsConf *eventingv1alpha1.SubscriptionConfig) GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) *eventingv1alpha1.SubscriptionConfig {
+		return s.Status.Config
+	}, Equal(subsConf))
+}
+
 func IsAnEmptySubscription() GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
 		emptySub := eventingv1alpha1.Subscription{}

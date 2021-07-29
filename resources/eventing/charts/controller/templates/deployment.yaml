@@ -43,6 +43,8 @@ spec:
             value: "{{ .Values.publisherProxy.image.pullPolicy }}"
           - name: PUBLISHER_REPLICAS
             value: "{{ .Values.publisherProxy.replicas }}"
+          - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
+            value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
           - name: APP_LOG_LEVEL

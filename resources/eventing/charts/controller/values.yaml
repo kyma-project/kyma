@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-11610"
+  tag: "PR-11733"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -36,7 +36,7 @@ publisherProxy:
   image:
     # name is the name of the container image for the eventing-publisher-proxy
     name: "event-publisher-proxy"
-    tag: "4c1d4ed7"
+    tag: "947fb1cd"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
@@ -61,6 +61,7 @@ clusterRoleBindingSuffix: ""
 
 eventingBackend:
   name: eventing-backend
+  defaultMaxInflightMessages: 10
 
 healthProbe:
   port: 8081

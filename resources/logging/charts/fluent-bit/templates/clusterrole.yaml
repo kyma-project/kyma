@@ -21,7 +21,7 @@ rules:
     resources:
       - podsecuritypolicies
     resourceNames:
-      - {{ include "fluent-bit.fullname" . }}
+      - 000-{{ include "fluent-bit.fullname" . }}
     verbs:
       - use
   {{- end }}

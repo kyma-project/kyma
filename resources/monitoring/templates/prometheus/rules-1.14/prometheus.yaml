@@ -94,6 +94,7 @@ spec:
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}
+{{- if .Values.alertmanager.enabled }}
     - alert: PrometheusNotConnectedToAlertmanagers
       annotations:
         description: Prometheus {{`{{`}}$labels.namespace{{`}}`}}/{{`{{`}}$labels.pod{{`}}`}} is not connected to any Alertmanagers.
@@ -105,6 +106,7 @@ spec:
       for: 10m
       labels:
         severity: warning
+{{- end }}
 {{- if .Values.defaultRules.additionalRuleLabels }}
 {{ toYaml .Values.defaultRules.additionalRuleLabels | indent 8 }}
 {{- end }}

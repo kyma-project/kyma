@@ -41,7 +41,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "c0278c39"
+    tag: "PR-11785"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -86,22 +86,30 @@ images:
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "6b4289ab"
+      tag: "PR-11791"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "6b4289ab"
+      tag: "PR-11791"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "6b4289ab"
+      tag: "PR-11791"
     python39:
       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "PR-11498"
+      tag: "PR-11791"
 
 deployment:
   replicas: 1
   labels: {}
   annotations: {}
   extraProperties: {}
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 pod:
   labels: {}
