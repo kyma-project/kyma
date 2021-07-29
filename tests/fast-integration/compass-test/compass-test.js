@@ -20,23 +20,20 @@ const installer = require("../installer");
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const centralApplicationConnectivity = !!process.env.CENTRAL_APPLICATION_CONNECTIVITY || false;
+  const centralApplicationConnectivity = !!process.env.WITH_CENTRAL_APP_CONNECTIVITY || false;
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
-  
-  debug(`Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
-
-  const testNS = "compass-test";
-  const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
+  .
+  p = ["dex","tracing","monitoring","console","kiali","logging"];
 
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
   it("Install Kyma", async function() {
-    await installer.installKyma({withCompass: true, skipComponents, centralApplicationConnectivity: centralApplicationConnectivity});
+    await installer.installKyma({withCompass: true, skipComponents: componentsToSkip, centralApplicationConnectivity: centralApplicationConnectivity});
   });
 
   it("Register Kyma instance in Compass", async function() {
