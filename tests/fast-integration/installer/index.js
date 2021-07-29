@@ -385,7 +385,7 @@ async function installKyma(options) {
 
   // temporary until kyma is provided via pipeline
   const result = await k8sCoreV1Api.listNamespace();
-  if (result.body.items.map((i) => i.metadata.name).includes('kyma-system')) {
+  if (result && result.body.items.map((i) => i.metadata.name).includes('kyma-system')) {
     console.log("Namespace 'kyma-system' exists. Skipping installation.");
     return;
   }
