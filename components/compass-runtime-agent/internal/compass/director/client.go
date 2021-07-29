@@ -69,23 +69,17 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) 
 }
 
 func (cc *directorClient) ReconcileLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
-	actualLabels, err := cc.getLabels()
-	if err != nil {
-		return nil, err
-	}
-
 	targetLabels := []struct {
 		key string
 		val string
 	}{
-		{
-			key: eventsURLLabelKey,
-			val: urlsCfg.EventsURL,
-		},
-		{
-			key: consoleURLLabelKey,
-			val: urlsCfg.ConsoleURL,
-		},
+		{key: eventsURLLabelKey, val: urlsCfg.EventsURL},
+		{key: consoleURLLabelKey, val: urlsCfg.ConsoleURL},
+	}
+
+	actualLabels, err := cc.getLabels()
+	if err != nil {
+		return nil, err
 	}
 
 	reconciledLabels := make(map[string]interface{})
