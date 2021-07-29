@@ -203,9 +203,6 @@ async function chartList(options) {
     `global.tlsCrt=ZHVtbXkK`
   ].join(',');
 
-  console.log("DEBUG overrides");
-  console.log(overrides);
-
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides;
   if (isGardener == true) {
@@ -421,9 +418,6 @@ async function installKyma(options) {
   await waitForNodesToBeReady();
   const crdsBefore = await getAllCRDs();
   const skipIstio = skipComponents.includes("istio") || (components && !components.includes("istio"));
-
-  console.log("DEBUG");
-  console.dir(options);
 
   if (!skipIstio) {
     if (options.isUpgrade) {

@@ -25,7 +25,6 @@ describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
-  console.log("DEBUG true: " + withCentralAppConnectivity)
   const testNamespace = "test";
   const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;
