@@ -4,41 +4,36 @@ import "fmt"
 
 type queryProvider struct{}
 
-func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
+func (qp queryProvider) applicationsAndLabelsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
-		result: applicationsForRuntime(runtimeID: "%s") {
+		runtime(id: "%s") {
 			%s
 		}
-	}`, runtimeID, applicationsQueryData())
+		applicationsForRuntime(runtimeID: "%s") {
+			%s
+		}
+	}`, runtimeID, labels(), runtimeID, applicationsQueryData())
 }
 
-func (qp queryProvider) getRuntimeLabelsQuery(runtimeID string) string {
-	return fmt.Sprintf(`query {
-		result: runtime(id: "%s") {
+func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
+	return fmt.Sprintf(`mutation {
+		setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
 			%s
 		}
-	}`, runtimeID, labels())
+	}`, runtimeId, key, value, labelData())
 }
 
 func labels() string {
 	return `labels`
 }
 
-func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
-	return fmt.Sprintf(`mutation {
-		result: setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
-			%s
-		}
-	}`, runtimeId, key, value, labelData())
+func applicationsQueryData() string {
+	return pageData(applicationData())
 }
 
 func labelData() string {
 	return `key
 			value`
-}
-
-func applicationsQueryData() string {
-	return pageData(applicationData())
 }
 
 func pageData(item string) string {

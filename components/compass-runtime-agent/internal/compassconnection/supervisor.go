@@ -147,7 +147,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		return s.updateCompassConnection(connection)
 	}
 
-	applicationsConfig, err := directorClient.FetchConfiguration()
+	applicationsConfig, runtimeLabels, err := directorClient.FetchConfiguration()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
@@ -172,8 +172,8 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		s.log.Info(res)
 	}
 
-	s.log.Infof("Reconciling Runtime Labels...")
-	_, err = directorClient.ReconcileLabels(s.runtimeURLsConfig)
+	s.log.Infof("Labeling Runtime with URLs...")
+	_, err = directorClient.SetURLsLabels(s.runtimeURLsConfig, runtimeLabels)
 	if err != nil {
 		connection.Status.State = v1alpha1.MetadataUpdateFailed
 		connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{

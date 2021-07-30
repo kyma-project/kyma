@@ -4,16 +4,13 @@ import (
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 )
 
-type ApplicationsForRuntimeResponse struct {
-	Result *ApplicationPage `json:"result"`
-}
-
-type GetRuntimeLabelsResponse struct {
-	Result *Labels `json:"result"`
+type ApplicationsAndLabelsForRuntimeResponse struct {
+	Runtime          *Runtime         `json:"runtime"`
+	ApplicationsPage *ApplicationPage `json:"applicationsForRuntime"`
 }
 
 type SetRuntimeLabelResponse struct {
-	Result *graphql.Label `json:"result"`
+	Result *graphql.Label `json:"setRuntimeLabel"`
 }
 
 type ApplicationPage struct {
@@ -32,6 +29,6 @@ type Application struct {
 	Packages     *graphql.PackagePageExt `json:"packages"`
 }
 
-type Labels struct {
+type Runtime struct {
 	Labels map[string]interface{} `json:"labels"`
 }
