@@ -4,7 +4,9 @@ import importlib
 import io
 import os
 import sys
+import json
 import threading
+import requests
 import bottle
 import prometheus_client as prom
 import queue
@@ -33,6 +35,7 @@ func = getattr(mod, os.getenv('FUNC_HANDLER'))
 func_port = os.getenv('FUNC_PORT', 8080)
 timeout = float(os.getenv('FUNC_TIMEOUT', 180))
 memfile_max = int(os.getenv('FUNC_MEMFILE_MAX', 100 * 1024 * 1024))
+publisher_proxy_address = os.getenv('PUBLISHER_PROXY_ADDRESS')
 bottle.BaseRequest.MEMFILE_MAX = memfile_max
 
 app = application = bottle.app()
@@ -79,6 +82,51 @@ class PicklableBottleRequest(bottle.BaseRequest):
         setattr(self, 'environ', env)
 
 
+class Event:
+    ceHeaders = dict()
+
+    def __init__(self, req):
+        data = req.body.read()
+        picklable_req = PicklableBottleRequest(data, req.environ.copy())
+        if req.get_header('content-type') == 'application/json':
+            data = req.json
+
+        self.req = req
+        self.ceHeaders = {
+            'data': data,
+            'ce-type': req.get_header('ce-type'),
+            'ce-source': req.get_header('ce-source'),
+            'ce-eventtypeversion': req.get_header('ce-eventtypeversion'),
+            'ce-specversion': req.get_header('ce-specversion'),
+            'ce-id': req.get_header('ce-id'),
+            'ce-time': req.get_header('ce-time'),
+            'extensions': {'request': picklable_req}
+        }
+
+    def __getitem__(self, item):
+        return self.ceHeaders[item]
+
+    def __setitem__(self, name, value):
+        self.ceHeaders[name] = value
+
+    def publishCloudEvent(self, data):
+        return requests.post(
+            publisher_proxy_address,
+            data = json.dumps(data),
+            headers = {"Content-Type": "application/cloudevents+json"}
+            )
+    
+    def buildResponseCloudEvent(self, event_id, event_type, event_data):
+        return {
+            'type': event_type,
+            'source': self.ceHeaders['ce-source'],
+            'eventtypeversion': self.ceHeaders['ce-eventtypeversion'],
+            'specversion': self.ceHeaders['ce-specversion'],
+            'id': event_id,
+            'data': event_data
+        }
+
+
 @app.get('/healthz')
 def healthz():
     return 'OK'
@@ -98,22 +146,7 @@ def exception_handler():
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
-    data = req.body.read()
-    picklable_req = PicklableBottleRequest(data, req.environ.copy())
-    if req.get_header('content-type') == 'application/json':
-        data = req.json
-
-    event = {
-        'data': data,
-        'ce-type': req.get_header('ce-type'),
-        'ce-source': req.get_header('ce-source'),
-        'ce-eventtypeversion': req.get_header('ce-eventtypeversion'),
-        'ce-specversion': req.get_header('ce-specversion'),
-        'ce-id': req.get_header('ce-id'),
-        'ce-time': req.get_header('ce-time'),
-        'extensions': {'request': picklable_req}
-    }
-
+    event = Event(req)
     method = req.method
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():

@@ -81,21 +81,21 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-11498"
+    tag: "PR-11697"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-11797"
+      tag: "PR-11697"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "PR-11797"
+      tag: "PR-11697"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "PR-11797"
+      tag: "PR-11697"
     python39:
       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "PR-11797"
+      tag: "PR-11697"
 
 deployment:
   replicas: 1
@@ -166,6 +166,8 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      functionPublisherProxyAddress:
+        value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
