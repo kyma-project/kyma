@@ -29,7 +29,7 @@ spec:
         message: The {{ `{{ $labels.job }}` }} {{ `{{ $labels.route }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}s 99th percentile latency.
     - alert: LokiRequestPanics
       expr: sum(increase(loki_panic_total[10m])) by (namespace, job) > 0
-      annotations:
       labels:
         severity: critical
+      annotations:
         message: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
