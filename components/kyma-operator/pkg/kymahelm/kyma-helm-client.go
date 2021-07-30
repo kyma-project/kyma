@@ -226,7 +226,7 @@ func (hc *Client) InstallRelease(chartDir string, nn NamespacedName, overrideVal
 	install.Atomic = false
 	install.Wait = true
 	install.CreateNamespace = true
-	install.Timeout = 5 * time.Minute
+	install.Timeout = 6 * time.Minute
 
 	comboValues, err := GetProfileValues(*chart, profile)
 	if err != nil {
@@ -264,7 +264,7 @@ func (hc *Client) UpgradeRelease(chartDir string, nn NamespacedName, overrideVal
 	upgrade.ReuseValues = false
 	upgrade.Recreate = false
 	upgrade.MaxHistory = hc.maxHistory
-	upgrade.Timeout = 5 * time.Minute
+	upgrade.Timeout = 6 * time.Minute
 
 	comboValues, err := GetProfileValues(*chart, profile)
 	if err != nil {
@@ -295,7 +295,7 @@ func (hc *Client) RollbackRelease(nn NamespacedName, revision int) error {
 	rollback.Version = revision
 	rollback.CleanupOnFail = true
 	rollback.Recreate = true
-	rollback.Timeout = 5 * time.Minute
+	rollback.Timeout = 6 * time.Minute
 
 	return rollback.Run(nn.Name)
 }
