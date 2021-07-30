@@ -132,15 +132,15 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 
 func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
 	switch {
-	// legacy-events reaching /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
+	// legacy-events reaching /{application}/v1/events are routed to /{application}/v1/events endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV1, applicationName)):
 		return ph.legacyEventsProxy, nil
 
-	// cloud-events reaching /{application}/v2/events or /{application}/events will be routed to /publish endpoint of event-publisher-proxy
+	// cloud-events reaching /{application}/v2/events or /{application}/events are routed to /publish endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV2, applicationName)):
 		return ph.cloudEventsProxy, nil
 
-	// cloud-events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
+	// cloud-events reaching /{application}/events are routed to /publish endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixEvents, applicationName)):
 		return ph.cloudEventsProxy, nil
 

@@ -167,7 +167,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		eventPublisherProxyServer := httptest.NewServer(eventPublisherProxyHandler)
 		eventPublisherProxyHost := strings.TrimPrefix(eventPublisherProxyServer.URL, "http://")
 
-		// publish handler which will be overwritten in the tests
+		// publish handler which are overwritten in the tests
 		var publishHandler http.HandlerFunc
 		eventPublisherProxyHandler.Path(eventingPathPrefixEvents).HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			publishHandler.ServeHTTP(writer, request)
