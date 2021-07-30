@@ -14,7 +14,6 @@ const k8s = require("@kubernetes/client-node");
 const {
   debug,
   k8sCoreV1Api,
-  k8sDynamicApi,
   kubectlDelete,
   kubectlApplyDir,
   kubectlApply,
@@ -366,7 +365,6 @@ async function uninstallKyma(options) {
     debug("Uninstalling istio");
     await uninstallIstio();
   }
-
 }
 
 /**
@@ -382,14 +380,6 @@ async function uninstallKyma(options) {
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
-
-  // temporary until kyma is provided via pipeline
-  const result = await k8sCoreV1Api.listNamespace();
-  if (result && result.body.items.map((i) => i.metadata.name).includes('kyma-system')) {
-    console.log("Namespace 'kyma-system' exists. Skipping installation.");
-    return;
-  }
-
   options = options || {};
   const installLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "resources");
   const crdLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "installation", "resources", "crds");
