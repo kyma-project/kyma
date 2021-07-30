@@ -165,9 +165,10 @@ func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) er
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
+	log = log.With(BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name, ERROR_LOG_KEY, err)
+		log.Errorw("delete BEB subscription failed", ERROR_LOG_KEY, err)
 		return nil, 0, err
 	}
 
@@ -179,14 +180,14 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name, ERROR_LOG_KEY, err)
+		log.Errorw("create BEB subscription failed", ERROR_LOG_KEY, err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name, ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription failed", ERROR_LOG_KEY, err)
 		return nil, 0, err
 	}
 
@@ -211,16 +212,17 @@ func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner
 		return nil, err
 	}
 
+	log = log.With(BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name)
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name, ERROR_LOG_KEY, err)
+		log.Errorw("create BEB subscription failed", ERROR_LOG_KEY, err)
 		return nil, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name, ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription failed", ERROR_LOG_KEY, err)
 		return nil, err
 	}
 
