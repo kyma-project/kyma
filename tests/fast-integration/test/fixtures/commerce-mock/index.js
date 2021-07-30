@@ -271,19 +271,27 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
       mockNamespace,
       targetNamespace,
       withCentralApplicationGateway ? prepareLastorderObjs('central-app-gateway-compass', `mp-${appName}`) : prepareLastorderObjs());
+  console.log("connectMockCompass");
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
+  console.log("registerAllApis");
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  console.log("waitForDeployment");
   await waitForDeployment(`mp-${appName}-connectivity-validator`, "kyma-integration");
   
+  console.log("waitForServiceClass");
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+  console.log("waitForServicePlanByServiceClass");
   await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
+  console.log("k8sApply");
   await retryPromise(
     () => k8sApply([serviceInstanceObj("commerce", commerceSC.spec.externalName)], targetNamespace, false),
     5,
     2000
   );
+  console.log("waitForServiceInstance");
   await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
 
+  console.log("patchApplicationGateway");
   await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   if (withCentralApplicationGateway) {
     await patchApplicationGateway('central-application-gateway', 'kyma-system');
