@@ -56,6 +56,15 @@ spec:
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
+          #TODO: temporary solution, replace with a health endpoint
+          livenessProbe:
+            httpGet:
+              port: {{ .Values.config.ports.metrics }}
+              path: "/metrics"
+          readinessProbe:
+            httpGet:
+              port: {{ .Values.config.ports.metrics }}
+              path: "/metrics"
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
       {{- with .Values.config.nodeSelector }}

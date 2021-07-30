@@ -375,7 +375,6 @@ async function uninstallKyma(options) {
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
- * @param {boolean} options.newEventing Use new eventing
  * @param {boolean} options.withCentralApplicationGateway Install cluster-wide Application Gateway
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install
@@ -383,6 +382,14 @@ async function uninstallKyma(options) {
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
+
+  // temporary until kyma is provided via pipeline
+  const result = await k8sCoreV1Api.listNamespace();
+  if (result && result.body.items.map((i) => i.metadata.name).includes('kyma-system')) {
+    console.log("Namespace 'kyma-system' exists. Skipping installation.");
+    return;
+  }
+
   options = options || {};
   const installLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "resources");
   const crdLocation = options.resourcesPath || join(__dirname, "..", "..", "..", "installation", "resources", "crds");

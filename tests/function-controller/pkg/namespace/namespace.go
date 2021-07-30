@@ -62,8 +62,7 @@ func (n *Namespace) Create() (string, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: n.name,
 			Labels: map[string]string{
-				"knative-eventing-injection": "enabled",               // https://knative.dev/v0.12-docs/eventing/broker-trigger/#annotation
-				TestNamespaceLabelKey:        TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
+				TestNamespaceLabelKey: TestNamespaceLabelValue, // convenience for cleaning up stale namespaces during development
 			},
 		},
 	}
