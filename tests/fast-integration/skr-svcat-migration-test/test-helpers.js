@@ -79,22 +79,31 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   }
 
   try {
-    args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`];
-    await execa(`smctl`, args);
+    args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`, `--mode=sync`];
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Service Binding successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
 
   try {
     args = [`delete-platform`, svcatPlatform, `-f`];
-    await execa(`smctl`, args);
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Platform(s) successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
 
   try {
-    args = [`deprovision`, btpOperatorInstance, `-f`];
-    await execa(`smctl`, args);
+    args = [`deprovision`, btpOperatorInstance, `-f`, `--mode=sync`];
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Service Instance successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
