@@ -77,7 +77,7 @@ A message confirming that the Subscription was created will appear in the **Even
 Kyma CLI
 </summary>
 
-1. Run the 'init' Kyma CLI command to create local files with the default configuration. Go to the folder in which you want to initiate the workspace content and run this command:
+1. Run the `init` Kyma CLI command to create local files with the default configuration. Go to the folder in which you want to initiate the workspace content and run this command:
 
     ```bash
     kyma init function
@@ -106,7 +106,7 @@ Kyma CLI
                     value: sap.kyma.custom.commerce.order.deliverysent.v1
     ```
 
-3. Run the 'apply' Kyma CLI command to create a Function CR and a Subscription CR in the YAML format on your cluster:
+3. Run the `apply` Kyma CLI command to create a Function CR and a Subscription CR in the YAML format on your cluster:
 
     ```bash
     kyma apply function
