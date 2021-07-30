@@ -72,6 +72,53 @@ Console UI
 A message confirming that the Subscription was created will appear in the **Event Subscriptions** section in the Function's details view.
 
   </details>
+<details>
+<summary label="kyma-cli">
+Kyma CLI
+</summary>
+
+1. Run the `init` Kyma CLI command to create local files with the default configuration. Go to the folder in which you want to initiate the workspace content and run this command:
+
+    ```bash
+    kyma init function
+    ```
+
+2. Add a Subscription to the `config.yaml` file. A sample configuration file looks like this:
+
+    ```yaml
+    name: orders-function
+    namespace: orders-service
+    runtime: nodejs14
+    source:
+        sourceType: inline
+        sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
+    subscriptions:
+        - name: orders-sub
+          filter:
+            filters:
+                - eventSource:
+                    property: source
+                    type: exact
+                    value: ""
+                  eventType:
+                    property: type
+                    type: exact
+                    value: sap.kyma.custom.commerce.order.deliverysent.v1
+    ```
+
+3. Run the `apply` Kyma CLI command to create a Function CR and a Subscription CR in the YAML format on your cluster:
+
+    ```bash
+    kyma apply function
+    ```
+
+4. Check that the Subscription CR was created and is ready. This is indicated by its status equal to `true`:
+
+    ```bash
+    kubectl get subscriptions.eventing.kyma-project.io orders-sub -n orders-service -o=jsonpath="{.status.ready}"
+    ```
+
+  </details>
 </div>
 
 ### Test the event delivery
