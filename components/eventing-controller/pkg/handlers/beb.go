@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"go.uber.org/zap"
 
@@ -116,8 +118,17 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("get BEB subscription failed", "error", err)
-			return false, err
+			log.Errorw("get BEB subscription failed", "bebSubscriptionName", sEv2.Name, "error", err)
+			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
+			if errors.As(err, &httpStatusNotFoundError) {
+				log.Infow("Recreate the BEB subscription", "bebSubscriptionName", sEv2.Name)
+				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
+				if err != nil {
+					return false, err
+				}
+			} else {
+				return false, err
+			}
 		}
 		// get the internal view for the EMS subscription
 		sEms, err := getInternalView4Ems(bebSubscription)
@@ -154,7 +165,7 @@ func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) er
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", "error", err)
+		log.Errorw("delete BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
@@ -166,14 +177,14 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", "error", err)
+		log.Errorw("create BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", "error", err)
+		log.Errorw("get BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
@@ -189,6 +200,29 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	return bebSubscription, newEmsHash, nil
+}
+
+func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
+	// clean the application name segment in the subscription event-types from none-alphanumeric characters
+	if err := cleanEventTypes(subscription, cleaner); err != nil {
+		log.Errorw("clean application name in the subscription event-types failed", "error", err)
+		return nil, err
+	}
+
+	// create a new EMS subscription
+	if err := b.createSubscription(subscription, log); err != nil {
+		log.Errorw("create BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
+		return nil, err
+	}
+
+	// get the new EMS subscription
+	bebSubscription, err := b.getSubscription(subscription.Name)
+	if err != nil {
+		log.Errorw("get BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
+		return nil, err
+	}
+
+	return bebSubscription, nil
 }
 
 // cleanEventTypes cleans the application name segment in the subscription event-types from none-alphanumeric characters
@@ -238,7 +272,7 @@ func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
 		return nil, fmt.Errorf("get subscription failed: %v", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("get subscription failed: %v; %v", resp.StatusCode, resp.Message)
+		return nil, fmt.Errorf("get subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
 	}
 	return bebSubscription, nil
 }
@@ -249,7 +283,7 @@ func (b *Beb) deleteSubscription(name string) error {
 		return fmt.Errorf("delete subscription failed: %v", err)
 	}
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusNotFound {
-		return fmt.Errorf("delete subscription failed: %v; %v", resp.StatusCode, resp.Message)
+		return fmt.Errorf("delete subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
 	}
 	return nil
 }
@@ -260,7 +294,7 @@ func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.Suga
 		return fmt.Errorf("create subscription failed: %v", err)
 	}
 	if createResponse.StatusCode > http.StatusAccepted && createResponse.StatusCode != http.StatusConflict {
-		return fmt.Errorf("create subscription failed: %v", createResponse)
+		return fmt.Errorf("create subscription failed: %w; %v", errors.New(strconv.Itoa(createResponse.StatusCode)), createResponse.Message)
 	}
 	log.Debug("create subscription succeeded")
 	return nil
