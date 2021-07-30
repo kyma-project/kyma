@@ -19,8 +19,6 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   Custom domain certificate
   </summary>
 
-  >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through Kyma Dashboard becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
-
   1. Export the Kyma version, your domain, new certificate and key as the environment variables.
 
       ```bash
@@ -45,37 +43,29 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   Self-signed certificate
   </summary>
 
-  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. - check if it valid for 30 days <!--If the self-signed certificate expired for your cluster and you can't, for example, log in to Kyma Dashboard, regenerate the self-signed certificate.-->
+  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. If the self-signed certificate expired for your cluster, regenerate the self-signed certificate. 
 
-  Dashboard and certificate - they are separated
-  No certificates required - for Kyma Dashboard run locally or remotely the certificates are just there
-
-  <!-->>>**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid.To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.-->
-
-  <!--1. Delete the Secret that stores the expired Kyma TLS certificate. Run:
+    1. Export the Kyma version as the environment variable.
 
       ```bash
-      kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
-      ```-->
-
-  2. Trigger the update process. Run:
-
-      ```bash
-      kubectl -n default label installation/kyma-installation action=install
+      export KYMA_VERSION={KYMA_RELEASE_VERSION}
       ```
 
-      To watch the progress of the update, run:
+    2. Delete the Secret that stores the expired Kyma TLS certificate. Run:
 
       ```bash
-      while true; do \
-      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
-      sleep 5; \
-      done
+      kubectl delete secret -n istio-system kyma-gateway-certs
+      ```
+
+    3. Trigger the update process. Run:
+
+      ```bash
+      kyma deploy -s $KYMA_VERSION
       ```
 
       The process is complete when you see the `Kyma installed` message.
 
-  3. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
+    4. Add the newly generated certificate to the trusted certificates of your OS. For MacOS, run:
   
       ```bash
       tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \

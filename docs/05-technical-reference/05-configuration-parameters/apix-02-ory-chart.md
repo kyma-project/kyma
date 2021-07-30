@@ -12,13 +12,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter |  Description | Default value |
 |-------|-------|:--------:|
-
-OATHKEEPER
 | **oathkeeper.deployment.resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
 | **oathkeeper.deployment.resources.requests.cpu** | Defines requests for CPU resources. | `50m` |
 | **hpa.oathkeeper.minReplicas** |  Defines the initial number of created Oathkeeper instances. | `1` |
-
-
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `true` |
 <!--**hydra.hydra.config.secrets.system** | Sets the system encryption string for Hydra. | An at least 16 characters long alphanumerical string |-->
 <!--| **hydra.hydra.config.secrets.cookie** | Sets the cookie session encryption string for Hydra. | An at least 16 characters long alphanumerical string |-->
