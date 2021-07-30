@@ -45,15 +45,18 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   Self-signed certificate
   </summary>
 
-  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to Kyma Dashboard, regenerate the self-signed certificate. 
+  The self-signed TLS certificate used in Kyma instances deployed with the default `kyma.example.com` domain is valid for 30 days. - check if it valid for 30 days <!--If the self-signed certificate expired for your cluster and you can't, for example, log in to Kyma Dashboard, regenerate the self-signed certificate.-->
 
-  >>**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
+  Dashboard and certificate - they are separated
+  No certificates required - for Kyma Dashboard run locally or remotely the certificates are just there
 
-  1. Delete the Secret that stores the expired Kyma TLS certificate. Run:
+  <!-->>>**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid.To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.-->
+
+  <!--1. Delete the Secret that stores the expired Kyma TLS certificate. Run:
 
       ```bash
       kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
-      ```
+      ```-->
 
   2. Trigger the update process. Run:
 
