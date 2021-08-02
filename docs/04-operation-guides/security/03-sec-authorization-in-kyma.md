@@ -17,7 +17,7 @@ The predefined roles are:
 | Role | Default group | Description |
 | --- | --- | --- |
 | **kyma-essentials** | `runtimeDeveloper` | The basic role required to allow the user to access Kyma Dashboard of the cluster. This role doesn't give the user rights to modify any resources. |
-| **kyma-namespace-admin-essentials** | `runtimeNamespaceAdmin` | The role that allows the user to access Kyma Dashboard and create Namespaces, built on top of the **kyma-essentials** role. Used to give the members of selected groups the ability to create Namespaces in which the [Permission Controller](#namespace-wide-authorization) binds them to the **kyma-namespace-admin** role. |
+| **kyma-namespace-admin-essentials** | `runtimeNamespaceAdmin` | The role that allows the user to access Kyma Dashboard and create Namespaces, built on top of the **kyma-essentials** role. |
 | **kyma-view** | `runtimeOperator` | The role for listing Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | None | The role for editing Kyma-specific resources. It's [aggregated](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) by other roles. |
 | **kyma-developer** | None | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. You need to bind it manually to a user or a group in the Namespaces of your choice. Use the `runtimeDeveloper` group when you run Kyma with the default `cluster-users` chart configuration. |
@@ -38,8 +38,6 @@ You can assign any of the predefined roles to a user or to a group of users in t
 >**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
 The RoleBinding or ClusterRoleBinding must have a group specified as their subject. See the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to learn how to manage Roles and RoleBindings.
-
->**NOTE:** You cannot define groups for the static user store. Instead, bind the user directly to a role or a cluster role by setting the user as the subject of a RoleBinding or ClusterRoleBinding.
 
 ## Service-to-service authorization
 
