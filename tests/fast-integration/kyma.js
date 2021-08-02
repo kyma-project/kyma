@@ -111,8 +111,8 @@ async function install(argv) {
     components,
     skipComponents,
     isUpgrade: !!argv.upgrade,
-    withCentralAppConnectivity: withCentralAppConnectivity,
     withCompass,
+    withCentralAppConnectivity: withCentralAppConnectivity,
     useHelmTemplate
   });
   console.log('Kyma installed');
