@@ -39,7 +39,7 @@ function installOptions(yargs) {
     'use-helm-template' : {
       describe: 'Use helm template | kubectl apply instead of helm upgrade -i'
     },
-    'central-application-connectivity': {
+    'with-central-app-connectivity': {
       describe: 'Install Application Connectivity components as single cluster-wide instances'
     },
     'with-compass': {
