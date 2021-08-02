@@ -17,7 +17,7 @@
 
 RETRY_TIME=3 #Seconds
 MAX_RETRIES=5
-
+OIDC_PROVIDER=${OIDC_PROVIDER:="dex"}
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # resources/cluster-users/values.yaml clusterRoles.verbs.view
@@ -250,7 +250,8 @@ function configFileRequestRetry() {
   for i in $(seq 1 "${MAX_RETRIES}"); do __configFileRequest "${AUTH_TOKEN}" "${MSG}" && break || __retry "${i}" || __failRetry "${MSG}"; done
 }
 
-function getConfigFile() {
+function getConfigFileDex() {
+
   registrationRequestRetry
 
   local REQUEST_ID
@@ -271,6 +272,20 @@ function getConfigFile() {
     echo "---> KUBECONFIG not created, or is empty!"
     exit 1
   fi
+}
+
+function getConfigFile() {
+  case ${OIDC_PROVIDER} in
+  "dex")
+    getConfigFileDex
+    ;;
+  "hydra")
+    echo "TODO"
+    ;;
+  *)
+    echo "$OIDC_PROVIDER not supported"
+    exit 1
+  esac
 }
 
 function testKymaEventing() {
@@ -431,7 +446,7 @@ function testIstio() {
 }
 
 function runTests() {
-  EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
+  OIDC_PROVIDER=${OIDC_PROVIDER} EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
   export KUBECONFIG="/tmp/kubeconfig"
 
   echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
