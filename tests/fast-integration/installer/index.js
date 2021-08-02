@@ -417,6 +417,9 @@ async function installKyma(options) {
   const crdsBefore = await getAllCRDs();
   const skipIstio = skipComponents.includes("istio") || (components && !components.includes("istio"));
 
+  console.log("DEBUG");
+  console.dir(options);
+
   if (!skipIstio) {
     if (options.isUpgrade) {
       await upgradeIstio(istioVersion);
