@@ -274,6 +274,15 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
+  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+  await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
+  await retryPromise(
+    () => k8sApply([serviceInstanceObj("commerce", commerceSC.spec.externalName)], targetNamespace, false),
+    5,
+    2000
+  );
+  await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
+
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
@@ -283,15 +292,6 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     await waitForDeployment(`mp-${appName}-connectivity-validator`, 'kyma-integration');
     await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   }
-
-  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
-  await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
-  await retryPromise(
-    () => k8sApply([serviceInstanceObj("commerce", commerceSC.spec.externalName)], targetNamespace, false),
-    5,
-    2000
-  );
-  await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
 
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
