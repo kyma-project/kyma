@@ -5,6 +5,7 @@ import (
 )
 
 type FunctionConfig struct {
+	PublisherProxyAddress                       string        `envconfig:"default=http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"`
 	ImageRegistryDefaultDockerConfigSecretName  string        `envconfig:"default=serverless-registry-config-default"`
 	ImageRegistryExternalDockerConfigSecretName string        `envconfig:"default=serverless-registry-config"`
 	PackageRegistryConfigSecretName             string        `envconfig:"default=serverless-package-registry-config"`

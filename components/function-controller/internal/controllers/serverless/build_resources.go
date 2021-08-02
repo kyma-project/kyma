@@ -368,6 +368,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
 	envs = append(envs, envVarsForDeployment...)
+	envs = append(envs, []corev1.EnvVar{
+		{Name: "PUBLISHER_PROXY_ADDRESS", Value: r.config.PublisherProxyAddress},
+	}...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

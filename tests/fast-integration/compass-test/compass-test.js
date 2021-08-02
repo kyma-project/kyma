@@ -17,6 +17,7 @@ const {
 } = require("../test/fixtures/commerce-mock");
 
 const installer = require("../installer");
+const { k8sCoreV1Api } = require("../utils");
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
@@ -34,6 +35,13 @@ describe("Kyma with Compass test", async function() {
   this.slow(5000);
 
   it("Install Kyma", async function() {
+    // temporary until kyma is provided via pipeline
+    const result = await k8sCoreV1Api.listNamespace();
+    if (result && result.body.items.map((i) => i.metadata.name).includes('kyma-system')) {
+      console.log("Namespace 'kyma-system' exists. Skipping installation.");
+      return;
+    }
+
     await installer.installKyma({skipComponents: componentsToSkip, withCompass: true, withCentralAppConnectivity: withCentralAppConnectivity});
   });
 

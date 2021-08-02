@@ -14,7 +14,6 @@ const k8s = require("@kubernetes/client-node");
 const {
   debug,
   k8sCoreV1Api,
-  k8sDynamicApi,
   kubectlDelete,
   kubectlApplyDir,
   kubectlApply,
@@ -390,7 +389,6 @@ async function uninstallKyma(options) {
     debug("Uninstalling istio");
     await uninstallIstio();
   }
-
 }
 
 /**
