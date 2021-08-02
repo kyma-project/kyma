@@ -76,3 +76,7 @@ spec:
             name: http-proxy
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
+        securityContext:
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
