@@ -21,14 +21,12 @@ const { k8sCoreV1Api } = require("../utils");
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
+  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
-  
-  debug(`Scenario ${scenarioName}`, `Runtime ${runtimeName}`, `Application ${appName}`);
 
   const testNS = "compass-test";
   const skipComponents = ["dex","tracing","monitoring","console","kiali","logging"];
@@ -44,7 +42,7 @@ describe("Kyma with Compass test", async function() {
       return;
     }
 
-    await installer.installKyma({withCompass: true, skipComponents, withCentralApplicationGateway});
+    await installer.installKyma({withCompass: true, withCentralAppConnectivity, skipComponents});
   });
 
   it("Register Kyma instance in Compass", async function() {
@@ -52,7 +50,7 @@ describe("Kyma with Compass test", async function() {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName,  "mocks", testNS, withCentralApplicationGateway);
+    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName,  "mocks", testNS, withCentralAppConnectivity);
   });
 
   it("function should reach Commerce mock API through app gateway", async function () {

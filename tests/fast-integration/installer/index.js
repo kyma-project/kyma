@@ -182,17 +182,41 @@ async function installRelease(
   debug(`Release ${release} deployed`);
 }
 
-async function chartList(options) {
-  const gardernerDomain = await getGardenerDomain();
-  const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
-  const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
+async function chartList(options) {  
+  const gardenerDomain = await getGardenerDomain();
+  const domain = process.env["KYMA_DOMAIN"] || gardenerDomain || "local.kyma.dev";
+
+  const isGardener = (gardenerDomain ? true : false) || (process.env["GARDENER"] === "true");
   const isCompassEnabled = !!options.withCompass;
-  const isCentralApplicationGatewayEnabled = !!options.withCentralApplicationGateway;
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.disableLegacyConnectivity=${isCompassEnabled},central_application_gateway.enabled=${isCentralApplicationGatewayEnabled},authProxy.config.useDex=false`;
+  const isCentralApplicationConnectivityEnabled = !!options.withCentralAppConnectivity;
+
+  const overrides = [
+    `authProxy.config.useDex=false`,
+    `central_application_connectivity_validator.enabled=${isCentralApplicationConnectivityEnabled}`,
+    `central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled}`,
+    `global.disableLegacyConnectivity=${isCompassEnabled}`,
+    `global.domainName=${domain}`,
+    `global.environment.gardener=${isGardener}`,
+    `global.isLocalEnv=false`,
+    `global.ingress.domainName=${domain}`,
+    `global.tlsCrt=ZHVtbXkK`
+  ].join(',');
+
   // https://github.com/kyma-project/test-infra/pull/2967
-  let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
-  if (isGardener == "true") {
-    registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
+  let registryOverrides;
+  if (isGardener == true) {
+    registryOverrides = [
+      `dockerRegistry.enableInternal=true`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');
+  } else {
+    registryOverrides = [
+      `containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
+      `dockerRegistry.enableInternal=false`,
+      `dockerRegistry.registryAddress=registry.localhost:5000`,
+      `dockerRegistry.serverAddress=registry.localhost:5000`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');
   }
   const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
   const tracingOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
@@ -373,10 +397,10 @@ async function uninstallKyma(options) {
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
- * @param {boolean} options.withCentralApplicationGateway Install cluster-wide Application Gateway
+ * @param {boolean} options.withCompass
+ * @param {boolean} options.withCentralAppConnectivity Install Application Connectivity as single cluster-wide instances
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install
- * @param {boolean} options.isCompassEnabled
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {
