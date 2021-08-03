@@ -412,9 +412,13 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 }
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs=lastorderObjs) {
+  console.log("Creating mock namespaces");
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
+  console.log("Deploying commerce mock");
   await k8sApply(commerceObjs);
+  console.log("Creating function");
   await k8sApply(functionObjs, targetNamespace, true);
+  console.log("Subscribe to events");
   await k8sApply([
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
