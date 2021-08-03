@@ -14,7 +14,7 @@ For example, this can happen when a high number of workloads perform a lot of co
 
 In such cases, the cardinality of the Istio metrics may increase too much and cause the container to be killed because of OOM (Istio telemetry V2 currently doesn't support the concept of metric expiry).
 
-There can be other causes for the Prometheus Istio Server to restart or crash, but the following istructions focus on preventing the OOM issue.
+There can be other causes for the Prometheus Istio Server to restart or crash, but the following istructions focus on fixing the OOM issue.
 
 ## Remedy
 
@@ -22,7 +22,7 @@ To prevent the OOM issue, you can increase the memory limit, and you can drop ad
 
 > **CAUTION:** Dropping additional labels with `prometheus-istio.envoyStats.labeldropRegex` has the side effect that graphs in Kiali will not work.
 
-For both solution, you can choose to apply them either on the Helm side, or in your Kyma cluster configuration.
+For both solutions, you can choose to apply them either on the Helm side, or in your Kyma cluster configuration.
 
 ### Change the Helm configuration
 
