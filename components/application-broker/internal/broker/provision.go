@@ -40,7 +40,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 	istioClient securityclientv1beta1.SecurityV1beta1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger, selector appSvcIDSelector,
 	apiPkgCredsCreator apiPackageCredentialsCreator,
-	validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError, newEventingFlow bool) *ProvisionService {
+	validateReq func(req *osb.ProvisionRequest) *osb.HTTPStatusCodeError) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:         instanceInserter,
 		instanceStateGetter:      instanceStateGetter,
@@ -57,7 +57,6 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 		apiPkgCredCreator:        apiPkgCredsCreator,
 		validateProvisionRequest: validateReq,
 		log:                      log.WithField("service", "provisioner"),
-		newEventingFlow:          newEventingFlow,
 	}
 }
 
@@ -82,8 +81,6 @@ type ProvisionService struct {
 	maxWaitTime time.Duration
 	log         logrus.FieldLogger
 	asyncHook   func()
-
-	newEventingFlow bool
 }
 
 // Provision action
