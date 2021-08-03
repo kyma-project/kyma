@@ -42,7 +42,7 @@ describe("Kyma with Compass test", async function() {
       return;
     }
 
-    await installer.installKyma({withCompass: true, withCentralAppConnectivity: withCentralAppConnectivity, componentsToSkip});
+    await installer.installKyma({withCompass: true, withCentralAppConnectivity, componentsToSkip});
   });
 
   it("Register Kyma instance in Compass", async function() {
