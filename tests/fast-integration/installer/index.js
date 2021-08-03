@@ -192,7 +192,7 @@ async function chartList(options) {
 
   const overrides = [
     `authProxy.config.useDex=false`,
-    `global.centralApplicationConnectivityValidatorEnabled=${isCentralApplicationConnectivityEnabled}`,
+    `central_application_connectivity_validator.enabled=${isCentralApplicationConnectivityEnabled}`,
     `central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled}`,
     `global.disableLegacyConnectivity=${isCompassEnabled}`,
     `global.domainName=${domain}`,
