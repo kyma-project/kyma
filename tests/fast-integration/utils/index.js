@@ -698,6 +698,7 @@ async function deleteK8sResource(o) {
 async function getContainerRestartsForAllNamespaces() {
   const { body } = await k8sCoreV1Api.listPodForAllNamespaces();
   const pods = body.items;
+  console.log(`First test: Pods listed: ${pods}`);
   return pods
     .filter((pd) => !!pd.status && !!pd.status.containerStatuses)
     .map((pod) => ({

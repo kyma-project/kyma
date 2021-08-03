@@ -330,19 +330,24 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationGateway=false) {
   
   await k8sApply(applicationObjs);
+  console.log("Provisioning commerce mock resource");
   const mockHost = await provisionCommerceMockResources(
       "commerce",
       mockNamespace,
       targetNamespace,
       withCentralApplicationGateway ? prepareLastorderObjs('central-app-gateway') : prepareLastorderObjs());
+  console.log("Connecting to commerce mock");
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
+  console.log("Register APIs");
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
+  console.log("Wait for web services");
   const webServicesSC = await waitForServiceClass(
     "webservices",
     targetNamespace,
     400 * 1000
   );
+  console.log("Wait for events");
   const eventsSC = await waitForServiceClass("events", targetNamespace);
   const webServicesSCExternalName = webServicesSC.spec.externalName;
   const eventsSCExternalName = eventsSC.spec.externalName;
@@ -351,6 +356,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     serviceInstanceObj("commerce-events", eventsSCExternalName),
   ];
 
+  console.log("Create service catalog");
   await retryPromise(
     () => k8sApply(serviceCatalogObjs, targetNamespace, false),
     5,
@@ -373,6 +379,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
       instanceRef: { name: "commerce-webservices" },
     },
   };
+
+  console.log("Apply service binding");
   await k8sApply([serviceBinding], targetNamespace, false);
   await waitForServiceBinding("commerce-binding", targetNamespace);
 
@@ -388,6 +396,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   await k8sApply([serviceBindingUsage], targetNamespace);
   await waitForServiceBindingUsage("commerce-lastorder-sbu", targetNamespace);
 
+  console.log("Creating function");
   await waitForFunction("lastorder", targetNamespace);
 
   await k8sApply([eventingSubscription(
@@ -398,6 +407,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     await waitForSubscription("order-received", targetNamespace);
     await waitForSubscription("order-created", targetNamespace);
 
+  console.log("Mock setup done");
   return mockHost;
 }
 
