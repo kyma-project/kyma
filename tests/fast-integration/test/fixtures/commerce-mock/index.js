@@ -213,10 +213,11 @@ async function connectMockLocal(mockHost, targetNamespace) {
     kind: "TokenRequest",
     metadata: { name: "commerce", namespace: targetNamespace },
   };
+  console.log(`Connect to mock with token: ${tokenRequest}`);
   await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
   const tokenObj = await waitForTokenRequest("commerce", targetNamespace);
-
+  console.log(`Token object: ${tokenObj}`);
   const pairingBody = {
     token: tokenObj.status.url,
     baseUrl: `https://${mockHost}`,
@@ -224,6 +225,7 @@ async function connectMockLocal(mockHost, targetNamespace) {
   };
   debug("Token URL", tokenObj.status.url);
   await connectCommerceMock(mockHost, pairingBody);
+  console.log("Connect to mock successful!")
   await ensureApplicationMapping("commerce", targetNamespace);
   debug("Commerce mock connected locally");
 }
