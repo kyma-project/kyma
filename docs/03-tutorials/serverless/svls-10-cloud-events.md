@@ -4,12 +4,13 @@ title: Recive and publish a CloudEvent
 
 This tutorial shows how you can receive a [Cloud Events](https://cloudevents.io/) in the Function and publish a CloudEvent to the same queue using Functions SDK.
 
-1. [Create a Function](./svls-02-create-git-function.md) then modify its body to be ready to publish a CloudEvent and replace `{event_type}` with the desired event type:
+1. [Create an inline Function](./svls-02-create-git-function.md)
+2. Modify its body to be ready to publish a CloudEvent:
 
     ```js
         module.exports = {
             main: function (event, context) {
-                console.log("publish an event");
+                console.log("publish event");
                 // Alternatively, you can build a Cloud Event object manually to get more control over object's fields:
                 // let ce = {
                 //   'eventtypeversion': {EVENT_EVENTTYPEVERSION},
@@ -31,7 +32,7 @@ This tutorial shows how you can receive a [Cloud Events](https://cloudevents.io/
         }
     ```
 
-2. Create a Subscription custom resource (CR) to subscribe the Function to the expected event type:
+3. Create a Subscription custom resource (CR) to subscribe the Function to the expected event type:
 
     ```bash
     cat <<EOF | kubectl apply -f  -
@@ -57,4 +58,6 @@ This tutorial shows how you can receive a [Cloud Events](https://cloudevents.io/
     EOF
     ```
 
-3. Now you can send a CloudEvent to the Function and Function will publish a new CloudEvent based on the first one.
+4. Now you can send a CloudEvent to the Function and Function will publish a new CloudEvent based on the first one.
+
+    >**NOTE:** If you want to send a CloudEvent without Kyma Application see [publish events without Kyma Application](../eventing/evnt-01-setup-in-cluster-eventing.md) article.
