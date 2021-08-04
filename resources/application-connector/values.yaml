@@ -4,14 +4,11 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-central_application_connectivity_validator:
-  enabled: &centralApplicationConnectivityValidatorEnabled false
-
 central_application_gateway:
-  enabled: false
+  enabled: true
 
 global:
-  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
+  centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
   integrationNamespace: kyma-integration
