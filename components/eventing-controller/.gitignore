@@ -27,3 +27,4 @@ bin
 /eventing-controller-nats
 vendor
 licenses
+/upgrade-job/.devEnv

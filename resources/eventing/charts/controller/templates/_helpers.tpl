@@ -72,3 +72,11 @@ Create eventing backend name.
 {{- define "controller.natsServer.url" -}}
 {{- printf "%s-nats.%s.svc.cluster.local" .Release.Name .Release.Namespace | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+-Pre upgrade hook
+-*/}}
+{{- define "eventing.preUpgrade.labels" -}}
+component: {{ .Release.Name }}
+job: pre-upgrade-hook
+{{- end }}

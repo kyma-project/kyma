@@ -39,7 +39,7 @@ authentication:
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
 
-preUpgradeJob:
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
+#preUpgradeJob:
+#  image:
+#    name: eu.gcr.io/kyma-project/tpi/k8s-tools
+#    tag: "20210610-d25e85b1"
