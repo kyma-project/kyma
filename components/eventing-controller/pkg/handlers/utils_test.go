@@ -212,41 +212,51 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 	s1 := &eventingv1alpha1.Subscription{
 		ObjectMeta: v1meta.ObjectMeta{
 			Name:      "subscription1",
-			Namespace: "loooong-loooong-namespace",
+			Namespace: "my-namespace",
 		},
 	}
+	s2 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "mysub",
+			Namespace: "another-namespace",
+		},
+	}
+	hashLength := 40
 
 	tests := []struct {
 		shootName  string
 		maxLen     int
 		inputSub   *eventingv1alpha1.Subscription
-		outputName string
+		outputHash string
 	}{
 		{
 			shootName:  "my-shoot-name",
-			maxLen:     40,
+			maxLen:     50,
 			inputSub:   s1,
-			outputName: fmt.Sprintf("%s/%s/%s", "my-shoot-name", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName("my-shoot-name", s1.Namespace, s1.Name),
 		},
 		{
 			shootName:  "   ",
-			maxLen:     40,
+			maxLen:     50,
 			inputSub:   s1,
-			outputName: fmt.Sprintf("%s/%s", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName("", s1.Namespace, s1.Name),
 		},
 		{
 			shootName:  "",
-			maxLen:     20,
-			inputSub:   s1,
-			outputName: fmt.Sprintf("%s/%s", s1.Namespace, s1.Name),
+			maxLen:     50,
+			inputSub:   s2,
+			outputHash: hashSubscriptionFullName("", s2.Namespace, s2.Name),
 		},
 	}
 	for _, test := range tests {
 		mapper := NewBebSubscriptionNameMapper(test.shootName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub)
-		g.Expect(strings.HasPrefix(test.outputName, s)).To(BeTrue())
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
-		g.Expect(len(s)).To(BeNumerically("<=", len(test.outputName)))
+		// the mapped name should always end with the SHA1
+		g.Expect(strings.HasSuffix(s, test.outputHash)).To(BeTrue())
+		// and have the first 10 char of the name
+		prefixLen := min(len(test.inputSub.Name), test.maxLen - hashLength)
+		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
 	}
 }
 
@@ -283,4 +293,11 @@ func TestShortenNameAndAppendHash(t *testing.T) {
 		nameWithHash := shortenNameAndAppendHash(test.name, test.hash, test.maxLen)
 		g.Expect(nameWithHash).To(Equal(test.output))
 	}
+}
+
+func min(i, j int) int {
+	if i < j {
+		return i
+	}
+	return j
 }

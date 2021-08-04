@@ -55,15 +55,19 @@ type bebSubscriptionNameMapper struct {
 
 func NewBebSubscriptionNameMapper(shootName string, maxNameLength int) *bebSubscriptionNameMapper {
 	return &bebSubscriptionNameMapper{
-		shootName: shootName,
+		shootName: strings.TrimSpace(shootName),
 		maxLength: maxNameLength,
 	}
 }
 
 func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
-	hash := sha1.Sum([]byte(m.shootName + sub.Namespace + sub.Name))
-	hashStr := fmt.Sprintf("%x", hash)
-	return shortenNameAndAppendHash(sub.Name, hashStr, m.maxLength)
+	hash := hashSubscriptionFullName(m.shootName, sub.Namespace, sub.Name)
+	return shortenNameAndAppendHash(sub.Name, hash, m.maxLength)
+}
+
+func hashSubscriptionFullName(shootName, namespace, name string) string {
+	hash := sha1.Sum([]byte(shootName + namespace + name))
+	return fmt.Sprintf("%x", hash)
 }
 
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
