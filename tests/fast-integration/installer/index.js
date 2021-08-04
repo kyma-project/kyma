@@ -185,12 +185,16 @@ async function installRelease(
 async function chartList(options) {
   const gardernerDomain = await getGardenerDomain();
   const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
+  console.log(isGardener);
   const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
+  console.log(domain);
   const isCompassEnabled = !!options.withCompass;
   const isCentralApplicationGatewayEnabled = !!options.withCentralApplicationGateway;
   const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.disableLegacyConnectivity=${isCompassEnabled},central_application_gateway.enabled=${isCentralApplicationGatewayEnabled},authProxy.config.useDex=false`;
+  console.log(overrides);
   // https://github.com/kyma-project/test-infra/pull/2967
   let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
+  console.log(registryOverrides);
   if (isGardener == "true") {
     registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
   }
