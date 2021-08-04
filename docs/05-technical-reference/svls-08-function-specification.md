@@ -111,14 +111,16 @@ See the detailed descriptions of these fields:
 
 ### Event object SDK
 
+The `event` object is extended by methods making things easier. You can use every method by writing `event.Function_Name(Arguments...)`.
+
 <div tabs name="signature" group="function-specification">
 <details>
 <summary label="Node.js">
 Node.js
 </summary>
 
-| Function | Arguments | Description |
-|----------|-----------|-------------|
+| Function Name | Arguments | Description |
+|---------------|-----------|-------------|
 | setResponseHeader | key, value | Set a header to the response object based on the given `key` and the `value` |
 | setResponseContentType | type | Set the `ContentType` header to the response object based on the given `type` |
 | setResponseStatus | status | Set the response statuc based on the given `status` |
