@@ -202,11 +202,9 @@ spec:
         autoscaleEnabled: false
         env: {}
         name: istio-ingressgateway
-{{- if (lookup "v1" "ConfigMap" "kube-system" "shoot-info") }}
         serviceAnnotations:
           dns.gardener.cloud/class: garden
           dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
-{{- end }}
         secretVolumes:
         - mountPath: /etc/istio/ingressgateway-certs
           name: ingressgateway-certs

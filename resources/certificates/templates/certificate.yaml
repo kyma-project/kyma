@@ -1,15 +1,4 @@
-{{- if not (lookup "v1" "Secret" "{{ .Values.certificates.kyma.namespace }}" "{{ .Values.certificates.kyma.name }}") }}
-{{- if (lookup "v1" "ConfigMap" "kube-system" "shoot-info") }}
----
-apiVersion: cert.gardener.cloud/v1alpha1
-kind: Certificate
-metadata:
-  name: kyma-tls-cert
-  namespace: {{ .Values.certificates.kyma.namespace }}
-spec:
-  commonName: "*.{{ .Values.global.domainName }}"
-  secretName: {{ .Values.certificates.kyma.name }}
-{{- else }}
+{{- if or .Values.global.tlsCrt .Values.global.tlsKey -}}
 ---
 apiVersion: v1
 kind: Secret
@@ -20,5 +9,14 @@ type: Opaque
 data:
   tls.crt: {{ .Values.global.tlsCrt }}
   tls.key: {{ .Values.global.tlsKey }}
-{{- end }}
-{{- end }}
+{{- else -}}
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-tls-cert
+  namespace: {{ .Values.certificates.kyma.namespace }}
+spec:
+  commonName: "*.{{ .Values.global.domainName }}"
+  secretName: {{ .Values.certificates.kyma.name }}
+{{- end -}}
