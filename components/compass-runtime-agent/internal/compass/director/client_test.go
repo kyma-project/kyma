@@ -2,6 +2,8 @@ package director
 
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
@@ -356,9 +358,9 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 	expectedSetConsoleURLRequest := gcli.NewRequest(expectedSetConsoleURLLabelQuery)
 	expectedSetConsoleURLRequest.Header.Set(TenantHeader, tenant)
 
-	newSetExpectedLabelFunc := func(expectedResponses *graphql.Label) func(t *testing.T, r interface{}) {
-		return func(t *testing.T, r interface{}) {
-			cfg, ok := r.(*SetRuntimeLabelResponse)
+	newSetExpectedLabelFunc2 := func(expectedResponses *graphql.Label) func(arguments mock.Arguments) {
+		return func(arguments mock.Arguments) {
+			cfg, ok := arguments[1].(*SetRuntimeLabelResponse)
 			require.True(t, ok)
 			assert.Empty(t, cfg.Result)
 			cfg.Result = expectedResponses
@@ -378,16 +380,19 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 	t.Run("should set URLs as labels if no labels are set", func(t *testing.T) {
 		currentLabels := graphql.Labels{}
 
-		gqlClient := gql.NewQueryAssertClient(t, false,
-			gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
-				ExpectedReq:        expectedSetEventsURLRequest,
-			}, gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
-				ExpectedReq:        expectedSetConsoleURLRequest,
-			})
+		client := &mocks.Client{}
+		client.
+			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(eventsURLLabel)).
+			Once()
+		client.
+			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(consoleURLLabel)).
+			Once()
 
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
 		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
@@ -404,9 +409,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		currentLabels[eventsURLLabelKey] = runtimeURLsConfig.EventsURL
 		currentLabels[consoleURLLabelKey] = runtimeURLsConfig.ConsoleURL
 
-		gqlClient := gql.NewQueryAssertClient(t, false)
-
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+		configClient := NewConfigurationClient(&mocks.Client{}, runtimeConfig)
 
 		// when
 		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
@@ -421,16 +424,19 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		currentLabels[eventsURLLabelKey] = runtimeURLsConfig.EventsURL + " something different"
 		currentLabels[consoleURLLabelKey] = runtimeURLsConfig.ConsoleURL + " something different"
 
-		gqlClient := gql.NewQueryAssertClient(t, false,
-			gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
-				ExpectedReq:        expectedSetEventsURLRequest,
-			}, gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
-				ExpectedReq:        expectedSetConsoleURLRequest,
-			})
+		client := &mocks.Client{}
+		client.
+			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(eventsURLLabel)).
+			Once()
+		client.
+			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(consoleURLLabel)).
+			Once()
 
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
 		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
@@ -446,13 +452,14 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		currentLabels := graphql.Labels{}
 		currentLabels[eventsURLLabelKey] = runtimeURLsConfig.EventsURL
 
-		gqlClient := gql.NewQueryAssertClient(t, false,
-			gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(consoleURLLabel),
-				ExpectedReq:        expectedSetConsoleURLRequest,
-			})
+		client := &mocks.Client{}
+		client.
+			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(consoleURLLabel)).
+			Once()
 
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
 		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
@@ -466,21 +473,20 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 	t.Run("should return error if setting label returned nil response", func(t *testing.T) {
 		currentLabels := graphql.Labels{}
 
-		gqlClient := gql.NewQueryAssertClient(t, false,
-			gql.ResponseMock{
-				ModifyResponseFunc: newSetExpectedLabelFunc(eventsURLLabel),
-				ExpectedReq:        expectedSetEventsURLRequest,
-			}, gql.ResponseMock{
-				ModifyResponseFunc: func(t *testing.T, r interface{}) {
-					cfg, ok := r.(*SetRuntimeLabelResponse)
-					assert.True(t, ok)
-					assert.Empty(t, cfg.Result)
-					cfg.Result = nil
-				},
-				ExpectedReq: expectedSetConsoleURLRequest,
-			})
+		client := &mocks.Client{}
+		client.
+			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(eventsURLLabel)).
+			Once()
 
-		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+		client.
+			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			Return(nil).
+			Run(newSetExpectedLabelFunc2(nil)).
+			Once()
+
+		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
 		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)

@@ -69,20 +69,17 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql
 }
 
 func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels graphql.Labels) (graphql.Labels, error) {
-	targetLabels := []struct {
-		key string
-		val string
-	}{
-		{key: eventsURLLabelKey, val: urlsCfg.EventsURL},
-		{key: consoleURLLabelKey, val: urlsCfg.ConsoleURL},
+	targetLabels := map[string]string{
+		eventsURLLabelKey:  urlsCfg.EventsURL,
+		consoleURLLabelKey: urlsCfg.ConsoleURL,
 	}
 
 	updatedLabels := make(map[string]interface{})
-	for _, tl := range targetLabels {
-		if val, ok := currentLabels[tl.key]; !ok || val != tl.val {
-			l, err := cc.setURLLabel(tl.key, tl.val)
+	for key, value := range targetLabels {
+		if val, ok := currentLabels[key]; !ok || val != value {
+			l, err := cc.setURLLabel(key, value)
 			if err != nil {
-				return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", tl.key, tl.val)
+				return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", key, val)
 			}
 
 			updatedLabels[l.Key] = l.Value
