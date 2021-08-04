@@ -18,13 +18,48 @@ There can be other causes for the Prometheus Istio Server to restart or crash, b
 
 ## Remedy
 
-To prevent the OOM issue, you can increase the memory limit, and you can drop additional labels.
+To prevent the OOM issue, you can increase the memory limit.
+Additionally, you can choose to decrease the volume of data by dropping additional labels.
 
 > **CAUTION:** Dropping additional labels with `prometheus-istio.envoyStats.labeldropRegex` has the side effect that graphs in Kiali will not work.
 
-For both solutions, you can choose to apply them either on the Helm side, or in your Kyma cluster configuration.
+For both solutions, you can choose to change your Kyma cluster settings or directly update the Istio Prometheus resources.
 
-### Change the Helm configuration
+### Change the Kyma settings
+
+1. To increase the memory limit to 6Gi, create a values YAML file with the following content:
+
+```yaml
+monitoring:
+  prometheus-istio:
+    server:
+      resources:
+        limits:
+          memory: "6Gi"
+```
+
+2. Deploy the values YAML file with the following command:
+
+```bash
+kyma deploy --values-file {VALUES_FILE_PATH}
+```
+
+3. If the problem persists, drop labels for the Istio metrics with the following values YAML file:
+  
+```yaml
+monitoring:
+  prometheus-istio:
+    envoyStats:
+      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
+```
+
+4. Again, change the settings with the following command:
+
+```bash
+kyma deploy --values-file {VALUES_FILE_PATH}
+```
+
+### Change the Istio Prometheus configuration
 
 1. To increase the memory for `prometheus-istio-server`, run the following command:
 
@@ -44,7 +79,7 @@ For both solutions, you can choose to apply them either on the Helm side, or in 
       memory: 200Mi
   ```
 
-3. To drop labels for the Istio metrics, edit `prometheus-istio server`:
+3. If the problem persists, drop labels for the Istio metrics, edit `prometheus-istio server`:
 
   ```bash
   kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
@@ -71,20 +106,3 @@ For both solutions, you can choose to apply them either on the Helm side, or in 
   ```bash
   kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
   ```
-
-### Change the Kyma configuration
-
-To [change the configuration](../../.../04-operation-guides/operations/03-change-kyma-config-values.md), deploy a values YAML file.
-
-You can set the value for the **memory limit** attribute to 6Gi, and/or **drop the labels** from Istio metrics.
-
-```yaml
-monitoring:
-  prometheus-istio:
-    envoyStats:
-      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
-    server:
-      resources:
-        limits:
-          memory: "6Gi"
-```
