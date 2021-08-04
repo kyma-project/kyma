@@ -109,6 +109,36 @@ See the detailed descriptions of these fields:
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
+### Event object SDK
+
+<div tabs name="signature" group="function-specification">
+<details>
+<summary label="Node.js">
+Node.js
+</summary>
+
+| Function | Arguments | Description |
+|----------|-----------|-------------|
+| setResponseHeader | key, value | Set a header to the response object based on the given `key` and the `value` |
+| setResponseContentType | type | Set the `ContentType` header to the response object based on the given `type` |
+| setResponseStatus | status | Set the response statuc based on the given `status` |
+| publishCloudEvent | event | Publish an CloudEvent to the publisher service based on the given CloudEvent object |
+| buildResponseCloudEvent | id, type, data | Build an CloudEvent object based on the request CloudEvent object and given arguments |
+
+</details>
+<details>
+<summary label="Python">
+Python
+</summary>
+
+| Function | Arguments | Description |
+|----------|-----------|-------------|
+| publishCloudEvent | event | Publish an CloudEvent to the publisher service based on the given CloudEvent object |
+| buildResponseCloudEvent | id, type, data | Build an CloudEvent object based on the request CloudEvent object and given arguments |
+
+</details>
+</div>
+
 ### Context object
 
 The `context` object contains information about the Function invocation, such as runtime details, execution timeout, or memory limits.
