@@ -39,7 +39,25 @@ func GroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
 		Group:    eventingv1alpha1.GroupVersion.Group,
-		Resource: "eventingbackends",
+		Resource: "EventingBackends",
+	}
+}
+
+// GroupVersionKind return the GVK for EventingBackend resource
+func GroupVersionKind() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Kind:    "EventingBackend",
+	}
+}
+
+// GroupVersionKindList return the GVK list for EventingBackend resource
+func GroupVersionKindList() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Kind:    "EventingBackendList",
 	}
 }
 

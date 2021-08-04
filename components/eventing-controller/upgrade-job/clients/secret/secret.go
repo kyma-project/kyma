@@ -3,7 +3,6 @@ package secret
 import (
 	"context"
 	"encoding/json"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -42,6 +41,24 @@ func GroupVersionResource() schema.GroupVersionResource {
 		Version:  corev1.SchemeGroupVersion.Version,
 		Group:    corev1.SchemeGroupVersion.Group,
 		Resource: "secrets",
+	}
+}
+
+// GroupVersionKind return the GVK for Secret k8s resource
+func GroupVersionKind() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  corev1.SchemeGroupVersion.Version,
+		Group:    corev1.SchemeGroupVersion.Group,
+		Kind:    "Secret",
+	}
+}
+
+// GroupVersionKindList return the GVK list for Secret k8s resource
+func GroupVersionKindList() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  corev1.SchemeGroupVersion.Version,
+		Group:    corev1.SchemeGroupVersion.Group,
+		Kind:    "SecretList",
 	}
 }
 

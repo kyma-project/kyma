@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kelseyhightower/envconfig"
+
 	"github.com/pkg/errors"
 	"log"
 	"os"
@@ -17,22 +18,13 @@ import (
 
 	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
 	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/env"
 	jobprocess "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/process"
 )
 
-// Config for env variables
-type Config struct {
-	ReleaseName     		string `envconfig:"RELEASE" required:"true"`
-	KymaNamespace    		string `envconfig:"KYMA_NAMESPACE" default:"kyma-system"`
-	EventingControllerName  string `envconfig:"EVENTING_CONTROLLER_NAME" required:"true"`
-	EventingPublisherName	string `envconfig:"EVENTING_PUBLISHER_NAME" required:"true"`
-	LogFormat 				string `envconfig:"APP_LOG_FORMAT" default:"json"`
-	LogLevel  				string `envconfig:"APP_LOG_LEVEL" default:"warn"`
-}
-
 func main() {
 	// Read Env variables
-	cfg := new(Config)
+	cfg := new(env.Config)
 	if err := envconfig.Process("", cfg); err != nil {
 		log.Fatalf("Start handler failed with error: %s", err)
 	}
@@ -77,6 +69,7 @@ func main() {
 			Secret: secretClient,
 			EventMesh: eventMeshClient,
 		},
+		State: jobprocess.State{},
 	}
 
 	// First check if BEB is enabled for Kyma cluster
