@@ -9,11 +9,7 @@ You can choose to provide just a partial definition specifying just some of the 
 1. To provide a custom IstioOperator configuration, define a Kyma Installation override with the **kyma_istio_operator** key.
 The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
 
-<!-- I believe this tip is obsolete -->
-
->**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
->* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
->* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides).
+>**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
 See the following example that customizes settings for the `policy` and `pilot` components of Istio:
 

@@ -2,8 +2,7 @@
 title: Incompatible Istio sidecar version after Kyma upgrade
 ---
 
-
-Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read [this document](#details-sidecar-proxy-injection).
+Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read [this document](../operations/smsh-01-istio-disable-sidecar-injection.md).
 
 The sidecar version in Pods must match the installed Istio version. Otherwise, mesh connectivity may be broken.
 This issue may appear during Kyma upgrade. When Kyma is upgraded to a new version along with a new Istio version, existing sidecars injected into Pods remain in an original version.
@@ -33,8 +32,8 @@ To check if any Pods or workloads require a manual restart, follow these steps:
         kubectl get pods -A -o json | jq -rc '.items | .[] | select(.spec.containers[].image | startswith("'"${COMMON_ISTIO_PROXY_IMAGE_PREFIX}"'") and (endswith("'"${KYMA_ISTIO_VERSION}"'") | not))  | "\(.metadata.name)/\(.metadata.namespace)"'
         ```
 
-
     * Run the `istio-proxy-reset` script in the dry-run mode. The output contains information about objects, such as Pods, Deployments, etc., that require rollout. To run the script, run this command from within the directory with checked-out Kyma sources:
+
         ```bash
         EXPECTED_ISTIO_PROXY_IMAGE="${KYMA_ISTIO_VERSION}"
         COMMON_ISTIO_PROXY_IMAGE_PREFIX="eu.gcr.io/kyma-project/external/istio/proxyv2"
