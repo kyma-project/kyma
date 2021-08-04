@@ -44,10 +44,6 @@ func main() {
 		hydraFqdn:  *oidcProviderFqdnPtr,
 		httpClient: client,
 		config:     config}
-	_, err = h.doLogin()
-	if err != nil {
-		l.Fatal(err)
-	}
 	token, err := h.GetToken()
 	if err != nil {
 		l.Fatal(err)

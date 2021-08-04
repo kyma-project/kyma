@@ -25,10 +25,6 @@ func TestHydraTokenFetcher(t *testing.T) {
 		hydraFqdn:  oryHydraOauthFqdn,
 		httpClient: client,
 		config:     config}
-	_, err = h.doLogin()
-	if err != nil {
-		t.Fatal(err)
-	}
 	token, err := h.GetToken()
 	if err != nil {
 		t.Fatal(err)
