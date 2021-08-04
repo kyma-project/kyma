@@ -1,10 +1,10 @@
 ---
-title: Recive and publish a CloudEvent
+title: Publish a CloudEvent
 ---
 
 This tutorial shows how you can receive a [Cloud Events](https://cloudevents.io/) in the Function and publish a CloudEvent to the same queue using Functions SDK.
 
-1. [Create an inline Function](./svls-02-create-git-function.md)
+1. [Create an inline Function](./svls-02-create-git-function.md).
 2. Modify its body to be ready to publish a CloudEvent:
 
     ```js
