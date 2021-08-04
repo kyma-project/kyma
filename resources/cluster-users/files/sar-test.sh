@@ -281,6 +281,7 @@ function getConfigFile() {
     ;;
   "hydra")
     echo "TODO"
+    exit 1
     ;;
   *)
     echo "$OIDC_PROVIDER not supported"
