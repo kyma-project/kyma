@@ -1151,7 +1151,7 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
-	nameMapper = handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
+	nameMapper = handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
 
 	err = NewReconciler(
 		context.Background(),

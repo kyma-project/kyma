@@ -90,7 +90,7 @@ func (c *Commander) Start() error {
 	if err != nil {
 		return errors.Wrap(err, "error getting shoot name")
 	}
-	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
+	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
 	reconciler := subscription.NewReconciler(

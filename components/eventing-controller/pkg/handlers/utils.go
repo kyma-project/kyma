@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -48,29 +49,32 @@ type NameMapper interface {
 }
 
 type bebSubscriptionNameMapper struct {
-	prefix    string
+	shootName string
 	maxLength int
-	separator string
 }
 
-func NewBebSubscriptionNameMapper(prefix string, maxNameLength int, separator string) *bebSubscriptionNameMapper {
-	p := strings.TrimSpace(prefix)
-	if len(p) > 0 {
-		p += separator
-	}
+func NewBebSubscriptionNameMapper(shootName string, maxNameLength int) *bebSubscriptionNameMapper {
 	return &bebSubscriptionNameMapper{
-		prefix:    p,
+		shootName: shootName,
 		maxLength: maxNameLength,
-		separator: separator,
 	}
 }
 
 func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
-	fullName := m.prefix + sub.GetNamespace() + m.separator + sub.GetName()
-	if len(fullName) > m.maxLength && m.maxLength > 0 {
-		return fullName[0:m.maxLength]
+	hash := sha1.Sum([]byte(m.shootName + sub.Namespace + sub.Name))
+	hashStr := fmt.Sprintf("%x", hash)
+	return shortenNameAndAppendHash(sub.Name, hashStr, m.maxLength)
+}
+
+func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
+	maxNameLen := maxLength - len(hash)
+	if maxNameLen <= 0 {
+		return hash
 	}
-	return fullName
+	if len(name) > maxNameLen {
+		name = name[:maxNameLen]
+	}
+	return name + hash
 }
 
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))

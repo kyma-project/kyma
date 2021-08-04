@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"strings"
 	"testing"
@@ -49,7 +50,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		TokenURL:     "tokenURL",
 	}
 
-	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50, "/")
+	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
 
 	defaultNamespace := "defaultNS"
 	svcName := "foo-svc"
@@ -241,10 +242,45 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		mapper := NewBebSubscriptionNameMapper(test.shootName, test.maxLen, "/")
+		mapper := NewBebSubscriptionNameMapper(test.shootName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub)
 		g.Expect(strings.HasPrefix(test.outputName, s)).To(BeTrue())
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
 		g.Expect(len(s)).To(BeNumerically("<=", len(test.outputName)))
+	}
+}
+
+func TestShortenNameAndAppendHash(t *testing.T) {
+	g := NewGomegaWithT(t)
+	fakeHash := fmt.Sprintf("%x", sha1.Sum([]byte("myshootmynamespacemyname")))
+
+	tests := []struct {
+		name   string
+		hash   string
+		maxLen int
+		output string
+	}{
+		{
+			name:   "mylongsubscription",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mylongsubs" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mysub" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 40,
+			output: fakeHash, // no room for name!
+		},
+	}
+	for _, test := range tests {
+		nameWithHash := shortenNameAndAppendHash(test.name, test.hash, test.maxLen)
+		g.Expect(nameWithHash).To(Equal(test.output))
 	}
 }

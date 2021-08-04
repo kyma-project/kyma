@@ -17,7 +17,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	// given
-	nameMapper := NewBebSubscriptionNameMapper("shoot001", MaxBEBSubscriptionNameLength, BebSubscriptionNameSeparator)
+	nameMapper := NewBebSubscriptionNameMapper("shoot001", MaxBEBSubscriptionNameLength)
 	beb := NewBEB(nameMapper, ctrl.Log)
 	clientId := "client-id"
 	clientSecret := "client-secret"

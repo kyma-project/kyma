@@ -19,7 +19,6 @@ import (
 const (
 	bebHandlerName               = "beb-handler"
 	MaxBEBSubscriptionNameLength = 50
-	BebSubscriptionNameSeparator = "/"
 )
 
 // compile time check
