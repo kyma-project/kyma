@@ -1,19 +1,45 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/common/logging/tracing"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/validationproxy"
+	"github.com/oklog/run"
 	"github.com/patrickmn/go-cache"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+const (
+	shutdownTimeout = 2 * time.Second
+)
+
+var (
+	scheme = runtime.NewScheme()
+)
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+}
 
 func main() {
 	options, err := parseOptions()
@@ -66,7 +92,7 @@ func main() {
 		log.WithContext().
 			With("controller", "cache_janitor").
 			With("name", key).
-			Warnf("Deleted the application from the cache on cache eviction.")
+			Warnf("Deleted the application from the cache with values %v.", i)
 	})
 
 	proxyHandler := validationproxy.NewProxyHandler(
@@ -93,20 +119,73 @@ func main() {
 		Addr:    fmt.Sprintf(":%d", options.externalAPIPort),
 	}
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme:             scheme,
+		MetricsBindAddress: "0",
+		SyncPeriod:         &options.syncPeriod,
+	})
+	if err != nil {
+		log.WithContext().Error("Unable to start manager: %s", err.Error())
+		os.Exit(1)
+	}
+	if err = controller.NewController(log, mgr.GetClient(), idCache).SetupWithManager(mgr); err != nil {
+		log.WithContext().Error("unable to create reconciler : %s", err.Error())
+		os.Exit(1)
+	}
 
-	go func() {
-		controller.Start(log, options.kubeConfig, options.apiServerURL, options.syncPeriod, idCache)
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	var g run.Group
+	addInterruptSignalToRunGroup(ctx, cancel, log, &g)
+	addManagerToRunGroup(ctx, log, &g, mgr)
+	addHttpServerToRunGroup(log, "proxy-server", &g, &proxyServer)
+	addHttpServerToRunGroup(log, "external-server", &g, &externalServer)
 
-	go func() {
-		log.WithContext().With("server", "proxy").With("port", options.proxyPort).Fatal(proxyServer.ListenAndServe())
-	}()
+	err = g.Run()
+	if err != nil && err != http.ErrServerClosed {
+		log.WithContext().Fatal(err)
+	}
+}
 
-	go func() {
-		log.WithContext().With("server", "external").With("port", options.externalAPIPort).Fatal(externalServer.ListenAndServe())
-	}()
+func addHttpServerToRunGroup(log *logger.Logger, name string, g *run.Group, srv *http.Server) {
+	log.WithContext().Infof("Starting %s HTTP server on %s", name, srv.Addr)
+	ln, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		log.WithContext().Fatalf("Unable to start %s HTTP server: '%s'", name, err.Error())
+	}
+	g.Add(func() error {
+		defer log.WithContext().Infof("Server %s finished", name)
+		return srv.Serve(ln)
+	}, func(error) {
+		log.WithContext().Infof("Shutting down %s HTTP server on %s", name, srv.Addr)
 
-	wg.Wait()
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		err = srv.Shutdown(ctx)
+		if err != nil && err != http.ErrServerClosed {
+			log.WithContext().Warnf("HTTP server shutdown %s failed: %s", name, err.Error())
+		}
+	})
+}
+
+func addManagerToRunGroup(ctx context.Context, log *logger.Logger, g *run.Group, mgr manager.Manager) {
+	g.Add(func() error {
+		defer log.WithContext().Infof("Manager finished")
+		return mgr.Start(ctx)
+	}, func(error) {
+	})
+}
+
+func addInterruptSignalToRunGroup(ctx context.Context, cancel context.CancelFunc, log *logger.Logger, g *run.Group) {
+	g.Add(func() error {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case <-ctx.Done():
+		case sig := <-c:
+			log.WithContext().Infof("received signal %s", sig)
+		}
+		return nil
+	}, func(error) {
+		cancel()
+	})
 }

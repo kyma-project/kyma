@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -76,6 +77,19 @@ func TestOptionsValidation(t *testing.T) {
 				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
 				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 				appRegistryPathPrefix:    "//v1/metadata",
+			},
+		},
+		{
+			name:  "syncPeriod greater than cacheExpirationSeconds",
+			valid: false,
+			args: args{
+				appNamePlaceholder:       "%%APP_NAME%%",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
+				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
+				cacheExpirationSeconds:   120,
+				syncPeriod:               121 * time.Second,
 			},
 		},
 	}

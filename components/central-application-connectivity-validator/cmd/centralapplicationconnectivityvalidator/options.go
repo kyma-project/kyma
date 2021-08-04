@@ -3,8 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"time"
+
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/vrischmann/envconfig"
 )
@@ -22,8 +25,6 @@ type args struct {
 	appNamePlaceholder          string
 	cacheExpirationSeconds      int
 	cacheCleanupIntervalSeconds int
-	kubeConfig                  string
-	apiServerURL                string
 	syncPeriod                  time.Duration
 }
 
@@ -49,10 +50,8 @@ func parseOptions() (*options, error) {
 	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appNamePlaceholder := flag.String("appNamePlaceholder", "%%APP_NAME%%", "Path URL placeholder used for an application name")
 	cacheExpirationSeconds := flag.Int("cacheExpirationSeconds", 90, "Expiration time for client IDs stored in cache expressed in seconds")
-	cacheCleanupIntervalSeconds := flag.Int("cacheCleanupIntervalSeconds", 15, "Clean up interval controls how often the client IDs stored in cache are removed")
-	kubeConfig := flag.String("kubeConfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	apiServerURL := flag.String("apiServerURL", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	syncPeriod := flag.Duration("syncPeriod", 60*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
+	cacheCleanupIntervalSeconds := flag.Int("cacheCleanupIntervalSeconds", 20, "Clean up interval controls how often the client IDs stored in cache are removed")
+	syncPeriod := flag.Duration("syncPeriod", 45*time.Second, "Sync period in seconds how often controller should periodically reconcile Application resource.")
 
 	flag.Parse()
 
@@ -75,8 +74,6 @@ func parseOptions() (*options, error) {
 			appNamePlaceholder:          *appNamePlaceholder,
 			cacheExpirationSeconds:      *cacheExpirationSeconds,
 			cacheCleanupIntervalSeconds: *cacheCleanupIntervalSeconds,
-			kubeConfig:                  *kubeConfig,
-			apiServerURL:                *apiServerURL,
 			syncPeriod:                  *syncPeriod,
 		},
 		config: c,
@@ -90,15 +87,13 @@ func (o *options) String() string {
 		"--eventingDestinationPath=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appNamePlaceholder=%s "+
 		"--cacheExpirationSeconds=%d --cacheCleanupIntervalSeconds=%d "+
-		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
-		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
+		"--syncPeriod=%d APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s KUBECONFIG=%s",
 		o.proxyPort, o.externalAPIPort,
 		o.eventingPathPrefixV1, o.eventingPathPrefixV2, o.eventingPathPrefixEvents,
 		o.eventingPublisherHost, o.eventingDestinationPath,
 		o.appRegistryPathPrefix, o.appRegistryHost, o.appNamePlaceholder,
 		o.cacheExpirationSeconds, o.cacheCleanupIntervalSeconds,
-		o.kubeConfig, o.apiServerURL, o.syncPeriod,
-		o.LogFormat, o.LogLevel)
+		o.syncPeriod, o.LogFormat, o.LogLevel, os.Getenv(clientcmd.RecommendedConfigPathEnvVar))
 }
 
 func (o *options) validate() error {
@@ -116,6 +111,9 @@ func (o *options) validate() error {
 	}
 	if !strings.Contains(o.appRegistryPathPrefix, o.appNamePlaceholder) {
 		return fmt.Errorf("appRegistryPathPrefix '%s' should contain appNamePlaceholder '%s'", o.appRegistryPathPrefix, o.appNamePlaceholder)
+	}
+	if o.syncPeriod > time.Duration(o.cacheExpirationSeconds)*time.Second {
+		return fmt.Errorf("syncPeriod '%v' greater than cacheExpirationSeconds '%v' will cause unwanted cache eviction", o.syncPeriod, o.cacheExpirationSeconds)
 	}
 	return nil
 }
