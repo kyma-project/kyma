@@ -2,9 +2,7 @@
 title: Provide custom Istio configuration
 ---
 The Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API.
-Kyma provides the default IstioOperator configurations for <!-- change to "production and evaluation" local (Minikube) and cluster installations-->, but you can add a custom IstioOperator definition that overrides the default settings.
-
-You can choose to provide just a partial definition specifying just some of the options, which will be merged with the defaults.
+Kyma provides the default IstioOperator configurations for <!-- change "production and evaluation" local (Minikube) and cluster installations-->, <!--but you can add a custom IstioOperator definition that overrides the default settings. - czesciowo mozesz skonfigurowac Istio, use values.yam.
 
 1. To provide a custom IstioOperator configuration, define a Kyma Installation override with the **kyma_istio_operator** key.
 The value for this override must be a single string containing a valid definition of the IstioOperator custom resource, in the YAML format.
