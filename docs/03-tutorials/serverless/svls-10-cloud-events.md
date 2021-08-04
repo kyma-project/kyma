@@ -60,4 +60,4 @@ This tutorial shows how you can receive a [Cloud Events](https://cloudevents.io/
 
 4. Now you can send a CloudEvent to the Function and Function will publish a new CloudEvent based on the first one.
 
-    >**NOTE:** If you want to send a CloudEvent without Kyma Application see [publish events without Kyma Application](../eventing/evnt-01-setup-in-cluster-eventing.md) article.
+    >**NOTE:** If you want to send a CloudEvent using the `In-cluster Eventing` see [publish events without Kyma Application](../eventing/evnt-01-setup-in-cluster-eventing.md) article.
