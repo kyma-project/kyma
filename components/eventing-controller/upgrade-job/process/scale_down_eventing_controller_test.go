@@ -1,10 +1,11 @@
 package process
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/onsi/gomega"
@@ -23,13 +24,13 @@ func TestScaleDownEventingController(t *testing.T) {
 
 	// Create process
 	p := &Process{
-		Logger: 		ctrLogger.Logger,
+		Logger:         ctrLogger.Logger,
 		TimeoutPeriod:  60 * time.Second,
 		ReleaseName:    cfg.ReleaseName,
 		KymaNamespace:  cfg.KymaNamespace,
 		ControllerName: cfg.EventingControllerName,
 		PublisherName:  cfg.EventingPublisherName,
-		State: 			State{},
+		State:          State{},
 	}
 	p.Clients = getProcessClients(e2eSetup, g)
 

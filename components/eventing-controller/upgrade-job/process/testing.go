@@ -18,13 +18,13 @@ import (
 )
 
 type E2ESetup struct {
-	secrets     			*corev1.SecretList
-	eventingPublishers      *appsv1.DeploymentList
-	eventingControllers     *appsv1.DeploymentList
-	eventingBackends        *eventingv1alpha1.EventingBackendList
-	subscriptions 			*eventingv1alpha1.SubscriptionList
-	namespaces       		*corev1.NamespaceList
-	config  				env.Config
+	secrets             *corev1.SecretList
+	eventingPublishers  *appsv1.DeploymentList
+	eventingControllers *appsv1.DeploymentList
+	eventingBackends    *eventingv1alpha1.EventingBackendList
+	subscriptions       *eventingv1alpha1.SubscriptionList
+	namespaces          *corev1.NamespaceList
+	config              env.Config
 }
 
 func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
@@ -39,13 +39,12 @@ func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 	fakeEventMeshClient, err := eventmesh.NewFakeClient()
 	g.Expect(err).Should(gomega.BeNil())
 
-
 	return Clients{
-		Deployment: fakeDeploymentClient,
-		Subscription: fakeSubscriptionClient,
+		Deployment:      fakeDeploymentClient,
+		Subscription:    fakeSubscriptionClient,
 		EventingBackend: fakeEventingBackendClient,
-		Secret: fakeSecretClient,
-		EventMesh: fakeEventMeshClient,
+		Secret:          fakeSecretClient,
+		EventMesh:       fakeEventMeshClient,
 	}
 }
 
@@ -63,17 +62,17 @@ func newE2ESetup() E2ESetup {
 		KymaNamespace:          "kyma-system",
 		EventingControllerName: "eventing-controller",
 		EventingPublisherName:  "eventing-publisher-proxy",
-		LogFormat: "json",
-		LogLevel: "warn",
+		LogFormat:              "json",
+		LogLevel:               "warn",
 	}
 
 	e2eSetup := E2ESetup{
-		config: envConfig,
-		secrets: newSecrets,
-		eventingPublishers: newEventingPublishers,
+		config:              envConfig,
+		secrets:             newSecrets,
+		eventingPublishers:  newEventingPublishers,
 		eventingControllers: newEventingControllers,
-		eventingBackends: newEventingBackends,
-		subscriptions: newSubscriptions,
+		eventingBackends:    newEventingBackends,
+		subscriptions:       newSubscriptions,
 		//namespaces:       newNamespaces,
 	}
 	return e2eSetup

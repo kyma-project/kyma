@@ -54,6 +54,8 @@ type Reconciler struct {
 	Backend          handlers.MessagingBackend
 	Domain           string
 	eventTypeCleaner eventtype.Cleaner
+	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
+	nameMapper handlers.NameMapper
 }
 
 var (
@@ -85,6 +87,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		Backend:          bebHandler,
 		Domain:           cfg.Domain,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		nameMapper:       mapper,
 	}
 }
 
@@ -252,7 +255,8 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 	}
 
 	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
+		message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
 			return statusChanged, err
 		}

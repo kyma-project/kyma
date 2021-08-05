@@ -2,6 +2,7 @@ package process
 
 import (
 	"errors"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 	corev1 "k8s.io/api/core/v1"
 )
