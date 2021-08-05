@@ -72,24 +72,6 @@ func GroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// GroupVersionKind return the GVK for Deployment k8s resource
-func GroupVersionKind() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: appsv1.SchemeGroupVersion.Version,
-		Group:   appsv1.SchemeGroupVersion.Group,
-		Kind:    "Deployment",
-	}
-}
-
-// GroupVersionKindList return the GVK list for Deployment k8s resource
-func GroupVersionKindList() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: appsv1.SchemeGroupVersion.Version,
-		Group:   appsv1.SchemeGroupVersion.Group,
-		Kind:    "DeploymentList",
-	}
-}
-
 // toDeployment converts unstructured deployment object to typed deployment object
 func toDeployment(unstructuredDeployment *unstructured.Unstructured) (*appsv1.Deployment, error) {
 	deployment := new(appsv1.Deployment)

@@ -1,6 +1,7 @@
 package process
 
 import (
+	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
 	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
 	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
 	"github.com/onsi/gomega"
@@ -19,6 +20,7 @@ import (
 
 type E2ESetup struct {
 	secrets             *corev1.SecretList
+	configMaps			*corev1.ConfigMapList
 	eventingPublishers  *appsv1.DeploymentList
 	eventingControllers *appsv1.DeploymentList
 	eventingBackends    *eventingv1alpha1.EventingBackendList
@@ -38,12 +40,15 @@ func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 	g.Expect(err).Should(gomega.BeNil())
 	fakeEventMeshClient, err := eventmesh.NewFakeClient()
 	g.Expect(err).Should(gomega.BeNil())
+	fakeConfigMapClient, err := configmap.NewFakeClient(e2eSetup.configMaps)
+	g.Expect(err).Should(gomega.BeNil())
 
 	return Clients{
 		Deployment:      fakeDeploymentClient,
 		Subscription:    fakeSubscriptionClient,
 		EventingBackend: fakeEventingBackendClient,
 		Secret:          fakeSecretClient,
+		ConfigMap: 		 fakeConfigMapClient,
 		EventMesh:       fakeEventMeshClient,
 	}
 }
@@ -52,10 +57,9 @@ func newE2ESetup() E2ESetup {
 	newEventingControllers := processtest.NewEventingControllers()
 	newEventingPublishers := processtest.NewEventingPublishers()
 	newSecrets := processtest.NewSecrets()
+	newConfigMaps := processtest.NewConfigMaps()
 	newSubscriptions := processtest.NewKymaSubscriptions()
 	newEventingBackends := processtest.NewEventingBackends()
-
-	//newNamespaces := processtest.NewNamespaces()
 
 	envConfig := env.Config{
 		ReleaseName:            "release",
@@ -69,11 +73,11 @@ func newE2ESetup() E2ESetup {
 	e2eSetup := E2ESetup{
 		config:              envConfig,
 		secrets:             newSecrets,
+		configMaps: 		 newConfigMaps,
 		eventingPublishers:  newEventingPublishers,
 		eventingControllers: newEventingControllers,
 		eventingBackends:    newEventingBackends,
 		subscriptions:       newSubscriptions,
-		//namespaces:       newNamespaces,
 	}
 	return e2eSetup
 }

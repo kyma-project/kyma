@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kelseyhightower/envconfig"
+	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
 
 	"log"
 	"os"
@@ -52,6 +53,7 @@ func main() {
 	subscriptionClient := subscription.NewClient(dynamicClient)
 	eventingBackendClient := eventingbackend.NewClient(dynamicClient)
 	secretClient := secret.NewClient(dynamicClient)
+	configMapClient := configmap.NewClient(dynamicClient)
 	eventMeshClient := eventmesh.NewClient()
 
 	// Create process
@@ -67,6 +69,7 @@ func main() {
 			Subscription:    subscriptionClient,
 			EventingBackend: eventingBackendClient,
 			Secret:          secretClient,
+			ConfigMap: 		 configMapClient,
 			EventMesh:       eventMeshClient,
 		},
 		State: jobprocess.State{},

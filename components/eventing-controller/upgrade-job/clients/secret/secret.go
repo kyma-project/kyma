@@ -45,24 +45,6 @@ func GroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// GroupVersionKind return the GVK for Secret k8s resource
-func GroupVersionKind() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: corev1.SchemeGroupVersion.Version,
-		Group:   corev1.SchemeGroupVersion.Group,
-		Kind:    "Secret",
-	}
-}
-
-// GroupVersionKindList return the GVK list for Secret k8s resource
-func GroupVersionKindList() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: corev1.SchemeGroupVersion.Version,
-		Group:   corev1.SchemeGroupVersion.Group,
-		Kind:    "SecretList",
-	}
-}
-
 // toSecretList converts unstructured Secret list object to typed object
 func toSecretList(unstructuredList *unstructured.UnstructuredList) (*corev1.SecretList, error) {
 	triggerList := new(corev1.SecretList)

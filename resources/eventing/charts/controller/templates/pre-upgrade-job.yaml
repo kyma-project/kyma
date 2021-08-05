@@ -22,10 +22,10 @@ rules:
     resources: ["deployments", "deployments/scale"]
     verbs: ["get", "list", "patch"]
   - apiGroups: [""]
-    resources: ["secrets"]
+    resources: ["secrets", "configmaps"]
     verbs: ["get", "list"]
   - apiGroups: ["eventing.kyma-project.io"]
-    resources: ["subscriptions"]
+    resources: ["subscriptions", "eventingbackends"]
     verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

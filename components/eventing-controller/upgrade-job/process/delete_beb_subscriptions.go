@@ -62,8 +62,6 @@ func (s DeleteBebSubscriptions) Do() error {
 		}
 
 		s.process.Logger.WithContext().Info(result.StatusCode, result.Message)
-
-		// @TODO: should we check for response
 	}
 
 	return nil

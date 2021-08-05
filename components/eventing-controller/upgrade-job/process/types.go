@@ -2,6 +2,7 @@ package process
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
 	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
@@ -15,14 +16,16 @@ type Clients struct {
 	Subscription    subscription.Client
 	EventingBackend eventingbackend.Client
 	Secret          secret.Client
+	ConfigMap 		configmap.Client
 	EventMesh       eventmesh.Client
 }
 
 // State consists of upgrade-job process state
 type State struct {
-	Subscriptions         *eventingv1alpha1.SubscriptionList
-	FilteredSubscriptions *eventingv1alpha1.SubscriptionList
-	IsBebEnabled          bool
+	Subscriptions         		*eventingv1alpha1.SubscriptionList
+	FilteredSubscriptions 		*eventingv1alpha1.SubscriptionList
+	//BebSubscriptionNameMapper   *handlers.NameMapper
+	IsBebEnabled          		bool
 }
 
 // int32Ptr converts int to int pointer

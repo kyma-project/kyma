@@ -43,24 +43,6 @@ func GroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// GroupVersionKind return the GVK for Subscription resource
-func GroupVersionKind() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: eventingv1alpha1.GroupVersion.Version,
-		Group:   eventingv1alpha1.GroupVersion.Group,
-		Kind:    "Subscription",
-	}
-}
-
-// GroupVersionKindList return the GVK list for Subscription resource
-func GroupVersionKindList() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: eventingv1alpha1.GroupVersion.Version,
-		Group:   eventingv1alpha1.GroupVersion.Group,
-		Kind:    "SubscriptionList",
-	}
-}
-
 // toSecretList converts unstructured Subscription list object to typed object
 func toSubscriptionList(unstructuredList *unstructured.UnstructuredList) (*eventingv1alpha1.SubscriptionList, error) {
 	triggerList := new(eventingv1alpha1.SubscriptionList)

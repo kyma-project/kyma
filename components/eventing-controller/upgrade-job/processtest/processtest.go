@@ -3,6 +3,7 @@ package processtest
 // processtest package provides utilities for Process testing.
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,6 +13,7 @@ import (
 
 const (
 	KymaSystemNamespace = "kyma-system"
+	testingShootName = "testing"
 )
 
 func NewEventingControllers() *appsv1.DeploymentList {
@@ -142,11 +144,43 @@ func NewSecret(name string) *corev1.Secret {
 	}
 }
 
+func NewConfigMaps() *corev1.ConfigMapList {
+	validator := ConfigMap("shoot-info")
+	return &corev1.ConfigMapList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMapList",
+			APIVersion: "v1",
+		},
+		Items: []corev1.ConfigMap{
+			*validator,
+		},
+	}
+}
+
+func ConfigMap(name string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: KymaSystemNamespace,
+			Labels: map[string]string{
+				"app": name,
+			},
+		},
+		Data: map[string]string{
+			"shootName": testingShootName,
+		},
+	}
+}
+
 func NewKymaSubscriptions() *eventingv1alpha1.SubscriptionList {
-	sub1 := NewKymaSubscription("sub1", true)
-	sub2 := NewKymaSubscription("sub2", true)
-	sub3 := NewKymaSubscription("sub3", true)
-	sub4 := NewKymaSubscription("sub4", false)
+	sub1 := NewKymaSubscription("sub1", true, false)
+	sub2 := NewKymaSubscription("sub2", true, false)
+	sub3 := NewKymaSubscription("sub3", true, true)
+	sub4 := NewKymaSubscription("sub4", false, false)
 
 	return &eventingv1alpha1.SubscriptionList{
 		TypeMeta: metav1.TypeMeta{
@@ -159,7 +193,27 @@ func NewKymaSubscriptions() *eventingv1alpha1.SubscriptionList {
 	}
 }
 
-func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.Subscription {
+func NewKymaSubscription(appName string, addConditions bool, includeBebMessageInCondition bool) *eventingv1alpha1.Subscription {
+	subscription := &eventingv1alpha1.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Subscription",
+			APIVersion: "eventing.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      appName,
+			Namespace: KymaSystemNamespace,
+			Labels: map[string]string{
+				"foo": "sub",
+			},
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{},
+			Sink:             "http://test.test.svc.cluster.local",
+		},
+		Status: eventingv1alpha1.SubscriptionStatus{},
+	}
+
+	// Define conditions
 	condition1 := eventingv1alpha1.Condition{
 		Type:               eventingv1alpha1.ConditionSubscriptionActive,
 		Reason:             "BEB Subscription active",
@@ -167,6 +221,12 @@ func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.S
 		Status:             "True",
 		LastTransitionTime: metav1.Now(),
 	}
+	if includeBebMessageInCondition {
+		nameMapper := handlers.NewBebSubscriptionNameMapper(testingShootName, handlers.MaxBEBSubscriptionNameLength)
+		newBebSubscriptionName := nameMapper.MapSubscriptionName(subscription)
+		condition1.Message =  eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
+	}
+
 	condition2 := eventingv1alpha1.Condition{
 		Type:               eventingv1alpha1.ConditionSubscribed,
 		Reason:             "BEB Subscription creation failed",
@@ -182,29 +242,9 @@ func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.S
 		LastTransitionTime: metav1.Now(),
 	}
 
-	var conditionsList []eventingv1alpha1.Condition
 	if addConditions {
-		conditionsList = []eventingv1alpha1.Condition{condition1, condition2, condition3}
+		subscription.Status.Conditions = []eventingv1alpha1.Condition{condition1, condition2, condition3}
 	}
 
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      appName,
-			Namespace: KymaSystemNamespace,
-			Labels: map[string]string{
-				"foo": "sub",
-			},
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{},
-			Sink:             "sink -> http://test.test.svc.cluster.local",
-		},
-		Status: eventingv1alpha1.SubscriptionStatus{
-			Conditions: conditionsList,
-		},
-	}
+	return subscription
 }

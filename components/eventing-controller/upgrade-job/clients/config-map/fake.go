@@ -1,4 +1,4 @@
-package secret
+package configmap
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
@@ -7,13 +7,13 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 )
 
-func NewFakeClient(secrets *corev1.SecretList) (Client, error) {
+func NewFakeClient(configMaps *corev1.ConfigMapList) (Client, error) {
 	scheme, err := SetupSchemeOrDie()
 	if err != nil {
 		return Client{}, err
 	}
 
-	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, secrets)
+	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, configMaps)
 	return Client{client: dynamicClient}, nil
 }
 
@@ -27,4 +27,3 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	}
 	return scheme, nil
 }
-
