@@ -2,10 +2,10 @@ package process
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
-	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
-	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/secret"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/subscription"
 )

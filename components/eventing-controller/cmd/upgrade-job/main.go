@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/kelseyhightower/envconfig"
-	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
 
 	"log"
 	"os"
@@ -14,12 +13,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/secret"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/subscription"
-
-	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
-	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/env"
 	jobprocess "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/process"
 )

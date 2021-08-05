@@ -1,21 +1,20 @@
 package process
 
 import (
-	configmap "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/config-map"
-	eventmesh "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/event-mesh"
-	eventingbackend "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventing-backend"
 	"github.com/onsi/gomega"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/secret"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/subscription"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
-
-	env "github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/env"
 )
 
 type E2ESetup struct {
