@@ -39,7 +39,7 @@ func GroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
 		Version:  eventingv1alpha1.GroupVersion.Version,
 		Group:    eventingv1alpha1.GroupVersion.Group,
-		Resource: "EventingBackends",
+		Resource: "eventingbackends",
 	}
 }
 

@@ -37,6 +37,8 @@ func (s FilterSubscriptions) Do() error {
 		Items:    []eventingv1alpha1.Subscription{},
 	}
 
+	// @TODO: check if s.process.State.Subscriptions is not nil
+
 	subscriptionItems := s.process.State.Subscriptions.Items
 
 	for _, subscription := range subscriptionItems {

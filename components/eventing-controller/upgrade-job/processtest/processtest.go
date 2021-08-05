@@ -29,6 +29,7 @@ func NewEventingControllers() *appsv1.DeploymentList {
 }
 
 func NewEventingController(name string) *appsv1.Deployment {
+	var replicaCount int32 = 1
 	return &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -40,6 +41,9 @@ func NewEventingController(name string) *appsv1.Deployment {
 			Labels: map[string]string{
 				"app": name,
 			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicaCount,
 		},
 	}
 }
@@ -142,44 +146,43 @@ func NewSecret(name string) *corev1.Secret {
 }
 
 func NewKymaSubscriptions() *eventingv1alpha1.SubscriptionList {
-	sub1 := NewKymaSubscription("app1", true)
-	sub2 := NewKymaSubscription("app2", true)
-	sub3 := NewKymaSubscription("app3", true)
-	sub4 := NewKymaSubscription("app4", false)
+	sub1 := NewKymaSubscription("app1", false)
+	//sub2 := NewKymaSubscription("app2", false)
+	//sub3 := NewKymaSubscription("app3", false)
+	//sub4 := NewKymaSubscription("app4", false)
 
 	return &eventingv1alpha1.SubscriptionList{
-		Items: []eventingv1alpha1.Subscription{*sub1, *sub2, *sub3, *sub4},
+		Items: []eventingv1alpha1.Subscription{*sub1},
 	}
 }
 
 func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.Subscription {
-	condition1 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionSubscriptionActive,
-		Reason: "BEB Subscription active",
-		Message: "",
-		Status: "True",
-		LastTransitionTime: metav1.Now(),
-	}
-	condition2 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionSubscribed,
-		Reason: "BEB Subscription creation failed",
-		Message: "",
-		Status: "False",
-		LastTransitionTime: metav1.Now(),
-	}
-	condition3 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionAPIRuleStatus,
-		Reason: "APIRule status ready",
-		Message: "",
-		Status: "True",
-		LastTransitionTime: metav1.Now(),
-	}
-
-	conditionsList := []eventingv1alpha1.Condition{}
-	if addConditions {
-		conditionsList = []eventingv1alpha1.Condition{condition1, condition2, condition3}
-	}
-
+	//condition1 := eventingv1alpha1.Condition{
+	//	Type: eventingv1alpha1.ConditionSubscriptionActive,
+	//	Reason: "BEB Subscription active",
+	//	Message: "",
+	//	Status: "True",
+	//	LastTransitionTime: metav1.Now(),
+	//}
+	//condition2 := eventingv1alpha1.Condition{
+	//	Type: eventingv1alpha1.ConditionSubscribed,
+	//	Reason: "BEB Subscription creation failed",
+	//	Message: "",
+	//	Status: "False",
+	//	LastTransitionTime: metav1.Now(),
+	//}
+	//condition3 := eventingv1alpha1.Condition{
+	//	Type: eventingv1alpha1.ConditionAPIRuleStatus,
+	//	Reason: "APIRule status ready",
+	//	Message: "",
+	//	Status: "True",
+	//	LastTransitionTime: metav1.Now(),
+	//}
+	//
+	//var conditionsList []eventingv1alpha1.Condition
+	//if addConditions {
+	//	conditionsList = []eventingv1alpha1.Condition{condition1, condition2, condition3}
+	//}
 
 	return &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
@@ -189,14 +192,13 @@ func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.S
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      appName,
 			Namespace: "test",
-			Labels: map[string]string{
-				"application-name": appName,
-			},
 		},
-		Spec: eventingv1alpha1.SubscriptionSpec{},
-		Status: eventingv1alpha1.SubscriptionStatus{
-			Conditions: conditionsList,
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{},
 		},
+		//Status: eventingv1alpha1.SubscriptionStatus{
+		//	Conditions: conditionsList,
+		//},
 	}
 }
 
