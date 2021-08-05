@@ -46,6 +46,6 @@ func TestFilterSubscriptions(t *testing.T) {
 		g.Expect(p.State.Subscriptions.Items).Should(gomega.HaveLen(4))
 
 		g.Expect(p.State.FilteredSubscriptions).Should(gomega.Not(gomega.BeNil()))
-		g.Expect(p.State.FilteredSubscriptions.Items).Should(gomega.HaveLen(3))
+		g.Expect(p.State.FilteredSubscriptions.Items).Should(gomega.HaveLen(4))
 	})
 }
