@@ -7,7 +7,7 @@ COPY go.mod go.mod
 COPY go.sum go.sum
 
 COPY api/ api/
-COPY cmd/ cmd/
+COPY cmd/eventing-controller cmd/eventing-controller
 COPY logger/ logger/
 COPY options/ options/
 COPY pkg/ pkg/
