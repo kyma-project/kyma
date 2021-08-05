@@ -15,7 +15,7 @@ The Application Gateway has the following parameters:
 **caCertificateSecretToMigrate** - Namespace and the name of the Secret which stores the CA certificate to be renamed. Requires the `Namespace/secret name` format. 
 **caCertificateSecretKeysToMigrate** - List of keys to be copied when migrating old secret specified in `caCertificateSecretToMigrate` to the new one specified in `caCertificateSecret`. Requires JSON table format.
 **connectorCertificateSecretToMigrate** - Namespace and the name of the Secret which stores the Connector Service certificate and key to be renamed. Requires the `Namespace/secret name` format. 
-**connectorCertificateSecretKeysToMigrate** - List of keys to be copied when migrating old secret specified in `connectorCertificateSecretToMigrate` to the new one specified in `caCertificateSecret`. Requires JSON table format.
+**connectorCertificateSecretKeysToMigrate** - List of keys to be copied when migrating the old Secret specified in `connectorCertificateSecretToMigrate` to the new one specified in `caCertificateSecret`. Requires the JSON table format.
 **generatedValidityTime** - Specifies how long the generated certificate is valid for.
 
 ## Renaming secrets
