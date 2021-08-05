@@ -20,7 +20,7 @@ import (
 
 type E2ESetup struct {
 	secrets             *corev1.SecretList
-	configMaps			*corev1.ConfigMapList
+	configMaps          *corev1.ConfigMapList
 	eventingPublishers  *appsv1.DeploymentList
 	eventingControllers *appsv1.DeploymentList
 	eventingBackends    *eventingv1alpha1.EventingBackendList
@@ -48,7 +48,7 @@ func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 		Subscription:    fakeSubscriptionClient,
 		EventingBackend: fakeEventingBackendClient,
 		Secret:          fakeSecretClient,
-		ConfigMap: 		 fakeConfigMapClient,
+		ConfigMap:       fakeConfigMapClient,
 		EventMesh:       fakeEventMeshClient,
 	}
 }
@@ -73,7 +73,7 @@ func newE2ESetup() E2ESetup {
 	e2eSetup := E2ESetup{
 		config:              envConfig,
 		secrets:             newSecrets,
-		configMaps: 		 newConfigMaps,
+		configMaps:          newConfigMaps,
 		eventingPublishers:  newEventingPublishers,
 		eventingControllers: newEventingControllers,
 		eventingBackends:    newEventingBackends,

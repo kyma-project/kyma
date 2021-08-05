@@ -16,16 +16,16 @@ type Clients struct {
 	Subscription    subscription.Client
 	EventingBackend eventingbackend.Client
 	Secret          secret.Client
-	ConfigMap 		configmap.Client
+	ConfigMap       configmap.Client
 	EventMesh       eventmesh.Client
 }
 
 // State consists of upgrade-job process state
 type State struct {
-	Subscriptions         		*eventingv1alpha1.SubscriptionList
-	FilteredSubscriptions 		*eventingv1alpha1.SubscriptionList
+	Subscriptions         *eventingv1alpha1.SubscriptionList
+	FilteredSubscriptions *eventingv1alpha1.SubscriptionList
 	//BebSubscriptionNameMapper   *handlers.NameMapper
-	IsBebEnabled          		bool
+	IsBebEnabled bool
 }
 
 // int32Ptr converts int to int pointer

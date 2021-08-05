@@ -3,6 +3,7 @@ package process
 import (
 	"errors"
 	"fmt"
+
 	errors2 "k8s.io/apimachinery/pkg/api/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"

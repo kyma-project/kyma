@@ -69,7 +69,7 @@ func main() {
 			Subscription:    subscriptionClient,
 			EventingBackend: eventingBackendClient,
 			Secret:          secretClient,
-			ConfigMap: 		 configMapClient,
+			ConfigMap:       configMapClient,
 			EventMesh:       eventMeshClient,
 		},
 		State: jobprocess.State{},

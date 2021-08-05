@@ -27,4 +27,3 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	}
 	return scheme, nil
 }
-

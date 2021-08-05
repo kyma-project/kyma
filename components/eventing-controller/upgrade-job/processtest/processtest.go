@@ -13,7 +13,7 @@ import (
 
 const (
 	KymaSystemNamespace = "kyma-system"
-	testingShootName = "testing"
+	testingShootName    = "testing"
 )
 
 func NewEventingControllers() *appsv1.DeploymentList {
@@ -224,7 +224,7 @@ func NewKymaSubscription(appName string, addConditions bool, includeBebMessageIn
 	if includeBebMessageInCondition {
 		nameMapper := handlers.NewBebSubscriptionNameMapper(testingShootName, handlers.MaxBEBSubscriptionNameLength)
 		newBebSubscriptionName := nameMapper.MapSubscriptionName(subscription)
-		condition1.Message =  eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
+		condition1.Message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
 	}
 
 	condition2 := eventingv1alpha1.Condition{
