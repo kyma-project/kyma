@@ -1,8 +1,8 @@
 ---
-title: Can't access Console UI or other endpoints
+title: Can't access Kyma endpoints
 ---
 
-The `503` status code received when you try to access the Console UI or any other endpoint in Kyma can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.
+The `503` status code received when you try to access a Kyma endpoint in Kyma can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.
 To fix this problem, restart the Pods of the Gateway.
 
 1. List all available endpoints:
@@ -45,7 +45,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl get secrets -n istio-system kyma-gateway-certs -oyaml
     kubectl get secrets -n istio-system app-connector-certs -oyaml
     ```
-
+<!-- jak bedzie long lasting certificate, 6 do przerobienia - only Gardener needed probably-->
 6. To regenerate a corrupted certificate, follow [this tutorial](components/security/#tutorials-update-tls-certificate). If you are running Kyma provisioned through Gardener, follow [this tutorial](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.
 
    >**NOTE**: Remember to switch back to the `distroless` image after you resolved the issue.
