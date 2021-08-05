@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"encoding/json"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -45,8 +46,8 @@ func GroupVersionResource() schema.GroupVersionResource {
 // GroupVersionKind return the GVK for Subscription resource
 func GroupVersionKind() schema.GroupVersionKind {
 	return schema.GroupVersionKind{
-		Version:  eventingv1alpha1.GroupVersion.Version,
-		Group:    eventingv1alpha1.GroupVersion.Group,
+		Version: eventingv1alpha1.GroupVersion.Version,
+		Group:   eventingv1alpha1.GroupVersion.Group,
 		Kind:    "Subscription",
 	}
 }
@@ -54,8 +55,8 @@ func GroupVersionKind() schema.GroupVersionKind {
 // GroupVersionKindList return the GVK list for Subscription resource
 func GroupVersionKindList() schema.GroupVersionKind {
 	return schema.GroupVersionKind{
-		Version:  eventingv1alpha1.GroupVersion.Version,
-		Group:    eventingv1alpha1.GroupVersion.Group,
+		Version: eventingv1alpha1.GroupVersion.Version,
+		Group:   eventingv1alpha1.GroupVersion.Group,
 		Kind:    "SubscriptionList",
 	}
 }

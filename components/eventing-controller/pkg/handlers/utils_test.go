@@ -255,7 +255,7 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		// the mapped name should always end with the SHA1
 		g.Expect(strings.HasSuffix(s, test.outputHash)).To(BeTrue())
 		// and have the first 10 char of the name
-		prefixLen := min(len(test.inputSub.Name), test.maxLen - hashLength)
+		prefixLen := min(len(test.inputSub.Name), test.maxLen-hashLength)
 		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
 	}
 }

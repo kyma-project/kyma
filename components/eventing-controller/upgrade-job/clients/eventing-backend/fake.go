@@ -58,4 +58,3 @@ func toUnstructuredItems(backends *eventingv1alpha1.EventingBackendList) ([]unst
 	}
 	return unstructuredItems, nil
 }
-

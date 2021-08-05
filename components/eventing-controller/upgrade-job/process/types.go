@@ -11,18 +11,18 @@ import (
 
 // Clients consists of clients for resources
 type Clients struct {
-	Deployment       deployment.Client
-	Subscription 	 subscription.Client
-	EventingBackend  eventingbackend.Client
-	Secret 			 secret.Client
-	EventMesh 		 eventmesh.Client
+	Deployment      deployment.Client
+	Subscription    subscription.Client
+	EventingBackend eventingbackend.Client
+	Secret          secret.Client
+	EventMesh       eventmesh.Client
 }
 
 // State consists of upgrade-job process state
 type State struct {
-	Subscriptions          *eventingv1alpha1.SubscriptionList
-	FilteredSubscriptions  *eventingv1alpha1.SubscriptionList
-	IsBebEnabled           bool
+	Subscriptions         *eventingv1alpha1.SubscriptionList
+	FilteredSubscriptions *eventingv1alpha1.SubscriptionList
+	IsBebEnabled          bool
 }
 
 // int32Ptr converts int to int pointer

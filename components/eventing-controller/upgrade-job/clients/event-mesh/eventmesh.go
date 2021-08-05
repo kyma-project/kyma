@@ -76,17 +76,17 @@ func (c *Client) processSecret(cfg *env.Config, bebSecret *v1.Secret) error {
 
 	cfg.ClientSecret = string(secret.StringData[deployment.PublisherSecretClientSecretKey])
 	if len(cfg.ClientSecret) == 0 {
-		return errors.New( "cannot get CLIENT_SECRET env var")
+		return errors.New("cannot get CLIENT_SECRET env var")
 	}
 
-	cfg.TokenEndpoint= string(secret.StringData[deployment.PublisherSecretTokenEndpointKey])
+	cfg.TokenEndpoint = string(secret.StringData[deployment.PublisherSecretTokenEndpointKey])
 	if len(cfg.TokenEndpoint) == 0 {
 		return errors.New("cannot get TOKEN_ENDPOINT env var")
 	}
 
 	cfg.BEBNamespace = fmt.Sprintf("%s%s", backend.NamespacePrefix, string(secret.StringData[deployment.PublisherSecretBEBNamespaceKey]))
 	if len(cfg.BEBNamespace) == 0 {
-		return errors.New( "cannot get BEB_NAMESPACE env var")
+		return errors.New("cannot get BEB_NAMESPACE env var")
 	}
 	return nil
 }
@@ -149,9 +149,7 @@ func (c *Client) getSecretStringData(clientID, clientSecret, tokenEndpoint, gran
 		deployment.PublisherSecretClientSecretKey:  clientSecret,
 		deployment.PublisherSecretTokenEndpointKey: fmt.Sprintf(backend.TokenEndpointFormat, tokenEndpoint, grantType),
 		deployment.PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, backend.BEBPublishEndpointForPublisher),
-		backend.PublisherSecretEMSHostKey:                  fmt.Sprintf("%s", publishURL),
+		backend.PublisherSecretEMSHostKey:          fmt.Sprintf("%s", publishURL),
 		deployment.PublisherSecretBEBNamespaceKey:  namespace,
 	}
 }
-
-

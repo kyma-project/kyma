@@ -14,7 +14,6 @@ const (
 	KymaSystemNamespace = "kyma-system"
 )
 
-
 func NewEventingControllers() *appsv1.DeploymentList {
 	validator := NewEventingController("eventing-controller")
 	return &appsv1.DeploymentList{
@@ -48,7 +47,6 @@ func NewEventingController(name string) *appsv1.Deployment {
 	}
 }
 
-
 func NewEventingPublishers() *appsv1.DeploymentList {
 	validator := NewEventingPublisher("eventing-publisher-proxy")
 	return &appsv1.DeploymentList{
@@ -77,7 +75,6 @@ func NewEventingPublisher(name string) *appsv1.Deployment {
 		},
 	}
 }
-
 
 func NewEventingBackends() *eventingv1alpha1.EventingBackendList {
 	validator := NewEventingBackend("eventing-backend", true)
@@ -201,4 +198,3 @@ func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.S
 		//},
 	}
 }
-

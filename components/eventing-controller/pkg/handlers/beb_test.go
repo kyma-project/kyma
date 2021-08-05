@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

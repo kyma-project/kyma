@@ -3,10 +3,11 @@ package main
 import (
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -40,7 +41,6 @@ func main() {
 		}
 	}()
 
-
 	// Generate dynamic clients
 	k8sConfig := config.GetConfigOrDie()
 
@@ -56,18 +56,18 @@ func main() {
 
 	// Create process
 	p := jobprocess.Process{
-		Logger: ctrLogger.Logger,
-		TimeoutPeriod: 60 * time.Second,
-		ReleaseName:  cfg.ReleaseName,
-		KymaNamespace: cfg.KymaNamespace,
+		Logger:         ctrLogger.Logger,
+		TimeoutPeriod:  60 * time.Second,
+		ReleaseName:    cfg.ReleaseName,
+		KymaNamespace:  cfg.KymaNamespace,
 		ControllerName: cfg.EventingControllerName,
-		PublisherName: cfg.EventingPublisherName,
+		PublisherName:  cfg.EventingPublisherName,
 		Clients: jobprocess.Clients{
-			Deployment: deploymentClient,
-			Subscription: subscriptionClient,
+			Deployment:      deploymentClient,
+			Subscription:    subscriptionClient,
 			EventingBackend: eventingBackendClient,
-			Secret: secretClient,
-			EventMesh: eventMeshClient,
+			Secret:          secretClient,
+			EventMesh:       eventMeshClient,
 		},
 		State: jobprocess.State{},
 	}

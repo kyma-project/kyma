@@ -1,8 +1,9 @@
 package process
 
 import (
-	"github.com/pkg/errors"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 var _ Step = &ScaleDownEventingController{}

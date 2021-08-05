@@ -3,6 +3,7 @@ package process
 import (
 	"errors"
 	"fmt"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
@@ -67,8 +68,6 @@ func (s FilterSubscriptions) Do() error {
 		// if reason dont match, then we need to migrate this subscription
 		s.process.State.FilteredSubscriptions.Items = append(s.process.State.FilteredSubscriptions.Items, subscription)
 	}
-
-
 
 	//3) if not in condition, then check if
 
