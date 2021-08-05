@@ -36,7 +36,7 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.14.0/index.yaml"
+defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.15.0/index.yaml"
 
 # A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
 # additionalAddonsRepositories:

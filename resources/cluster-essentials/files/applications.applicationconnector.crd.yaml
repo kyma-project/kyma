@@ -6,6 +6,7 @@ metadata:
   name: applications.applicationconnector.kyma-project.io
 spec:
   group: applicationconnector.kyma-project.io
+  preserveUnknownFields: false
   versions:
     - name: v1alpha1
       served: true
