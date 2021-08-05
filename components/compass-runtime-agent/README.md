@@ -46,9 +46,9 @@ The Runtime Agent uses these environment variables:
 ## Renaming secrets
 
 In order to rename secret containing CA cert the following environment variables need to be specified:
-- APP_CA_CERTIFICATES_SECRET containing a new name
-- APP_CA_CERT_SECRET_TO_MIGRATE containing an old name
-- APP_CA_CERT_SECRET_KEYS_TO_MIGRATE containing a list of keys to copy from the old secret
+- **APP_CA_CERTIFICATES_SECRET**
+- **APP_CA_CERT_SECRET_TO_MIGRATE**
+- **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE**
 
 ## Generating Custom Resource client
 
