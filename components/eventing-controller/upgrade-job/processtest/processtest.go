@@ -161,24 +161,24 @@ func NewKymaSubscriptions() *eventingv1alpha1.SubscriptionList {
 
 func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.Subscription {
 	condition1 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionSubscriptionActive,
-		Reason: "BEB Subscription active",
-		Message: "",
-		Status: "True",
+		Type:               eventingv1alpha1.ConditionSubscriptionActive,
+		Reason:             "BEB Subscription active",
+		Message:            "",
+		Status:             "True",
 		LastTransitionTime: metav1.Now(),
 	}
 	condition2 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionSubscribed,
-		Reason: "BEB Subscription creation failed",
-		Message: "",
-		Status: "False",
+		Type:               eventingv1alpha1.ConditionSubscribed,
+		Reason:             "BEB Subscription creation failed",
+		Message:            "",
+		Status:             "False",
 		LastTransitionTime: metav1.Now(),
 	}
 	condition3 := eventingv1alpha1.Condition{
-		Type: eventingv1alpha1.ConditionAPIRuleStatus,
-		Reason: "APIRule status ready",
-		Message: "",
-		Status: "True",
+		Type:               eventingv1alpha1.ConditionAPIRuleStatus,
+		Reason:             "APIRule status ready",
+		Message:            "",
+		Status:             "True",
 		LastTransitionTime: metav1.Now(),
 	}
 
@@ -201,7 +201,7 @@ func NewKymaSubscription(appName string, addConditions bool) *eventingv1alpha1.S
 		},
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{},
-		 Sink: "sink -> http://test.test.svc.cluster.local",
+			Sink:             "sink -> http://test.test.svc.cluster.local",
 		},
 		Status: eventingv1alpha1.SubscriptionStatus{
 			Conditions: conditionsList,
