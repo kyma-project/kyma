@@ -23,8 +23,8 @@ type RuntimeURLsConfig struct {
 
 //go:generate mockery --name=DirectorClient
 type DirectorClient interface {
-	FetchConfiguration() ([]kymamodel.Application, error)
-	SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)
+	FetchConfiguration() ([]kymamodel.Application, graphql.Labels, error)
+	SetURLsLabels(urlsCfg RuntimeURLsConfig, actualLabels graphql.Labels) (graphql.Labels, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
@@ -41,48 +41,52 @@ type directorClient struct {
 	runtimeConfig config.RuntimeConfig
 }
 
-func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) {
-	response := ApplicationsForRuntimeResponse{}
+func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql.Labels, error) {
+	response := ApplicationsAndLabelsForRuntimeResponse{}
 
-	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
-	req := gcli.NewRequest(applicationsQuery)
+	appsAndLabelsForRuntimeQuery := cc.queryProvider.applicationsAndLabelsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
+	req := gcli.NewRequest(appsAndLabelsForRuntimeQuery)
 	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
 
 	err := cc.gqlClient.Do(req, &response)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to fetch Applications")
+		return nil, nil, errors.Wrap(err, "Failed to fetch Applications and Labels")
 	}
 
 	// Nil check is necessary due to GraphQL client not checking response code
-	if response.Result == nil {
-		return nil, errors.Errorf("Failed fetch Applications for Runtime from Director: received nil response.")
+	if response.Runtime == nil || response.ApplicationsPage == nil {
+		return nil, nil, errors.Errorf("Failed fetch Applications or Labels for Runtime from Director: received nil response.")
 	}
 
 	// TODO: After implementation of paging modify the fetching logic
 
-	applications := make([]kymamodel.Application, len(response.Result.Data))
-	for i, app := range response.Result.Data {
+	applications := make([]kymamodel.Application, len(response.ApplicationsPage.Data))
+	for i, app := range response.ApplicationsPage.Data {
 		applications[i] = app.ToApplication()
 	}
 
-	return applications, nil
+	return applications, response.Runtime.Labels, nil
 }
 
-func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
-	eventsURLLabel, err := cc.setURLLabel(eventsURLLabelKey, urlsCfg.EventsURL)
-	if err != nil {
-		return nil, err
+func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels graphql.Labels) (graphql.Labels, error) {
+	targetLabels := map[string]string{
+		eventsURLLabelKey:  urlsCfg.EventsURL,
+		consoleURLLabelKey: urlsCfg.ConsoleURL,
 	}
 
-	consoleURLLabel, err := cc.setURLLabel(consoleURLLabelKey, urlsCfg.ConsoleURL)
-	if err != nil {
-		return nil, err
+	updatedLabels := make(map[string]interface{})
+	for key, value := range targetLabels {
+		if val, ok := currentLabels[key]; !ok || val != value {
+			l, err := cc.setURLLabel(key, value)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", key, val)
+			}
+
+			updatedLabels[l.Key] = l.Value
+		}
 	}
 
-	return graphql.Labels{
-		eventsURLLabel.Key:  eventsURLLabel.Value,
-		consoleURLLabel.Key: consoleURLLabel.Value,
-	}, nil
+	return updatedLabels, nil
 }
 
 func (cc *directorClient) setURLLabel(key, value string) (*graphql.Label, error) {
