@@ -202,7 +202,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscribed condition")
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, "")
+			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
@@ -212,7 +213,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var subscriptionEvents = v1.EventList{}
 			subscriptionCreatedEvent := v1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
-				Message: "",
+				Message: message,
 				Type:    v1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
@@ -377,7 +378,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscribed condition")
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, "")
+			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
 			getSubscription(givenSubscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
@@ -387,7 +389,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var subscriptionEvents = v1.EventList{}
 			subscriptionCreatedEvent := v1.Event{
 				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
-				Message: "",
+				Message: message,
 				Type:    v1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
