@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
@@ -123,6 +125,9 @@ func main() {
 		Scheme:             scheme,
 		MetricsBindAddress: "0",
 		SyncPeriod:         &options.syncPeriod,
+		ClientDisableCacheFor: []client.Object{
+			&v1alpha1.Application{},
+		},
 	})
 	if err != nil {
 		log.WithContext().Error("Unable to start manager: %s", err.Error())
