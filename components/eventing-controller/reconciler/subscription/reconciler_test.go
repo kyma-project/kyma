@@ -736,7 +736,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					if reconcilertesting.IsBebSubscriptionDelete(r) {
 						receivedSubscriptionName := reconcilertesting.GetRestAPIObject(r.URL)
 						// ensure the correct subscription was created
-						return subscriptionName == receivedSubscriptionName
+						return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 					}
 					// TODO: ensure that the remaining beb calls are neither create nor delete (means no new beb subscription is created)
 				}
