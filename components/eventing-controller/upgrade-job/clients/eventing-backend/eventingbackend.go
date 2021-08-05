@@ -43,6 +43,24 @@ func GroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
+// GroupVersionKind return the GVK for EventingBackend resource
+func GroupVersionKind() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Kind:    "EventingBackend",
+	}
+}
+
+// GroupVersionKindList return the GVK list for EventingBackend resource
+func GroupVersionKindList() schema.GroupVersionKind {
+	return schema.GroupVersionKind{
+		Version:  eventingv1alpha1.GroupVersion.Version,
+		Group:    eventingv1alpha1.GroupVersion.Group,
+		Kind:    "EventingBackendList",
+	}
+}
+
 // toEventingBackend converts unstructured EventingBackend object to typed EventingBackend object
 func toEventingBackend(unstructured *unstructured.Unstructured) (*eventingv1alpha1.EventingBackend, error) {
 	triggerList := new(eventingv1alpha1.EventingBackend)
