@@ -1,9 +1,8 @@
 ---
-title: Deploy a service
+title: Deploy a service in your Kyma cluster
 ---
 
-Basic workflow:
-1. Install the {GCP?} operator in your Kubernetes cluster.
+This tutorial describes how you can deploy a service in your Kyma cluster using the {GCP} service operator.
+
+1. Install the {GCP?} service operator in your Kyma cluster.
 2.
-...
-3. any UI steps?
