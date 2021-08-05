@@ -8,10 +8,11 @@ spec:
     host: "httpbin-{{.TestID}}.{{.Domain}}"
     name: httpbin-{{.TestID}}
     port: 8000
-  gateway: "{{.GatewayName}}.{{.GatewayNamespace}}.svc.cluster.local"
+  gateways:
+    - "{{.GatewayNamespace}}/{{.GatewayName}}"
   rules:
-  - path: /.*
-    methods: ["GET"]
-    accessStrategies:
-    - handler: noop
-    mutators: []
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: noop
+      mutators: []

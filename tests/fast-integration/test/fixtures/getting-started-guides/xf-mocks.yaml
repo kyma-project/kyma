@@ -210,7 +210,8 @@ metadata:
   name: orders-function
   namespace: orders-service
 spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateways:
+    - kyma-system/kyma-gateway
   rules:
     - path: /.*
       accessStrategies:

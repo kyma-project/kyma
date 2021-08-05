@@ -4,7 +4,8 @@ metadata:
   name: "{{.NamePrefix}}-{{.TestID}}"
   namespace: "{{.Namespace}}"
 spec:
-  gateway: "{{.GatewayName}}.{{.GatewayNamespace}}.svc.cluster.local"
+  gateways:
+    - "{{.GatewayNamespace}}/{{.GatewayName}}"
   service:
     host: "httpbin-{{.TestID}}.{{.Domain}}"
     name: httpbin-{{.TestID}}

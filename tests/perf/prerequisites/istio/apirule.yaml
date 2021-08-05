@@ -7,7 +7,8 @@ spec:
     host: httpbin-$WORKER.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin-$WORKER
     port: 8000
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateways:
+    - kyma-system/kyma-gateway
   rules:
     - path: /.*
       methods: ["GET"]
