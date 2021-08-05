@@ -74,6 +74,7 @@ func getWebHookAuth(cfg env.Config) *types.WebhookAuth {
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
 func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+	log := b.Log.WithValues("Kyma subscription name", subscription.Name)
 	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
 	if !ok {
 		err := fmt.Errorf("failed to get apiRule from params[0]: %v", params[0])
@@ -89,7 +90,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	}
 	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
-		b.Log.Error(err, "failed to get the hash value", "subscription name", sEv2.Name)
+		log.Error(err, "failed to get the hash value", "subscription name", sEv2.Name)
 		return false, err
 	}
 	var emsSubscription *types.Subscription
@@ -108,18 +109,18 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if ems subscription is the same as in the past
 		emsSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			b.Log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
+			log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
 			return false, err
 		}
 		// get the internal view for the ems subscription
 		sEms, err := getInternalView4Ems(emsSubscription)
 		if err != nil {
-			b.Log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
+			log.Error(err, "failed to get internal view for ems subscription", "subscription name:", emsSubscription.Name)
 			return false, err
 		}
 		newEmsHash, err := getHash(sEms)
 		if err != nil {
-			b.Log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
+			log.Error(err, "failed to get the hash value for ems subscription", "subscription", sEms.Name)
 			return false, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
