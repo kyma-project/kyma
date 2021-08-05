@@ -134,7 +134,7 @@ func main() {
 		os.Exit(1)
 	}
 	if err = controller.NewController(log, mgr.GetClient(), idCache).SetupWithManager(mgr); err != nil {
-		log.WithContext().Error("unable to create reconciler : %s", err.Error())
+		log.WithContext().Error("Unable to create reconciler: %s", err.Error())
 		os.Exit(1)
 	}
 
