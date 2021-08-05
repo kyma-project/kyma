@@ -15,13 +15,13 @@ type CacheSync interface {
 }
 
 type cacheSync struct {
-	client         client.Client
+	client         client.Reader
 	appCache       *gocache.Cache
 	log            *logger.Logger
 	controllerName string
 }
 
-func NewCacheSync(log *logger.Logger, client client.Client, appCache *gocache.Cache, controllerName string) CacheSync {
+func NewCacheSync(log *logger.Logger, client client.Reader, appCache *gocache.Cache, controllerName string) CacheSync {
 	return &cacheSync{
 		client:         client,
 		appCache:       appCache,
@@ -44,7 +44,7 @@ func (c *cacheSync) Sync(ctx context.Context, applicationName string) error {
 			c.log.WithContext().
 				With("controller", c.controllerName).
 				With("name", applicationName).
-				Infof("Deleted the application from the cache.")
+				Infof("Application not found, deleting from the cache.")
 		}
 		return err
 	}
