@@ -7,6 +7,13 @@ metadata:
 spec:
   grantTypes:
   - "client_credentials"
-  scope: "read write"
+  - "implicit"
+  scope: "openid read write"
+  responseTypes:
+    - "id_token"
+    - "code"
+    - "token"  
   secretName: "{{.OauthSecretName}}"
+  redirectUris:
+    - "http://testclient3.example.com"  
 status: {}
