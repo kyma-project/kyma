@@ -188,7 +188,7 @@ async function kubectlDeleteDir(dir, namespace) {
 }
 
 function kubectlDelete(file, namespace) {
-  console.log(`Deleting ${file}...`)
+  debug(`Deleting ${file}...`)
   const yaml = fs.readFileSync(file);
   const listOfSpecs = k8s.loadAllYaml(yaml);
   return k8sDelete(listOfSpecs, namespace);

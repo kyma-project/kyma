@@ -211,46 +211,6 @@ async function deploy() {
   })
 }
 
-// async function getSecrets(secretNames) {
-
-//   await secretNames
-
-// }
-
-async function checkSecrets() {
-  let allSecrets = await getSecrets("default")
-
-  let reference = [
-    "hb-redis-micro",
-    "func-sb-svcat-auditlog-management-1",
-    "func-sb-svcat-auditlog-api-1",
-    "inst-sb-svcat-auditlog-api-1",
-    "inst-sb-svcat-auditlog-management-1",
-    "func-sb-svcat-html5-apps-repo-1",
-    "inst-sb-svcat-html5-apps-repo-1",
-    "func-sb-redis-function-1",
-    "inst-sb-redis-function-1"
-  ]
-  
-  allSecrets.forEach(async function(secretName){
-    let s = await getSecret(secretName, "default")
-    // s = JSON.parse(s)
-    console.log(s.metadata.name)
-  })
-
-}
-
-checkSecrets()
-
-async function getPodPresets([]) {
-
-}
-async function checkPodPresets([]) {
-
-}
-
-
-// deploy()
 module.exports = {
   deploy,
   destroy,
