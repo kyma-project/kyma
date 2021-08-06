@@ -30,7 +30,7 @@ spec:
 
 2. On the publisher side, include the exact same Application name in the `type` field, like in the following example:
 
-> **NOTE:** If you want to use a function to publish a CloudEvent look at the (Event Object SDK specification)[../../05-technical-reference/svls-08-function-specification.md]
+> **NOTE:** If you want to use a function to publish a CloudEvent look at the [Event Object SDK specification](../../05-technical-reference/svls-08-function-specification.md).
 
 ```yaml
 curl -k -i \
