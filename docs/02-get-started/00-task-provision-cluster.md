@@ -4,13 +4,13 @@ type: Tasks
 ---
 <!-- this is surely mentioned in Basic Tasks/Get Started -->
 
-To provision a k3s cluster, run:
+To provision a k3d cluster, run:
 
 ```
-kyma alpha provision k3s 
+kyma provision k3d
 ```
-If you want to define the name of your k3s cluster and pass arguments to the Kubernetes API server (for example, to log to stderr), run:
+If you want to define the name of your k3d cluster and pass arguments to the Kubernetes API server (for example, to log to stderr), run:
 
 ```
-kyma alpha provision k3s --name='custom_name' --server-args='--alsologtostderr'
+kyma provision k3d --name='custom_name' --server-args='--alsologtostderr'
 ```
