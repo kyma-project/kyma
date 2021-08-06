@@ -20,7 +20,8 @@ metadata:
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments", "deployments/scale"]
-    verbs: ["get", "list", "patch"]
+    resourceNames: ["eventing-controller", "eventing-publisher-proxy"]
+    verbs: ["get", "list", "patch", "delete"]
   - apiGroups: [""]
     resources: ["secrets", "configmaps"]
     verbs: ["get", "list"]
@@ -54,7 +55,7 @@ metadata:
   annotations:
     helm.sh/hook-weight: "2"
     helm.sh/hook: "pre-upgrade"
-    helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
+#    helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
 spec:
   backoffLimit: 5
   template:
@@ -69,6 +70,7 @@ spec:
       containers:
         - name: {{ template "eventing.fullname" . }}-pre-upgrade
           image: "{{ .Values.global.image.repository }}/{{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }}"
+          imagePullPolicy: "{{ .Values.preUpgradeJob.image.pullPolicy }}"
           terminationMessagePolicy: "FallbackToLogsOnError"
           {{- if .Values.global.securityContext }}
           securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}

@@ -90,3 +90,4 @@ preUpgradeJob:
   image:
     name: "upgrade-job"
     tag: "PR-11819"
+    pullPolicy: Always
