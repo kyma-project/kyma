@@ -20,13 +20,9 @@ async function getK8sPrometheusRuleNames() {
   return rules.map((o) => o.metadata.name);
 }
 
-async function getRegisteredPrometheusRules() {
-  // prometheusPortForward();
-  return await getPrometheusRuleGroups();
-}
-
+// prometheusPortForward needs to be called before
 async function getRegisteredPrometheusRuleNames() {
-  let rules = await getRegisteredPrometheusRules();
+  let rules = await getPrometheusRuleGroups();
   return rules.map((o) => o.name);
 }
 
