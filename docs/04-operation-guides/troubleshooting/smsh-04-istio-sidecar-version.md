@@ -19,7 +19,7 @@ To check if any Pods or workloads require a manual restart, follow these steps:
         export KYMA_ISTIO_VERSION=$(kubectl get deployment istiod -n istio-system -o json | jq '.spec.template.spec.containers | .[].image' | sed 's/[^:"]*[:]//' | sed 's/["]//g')
         ```
 
-    * From Kyma sources - run this command from within the directory that contains Kyma sources:<!-- consult Karol-->
+    * From Kyma sources - run this command from within the directory that contains Kyma sources:<!-- consult Karol--> valid
         ```bash
         export KYMA_ISTIO_VERSION=$(cat resources/istio/Chart.yaml | grep version | sed 's/[^:]*[:]//' | sed 's/ //g')
         ```
