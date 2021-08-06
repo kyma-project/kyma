@@ -19,7 +19,7 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
 
   ```bash
-  kyma provision k3s
+  kyma provision k3d
   ```
 
 Use the `deploy` command to install Kyma.
