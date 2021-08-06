@@ -35,7 +35,7 @@ function removeNamePrefixes(ruleNames) {
 async function getNotRegisteredPrometheusRuleNames() {
   let registeredRules = await getRegisteredPrometheusRuleNames();
   let k8sRuleNames = await getK8sPrometheusRuleNames();
-  k8sRuleNames = removeNamePrefixes();
+  k8sRuleNames = removeNamePrefixes(k8sRuleNames);
   return k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
 }
 
