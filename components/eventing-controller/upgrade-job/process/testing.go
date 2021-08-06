@@ -17,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
 )
 
+// E2ESetup containers the resources for testing environment
 type E2ESetup struct {
 	secrets             *corev1.SecretList
 	configMaps          *corev1.ConfigMapList
@@ -28,6 +29,7 @@ type E2ESetup struct {
 	config              env.Config
 }
 
+// getProcessClients returns the fake clients to be used testing environment
 func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 	fakeSecretClient, err := secret.NewFakeClient(e2eSetup.secrets)
 	g.Expect(err).Should(gomega.BeNil())
@@ -52,6 +54,7 @@ func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 	}
 }
 
+// newE2ESetup initialized and returns a new testing environment setup
 func newE2ESetup() E2ESetup {
 	newEventingControllers := processtest.NewEventingControllers()
 	newEventingPublishers := processtest.NewEventingPublishers()
@@ -81,12 +84,13 @@ func newE2ESetup() E2ESetup {
 	return e2eSetup
 }
 
-func combineEventingControllersAndPublishers(validators, eventServices *appsv1.DeploymentList) *appsv1.DeploymentList {
+// combineEventingControllersAndPublishers merges eventingControllers and eventingPublishers deployments lists
+func combineEventingControllersAndPublishers(eventingControllers, eventingPublishers *appsv1.DeploymentList) *appsv1.DeploymentList {
 	result := new(appsv1.DeploymentList)
-	for _, v := range validators.Items {
+	for _, v := range eventingControllers.Items {
 		result.Items = append(result.Items, v)
 	}
-	for _, es := range eventServices.Items {
+	for _, es := range eventingPublishers.Items {
 		result.Items = append(result.Items, es)
 	}
 	return result

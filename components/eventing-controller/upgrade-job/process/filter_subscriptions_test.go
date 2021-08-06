@@ -9,6 +9,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
+// TestFilterSubscriptions tests the FilterSubscriptions_DO step
 func TestFilterSubscriptions(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	e2eSetup := newE2ESetup()
@@ -41,10 +42,12 @@ func TestFilterSubscriptions(t *testing.T) {
 		err = p.Execute()
 		g.Expect(err).Should(gomega.BeNil())
 
-		// Check if total subscriptions are 4 and filteredSubscriptions are 3
+		// Check if total subscriptions are 4
 		g.Expect(p.State.Subscriptions).Should(gomega.Not(gomega.BeNil()))
 		g.Expect(p.State.Subscriptions.Items).Should(gomega.HaveLen(4))
 
+		// FilteredSubscriptions should have length 3 because 1 subscription was marked
+		// as migrated in our dummy data
 		g.Expect(p.State.FilteredSubscriptions).Should(gomega.Not(gomega.BeNil()))
 		g.Expect(p.State.FilteredSubscriptions.Items).Should(gomega.HaveLen(3))
 	})

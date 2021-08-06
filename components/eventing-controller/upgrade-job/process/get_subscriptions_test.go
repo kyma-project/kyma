@@ -9,6 +9,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
+// TestGetSubscriptions tests the TestGetSubscriptions_DO step
 func TestGetSubscriptions(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	e2eSetup := newE2ESetup()

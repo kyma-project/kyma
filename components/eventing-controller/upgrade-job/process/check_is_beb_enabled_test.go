@@ -11,6 +11,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
+// TestCheckIsBebEnabled tests the CheckIsBebEnabled_DO step
 func TestCheckIsBebEnabled(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	e2eSetup := newE2ESetup()

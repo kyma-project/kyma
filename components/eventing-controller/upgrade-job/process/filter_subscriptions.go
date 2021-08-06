@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	errors2 "k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -38,7 +38,7 @@ func (s FilterSubscriptions) Do() error {
 	// First get the shootName, and initialize BebSubscriptionNameMapper
 	shootName := ""
 	configmap, err := s.process.Clients.ConfigMap.Get(s.process.KymaNamespace, "shoot-info")
-	if err != nil && !errors2.IsNotFound(err) {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
 	if err == nil {

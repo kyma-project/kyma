@@ -43,24 +43,6 @@ func GroupVersionResource() schema.GroupVersionResource {
 	}
 }
 
-// GroupVersionKind return the GVK for Secret k8s resource
-func GroupVersionKind() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: corev1.SchemeGroupVersion.Version,
-		Group:   corev1.SchemeGroupVersion.Group,
-		Kind:    "ConfigMap",
-	}
-}
-
-// GroupVersionKindList return the GVK list for Secret k8s resource
-func GroupVersionKindList() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Version: corev1.SchemeGroupVersion.Version,
-		Group:   corev1.SchemeGroupVersion.Group,
-		Kind:    "ConfigMapList",
-	}
-}
-
 // toConfigMap converts unstructured deployment object to typed ConfigMap object
 func toConfigMap(unstructuredDeployment *unstructured.Unstructured) (*corev1.ConfigMap, error) {
 	cm := new(corev1.ConfigMap)

@@ -25,13 +25,13 @@ func (s CheckIsBebEnabled) ToString() string {
 
 // Do checks if BEB is enabled in the Kyma Cluster and saves the result in process state
 func (s CheckIsBebEnabled) Do() error {
-	eventingbackendObject, err := s.process.Clients.EventingBackend.Get(s.process.KymaNamespace, "eventing-backend")
+	eventingBackendObject, err := s.process.Clients.EventingBackend.Get(s.process.KymaNamespace, "eventing-backend")
 	if err != nil {
 		return err
 	}
 
 	s.process.State.IsBebEnabled = false
-	if eventingbackendObject.Status.Backend == eventingv1alpha1.BebBackendType {
+	if eventingBackendObject.Status.Backend == eventingv1alpha1.BebBackendType {
 		s.process.State.IsBebEnabled = true
 	}
 

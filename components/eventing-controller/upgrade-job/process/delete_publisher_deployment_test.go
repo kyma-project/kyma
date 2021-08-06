@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
-
 	"github.com/onsi/gomega"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/processtest"
 )
 
+// TestDeletePublisherDeployment tests the DeletePublisherDeployment_DO step
 func TestDeletePublisherDeployment(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	e2eSetup := newE2ESetup()

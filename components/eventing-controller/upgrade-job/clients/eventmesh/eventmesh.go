@@ -47,7 +47,7 @@ func (c *Client) Init(secret *v1.Secret) error {
 	return nil
 }
 
-// Delete deletes the specified subcription from Event Mesh (BEB).
+// Delete deletes the specified subscription from Event Mesh (BEB).
 // It returns DeleteResponse, nil if the request was successful.
 // The DeleteResponse object contains the information if the deletion was successful or not
 // or returns an error if it fails to send the request
@@ -95,8 +95,8 @@ func (c *Client) processSecret(cfg *env.Config, bebSecret *v1.Secret) error {
 func (c *Client) getParsedSecret(bebSecret *v1.Secret) (*v1.Secret, error) {
 	secret := &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "temp",
-			Namespace: "temp",
+			Name:      bebSecret.Name,
+			Namespace: bebSecret.Namespace,
 		},
 	}
 

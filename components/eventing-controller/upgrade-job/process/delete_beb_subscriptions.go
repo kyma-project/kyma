@@ -3,8 +3,9 @@ package process
 import (
 	"errors"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
 
 var _ Step = &DeleteBebSubscriptions{}
@@ -55,13 +56,13 @@ func (s DeleteBebSubscriptions) Do() error {
 
 	for _, subscription := range subscriptionListItems {
 		s.process.Logger.WithContext().Info("Deleting: ", subscription.Name)
-		result, err := s.process.Clients.EventMesh.Delete(subscription.Name)
+		_, err := s.process.Clients.EventMesh.Delete(subscription.Name)
 		if err != nil {
 			s.process.Logger.WithContext().Error(err)
 			continue
 		}
 
-		s.process.Logger.WithContext().Info(result.StatusCode, result.Message)
+		// s.process.Logger.WithContext().Info(result.StatusCode, result.Message)
 	}
 
 	return nil

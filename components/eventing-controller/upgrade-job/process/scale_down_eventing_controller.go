@@ -43,7 +43,6 @@ func (s ScaleDownEventingController) Do() error {
 		return err
 	}
 
-	// @TODO: Do we need to wait
 	// Wait until pod down
 	isScaledDownSuccess := false
 	start := time.Now()
@@ -55,7 +54,7 @@ func (s ScaleDownEventingController) Do() error {
 		controllerDeployment, err := s.process.Clients.Deployment.Get(s.process.KymaNamespace, s.process.ControllerName)
 		if err != nil {
 			s.process.Logger.WithContext().Error(err)
-			// @TODO: should we stop or continue
+			// should we stop or continue
 			continue
 		}
 

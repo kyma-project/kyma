@@ -13,22 +13,6 @@ func NewFakeClient(deployments *appsv1.DeploymentList) (Client, error) {
 		return Client{}, err
 	}
 
-	//deploymentsUnstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(deployments)
-	//if err != nil {
-	//	return Client{}, err
-	//}
-	//
-	//unstructuredItems, err := toUnstructuredItems(deployments)
-	//if err != nil {
-	//	return Client{}, err
-	//}
-	//
-	//deployUnstructured := &unstructured.UnstructuredList{
-	//	Object: deploymentsUnstructuredMap,
-	//	Items:  unstructuredItems,
-	//}
-	//deployUnstructured.SetGroupVersionKind(GroupVersionKindList())
-
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, deployments)
 	return Client{client: dynamicClient}, nil
 }
@@ -43,17 +27,3 @@ func SetupSchemeOrDie() (*runtime.Scheme, error) {
 	}
 	return scheme, nil
 }
-
-//func toUnstructuredItems(deploymentList *appsv1.DeploymentList) ([]unstructured.Unstructured, error) {
-//	unstructuredItems := make([]unstructured.Unstructured, 0)
-//	for _, deployment := range deploymentList.Items {
-//		unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&deployment)
-//		if err != nil {
-//			return nil, err
-//		}
-//		deploymentUnstructured := &unstructured.Unstructured{Object: unstructuredMap}
-//		deploymentUnstructured.SetGroupVersionKind(GroupVersionKind())
-//		unstructuredItems = append(unstructuredItems, *deploymentUnstructured)
-//	}
-//	return unstructuredItems, nil
-//}

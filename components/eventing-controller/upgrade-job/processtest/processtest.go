@@ -3,12 +3,18 @@ package processtest
 // processtest package provides utilities for Process testing.
 
 import (
+	"encoding/json"
+	"strings"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
+	ectesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	bebClientTesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -116,32 +122,85 @@ func NewEventingBackend(name string, isBebEnabled bool) *eventingv1alpha1.Eventi
 }
 
 func NewSecrets() *corev1.SecretList {
-	validator := NewSecret("eventing-backend")
+	bebSecret := ectesting.WithBEBMessagingSecret("eventing-backend", "test")
+	bebSecret.Labels = map[string]string{
+		backend.BEBBackendSecretLabelKey: backend.BEBBackendSecretLabelValue,
+	}
+
+	// copy secret.StringData to secret.Data
+	messagingStr := bebSecret.StringData["messaging"]
+	// remove \n and \t from messagingStr
+	messagingBytes := []byte(strings.ReplaceAll(strings.ReplaceAll(messagingStr, "\t", ""), "\n", ""))
+	namespaceBytes := []byte(bebSecret.StringData["namespace"])
+
+	// copy secret.StringData to secret.Data
+	bebSecret.Data = map[string][]byte{
+		"messaging": messagingBytes,
+		"namespace": namespaceBytes,
+	}
+
 	return &corev1.SecretList{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "SecretList",
 			APIVersion: "v1",
 		},
 		Items: []corev1.Secret{
-			*validator,
+			*bebSecret,
 		},
 	}
 }
 
-func NewSecret(name string) *corev1.Secret {
-	return &corev1.Secret{
+func NewBebSecrets(bebMock *bebClientTesting.BebMock) (*corev1.SecretList, error) {
+	bebSecret := ectesting.WithBEBMessagingSecret("eventing-backend", "test")
+	bebSecret.Labels = map[string]string{
+		backend.BEBBackendSecretLabelKey: backend.BEBBackendSecretLabelValue,
+	}
+
+	messagingStr := bebSecret.StringData["messaging"]
+	// remove \n and \t from messagingStr
+	messagingBytes := []byte(strings.ReplaceAll(strings.ReplaceAll(messagingStr, "\t", ""), "\n", ""))
+	//namespaceBytes := []byte(bebSecret.StringData["namespace"])
+	namespaceBytes := []byte("/default/ns")
+
+	// Update messaging data according to bebMock configs
+	var messages []backend.Message
+	err := json.Unmarshal(messagingBytes, &messages)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, _ := range messages {
+		if messages[i].Broker.BrokerType == "saprestmgw" {
+			messages[i].OA2.ClientID = "foo-id"
+			messages[i].OA2.ClientSecret = "foo-secret"
+			messages[i].OA2.TokenEndpoint = bebMock.TokenURL
+			//m.OA2.GrantType = ""
+			messages[i].URI = bebMock.MessagingURL
+
+			break
+		}
+	}
+
+	messagingBytes, err = json.Marshal(messages)
+	if err != nil {
+		return nil, err
+	}
+
+	// copy secret.StringData to secret.Data
+	bebSecret.Data = map[string][]byte{
+		"messaging": messagingBytes,
+		"namespace": namespaceBytes,
+	}
+
+	return &corev1.SecretList{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
+			Kind:       "SecretList",
 			APIVersion: "v1",
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: KymaSystemNamespace,
-			Labels: map[string]string{
-				"app": name,
-			},
+		Items: []corev1.Secret{
+			*bebSecret,
 		},
-	}
+	}, nil
 }
 
 func NewConfigMaps() *corev1.ConfigMapList {

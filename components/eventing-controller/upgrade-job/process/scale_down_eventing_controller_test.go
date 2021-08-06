@@ -11,6 +11,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
+// TestScaleDownEventingController tests the ScaleDownEventingController_DO step
 func TestScaleDownEventingController(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	e2eSetup := newE2ESetup()

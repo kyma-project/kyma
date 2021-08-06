@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/common/logging/logger"
 )
 
+// Process contains the common resources for this upgrade-job steps
 type Process struct {
 	Steps          []Step
 	ReleaseName    string
