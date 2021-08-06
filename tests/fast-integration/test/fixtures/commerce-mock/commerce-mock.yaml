@@ -79,8 +79,7 @@ metadata:
   name: commerce-mock
   namespace: mocks
 spec:
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
     - accessStrategies:
         - config: {}

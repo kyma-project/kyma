@@ -85,8 +85,7 @@ kind: APIRule
 metadata:
   name: lastorder
 spec:
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
     - accessStrategies:
         - config: {}

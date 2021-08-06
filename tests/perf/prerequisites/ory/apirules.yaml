@@ -7,8 +7,7 @@ spec:
     host: httpbin.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin
     port: 8000
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
     - path: /.*
       methods: ["GET"]
@@ -21,8 +20,7 @@ kind: APIRule
 metadata:
   name: oauth
 spec:
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
     host: httpbin1.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin1
@@ -41,8 +39,7 @@ kind: APIRule
 metadata:
   name: oauth-with-id-token-mutator
 spec:
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
     host: httpbin2.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin2
@@ -53,7 +50,7 @@ spec:
       mutators:
         - handler: id_token
           config:
-            claims: '{ "example": "claim" }'
+            claims: "{ \"example\": \"claim\" }"
       accessStrategies:
         - handler: oauth2_introspection
           config:
@@ -64,8 +61,7 @@ kind: APIRule
 metadata:
   name: oauth-with-header-mutator
 spec:
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
     host: httpbin3.$NAMESPACE.$CLUSTER_DOMAIN_NAME
     name: httpbin3

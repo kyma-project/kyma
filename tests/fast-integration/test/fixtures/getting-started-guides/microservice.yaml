@@ -67,8 +67,7 @@ spec:
     host: orders-service
     name: orders-service
     port: 80
-  gateways:
-    - kyma-system/kyma-gateway
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
     - path: /.*
       methods: ["GET", "POST"]
