@@ -26,9 +26,16 @@ async function getRegisteredPrometheusRuleNames() {
   return rules.map((o) => o.name);
 }
 
+function removeNamePrefixes(ruleNames) {
+  return ruleNames.map((rule) =>
+    rule.replace("monitoring-", "").replace("kyma-", "")
+  );
+}
+
 async function getNotRegisteredPrometheusRuleNames() {
   let registeredRules = await getRegisteredPrometheusRuleNames();
   let k8sRuleNames = await getK8sPrometheusRuleNames();
+  k8sRuleNames = removeNamePrefixes();
   return k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
 }
 
