@@ -90,7 +90,7 @@ func (m *BebMock) Start() string {
 		w.Header().Set("Content-Type", "application/json")
 
 		// oauth2 request
-		if r.Method == http.MethodPost && r.RequestURI == TokenURLPath {
+		if r.Method == http.MethodPost && strings.HasPrefix(r.RequestURI, TokenURLPath) {
 			if m.AuthResponse != nil {
 				m.AuthResponse(w)
 			} else {
