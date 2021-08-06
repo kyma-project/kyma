@@ -8,8 +8,8 @@ const {
     waitForServiceBinding,
     waitForServiceBindingUsage,
     waitForClusterAddonsConfiguration,
-    getSecret,
     getSecrets,
+    getPodPresets,
     debug,
   } = require("../utils");
 const {
@@ -179,6 +179,98 @@ async function goodNight() {
   console.log('Waking up...');
 }
 
+async function storeSecretsAndPresets() {
+  let secretsResp = await getSecrets("default")
+  let podPresetsResp = await getPodPresets("default")
+
+  let secrets = []
+  let podPresets = []
+
+  secretsResp.forEach(function (secret) {
+    secrets.push(secret.metadata.name)
+  })
+
+  podPresetsResp.forEach(function (podPreset) {
+    podPresets.push(podPreset.metadata.name)
+  })
+
+  // return { secrets, podPresets }
+  return Promise
+    .all([ {secrets, podPresets} ])
+    .then( function () {
+      return arguments[0][0]
+    
+  }, function (err) {
+    console.log (err)
+  })
+}
+
+async function checkSecrets(allSecrets) {
+  // allSecrets = await storeSecretsAndPresets()
+  // allSecrets = allSecrets.secrets
+
+  // this are fixed values from resource names of test fixtures
+  let reference = [
+    "hb-redis-micro",
+    "sh.helm.release.v1.hb-redis-micro",
+    "func-sb-svcat-auditlog-management-1",
+    "func-sb-svcat-auditlog-api-1",
+    "inst-sb-svcat-auditlog-api-1",
+    "inst-sb-svcat-auditlog-management-1",
+    "func-sb-svcat-html5-apps-repo-1",
+    "inst-sb-svcat-html5-apps-repo-1",
+    "func-sb-redis-function-1",
+    "inst-sb-redis-function-1",
+  ]
+
+  let missing = reference
+
+  // iterate through the list of all existing secrets in namespace
+  // and check if this list contains our well known secrets
+  allSecrets.forEach( function (secretName) {
+    for (var i=0; i < reference.length; i++) {
+      if (secretName.includes(reference[i])) {
+        let index = missing.indexOf(reference[i])
+        if (index !== -1) {
+          missing.splice(index, 1)
+        }
+      }
+    }
+  })
+
+  // if missing > 0 -> there are some secrets lost
+  debug(`Missing ${missing.length} secrets`)
+  console.log(`Missing ${missing.length} secrets`)
+}
+
+async function checkPodPresets(allPodPresets) {
+  // allPodPresets = await storeSecretsAndPresets()
+  // allPodPresets = allPodPresets.podPresets
+
+  let reference = await storeSecretsAndPresets()
+  reference = reference.podPresets
+
+  let missing = reference
+
+  // iterate through the list of all existing PodPresets in namespace
+  // and check if this list still contains the same PodPresets
+  allPodPresets.forEach( function (podPresetName) {
+    for (var i=0; i < reference.length; i++) {
+      if (podPresetName.includes(reference[i])) {
+        let index = missing.indexOf(reference[i])
+        if (index !== -1) {
+          missing.splice(index, 1)
+        }
+        console.log(missing)
+      }
+    }
+  })
+
+  // if missing > 0 -> there are some secrets lost
+  debug(`Missing ${missing.length} PodPresets`)
+  console.log(`Missing ${missing.length} PodPresets`)
+}
+
 async function deploy() {
   let times = []
 
@@ -193,7 +285,7 @@ async function deploy() {
   times.push(installHTML5AppsRepoExample())
   times.push(installAuditManagementExample())
   
-  Promise.all(times).then(function () {
+  return Promise.all(times).then(function () {
     console.log(`\nSuccessfully deployed all resources:`)
     let items = arguments[0]
     items.sort(function(a, b) {
@@ -214,8 +306,8 @@ async function deploy() {
 module.exports = {
   deploy,
   destroy,
+  storeSecretsAndPresets,
   checkSecrets,
-  getPodPresets,
   checkPodPresets,
   goodNight
 };

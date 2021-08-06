@@ -38,15 +38,35 @@ async function installBTPOperatorHelmChart(creds) {
     await installer.helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
   } catch(error) {
     if (error.stderr === undefined) {
-      throw new Error(`failed to install btp-operator: ${error}`);
+      throw new Error(`failed to install ${btp}: ${error}`);
     }
-    throw new Error(`failed to install btp-operator: ${error.stderr}`);
+    throw new Error(`failed to install ${btp}: ${error.stderr}`);
   }
 }
 
-async function smInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
+async function installBTPServiceOperatorMigrationHelmChart() {
+  const chart = "https://github.com/kyma-incubator/sc-removal/releases/download/0.2.0/sap-btp-service-operator-migration-0.2.0.tar.gz";
+  const btp = "sap-btp-service-operator-migration";
+  const image = {
+    repository: "eu.gcr.io/sap-se-cx-gopher/sap-btp-service-operator-migration",
+    tag : "v0.2.0"
+  }
+  const values = `image.repository=${image.repository},image.tag=${image.tag}`
+
+  try { 
+    await installer.helmInstallUpgrade(btp, chart, "sap-btp-operator", values, null, ["--create-namespace"]);
+  } catch(error) {
+    if (error.stderr === undefined) {
+      throw new Error(`failed to install ${btp}: ${error}`);
+    }
+    throw new Error(`failed to install ${btp}: ${error.stderr}`);
+  }
+}
+
+async function provisionPlatform(creds, svcatPlatform) {
+  let args = [];
   try {
-    let args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
+    args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
     await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
 
     // $ smctl register-platform <name> kubernetes -o json
@@ -74,9 +94,28 @@ async function smInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpO
     let registerPlatformOut = await execa(`smctl`, args);
     let platform = JSON.parse(registerPlatformOut.stdout)
 
+    return {
+      clusterId: platform.id,
+      name: platform.name,
+      credentials: platform.credentials.basic,
+    }
+
+  } catch (error) {
+    if (error.stderr === undefined) {
+      throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
+    }
+    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
+  }
+}
+
+async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
+  let args = [];
+  try {
+
     args = [`provision`, btpOperatorInstance, `service-manager`, `service-operator-access`, `--mode=sync`]
     await execa(`smctl`, args);
 
+    // Move to Operator Install
     args = [`bind`, btpOperatorInstance, btpOperatorBinding, `--mode=sync`];
     await execa(`smctl`, args);
     args = [`get-binding`, btpOperatorBinding, `-o`, `json`];
@@ -84,7 +123,13 @@ async function smInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpO
     let b = JSON.parse(out.stdout)
     let c = b.items[0].credentials
 
-    return {clientId:c.clientid,clientSecret:c.clientsecret,smURL:c.sm_url,url:c.url,clusterId:platform.id};
+    return {
+      clientId: c.clientid,
+      clientSecret: c.clientsecret,
+      smURL: c.sm_url,
+      url: c.url,
+    }
+
   } catch(error) {
     if (error.stderr === undefined) {
       throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
@@ -138,9 +183,11 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
 }
 
 module.exports = {
+  provisionPlatform,
   smInstanceBinding,
   cleanupInstanceBinding,
   installBTPOperatorHelmChart,
+  installBTPServiceOperatorMigrationHelmChart,
   saveKubeconfig,
   SMCreds,
 };
