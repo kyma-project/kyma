@@ -7,8 +7,8 @@ const {
   expect 
 } = require("chai");
 
-async function provisionSKR(keb, gardener, instanceID, name) {
-  const resp = await keb.provisionSKR(name, instanceID);
+async function provisionSKR(keb, gardener, instanceID, name, platformCreds, btpOperatorCreds) {
+  const resp = await keb.provisionSKR(name, instanceID, platformCreds, btpOperatorCreds);
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation

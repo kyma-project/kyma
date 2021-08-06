@@ -37,41 +37,75 @@ describe("SKR SVCAT migration test", function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);  
 
+  let platformCreds;
+  it(`Should Provision Platform`, async function() {
+    platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform)
+  });
+
+  let btpOperatorCreds;
+  it(`Should instantiate SM Instance and Binding`, async function() {
+    btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
+  });
+
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName);
+    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, platformCreds, btpOperatorCreds);
   });
+
   it(`Should save kubeconfig`, async function() {
     t.saveKubeconfig(skr.shoot.kubeconfig);
   });
+
   it(`Should initialize K8s`, async function() {
     await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
-  let btpOperatorCreds;
-  it(`Should instantiate SM Instance and Binding`, async function() {
-    btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
-  });
+
   it(`Should install sample service catalogue ressources`, async function() {
     await sampleResources.deploy()
   });
+
+  let secretsAndPresets
+  it(`Should store secrets and presets`, async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
+  });
+
   it(`Should install BTP Operator helm chart`, async function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds);
   });
+
+  it(`Should install BTP Service Operator Migration helm chart`, async function() {
+    await t.installBTPServiceOperatorMigrationHelmChart();
+
+    // TODO: Print log output of migrator job "sap-btp-operator-migration"
+  });
+
+  // TODO: Remove
   it(`Should Sleep and wakeup properly`, async function() {
     await sampleResources.goodNight()
   });
-  
-  // Install BTP-Migrator and execute sc-removal
-  
-  // Sanity Check: secrets & presets still available?
-  // All other SVCAT resources removed?
+
+  it(`Should pass sanity check`, async function() {
+    // TODO: Wait/Check until Job of BTP-Migrator/SC-Removal is finished successfully
+
+    // Check if Secrets and PodPresets are still available
+    await sampleResources.checkSecrets(secretsAndPresets.secrets)
+    await sampleResources.checkPodPresets(secretsAndPresets.podPresets)
+
+    // TODO: Check if all other SVCat resources are successfully removed
+  });
+
   
   it(`Should destroy sample service catalogue ressources`, async function() {
+    // TODO: Remove anything from BT-Operator
     await sampleResources.destroy()
+
+    // TODO: Check if no Service Instances are left over
   });
+
   it(`Should deprovision SKR`, async function() {
     await deprovisionSKR(keb, runtimeID);
   });
+
   it(`Should cleanup SM instances and bindings`, async function() {
     await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
