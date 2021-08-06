@@ -30,3 +30,13 @@ type State struct {
 
 // int32Ptr converts int to int pointer
 func int32Ptr(i int32) *int32 { return &i }
+
+// PatchDeploymentSpec for defining patch data for updating k8s deployment
+type PatchDeploymentSpec struct {
+	Spec Spec `json:"spec"`
+}
+
+// Spec child node for PatchDeploymentSpec struct
+type Spec struct {
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
+}

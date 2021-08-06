@@ -1,6 +1,7 @@
 package process
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,16 +30,25 @@ func (s ScaleDownEventingController) ToString() string {
 
 // Do scales down eventing-controller deployment to zero replicas
 func (s ScaleDownEventingController) Do() error {
-	// Get eventing-controller deployment object
-	oldDeployment, err := s.process.Clients.Deployment.Get(s.process.KymaNamespace, s.process.ControllerName)
+	// Get eventing-controller deployment object and verify if it exists or not
+	_, err := s.process.Clients.Deployment.Get(s.process.KymaNamespace, s.process.ControllerName)
 	if err != nil {
 		return err
 	}
 
 	// reduce replica count to zero
-	desiredContainer := oldDeployment.DeepCopy()
-	desiredContainer.Spec.Replicas = int32Ptr(0)
-	_, err = s.process.Clients.Deployment.Update(s.process.KymaNamespace, desiredContainer)
+	targetPatch := PatchDeploymentSpec{
+		Spec: Spec{
+			Replicas: int32Ptr(0),
+		},
+	}
+	containerData, err := json.Marshal(targetPatch)
+	if err != nil {
+		return errors.Wrapf(err, "failed to marshal deployment patch for %s", s.process.ControllerName)
+	}
+
+	// Patch the eventing controller deployment
+	_, err = s.process.Clients.Deployment.Patch(s.process.KymaNamespace, s.process.ControllerName, containerData)
 	if err != nil {
 		return err
 	}

@@ -78,7 +78,7 @@ func main() {
 	checkBebJob := jobprocess.NewCheckIsBebEnabled(&p)
 	err = checkBebJob.Do()
 	if err != nil {
-		ctrLogger.Logger.WithContext().Error(errors.Wrapf(err, "failed to check: %s", checkBebJob.ToString()))
+		ctrLogger.Logger.WithContext().Error(errors.Wrapf(err, "failed to check: %s", checkBebJob.ToString()), p.KymaNamespace)
 		os.Exit(1)
 	}
 
@@ -97,6 +97,7 @@ func main() {
 	err = p.Execute()
 	if err != nil {
 		ctrLogger.Logger.WithContext().Error(err)
+		os.Exit(1)
 	}
 
 	ctrLogger.Logger.WithContext().Info("upgrade-job completed")

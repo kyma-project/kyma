@@ -4,6 +4,7 @@ import (
 	"context"
 
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,20 +33,11 @@ func (c Client) Get(namespace, name string) (*appsv1.Deployment, error) {
 	return toDeployment(unstructuredDeployment)
 }
 
-// Update updated the specified deployment to desired state.
+// Patch changes the specified deployment according to provided PatchData
 // It return the new updated deployment
 // or returns an error if it fails to update the deployment
-func (c Client) Update(namespace string, desiredDeployment *appsv1.Deployment) (*appsv1.Deployment, error) {
-	// Unmarshal from typed to unstructured
-	data, err := k8sruntime.DefaultUnstructuredConverter.ToUnstructured(desiredDeployment)
-	if err != nil {
-		return nil, err
-	}
-	unstructuredObj := &unstructured.Unstructured{
-		Object: data,
-	}
-
-	unstructuredDeployment, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Update(context.Background(), unstructuredObj, metav1.UpdateOptions{})
+func (c Client) Patch(namespace string, name string, data []byte) (*appsv1.Deployment, error) {
+	unstructuredDeployment, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Patch(context.Background(), name, types.MergePatchType, data, metav1.PatchOptions{})
 	if err != nil {
 		return nil, err
 	}

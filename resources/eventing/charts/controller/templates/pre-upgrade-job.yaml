@@ -68,26 +68,24 @@ spec:
       restartPolicy: Never
       containers:
         - name: {{ template "eventing.fullname" . }}-pre-upgrade
-          {{/* Use an image created by Prow */}}
-          {{/* image: {{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }} */}}
-#          image: "eu.gcr.io/kyma-project/incubator/k8s-tools:20210310-c03fb8b6"
-          image: "{{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }}"
+          image: "{{ .Values.global.image.repository }}/{{ .Values.preUpgradeJob.image.name }}:{{ .Values.preUpgradeJob.image.tag }}"
           terminationMessagePolicy: "FallbackToLogsOnError"
-#          command:
-#            - /bin/bash
-#            - -c
-#            - |
-#              set -ex
-#              ### TODO: remove me
-#              kubectl scale deployment -n kyma-system eventing-controller --replicas=0 || true
-#              kubectl get subscriptions.eventing.kyma-project.io -A --no-headers | wc -l
-#              kubectl get secret --no-headers -A | wc -l
           {{- if .Values.global.securityContext }}
           securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
           {{- end }}
           env:
-            - name: HOME
-              value: /tmp
+            - name: RELEASE
+              value: {{ .Values.preUpgradeJob.releaseName }}
+            - name: KYMA_NAMESPACE
+              value: {{ .Values.preUpgradeJob.kymaNamespace }}
+            - name: EVENTING_CONTROLLER_NAME
+              value: {{ .Values.preUpgradeJob.eventingControllerName }}
+            - name: EVENTING_PUBLISHER_NAME
+              value: {{ .Values.preUpgradeJob.eventingPublisherName }}
+            - name: APP_LOG_FORMAT
+              value: {{ .Values.global.log.format | quote }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.global.log.level | quote }}
       {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}
