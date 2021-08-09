@@ -28,3 +28,4 @@ bin
 vendor
 licenses
 /upgrade-job/.devEnv
+/upgrade-job/upgrade-job
