@@ -21,7 +21,7 @@ There can be other causes for the Prometheus Istio Server to restart or crash, b
 To prevent the OOM issue, you can increase the memory limit.
 Additionally, you can choose to decrease the volume of data by dropping additional labels.
 
-> **CAUTION:** Dropping additional labels with `prometheus-istio.envoyStats.labeldropRegex` has the side effect that graphs in Kiali will not work.
+> **CAUTION:** Dropping additional labels with `prometheus-istio.envoyStats.labeldropRegex` has the side effect that graphs in Kiali don't work.
 
 For both solutions, you can choose to change your Kyma cluster settings or directly update the Istio Prometheus resources.
 
@@ -38,7 +38,7 @@ monitoring:
           memory: "6Gi"
 ```
 
-> **TIP:** You should be fine with increating the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
 2. Deploy the values YAML file with the following command:
 
@@ -80,6 +80,8 @@ kyma deploy --values-file {VALUES_FILE_PATH}
       cpu: 40m
       memory: 200Mi
   ```
+
+> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
 3. If the problem persists, drop labels for the Istio metrics, edit `prometheus-istio server`:
 
