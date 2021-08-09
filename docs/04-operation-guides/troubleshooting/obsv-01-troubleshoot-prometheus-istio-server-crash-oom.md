@@ -89,7 +89,7 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
    kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
    ```
 
-4. Set the following values:
+4. Modify the following values:
 
    ```yaml
    metric_relabel_configs:
