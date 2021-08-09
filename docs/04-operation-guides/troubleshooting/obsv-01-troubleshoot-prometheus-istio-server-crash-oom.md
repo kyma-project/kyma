@@ -2,84 +2,111 @@
 title: Prometheus Istio Server restarting or in crashback loop
 ---
 
-<!-- the entire content needs update: values files instead of configmaps -->
-
 ## Condition
 
 Prometheus Istio Server is restarting or in a crashback loop.
 
 ## Cause
 
-Prometheus Istio Server scrapes metrics from all envoy side cars. It might crash because of OOM when the cardinality of the Istio metrics increases too much. This usually happens when a high number of workloads perform a lot of communication to other workloads.
+Prometheus Istio Server scrapes metrics from all envoy side cars, which may lead to OOM issues.
+
+For example, this can happen when a high number of workloads perform a lot of communication to other workloads, or when workloads are created and deleted dynamically.
+
+In such cases, the cardinality of the Istio metrics may increase too much and cause the container to be killed because of OOM (Istio telemetry V2 currently doesn't support the concept of metric expiry).
+
+There can be other causes for the Prometheus Istio Server to restart or crash, but the following istructions focus on fixing the OOM issue.
 
 ## Remedy
 
-1. Increase the memory for `prometheus-istio-server`:
+To prevent the OOM issue, you can increase the memory limit.
+Additionally, you can choose to decrease the volume of data by dropping additional labels.
 
-    ```bash
-    kubect edit deployment -n kyma monitoring-prometheus-istio-server
+> **CAUTION:** Dropping additional labels with `prometheus-istio.envoyStats.labeldropRegex` has the side effect that graphs in Kiali don't work.
 
-    ```
+For both solutions, you can choose to change your Kyma cluster settings or directly update the Istio Prometheus resources.
 
-    Increase the limits for memory:
+### Change the Kyma settings
 
-    ```yaml
-    resources:
-      limits:
-        cpu: 600m
-        memory: 2000Mi
-      requests:
-        cpu: 40m
-        memory: 200Mi
-    ```
-
-2. Drop labels for the Istio metrics.
-
-   Edit the values for `prometheus-istio server`:
-
-   ```bash
-    kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
-    ```
-
-    Edit:
-
-    ```yaml
-    metric_relabel_configs:
-      - separator: ;
-        regex: ^(grpc_response_status|source_version|destination_version|source_app|destination_app)$
-        replacement: $1
-        action: labeldrop
-    ```
-
-    Change regex to:
-
-    ```yaml
-    regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
-    ```
-
-    Save the ConfigMap and restart `prometheus-istio-server` for the changes to take effect:
-
-    ```bash
-    kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
-    ```
-
-    > **CAUTION:** The side effect of this change is graphs in Kiali will not work.
-
-<!-- why is there suddenly a sub-headline when the previous steps had no separate headline? -->
-
-### Override the configuration
-
-[Change the configuration](../../.../04-operation-guides/operations/03-change-kyma-config-values.md) with a values YAML file. You can set the value for the **memory limit** attribute to 4Gi, and/or **drop the labels** from Istio metrics.
-
-> **CAUTION:** If you drop additional labels with `prometheus-istio.envoyStats.labeldropRegex`, graphs in Kiali will not work.
+1. To increase the memory limit, create a values YAML file with the following content:
 
 ```yaml
-monitoring
+monitoring:
   prometheus-istio:
-    envoyStats:
-      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
     server:
       resources:
         limits:
-          memory: "4Gi"
+          memory: "6Gi"
 ```
+
+> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+
+2. Deploy the values YAML file with the following command:
+
+```bash
+kyma deploy --values-file {VALUES_FILE_PATH}
+```
+
+3. If the problem persists, drop labels for the Istio metrics with the following values YAML file:
+  
+```yaml
+monitoring:
+  prometheus-istio:
+    envoyStats:
+      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
+```
+
+4. Again, change the settings with the following command:
+
+```bash
+kyma deploy --values-file {VALUES_FILE_PATH}
+```
+
+### Change the Istio Prometheus configuration
+
+1. To increase the memory for `prometheus-istio-server`, run the following command:
+
+  ```bash
+  kubect edit deployment -n kyma monitoring-prometheus-istio-server
+  ```
+
+2. In your deployment resource, set the following limits for memory:
+
+  ```yaml
+  resources:
+    limits:
+      cpu: 600m
+      memory: 6000Mi
+    requests:
+      cpu: 40m
+      memory: 200Mi
+  ```
+
+> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+
+3. If the problem persists, drop labels for the Istio metrics, edit `prometheus-istio server`:
+
+  ```bash
+  kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
+  ```
+
+4. Edit the values:
+
+  ```yaml
+  metric_relabel_configs:
+    - separator: ;
+      regex: ^(grpc_response_status|source_version|destination_version|source_app|destination_app)$
+      replacement: $1
+      action: labeldrop
+  ```
+
+5. Change regex in the following way:
+
+  ```yaml
+  regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
+  ```
+
+6. Save the ConfigMap and restart `prometheus-istio-server` for the changes to take effect:
+
+  ```bash
+  kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
+  ```
