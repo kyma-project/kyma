@@ -48,12 +48,12 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 3. If the problem persists, drop additional labels for the Istio metrics with the following values YAML file:
   
-  ```yaml
-  monitoring:
-    prometheus-istio:
-      envoyStats:
-        labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
-  ```
+   ```yaml
+   monitoring:
+     prometheus-istio:
+       envoyStats:
+         labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
+   ```
 
 4. Change the settings with the following command:
 
