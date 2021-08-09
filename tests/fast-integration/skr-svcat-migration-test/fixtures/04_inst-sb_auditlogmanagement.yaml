@@ -1,0 +1,9 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: inst-sb-svcat-auditlog-management-1
+spec:
+  # externalID: a42a5dde-8bd8-4491-9cca-6a6343e97158
+  instanceRef:
+    name: svcat-auditlog-management-1

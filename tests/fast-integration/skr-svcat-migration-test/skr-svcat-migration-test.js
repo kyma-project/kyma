@@ -13,8 +13,10 @@ const {
   debug,
   genRandom,
   initializeK8sClient,
+  switchDebug,
 } = require("../utils");
 const t = require("./test-helpers");
+const sampleResources = require("./deploy-sample-resources");
 
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
@@ -29,7 +31,7 @@ describe("SKR SVCAT migration test", function() {
   const svcatPlatform = `svcat-${suffix}`
   const btpOperatorInstance = `btp-operator-${suffix}`
   const btpOperatorBinding = `btp-operator-binding-${suffix}`
-
+  switchDebug(on = true)
   debug(`RuntimeID ${runtimeID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
@@ -49,8 +51,23 @@ describe("SKR SVCAT migration test", function() {
   it(`Should instantiate SM Instance and Binding`, async function() {
     btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
+  it(`Should install sample service catalogue ressources`, async function() {
+    await sampleResources.deploy()
+  });
   it(`Should install BTP Operator helm chart`, async function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds);
+  });
+  it(`Should Sleep and wakeup properly`, async function() {
+    await sampleResources.goodNight()
+  });
+  
+  // Install BTP-Migrator and execute sc-removal
+  
+  // Sanity Check: secrets & presets still available?
+  // All other SVCAT resources removed?
+  
+  it(`Should destroy sample service catalogue ressources`, async function() {
+    await sampleResources.destroy()
   });
   it(`Should deprovision SKR`, async function() {
     await deprovisionSKR(keb, runtimeID);

@@ -39,15 +39,15 @@ function installOptions(yargs) {
     'use-helm-template' : {
       describe: 'Use helm template | kubectl apply instead of helm upgrade -i'
     },
+    'with-central-app-connectivity': {
+      describe: 'Install Application Connectivity components as single cluster-wide instances'
+    },
     'with-compass': {
       describe: 'Install with compass-runtime-agent and disable legacy connectivity'
-    },
-    'with-central-application-gateway': {
-      describe: 'Install a single cluster-wide application gateway'
     }
   });
-
 }
+
 function uninstallOptions(yargs) {
   yargs.options({
     'skip-crd': {
@@ -66,7 +66,6 @@ function uninstallOptions(yargs) {
       describe: 'Install only these components (comma separated list)'
     }
   });
-
 }
 
 function verbose(argv) {
@@ -104,7 +103,7 @@ async function install(argv) {
   const skipComponents = argv.skipComponents ? argv.skipComponents.split(',').map(c => c.trim()) : [];
   const components = argv.components ? argv.components.split(',').map(c => c.trim()) : undefined;
   const withCompass = argv.withCompass;
-  const withCentralApplicationGateway = argv.withCentralApplicationGateway;
+  const withCentralAppConnectivity = argv.centralAppConnectivity;
   const useHelmTemplate = argv.useHelmTemplate;
 
   await installer.installKyma({
@@ -113,7 +112,7 @@ async function install(argv) {
     skipComponents,
     isUpgrade: !!argv.upgrade,
     withCompass,
-    withCentralApplicationGateway,
+    withCentralAppConnectivity: withCentralAppConnectivity,
     useHelmTemplate
   });
   console.log('Kyma installed');

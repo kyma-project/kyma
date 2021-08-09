@@ -142,7 +142,20 @@ func TestRoundTripperMTLS(t *testing.T) {
 	require.Equal(t, res.StatusCode, http.StatusOK)
 }
 
-func TestRoundTripperMTLSMissingCert(t *testing.T) {
+func TestRoundTripperMTLSMissingCert_RequireAndVerifyClientCert(t *testing.T) {
+	_, err := roundTripperMTLSMissingCert(t, tls.RequireAndVerifyClientCert)
+	require.NotNil(t, err, "Should have tls: client didn't provide a certificate error")
+}
+
+func TestRoundTripperMTLSMissingCert_RequestClientCert(t *testing.T) {
+	res, err := roundTripperMTLSMissingCert(t, tls.RequestClientCert)
+	require.NoError(t, err)
+
+	_ = res.Body.Close()
+	require.Equal(t, res.StatusCode, http.StatusOK)
+}
+
+func roundTripperMTLSMissingCert(t *testing.T, clientAuth tls.ClientAuthType) (*http.Response, error) {
 	caTLSCert, caX509Cert, err := newCA()
 	require.NoError(t, err)
 
@@ -157,7 +170,7 @@ func TestRoundTripperMTLSMissingCert(t *testing.T) {
 	}))
 	ts.TLS = &tls.Config{
 		Certificates: []tls.Certificate{*serverCert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientAuth:   clientAuth,
 		ClientCAs:    certpool,
 	}
 	ts.StartTLS()
@@ -174,8 +187,7 @@ func TestRoundTripperMTLSMissingCert(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, ts.URL, nil)
 	require.NoError(t, err)
 
-	_, err = httpClient.Do(req)
-	require.ErrorIs(t, err, clientcert.ErrMissingClientCertificate)
+	return httpClient.Do(req)
 }
 
 func newCert(caCert *tls.Certificate) (*tls.Certificate, error) {

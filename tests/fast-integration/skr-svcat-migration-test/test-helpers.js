@@ -9,8 +9,11 @@ const {
 class SMCreds {
   static fromEnv() {
     return new SMCreds(
+      // TODO: rename to BTP_SM_ADMIN_CLIENTID
       getEnvOrThrow("BTP_OPERATOR_CLIENTID"),
+      // TODO: rename to BTP_SM_ADMIN_CLIENTID
       getEnvOrThrow("BTP_OPERATOR_CLIENTSECRET"),
+      // TODO: rename to BTP_SM_URL
       getEnvOrThrow("BTP_OPERATOR_URL")
     );
   }
@@ -46,8 +49,30 @@ async function smInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpO
     let args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
     await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
 
-    args = [`register-platform`, svcatPlatform, `kubernetes`]
-    await execa(`smctl`, args);
+    // $ smctl register-platform <name> kubernetes -o json
+    // Output:
+    // {
+    //   "id": "<platform-id/cluster-id>",
+    //   "name": "<name>",
+    //   "type": "kubernetes",
+    //   "created_at": "...",
+    //   "updated_at": "...",
+    //   "credentials": {
+    //     "basic": {
+    //       "username": "...",
+    //       "password": "..."
+    //     }
+    //   },
+    //   "labels": {
+    //     "subaccount_id": [
+    //       "..."
+    //     ]
+    //   },
+    //   "ready": true
+    // }
+    args = [`register-platform`, svcatPlatform, `kubernetes`, `-o`, `json`]
+    let registerPlatformOut = await execa(`smctl`, args);
+    let platform = JSON.parse(registerPlatformOut.stdout)
 
     args = [`provision`, btpOperatorInstance, `service-manager`, `service-operator-access`, `--mode=sync`]
     await execa(`smctl`, args);
@@ -58,8 +83,8 @@ async function smInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpO
     let out = await execa(`smctl`, args);
     let b = JSON.parse(out.stdout)
     let c = b.items[0].credentials
-    //TODO figure out how to find clusterid
-    return {clientId:c.clientid,clientSecret:c.clientsecret,smURL:c.sm_url,url:c.url,clusterId:"TODO"};
+
+    return {clientId:c.clientid,clientSecret:c.clientsecret,smURL:c.sm_url,url:c.url,clusterId:platform.id};
   } catch(error) {
     if (error.stderr === undefined) {
       throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
@@ -79,22 +104,31 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   }
 
   try {
-    args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`];
-    await execa(`smctl`, args);
+    args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`, `--mode=sync`];
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Service Binding successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
 
   try {
     args = [`delete-platform`, svcatPlatform, `-f`];
-    await execa(`smctl`, args);
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Platform(s) successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
 
   try {
-    args = [`deprovision`, btpOperatorInstance, `-f`];
-    await execa(`smctl`, args);
+    args = [`deprovision`, btpOperatorInstance, `-f`, `--mode=sync`];
+    let {stdout} = await execa(`smctl`, args);
+    if(stdout !== "Service Instance successfully deleted.") {
+      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+    }
   } catch(error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }

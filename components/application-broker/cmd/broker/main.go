@@ -138,7 +138,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 		mInformersGroup.ApplicationMappings().Lister(), brokerService,
 		&mClient, &istioClient, log, livenessCheckStatus,
 		cfg.APIPackagesSupport, cfg.Director.Service, cfg.Director.ProxyURL,
-		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector, cfg.NewEventingFlow)
+		scInformersGroup.ServiceBindings().Informer(), cfg.GatewayBaseURLFormat, idSelector)
 
 	// wait for api server
 	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {

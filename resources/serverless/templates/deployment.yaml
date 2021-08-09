@@ -106,6 +106,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLE_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_ROLEBINDING_REQUEUE_DURATION" "value" .Values.containers.manager.envs.roleBindingRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_EXCLUDED_NAMESPACES" "value" .Values.containers.manager.envs.namespaceExcludedNames "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_PUBLISHER_PROXY_ADDRESS" "value" .Values.containers.manager.envs.functionPublisherProxyAddress "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_DEFAULT_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryDefaultDockerConfigSecretName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_REGISTRY_EXTERNAL_DOCKER_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.imageRegistryExternalDockerConfigSecretName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_PACKAGE_REGISTRY_CONFIG_SECRET_NAME" "value" .Values.containers.manager.envs.packageRegistryConfigSecretName "context" . ) | nindent 12 }}
