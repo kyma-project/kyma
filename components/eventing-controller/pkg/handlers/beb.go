@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-logr/logr"
 
@@ -112,14 +110,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		emsSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
 			log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
-			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
-			if !errors.As(err, &httpStatusNotFoundError) {
-				return false, err
-			}
-			log.Info("Recreate the BEB subscription", "subscription name", sEv2.Name)
-			if emsSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log); err != nil {
-				return false, err
-			}
+			return false, err
 		}
 		// get the internal view for the ems subscription
 		sEms, err := getInternalView4Ems(emsSubscription)
@@ -268,28 +259,4 @@ func (b *Beb) createSubscription(subscription *types.Subscription) error {
 		return fmt.Errorf("failed to create subscription with error: %v", createResponse)
 	}
 	return nil
-}
-
-func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log logr.Logger) (*types.Subscription, error) {
-	// clean the application name segment in the subscription event-types from none-alphanumeric characters
-	if err := cleanEventTypes(subscription, cleaner); err != nil {
-		log.Error(err, "clean application name in the subscription event-types failed")
-		return nil, err
-	}
-
-	log = log.WithValues("BEB subscription name", subscription.Name)
-	// create a new EMS subscription
-	if err := b.createSubscription(subscription); err != nil {
-		log.Error(err, "create BEB subscription failed")
-		return nil, err
-	}
-
-	// get the new EMS subscription
-	bebSubscription, err := b.getSubscription(subscription.Name)
-	if err != nil {
-		log.Error(err, "get BEB subscription failed")
-		return nil, err
-	}
-
-	return bebSubscription, nil
 }
