@@ -31,7 +31,7 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
   2. Trigger the update process. Run:
 
       ```bash
-      kyma deploy -s $KYMA_VERSION --domain $DOMAIN --tls-cert $TLS_CERT --tls-key $TLS_KEY
+      kyma deploy -s $KYMA_VERSION --domain $DOMAIN --tls-crt $TLS_CERT --tls-key $TLS_KEY
       ```
     
       The process is complete when you see the `Kyma installed` message.
