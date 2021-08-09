@@ -42,9 +42,9 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 2. Deploy the values YAML file with the following command:
 
-  ```bash
-  kyma deploy --values-file {VALUES_FILE_PATH}
-  ```
+   ```bash
+   kyma deploy --values-file {VALUES_FILE_PATH}
+   ```
 
 3. If the problem persists, drop additional labels for the Istio metrics with the following values YAML file:
   
