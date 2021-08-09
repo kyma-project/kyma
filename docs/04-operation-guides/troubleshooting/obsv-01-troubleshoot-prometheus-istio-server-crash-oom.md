@@ -38,7 +38,7 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
             memory: "6Gi"
   ```
   
-  > **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+  > **TIP:** You should be fine with increasing the limit to 6Gi. However, if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
 2. Deploy the values YAML file with the following command:
 
