@@ -29,16 +29,16 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 1. To increase the memory limit, create a values YAML file with the following content:
 
-  ```yaml
-  monitoring:
-    prometheus-istio:
-      server:
-        resources:
-          limits:
-            memory: "6Gi"
-  ```
+   ```yaml
+   monitoring:
+     prometheus-istio:
+       server:
+         resources:
+           limits:
+             memory: "6Gi"
+   ```
   
-  > **TIP:** You should be fine with increasing the limit to 6Gi. However, if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+   > **TIP:** You should be fine with increasing the limit to 6Gi. However, if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
 2. Deploy the values YAML file with the following command:
 
