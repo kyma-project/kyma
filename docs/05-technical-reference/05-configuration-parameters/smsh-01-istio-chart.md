@@ -1,5 +1,5 @@
 ---
-title: Istio <!--Operator--> chart
+title: Istio chart
 ---
 
 To configure the Istio chart and, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuratio/nvalues.yaml) file. This document describes parameters that you can configure.
