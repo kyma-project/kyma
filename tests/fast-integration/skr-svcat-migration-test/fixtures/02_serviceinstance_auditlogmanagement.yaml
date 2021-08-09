@@ -1,0 +1,10 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: svcat-auditlog-management-1
+spec:
+  clusterServiceClassExternalName: auditlog-management
+  clusterServicePlanExternalName: default
+  clusterServicePlanRef:
+    name: e95e800c-f129-474f-b08e-fbfbe624abfd-3
