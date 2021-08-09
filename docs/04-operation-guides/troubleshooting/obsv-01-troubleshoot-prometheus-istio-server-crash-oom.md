@@ -71,15 +71,15 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 2. In your deployment resource, set the following limits for memory:
 
-  ```yaml
-  resources:
-    limits:
-      cpu: 600m
-      memory: 6000Mi
-    requests:
-      cpu: 40m
-      memory: 200Mi
-  ```
+   ```yaml
+   resources:
+     limits:
+       cpu: 600m
+       memory: 6000Mi
+     requests:
+       cpu: 40m
+       memory: 200Mi
+   ```
   
    > **TIP:** You should be fine with increasing the limit to 6Gi. However, if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
@@ -91,22 +91,22 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 4. Set the following values:
 
-  ```yaml
-  metric_relabel_configs:
-    - separator: ;
-      regex: ^(grpc_response_status|source_version|destination_version|source_app|destination_app)$
-      replacement: $1
-      action: labeldrop
-  ```
+   ```yaml
+   metric_relabel_configs:
+     - separator: ;
+       regex: ^(grpc_response_status|source_version|destination_version|source_app|destination_app)$
+       replacement: $1
+       action: labeldrop
+   ```
 
 5. Change regex in the following way:
 
-  ```yaml
-  regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
-  ```
+   ```yaml
+   regex: ^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$
+   ```
 
 6. Save the ConfigMap and restart `prometheus-istio-server` for the changes to take effect:
 
-  ```bash
-  kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
-  ```
+   ```bash
+   kubectl rollout restart deployment -n kyma-system monitoring-prometheus-istio-server
+   ```
