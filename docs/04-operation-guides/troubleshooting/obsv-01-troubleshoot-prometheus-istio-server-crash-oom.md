@@ -57,9 +57,9 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 4. Change the settings with the following command:
 
-  ```bash
-  kyma deploy --values-file {VALUES_FILE_PATH}
-  ```
+   ```bash
+   kyma deploy --values-file {VALUES_FILE_PATH}
+   ```
 
 ### Change the Istio Prometheus configuration
 
