@@ -10,7 +10,7 @@ If you're interested in learning more about Service Mesh in Kyma, follow these l
 
 - Troubleshoot Service Mesh-related issues when:
 
-  - You [can't access a Kyma endpoint](../../../04-operation-guides/troubleshooting/smsh-01-503-no-access.md) come up
+  - You [can't access a Kyma endpoint](../../../04-operation-guides/troubleshooting/smsh-01-503-no-access.md)
   - [Connection refused errors](../../../04-operation-guides/troubleshooting/smsh-02-connection-refused.md) occur
   - [Issues with Istio sidecar injection](../../../04-operation-guides/troubleshooting/smsh-03-istio-no-sidecar.md) come up
   - You have an [incompatible Istio sidecar version after Kyma upgrade](../../../04-operation-guides/troubleshooting/smsh-04-istio-sidecar-version.md)

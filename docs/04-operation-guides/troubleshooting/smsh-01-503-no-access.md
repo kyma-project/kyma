@@ -1,8 +1,13 @@
 ---
-title: Can't access Kyma endpoints
+title: Can't access a Kyma endpoint
 ---
 
+## Symptom & cause
+
 The `503` status code received when you try to access a Kyma endpoint can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.
+
+## Remedy
+
 To fix this problem, restart the Pods of the Gateway.
 
 1. List all available endpoints:
