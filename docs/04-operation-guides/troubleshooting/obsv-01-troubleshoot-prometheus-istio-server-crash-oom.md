@@ -29,42 +29,42 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 1. To increase the memory limit, create a values YAML file with the following content:
 
-```yaml
-monitoring:
-  prometheus-istio:
-    server:
-      resources:
-        limits:
-          memory: "6Gi"
-```
-
-> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
+  ```yaml
+  monitoring:
+    prometheus-istio:
+      server:
+        resources:
+          limits:
+            memory: "6Gi"
+  ```
+  
+  > **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
 2. Deploy the values YAML file with the following command:
 
-```bash
-kyma deploy --values-file {VALUES_FILE_PATH}
-```
+  ```bash
+  kyma deploy --values-file {VALUES_FILE_PATH}
+  ```
 
-3. If the problem persists, drop labels for the Istio metrics with the following values YAML file:
+3. If the problem persists, drop additional labels for the Istio metrics with the following values YAML file:
   
-```yaml
-monitoring:
-  prometheus-istio:
-    envoyStats:
-      labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
-```
+  ```yaml
+  monitoring:
+    prometheus-istio:
+      envoyStats:
+        labeldropRegex: "^(grpc_response_status|source_version|source_principal|source_app|response_flags|request_protocol|destination_version|destination_principal|destination_app|destination_canonical_service|destination_canonical_revision|source_canonical_revision|source_canonical_service)$"
+  ```
 
-4. Again, change the settings with the following command:
+4. Change the settings with the following command:
 
-```bash
-kyma deploy --values-file {VALUES_FILE_PATH}
-```
+  ```bash
+  kyma deploy --values-file {VALUES_FILE_PATH}
+  ```
 
 ### Change the Istio Prometheus configuration
 
 1. To increase the memory for `prometheus-istio-server`, run the following command:
-
+  
   ```bash
   kubect edit deployment -n kyma monitoring-prometheus-istio-server
   ```
@@ -80,16 +80,16 @@ kyma deploy --values-file {VALUES_FILE_PATH}
       cpu: 40m
       memory: 200Mi
   ```
+  
+  > **TIP:** You should be fine with increasing the limit to 6Gi. However, if your resources are scarce, try increasing the value gradually in steps of 1Gi.
 
-> **TIP:** You should be fine with increasing the limit to 6Gi. But if your resources are scarce, try increasing the value gradually in steps of 1Gi.
-
-3. If the problem persists, drop labels for the Istio metrics, edit `prometheus-istio server`:
+3. If the problem persists, drop additional labels for the Istio metrics by editing `prometheus-istio server`:
 
   ```bash
   kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
   ```
 
-4. Edit the values:
+4. Set the following values:
 
   ```yaml
   metric_relabel_configs:
