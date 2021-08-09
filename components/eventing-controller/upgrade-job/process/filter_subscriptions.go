@@ -37,7 +37,7 @@ func (s FilterSubscriptions) Do() error {
 
 	// First get the shootName, and initialize BebSubscriptionNameMapper
 	shootName := ""
-	configmap, err := s.process.Clients.ConfigMap.Get(s.process.KymaNamespace, "shoot-info")
+	configmap, err := s.process.Clients.ConfigMap.Get("kube-system", "shoot-info")
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
 	}
@@ -63,7 +63,7 @@ func (s FilterSubscriptions) Do() error {
 		// generate the new name for the BEB webhook from subscription
 		newBebSubscriptionName := nameMapper.MapSubscriptionName(&subscription)
 		expectedConditionMessage := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
-		conditionTypeToCheck := eventingv1alpha1.ConditionSubscriptionActive
+		conditionTypeToCheck := eventingv1alpha1.ConditionSubscribed
 
 		condition, err := s.findSubscriptionCondition(&subscription, conditionTypeToCheck)
 		if err != nil {
