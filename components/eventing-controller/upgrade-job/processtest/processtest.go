@@ -6,15 +6,15 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
-	ectesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 	bebClientTesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	ectesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -224,7 +224,7 @@ func ConfigMap(name string) *corev1.ConfigMap {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: KymaSystemNamespace,
+			Namespace: "kube-system",
 			Labels: map[string]string{
 				"app": name,
 			},
@@ -280,12 +280,6 @@ func NewKymaSubscription(appName string, addConditions bool, includeBebMessageIn
 		Status:             "True",
 		LastTransitionTime: metav1.Now(),
 	}
-	if includeBebMessageInCondition {
-		nameMapper := handlers.NewBebSubscriptionNameMapper(testingShootName, handlers.MaxBEBSubscriptionNameLength)
-		newBebSubscriptionName := nameMapper.MapSubscriptionName(subscription)
-		condition1.Message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
-	}
-
 	condition2 := eventingv1alpha1.Condition{
 		Type:               eventingv1alpha1.ConditionSubscribed,
 		Reason:             "BEB Subscription creation failed",
@@ -299,6 +293,12 @@ func NewKymaSubscription(appName string, addConditions bool, includeBebMessageIn
 		Message:            "",
 		Status:             "True",
 		LastTransitionTime: metav1.Now(),
+	}
+
+	if includeBebMessageInCondition {
+		nameMapper := handlers.NewBebSubscriptionNameMapper(testingShootName, handlers.MaxBEBSubscriptionNameLength)
+		newBebSubscriptionName := nameMapper.MapSubscriptionName(subscription)
+		condition2.Message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
 	}
 
 	if addConditions {

@@ -67,7 +67,7 @@ func (s FilterSubscriptions) Do() error {
 
 		condition, err := s.findSubscriptionCondition(&subscription, conditionTypeToCheck)
 		if err != nil {
-			s.process.Logger.WithContext().Error(err)
+			s.process.Logger.WithContext().Warn(err)
 
 			// if condition not found, then we need to migrate this subscription
 			s.process.State.FilteredSubscriptions.Items = append(s.process.State.FilteredSubscriptions.Items, subscription)
