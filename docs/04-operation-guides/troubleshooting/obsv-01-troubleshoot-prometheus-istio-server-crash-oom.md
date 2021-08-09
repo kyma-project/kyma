@@ -85,9 +85,9 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 3. If the problem persists, drop additional labels for the Istio metrics by editing `prometheus-istio server`:
 
-  ```bash
-  kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
-  ```
+   ```bash
+   kubectl edit configmap -n kyma-system monitoring-prometheus-istio-server
+   ```
 
 4. Set the following values:
 
