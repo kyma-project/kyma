@@ -65,9 +65,9 @@ For both solutions, you can choose to change your Kyma cluster settings or direc
 
 1. To increase the memory for `prometheus-istio-server`, run the following command:
   
-  ```bash
-  kubect edit deployment -n kyma monitoring-prometheus-istio-server
-  ```
+   ```bash
+   kubectl edit deployment -n kyma monitoring-prometheus-istio-server
+   ```
 
 2. In your deployment resource, set the following limits for memory:
 
