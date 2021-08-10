@@ -184,6 +184,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Save the subscription status if it was changed
 	if statusChanged {
+		log.Info("----> status changed, updating status", "status", desiredSubscription.Status)
 		if err := r.Status().Update(ctx, desiredSubscription); err != nil {
 			log.Error(err, "Update subscription status failed")
 			return ctrl.Result{}, err
@@ -254,10 +255,25 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 		return false, err
 	}
 
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
 	if !subscription.Status.IsConditionSubscribed() {
-		message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
 		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
+		statusChanged = true
+	}
+
+	// Make sure the BEB subscription ID is written to the message
+	var subscribedCondition *eventingv1alpha1.Condition
+	for _, condition := range subscription.Status.Conditions {
+		if condition.Type == eventingv1alpha1.ConditionSubscribed {
+			subscribedCondition = condition.DeepCopy()
+		}
+	}
+	if subscribedCondition != nil && subscribedCondition.Message != message {
+		subscribedCondition.Message = message
+		if err := r.updateCondition(subscription, *subscribedCondition, ctx); err != nil {
 			return statusChanged, err
 		}
 		statusChanged = true
