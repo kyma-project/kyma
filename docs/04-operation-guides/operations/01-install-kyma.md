@@ -70,7 +70,7 @@ To install Kyma using your own domain name, you must provide the certificate and
   Then, pass the certificate files to the `deploy` command:
 
   ```bash
-  kyma deploy --domain {DOMAIN} --tls-cert crt.pem --tls-key key.pem
+  kyma deploy --domain {DOMAIN} --tls-crt crt.pem --tls-key key.pem
   ```
 
 ## Install from a specific source
