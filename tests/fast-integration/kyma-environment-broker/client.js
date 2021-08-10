@@ -107,8 +107,10 @@ class KEBClient {
     if (platformCreds && btpOperatorCreds) {
       payload.context["sm_platform_credentials"] = {
         credentials: {
-          username: platformCreds.credentials.username,
-          password: platformCreds.credentials.password,
+          basic: {
+            username: platformCreds.credentials.username,
+            password: platformCreds.credentials.password,
+          }
         },
         url: btpOperatorCreds.smURL
       }
