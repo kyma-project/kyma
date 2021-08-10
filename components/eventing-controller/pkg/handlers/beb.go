@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-logr/logr"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
@@ -17,8 +18,8 @@ import (
 )
 
 const (
-	bebHandlerName               = "beb-handler"
 	MaxBEBSubscriptionNameLength = 50
+	logKeyBEBSubscriptionName    = "bebSubscriptionName"
 )
 
 // compile time check
@@ -109,8 +110,17 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if ems subscription is the same as in the past
 		emsSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Error(err, "failed to get ems subscription", "subscription name", sEv2.Name)
-			return false, err
+			log.Error(err, "get BEB subscription failed", logKeyBEBSubscriptionName, sEv2.Name)
+			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
+			if errors.As(err, &httpStatusNotFoundError) {
+				log.Info("Recreate the BEB subscription", logKeyBEBSubscriptionName, sEv2.Name)
+				emsSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
+				if err != nil {
+					return false, err
+				}
+			} else {
+				return false, err
+			}
 		}
 		// get the internal view for the ems subscription
 		sEms, err := getInternalView4Ems(emsSubscription)
@@ -137,6 +147,30 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	statusChanged = b.setEmsSubscriptionStatus(subscription, emsSubscription) || statusChanged
 
 	return statusChanged, nil
+}
+
+func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log logr.Logger) (*types.Subscription, error) {
+	// clean the application name segment in the subscription event-types from none-alphanumeric characters
+	if err := cleanEventTypes(subscription, cleaner); err != nil {
+		log.Error(err, "clean application name in the subscription event-types failed")
+		return nil, err
+	}
+
+	log = log.WithValues(logKeyBEBSubscriptionName, subscription.Name)
+	// create a new EMS subscription
+	if err := b.createSubscription(subscription); err != nil {
+		log.Error(err, "create BEB subscription failed")
+		return nil, err
+	}
+
+	// get the new EMS subscription
+	bebSubscription, err := b.getSubscription(subscription.Name)
+	if err != nil {
+		log.Error(err, "get BEB subscription failed")
+		return nil, err
+	}
+
+	return bebSubscription, nil
 }
 
 // DeleteSubscription deletes the corresponding EMS subscription
