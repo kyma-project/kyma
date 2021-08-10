@@ -11,6 +11,7 @@ var email = "admin@kyma.cx"
 var password = "1234"
 
 func TestHydraTokenFetcher(t *testing.T) {
+	t.Skip("this should serve as example how to use the client outside cli context")
 	client, err := buildClient()
 	if err != nil {
 		t.Fatal(err)

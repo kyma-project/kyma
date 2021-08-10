@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"golang.org/x/net/publicsuffix"
 	l "log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 const (
