@@ -356,7 +356,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   return mockHost;
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
+async function  ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
     "commerce",

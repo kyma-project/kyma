@@ -175,7 +175,7 @@ function sleep(ms) {
 
 async function goodNight() {
   console.log('Taking a break...');
-  await sleep(900000); //15min
+  await sleep(1200000); //20min
   console.log('Waking up...');
 }
 
