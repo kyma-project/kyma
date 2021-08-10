@@ -289,7 +289,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     await patchApplicationGateway('central-application-gateway', 'kyma-system');
   } else {
     await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
-    await waitForDeployment(`mp-${appName}-connectivity-validator`, 'kyma-integration');
+    // await waitForDeployment(`mp-${appName}-connectivity-validator`, 'kyma-integration');
     await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   }
 
