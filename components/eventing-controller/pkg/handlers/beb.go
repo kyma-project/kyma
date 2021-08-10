@@ -21,9 +21,9 @@ import (
 )
 
 const (
-	bebHandlerName = "beb-handler"
+	bebHandlerName                = "beb-handler"
 	BEB_SUBSCRIPTION_NAME_LOG_KEY = "bebSubscriptionName"
-	ERROR_LOG_KEY = "error"
+	ERROR_LOG_KEY                 = "error"
 )
 
 // compile time check

@@ -679,7 +679,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			processedBebRequests := 0
 
 			// Create service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
@@ -712,7 +711,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							// ensure the correct subscription was created
 							return subscriptionName == receivedSubscriptionName
 						}
-						processedBebRequests++
 					}
 					return false
 				}).Should(BeTrue())
@@ -726,19 +724,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the BEB Subscription")
 			Eventually(func() bool {
-				i := -1
 				for r := range beb.Requests {
-					i++
-					// only consider requests against beb after the subscription creation request
-					if i <= processedBebRequests {
-						continue
-					}
 					if reconcilertesting.IsBebSubscriptionDelete(r) {
 						receivedSubscriptionName := reconcilertesting.GetRestAPIObject(r.URL)
 						// ensure the correct subscription was created
 						return subscriptionName == receivedSubscriptionName
 					}
-					// TODO: ensure that the remaining beb calls are neither create nor delete (means no new beb subscription is created)
 				}
 				return false
 			}).Should(BeTrue())
@@ -784,7 +775,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					getAPIRuleForASvc(svc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
 				})
 
-				By("Updating APIRule status to be Ready", func() {
+				By("Updating APIRule status to be ready", func() {
 					apiRule := filterAPIRulesForASvc(getAPIRules(ctx, svc), svc)
 					ensureAPIRuleStatusUpdatedWithStatusReady(&apiRule, ctx).Should(BeNil())
 				})
@@ -814,12 +805,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			notfoundHandlerCalled := make(chan bool, 1)
-			Context("Simulate manual deletion of BEB Subscription", func() {
-				By("Overriding behaviour of BEB mock server get Subscription handler to return not found response", func() {
-					beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
-						w.WriteHeader(http.StatusNotFound)
-						notfoundHandlerCalled <- true
+			Context("Delete BEB Subscription", func() {
+				By("Deleting its entry in BEB mock internal cache", func() {
+					for k := range beb.Subscriptions {
+						if strings.Contains(k, kymaSubscriptionName) {
+							delete(beb.Subscriptions, k)
+						}
 					}
 				})
 			})
@@ -832,23 +823,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Restore default behaviour of BEB mock server get Subscription handler", func() {
-				By("Forcing BEB mock server to evaluate Subscription get requests", func() {
-					select {
-					case <-notfoundHandlerCalled:
-						beb.GetResponse = nil
-					case <-time.After(time.Minute):
-						Fail("timeout waiting for BEB Subscription notfound handler to be called")
-					}
-				})
-			})
-
 			Context("Check BEB Subscription was recreated", func() {
-				By("Checking BEB mock server received at least two Subscription creation requests", func() {
+				By("Checking BEB mock server received a second creation request", func() {
 					Eventually(func() int {
 						_, countPost, _ := countBebRequests(kymaSubscriptionName)
 						return countPost
-					}, bigTimeOut, bigPollingInterval).Should(reconcilertesting.BeGreaterThanOrEqual(2))
+					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
 				})
 			})
 		})
