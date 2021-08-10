@@ -16,7 +16,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.postgresql.postgresqlUsername** | Specifies the username of the database saved in Hydra. | `hydra` |
 | **global.istio.gateway.name** | Specifies the name of the Istio Gateway used in Hydra. | `kyma-gateway` |
 | **global.istio.gateway.namespace** | Specifies the Namespace of the Istio Gateway used in Hydra. | `kyma-system` |
-| **global.ory.oathkeeper.maester.mode** | Specifies the mode in which ORY Oathkeeper Maester in expected to be deployed. | `sidecar` |
+| **global.ory.oathkeeper.maester.mode** | Specifies the mode in which ORY Oathkeeper Maester is expected to be deployed. | `sidecar` |
 | **global.ory.hydra.persistence.enabled** | Sets persistence for Hydra. | `true`|
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `true` |
 | **hpa.oathkeeper.minReplicas** |  Defines the initial number of created Oathkeeper instances. | `1` |
