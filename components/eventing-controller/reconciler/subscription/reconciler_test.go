@@ -829,7 +829,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				By("Checking BEB mock server received a second creation request", func() {
 					Eventually(func() int {
 						_, countPost, _ := countBebRequests(nameMapper.MapSubscriptionName(kymaSubscription))
-						fmt.Println(">>>", countPost)
 						return countPost
 					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
 				})
