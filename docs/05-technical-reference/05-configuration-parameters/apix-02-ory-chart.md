@@ -17,7 +17,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **global.istio.gateway.name** | Specifies the name of the Istio Gateway used in Hydra. | `kyma-gateway` |
 | **global.istio.gateway.namespace** | Specifies the Namespace of the Istio Gateway used in Hydra. | `kyma-system` |
 | **global.ory.oathkeeper.maester.mode** | Specifies the mode in which ORY Oathkeeper Maester in expected to be deployed. | `sidecar` |
-| **global.ory.hydra.persistence.enabled** | Sets persistence for Hydra | `true`|
+| **global.ory.hydra.persistence.enabled** | Sets persistence for Hydra. | `true`|
 | **global.ory.hydra.persistence.postgresql.enabled** | Defines whether Hydra should initiate the deployment of an in-cluster database. Set to `false` to use a self-provided database. If set to `true`, Hydra always uses an in-cluster database and ignores the custom database details. | `true` |
 | **hpa.oathkeeper.minReplicas** |  Defines the initial number of created Oathkeeper instances. | `1` |
 | **hpa.oathkeeper.maxReplicas** |  Defines the maximum number of created Oathkeeper instances. | `3` |
@@ -38,7 +38,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **postgresql.resources.requests.cpu** | Defines requests for CPU resources. | `250m` |
 | **postgresql.resources.limits.memory** | Defines limits for memory resources.| `1024Mi` |
 | **postgresql.resources.limits.cpu** | Defines limits for CPU resources. | `750m` |
-| **postgresql.existingSecret** | pecifies the name of the Secret... | `"ory-hydra-credentials"` |
+| **postgresql.existingSecret** | Specifies the name of the Secret... | `"ory-hydra-credentials"` |
 | **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `ory-hydra-credentials` |
 | **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). | `gcp-sa.json` |
 
