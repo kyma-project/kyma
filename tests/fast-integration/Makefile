@@ -5,10 +5,7 @@ ci:
 	npm run test-monitoring
 
 .PHONY: ci-no-install
-ci-no-install:
-	npm install
-	npm run test-no-install
-	npm run test-monitoring
+ci-no-install: ci
 
 .PHONY: ci-compass
 ci-compass:
