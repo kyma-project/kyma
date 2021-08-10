@@ -215,7 +215,7 @@ func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
 }
 
-// IsBebSubscriptionCreate determines if the http request is deleting a BEB subscription.
+// IsBebSubscriptionDelete determines if the http request is deleting a BEB subscription.
 func IsBebSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, MessagingURLPath)
 }

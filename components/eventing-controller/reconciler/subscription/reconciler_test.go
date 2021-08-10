@@ -764,6 +764,88 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	When("Deleting BEB Subscription manually", func() {
+		It("Should recreate BEB Subscription again", func() {
+			kymaSubscriptionName := "test-subscription"
+			kymaSubscription := reconcilertesting.NewSubscription(kymaSubscriptionName, namespaceName,
+				reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
+
+			Context("Setup Kyma Subscription required resources", func() {
+				var svc *v1.Service
+				By("Creating Subscriber service", func() {
+					svc = reconcilertesting.NewSubscriberSvc("test-service", namespaceName)
+					ensureSubscriberSvcCreated(svc, ctx)
+				})
+
+				By("Creating Kyma Subscription", func() {
+					reconcilertesting.WithValidSink(svc.Namespace, svc.Name, kymaSubscription)
+					ensureSubscriptionCreated(kymaSubscription, ctx)
+				})
+
+				By("Creating APIRule", func() {
+					getAPIRuleForASvc(svc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+				})
+
+				By("Updating APIRule status to be ready", func() {
+					apiRule := filterAPIRulesForASvc(getAPIRules(ctx, svc), svc)
+					ensureAPIRuleStatusUpdatedWithStatusReady(&apiRule, ctx).Should(BeNil())
+				})
+			})
+
+			Context("Check Kyma Subscription ready", func() {
+				By("Checking BEB mock server creation requests to contain Subscription creation request", func() {
+					Eventually(func() bool {
+						for r, payload := range beb.Requests {
+							if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+								if bebSubscription, ok := payload.(bebtypes.Subscription); !ok {
+									return false
+								} else {
+									return nameMapper.MapSubscriptionName(kymaSubscription) == bebSubscription.Name
+								}
+							}
+						}
+						return false
+					}).Should(BeTrue())
+				})
+
+				By("Checking Kyma Subscription ready condition to be true", func() {
+					getSubscription(kymaSubscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(kymaSubscriptionName),
+						reconcilertesting.HaveSubscriptionReady(),
+					))
+				})
+			})
+
+			Context("Delete BEB Subscription", func() {
+				By("Deleting its entry in BEB mock internal cache", func() {
+					for k := range beb.Subscriptions {
+						if strings.Contains(k, nameMapper.MapSubscriptionName(kymaSubscription)) {
+							delete(beb.Subscriptions, k)
+						}
+					}
+				})
+			})
+
+			Context("Trigger Kyma Subscription reconciliation request", func() {
+				By("Labeling Kyma Subscription", func() {
+					labels := map[string]string{"reconcile": "true"}
+					kymaSubscription.Labels = labels
+					updateSubscription(kymaSubscription, ctx).Should(reconcilertesting.HaveSubscriptionLabels(labels))
+				})
+			})
+
+			Context("Check BEB Subscription was recreated", func() {
+				By("Checking BEB mock server received at least two Subscription creation requests", func() {
+					Eventually(func() int {
+						_, countPost, _ := countBebRequests(nameMapper.MapSubscriptionName(kymaSubscription))
+						fmt.Println(">>>", countPost)
+						return countPost
+					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
+				})
+			})
+		})
+	})
+
 	DescribeTable("Schema tests: ensuring required fields are not treated as optional",
 		func(subscription *eventingv1alpha1.Subscription) {
 			subscription.Namespace = namespaceName
