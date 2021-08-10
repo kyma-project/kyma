@@ -1,5 +1,5 @@
 ---
-title: Service Mesh - overview
+title: Service Mesh
 ---
 
 Kyma Service Mesh is the component responsible for service-to-service communication, proxying, service discovery, traceability, and security. To deliver this functionality, Kyma Service Mesh uses [Istio](https://istio.io/docs/concepts/what-is-istio/) open platform.
