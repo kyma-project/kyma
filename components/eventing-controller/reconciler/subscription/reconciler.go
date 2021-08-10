@@ -184,7 +184,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Save the subscription status if it was changed
 	if statusChanged {
-		log.Info("----> status changed, updating status", "status", desiredSubscription.Status)
 		if err := r.Status().Update(ctx, desiredSubscription); err != nil {
 			log.Error(err, "Update subscription status failed")
 			return ctrl.Result{}, err
