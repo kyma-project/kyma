@@ -1,8 +1,8 @@
 {{- $ca := genCA "helm-broker-webhook-ca" 3650 }}
-{{- $cn := printf "%s-webhook" (include "fullname" .) }}
-{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+  {{- $cn := printf "%s" (include "fullname" .) }}
+  {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+  {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+  {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 
 apiVersion: v1
 kind: Secret
@@ -27,13 +27,17 @@ webhooks:
         operations: ["CREATE", "UPDATE"]
         resources: ["pods"]
         scope: "Namespaced"
-    failurePolicy: Ignore
+    objectSelector:
+      matchLabels:
+        chart: azure-service-broker-0.0.1
+    failurePolicy: Fail
     clientConfig:
       caBundle: {{ b64enc $ca.Cert }}
       service:
-        name: {{ template "fullname" . }}-webhook
+        name: {{ template "fullname" . }}
         namespace: {{ .Release.Namespace }}
-        path: "/hb-pod-mutating"
-    admissionReviewVersions: ["v1beta1"]
+        path: /hb-pod-mutating
+        port: {{ .Values.ctrl.internalPort }}
+    admissionReviewVersions: ["v1beta1", "v1"]
     sideEffects: None
-    timeoutSeconds: 5
+    timeoutSeconds: 30

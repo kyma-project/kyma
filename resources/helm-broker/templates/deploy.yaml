@@ -60,9 +60,6 @@ spec:
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
-        - mountPath: /var/run/webhook
-          name: webhook-cert
-          readOnly: true
 {{ end }}
         ports:
         - containerPort: {{ .Values.broker.internalPort }}
@@ -109,6 +106,9 @@ spec:
           privileged: false
           allowPrivilegeEscalation: false
         volumeMounts:
+        - mountPath: /var/run/webhook
+          name: webhook-cert
+          readOnly: true
         - mountPath: /tmp
           name: tmp-empty-dir
         - mountPath: /etc/config/helm-broker
