@@ -4,36 +4,12 @@ const { assert } = require("chai");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
-const {
-  waitForPodWithLabel,
-  k8sCoreV1Api,
-  k8sCustomApi,
-  k8sApply,
-  wait,
-} = require("../utils");
+const { waitForPodWithLabel, k8sCoreV1Api, k8sApply } = require("../utils");
 const nock = require("nock");
-// beforeEach(function (done) {
-//   server.start(done);
-//   console.log(server.getHttpPort());
-// });
 
-// afterEach(function (done) {
-//   server.stop(done);
-// });
-
-describe("Test", async function () {
-  // http.get("http://localhost/"); // respond body "Ok"
-  // http.get("http://localhost/"); // respond body "Ok"
-  // http.get("http://localhost/"); // respond body "Ok"
-  // Run an HTTP server on localhost:8080
-  // var server = new ServerMock({ host: "localhost", port: 8080 });
-  // beforeEach(function (done) {
-  //   server.start(done);
-  // });
-  // afterEach(function (done) {
-  //   server.stop(done);
-  // });
-});
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 describe("Telemtry operator", () => {
   var port = 8080;
@@ -93,14 +69,18 @@ describe("Telemtry operator", () => {
     const crd = k8s.loadAllYaml(loggingConfigYaml);
     let res = await k8sApply(crd, namespace);
 
-    // console.log(res);
-
-    // let body = {};
-    // k8sCustomApi.createNamespacedCustomObject(
-    //   "telemetry.kyma-project.io",
-    //   "v1",
-    //   namespace,
-    //   "loggingconfigurations"
+    nock.recorder.rec();
+    // await axios.post(
+    //   `http://localhost:${port}`,
+    //   { msg: "Hello world!" },
+    //   {
+    //     headers: {
+    //       "Content-type": "application/json; charset=UTF-8",
+    //     },
+    //   }
     // );
-  });
+    await sleep(10000);
+
+    assert.equal(server.isDone(), true);
+  }).timeout(20000);
 });

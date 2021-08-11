@@ -6,7 +6,8 @@ spec:
   sections:
     - content: |
         [OUTPUT]
-            Name stdout
+            Name http
+            port 8080
             Match *
       files:
         - name: test
