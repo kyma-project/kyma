@@ -30,7 +30,8 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.3.2",
-    "mocha-multi-reporters": "^1.5.1"
+    "mocha-multi-reporters": "^1.5.1",
+    "nock": "^13.1.1"
   },
   "dependencies": {
     "@kubernetes/client-node": "0.13.0",
