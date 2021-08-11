@@ -41,18 +41,6 @@ describe("Telemtry operator", () => {
 
   // check if operator installed
   let namespace = "kyma-system";
-  // it("Operator should be ready", async function () {
-  //   let res = await k8sCoreV1Api.listNamespacedPod(
-  //     namespace,
-  //     "true",
-  //     undefined,
-  //     undefined,
-  //     undefined,
-  //     "control-plane=controller-manager,service.istio.io/canonical-name=telemetry-operator-controller-manager"
-  //   );
-  //   let podList = res.body.items;
-  //   assert.equal(podList.length, 1);
-  // });
 
   beforeEach(function () {
     server = nock(`http://localhost:${port}`)
@@ -65,12 +53,25 @@ describe("Telemtry operator", () => {
     nock.cleanAll();
   });
 
+  it("Operator should be ready", async function () {
+    let res = await k8sCoreV1Api.listNamespacedPod(
+      namespace,
+      "true",
+      undefined,
+      undefined,
+      undefined,
+      "control-plane=controller-manager,service.istio.io/canonical-name=telemetry-operator-controller-manager"
+    );
+    let podList = res.body.items;
+    assert.equal(podList.length, 1);
+  });
+
   it("should not receive HTTP traffic", async function () {
     assert.equal(server.isDone(), false);
   });
 
   it("should receive HTTP traffic", async function () {
-    let res = await axios.post(
+    await axios.post(
       `http://localhost:${port}`,
       { msg: "Hello world!" },
       {
@@ -79,28 +80,27 @@ describe("Telemtry operator", () => {
         },
       }
     );
-    // console.log(res);
     assert.equal(server.isDone(), true);
   });
 
-  // it("Create CRD for fluent-bit config", async () => {
-  //   const loggingConfigYaml = fs.readFileSync(
-  //     path.join(__dirname, "./logging-config.yaml"),
-  //     {
-  //       encoding: "utf8",
-  //     }
-  //   );
-  //   const crd = k8s.loadAllYaml(loggingConfigYaml);
-  //   let res = await k8sApply(crd, namespace);
+  it("Create CRD for fluent-bit config", async () => {
+    const loggingConfigYaml = fs.readFileSync(
+      path.join(__dirname, "./logging-config.yaml"),
+      {
+        encoding: "utf8",
+      }
+    );
+    const crd = k8s.loadAllYaml(loggingConfigYaml);
+    let res = await k8sApply(crd, namespace);
 
-  //   // console.log(res);
+    // console.log(res);
 
-  //   // let body = {};
-  //   // k8sCustomApi.createNamespacedCustomObject(
-  //   //   "telemetry.kyma-project.io",
-  //   //   "v1",
-  //   //   namespace,
-  //   //   "loggingconfigurations"
-  //   // );
-  // });
+    // let body = {};
+    // k8sCustomApi.createNamespacedCustomObject(
+    //   "telemetry.kyma-project.io",
+    //   "v1",
+    //   namespace,
+    //   "loggingconfigurations"
+    // );
+  });
 });
