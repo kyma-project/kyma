@@ -14,9 +14,17 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter |  Description | Default value |
 |-------|-------|:--------:|
-| **global.proxy.resources.requests.cpu** | Defines requests for CPU resources. | 75m |
-| **global.proxy.resources.requests.memory** | Defines requests for memory resources. | 64Mi |
-| **global.proxy.resources.limits.cpu** | Defines limits for CPU resources. | 250m |
-| **global.proxy.resources.limits.memory** | Defines limits for memory resources. | 256Mi |
-| **components.ingressGateways.config.hpaSpec.maxReplicas** | Defines the maximum number of . | 5 |
-| **components.ingressGateways.config.hpaSpec.minReplicas** | Defines the minimum number of . | 1 |
+| **helmValues.lobal.proxy.resources.requests.cpu** | Defines requests for CPU resources for the Proxy component. | `75m` |
+| **helmValues.global.proxy.resources.requests.memory** | Defines requests for memory resources for the Proxy component. | `64Mi` |
+| **helmValues.global.proxy.resources.limits.cpu** | Defines limits for CPU resources for the Proxy component. | `250m` |
+| **helmValues.global.proxy.resources.limits.memory** | Defines limits for memory resources for the Proxy component. | `256Mi` |
+| **components.ingressGateways.config.hpaSpec.maxReplicas** | Defines the maximum number of replicas managed by the autoscaler. | `5` |
+| **components.ingressGateways.config.hpaSpec.minReplicas** | Defines the minimum number of replicas managed by the autoscaler. | `1` |
+| **components.ingressGateways.resources.limits.cpu** | Defines limits for CPU resources for the Ingress Gateway component. | `200m` |
+| **components.ingressGateways.resources.limits.memory** | Defines limits for memory resources for the Ingress Gateway component. | `1024Mi` |
+| **components.ingressGateways.resources.requests.cpu** | Defines requests for CPU resources for the Ingress Gateway component. | `100m` |
+| **components.ingressGateways.resources.requests.memory** | Defines requests for memory resources for the Ingress Gateway component.| `128Mi` |
+| **components.pilot.resources.limits.cpu** | Defines limits for CPU resources for the Pilot component. | `500m` |
+| **components.pilot.resources.limits.memory** | Defines limits for memory resources for the Pilot component. | `1024Mi` |
+| **components.pilot.resources.requests.cpu** | Defines requests for CPU resources for the Pilot component. | `250m` |
+| **components.pilot.resources.requests.memory** | Defines requests for memory resourcesfor the Pilot component. | `512Mi` |
