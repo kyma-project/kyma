@@ -25,7 +25,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **hydra.deployment.resources.limits.memory** | Defines limits for memory resources. | `256Mi` |
 | **hydra.deployment.resources.requests.cpu** | Defines requests for CPU resources. | `100m` |
 | **hydra.deployment.resources.requests.memory** | Defines requests for memory resources. | `128Mi` |
-| **hydra.hydra.existingSecret** | Specifies the name of the Secret... | `"ory-hydra-credentials"` |
+| **hydra.hydra.existingSecret** | Specifies the name of an existing Kubernetes Secret containing credentials required for Hydra. A default Secret with random values is generated if this value is not provided. | `"ory-hydra-credentials"` |
 | **oathkeeper.deployment.resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
 | **oathkeeper.deployment.resources.limits.memory** | Defines limits for memory resources.| `128Mi` |
 | **oathkeeper.deployment.resources.requests.cpu** | Defines requests for CPU resources. | `50m` |
@@ -38,7 +38,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **postgresql.resources.requests.cpu** | Defines requests for CPU resources. | `250m` |
 | **postgresql.resources.limits.memory** | Defines limits for memory resources.| `1024Mi` |
 | **postgresql.resources.limits.cpu** | Defines limits for CPU resources. | `750m` |
-| **postgresql.existingSecret** | Specifies the name of the Secret... | `"ory-hydra-credentials"` |
+| **postgresql.existingSecret** | Specifies the name of an existing secret to use for PostgreSQL passwords. | `"ory-hydra-credentials"` |
 | **gcloud-sqlproxy.existingSecret** | Specifies the name of the Secret in the same Namespace as the proxy, that stores the database password. | `ory-hydra-credentials` |
 | **gcloud-sqlproxy.existingSecretKey** | Specifies the name of the key in the Secret that contains the [GCP ServiceAccount json key](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). | `gcp-sa.json` |
 
