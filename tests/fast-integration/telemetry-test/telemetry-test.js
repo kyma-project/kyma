@@ -36,7 +36,7 @@ describe("Test", async function () {
 });
 
 describe("Telemtry operator", () => {
-  var port = 60000;
+  var port = 8080;
   var server;
 
   // check if operator installed
@@ -61,17 +61,17 @@ describe("Telemtry operator", () => {
       .reply(200, "Ok");
   });
 
+  afterEach(function () {
+    nock.cleanAll();
+  });
+
   it("should not receive HTTP traffic", async function () {
     assert.equal(server.isDone(), false);
   });
 
   it("should receive HTTP traffic", async function () {
-    const scope = nock("http://localhost:8080")
-      .persist()
-      .post("/")
-      .reply(200, "Ok");
-    await axios.post(
-      "http://localhost:8080/",
+    let res = await axios.post(
+      `http://localhost:${port}`,
       { msg: "Hello world!" },
       {
         headers: {
@@ -79,7 +79,8 @@ describe("Telemtry operator", () => {
         },
       }
     );
-    assert.equal(scope.isDone(), true);
+    // console.log(res);
+    assert.equal(server.isDone(), true);
   });
 
   // it("Create CRD for fluent-bit config", async () => {
