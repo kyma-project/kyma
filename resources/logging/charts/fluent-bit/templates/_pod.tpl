@@ -57,6 +57,8 @@ containers:
     volumeMounts:
       - name: config
         mountPath: /fluent-bit/etc/
+      - name: dynamic-config
+        mountPath: /fluent-bit/dynamic/
     {{- if eq .Values.kind "DaemonSet" }}
       - name: varfluentbit
         mountPath: /data
@@ -122,6 +124,11 @@ volumes:
   - name: config
     configMap:
       name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ include "fluent-bit.fullname" . }}{{- end }}
+  {{- if .Values.dynamicConfigMap }}
+  - name: dynamic-config
+    configMap:
+      name: {{ .Values.dynamicConfigMap }}
+  {{- end }}
 {{- if eq .Values.kind "DaemonSet" }}
   - name: varfluentbit
     hostPath:

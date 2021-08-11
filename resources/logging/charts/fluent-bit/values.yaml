@@ -54,8 +54,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 2020
-  labels: 
-    {}
+  labels: {}
   annotations:
     {}
     # prometheus.io/path: "/api/v1/metrics/prometheus"
@@ -132,6 +131,7 @@ updateStrategy:
 
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
+dynamicConfigMap: "logging-fluent-bit-sections"
 
 ## Custom configuration for Kyma alerting rules
 prometheusRules:

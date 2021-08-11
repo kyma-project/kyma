@@ -13,6 +13,9 @@ data:
   {{- end }}
 
   fluent-bit.conf: |
+    {{- if .Values.dynamicConfigMap }}
+    @INCLUDE /fluent-bit/dynamic/*.conf
+    {{- end }} 
     [SERVICE]
         Flush         {{ .Values.config.service.flush }}
         Grace         {{ .Values.config.service.grace }}
