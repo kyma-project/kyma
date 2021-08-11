@@ -46,13 +46,13 @@ To override the default percentage, you deploy a YAML file. You can do this eith
 
 3. If you add the override in the Runtime, run the following command to trigger the update:
 
-    > ```bash
-    > kubectl -n default label installation/kyma-installation action=install
-    > ```
+   ```bash
+   kubectl -n default label installation/kyma-installation action=install
+   ```
 
-   If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
+  If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
 
-   >**NOTE:** Only if the meshConfig override is not defined, the change to PILOT_TRACE_SAMPLING takes effect.
+  >**NOTE:** Only if the meshConfig override is not defined, the change to PILOT_TRACE_SAMPLING takes effect.
 
 ### Force sampling for a particular request
 
