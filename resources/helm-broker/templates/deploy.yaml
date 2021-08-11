@@ -60,6 +60,9 @@ spec:
         - mountPath: /etc/certs
           name: helm-certs
           readOnly: true
+        - mountPath: /var/run/webhook
+          name: webhook-cert
+          readOnly: true
 {{ end }}
         ports:
         - containerPort: {{ .Values.broker.internalPort }}
@@ -139,6 +142,9 @@ spec:
       - name: tmp-empty-dir
         emptyDir:
           sizeLimit: "{{ .Values.ctrl.tmpDirSizeLimit }}"
+      - name: webhook-cert
+        secret:
+          secretName: {{ template "fullname" . }}-webhook-cert
       - name: config-volume
         configMap:
           name: helm-config-map
