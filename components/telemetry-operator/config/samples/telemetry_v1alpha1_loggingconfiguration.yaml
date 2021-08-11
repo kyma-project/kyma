@@ -6,8 +6,8 @@ spec:
   sections:
     - content: |
         [OUTPUT]
-          Name "null"
-          Match *
+            Name stdout
+            Match *
       files:
         - name: test
           content: |
