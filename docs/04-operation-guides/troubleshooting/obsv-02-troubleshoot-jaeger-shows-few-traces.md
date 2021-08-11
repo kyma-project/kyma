@@ -22,8 +22,6 @@ To override the default percentage, you deploy a YAML file. You can do this eith
 1. To set the value for the **trace sampling** attribute, create a values YAML file.
    The following example sets the value to `60`, which means 60% of the requests are sent to Jaeger.
 
-   > **CAUTION:** Be careful if you consider sending 100% of the requests to Jaeger, as this might destabilize Istio.
-
    ```yaml
    istio:
      kyma_istio_operator: |-
@@ -37,6 +35,8 @@ To override the default percentage, you deploy a YAML file. You can do this eith
            tracing:
              sampling: 60
    ```
+
+   > **CAUTION:** Sending 100% of the requests to Jaeger might destabilize Istio.
 
 2. Deploy the values YAML file with the following command:
 
