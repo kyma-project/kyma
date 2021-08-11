@@ -1,8 +1,8 @@
-{{- $ca := genCA "helm-broker-webhook-ca" 3650 }}
-  {{- $cn := printf "%s" (include "fullname" .) }}
-  {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-  {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-  {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+{{- $cn := printf "%s" (include "fullname" .) }}
+{{- $ca := genCA (printf "%s-%s" $cn "ca") 3650 }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 
 apiVersion: v1
 kind: Secret
@@ -37,7 +37,7 @@ webhooks:
         name: {{ template "fullname" . }}
         namespace: {{ .Release.Namespace }}
         path: /hb-pod-mutating
-        port: {{ .Values.ctrl.internalPort }}
+        port: {{ .Values.service.externalPort }}
     admissionReviewVersions: ["v1beta1", "v1"]
     sideEffects: None
     timeoutSeconds: 30
