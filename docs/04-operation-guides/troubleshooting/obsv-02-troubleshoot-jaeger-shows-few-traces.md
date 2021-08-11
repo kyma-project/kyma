@@ -1,12 +1,10 @@
 ---
-title: Jaeger shows only a few traces
+title: Jaeger doesn't show the traces you want to see
 ---
-
-<!-- the entire content needs update: values files instead of configmaps -->
 
 ## Condition
 
-Jaeger shows only a few traces.
+Jaeger shows fewer traces than you would like to see.
 
 ## Cause
 
@@ -14,51 +12,48 @@ By default, only 1% of the requests are sent to Jaeger for trace recording.
 
 ## Remedy
 
-Change the default behavior, either by overriding the existing settings or adjusting the value in the Runtime.
+To see more traces in Jaeger, increase the percentage of requests by changing the default settings.
+If you just want to see traces for one particular request, you can manually force sampling.
 
-> **NOTE:** You can also manually set the `x-b3-sampled: 1` header to force sampling for a particular request.
+### Change the default setting
 
-### Create an override
+To override the default percentage, you deploy a YAML file. You can do this either during initial installation or to adjust an existing Kyma installation.
 
-Follow these steps to [override](TO_DO) the existing configuration
+1. To set the value for the **trace sampling** attribute, create a values YAML file.
+   The following example sets the value to `60`, which means 60% of the requests are sent to Jaeger.
 
-1. Add and apply a ConfigMap in the `kyma-installer` Namespace in which you set the value for the **trace sampling** attribute to `60`.
+   > **CAUTION:** Be careful if you consider sending 100% of the requests to Jaeger, as this might destabilize Istio.
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: istio-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio
-    kyma-project.io/installation: ""
-data:
-  kyma_istio_operator: |-
-    apiVersion: install.istio.io/v1alpha1
-    kind: IstioOperator
-    metadata:
-      namespace: istio-system
-    spec:
-      meshConfig:
-        defaultConfig:
-          tracing:
-            sampling: 60
-EOF
-```
+   ```yaml
+   istio:
+     kyma_istio_operator: |-
+     apiVersion: install.istio.io/v1alpha1
+     kind: IstioOperator
+     metadata:
+       namespace: istio-system
+     spec:
+       meshConfig:
+         defaultConfig:
+           tracing:
+             sampling: 60
+   ```
 
-2. Proceed with the installation. Once the installation starts, the Kyma Operator will generate the override based on the ConfigMap and set the value of trace sampling to `60`.
+2. Deploy the values YAML file with the following command:
 
-    >**NOTE:** If you add the override in the Runtime, run the following command to trigger the update:
+   ```bash
+   kyma deploy --values-file {VALUES_FILE_PATH}
+   ```
+
+3. If you add the override in the Runtime, run the following command to trigger the update:
 
     > ```bash
     > kubectl -n default label installation/kyma-installation action=install
     > ```
 
-### Define the value in the Runtime
+   If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
 
-If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
+   >**NOTE:** Only if the meshConfig override is not defined, the change to PILOT_TRACE_SAMPLING takes effect.
 
->**NOTE:** Only if the meshConfig override is not defined, the change to PILOT_TRACE_SAMPLING takes effect.
+### Force sampling for a particular request
+
+You can also manually set the `x-b3-sampled: 1` header to force sampling for a particular request.
