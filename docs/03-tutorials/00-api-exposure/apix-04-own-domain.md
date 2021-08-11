@@ -16,7 +16,7 @@ Depending on your cluster provider, meet the relevant prerequisites.
   Gardener cluster
   </summary>
 
-If you use a Gardener cluster, add an annotation for the `DNSProvider` and `DNSEntry` Custom Resources (CRs). The annotation allows the DNS source controllers to watch resources on the default cluster and create DNS entries on the target cluster. The annotation should look as follows:
+If you use a Gardener cluster, add an annotation for the DNSProvider and DNSEntry Custom Resources (CRs). The annotation allows the DNS source controllers to watch resources on the default cluster and create DNS entries on the target cluster. The annotation should look as follows:
 
 ```bash
   annotations:
@@ -137,7 +137,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 5. Create an Issuer CRD. See the following example and modify values of the **spec.acme.email**, **spec.domains.include**, and **spec.domains.exclude** parameters. As the value for the **spec.domains.include** parameter, use the subdomain from `{DNS-ENTRY}.yaml`.
 
-```bash
+   ```bash
    apiVersion: cert.gardener.cloud/v1alpha1
    kind: Issuer
    metadata:
