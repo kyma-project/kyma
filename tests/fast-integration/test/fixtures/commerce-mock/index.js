@@ -40,7 +40,11 @@ const {
 const {
   registerOrReturnApplication,
 } = require("../../../compass");
-const { OAuthToken, OAuthCredentials } = require("../../../lib/oauth");
+
+const {
+  OAuthToken,
+  OAuthCredentials
+} = require("../../../lib/oauth");
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
