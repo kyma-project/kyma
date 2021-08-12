@@ -77,7 +77,7 @@ describe("Telemtry operator", () => {
             assert.fail("HTTP endpoint was called");
           }
         );
-    });
+    }).timeout(5000);
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
       await k8sApply(loggingConfigCRD, namespace);
@@ -105,29 +105,6 @@ describe("Telemtry operator", () => {
     }).timeout(5000);
   });
 
-  // it("Create CRD for fluent-bit config", async () => {
-  //   let res = await k8sApply(loggingConfigCRD, namespace);
-  //   let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-  //   let mockPod = body.items[0].name;
-  //   // kubectlPortForward(mockNamespace, mockPod, mockServerPort);
-  //   mockServerClient("localhost", mockServerPort)
-  //     .verify(
-  //       {
-  //         path: "/",
-  //       },
-  //       1
-  //     )
-  //     .then(
-  //       function () {
-  //         console.log("request found 2 times");
-  //       },
-  //       function (error) {
-  //         // throw error;
-  //         // console.log(error);
-  //       }
-  //     );
-
-  // console.log(reso);
   // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
   //   metadata: { name: "test-server" },
   //   spec: {
