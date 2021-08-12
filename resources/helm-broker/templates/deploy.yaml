@@ -106,9 +106,6 @@ spec:
           privileged: false
           allowPrivilegeEscalation: false
         volumeMounts:
-        - mountPath: /var/run/webhook
-          name: webhook-cert
-          readOnly: true
         - mountPath: /tmp
           name: tmp-empty-dir
         - mountPath: /etc/config/helm-broker
@@ -123,9 +120,6 @@ spec:
           readOnly: true
         ports:
         - containerPort: {{ .Values.ctrl.internalPort }}
-          name: "ctrl-port"
-        - containerPort: 8443
-          name: "webhook-port"
         readinessProbe:
           httpGet:
             path: /ready
@@ -145,9 +139,6 @@ spec:
       - name: tmp-empty-dir
         emptyDir:
           sizeLimit: "{{ .Values.ctrl.tmpDirSizeLimit }}"
-      - name: webhook-cert
-        secret:
-          secretName: {{ template "fullname" . }}-webhook-cert
       - name: config-volume
         configMap:
           name: helm-config-map
