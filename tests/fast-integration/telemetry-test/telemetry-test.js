@@ -34,7 +34,7 @@ describe("Telemtry operator", () => {
 
   after(() => {
     // delete custom config TODO
-    k8sDelete(loggingConfigCRD, namespace);
+    // k8sDelete(loggingConfigCRD, namespace);
   });
 
   it("Operator should be ready", async function () {
@@ -102,7 +102,7 @@ describe("Telemtry operator", () => {
             assert.fail("The HTTP endpoint was not called");
           }
         );
-    });
+    }).timeout(5000);
   });
 
   // it("Create CRD for fluent-bit config", async () => {

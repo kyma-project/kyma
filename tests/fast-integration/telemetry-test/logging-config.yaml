@@ -7,7 +7,8 @@ spec:
     - content: |
         [OUTPUT]
             Name http
-            port 8080
+            host mockserver.mockserver
+            port 1080
             Match *
       files:
         - name: test
