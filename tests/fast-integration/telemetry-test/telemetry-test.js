@@ -64,8 +64,8 @@ describe("Telemtry operator", () => {
       // uninstall helm chart
     });
 
-    it("Should not receive HTTP traffic", async function () {
-      mockServerClient("localhost", mockServerPort)
+    it("Should not receive HTTP traffic", function () {
+      return mockServerClient("localhost", mockServerPort)
         .verify(
           {
             path: "/",
@@ -74,12 +74,9 @@ describe("Telemtry operator", () => {
           0
         )
         .then(
-          function () {
-            console.log("request found exactly 0 times");
-          },
+          function () {},
           function (error) {
-            throw error;
-            console.log("Not exactly 0 times error");
+            assert.fail("HTTP endpoint was called");
           }
         );
     });
