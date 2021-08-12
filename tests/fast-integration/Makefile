@@ -4,9 +4,6 @@ ci:
 	npm test
 	npm run test-monitoring
 
-.PHONY: ci-no-install
-ci-no-install: ci
-
 .PHONY: ci-compass
 ci-compass:
 	npm install
