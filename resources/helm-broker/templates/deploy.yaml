@@ -123,6 +123,9 @@ spec:
           readOnly: true
         ports:
         - containerPort: {{ .Values.ctrl.internalPort }}
+          name: "ctrl-port"
+        - containerPort: 8443
+          name: "webhook-port"
         readinessProbe:
           httpGet:
             path: /ready

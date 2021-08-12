@@ -20,3 +20,11 @@ spec:
     {{- if eq .Values.service.type "ClusterIP" }}
     nodePort: null
     {{ end }}
+  - protocol: TCP
+    name: http-hb-webhook-port
+    port: 8443
+    targetPort: 8443
+    {{- if eq .Values.service.type "ClusterIP" }}
+    nodePort: null
+    {{ end }}
+
