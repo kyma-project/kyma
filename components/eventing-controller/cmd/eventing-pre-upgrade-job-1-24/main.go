@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	publisherDeployment "github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
@@ -57,12 +58,13 @@ func main() {
 
 	// Create process
 	p := jobprocess.Process{
-		Logger:         ctrLogger.Logger,
-		TimeoutPeriod:  60 * time.Second,
-		ReleaseName:    cfg.ReleaseName,
-		KymaNamespace:  cfg.KymaNamespace,
-		ControllerName: cfg.EventingControllerName,
-		PublisherName:  cfg.EventingPublisherName,
+		Logger:             ctrLogger.Logger,
+		TimeoutPeriod:      60 * time.Second,
+		ReleaseName:        cfg.ReleaseName,
+		KymaNamespace:      cfg.KymaNamespace,
+		ControllerName:     cfg.EventingControllerName,
+		PublisherName:      publisherDeployment.PublisherName,
+		PublisherNamespace: publisherDeployment.PublisherNamespace,
 		Clients: jobprocess.Clients{
 			Deployment:      deploymentClient,
 			Subscription:    subscriptionClient,

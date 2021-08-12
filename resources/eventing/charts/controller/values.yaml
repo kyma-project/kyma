@@ -83,11 +83,7 @@ healthProbe:
     timeoutSeconds: 2
 
 preUpgradeJob:
-  releaseName: "1.24.3"
-  kymaNamespace: "kyma-system"
-  eventingControllerName: "eventing-controller"
-  eventingPublisherName: "eventing-publisher-proxy"
   image:
-    name: "upgrade-job"
+    name: "eventing-pre-upgrade-job-1-24"
     tag: "PR-11819"
     pullPolicy: Always

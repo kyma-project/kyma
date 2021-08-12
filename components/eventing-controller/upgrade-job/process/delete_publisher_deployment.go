@@ -28,7 +28,7 @@ func (s DeletePublisherDeployment) ToString() string {
 // Do deletes the eventing-publisher deployment
 func (s DeletePublisherDeployment) Do() error {
 	// Get eventing-controller deployment object
-	err := s.process.Clients.Deployment.Delete(s.process.KymaNamespace, s.process.PublisherName)
+	err := s.process.Clients.Deployment.Delete(s.process.PublisherNamespace, s.process.PublisherName)
 	// Ignore the error if its 404 error
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err

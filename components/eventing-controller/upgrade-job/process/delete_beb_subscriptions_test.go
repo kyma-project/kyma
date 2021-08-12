@@ -59,13 +59,14 @@ func TestDeleteBebSubscriptions(t *testing.T) {
 
 	// Create process
 	p := &Process{
-		Logger:         ctrLogger.Logger,
-		TimeoutPeriod:  60 * time.Second,
-		ReleaseName:    cfg.ReleaseName,
-		KymaNamespace:  cfg.KymaNamespace,
-		ControllerName: cfg.EventingControllerName,
-		PublisherName:  cfg.EventingPublisherName,
-		State:          State{},
+		Logger:             ctrLogger.Logger,
+		TimeoutPeriod:      60 * time.Second,
+		ReleaseName:        cfg.ReleaseName,
+		KymaNamespace:      cfg.KymaNamespace,
+		ControllerName:     cfg.EventingControllerName,
+		PublisherName:      "eventing-publisher-proxy",
+		PublisherNamespace: cfg.KymaNamespace,
+		State:              State{},
 	}
 
 	p.Clients = getProcessClients(e2eSetup, g)

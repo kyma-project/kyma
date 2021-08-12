@@ -77,13 +77,11 @@ spec:
           {{- end }}
           env:
             - name: RELEASE
-              value: {{ .Values.preUpgradeJob.releaseName }}
+              value: {{ .Release.Name }}-pre-upgrade
             - name: KYMA_NAMESPACE
-              value: {{ .Values.preUpgradeJob.kymaNamespace }}
+              value: {{ .Release.Namespace }}
             - name: EVENTING_CONTROLLER_NAME
-              value: {{ .Values.preUpgradeJob.eventingControllerName }}
-            - name: EVENTING_PUBLISHER_NAME
-              value: {{ .Values.preUpgradeJob.eventingPublisherName }}
+              value: {{ include "controller.fullname" . }}
             - name: APP_LOG_FORMAT
               value: {{ .Values.global.log.format | quote }}
             - name: APP_LOG_LEVEL

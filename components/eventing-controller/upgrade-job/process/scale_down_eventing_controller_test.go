@@ -25,12 +25,13 @@ func TestScaleDownEventingController(t *testing.T) {
 
 	// Create process
 	p := &Process{
-		Logger:         ctrLogger.Logger,
-		TimeoutPeriod:  60 * time.Second,
-		ReleaseName:    cfg.ReleaseName,
-		KymaNamespace:  cfg.KymaNamespace,
-		ControllerName: cfg.EventingControllerName,
-		PublisherName:  cfg.EventingPublisherName,
+		Logger:             ctrLogger.Logger,
+		TimeoutPeriod:      60 * time.Second,
+		ReleaseName:        cfg.ReleaseName,
+		KymaNamespace:      cfg.KymaNamespace,
+		ControllerName:     cfg.EventingControllerName,
+		PublisherName:      "eventing-publisher-proxy",
+		PublisherNamespace: cfg.KymaNamespace,
 		State: State{
 			Is124Cluster: true,
 		},

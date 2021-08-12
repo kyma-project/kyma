@@ -8,13 +8,14 @@ import (
 
 // Process contains the common resources for this upgrade-job steps
 type Process struct {
-	Steps          []Step
-	ReleaseName    string
-	KymaNamespace  string
-	ControllerName string
-	PublisherName  string
-	Clients        Clients
-	State          State
-	TimeoutPeriod  time.Duration
-	Logger         *logger.Logger
+	Steps              []Step
+	ReleaseName        string
+	KymaNamespace      string
+	ControllerName     string
+	PublisherName      string
+	PublisherNamespace string
+	Clients            Clients
+	State              State
+	TimeoutPeriod      time.Duration
+	Logger             *logger.Logger
 }

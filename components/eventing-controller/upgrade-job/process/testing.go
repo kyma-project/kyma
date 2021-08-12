@@ -67,7 +67,6 @@ func newE2ESetup() E2ESetup {
 		ReleaseName:            "release",
 		KymaNamespace:          "kyma-system",
 		EventingControllerName: "eventing-controller",
-		EventingPublisherName:  "eventing-publisher-proxy",
 		LogFormat:              "json",
 		LogLevel:               "warn",
 	}
