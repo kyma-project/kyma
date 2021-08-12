@@ -1,8 +1,8 @@
 {{- $cn := printf "%s-webhook" (include "fullname" .) }}
-  {{- $ca := genCA (printf "%s-%s" $cn "ca") 3650 }}
-  {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-  {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-  {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+{{- $ca := genCA (printf "%s-%s" $cn "ca") 3650 }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 
 apiVersion: v1
 kind: Secret

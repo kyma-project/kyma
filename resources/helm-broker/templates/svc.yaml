@@ -20,4 +20,3 @@ spec:
     {{- if eq .Values.service.type "ClusterIP" }}
     nodePort: null
     {{ end }}
-
