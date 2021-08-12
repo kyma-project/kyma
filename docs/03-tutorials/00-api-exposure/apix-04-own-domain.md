@@ -4,32 +4,9 @@ title: Use a custom domain to expose a service
 
 This tutorial shows how to set up your custom domain and prepare a certificate to use the domain for exposing a service.
 
-To learn how to expose a service, go to [this](..//apix-01-expose-service-apigateway.md) tutorial.
+To learn how to expose a service, go to [this](./apix-01-expose-service-apigateway.md) tutorial.
 
 ## Prerequisites
-
-Depending on your cluster provider, meet the relevant prerequisites.
-
-<div tabs name="cluster-provider" group="cluster-provider">
-  <details>
-  <summary label="Gardener">
-  Gardener cluster
-  </summary>
-
-If you use a Gardener cluster, add an annotation for the DNSProvider and DNSEntry Custom Resources (CRs). The annotation allows the DNS source controllers to watch resources on the default cluster and create DNS entries on the target cluster. The annotation should look as follows:
-
-```bash
-  annotations:
-    dns.gardener.cloud/class: garden
-```
-
-For more details see the [official Gardener documentation](https://gardener.cloud/docs/concepts/networking/dns-managment/#automatic-creation-of-dns-entries-for-services-and-ingresses).
-
-  </details>
-  <details>
-  <summary label="non-Gardener">
-  Non-Gardener cluster
-  </summary>
 
 If you use a cluster not managed by Gardener, install the required components manually. Follow these steps:
 
@@ -59,9 +36,6 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace={NAMESPACE_NAME} --set configuration.identifier=cert-manager-identifier
    ```
 
-</details>
-</div>
-
 ## Steps
 
 Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
@@ -74,7 +48,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kubectl create ns {NAMESPACE_NAME}
    ```
 
-3. Create a Secret. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management) and choose your DNS cloud service provider for the relevant guidelines. Once the Secret Custom Resource (CR) is ready, run the following command:
+3. Create a Secret containing the credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Once the YAML file with the required parameters is ready, create a Secret Custom Resource (CR). Run the following command:
 
    ```bash
    kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
@@ -82,17 +56,17 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 4. Set up the `external-dns-management` component.
 
-- Create a DNSProvider Custom Resource Definition (CRD). See the following example and modify values for the **namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#external-dns-management), **spec.secretRef.name** and **spec.domains.include** parameters. For the **spec.secretRef.name** parameter, use the value from `{SECRET}.yaml`.
+- Create a DNSProvider CR. See the following example and modify values for the **namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **spec.secretRef.name** and **spec.domains.include** parameters. For the **spec.secretRef.name** parameter, use the **metadata.name** value from `{SECRET}.yaml`. Run:
 
    ```bash
+   cat <<EOF | kubectl apply -f -
    apiVersion: dns.gardener.cloud/v1alpha1
    kind: DNSProvider
    metadata:
      name: dns-provider
      namespace: NAMESPACE_NAME # Edit this value
-     # Uncomment when using on a Gardener cluster
-   #  annotations:
-   #    dns.gardener.cloud/class: garden
+     annotations:
+       dns.gardener.cloud/class: garden
    spec:
      type: your-provider-dns # Edit this value
      secretRef:
@@ -101,43 +75,34 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        include:
          # Replace with a domain of the hosted zone
          - mydomain.com # Edit this value
+    EOF     
    ```
 
-   Once the DNSProvider CRD is ready, create the DNSProvider CR. Run:
+- Create a DNSEntry CR. See the following example and modify values for the **namespace**, **spec.dnsName**, **spec.ttl**, and **spec.targets.IP** parameters. Run:
 
    ```bash
-   kubectl apply -n {NAMESPACE_NAME} -f {DNS-PROVIDER}.yaml
-   ```
-
-- Create a DNSEntry CRD. See the following example and modify values for the **namespace**, **spec.dnsName**, **spec.ttl**, and **spec.targets.IP** parameters:
-
-   ```bash
+   cat <<EOF | kubectl apply -f -
    apiVersion: dns.gardener.cloud/v1alpha1
    kind: DNSEntry
    metadata:
      name: dns-entry
      namespace: NAMESPACE_NAME # Edit this value
-     # Uncomment when using on a Gardener cluster
-   #  annotations:
-   #    dns.gardener.cloud/class: garden
+     annotations:
+       dns.gardener.cloud/class: garden
    spec:
      dnsName: "private.sub1.mydomain.com" # Edit this value
      ttl: 600
      targets:
-       - IP # Edit this value
-   ```
-
-   Once the DNSEntry CRD is ready, create the DNSEntry CR. Run:
-
-   ```bash
-   kubectl apply -n {NAMESPACE_NAME} -f {DNS-ENTRY}.yaml
+       - 1.2.3.4 # Edit this value
+    EOF   
    ```
 
    >**NOTE:** You can create many DNSEntry CRs for one DNSProvider depending on the number of subdomains you want to use.
 
-5. Create an Issuer CRD. See the following example and modify values of the **spec.acme.email**, **spec.domains.include**, and **spec.domains.exclude** parameters. As the value for the **spec.domains.include** parameter, use the subdomain from `{DNS-ENTRY}.yaml`.
+5. Create an Issuer CR. See the following example and modify values of the **spec.acme.email**, **spec.domains.include**, and **spec.domains.exclude** parameters. As the value for the **spec.domains.include** parameter, use the subdomain from the **spec.dnsName** parameter of the DNSEntry CR. Run:
 
    ```bash
+   cat <<EOF | kubectl apply -f -
    apiVersion: cert.gardener.cloud/v1alpha1
    kind: Issuer
    metadata:
@@ -148,30 +113,24 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        server: https://acme-staging-v02.api.letsencrypt.org/directory
        email: YOUR_EMAIL_ADDRESS # Edit this value
        autoRegistration: true
-
        # Name of the Secret used to store the ACME account private key
        # If does not exist, a new one is created
        privateKeySecretRef:
          name: letsencrypt-staging-secret
          namespace: default
-
        # Optionally, restrict domain ranges for which certificates can be requested
        domains:
          include:
            - private.sub1.mydomain.com # Edit this value
    #     exclude:
    #       - private.sub2.mydomain.com # Edit this value
+   EOF
    ```
 
-   Once the DNSEntry CRD is ready, create the DNSEntry CR. Run:
+6. Create a Certificate CR. See the following example and modify values of the **spec.secretName**, **spec.commonName**, , and **spec.issuerRef.name** parameters. As the value for the **spec.issuerRef.name** parameter, use the Issuer name from the Issuer CR. Run:
 
    ```bash
-   kubectl apply -n {NAMESPACE-NAME} -f {ISSUER}.yaml
-   ```
-
-6. Create a Certificate CRD. See the following example and modify values of the **spec.secretName**, **spec.commonName**, , and **spec.issuerRef.name** parameters. As the value for the **spec.issuerRef.name** parameter, use the Issuer name from `{ISSUER}.yaml`.
-
-   ```bash
+   cat <<EOF | kubectl apply -f -
    apiVersion: cert.gardener.cloud/v1alpha1
    kind: Certificate
    metadata:
@@ -186,12 +145,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: default
      dnsNames:
        - private.sub.mydomain.com # Edit this value
+   EOF
    ```
 
-   Once the Certificate CRD is ready, create the Certificate CR. Run:
-
-   ```bash
-   kubectl apply -n {NAMESPACE_NAME} -f {CERTIFICATE}.yaml
-   ```
-
-When you finish the setup, go to [this](..//apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
+When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
