@@ -26,6 +26,7 @@ type State struct {
 	FilteredSubscriptions *eventingv1alpha1.SubscriptionList
 	//BebSubscriptionNameMapper   *handlers.NameMapper
 	IsBebEnabled bool
+	Is124Cluster bool
 }
 
 // int32Ptr converts int to int pointer

@@ -25,7 +25,7 @@ require (
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	k8s.io/api v0.20.7
-	k8s.io/apiextensions-apiserver v0.20.7 // indirect
+	k8s.io/apiextensions-apiserver v0.20.7
 	k8s.io/apimachinery v0.20.7
 	k8s.io/client-go v0.20.7
 	sigs.k8s.io/controller-runtime v0.8.3

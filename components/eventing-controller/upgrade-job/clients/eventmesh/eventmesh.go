@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
@@ -24,14 +24,11 @@ type Client struct {
 
 // NewClient creates and returns new client for EventMesh (BEB)
 func NewClient() Client {
-	//authenticator := auth.NewAuthenticator(cfg)
-	// client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
 	return Client{}
 }
 
-// Init initializes the client by parsing the provided BEB secret
-// It needs to be called once before the client can be used for further operations.
-func (c *Client) Init(secret *v1.Secret) error {
+// InitUsingSecret initializes the client by parsing the provided BEB secret (for v1.24.x)
+func (c *Client) InitUsingSecret(secret *corev1.Secret) error {
 	// First set beb config
 	cfg := env.Config{}
 	err := c.processSecret(&cfg, secret)
@@ -47,6 +44,55 @@ func (c *Client) Init(secret *v1.Secret) error {
 	return nil
 }
 
+// InitUsingEventingSecret initializes the client by parsing the provided eventing secret (for v1.23.x)
+func (c *Client) InitUsingEventingSecret(eventingSecret *corev1.Secret) error {
+	bebNamespace, ok := eventingSecret.Data["beb-namespace"]
+	if !ok || string(bebNamespace) == "" {
+		return errors.New(fmt.Sprintf("cannot get beb-namespace from secret: %s", eventingSecret.Name))
+	}
+	bebClientId, ok := eventingSecret.Data["client-id"]
+	if !ok || string(bebClientId) == "" {
+		return errors.New(fmt.Sprintf("cannot get client-id from secret %s", eventingSecret.Name))
+	}
+	bebClientSecret, ok := eventingSecret.Data["client-secret"]
+	if !ok || string(bebClientSecret) == "" {
+		return errors.New(fmt.Sprintf("cannot get client-secret from secret %s", eventingSecret.Name))
+	}
+	bebPublishUrl, ok := eventingSecret.Data["ems-publish-url"]
+	if !ok || string(bebPublishUrl) == "" {
+		return errors.New(fmt.Sprintf("cannot get ems-publish-url from secret %s", eventingSecret.Name))
+	}
+	bebTokenEndpoint, ok := eventingSecret.Data["token-endpoint"]
+	if !ok || string(bebTokenEndpoint) == "" {
+		return errors.New(fmt.Sprintf("cannot get token-endpoint from secret %s", eventingSecret.Name))
+	}
+
+	// Set beb config
+	cfg := env.Config{
+		BebApiUrl:     string(bebPublishUrl),
+		ClientID:      string(bebClientId),
+		ClientSecret:  string(bebClientSecret),
+		TokenEndpoint: string(bebTokenEndpoint),
+		BEBNamespace:  string(bebNamespace),
+	}
+
+	// Setup authenticator and beb client
+	if c.client == nil {
+		authenticator := auth.NewAuthenticator(cfg)
+		c.client = emsclient.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
+	}
+	return nil
+}
+
+// IsInitialised returns true if the BEB client is initialised
+// or returns false if not initialised
+func (c *Client) IsInitialised() bool {
+	if c.client != nil {
+		return true
+	}
+	return false
+}
+
 // Delete deletes the specified subscription from Event Mesh (BEB).
 // It returns DeleteResponse, nil if the request was successful.
 // The DeleteResponse object contains the information if the deletion was successful or not
@@ -56,7 +102,7 @@ func (c *Client) Delete(bebSubscriptionName string) (*types.DeleteResponse, erro
 }
 
 // processSecret private method to process BEB secret
-func (c *Client) processSecret(cfg *env.Config, bebSecret *v1.Secret) error {
+func (c *Client) processSecret(cfg *env.Config, bebSecret *corev1.Secret) error {
 	// First parse/decode the bebsecret
 	secret, err := c.getParsedSecret(bebSecret)
 	if err != nil {
@@ -66,34 +112,34 @@ func (c *Client) processSecret(cfg *env.Config, bebSecret *v1.Secret) error {
 	// Read the config values
 	cfg.BebApiUrl = fmt.Sprintf("%s%s", string(secret.StringData[backend.PublisherSecretEMSHostKey]), backend.BEBPublishEndpointForSubscriber)
 	if len(cfg.BebApiUrl) == 0 {
-		return errors.New("cannot get BEB_API_URL env var")
+		return errors.New("cannot get BebApiUrl from BEB secret")
 	}
 
 	cfg.ClientID = string(secret.StringData[deployment.PublisherSecretClientIDKey])
 	if len(cfg.ClientID) == 0 {
-		return errors.New("cannot get CLIENT_ID env var")
+		return errors.New("cannot get CLIENT_ID from BEB secret")
 	}
 
 	cfg.ClientSecret = string(secret.StringData[deployment.PublisherSecretClientSecretKey])
 	if len(cfg.ClientSecret) == 0 {
-		return errors.New("cannot get CLIENT_SECRET env var")
+		return errors.New("cannot get CLIENT_SECRET from BEB secret")
 	}
 
 	cfg.TokenEndpoint = string(secret.StringData[deployment.PublisherSecretTokenEndpointKey])
 	if len(cfg.TokenEndpoint) == 0 {
-		return errors.New("cannot get TOKEN_ENDPOINT env var")
+		return errors.New("cannot get TOKEN_ENDPOINT from BEB secret")
 	}
 
 	cfg.BEBNamespace = fmt.Sprintf("%s%s", backend.NamespacePrefix, string(secret.StringData[deployment.PublisherSecretBEBNamespaceKey]))
 	if len(cfg.BEBNamespace) == 0 {
-		return errors.New("cannot get BEB_NAMESPACE env var")
+		return errors.New("cannot get BEB_NAMESPACE from BEB secret")
 	}
 	return nil
 }
 
 // getParsedSecret private method to parse/decode BEB secret
-func (c *Client) getParsedSecret(bebSecret *v1.Secret) (*v1.Secret, error) {
-	secret := &v1.Secret{
+func (c *Client) getParsedSecret(bebSecret *corev1.Secret) (*corev1.Secret, error) {
+	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      bebSecret.Name,
 			Namespace: bebSecret.Namespace,

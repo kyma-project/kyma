@@ -2,6 +2,7 @@ package process
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -30,13 +31,18 @@ func (s ScaleDownEventingController) ToString() string {
 
 // Do scales down eventing-controller deployment to zero replicas
 func (s ScaleDownEventingController) Do() error {
-	// Get eventing-controller deployment object and verify if it exists or not
-	_, err := s.process.Clients.Deployment.Get(s.process.KymaNamespace, s.process.ControllerName)
-	if err != nil {
-		return err
+	if s.process.State.Is124Cluster {
+		// Scale down
+		return s.ScaleDownK8sDeployment(s.process.KymaNamespace, s.process.ControllerName)
 	}
 
-	// reduce replica count to zero
+	return nil
+}
+
+// ScaleDownK8sDeployment scales down k8s deployment to zero replicas
+func (s ScaleDownEventingController) ScaleDownK8sDeployment(namespace, name string) error {
+
+	// Create patch object to reduce replica count to zero
 	targetPatch := PatchDeploymentSpec{
 		Spec: Spec{
 			Replicas: int32Ptr(0),
@@ -48,7 +54,7 @@ func (s ScaleDownEventingController) Do() error {
 	}
 
 	// Patch the eventing controller deployment
-	_, err = s.process.Clients.Deployment.Patch(s.process.KymaNamespace, s.process.ControllerName, containerData)
+	_, err = s.process.Clients.Deployment.Patch(namespace, name, containerData)
 	if err != nil {
 		return err
 	}
@@ -57,26 +63,26 @@ func (s ScaleDownEventingController) Do() error {
 	isScaledDownSuccess := false
 	start := time.Now()
 	for time.Since(start) < s.process.TimeoutPeriod {
-		s.process.Logger.WithContext().Debug("Checking replica count of eventing-controller...")
+		s.process.Logger.WithContext().Debug(fmt.Sprintf("Checking replica count of deployment: %s", name))
 
 		time.Sleep(1 * time.Second)
 
-		controllerDeployment, err := s.process.Clients.Deployment.Get(s.process.KymaNamespace, s.process.ControllerName)
+		deployment, err := s.process.Clients.Deployment.Get(namespace, name)
 		if err != nil {
 			s.process.Logger.WithContext().Error(err)
 			// should we stop or continue
 			continue
 		}
 
-		if controllerDeployment.Status.Replicas == 0 {
-			s.process.Logger.WithContext().Info("Eventing Controller scaled down to zero!")
+		if deployment.Status.Replicas == 0 {
+			s.process.Logger.WithContext().Info(fmt.Sprintf("Deployment: %s scaled down to zero!", name))
 			isScaledDownSuccess = true
 			break
 		}
 	}
 
 	if !isScaledDownSuccess {
-		return errors.New("Timeout! Failed to scale down eventing-controller")
+		return errors.New(fmt.Sprintf("Timeout! Failed to scale down deployment: %s", name))
 	}
 
 	return nil

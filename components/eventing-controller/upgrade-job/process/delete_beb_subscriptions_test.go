@@ -73,6 +73,7 @@ func TestDeleteBebSubscriptions(t *testing.T) {
 	t.Run("Delete BEB subscriptions", func(t *testing.T) {
 		// Now delete the BEB subscriptions
 		p.Steps = []Step{
+			NewCheckIsBebEnabled(p),
 			NewGetSubscriptions(p),
 			NewFilterSubscriptions(p),
 			NewDeleteBebSubscriptions(p),

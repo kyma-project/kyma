@@ -31,7 +31,9 @@ func TestScaleDownEventingController(t *testing.T) {
 		KymaNamespace:  cfg.KymaNamespace,
 		ControllerName: cfg.EventingControllerName,
 		PublisherName:  cfg.EventingPublisherName,
-		State:          State{},
+		State: State{
+			Is124Cluster: true,
+		},
 	}
 	p.Clients = getProcessClients(e2eSetup, g)
 

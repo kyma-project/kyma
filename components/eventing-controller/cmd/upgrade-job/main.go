@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/kelseyhightower/envconfig"
-
 	"log"
 	"os"
 	"time"
 
 	"github.com/pkg/errors"
 
+	"github.com/kelseyhightower/envconfig"
+
+	apixv1beta1client "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
@@ -44,13 +45,16 @@ func main() {
 	// Generate dynamic clients
 	k8sConfig := config.GetConfigOrDie()
 
-	// Create dynamic client
+	// Create dynamic client (k8s)
 	dynamicClient := dynamic.NewForConfigOrDie(k8sConfig)
+
+	// Create API Extensions Client (k8s)
+	apixClient := apixv1beta1client.NewForConfigOrDie(k8sConfig)
 
 	// setup clients
 	deploymentClient := deployment.NewClient(dynamicClient)
 	subscriptionClient := subscription.NewClient(dynamicClient)
-	eventingBackendClient := eventingbackend.NewClient(dynamicClient)
+	eventingBackendClient := eventingbackend.NewClient(dynamicClient, apixClient)
 	secretClient := secret.NewClient(dynamicClient)
 	configMapClient := configmap.NewClient(dynamicClient)
 	eventMeshClient := eventmesh.NewClient()

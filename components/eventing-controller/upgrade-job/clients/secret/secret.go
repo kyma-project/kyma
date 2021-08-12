@@ -36,6 +36,18 @@ func (c Client) ListByMatchingLabels(namespace string, labelSelector string) (*c
 	return toSecretList(subscriptionsUnstructured)
 }
 
+// Get returns the k8s secrets in specified namespace and matching name.
+// or returns an error if it fails for any reason
+func (c Client) Get(namespace string, name string) (*corev1.Secret, error) {
+
+	subscriptionUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+
+	if err != nil {
+		return nil, err
+	}
+	return toSecret(subscriptionUnstructured)
+}
+
 // GroupVersionResource returns the GVR for secret k8s resource
 func GroupVersionResource() schema.GroupVersionResource {
 	return schema.GroupVersionResource{
@@ -57,4 +69,18 @@ func toSecretList(unstructuredList *unstructured.UnstructuredList) (*corev1.Secr
 		return nil, err
 	}
 	return triggerList, nil
+}
+
+// toSecret converts unstructured Secret object to typed object
+func toSecret(unstructuredObj *unstructured.Unstructured) (*corev1.Secret, error) {
+	triggerObj := new(corev1.Secret)
+	triggerObjBytes, err := unstructuredObj.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(triggerObjBytes, triggerObj)
+	if err != nil {
+		return nil, err
+	}
+	return triggerObj, nil
 }
