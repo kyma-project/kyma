@@ -5,8 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/onsi/gomega"
+
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 )
 
 // TestCheckIsBebEnabled tests the CheckIsBebEnabled_DO step
@@ -29,7 +33,9 @@ func TestCheckIsBebEnabled(t *testing.T) {
 		KymaNamespace:  cfg.KymaNamespace,
 		ControllerName: cfg.EventingControllerName,
 		PublisherName:  cfg.EventingPublisherName,
-		State:          State{},
+		State: State{
+			Is124Cluster: true,
+		},
 	}
 	p.Clients = getProcessClients(e2eSetup, g)
 
@@ -38,28 +44,28 @@ func TestCheckIsBebEnabled(t *testing.T) {
 		// First check if the initial value is false for IsBebEnabled
 		g.Expect(p.State.IsBebEnabled).Should(gomega.BeFalse())
 
-		// @TODO: Fix this test
+		// Now check is beb enabled
+		p.Steps = []Step{
+			NewCheckIsBebEnabled(p),
+		}
+		err := p.Execute()
+		g.Expect(err).Should(gomega.BeNil())
 
-		//// Now check is beb enabled
-		//p.Steps = []Step{
-		//	NewCheckIsBebEnabled(p),
-		//}
-		//err := p.Execute()
-		//g.Expect(err).Should(gomega.BeNil())
-		//
-		//// Check if the IsBebEnabled value is true
-		//g.Expect(p.State.IsBebEnabled).Should(gomega.BeTrue())
-		//
-		////// CASE 1: NATS
-		//// Now, change the Backend type to NATS and test again
-		//e2eSetup.eventingBackends.Items[0].Status.Backend = eventingv1alpha1.NatsBackendType
-		//p.Clients = getProcessClients(e2eSetup, g)
-		//
-		//// Now check is beb enabled
-		//err = p.Execute()
-		//g.Expect(err).Should(gomega.BeNil())
-		//
-		//// Check if the IsBebEnabled value is true
-		//g.Expect(p.State.IsBebEnabled).Should(gomega.BeFalse())
+		// Check if the IsBebEnabled value is true
+		g.Expect(p.State.IsBebEnabled).Should(gomega.BeTrue())
+
+		//// CASE 2: NATS
+		// Now, change the Backend type to NATS and test again
+		e2eSetup.eventingBackends.Items[0].Status.Backend = eventingv1alpha1.NatsBackendType
+		e2eSetup.secrets = &corev1.SecretList{} // Remove BEB secret
+
+		p.Clients = getProcessClients(e2eSetup, g)
+
+		// Now check is beb enabled
+		err = p.Execute()
+		g.Expect(err).Should(gomega.BeNil())
+
+		// Check if the IsBebEnabled value is true
+		g.Expect(p.State.IsBebEnabled).Should(gomega.BeFalse())
 	})
 }

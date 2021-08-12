@@ -36,6 +36,7 @@ func (s ScaleDownEventingController) Do() error {
 		return s.ScaleDownK8sDeployment(s.process.KymaNamespace, s.process.ControllerName)
 	}
 
+	s.process.Logger.WithContext().Info(fmt.Sprintf("Skipping step: %s, because it is not a v1.24.x cluster", s.ToString()))
 	return nil
 }
 

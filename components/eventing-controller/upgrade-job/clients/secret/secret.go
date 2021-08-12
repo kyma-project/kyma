@@ -25,7 +25,7 @@ func NewClient(client dynamic.Interface) Client {
 // or returns an error if it fails for any reason
 func (c Client) ListByMatchingLabels(namespace string, labelSelector string) (*corev1.SecretList, error) {
 
-	subscriptionsUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).List(
+	secretsUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).List(
 		context.Background(), metav1.ListOptions{
 			LabelSelector: labelSelector,
 		})
@@ -33,19 +33,19 @@ func (c Client) ListByMatchingLabels(namespace string, labelSelector string) (*c
 	if err != nil {
 		return nil, err
 	}
-	return toSecretList(subscriptionsUnstructured)
+	return toSecretList(secretsUnstructured)
 }
 
 // Get returns the k8s secrets in specified namespace and matching name.
 // or returns an error if it fails for any reason
 func (c Client) Get(namespace string, name string) (*corev1.Secret, error) {
 
-	subscriptionUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	secretUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 
 	if err != nil {
 		return nil, err
 	}
-	return toSecret(subscriptionUnstructured)
+	return toSecret(secretUnstructured)
 }
 
 // GroupVersionResource returns the GVR for secret k8s resource

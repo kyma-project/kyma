@@ -30,8 +30,7 @@ func NewClient() Client {
 // InitUsingSecret initializes the client by parsing the provided BEB secret (for v1.24.x)
 func (c *Client) InitUsingSecret(secret *corev1.Secret) error {
 	// First set beb config
-	cfg := env.Config{}
-	err := c.processSecret(&cfg, secret)
+	cfg, err := c.processSecret(secret)
 	if err != nil {
 		return err
 	}
@@ -102,39 +101,42 @@ func (c *Client) Delete(bebSubscriptionName string) (*types.DeleteResponse, erro
 }
 
 // processSecret private method to process BEB secret
-func (c *Client) processSecret(cfg *env.Config, bebSecret *corev1.Secret) error {
+func (c *Client) processSecret(bebSecret *corev1.Secret) (env.Config, error) {
+	cfg := env.Config{}
+
 	// First parse/decode the bebsecret
 	secret, err := c.getParsedSecret(bebSecret)
 	if err != nil {
-		return err
+		return cfg, err
 	}
 
 	// Read the config values
 	cfg.BebApiUrl = fmt.Sprintf("%s%s", string(secret.StringData[backend.PublisherSecretEMSHostKey]), backend.BEBPublishEndpointForSubscriber)
 	if len(cfg.BebApiUrl) == 0 {
-		return errors.New("cannot get BebApiUrl from BEB secret")
+		return cfg, errors.New("cannot get BebApiUrl from BEB secret")
 	}
 
 	cfg.ClientID = string(secret.StringData[deployment.PublisherSecretClientIDKey])
 	if len(cfg.ClientID) == 0 {
-		return errors.New("cannot get CLIENT_ID from BEB secret")
+		return cfg, errors.New("cannot get CLIENT_ID from BEB secret")
 	}
 
 	cfg.ClientSecret = string(secret.StringData[deployment.PublisherSecretClientSecretKey])
 	if len(cfg.ClientSecret) == 0 {
-		return errors.New("cannot get CLIENT_SECRET from BEB secret")
+		return cfg, errors.New("cannot get CLIENT_SECRET from BEB secret")
 	}
 
 	cfg.TokenEndpoint = string(secret.StringData[deployment.PublisherSecretTokenEndpointKey])
 	if len(cfg.TokenEndpoint) == 0 {
-		return errors.New("cannot get TOKEN_ENDPOINT from BEB secret")
+		return cfg, errors.New("cannot get TOKEN_ENDPOINT from BEB secret")
 	}
 
 	cfg.BEBNamespace = fmt.Sprintf("%s%s", backend.NamespacePrefix, string(secret.StringData[deployment.PublisherSecretBEBNamespaceKey]))
 	if len(cfg.BEBNamespace) == 0 {
-		return errors.New("cannot get BEB_NAMESPACE from BEB secret")
+		return cfg, errors.New("cannot get BEB_NAMESPACE from BEB secret")
 	}
-	return nil
+
+	return cfg, nil
 }
 
 // getParsedSecret private method to parse/decode BEB secret

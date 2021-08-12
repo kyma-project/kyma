@@ -26,12 +26,12 @@ func NewClient(client dynamic.Interface) Client {
 // or returns an error if it fails for any reason
 func (c Client) Get(namespace string, name string) (*corev1.ConfigMap, error) {
 
-	subscriptionsUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	configMapsUnstructured, err := c.client.Resource(GroupVersionResource()).Namespace(namespace).Get(context.Background(), name, metav1.GetOptions{})
 
 	if err != nil {
 		return nil, err
 	}
-	return toConfigMap(subscriptionsUnstructured)
+	return toConfigMap(configMapsUnstructured)
 }
 
 // GroupVersionResource returns the GVR for secret k8s resource
@@ -44,9 +44,9 @@ func GroupVersionResource() schema.GroupVersionResource {
 }
 
 // toConfigMap converts unstructured deployment object to typed ConfigMap object
-func toConfigMap(unstructuredDeployment *unstructured.Unstructured) (*corev1.ConfigMap, error) {
+func toConfigMap(unstructuredConfigMap *unstructured.Unstructured) (*corev1.ConfigMap, error) {
 	cm := new(corev1.ConfigMap)
-	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredDeployment.Object, cm)
+	err := k8sruntime.DefaultUnstructuredConverter.FromUnstructured(unstructuredConfigMap.Object, cm)
 	if err != nil {
 		return nil, err
 	}

@@ -33,7 +33,7 @@ func (s CheckClusterVersion) Do() error {
 	return err
 }
 
-// If it returns false, it is a 1.23 cluster
+// isClusterVersion1_24 If it returns false, it is a 1.23 cluster
 func (s CheckClusterVersion) isClusterVersion1_24() (bool, error) {
 	eventingBackend, err := s.process.Clients.EventingBackend.Get(s.process.KymaNamespace, "eventing-backend")
 	if err == nil {

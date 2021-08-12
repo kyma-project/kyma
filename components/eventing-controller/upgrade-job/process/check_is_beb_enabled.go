@@ -1,6 +1,8 @@
 package process
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
@@ -38,7 +40,8 @@ func (s CheckIsBebEnabled) Do() error {
 		return s.CheckIfBebEnabled124()
 	}
 
-	return s.CheckIfBebEnabled123()
+	s.process.Logger.WithContext().Info(fmt.Sprintf("Skipping step: %s, because it is not a v1.24.x cluster", s.ToString()))
+	return nil
 }
 
 // CheckIfBebEnabled124 checks if BEB is enabled in v1.24.x and initialises BEB client
@@ -60,12 +63,4 @@ func (s CheckIsBebEnabled) CheckIfBebEnabled124() error {
 
 	s.process.State.IsBebEnabled = true
 	return s.process.Clients.EventMesh.InitUsingSecret(&secretList.Items[0])
-}
-
-// CheckIfBebEnabled123 checks if BEB is enabled in v1.23.x and initialises BEB client
-// It also sets s.process.State.IsBebEnabled
-func (s CheckIsBebEnabled) CheckIfBebEnabled123() error {
-	s.process.State.IsBebEnabled = false
-	// TODO initialize BEB client?
-	return nil
 }
