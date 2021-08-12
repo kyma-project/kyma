@@ -12,7 +12,6 @@ const {
   k8sDelete,
   kubectlPortForward,
 } = require("../utils");
-const nock = require("nock");
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,12 +19,9 @@ function sleep(ms) {
 const mockServerClient = require("mockserver-client").mockServerClient;
 
 describe("Telemtry operator", () => {
-  // var port = 8080;
-  var server; // TODO
-
   let namespace = "kyma-system";
   let mockNamespace = "mockserver";
-  let mockServerPort = 9999;
+  let mockServerPort = 1080;
 
   const loggingConfigYaml = fs.readFileSync(
     path.join(__dirname, "./logging-config.yaml"),
@@ -40,17 +36,6 @@ describe("Telemtry operator", () => {
     k8sDelete(loggingConfigCRD, namespace);
   });
 
-  beforeEach(function () {
-    server = nock(`http://localhost:${port}`)
-      .persist()
-      .post("/")
-      .reply(200, "Ok");
-  });
-
-  afterEach(function () {
-    nock.cleanAll();
-  });
-
   it("Operator should be ready", async function () {
     let res = await k8sCoreV1Api.listNamespacedPod(
       namespace,
@@ -63,35 +48,40 @@ describe("Telemtry operator", () => {
     let podList = res.body.items;
     assert.equal(podList.length, 1);
   });
-
-  // it("should not receive HTTP traffic", async function () {
-  //   assert.equal(server.isDone(), false);
-  // });
-
-  // it("should receive HTTP traffic", async function () {
-  //   await axios.post(
-  //     `http://localhost:${port}`,
-  //     { msg: "Hello world!" },
-  //     {
-  //       headers: {
-  //         "Content-type": "application/json; charset=UTF-8",
-  //       },
-  //     }
-  //   );
-  //   assert.equal(server.isDone(), true);
-  // });
-
   describe("Prepare mockserver", function () {
-    before(() => {
+    before(async () => {
       // install helm chart
       // configure port forward..
+      let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
+      // console.log(body.items[0].metadata);.
+      let mockPod = body.items[0].metadata.name;
+      console.log("Pod", mockPod, mockServerPort);
+      kubectlPortForward(mockNamespace, mockPod, mockServerPort); //forward service?
+
+      // wait for pod to be ready
     });
     after(() => {
       // uninstall helm chart
     });
 
     it("Should not receive HTTP traffic", async function () {
-      //
+      mockServerClient("localhost", mockServerPort)
+        .verify(
+          {
+            path: "/",
+          },
+          0,
+          0
+        )
+        .then(
+          function () {
+            console.log("request found exactly 0 times");
+          },
+          function (error) {
+            throw error;
+            console.log("Not exactly 0 times error");
+          }
+        );
     });
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
@@ -103,105 +93,66 @@ describe("Telemtry operator", () => {
     });
   });
 
-  it("Should not receive HTTP traffic", async function () {
-    let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-    let mockPod = body.items[0].name;
-    kubectlPortForward(mockNamespace, mockPod, mockServerPort);
-    mockServerClient("localhost", mockServerPort)
-      .verify(
-        {
-          path: "/",
-        },
-        0,
-        true
-      )
-      .then(
-        function () {
-          console.log("request found exactly 0 times");
-        },
-        function (error) {
-          // throw error;
-          console.log("Not exactly 0 times error");
-        }
-      );
-  });
+  // it("Create CRD for fluent-bit config", async () => {
+  //   let res = await k8sApply(loggingConfigCRD, namespace);
+  //   let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
+  //   let mockPod = body.items[0].name;
+  //   // kubectlPortForward(mockNamespace, mockPod, mockServerPort);
+  //   mockServerClient("localhost", mockServerPort)
+  //     .verify(
+  //       {
+  //         path: "/",
+  //       },
+  //       1
+  //     )
+  //     .then(
+  //       function () {
+  //         console.log("request found 2 times");
+  //       },
+  //       function (error) {
+  //         // throw error;
+  //         // console.log(error);
+  //       }
+  //     );
 
-  it("Create CRD for fluent-bit config", async () => {
-    let res = await k8sApply(loggingConfigCRD, namespace);
-    // kubectlPortForward(namespace, "logging-fluent-bit-5qvxz", port);
-
-    // nock.recorder.rec();
-    // pname = "logging-fluent-bit-5qvxz";
-    let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-    let mockPod = body.items[0].name;
-    // kubectlPortForward(mockNamespace, mockPod, mockServerPort);
-    mockServerClient("localhost", mockServerPort)
-      .verify(
-        {
-          path: "/",
-        },
-        1
-      )
-      .then(
-        function () {
-          console.log("request found 2 times");
-        },
-        function (error) {
-          // throw error;
-          // console.log(error);
-        }
-      );
-    // console.log(reso);
-    // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
-    //   metadata: { name: "test-server" },
-    //   spec: {
-    //     containers: [
-    //       {
-    //         name: "server",
-    //         image: "mockserver/mockserver",
-    //         ports: [
-    //           {
-    //             name: "server-port",
-    //             containerPort: 8081,
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // });
-    // console.log("path", k8sDynamicApi.basePath);
-    // let { body } = await k8sDynamicApi.requestPromise({
-    //   url:
-    //     k8sDynamicApi.basePath +
-    //     `/api/v1/namespaces/${namespace}/pods/${pname}/log`,
-    //   method: "GET",
-    // });
-    // let { body } = await k8sCoreV1Api.readNamespacedPodLog(
-    //   pname,
-    //   namespace,
-    //   undefined,
-    //   undefined,
-    //   true,
-    //   1000,
-    //   "false",
-    //   false,
-    //   undefined,
-    //   undefined,
-    //   undefined,
-    //   undefined
-    // );
-    // console.log(body);
-    // await axios.post(
-    //   `http://localhost:${port}`,
-    //   { msg: "Hello world!" },
-    //   {
-    //     headers: {
-    //       "Content-type": "application/json; charset=UTF-8",
-    //     },
-    //   }
-    // );
-    // await sleep(10000);
-
-    // assert.equal(server.isDone(), true);
-  }).timeout(20000);
+  // console.log(reso);
+  // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
+  //   metadata: { name: "test-server" },
+  //   spec: {
+  //     containers: [
+  //       {
+  //         name: "server",
+  //         image: "mockserver/mockserver",
+  //         ports: [
+  //           {
+  //             name: "server-port",
+  //             containerPort: 8081,
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   },
+  // });
+  // console.log("path", k8sDynamicApi.basePath);
+  // let { body } = await k8sDynamicApi.requestPromise({
+  //   url:
+  //     k8sDynamicApi.basePath +
+  //     `/api/v1/namespaces/${namespace}/pods/${pname}/log`,
+  //   method: "GET",
+  // });
+  // let { body } = await k8sCoreV1Api.readNamespacedPodLog(
+  //   pname,
+  //   namespace,
+  //   undefined,
+  //   undefined,
+  //   true,
+  //   1000,
+  //   "false",
+  //   false,
+  //   undefined,
+  //   undefined,
+  //   undefined,
+  //   undefined
+  // );
+  // }).timeout(20000);
 });
