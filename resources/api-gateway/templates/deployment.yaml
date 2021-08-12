@@ -33,6 +33,7 @@ spec:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.config.ports.metrics }}
+            - --health-probe-addr=0.0.0.0:{{ .Values.config.ports.healthProbe }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
@@ -56,15 +57,14 @@ spec:
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
-          #TODO: temporary solution, replace with a health endpoint
           livenessProbe:
             httpGet:
-              port: {{ .Values.config.ports.metrics }}
-              path: "/metrics"
+              port: {{ .Values.config.ports.healthProbe }}
+              path: "/healthz"
           readinessProbe:
             httpGet:
-              port: {{ .Values.config.ports.metrics }}
-              path: "/metrics"
+              port: {{ .Values.config.ports.healthProbe }}
+              path: "/readyz"
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
       {{- with .Values.config.nodeSelector }}

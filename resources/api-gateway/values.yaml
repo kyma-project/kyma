@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "7ccdd889"
+  tag: "PR-117"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -81,6 +81,7 @@ config:
   # Port configuration
   ports:
     metrics: 8080
+    healthProbe: 8081
 
 # Configure node affinity
 affinity: {}
