@@ -78,23 +78,24 @@ func main() {
 		State: jobprocess.State{},
 	}
 
-	// First check if BEB is enabled for Kyma cluster
-	checkBebJob := jobprocess.NewCheckIsBebEnabled(&p)
-	err = checkBebJob.Do()
-	if err != nil {
-		ctrLogger.Logger.WithContext().Error(errors.Wrapf(err, "failed to check: %s", checkBebJob.ToString()), p.KymaNamespace)
+	checkClusterVersion := jobprocess.NewCheckClusterVersion(&p)
+	if err := checkClusterVersion.Do(); err != nil {
+		ctrLogger.Logger.WithContext().Error(errors.Wrapf(err, "failed to check: %s", checkClusterVersion.ToString()), p.KymaNamespace)
 		os.Exit(1)
 	}
 
-	// If BEB is not enabled then stop the upgrade-job
-	// because we don't need this upgrade-job
+	checkBebIsEnabled := jobprocess.NewCheckIsBebEnabled(&p)
+	err = checkBebIsEnabled.Do()
+	if err != nil {
+		ctrLogger.Logger.WithContext().Error(errors.Wrapf(err, "failed to check: %s", checkBebIsEnabled.ToString()), p.KymaNamespace)
+		os.Exit(1)
+	}
+
 	if !p.State.IsBebEnabled {
 		ctrLogger.Logger.WithContext().Info("BEB not enabled for Kyma cluster! Exiting upgrade-job")
 		return
 	}
 
-	// BEB is enabled, execute the steps for this upgrade-job
-	// Add steps to process
 	p.AddSteps()
 
 	// Execute process

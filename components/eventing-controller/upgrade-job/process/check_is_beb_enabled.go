@@ -3,10 +3,8 @@ package process
 import (
 	"github.com/pkg/errors"
 
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var _ Step = &CheckIsBebEnabled{}
@@ -36,71 +34,11 @@ func (s CheckIsBebEnabled) Do() error {
 	// Set default to false
 	s.process.State.IsBebEnabled = false
 
-	// Get eventing-backend CRD
-	//eventingBackendCRD, err := s.process.Clients.EventingBackend.GetCRD()
-	eventingBackend, err := s.process.Clients.EventingBackend.Get(s.process.KymaNamespace, "eventing-backend")
-	if err == nil {
-		// eventing-backend CRD found, meaning its a v1.24.x cluster
-		//s.process.Logger.WithContext().Info(eventingBackendCRD.ObjectMeta.Name)
-		s.process.Logger.WithContext().Info(eventingBackend.Name)
-
-		s.process.State.Is124Cluster = true
+	if s.process.State.Is124Cluster {
 		return s.CheckIfBebEnabled124()
 	}
 
-	if !k8serrors.IsNotFound(err) {
-		return err
-	}
-
-	// eventing-backend CRD not found, meaning its a v1.23.x cluster
-	s.process.State.Is124Cluster = false
 	return s.CheckIfBebEnabled123()
-
-	//if err == nil {
-	//	// Check if backend set BEB
-	//	if eventingBackendObject.Status.Backend == eventingv1alpha1.BebBackendType {
-	//		s.process.State.IsBebEnabled = true
-	//
-	//		// Init BEB Client
-	//		err = s.InitBebClientUsingBebSecret()
-	//		if err != nil {
-	//			return err
-	//		}
-	//		return nil
-	//	}
-	//	// else its a NATs cluster
-	//	s.process.State.IsBebEnabled = false
-	//	return nil
-	//}
-	//
-	//// If there is any error other then 404 then return error
-	//// else it means that its a older Kyma cluster (e.g. 1.23.x)
-	//if !k8serrors.IsNotFound(err){
-	//	return err
-	//}
-	//
-	//// Logic to check isBEBEnabled for v1.23.x
-	//// Get eventing secret
-	//s.process.Logger.WithContext().Info("Checking for beb configs in secret: ", "eventing")
-	//eventingSecret, err := s.process.Clients.Secret.Get(s.process.KymaNamespace, "eventing")
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//// If BEB config data in eventing secret is empty then it means
-	//// that BEB is not enabled
-	//bebNamespace, ok := eventingSecret.Data["beb-namespace"]
-	//if !ok || string(bebNamespace) == "" {
-	//	s.process.State.IsBebEnabled = false
-	//	return nil
-	//}
-	//
-	//s.process.State.IsBebEnabled = true
-	//// Init BEB Client using eventing secret
-	//err = s.InitBebClientUsingEventingSecret(eventingSecret)
-	//if err != nil {
-	//	return err
-	//}
 }
 
 // CheckIfBebEnabled124 checks if BEB is enabled in v1.24.x and initialises BEB client
@@ -128,5 +66,6 @@ func (s CheckIsBebEnabled) CheckIfBebEnabled124() error {
 // It also sets s.process.State.IsBebEnabled
 func (s CheckIsBebEnabled) CheckIfBebEnabled123() error {
 	s.process.State.IsBebEnabled = false
+	// TODO initialize BEB client?
 	return nil
 }
