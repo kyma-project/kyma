@@ -36,6 +36,33 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
+webhook:
+  image: "eu.gcr.io/kyma-project/helm-broker-webhook:PR-168"
+  imagePullPolicy: Always
+  securityContext: { runAsUser: 1001 }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  minReadySeconds: 1
+  annotations:
+    sidecar.istio.io/inject: "false"
+  healthcheck:
+    enabled: false
+  # Attributes of the webhook's service resource
+  service:
+    port: 8443
+    targetPort: 8443
+  # Webhook resource requests and limits
+  # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      cpu: 100m
+      memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 30Mi
+
 defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.15.0/index.yaml"
 
 # A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
