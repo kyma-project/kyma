@@ -54,7 +54,7 @@ global:
   isDevelopMode: false
   # image pull policy for helm broker broker/controller containers
   image:
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   # paths to docker images
   helm_broker:
     dir: ""

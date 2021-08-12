@@ -20,11 +20,23 @@ spec:
     {{- if eq .Values.service.type "ClusterIP" }}
     nodePort: null
     {{ end }}
-  - protocol: TCP
-    name: http-hb-webhook-port
-    port: 8443
-    targetPort: 8443
-    {{- if eq .Values.service.type "ClusterIP" }}
-    nodePort: null
-    {{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+    - name: http-hb-webhook-port
+      port: 8443
+      targetPort: 8443
+  selector:
+    app: {{ template "fullname" . }}
+    release: {{ .Release.Name }}
 
