@@ -9,6 +9,7 @@ const {
   k8sCoreV1Api,
   k8sDynamicApi,
   k8sApply,
+  k8sDelete,
   kubectlPortForward,
 } = require("../utils");
 const nock = require("nock");
@@ -19,13 +20,25 @@ function sleep(ms) {
 const mockServerClient = require("mockserver-client").mockServerClient;
 
 describe("Telemtry operator", () => {
-  var port = 8080;
-  var server;
+  // var port = 8080;
+  var server; // TODO
 
-  // check if operator installed
   let namespace = "kyma-system";
   let mockNamespace = "mockserver";
   let mockServerPort = 9999;
+
+  const loggingConfigYaml = fs.readFileSync(
+    path.join(__dirname, "./logging-config.yaml"),
+    {
+      encoding: "utf8",
+    }
+  );
+  const loggingConfigCRD = k8s.loadAllYaml(loggingConfigYaml);
+
+  after(() => {
+    // delete custom config
+    k8sDelete(loggingConfigCRD, namespace);
+  });
 
   beforeEach(function () {
     server = nock(`http://localhost:${port}`)
@@ -68,6 +81,28 @@ describe("Telemtry operator", () => {
   //   assert.equal(server.isDone(), true);
   // });
 
+  describe("Prepare mockserver", function () {
+    before(() => {
+      // install helm chart
+      // configure port forward..
+    });
+    after(() => {
+      // uninstall helm chart
+    });
+
+    it("Should not receive HTTP traffic", async function () {
+      //
+    });
+
+    it("Apply HTTP output plugin to fluent-bit", async function () {
+      // wait for pod restart
+    });
+
+    it("Should receive HTTP traffic from fluent-bit", async function () {
+      // verify server
+    });
+  });
+
   it("Should not receive HTTP traffic", async function () {
     let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
     let mockPod = body.items[0].name;
@@ -92,14 +127,7 @@ describe("Telemtry operator", () => {
   });
 
   it("Create CRD for fluent-bit config", async () => {
-    const loggingConfigYaml = fs.readFileSync(
-      path.join(__dirname, "./logging-config.yaml"),
-      {
-        encoding: "utf8",
-      }
-    );
-    const crd = k8s.loadAllYaml(loggingConfigYaml);
-    let res = await k8sApply(crd, namespace);
+    let res = await k8sApply(loggingConfigCRD, namespace);
     // kubectlPortForward(namespace, "logging-fluent-bit-5qvxz", port);
 
     // nock.recorder.rec();
