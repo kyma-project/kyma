@@ -29,3 +29,5 @@ vendor
 licenses
 /upgrade-job/.devEnv
 /upgrade-job/upgrade-job
+/upgrade-job/eventing-pre-upgrade-job-1-24
+/eventing-pre-upgrade-job-1-24
