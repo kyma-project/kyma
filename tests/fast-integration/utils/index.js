@@ -509,6 +509,23 @@ function waitForReplicaSet(name, namespace = "default", timeout = 90000) {
   );
 }
 
+function waitForDaemonSet(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/apps/v1/namespaces/${namespace}/daemonsets/${name}`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.status.numberReady ===
+          watchObj.status.desiredNumberScheduled &&
+        watchObj.status.numberAvailable ===
+          watchObj.status.desiredNumberScheduled
+      );
+    },
+    timeout,
+    `Waiting for daemonset ${name} timeout (${timeout} ms)`
+  );
+}
+
 function waitForDeployment(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
@@ -1113,6 +1130,7 @@ module.exports = {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForDaemonSet,
   waitForStatefulSet,
   waitForTokenRequest,
   waitForCompassConnection,

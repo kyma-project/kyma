@@ -6,6 +6,7 @@ const path = require("path");
 const axios = require("axios");
 const {
   waitForPodWithLabel,
+  waitForDaemonSet,
   k8sCoreV1Api,
   k8sDynamicApi,
   k8sApply,
@@ -32,7 +33,7 @@ describe("Telemtry operator", () => {
   const loggingConfigCRD = k8s.loadAllYaml(loggingConfigYaml);
 
   after(() => {
-    // delete custom config
+    // delete custom config TODO
     k8sDelete(loggingConfigCRD, namespace);
   });
 
@@ -51,11 +52,8 @@ describe("Telemtry operator", () => {
   describe("Prepare mockserver", function () {
     before(async () => {
       // install helm chart
-      // configure port forward..
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-      // console.log(body.items[0].metadata);.
       let mockPod = body.items[0].metadata.name;
-      console.log("Pod", mockPod, mockServerPort);
       kubectlPortForward(mockNamespace, mockPod, mockServerPort); //forward service?
 
       // wait for pod to be ready
@@ -82,11 +80,28 @@ describe("Telemtry operator", () => {
     });
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
-      // wait for pod restart
-    });
+      await k8sApply(loggingConfigCRD, namespace);
+      // await waitForDaemonSet("logging-fluent-bit", namespace);// TODO
+      await sleep(70000);
+    }).timeout(90000);
 
-    it("Should receive HTTP traffic from fluent-bit", async function () {
+    it("Should receive HTTP traffic from fluent-bit", function () {
       // verify server
+      return mockServerClient("localhost", mockServerPort)
+        .verify(
+          {
+            path: "/",
+          },
+          1
+        )
+        .then(
+          function () {
+            console.log("request found 1 times");
+          },
+          function (error) {
+            assert.fail("The HTTP endpoint was not called");
+          }
+        );
     });
   });
 
