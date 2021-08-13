@@ -105,5 +105,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "PR-11886"
+      version: "PR-11783"
       pullPolicy: IfNotPresent
