@@ -38,7 +38,7 @@ If you use a cluster not managed by Gardener, install the required components ma
 
 ## Steps
 
-Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
+Follow these steps to set up your custom domain and prepare a certificate required to expose a service using your custom domain.
 
 1. Install Kyma 2.0 or higher.
 
@@ -48,7 +48,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kubectl create ns {NAMESPACE_NAME}
    ```
 
-3. Create a Secret containing the credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Once the YAML file with the required parameters is ready, create a Secret Custom Resource (CR). Run the following command:
+3. Create a Secret containing credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Once the YAML file with the required parameters is ready, create a Secret Custom Resource (CR). Run the following command:
 
    ```bash
    kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
@@ -68,14 +68,14 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      annotations:
        dns.gardener.cloud/class: garden
    spec:
-     type: your-provider-dns # Edit this value
+     type: your-provider-dns-type # Edit this value
      secretRef:
        name: secret-name # Edit this value
      domains:
        include:
          # Replace with a domain of the hosted zone
          - mydomain.com # Edit this value
-    EOF     
+   EOF  
    ```
 
 - Create a DNSEntry CR. See the following example and modify values for the **namespace**, **spec.dnsName**, **spec.ttl**, and **spec.targets.IP** parameters. Run:
@@ -94,7 +94,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      ttl: 600
      targets:
        - 1.2.3.4 # Edit this value
-    EOF   
+   EOF
    ```
 
    >**NOTE:** You can create many DNSEntry CRs for one DNSProvider depending on the number of subdomains you want to use.
@@ -121,13 +121,13 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        # Optionally, restrict domain ranges for which certificates can be requested
        domains:
          include:
-           - private.sub1.mydomain.com # Edit this value
+           - private.sub1.mydomain.com # The subdomain provided in the DNS Entry created in the previous step. Edit this value
    #     exclude:
    #       - private.sub2.mydomain.com # Edit this value
    EOF
    ```
 
-6. Create a Certificate CR. See the following example and modify values of the **spec.secretName**, **spec.commonName**, , and **spec.issuerRef.name** parameters. As the value for the **spec.issuerRef.name** parameter, use the Issuer name from the Issuer CR. Run:
+6. Create a Certificate CR. See the following example and modify values of the **spec.secretName**, **spec.commonName**, , and **spec.issuerRef.name** parameters. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -140,7 +140,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      secretName: httpbin-tls-credentials # Name of the created Secret. Edit this value
      commonName: mydomain.com # Edit this value
      issuerRef:
-       # Name of the Issuer created previously
+       # Name of the Issuer created in the previous step
        name: letsencrypt-staging
        namespace: default
      dnsNames:
