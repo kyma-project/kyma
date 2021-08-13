@@ -2,12 +2,10 @@ package process
 
 import (
 	"github.com/onsi/gomega"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
@@ -41,15 +39,12 @@ func getProcessClients(e2eSetup E2ESetup, g *gomega.GomegaWithT) Clients {
 	g.Expect(err).Should(gomega.BeNil())
 	fakeEventMeshClient, err := eventmesh.NewFakeClient()
 	g.Expect(err).Should(gomega.BeNil())
-	fakeConfigMapClient, err := configmap.NewFakeClient(e2eSetup.configMaps)
-	g.Expect(err).Should(gomega.BeNil())
 
 	return Clients{
 		Deployment:      fakeDeploymentClient,
 		Subscription:    fakeSubscriptionClient,
 		EventingBackend: fakeEventingBackendClient,
 		Secret:          fakeSecretClient,
-		ConfigMap:       fakeConfigMapClient,
 		EventMesh:       fakeEventMeshClient,
 	}
 }
@@ -59,13 +54,13 @@ func newE2ESetup() E2ESetup {
 	newEventingControllers := processtest.NewEventingControllers()
 	newEventingPublishers := processtest.NewEventingPublishers()
 	newSecrets := processtest.NewSecrets()
-	newConfigMaps := processtest.NewConfigMaps()
 	newSubscriptions := processtest.NewKymaSubscriptions()
 	newEventingBackends := processtest.NewEventingBackends()
 
 	envConfig := env.Config{
 		ReleaseName:            "release",
-		KymaNamespace:          "kyma-system",
+		KymaNamespace:          processtest.KymaSystemNamespace,
+		Domain:                 processtest.TestingDomainName,
 		EventingControllerName: "eventing-controller",
 		LogFormat:              "json",
 		LogLevel:               "warn",
@@ -74,7 +69,6 @@ func newE2ESetup() E2ESetup {
 	e2eSetup := E2ESetup{
 		config:              envConfig,
 		secrets:             newSecrets,
-		configMaps:          newConfigMaps,
 		eventingPublishers:  newEventingPublishers,
 		eventingControllers: newEventingControllers,
 		eventingBackends:    newEventingBackends,

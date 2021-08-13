@@ -10,6 +10,7 @@ import (
 type Process struct {
 	Steps              []Step
 	ReleaseName        string
+	Domain             string
 	KymaNamespace      string
 	ControllerName     string
 	PublisherName      string

@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 )
@@ -35,16 +33,9 @@ func (s FilterSubscriptions) ToString() string {
 // by checking if the new BEB webhook name is in subscription condition
 func (s FilterSubscriptions) Do() error {
 
-	// First get the shootName, and initialize BebSubscriptionNameMapper
-	shootName := ""
-	configmap, err := s.process.Clients.ConfigMap.Get("kube-system", "shoot-info")
-	if err != nil && !k8serrors.IsNotFound(err) {
-		return err
-	}
-	if err == nil {
-		shootName = configmap.Data["shootName"]
-	}
-
+	// First set the subscription name mapper
+	// #TODO: Fix the shootname to Domain
+	shootName := s.process.Domain
 	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
 
 	// Now filter out the subscriptions which are not migrated

@@ -14,7 +14,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	publisherDeployment "github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
@@ -53,7 +52,6 @@ func main() {
 	subscriptionClient := subscription.NewClient(dynamicClient)
 	eventingBackendClient := eventingbackend.NewClient(dynamicClient)
 	secretClient := secret.NewClient(dynamicClient)
-	configMapClient := configmap.NewClient(dynamicClient)
 	eventMeshClient := eventmesh.NewClient()
 
 	// Create process
@@ -61,6 +59,7 @@ func main() {
 		Logger:             ctrLogger.Logger,
 		TimeoutPeriod:      60 * time.Second,
 		ReleaseName:        cfg.ReleaseName,
+		Domain:             cfg.Domain,
 		KymaNamespace:      cfg.KymaNamespace,
 		ControllerName:     cfg.EventingControllerName,
 		PublisherName:      publisherDeployment.PublisherName,
@@ -70,7 +69,6 @@ func main() {
 			Subscription:    subscriptionClient,
 			EventingBackend: eventingBackendClient,
 			Secret:          secretClient,
-			ConfigMap:       configMapClient,
 			EventMesh:       eventMeshClient,
 		},
 		State: jobprocess.State{},

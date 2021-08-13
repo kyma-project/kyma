@@ -62,6 +62,7 @@ func TestDeleteBebSubscriptions(t *testing.T) {
 		Logger:             ctrLogger.Logger,
 		TimeoutPeriod:      60 * time.Second,
 		ReleaseName:        cfg.ReleaseName,
+		Domain:             cfg.Domain,
 		KymaNamespace:      cfg.KymaNamespace,
 		ControllerName:     cfg.EventingControllerName,
 		PublisherName:      "eventing-publisher-proxy",

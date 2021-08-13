@@ -19,7 +19,7 @@ import (
 
 const (
 	KymaSystemNamespace = "kyma-system"
-	testingShootName    = "testing"
+	TestingDomainName   = "domain.kyma-testing.com"
 )
 
 func NewEventingControllers() *appsv1.DeploymentList {
@@ -203,38 +203,6 @@ func NewBebSecrets(bebMock *bebClientTesting.BebMock) (*corev1.SecretList, error
 	}, nil
 }
 
-func NewConfigMaps() *corev1.ConfigMapList {
-	validator := ConfigMap("shoot-info")
-	return &corev1.ConfigMapList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMapList",
-			APIVersion: "v1",
-		},
-		Items: []corev1.ConfigMap{
-			*validator,
-		},
-	}
-}
-
-func ConfigMap(name string) *corev1.ConfigMap {
-	return &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: "kube-system",
-			Labels: map[string]string{
-				"app": name,
-			},
-		},
-		Data: map[string]string{
-			"shootName": testingShootName,
-		},
-	}
-}
-
 func NewKymaSubscriptions() *eventingv1alpha1.SubscriptionList {
 	sub1 := NewKymaSubscription("sub1", true, false)
 	sub2 := NewKymaSubscription("sub2", true, false)
@@ -296,7 +264,7 @@ func NewKymaSubscription(appName string, addConditions bool, includeBebMessageIn
 	}
 
 	if includeBebMessageInCondition {
-		nameMapper := handlers.NewBebSubscriptionNameMapper(testingShootName, handlers.MaxBEBSubscriptionNameLength)
+		nameMapper := handlers.NewBebSubscriptionNameMapper(TestingDomainName, handlers.MaxBEBSubscriptionNameLength)
 		newBebSubscriptionName := nameMapper.MapSubscriptionName(subscription)
 		condition2.Message = eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
 	}

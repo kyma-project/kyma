@@ -2,7 +2,6 @@ package process
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/configmap"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
@@ -16,7 +15,6 @@ type Clients struct {
 	Subscription    subscription.Client
 	EventingBackend eventingbackend.Client
 	Secret          secret.Client
-	ConfigMap       configmap.Client
 	EventMesh       eventmesh.Client
 }
 
