@@ -34,9 +34,8 @@ func (s FilterSubscriptions) ToString() string {
 func (s FilterSubscriptions) Do() error {
 
 	// First set the subscription name mapper
-	// #TODO: Fix the shootname to Domain
-	shootName := s.process.Domain
-	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
+	s.process.Logger.WithContext().Info(fmt.Sprintf("Using domain name: %s in step: %s", s.process.Domain, s.ToString()))
+	nameMapper := handlers.NewBebSubscriptionNameMapper(s.process.Domain, handlers.MaxBEBSubscriptionNameLength)
 
 	// Now filter out the subscriptions which are not migrated
 	s.process.State.FilteredSubscriptions = &eventingv1alpha1.SubscriptionList{
