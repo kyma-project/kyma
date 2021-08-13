@@ -38,7 +38,7 @@ broker:
 
 webhook:
   image: "eu.gcr.io/kyma-project/helm-broker-webhook:PR-168"
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   securityContext: { runAsUser: 1001 }
   strategy:
     type: RollingUpdate
@@ -63,7 +63,7 @@ webhook:
       cpu: 100m
       memory: 30Mi
 
-defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.14.0/index.yaml" # switch to 0.15 after testing PR
+defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.15.0/index.yaml" # switch to 0.15 after testing PR
 
 # A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
 # additionalAddonsRepositories:
