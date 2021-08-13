@@ -44,34 +44,40 @@ type MessagingBackend interface {
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
+// NameMapper is used to map Kyma-specific resource names to their corresponding name on other
+// (external) systems, e.g. on different eventing backends, the same Kyma subscription name
+// could map to a different name.
 type NameMapper interface {
 	MapSubscriptionName(sub *eventingv1alpha1.Subscription) string
 }
 
+// bebSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the BEB backend,
+// which has a max length. Domain name is used to make the names on BEB unique.
 type bebSubscriptionNameMapper struct {
-	shootName string
-	maxLength int
+	domainName string
+	maxLength  int
 }
 
-func NewBebSubscriptionNameMapper(shootName string, maxNameLength int) *bebSubscriptionNameMapper {
+func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
 	return &bebSubscriptionNameMapper{
-		shootName: strings.TrimSpace(shootName),
-		maxLength: maxNameLength,
+		domainName: strings.TrimSpace(domainName),
+		maxLength:  maxNameLength,
 	}
 }
 
 func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
-	hash := hashSubscriptionFullName(m.shootName, sub.Namespace, sub.Name)
+	hash := hashSubscriptionFullName(m.domainName, sub.Namespace, sub.Name)
 	return shortenNameAndAppendHash(sub.Name, hash, m.maxLength)
 }
 
-func hashSubscriptionFullName(shootName, namespace, name string) string {
-	hash := sha1.Sum([]byte(shootName + namespace + name))
+func hashSubscriptionFullName(domainName, namespace, name string) string {
+	hash := sha1.Sum([]byte(domainName + namespace + name))
 	return fmt.Sprintf("%x", hash)
 }
 
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 	maxNameLen := maxLength - len(hash)
+	// keep the first maxNameLen characters of the name
 	if maxNameLen <= 0 {
 		return hash
 	}
