@@ -19,7 +19,7 @@ func Test_SyncBebSubscription(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	// given
-	nameMapper := NewBebSubscriptionNameMapper("shoot001", MaxBEBSubscriptionNameLength)
+	nameMapper := NewBebSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
 	beb := NewBEB(nameMapper, ctrl.Log)
 	// start BEB Mock
 	bebMock := startBebMock()

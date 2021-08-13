@@ -258,6 +258,10 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		prefixLen := min(len(test.inputSub.Name), test.maxLen-hashLength)
 		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
 	}
+
+	// Same subscription should give the same name
+	mapper := NewBebSubscriptionNameMapper("mydomain.com", 50)
+	g.Expect(mapper.MapSubscriptionName(s1)).To(Equal(mapper.MapSubscriptionName(s1)))
 }
 
 func TestShortenNameAndAppendHash(t *testing.T) {
