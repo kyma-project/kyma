@@ -1,6 +1,6 @@
 const {
   checkInClusterEventDelivery,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   sendEventAndCheckResponse,
 } = require("../test/fixtures/commerce-mock");
 const {
@@ -22,8 +22,8 @@ describe("Upgrade test tests", function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNamespace);
   });
 
   it("order.created.v1 event should trigger the lastorder function", async function () {

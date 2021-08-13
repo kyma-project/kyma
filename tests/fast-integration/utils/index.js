@@ -674,6 +674,23 @@ async function getAllResourceTypes() {
   }
 }
 
+async function getSecretData(name, namespace) {
+  try {
+    const secret = await getSecret(name, namespace);
+    const encodedData = secret.data;
+    return Object.fromEntries(
+      Object.entries(encodedData).map(([key, value]) => {
+        const buff = Buffer.from(value, "base64");
+        const decoded = buff.toString("ascii");
+        return [key, decoded];
+      })
+    );
+  } catch (e) {
+    console.log("Error:", e);
+    throw e;
+  }
+}
+
 function ignore404(e) {
   if (e.statusCode != 404) {
     throw e;
@@ -1042,6 +1059,7 @@ module.exports = {
   getClusteraddonsconfigurations,
   getSecret,
   getSecrets,
+  getSecretData,
   listResources,
   listResourceNames,
   k8sDynamicApi,

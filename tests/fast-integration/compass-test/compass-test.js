@@ -12,7 +12,7 @@ const {
 const {
   ensureCommerceMockWithCompassTestFixture,
   cleanMockTestFixture,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   sendEventAndCheckResponse
 } = require("../test/fixtures/commerce-mock");
 
@@ -38,8 +38,8 @@ describe("Kyma with Compass test", async function() {
     await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName,  "mocks", testNS, withCentralAppConnectivity);
   });
 
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNS);
   });
     
   it("order.created.v1 event should trigger the lastorder function", async function () {

@@ -33,12 +33,18 @@ const {
   ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription,
-  k8sDelete
+  k8sDelete,
+  getSecretData
 } = require("../../../utils");
 
 const {
   registerOrReturnApplication,
 } = require("../../../compass");
+
+const {
+  OAuthToken,
+  OAuthCredentials
+} = require("../../../lib/oauth");
 
 const commerceMockYaml = fs.readFileSync(
   path.join(__dirname, "./commerce-mock.yaml"),
@@ -100,22 +106,44 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
-
-async function checkAppGatewayResponse() {
+async function checkFunctionResponse(functionNamespace) {
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
+  // get OAuth client id and client secret from Kubernetes Secret
+  const oAuthSecretData = await getSecretData("lastorder-oauth", functionNamespace);
+
+  // get access token from OAuth server
+  const oAuthTokenGetter = new OAuthToken(
+    `https://oauth2.${host}/oauth2/token`,
+    new OAuthCredentials(oAuthSecretData["client_id"], oAuthSecretData["client_secret"])
+  );
+  const accessToken = await oAuthTokenGetter.getToken(["read", "write"]);
+
+  // expect no error when authorized
   let res = await retryPromise(
-    () => axios.post(`https://lastorder.${host}`, { orderCode: "789" }, { timeout: 5000 }),
+    () => axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, { 
+      timeout: 5000,
+      headers: { Authorization: `bearer ${accessToken}`}
+    }),
     45,
     2000
-  ).catch((err) => { throw convertAxiosError(err, "Function lastorder responded with error") });
+  ).catch((err) => {
+    throw convertAxiosError(err, "Function lastorder responded with error");
+  });
 
-  expect(res.data).to.have.nested.property(
-    "order.totalPriceWithTax.value",
-    100
-  );
+  expect(res.data).to.have.nested.property("order.totalPriceWithTax.value", 100);
+
+  // expect error when unauthorized
+  let errorOccurred = false
+  try {
+    res = await axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, { timeout: 5000 })
+  } catch (err) {
+    errorOccurred = true;
+    expect(err.response.status).to.be.equal(401);
+  }
+  expect(errorOccurred).to.be.equal(true);
 }
 
 async function sendEventAndCheckResponse() {
@@ -505,7 +533,7 @@ module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   checkInClusterEventDelivery,
   cleanMockTestFixture,
   deleteMockTestFixture,
