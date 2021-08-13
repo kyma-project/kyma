@@ -57,13 +57,16 @@ spec:
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
+          ports:
+          - containerPort: {{ .Values.config.ports.healthProbe }}
+            name: health           
           livenessProbe:
             httpGet:
-              port: {{ .Values.config.ports.healthProbe }}
+              port: health
               path: "/healthz"
           readinessProbe:
             httpGet:
-              port: {{ .Values.config.ports.healthProbe }}
+              port: health
               path: "/readyz"
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
