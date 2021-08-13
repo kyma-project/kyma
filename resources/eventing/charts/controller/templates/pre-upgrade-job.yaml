@@ -23,7 +23,7 @@ rules:
     resourceNames: ["eventing-controller", "eventing-publisher-proxy"]
     verbs: ["get", "list", "patch", "delete"]
   - apiGroups: [""]
-    resources: ["secrets", "configmaps"]
+    resources: ["secrets"]
     verbs: ["get", "list"]
   - apiGroups: ["eventing.kyma-project.io"]
     resources: ["subscriptions", "eventingbackends"]
@@ -80,6 +80,8 @@ spec:
               value: {{ .Release.Name }}-pre-upgrade
             - name: KYMA_NAMESPACE
               value: {{ .Release.Namespace }}
+            - name: DOMAIN
+              value: {{ .Values.global.domainName }}
             - name: EVENTING_CONTROLLER_NAME
               value: {{ include "controller.fullname" . }}
             - name: APP_LOG_FORMAT
