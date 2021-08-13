@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -867,59 +865,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	)
 })
 
-var _ = Describe("Testing GetShootName", func() {
-	ctx := context.Background()
-	When("No ConfigMap is found", func() {
-		It("Should return an empty shoot name", func() {
-			Eventually(func() (string, error) {
-				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
-			}, smallTimeOut, smallPollingInterval).Should(Equal(""))
-		})
-	})
-	When("A ConfigMap is found, but has no shoot name entry", func() {
-		It("Should return an empty shoot name", func() {
-			By("Creating a configMap with no shootName entry")
-			ensureConfigMapCreated(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace, map[string]string{})
-			Eventually(func() (string, error) {
-				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
-			}, smallTimeOut, smallPollingInterval).Should(Equal(""))
-			ensureConfigMapDeleted(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace)
-		})
-	})
-	When("A ConfigMap is found with shootName entry", func() {
-		It("Should return the shoot name", func() {
-			By("Creating a configMap with shootName entry")
-			entries := map[string]string{shootNameConfigMapKey: shootName}
-			ensureConfigMapCreated(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace, entries)
-			Eventually(func() (string, error) {
-				return utils.GetShootName(ctx, k8sClient, shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
-			}, smallTimeOut, smallPollingInterval).Should(Equal(shootName))
-			ensureConfigMapDeleted(ctx, shootInfoConfigMapName, shootInfoConfigMapNamespace)
-		})
-	})
-})
-
-func ensureConfigMapDeleted(ctx context.Context, name, namespace string) {
-	cm := &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-	Expect(k8sClient.Delete(ctx, cm)).ToNot(HaveOccurred())
-}
-
-func ensureConfigMapCreated(ctx context.Context, name, namespace string, entries map[string]string) {
-	cm := &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: entries,
-	}
-	Expect(k8sClient.Create(ctx, cm)).ToNot(HaveOccurred())
-}
-
 func updateAPIRuleStatus(apiRule *apigatewayv1alpha1.APIRule, ctx context.Context) AsyncAssertion {
 	return Eventually(func() error {
 		return k8sClient.Status().Update(ctx, apiRule)
@@ -1147,12 +1092,8 @@ func updateSubscription(subscription *eventingv1alpha1.Subscription, ctx context
 
 // TODO: make configurable
 const (
-	useExistingCluster          = false
-	attachControlPlaneOutput    = false
-	shootName                   = "my-cluster"
-	shootInfoConfigMapNamespace = "kube-system"
-	shootInfoConfigMapName      = "shoot-info"
-	shootNameConfigMapKey       = "shootName"
+	useExistingCluster       = false
+	attachControlPlaneOutput = false
 )
 
 var cfg *rest.Config
@@ -1225,7 +1166,7 @@ var _ = BeforeSuite(func(done Done) {
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
-	nameMapper = handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
+	nameMapper = handlers.NewBebSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
 	err = NewReconciler(
 		context.Background(),

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
@@ -86,13 +85,12 @@ func (c *Commander) Start() error {
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 
-	shootName, err := utils.GetShootName(ctx, c.mgr.GetClient(), shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
-	if err != nil {
-		return errors.Wrap(err, "error getting shoot name")
-	}
-	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength)
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
+	nameMapper := handlers.NewBebSubscriptionNameMapper(c.envCfg.Domain, handlers.MaxBEBSubscriptionNameLength)
+	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
+		"domainName", c.envCfg.Domain,
+		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	reconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),

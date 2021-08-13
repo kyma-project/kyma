@@ -224,32 +224,32 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 	hashLength := 40
 
 	tests := []struct {
-		shootName  string
+		domainName string
 		maxLen     int
 		inputSub   *eventingv1alpha1.Subscription
 		outputHash string
 	}{
 		{
-			shootName:  "my-shoot-name",
+			domainName: "my-domain-name",
 			maxLen:     50,
 			inputSub:   s1,
-			outputHash: hashSubscriptionFullName("my-shoot-name", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName("my-domain-name", s1.Namespace, s1.Name),
 		},
 		{
-			shootName:  "   ",
+			domainName: "another-domain",
 			maxLen:     50,
 			inputSub:   s1,
-			outputHash: hashSubscriptionFullName("", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName("another-domain", s1.Namespace, s1.Name),
 		},
 		{
-			shootName:  "",
+			domainName: "",
 			maxLen:     50,
 			inputSub:   s2,
 			outputHash: hashSubscriptionFullName("", s2.Namespace, s2.Name),
 		},
 	}
 	for _, test := range tests {
-		mapper := NewBebSubscriptionNameMapper(test.shootName, test.maxLen)
+		mapper := NewBebSubscriptionNameMapper(test.domainName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub)
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
 		// the mapped name should always end with the SHA1
