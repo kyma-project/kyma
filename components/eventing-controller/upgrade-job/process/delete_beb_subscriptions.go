@@ -43,8 +43,9 @@ func (s DeleteBebSubscriptions) Do() error {
 		s.process.Logger.WithContext().Info("Deleting Event Mesh (BEB) Subscription: ", subscription.Name)
 		err := s.DeleteBEBSubscription(subscription.Name)
 		if err != nil {
-			s.process.Logger.WithContext().Error(err)
-			continue
+			// If a single BEB subscription deletion fails
+			// then we fail the upgrade-job
+			return err
 		}
 	}
 
