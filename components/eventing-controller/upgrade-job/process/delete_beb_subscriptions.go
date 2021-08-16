@@ -53,8 +53,8 @@ func (s DeleteBebSubscriptions) Do() error {
 
 // DeleteBEBSubscription deletes the subscription with provided name from Event Mesh (BEB)
 func (s DeleteBebSubscriptions) DeleteBEBSubscription(name string) error {
-	maxAttempts := uint(5)
-	delay := time.Second
+	maxAttempts := uint(10)
+	delay := 15 * time.Second
 
 	err := retry.Do(
 		func() error {
