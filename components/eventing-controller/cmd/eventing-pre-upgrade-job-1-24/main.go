@@ -57,7 +57,7 @@ func main() {
 	// Create process
 	p := jobprocess.Process{
 		Logger:             ctrLogger.Logger,
-		TimeoutPeriod:      60 * time.Second,
+		TimeoutPeriod:      60 * time.Minute,
 		ReleaseName:        cfg.ReleaseName,
 		Domain:             cfg.Domain,
 		KymaNamespace:      cfg.KymaNamespace,
