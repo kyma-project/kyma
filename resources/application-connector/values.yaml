@@ -4,19 +4,16 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-central_application_connectivity_validator:
-  enabled: &centralApplicationConnectivityValidatorEnabled false
-
 central_application_gateway:
-  enabled: false
+  enabled: true
 
 global:
-  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
+  centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
-  namespace: kyma-integration
+  integrationNamespace: kyma-integration
+  systemNamespace: kyma-system
   strictMode: disabled
-  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -39,29 +36,29 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "96c3c891"
+    version: "PR-11784"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "1683d7cf"
+    version: "PR-11558"
   application_operator:
-    version: "b11a4b7b"
+    version: "PR-11881"
   application_operator_tests:
-    version: "68baa911"
+    version: "PR-11558"
   application_gateway:
-    version: "1683d7cf"
+    version: "PR-11558"
   application_gateway_tests:
     version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "6769d5db"
+    version: "PR-11623"
   application_registry_tests:
-    version: "68baa911"
+    version: "PR-11558"
   connection_token_handler:
-    version: "1683d7cf"
+    version: "PR-11558"
   connection_token_handler_tests:
     version: "9776cb81"
   connector_service:
@@ -73,9 +70,9 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "b11a4b7b"
+    version: "PR-11846"
   central_application_gateway:
-    version: "ec86782f"
+    version: "PR-11859"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -108,5 +105,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "9776cb81"
+      version: "PR-11783"
       pullPolicy: IfNotPresent
