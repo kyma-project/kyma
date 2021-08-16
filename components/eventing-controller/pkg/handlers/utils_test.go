@@ -221,6 +221,35 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 			Namespace: "another-namespace",
 		},
 	}
+
+	s3 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub3-sink",
+		},
+	}
+	s4 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub4-sink",
+		},
+	}
+	s5 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name2",
+			Namespace: "name1",
+		},
+	}
+
+	domain1 := "my-domain-name.com"
+	domain2 := "another.domain.com"
+
 	hashLength := 40
 
 	tests := []struct {
@@ -230,16 +259,16 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		outputHash string
 	}{
 		{
-			domainName: "my-domain-name",
+			domainName: domain1,
 			maxLen:     50,
 			inputSub:   s1,
-			outputHash: hashSubscriptionFullName("my-domain-name", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName(domain1, s1.Namespace, s1.Name),
 		},
 		{
-			domainName: "another-domain",
+			domainName: domain2,
 			maxLen:     50,
 			inputSub:   s1,
-			outputHash: hashSubscriptionFullName("another-domain", s1.Namespace, s1.Name),
+			outputHash: hashSubscriptionFullName(domain2, s1.Namespace, s1.Name),
 		},
 		{
 			domainName: "",
@@ -258,6 +287,13 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		prefixLen := min(len(test.inputSub.Name), test.maxLen-hashLength)
 		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
 	}
+
+	// Same domain and subscription name/namespace should map to the same name
+	mapper := NewBebSubscriptionNameMapper(domain1, 50)
+	g.Expect(mapper.MapSubscriptionName(s3)).To(Equal(mapper.MapSubscriptionName(s4)))
+
+	// If the same names are used in different order, they get mapped to different names
+	g.Expect(mapper.MapSubscriptionName(s4)).ToNot(Equal(mapper.MapSubscriptionName(s5)))
 }
 
 func TestShortenNameAndAppendHash(t *testing.T) {

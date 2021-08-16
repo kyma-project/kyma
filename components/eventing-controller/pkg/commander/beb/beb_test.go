@@ -58,7 +58,7 @@ func TestCleanup(t *testing.T) {
 	}
 
 	// create a BEB handler to connect to BEB Mock
-	nameMapper := handlers.NewBebSubscriptionNameMapper("shoot001", handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBebSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
 	bebHandler := handlers.NewBEB(nameMapper, log)
 	err := bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
