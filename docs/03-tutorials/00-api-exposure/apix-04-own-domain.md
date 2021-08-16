@@ -38,7 +38,7 @@ If you use a cluster not managed by Gardener, install the required components ma
 
 ## Steps
 
-Follow these steps to set up your custom domain and prepare a certificate required to expose a service using your custom domain.
+Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
 
 1. Install Kyma 2.0 or higher.
 
