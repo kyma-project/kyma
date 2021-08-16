@@ -39,9 +39,7 @@ func (s DeleteBebSubscriptions) Do() error {
 	}
 
 	// Traverse through the subscriptions and migrate
-	subscriptionListItems := s.process.State.FilteredSubscriptions.Items
-
-	for _, subscription := range subscriptionListItems {
+	for _, subscription := range s.process.State.FilteredSubscriptions.Items {
 		s.process.Logger.WithContext().Info("Deleting Event Mesh (BEB) Subscription: ", subscription.Name)
 		err := s.DeleteBEBSubscription(subscription.Name)
 		if err != nil {
