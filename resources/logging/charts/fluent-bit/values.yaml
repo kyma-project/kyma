@@ -7,9 +7,9 @@ kind: DaemonSet
 replicaCount: 1
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/fluent-bit
+  repository: fluent/fluent-bit #eu.gcr.io/kyma-project/tpi/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.5.7-a558c5c4
+  tag: 1.8-debug #latest #1.5.7-a558c5c4
 
 imagePullSecrets: []
 nameOverride: ""
@@ -149,7 +149,7 @@ config:
     grace: 5
     daemon: "off"
     logFile:
-    logLevel: "warn"
+    logLevel: "debug"
     http:
       server: "On"
       listen: 0.0.0.0
@@ -232,7 +232,7 @@ config:
     additional: ""
   outputs:
     loki:
-      enabled: true
+      enabled: false
       alias: "loki-output"
       match: "loki.*"
       serviceName: "logging-loki"
@@ -259,7 +259,7 @@ config:
             pod_name: pod
           stream: stream
     es:
-      enabled: false
+      enabled: true
       alias:
       match: "*"
       host: elasticsearch

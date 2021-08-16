@@ -56,9 +56,11 @@ containers:
       {{- toYaml .Values.resources | nindent 6 }}
     volumeMounts:
       - name: config
-        mountPath: /fluent-bit/etc/
+        mountPath: /fluent-bit/etc/fluent-bit.conf
+        subPath: fluent-bit.conf
       - name: dynamic-config
-        mountPath: /fluent-bit/dynamic/
+        mountPath: /fluent-bit/etc/dynamic/i-sample2.conf
+        subPath: i-sample2.conf
     {{- if eq .Values.kind "DaemonSet" }}
       - name: varfluentbit
         mountPath: /data

@@ -14,7 +14,7 @@ data:
 
   fluent-bit.conf: |
     {{- if .Values.dynamicConfigMap }}
-    @INCLUDE /fluent-bit/dynamic/loggingconfiguration-sample.conf
+    @INCLUDE dynamic/*.conf
     {{- end }}
     [SERVICE]
         Flush         {{ .Values.config.service.flush }}
