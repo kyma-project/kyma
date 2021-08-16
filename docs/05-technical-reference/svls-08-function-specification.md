@@ -111,7 +111,7 @@ See the detailed descriptions of these fields:
 
 ### Event object SDK
 
-The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
+The `event` object is extended by functions making some operations easier. You can use every function by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
 
 <div tabs name="signature" group="function-specification">
 <details>
