@@ -111,7 +111,7 @@ See the detailed descriptions of these fields:
 
 ### Event object SDK
 
-The `event` object is extended by methods making things easier. You can use every method by writing `event.Function_Name(Arguments...)`.
+The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
 
 <div tabs name="signature" group="function-specification">
 <details>
@@ -121,11 +121,11 @@ Node.js
 
 | Function Name | Arguments | Description |
 |---------------|-----------|-------------|
-| setResponseHeader | key, value | Set a header to the response object based on the given `key` and the `value` |
-| setResponseContentType | type | Set the `ContentType` header to the response object based on the given `type` |
-| setResponseStatus | status | Set the response statuc based on the given `status` |
-| publishCloudEvent | event | Publish an CloudEvent to the publisher service based on the given CloudEvent object |
-| buildResponseCloudEvent | id, type, data | Build an CloudEvent object based on the request CloudEvent object and given arguments |
+| **setResponseHeader** | key, value | Sets a header to the response object based on the given key and the value |
+| **setResponseContentType** | type | Sets the `ContentType` header to the response object based on the given type |
+| **setResponseStatus** | status | Sets the response status based on the given status |
+| **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and given arguments |
 
 </details>
 <details>
@@ -133,10 +133,11 @@ Node.js
 Python
 </summary>
 
-| Function | Arguments | Description |
+| Function name | Arguments | Description |
+```or "Method name" (depending on the answer to the question from one of the above comments.)
 |----------|-----------|-------------|
-| publishCloudEvent | event | Publish an CloudEvent to the publisher service based on the given CloudEvent object |
-| buildResponseCloudEvent | id, type, data | Build an CloudEvent object based on the request CloudEvent object and given arguments |
+| **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and given arguments |
 
 </details>
 </div>
