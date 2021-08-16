@@ -36,6 +36,8 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace={NAMESPACE_NAME} --set configuration.identifier=cert-manager-identifier
    ```
 
+When you meet the prerequisites, go directly to step 2.
+
 ## Steps
 
 Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
@@ -90,7 +92,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      annotations:
        dns.gardener.cloud/class: garden
    spec:
-     dnsName: "private.sub1.mydomain.com" # Edit this value
+     dnsName: "my.sub1.mydomain.com" # Edit this value
      ttl: 600
      targets:
        - 1.2.3.4 # Edit this value
@@ -121,9 +123,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        # Optionally, restrict domain ranges for which certificates can be requested
        domains:
          include:
-           - private.sub1.mydomain.com # The subdomain provided in the DNS Entry created in the previous step. Edit this value
+           - my.sub1.mydomain.com # The subdomain provided in the DNS Entry created in the previous step. Edit this value
    #     exclude:
-   #       - private.sub2.mydomain.com # Edit this value
+   #       - my.sub2.mydomain.com # Edit this value
    EOF
    ```
 
@@ -134,7 +136,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    apiVersion: cert.gardener.cloud/v1alpha1
    kind: Certificate
    metadata:
-     name: httpbin
+     name: httpbin-cert
      namespace: istio-system
    spec:
      secretName: httpbin-tls-credentials # Name of the created Secret. Edit this value
@@ -144,8 +146,41 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        name: letsencrypt-staging
        namespace: default
      dnsNames:
-       - private.sub.mydomain.com # Edit this value
+       - my.sub1.mydomain.com # Edit this value
    EOF
    ```
 
+7. Create a Gateway CR. See the following example and modify values of the **spec.servers.tls.credentialName** and **servers.hosts** parameters. For the **spec.servers.tls.credentialName** parameter, use the **metadata.name** value from `{SECRET}.yaml`. As the value of **spec.servers.hosts**, use the subdomain from the **spec.dnsName** parameter of the DNSEntry CR. Run:
+
+   ```bash
+   cat <<EOF | kubectl apply -f -
+   apiVersion: networking.istio.io/v1alpha3
+   kind: Gateway
+   metadata:
+     name: httpbin-gateway
+   spec:
+     selector:
+       istio: ingressgateway # Use Istio Ingress Gateway as deafult
+     servers:
+       - port:
+           number: 443
+           name: https-httpbin
+           protocol: HTTPS
+         tls:
+           mode: SIMPLE
+           credentialName: secret-name # Edit this value
+         hosts:
+           - "my.sub1.mydomain.com" # Edit this value
+   EOF
+   ```
+
+8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. For example, `--domain-whitelist=my.sub1.mydomain.com`. Use a comma as a separator. Run:
+
+   ```bash
+  kubectl edit deployment -n kyma-system api-gateway
+  ```
+
+   Press `i` to enter and `esc` to exit the interactive mode. Save the changes and exit the editor by pressing `:wq`.
+
+  
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
