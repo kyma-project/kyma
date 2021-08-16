@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/pkg/errors"
@@ -24,14 +25,21 @@ func main() {
 	log.Println("Start repo fetcher...")
 	cfg := config{}
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
-		log.Fatalln("while reading env variables")
+		log.Fatalf("while reading env variables: %s", err.Error())
 	}
-	operator := git.New()
+	operator := git.NewGit2Go()
 
 	log.Println("Get auth config...")
 	gitOptions := cfg.getOptions()
 
 	log.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
+	commitId, err := operator.LastCommit(gitOptions)
+	if err != nil {
+		log.Fatalln(err.Error())
+		os.Exit(1)
+	}
+	log.Println(commitId)
+	os.Exit(0)
 	commit, err := operator.Clone(cfg.MountPath, gitOptions)
 	if err != nil {
 		log.Fatalln(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
