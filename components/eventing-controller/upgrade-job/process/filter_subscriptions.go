@@ -44,33 +44,28 @@ func (s FilterSubscriptions) Do() error {
 		Items:    []eventingv1alpha1.Subscription{},
 	}
 
-	var subscriptionItems []eventingv1alpha1.Subscription
-	if s.process.State.Subscriptions != nil {
-		subscriptionItems = s.process.State.Subscriptions.Items
-	}
-
-	for _, subscription := range subscriptionItems {
+	for _, subscription := range s.process.State.Subscriptions.Items {
 		// generate the new name for the BEB webhook from subscription
 		newBebSubscriptionName := nameMapper.MapSubscriptionName(&subscription)
 		expectedConditionMessage := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(newBebSubscriptionName)
 		conditionTypeToCheck := eventingv1alpha1.ConditionSubscribed
 
 		condition, err := s.findSubscriptionCondition(&subscription, conditionTypeToCheck)
-		if err != nil {
-			s.process.Logger.WithContext().Warn(err)
 
-			// if condition not found, then we need to migrate this subscription
-			s.process.State.FilteredSubscriptions.Items = append(s.process.State.FilteredSubscriptions.Items, subscription)
+		// If condition found and has expected message
+		// then we don't need to migrate
+		if err == nil && condition.Message == expectedConditionMessage {
 			continue
 		}
 
-		// If the condition message don't match with expectedConditionMessage
-		// then we need to migrate this subscription
-		if string(condition.Message) != expectedConditionMessage {
-			s.process.State.FilteredSubscriptions.Items = append(s.process.State.FilteredSubscriptions.Items, subscription)
+		if err != nil {
+			s.process.Logger.WithContext().Warn(err)
 		}
+		// Append to Filtered Subscriptions list, which needs to be migrated
+		s.process.State.FilteredSubscriptions.Items = append(s.process.State.FilteredSubscriptions.Items, subscription)
 	}
 
+	s.process.Logger.WithContext().Info(fmt.Sprintf("Total Subscriptions: %d, Unmigrated Subscriptions: %d", len(s.process.State.Subscriptions.Items), len(s.process.State.FilteredSubscriptions.Items)))
 	return nil
 }
 

@@ -43,46 +43,6 @@ func (c *Client) InitUsingSecret(secret *corev1.Secret) error {
 	return nil
 }
 
-// InitUsingEventingSecret initializes the client by parsing the provided eventing secret (for v1.23.x)
-func (c *Client) InitUsingEventingSecret(eventingSecret *corev1.Secret) error {
-	bebNamespace, ok := eventingSecret.Data["beb-namespace"]
-	if !ok || string(bebNamespace) == "" {
-		return errors.New(fmt.Sprintf("cannot get beb-namespace from secret: %s", eventingSecret.Name))
-	}
-	bebClientId, ok := eventingSecret.Data["client-id"]
-	if !ok || string(bebClientId) == "" {
-		return errors.New(fmt.Sprintf("cannot get client-id from secret %s", eventingSecret.Name))
-	}
-	bebClientSecret, ok := eventingSecret.Data["client-secret"]
-	if !ok || string(bebClientSecret) == "" {
-		return errors.New(fmt.Sprintf("cannot get client-secret from secret %s", eventingSecret.Name))
-	}
-	bebPublishUrl, ok := eventingSecret.Data["ems-publish-url"]
-	if !ok || string(bebPublishUrl) == "" {
-		return errors.New(fmt.Sprintf("cannot get ems-publish-url from secret %s", eventingSecret.Name))
-	}
-	bebTokenEndpoint, ok := eventingSecret.Data["token-endpoint"]
-	if !ok || string(bebTokenEndpoint) == "" {
-		return errors.New(fmt.Sprintf("cannot get token-endpoint from secret %s", eventingSecret.Name))
-	}
-
-	// Set beb config
-	cfg := env.Config{
-		BebApiUrl:     string(bebPublishUrl),
-		ClientID:      string(bebClientId),
-		ClientSecret:  string(bebClientSecret),
-		TokenEndpoint: string(bebTokenEndpoint),
-		BEBNamespace:  string(bebNamespace),
-	}
-
-	// Setup authenticator and beb client
-	if c.client == nil {
-		authenticator := auth.NewAuthenticator(cfg)
-		c.client = emsclient.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
-	}
-	return nil
-}
-
 // IsInitialised returns true if the BEB client is initialised
 // or returns false if not initialised
 func (c *Client) IsInitialised() bool {

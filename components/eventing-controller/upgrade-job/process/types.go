@@ -1,6 +1,8 @@
 package process
 
 import (
+	"net/http"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
@@ -29,6 +31,10 @@ type State struct {
 
 // int32Ptr converts int to int pointer
 func int32Ptr(i int32) *int32 { return &i }
+
+func is2XXStatusCode(statusCode int) bool {
+	return statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices
+}
 
 // PatchDeploymentSpec for defining patch data for updating k8s deployment
 type PatchDeploymentSpec struct {

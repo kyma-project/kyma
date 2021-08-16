@@ -1,6 +1,14 @@
 package process
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/avast/retry-go"
+	pkgerrors "github.com/pkg/errors"
+)
 
 var _ Step = &DeleteBebSubscriptions{}
 
@@ -35,12 +43,50 @@ func (s DeleteBebSubscriptions) Do() error {
 
 	for _, subscription := range subscriptionListItems {
 		s.process.Logger.WithContext().Info("Deleting Event Mesh (BEB) Subscription: ", subscription.Name)
-		_, err := s.process.Clients.EventMesh.Delete(subscription.Name)
+		err := s.DeleteBEBSubscription(subscription.Name)
 		if err != nil {
 			s.process.Logger.WithContext().Error(err)
 			continue
 		}
-		// s.process.Logger.WithContext().Info(result.StatusCode, result.Message)
+	}
+
+	return nil
+}
+
+// DeleteBEBSubscription deletes the subscription with provided name from Event Mesh (BEB)
+func (s DeleteBebSubscriptions) DeleteBEBSubscription(name string) error {
+	maxAttempts := uint(5)
+	delay := time.Second
+
+	err := retry.Do(
+		func() error {
+			result, err := s.process.Clients.EventMesh.Delete(name)
+			if err != nil {
+				return pkgerrors.Wrapf(err, "failed to delete BEB subscription")
+			}
+			// If 404, then we don't retry as subscription is not on BEB
+			if result.StatusCode == http.StatusNotFound {
+				s.process.Logger.WithContext().Error(fmt.Sprintf("subscription: %s not found on Event Mesh (BEB)", name))
+				return nil
+			}
+
+			// If status code is other than 404 and 2xx, then we return error and retry
+			if !is2XXStatusCode(result.StatusCode) {
+				return fmt.Errorf("response code is not 2xx, received response code is: %d for subscription: %s", result.StatusCode, name)
+			}
+
+			return nil
+		},
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.Attempts(maxAttempts),
+		retry.OnRetry(func(n uint, err error) {
+			s.process.Logger.WithContext().Error("BEB subscription delete retry failed", err)
+		}),
+	)
+
+	if err != nil {
+		return pkgerrors.Wrapf(err, "failed to delete BEB subscription after retries")
 	}
 
 	return nil
