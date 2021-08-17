@@ -119,13 +119,13 @@ The `event` object is extended by functions making some operations easier. You c
 Node.js
 </summary>
 
-| Function Name | Arguments | Description |
+| Function name | Arguments | Description |
 |---------------|-----------|-------------|
-| **setResponseHeader** | key, value | Sets a header to the response object based on the given key and the value |
+| **setResponseHeader** | key, value | Sets a header to the response object based on the given key and value |
 | **setResponseContentType** | type | Sets the `ContentType` header to the response object based on the given type |
 | **setResponseStatus** | status | Sets the response status based on the given status |
 | **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
-| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and given arguments |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and the given arguments |
 
 </details>
 <details>
@@ -134,17 +134,16 @@ Python
 </summary>
 
 | Function name | Arguments | Description |
-```or "Method name" (depending on the answer to the question from one of the above comments.)
 |----------|-----------|-------------|
 | **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
-| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and given arguments |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and the given arguments |
 
 </details>
 </div>
 
 ### Context object
 
-The `context` object contains information about the Function invocation, such as runtime details, execution timeout, or memory limits.
+The `context` object contains information about the Function's invocation, such as runtime details, execution timeout, or memory limits.
 
 See sample context details:
 

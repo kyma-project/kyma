@@ -48,4 +48,4 @@ EOF
     "http://eventing-event-publisher-proxy.kyma-system/publish"
 ```
 
-> **NOTE:** If you want to use a Function to publish a CloudEvent look at the [Event Object SDK specification](../../05-technical-reference/svls-08-function-specification.md).
+> **NOTE:** If you want to use a Function to publish a CloudEvent, see the [Event object SDK specification](../../05-technical-reference/svls-08-function-specification.md#event-object-sdk).
