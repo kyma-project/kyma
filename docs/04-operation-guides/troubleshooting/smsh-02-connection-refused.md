@@ -9,4 +9,4 @@ Mutual TLS (mTLS) is enabled in the Service Mesh by default. As a result, every 
 ## Remedy
 
 - To whitelist a Service without a sidecar and disable mTLS traffic for it, create a [DestinationRule](https://istio.io/docs/reference/config/networking/destination-rule/).
-- To allow connections between Services without a sidecar and a Service with a sidecar, create a [Peer Authentication](https://istio.io/latest/docs/reference/config/security/peer_authentication/) in the `PERMISSIVE` mode.
+- To allow connections between a Service without a sidecar and a Service with a sidecar, create a [Peer Authentication](https://istio.io/latest/docs/reference/config/security/peer_authentication/) in the `PERMISSIVE` mode.

@@ -14,3 +14,7 @@ If you're interested in learning more about Service Mesh in Kyma, follow these l
   - [Connection refused errors](../../../04-operation-guides/troubleshooting/smsh-02-connection-refused.md) occur
   - [Issues with Istio sidecar injection](../../../04-operation-guides/troubleshooting/smsh-03-istio-no-sidecar.md) come up
   - You have an [incompatible Istio sidecar version after Kyma upgrade](../../../04-operation-guides/troubleshooting/smsh-04-istio-sidecar-version.md)
+
+- Analyze configuration details for:
+
+   - The [Istio chart](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/values.yaml)

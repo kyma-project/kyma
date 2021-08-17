@@ -6,7 +6,7 @@ Istio in Kyma is installed with the help of the `istioctl` tool. The tool is dri
 
 ## Istio components
 
-This list shows the available Istio components and the components enabled in Kyma:
+This list shows the available Istio components and addons. Check which of those are enabled in Kyma:
 
 | Component | Enabled |
 | :--- | :---: |
@@ -28,6 +28,6 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.
 - Global tracing is set to use the Zipkin installation provided by Kyma.
 - Ingress Gateway is expanded to handle ports `80`, `443`, and `31400` for local Kyma deployments.
-- The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the kube-system Namespace and the timeout is set to 10 seconds.
+- The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the `kube-system` Namespace and the timeout is set to 10 seconds.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
 - IstioOperator configuration file is modified. [Change Kyma settings](../../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.

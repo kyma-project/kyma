@@ -4,7 +4,7 @@ title: Istio chart
 
 To configure the Istio chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/values.yaml) file. This document describes parameters that you can configure.
 
-The Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default IstioOperator configurations for the production and evaluation profiles, You can add a custom IstioOperator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-production.yaml) profiles.
+The Istio installation in Kyma uses the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default IstioOperator configurations for the production and evaluation profiles. You can also add a custom IstioOperator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-production.yaml) profiles. To learn more about profiles in Kyma, read about the [resource consumption](../../04-operation-guides/operations/01-install-kyma.md#choose-resource-consumption).
 
 >**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
@@ -27,4 +27,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **components.pilot.resources.limits.cpu** | Defines limits for CPU resources for the Pilot component. | `500m` |
 | **components.pilot.resources.limits.memory** | Defines limits for memory resources for the Pilot component. | `1024Mi` |
 | **components.pilot.resources.requests.cpu** | Defines requests for CPU resources for the Pilot component. | `250m` |
-| **components.pilot.resources.requests.memory** | Defines requests for memory resourcesfor the Pilot component. | `512Mi` |
+| **components.pilot.resources.requests.memory** | Defines requests for memory resources for the Pilot component. | `512Mi` |

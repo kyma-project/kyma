@@ -4,7 +4,7 @@ title: Incompatible Istio sidecar version after Kyma upgrade
 
 ## Symptom and cause
 
-Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read [this document](../operations/smsh-01-istio-disable-sidecar-injection.md).
+Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../operations/smsh-01-istio-disable-sidecar-injection.md).
 
 The sidecar version in Pods must match the installed Istio version. Otherwise, mesh connectivity may be broken.
 This issue may appear during Kyma upgrade. When Kyma is upgraded to a new version along with a new Istio version, existing sidecars injected into Pods remain in an original version.
@@ -18,12 +18,14 @@ To check if any Pods or workloads require a manual restart, follow these steps:
 
 1. Check the installed Istio version using one of these methods:
 
-* From the `istiod` deployment in a running cluster:
+* From the `istiod` deployment in a running cluster, run:
+
    ```bash
    export KYMA_ISTIO_VERSION=$(kubectl get deployment istiod -n istio-system -o json | jq '.spec.template.spec.containers | .[].image' | sed 's/[^:"]*[:]//' | sed 's/["]//g')
    ```
 
-* From Kyma sources - run this command from within the directory that contains Kyma sources:
+* From Kyma sources, run this command from within the directory that contains Kyma sources:
+
    ```bash
    export KYMA_ISTIO_VERSION=$(cat resources/istio/Chart.yaml | grep version | sed 's/[^:]*[:]//' | sed 's/ //g')
    ```
