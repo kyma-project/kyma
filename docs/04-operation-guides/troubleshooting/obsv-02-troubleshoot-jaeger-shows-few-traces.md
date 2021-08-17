@@ -25,15 +25,15 @@ To override the default percentage, you deploy a YAML file. You can do this eith
    ```yaml
    istio:
      kyma_istio_operator: |-
-     apiVersion: install.istio.io/v1alpha1
-     kind: IstioOperator
-     metadata:
-       namespace: istio-system
-     spec:
-       meshConfig:
-         defaultConfig:
-           tracing:
-             sampling: 60
+       apiVersion: install.istio.io/v1alpha1
+       kind: IstioOperator
+       metadata:
+         namespace: istio-system
+       spec:
+         meshConfig:
+           defaultConfig:
+             tracing:
+               sampling: 60
    ```
 
    > **CAUTION:** Sending 100% of the requests to Jaeger might destabilize Istio.
@@ -44,16 +44,6 @@ To override the default percentage, you deploy a YAML file. You can do this eith
    kyma deploy --values-file {VALUES_FILE_PATH}
    ```
 
-3. If you add the override in the Runtime, run the following command to trigger the update:
-
-   ```bash
-   kubectl -n default label installation/kyma-installation action=install
-   ```
-
-  If you have already installed Kyma and do not want to trigger any updates, edit the `istiod` deployment to set the desired value for **PILOT_TRACE_SAMPLING**. For detailed instructions, see the [Istio documentation](https://istio.io/latest/docs/tasks/observability/distributed-tracing/configurability/#customizing-trace-sampling).
-
-  >**NOTE:** Only if the meshConfig override is not defined, the change to PILOT_TRACE_SAMPLING takes effect.
-
 ### Force sampling for a particular request
 
-You can also manually set the `x-b3-sampled: 1` header to force sampling for a particular request.
+If you want to force sampling for a particular request, set the `x-b3-sampled: 1` http header manually in the application code.
