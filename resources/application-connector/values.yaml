@@ -1,6 +1,5 @@
 connector_service:
   enabled: &connectorServiceEnabled true
-
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
@@ -87,7 +86,6 @@ application_connectivity_certs_setup_job:
       namespace: istio-system
   certificate:
     validityTime: 92d
-
 application_connectivity_certs_sync:
   secrets:
     caCertificateSecret:
@@ -99,7 +97,6 @@ application_connectivity_certs_sync:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
     tag: "20210610-d25e85b1"
-
 tests:
   application_connector_tests:
     labels:
