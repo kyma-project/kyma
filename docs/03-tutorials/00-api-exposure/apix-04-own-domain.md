@@ -58,7 +58,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 4. Set up the `external-dns-management` component.
 
-- Create a DNSProvider CR. See the following example and modify values for the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from `{SECRET}.yaml`. Run:
+- Create a DNSProvider CR. See the following example and modify values for the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from your `{SECRET}.yaml`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -75,8 +75,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        name: secret-name # Edit this value
      domains:
        include:
-         # Replace with the domain of the hosted zone
-         - mydomain.com # Edit this value
+         - mydomain.com # The main domain. Edit this value
    EOF  
    ```
 
@@ -92,11 +91,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      annotations:
        dns.gardener.cloud/class: garden
    spec:
-     # Replace with your subdomain
-     dnsName: "my.sub1.mydomain.com" # Edit this value
+     dnsName: "my.sub1.mydomain.com" # Your subdomain. Edit this value
      ttl: 600
      targets:
-       - 1.2.3.4 # Edit this value
+       - 1.2.3.4 # IP address. Edit this value
    EOF
    ```
 
@@ -105,9 +103,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
     >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
     >```
 
-   >**NOTE:** You can create many DNSEntry CRs for one DNSProvider depending on the number of subdomains you want to use.
+   >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use.
 
-5. Create an Issuer CR. See the following example and modify values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters. As the value for the **metadata.spec.domains.include** parameter, use the main domainm subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
+5. Create an Issuer CR. See the following example and modify values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters. As the values for the **metadata.spec.domains.include** parameter, use the main domain, the subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -122,15 +120,15 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        email: YOUR_EMAIL_ADDRESS # Edit this value
        autoRegistration: true
        # Name of the Secret used to store the ACME account private key
-       # If does not exist, a new one is created
+       # If doesn't exist, a new one is created
        privateKeySecretRef:
          name: letsencrypt-staging-secret
          namespace: default
        domains:
          include:
            - mydomain.com # The main domain. Edit this value
-           - "*.mydomain.com" # A wildcard DNS record. Edit this value
            - my.sub1.mydomain.com # The subdomain provided in the DNS Entry created in the previous step. Edit this value
+           - "*.mydomain.com" # A wildcard DNS record. Edit this value
          # Optionally, restrict domain ranges for which certificates can be requested
    #     exclude:
    #       - my.sub2.mydomain.com # Edit this value
@@ -148,10 +146,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      namespace: istio-system
    spec:
      secretName: httpbin-tls-credentials # Name of the Secret created using this CR. Edit this value
-     commonName: mydomain.com # Edit this value
+     commonName: mydomain.com # The main domain. Edit this value
      issuerRef:
-       # Name of the Issuer created in the previous step
-       name: letsencrypt-staging # Edit this value
+       name: letsencrypt-staging # Name of the Issuer created in the previous step. Edit this value
        namespace: default
      dnsNames:
        - my.sub1.mydomain.com # Edit this value
@@ -176,7 +173,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
            protocol: HTTPS
          tls:
            mode: SIMPLE
-           credentialName: secret-name # Edit this value
+           credentialName: secret-name # Name of the Secret created in the Certificate CR in the previous step. Edit this value
          hosts:
            - "my.sub1.mydomain.com" # Edit this value
    EOF
