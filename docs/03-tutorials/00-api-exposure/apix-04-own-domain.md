@@ -58,7 +58,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 4. Set up the `external-dns-management` component.
 
-- Create a DNSProvider CR. See the following example and modify values for the **namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **spec.secretRef.name** and **spec.domains.include** parameters. For the **spec.secretRef.name** parameter, use the **metadata.name** value from `{SECRET}.yaml`. Run:
+- Create a DNSProvider CR. See the following example and modify values for the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from `{SECRET}.yaml`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -75,12 +75,12 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        name: secret-name # Edit this value
      domains:
        include:
-         # Replace with a domain of the hosted zone
+         # Replace with the domain of the hosted zone
          - mydomain.com # Edit this value
    EOF  
    ```
 
-- Create a DNSEntry CR. See the following example and modify values for the **namespace**, **spec.dnsName**, **spec.ttl**, and **spec.targets.IP** parameters. Run:
+- Create a DNSEntry CR. See the following example and modify values for the **metadata.namespace**, **metadata.spec.dnsName**, and **metadata.spec.targets.IP** parameters. Optionally, you can also change the value of **metadata.spec.ttl**. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -92,6 +92,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      annotations:
        dns.gardener.cloud/class: garden
    spec:
+     # Replace with your subdomain
      dnsName: "my.sub1.mydomain.com" # Edit this value
      ttl: 600
      targets:
@@ -99,9 +100,14 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
+    >**NOTE:** To check the Ingress Gateway IP, run:
+    >```
+    >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+    >```
+
    >**NOTE:** You can create many DNSEntry CRs for one DNSProvider depending on the number of subdomains you want to use.
 
-5. Create an Issuer CR. See the following example and modify values of the **spec.acme.email**, **spec.domains.include**, and **spec.domains.exclude** parameters. As the value for the **spec.domains.include** parameter, use the subdomain from the **spec.dnsName** parameter of the DNSEntry CR. Run:
+5. Create an Issuer CR. See the following example and modify values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters. As the value for the **metadata.spec.domains.include** parameter, use the main domainm subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -120,16 +126,18 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        privateKeySecretRef:
          name: letsencrypt-staging-secret
          namespace: default
-       # Optionally, restrict domain ranges for which certificates can be requested
        domains:
          include:
+           - mydomain.com # The main domain. Edit this value
+           - "*.mydomain.com" # A wildcard DNS record. Edit this value
            - my.sub1.mydomain.com # The subdomain provided in the DNS Entry created in the previous step. Edit this value
+         # Optionally, restrict domain ranges for which certificates can be requested
    #     exclude:
    #       - my.sub2.mydomain.com # Edit this value
    EOF
    ```
 
-6. Create a Certificate CR. See the following example and modify values of the **spec.secretName**, **spec.commonName**, , and **spec.issuerRef.name** parameters. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
+6. Create a Certificate CR. See the following example and modify values of the **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -139,18 +147,18 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      name: httpbin-cert
      namespace: istio-system
    spec:
-     secretName: httpbin-tls-credentials # Name of the created Secret. Edit this value
+     secretName: httpbin-tls-credentials # Name of the Secret created using this CR. Edit this value
      commonName: mydomain.com # Edit this value
      issuerRef:
        # Name of the Issuer created in the previous step
-       name: letsencrypt-staging
+       name: letsencrypt-staging # Edit this value
        namespace: default
      dnsNames:
        - my.sub1.mydomain.com # Edit this value
    EOF
    ```
 
-7. Create a Gateway CR. See the following example and modify values of the **spec.servers.tls.credentialName** and **servers.hosts** parameters. For the **spec.servers.tls.credentialName** parameter, use the **metadata.name** value from `{SECRET}.yaml`. As the value of **spec.servers.hosts**, use the subdomain from the **spec.dnsName** parameter of the DNSEntry CR. Run:
+7. Create a Gateway CR. See the following example and modify values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the subdomain from the **spec.dnsName** parameter of the DNSEntry CR. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -174,7 +182,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
-8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. For example, `--domain-whitelist=my.sub1.mydomain.com`. Use a comma as a separator. Run:
+8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. See the following example: `--domain-allowlist=my.sub1.mydomain.com`. Use a comma as a separator. Run the following command, to edit the deployment:
 
    ```bash
   kubectl edit deployment -n kyma-system api-gateway
@@ -182,5 +190,12 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    Press `i` to enter and `esc` to exit the interactive mode. Save the changes and exit the editor by pressing `:wq`.
 
-  
+9. Restart API Gateway. Run:
+   
+   ```bash
+   kubectl rollout restart deployment {DEPLOYMENT_NAME}
+   ```
+
+   >**TIP:** To check the deployment name, run: `kubectl get deployments -A`
+
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.

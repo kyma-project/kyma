@@ -54,6 +54,8 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   >**NOTE:** If you are running Kyma on Minikube, add `httpbin.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
+  >**NOTE:** If you use a custom domain, modify the value of the **spec.gateway** parameter. Use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.default.svc.cluster.local`.
+
 ## Access the exposed resources
 
 1. Call the endpoint by sending a `GET` request to the HttpBin service:
