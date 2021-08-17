@@ -232,7 +232,7 @@ config:
     additional: ""
   outputs:
     loki:
-      enabled: true
+      enabled: false
       alias: "loki-output"
       match: "loki.*"
       serviceName: "logging-loki"
@@ -259,7 +259,7 @@ config:
             pod_name: pod
           stream: stream
     es:
-      enabled: false
+      enabled: true
       alias:
       match: "*"
       host: elasticsearch
