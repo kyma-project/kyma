@@ -19,6 +19,7 @@ containers:
       {{- toYaml .Values.securityContext | nindent 6 }}
     image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
+    command: ['sh','-c', './fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf']
   {{- if .Values.env }}
     env:
     {{- toYaml .Values.env | nindent 4 }}
