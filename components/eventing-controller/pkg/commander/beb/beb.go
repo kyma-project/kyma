@@ -3,9 +3,8 @@ package beb
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -17,6 +16,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -31,10 +31,6 @@ import (
 
 const (
 	commanderName = "beb-commander"
-
-	shootInfoConfigMapNamespace = "kube-system"
-	shootInfoConfigMapName      = "shoot-info"
-	shootNameConfigMapKey       = "shootName"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -98,13 +94,12 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 		return errors.Wrap(err, "get oauth2client credentials failed")
 	}
 
-	shootName, err := utils.GetShootName(ctx, c.mgr.GetClient(), shootInfoConfigMapNamespace, shootInfoConfigMapName, shootNameConfigMapKey)
-	if err != nil {
-		return errors.Wrap(err, "error getting shoot name")
-	}
-	nameMapper := handlers.NewBebSubscriptionNameMapper(shootName, handlers.MaxBEBSubscriptionNameLength, handlers.BebSubscriptionNameSeparator)
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
+	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
+		"domainName", c.envCfg.Domain,
+		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	reconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),

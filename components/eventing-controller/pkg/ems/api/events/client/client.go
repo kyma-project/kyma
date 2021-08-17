@@ -3,7 +3,6 @@ package client
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
@@ -113,7 +112,7 @@ func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 }
 
 func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
-	req, err := c.httpClient.NewRequest(http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, url.PathEscape(name)), nil)
+	req, err := c.httpClient.NewRequest(http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, name), nil)
 	if err != nil {
 		return nil, nil, err
 	}

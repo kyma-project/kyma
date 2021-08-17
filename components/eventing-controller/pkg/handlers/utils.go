@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -44,34 +45,53 @@ type MessagingBackend interface {
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
+// NameMapper is used to map Kyma-specific resource names to their corresponding name on other
+// (external) systems, e.g. on different eventing backends, the same Kyma subscription name
+// could map to a different name.
 type NameMapper interface {
 	MapSubscriptionName(sub *eventingv1alpha1.Subscription) string
 }
 
+// bebSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the BEB backend,
+// which has a max length. Domain name is used to make the names on BEB unique.
 type bebSubscriptionNameMapper struct {
-	prefix    string
-	maxLength int
-	separator string
+	domainName string
+	maxLength  int
 }
 
-func NewBebSubscriptionNameMapper(prefix string, maxNameLength int, separator string) *bebSubscriptionNameMapper {
-	p := strings.TrimSpace(prefix)
-	if len(p) > 0 {
-		p += separator
-	}
+func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
 	return &bebSubscriptionNameMapper{
-		prefix:    p,
-		maxLength: maxNameLength,
-		separator: separator,
+		domainName: domainName,
+		maxLength:  maxNameLength,
 	}
 }
 
 func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
-	fullName := m.prefix + sub.GetNamespace() + m.separator + sub.GetName()
-	if len(fullName) > m.maxLength && m.maxLength > 0 {
-		return fullName[0:m.maxLength]
+	hash := hashSubscriptionFullName(m.domainName, sub.Namespace, sub.Name)
+	return shortenNameAndAppendHash(sub.Name, hash, m.maxLength)
+}
+
+func hashSubscriptionFullName(domainName, namespace, name string) string {
+	hash := sha1.Sum([]byte(domainName + namespace + name))
+	return fmt.Sprintf("%x", hash)
+}
+
+// produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
+// Requires maxLength >= len(hash)
+func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
+	if len(hash) > maxLength {
+		// This shouldn't happen!
+		panic(fmt.Sprintf("max name length (%d) used for BEB subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
 	}
-	return fullName
+	maxNameLen := maxLength - len(hash)
+	// keep the first maxNameLen characters of the name
+	if maxNameLen <= 0 {
+		return hash
+	}
+	if len(name) > maxNameLen {
+		name = name[:maxNameLen]
+	}
+	return name + hash
 }
 
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))

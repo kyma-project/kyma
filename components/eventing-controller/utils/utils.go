@@ -1,16 +1,9 @@
 package utils
 
 import (
-	"context"
 	"net/url"
 	"strconv"
 	"strings"
-
-	v1 "k8s.io/api/core/v1"
-	errors2 "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -88,20 +81,4 @@ func LoggerWithSubscription(log *zap.SugaredLogger, subscription *eventingv1alph
 		"namespace", subscription.GetNamespace(),
 		"name", subscription.GetName(),
 	)
-}
-
-func GetShootName(ctx context.Context, client client.Client, namespace, cmName, cmKey string) (string, error) {
-	cmNamespacedName := types.NamespacedName{
-		Name:      cmName,
-		Namespace: namespace,
-	}
-	cm := new(v1.ConfigMap)
-	if err := client.Get(ctx, cmNamespacedName, cm); err != nil {
-		if errors2.IsNotFound(err) {
-			// no map -> no shoot name!
-			return "", nil
-		}
-		return "", err
-	}
-	return cm.Data[cmKey], nil
 }
