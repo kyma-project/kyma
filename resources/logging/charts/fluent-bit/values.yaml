@@ -149,7 +149,7 @@ config:
     grace: 5
     daemon: "off"
     logFile:
-    logLevel: "debug"
+    logLevel: "warn"
     http:
       server: "On"
       listen: 0.0.0.0
@@ -232,7 +232,7 @@ config:
     additional: ""
   outputs:
     loki:
-      enabled: false
+      enabled: true
       alias: "loki-output"
       match: "loki.*"
       serviceName: "logging-loki"
@@ -259,7 +259,7 @@ config:
             pod_name: pod
           stream: stream
     es:
-      enabled: true
+      enabled: false
       alias:
       match: "*"
       host: elasticsearch
