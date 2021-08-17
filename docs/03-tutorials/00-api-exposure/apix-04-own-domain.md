@@ -187,8 +187,8 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    Press `i` to enter and `esc` to exit the interactive mode. Save the changes and exit the editor by pressing `:wq`.
 
-9. Restart API Gateway. Run:
-   
+9. Restart the relevant deployment using this command:
+
    ```bash
    kubectl rollout restart deployment {DEPLOYMENT_NAME}
    ```
