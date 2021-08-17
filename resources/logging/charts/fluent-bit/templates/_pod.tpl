@@ -122,7 +122,20 @@ containers:
     {{- with .Values.extraVolumeMounts }}
       {{- tpl . $ | nindent 6}}
     {{- end }}
+initContainers:
+  - name: prep-fluent-bit-config
+    image: busybox:stable
+    volumeMounts:
+    - name: shared-fluent-bit-config
+      mountPath: /fluent-bit/etc/
+    - name: config
+      mountPath: /main
+    - name: dynamic-config
+      mountPath: /dynamic
+    command: ['sh', '-c', 'cp -a /main/. /fluent-bit/etc/ && cp -a /dynamic /fluent-bit/etc/dynamic']
 volumes:
+  - name: shared-fluent-bit-config
+    emptyDir: {}
   - name: config
     configMap:
       name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ include "fluent-bit.fullname" . }}{{- end }}
