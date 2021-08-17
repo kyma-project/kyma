@@ -1,19 +1,21 @@
 connector_service:
   enabled: &connectorServiceEnabled true
-
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+central_application_connectivity_validator:
+  enabled: &centralApplicationConnectivityValidatorEnabled false
+
 central_application_gateway:
-  enabled: true
+  enabled: false
 
 global:
-  centralApplicationConnectivityValidatorEnabled: true
+  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
   isLocalEnv: false
-  integrationNamespace: kyma-integration
-  systemNamespace: kyma-system
+  namespace: kyma-integration
   strictMode: disabled
+  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -36,29 +38,29 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "PR-11784"
+    version: "96c3c891"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "PR-11558"
+    version: "1683d7cf"
   application_operator:
-    version: "PR-11881"
+    version: "b11a4b7b"
   application_operator_tests:
-    version: "PR-11558"
+    version: "68baa911"
   application_gateway:
-    version: "PR-11558"
+    version: "1683d7cf"
   application_gateway_tests:
     version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "PR-11623"
+    version: "6769d5db"
   application_registry_tests:
-    version: "PR-11558"
+    version: "68baa911"
   connection_token_handler:
-    version: "PR-11558"
+    version: "1683d7cf"
   connection_token_handler_tests:
     version: "9776cb81"
   connector_service:
@@ -70,9 +72,9 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "PR-11846"
+    version: "b11a4b7b"
   central_application_gateway:
-    version: "PR-11859"
+    version: "ec86782f"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -84,7 +86,6 @@ application_connectivity_certs_setup_job:
       namespace: istio-system
   certificate:
     validityTime: 92d
-
 application_connectivity_certs_sync:
   secrets:
     caCertificateSecret:
@@ -96,7 +97,6 @@ application_connectivity_certs_sync:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
     tag: "20210610-d25e85b1"
-
 tests:
   application_connector_tests:
     labels:
@@ -105,5 +105,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "PR-11783"
+      version: "9776cb81"
       pullPolicy: IfNotPresent
