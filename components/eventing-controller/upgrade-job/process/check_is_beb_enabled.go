@@ -1,8 +1,6 @@
 package process
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
@@ -37,30 +35,36 @@ func (s CheckIsBebEnabled) Do() error {
 	s.process.State.IsBebEnabled = false
 
 	if s.process.State.Is124Cluster {
-		return s.CheckIfBebEnabled124()
+		secretList, err := s.checkIfBebEnabled124()
+		if err != nil {
+			return err
+		}
+		if s.process.State.IsBebEnabled {
+			return s.process.Clients.EventMesh.InitUsingSecret(&secretList.Items[0])
+		}
+	} else {
+		s.process.Logger.WithContext().Infof("Skipping step: %s, because it is not a v1.24.x cluster", s.ToString())
 	}
-
-	s.process.Logger.WithContext().Info(fmt.Sprintf("Skipping step: %s, because it is not a v1.24.x cluster", s.ToString()))
 	return nil
 }
 
-// CheckIfBebEnabled124 checks if BEB is enabled in v1.24.x and initialises BEB client
+// checkIfBebEnabled124 checks if BEB is enabled in v1.24.x and initialises BEB client
 // It also sets s.process.State.IsBebEnabled flag
-func (s CheckIsBebEnabled) CheckIfBebEnabled124() error {
+func (s CheckIsBebEnabled) checkIfBebEnabled124() (*corev1.SecretList, error) {
 	// Get BEB configs from beb k8s secret
 	secretLabel := backend.BEBBackendSecretLabelKey + "=" + backend.BEBBackendSecretLabelValue
 	secretList, err := s.process.Clients.Secret.ListByMatchingLabels(corev1.NamespaceAll, secretLabel)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(secretList.Items) == 0 {
 		s.process.State.IsBebEnabled = false
-		return nil
+		return secretList, nil
 	}
 	if len(secretList.Items) > 1 {
-		return errors.New("more than 1 BEB secrets found")
+		return nil, errors.New("more than 1 BEB secrets found")
 	}
 
 	s.process.State.IsBebEnabled = true
-	return s.process.Clients.EventMesh.InitUsingSecret(&secretList.Items[0])
+	return secretList, nil
 }

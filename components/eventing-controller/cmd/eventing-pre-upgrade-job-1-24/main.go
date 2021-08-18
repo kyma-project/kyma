@@ -13,7 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	publisherDeployment "github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	publisherdeployment "github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventingbackend"
 	"github.com/kyma-project/kyma/components/eventing-controller/upgrade-job/clients/eventmesh"
@@ -62,8 +62,8 @@ func main() {
 		Domain:             cfg.Domain,
 		KymaNamespace:      cfg.KymaNamespace,
 		ControllerName:     cfg.EventingControllerName,
-		PublisherName:      publisherDeployment.PublisherName,
-		PublisherNamespace: publisherDeployment.PublisherNamespace,
+		PublisherName:      publisherdeployment.PublisherName,
+		PublisherNamespace: publisherdeployment.PublisherNamespace,
 		Clients: jobprocess.Clients{
 			Deployment:      deploymentClient,
 			Subscription:    subscriptionClient,

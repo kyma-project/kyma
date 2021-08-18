@@ -1,8 +1,8 @@
 package process
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -35,7 +35,7 @@ func (s FilterSubscriptions) Do() error {
 
 	// First set the subscription name mapper
 	s.process.Logger.WithContext().Info(fmt.Sprintf("Using domain name: %s in step: %s", s.process.Domain, s.ToString()))
-	nameMapper := handlers.NewBebSubscriptionNameMapper(s.process.Domain, handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(s.process.Domain), handlers.MaxBEBSubscriptionNameLength)
 
 	// Now filter out the subscriptions which are not migrated
 	s.process.State.FilteredSubscriptions = &eventingv1alpha1.SubscriptionList{
@@ -77,5 +77,5 @@ func (s FilterSubscriptions) findSubscriptionCondition(subscription *eventingv1a
 			return &condition, nil
 		}
 	}
-	return nil, errors.New(fmt.Sprintf("failed to find condition with type: %s in subscription: %s", conditionType, subscription.Name))
+	return nil, fmt.Errorf("failed to find condition with type: %s in subscription: %s", conditionType, subscription.Name)
 }

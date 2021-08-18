@@ -3,6 +3,7 @@ package beb
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -23,14 +24,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
-)
-
-const (
-	commanderName = "beb-commander"
-
-	shootInfoConfigMapNamespace = "kube-system"
-	shootInfoConfigMapName      = "shoot-info"
-	shootNameConfigMapKey       = "shootName"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -87,7 +80,7 @@ func (c *Commander) Start() error {
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := handlers.NewBebSubscriptionNameMapper(c.envCfg.Domain, handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)

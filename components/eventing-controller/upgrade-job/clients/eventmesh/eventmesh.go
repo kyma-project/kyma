@@ -76,7 +76,7 @@ func (c *Client) processSecret(bebSecret *corev1.Secret) (env.Config, error) {
 		return cfg, errors.New("cannot get BebApiUrl from BEB secret")
 	}
 
-	cfg.ClientID = string(secret.StringData[deployment.PublisherSecretClientIDKey])
+	cfg.ClientID = secret.StringData[deployment.PublisherSecretClientIDKey]
 	if len(cfg.ClientID) == 0 {
 		return cfg, errors.New("cannot get CLIENT_ID from BEB secret")
 	}

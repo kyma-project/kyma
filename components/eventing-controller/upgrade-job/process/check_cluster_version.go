@@ -28,13 +28,13 @@ func (s CheckClusterVersion) ToString() string {
 // Do checks if BEB is enabled in the Kyma Cluster and saves the result in process state
 // It also initializes the BEB client
 func (s CheckClusterVersion) Do() error {
-	is124, err := s.isClusterVersion1_24()
+	is124, err := s.isClusterVersion124()
 	s.process.State.Is124Cluster = is124
 	return err
 }
 
-// isClusterVersion1_24 If it returns false, it is a 1.23 cluster
-func (s CheckClusterVersion) isClusterVersion1_24() (bool, error) {
+// isClusterVersion124 If it returns false, it is a 1.23 cluster
+func (s CheckClusterVersion) isClusterVersion124() (bool, error) {
 	eventingBackend, err := s.process.Clients.EventingBackend.Get(s.process.KymaNamespace, "eventing-backend")
 	if err == nil {
 		// eventing-backend instance found, meaning its a v1.24.x cluster

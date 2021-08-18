@@ -64,14 +64,13 @@ func (s ScaleDownEventingController) ScaleDownK8sDeployment(namespace, name stri
 	isScaledDownSuccess := false
 	start := time.Now()
 	for time.Since(start) < s.process.TimeoutPeriod {
-		s.process.Logger.WithContext().Info(fmt.Sprintf("Checking replica count of deployment: %s", name))
+		s.process.Logger.WithContext().Infof("Checking replica count of deployment: %s", name)
 
 		time.Sleep(5 * time.Second)
 
 		deployment, err := s.process.Clients.Deployment.Get(namespace, name)
 		if err != nil {
 			s.process.Logger.WithContext().Error(err)
-			// should we stop or continue
 			continue
 		}
 

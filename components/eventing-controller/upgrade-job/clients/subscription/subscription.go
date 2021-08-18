@@ -45,14 +45,14 @@ func GroupVersionResource() schema.GroupVersionResource {
 
 // toSecretList converts unstructured Subscription list object to typed object
 func toSubscriptionList(unstructuredList *unstructured.UnstructuredList) (*eventingv1alpha1.SubscriptionList, error) {
-	triggerList := new(eventingv1alpha1.SubscriptionList)
-	triggerListBytes, err := unstructuredList.MarshalJSON()
+	subscriptionList := new(eventingv1alpha1.SubscriptionList)
+	subscriptionListBytes, err := unstructuredList.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(triggerListBytes, triggerList)
+	err = json.Unmarshal(subscriptionListBytes, subscriptionList)
 	if err != nil {
 		return nil, err
 	}
-	return triggerList, nil
+	return subscriptionList, nil
 }

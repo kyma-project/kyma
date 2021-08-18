@@ -60,7 +60,7 @@ type bebSubscriptionNameMapper struct {
 
 func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
 	return &bebSubscriptionNameMapper{
-		domainName: strings.TrimSpace(domainName),
+		domainName: domainName,
 		maxLength:  maxNameLength,
 	}
 }
@@ -75,7 +75,13 @@ func hashSubscriptionFullName(domainName, namespace, name string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
+// produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
+// Requires maxLength >= len(hash)
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
+	if len(hash) > maxLength {
+		// This shouldn't happen!
+		panic(fmt.Sprintf("max name length (%d) used for BEB subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
+	}
 	maxNameLen := maxLength - len(hash)
 	// keep the first maxNameLen characters of the name
 	if maxNameLen <= 0 {
