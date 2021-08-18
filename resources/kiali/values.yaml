@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210610-d25e85b1
+    version: 20210817-8cdbfce3
   labels:
     integration: true
     after-upgrade: true
