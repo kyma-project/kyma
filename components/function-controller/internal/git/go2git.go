@@ -1,28 +1,58 @@
 package git
 
+import "C"
 import (
 	"fmt"
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
+	"log"
 	"os"
+	"strings"
 )
 
 const (
 	tempDir          = "/tmp"
-	tagRefPattern    = "refs/tags/%s"
-	branchRefPattern = "refs/remotes/%s"
+	branchRefPattern = "refs/remotes/origin"
 )
 
-type Go2GitClient struct {
+type git2goCloner struct {
 }
 
-func NewGit2Go() *Go2GitClient {
-	return &Go2GitClient{}
+func (g *git2goCloner) cloneRepo(options Options, outputPath string) (*git2go.Repository, error) {
+	authCallbacks, err := getAuth(options.Auth)
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting authentication opts")
+	}
+
+	repo, err := git2go.Clone(options.URL, outputPath, &git2go.CloneOptions{
+		FetchOptions: &git2go.FetchOptions{
+			RemoteCallbacks: authCallbacks,
+			DownloadTags:    git2go.DownloadTagsAll,
+		},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while cloning the repository")
+	}
+	return repo, nil
 }
 
-func (g *Go2GitClient) LastCommit(options Options) (string, error) {
+type cloner interface {
+	cloneRepo(options Options, outputPath string) (*git2go.Repository, error)
+}
+
+type Git2GoClient struct {
+	cloner
+}
+
+func NewGit2Go() *Git2GoClient {
+	return &Git2GoClient{
+		cloner: &git2goCloner{},
+	}
+}
+
+func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	//commit
 	_, err := git2go.NewOid(options.Reference)
 	if err == nil {
@@ -33,71 +63,35 @@ func (g *Go2GitClient) LastCommit(options Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Println(tmpPath)
 	defer removeDir(tmpPath)
 
-	repo, err := g.cloneRepo(options, tmpPath)
+	repo, err := g.cloner.cloneRepo(options, tmpPath)
 	if err != nil {
 		return "", errors.Wrap(err, "while cloning the repository")
 	}
 
 	//branch
-	branch, err := repo.LookupBranch(fmt.Sprintf(branchRefPattern, options.Reference), git2go.BranchAll)
+	ref, err := g.lookupBranch(repo, options.Reference)
 	if err == nil {
-		return branch.Target().String(), nil
+		return ref.Target().String(), nil
 	}
 	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
-		return "", errors.Wrap(err, "while lookup branch")
+		return "", err
 	}
 
 	//tag
-	ref, err := repo.References.Dwim(fmt.Sprintf(tagRefPattern, options.Reference))
+	ref, err = repo.References.Dwim(options.Reference)
 	if err == nil {
 		return ref.Target().String(), nil
 	}
 	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
 		return "", errors.Wrap(err, "while lookup branch")
 	}
-	return "", errors.Errorf("Could find commit/branch/tag with given ref: %s", options.Reference)
-
-	//
-	//log.Println(ref.Target().String())
-	//
-	//iter, err := repo.NewReferenceIterator()
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//log.Println("all references")
-	//for ; ; {
-	//	item, err := iter.Next()
-	//	if err != nil {
-	//		break
-	//	}
-	//
-	//	log.Println(item.Name())
-	//}
-	//
-	////Tags
-	//log.Println("Tag")
-	//
-	//tags, err := repo.Tags.List()
-	//if err != nil {
-	//	return "", err
-	//}
-	//for tag, _ := range tags {
-	//	log.Println(tag)
-	//}
-	//
-	//ref, err := repo.References.Dwim(fmt.Sprintf("refs/tags/first"))
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//log.Println(ref.Target().String())
-	//return "", nil
+	return "", errors.Errorf("Could find commit,branch or tag with given ref: %s", options.Reference)
 }
 
-func (g *Go2GitClient) Clone(path string, options Options) (string, error) {
+func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
 	repo, err := g.cloneRepo(options, path)
 	if err != nil {
 		return "", errors.Wrap(err, "while cloning the repository")
@@ -126,25 +120,11 @@ func (g *Go2GitClient) Clone(path string, options Options) (string, error) {
 	return ref.Target().String(), nil
 }
 
-func (g *Go2GitClient) cloneRepo(options Options, outputPath string) (*git2go.Repository, error) {
-	authCallbacks, err := getAuth(options.Auth)
-	if err != nil {
-		return nil, errors.Wrap(err, "while getting authentication opts")
-	}
-
-	repo, err := git2go.Clone(options.URL, outputPath, &git2go.CloneOptions{
-		FetchOptions: &git2go.FetchOptions{
-			RemoteCallbacks: authCallbacks,
-			DownloadTags:    git2go.DownloadTagsAll,
-		},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "while cloning the repository")
-	}
-	return repo, nil
-}
-
 func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
+	if options == nil {
+		return git2go.RemoteCallbacks{}, nil
+	}
+
 	switch authType := options.Type; authType {
 	case RepositoryAuthBasic:
 		{
@@ -189,10 +169,38 @@ func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 			}, nil
 
 		}
-	default:
-		return git2go.RemoteCallbacks{}, nil
 	}
+	return git2go.RemoteCallbacks{}, nil
+}
 
+func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {
+	iter, err := repo.NewReferenceIterator()
+	if err != nil {
+		return nil, err
+	}
+	for ; ; {
+		item, err := iter.Next()
+		if err != nil {
+			if git2go.IsErrorCode(err, git2go.ErrorCodeIterOver) {
+				return nil, git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
+			}
+			return nil, errors.Wrap(err, "while listing reference")
+		}
+		if g.isBranch(item, branchName) {
+			return item, nil
+		}
+	}
+}
+
+func (g *Git2GoClient) isBranch(ref *git2go.Reference, branchName string) bool {
+	if strings.Contains(ref.Name(), branchRefPattern) {
+		splittedName := strings.Split(ref.Name(), "/")
+		if len(splittedName) < 4 {
+			return false
+		}
+		return splittedName[3] == branchName
+	}
+	return false
 }
 
 func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
@@ -208,5 +216,7 @@ func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname stri
 }
 
 func removeDir(path string) {
-	os.RemoveAll(path)
+	if os.RemoveAll(path) != nil {
+		log.Printf("Error while deleting directory: %s", path)
+	}
 }
