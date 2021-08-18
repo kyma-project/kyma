@@ -1,8 +1,13 @@
 ---
-title: Can't access Console UI or other endpoints
+title: Can't access a Kyma endpoint
 ---
 
-The `503` status code received when you try to access the Console UI or any other endpoint in Kyma can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.
+## Symptom & cause
+
+The `503` status code received when you try to access a Kyma endpoint can be caused by a configuration error in the Istio Ingress Gateway. As a result, the endpoint you call is not exposed.
+
+## Remedy
+
 To fix this problem, restart the Pods of the Gateway.
 
 1. List all available endpoints:
@@ -24,7 +29,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     ```bash
     kubectl edit deployment -n istio-system istio-ingressgateway
     ```
-   
+
 2. Find the `istio-proxy` container and delete the `-distroless` suffix.
 
 3. Check all ports used by the Istio Ingress Gateway:
@@ -38,7 +43,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     ```bash
     kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
-   
+
 5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `app-connector-certs` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
 
     ```bash
@@ -46,7 +51,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl get secrets -n istio-system app-connector-certs -oyaml
     ```
 
-6. To regenerate a corrupted certificate, follow [this tutorial](components/security/#tutorials-update-tls-certificate). If you are running Kyma provisioned through Gardener, follow [this tutorial](components/security/#troubleshooting-issues-with-certificates-on-gardener) instead.
+<!-- Update step 6 once the long-lasting certificate is implemented. Probably, only the details about Gardener will be needed. -->
+6. To regenerate a corrupted certificate, follow [this tutorial](../../../03-tutorials/sec-01-tls-certificates-security.md). If you are running Kyma provisioned through Gardener, follow [this troubleshooting guide](./sec-01-certificates-gardener/) instead.
 
    >**NOTE**: Remember to switch back to the `distroless` image after you resolved the issue.
-
