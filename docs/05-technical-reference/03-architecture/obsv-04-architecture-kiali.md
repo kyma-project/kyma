@@ -1,6 +1,5 @@
 ---
 title: Kiali Architecture
-type: Architecture
 ---
 
 The following diagram presents the overall Kiali architecture and the way the components interact with each other.
