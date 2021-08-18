@@ -59,28 +59,28 @@ func GroupVersionResource() schema.GroupVersionResource {
 
 // toSecretList converts unstructured Secret list object to typed object
 func toSecretList(unstructuredList *unstructured.UnstructuredList) (*corev1.SecretList, error) {
-	triggerList := new(corev1.SecretList)
-	triggerListBytes, err := unstructuredList.MarshalJSON()
+	secretList := new(corev1.SecretList)
+	secretListBytes, err := unstructuredList.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(triggerListBytes, triggerList)
+	err = json.Unmarshal(secretListBytes, secretList)
 	if err != nil {
 		return nil, err
 	}
-	return triggerList, nil
+	return secretList, nil
 }
 
 // toSecret converts unstructured Secret object to typed object
 func toSecret(unstructuredObj *unstructured.Unstructured) (*corev1.Secret, error) {
-	triggerObj := new(corev1.Secret)
-	triggerObjBytes, err := unstructuredObj.MarshalJSON()
+	secretObj := new(corev1.Secret)
+	secretObjObjBytes, err := unstructuredObj.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(triggerObjBytes, triggerObj)
+	err = json.Unmarshal(secretObjObjBytes, secretObj)
 	if err != nil {
 		return nil, err
 	}
-	return triggerObj, nil
+	return secretObj, nil
 }

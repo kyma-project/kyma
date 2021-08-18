@@ -46,14 +46,14 @@ func GroupVersionResource() schema.GroupVersionResource {
 
 // toEventingBackend converts unstructured EventingBackend object to typed EventingBackend object
 func toEventingBackend(unstructured *unstructured.Unstructured) (*eventingv1alpha1.EventingBackend, error) {
-	triggerList := new(eventingv1alpha1.EventingBackend)
-	triggerListBytes, err := unstructured.MarshalJSON()
+	backendList := new(eventingv1alpha1.EventingBackend)
+	backendListBytes, err := unstructured.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(triggerListBytes, triggerList)
+	err = json.Unmarshal(backendListBytes, backendList)
 	if err != nil {
 		return nil, err
 	}
-	return triggerList, nil
+	return backendList, nil
 }
