@@ -1,4 +1,5 @@
 const { exec } = require("child_process");
+const { debug } = require("../utils");
 
 function execShellCommand(cmd) {
   const exec = require("child_process").exec;
@@ -7,7 +8,7 @@ function execShellCommand(cmd) {
       if (error) {
         console.warn(error);
       } else {
-        console.log(`stdout: ${stdout}`);
+        debug(`stdout: ${stdout}`);
       }
       resolve(stdout ? stdout : stderr);
     });
