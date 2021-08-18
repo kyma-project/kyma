@@ -24,6 +24,7 @@ describe("Telemetry operator", function () {
   let namespace = "kyma-system";
   let mockNamespace = "mockserver";
   let mockServerPort = 1080;
+  let cancelPortForward = null;
 
   const loggingConfigYaml = fs.readFileSync(
     path.join(__dirname, "./logging-config.yaml"),
@@ -66,11 +67,16 @@ describe("Telemetry operator", function () {
       sleep(3000); // TODO
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       let mockPod = body.items[0].metadata.name;
-      kubectlPortForward(mockNamespace, mockPod, mockServerPort); //forward service?
+      cancelPortForward = kubectlPortForward(
+        mockNamespace,
+        mockPod,
+        mockServerPort
+      );
 
       // wait for pod to be ready
     });
     after(async function () {
+      cancelPortForward();
       await helm.uninstallChart("mockserver", "mockserver");
       await helm.uninstallChart("mockserver-config", "mockserver");
     });
@@ -115,7 +121,7 @@ describe("Telemetry operator", function () {
             assert.fail("The HTTP endpoint was not called");
           }
         );
-    }).timeout(5000);
+    }).timeout(10000);
   }).timeout(80000);
 
   // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
