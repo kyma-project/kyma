@@ -133,7 +133,7 @@ Node.js
 Python
 </summary>
 
-| Function name | Arguments | Description |
+| Method name | Arguments | Description |
 |----------|-----------|-------------|
 | **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
 | **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the `request` CloudEvent object and the given arguments |
