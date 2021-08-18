@@ -1,6 +1,5 @@
 ---
 title: Debugger stops at dependency files
-type: Troubleshooting
 ---
 
 <!-- I'm massively missing context here - which command did the user run, `kyma run function --debug` ? Isn't this simply a note to the topic about debugging a Function with the CLI? -->

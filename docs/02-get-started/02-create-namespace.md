@@ -1,6 +1,5 @@
 ---
 title: Create a Namespace
-type: Getting Started
 ---
 
 Almost all operations in these guides are performed using [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)-scoped resources, so let's start by creating a dedicated `orders-service` Namespace for them.

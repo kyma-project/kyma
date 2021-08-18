@@ -1,6 +1,5 @@
 ---
 title: Expose the microservice
-type: Getting Started
 ---
 
 Now that you deployed a standalone `orders-service` microservice, allow other resources to communicate with it. Make it available for other resources outside the cluster by exposing its Kubernetes Service through an APIRule custom resource (CR).

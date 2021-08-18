@@ -1,6 +1,5 @@
 ---
 title: Bind a Redis ServiceInstance to the Function
-type: Getting Started
 ---
 
 This guide shows how you can bind a sample instance of the Redis service to the Function. After completing all the steps, you will get the Function with encoded Secrets to the service. You will use Redis as an external database for the Function. This database replaces the Function's in-memory storage.

@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Getting Started
 ---
 
 This set of Getting Started guides is an end-to-end scenario that will walk you through major Kyma components and show its two main use cases:

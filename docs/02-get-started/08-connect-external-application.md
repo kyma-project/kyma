@@ -1,6 +1,5 @@
 ---
 title: Connect an external application
-type: Getting Started
 ---
 
 Let's now connect an external application to Kyma. In this set of guides, we will use a sample application called [Commerce mock](https://github.com/SAP-samples/xf-addons/tree/master/addons/commerce-mock-0.1.0) that simulates a monolithic application. You will learn how you can connect it to Kyma, and expose its API and events. In further guides, you will subscribe to one of Commerce mock events (`order.deliverysent.v1`) and see how you can use it to trigger the logic of the `orders-service` microservice.  

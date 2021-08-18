@@ -1,6 +1,5 @@
 ---
 title: Expose the Function
-type: Getting Started
 ---
 
 In this guide, you will expose your Function outside the cluster, through an HTTP proxy. To expose it, use an APIRule custom resource (CR) managed by the in-house API Gateway Controller. This controller reacts to an instance of the APIRule CR and, based on its details, it creates an Istio Virtual Service and Oathkeeper Access Rules that specify your permissions for the exposed Function.

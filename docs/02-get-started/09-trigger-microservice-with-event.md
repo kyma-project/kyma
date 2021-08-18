@@ -1,6 +1,5 @@
 ---
 title: Trigger the microservice with an event
-type: Getting Started
 ---
 
 This tutorial shows how to trigger the deployed `orders-service` microservice with the `order.deliverysent.v1` event from Commerce mock previously connected to Kyma.

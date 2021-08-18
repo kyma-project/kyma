@@ -1,6 +1,5 @@
 ---
 title: Create a Function
-type: Getting Started
 ---
 
 Let's now repeat the microservice flow for the Function. This guide shows how you can create a simple Function (`orders-function`) with the same logic as the one in the microservice. In further guides, you will expose the Function, bind it to the Redis storage, and subscribe it to the `order.deliverysent.v1` event type from Commerce mock.

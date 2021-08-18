@@ -1,6 +1,5 @@
 ---
 title: Add the Redis service
-type: Getting Started
 ---
 
 Provision the external [Redis](https://redis.io/) service that will replace your microservice in-memory storage. To do so, you will use a sample addon configuration linking to an example in the GitHub repository.

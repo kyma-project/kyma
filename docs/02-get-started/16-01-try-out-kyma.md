@@ -1,6 +1,5 @@
 ---
 title: Kyma features and concepts in practice
-type: Examples
 ---
 
 The table contains a list of examples that demonstrate Kyma functionalities. You can run all of them locally or on a cluster. Examples are organized by a feature or concept they showcase. Each of them contains ready-to-use code snippets and the instructions in `README.md` documents.

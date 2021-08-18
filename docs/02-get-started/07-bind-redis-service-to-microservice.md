@@ -1,6 +1,5 @@
 ---
 title: Bind the Redis ServiceInstance to the microservice
-type: Getting Started
 ---
 
 In this guide, you will bind the created ServiceInstance of the Redis service to the `orders-service` microservice. Then, you will test the binding by sending a sample order to the microservice. This way you can check that the binding to the external Redis storage works and the order data no longer gets removed upon the microservice Pod restart.

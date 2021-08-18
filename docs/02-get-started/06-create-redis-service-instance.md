@@ -1,6 +1,5 @@
 ---
 title: Create a ServiceInstance for the Redis service
-type: Getting Started
 ---
 
 To create a binding between the microservice and the Redis service, you must first create an [instance](https://svc-cat.io/docs/walkthrough/#step-4---creating-a-new-serviceinstance) of the previously provisioned service.

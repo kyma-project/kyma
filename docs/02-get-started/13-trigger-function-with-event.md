@@ -1,6 +1,5 @@
 ---
 title: Trigger the Function with an event
-type: Getting Started
 ---
 
 As the final step, you will trigger the Function with the `order.deliverysent.v1` event type from Commerce mock, send a sample event from the mock application, and test if the event reached the Function.
