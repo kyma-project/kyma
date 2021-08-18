@@ -30,9 +30,9 @@ require (
 	istio.io/api v0.0.0-20201113155354-fcf32ac5d223
 	istio.io/client-go v0.0.0-20201113160737-d4c1e2c0a42f
 	istio.io/gogo-genproto v0.0.0-20191029161641-f7d19ec0141d // indirect
-	k8s.io/api v0.21.4
-	k8s.io/apimachinery v0.21.4
-	k8s.io/client-go v0.21.4
+	k8s.io/api v0.20.7
+	k8s.io/apimachinery v0.20.7
+	k8s.io/client-go v0.20.7
 	knative.dev/pkg v0.0.0-20210818135208-7b5ecbc0e477
 	launchpad.net/gocheck v0.0.0-20140225173054-000000000087 // indirect
 )
