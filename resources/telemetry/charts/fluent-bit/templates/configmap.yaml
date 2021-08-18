@@ -1,0 +1,16 @@
+{{- if (empty .Values.existingConfigMap) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluent-bit.fullname" . }}
+  labels:
+    {{- include "fluent-bit.labels" . | nindent 4 }}
+data:
+  custom_parsers.conf: |
+    {{- (tpl .Values.config.customParsers $) | nindent 4 }}
+  fluent-bit.conf: |
+    {{- (tpl .Values.config.service $)  | nindent 4 }}
+    {{- (tpl .Values.config.inputs $)  | nindent 4 }}
+    {{- (tpl .Values.config.filters $)  | nindent 4 }}
+    {{- (tpl .Values.config.outputs $)  | nindent 4 }}
+{{- end -}}
