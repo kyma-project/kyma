@@ -10,9 +10,9 @@ Kyma collects telemetry data with several in-cluster components:
 
 [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more.
 
-> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/02-main-areas/observability/obsv-03-istio-monitoring.md).
+> **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/main-areas/observability/obsv-03-istio-monitoring.md).
 
-[Fluent Bit](https://fluentbit.io/) collects logs. 
+[Fluent Bit](https://fluentbit.io/) collects logs.
 
 Traces are getting to [Jaeger](https://www.jaegertracing.io/docs).
 

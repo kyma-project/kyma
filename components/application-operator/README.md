@@ -4,7 +4,7 @@
 
 The Application Operator (AO) can work in two modes.
 By default, it detects changes in [Application](../../docs/05-technical-reference/06-custom-resources/ac-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
-In the alternative mode, it detects changes in [ServiceInstance](../../docs/01-overview/02-main-areas/service-management/smgt-03-sc-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
+In the alternative mode, it detects changes in [ServiceInstance](../../docs/01-overview/main-areas/service-management/smgt-03-sc-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
@@ -41,7 +41,7 @@ The Application Operator has the following parameters:
  - **strictMode** is a toggle used to enable or disable Istio authorization policy for validator and HTTP source adapter. The default value is `disabled`.
  - **healthPort** is the number of the TCP port used to perform health checking of the Application Operator.
  - **isBEBEnabled** is a toggle used to enable or disable eventing based on BEB. The default value is `false`.
- 
+
 ## Testing on a local deployment
 
 When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.
