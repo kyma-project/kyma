@@ -109,9 +109,41 @@ See the detailed descriptions of these fields:
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
+### Event object SDK
+
+The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
+
+<div tabs name="signature" group="function-specification">
+<details>
+<summary label="Node.js">
+Node.js
+</summary>
+
+| Method name | Arguments | Description |
+|---------------|-----------|-------------|
+| **setResponseHeader** | key, value | Sets a header to the `response` object based on the given key and value |
+| **setResponseContentType** | type | Sets the `ContentType` header to the `response` object based on the given type |
+| **setResponseStatus** | status | Sets the `response` status based on the given status |
+| **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the `request` CloudEvent object and the given arguments |
+
+</details>
+<details>
+<summary label="Python">
+Python
+</summary>
+
+| Method name | Arguments | Description |
+|----------|-----------|-------------|
+| **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the `request` CloudEvent object and the given arguments |
+
+</details>
+</div>
+
 ### Context object
 
-The `context` object contains information about the Function invocation, such as runtime details, execution timeout, or memory limits.
+The `context` object contains information about the Function's invocation, such as runtime details, execution timeout, or memory limits.
 
 See sample context details:
 
