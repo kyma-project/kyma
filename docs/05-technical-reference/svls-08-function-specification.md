@@ -111,7 +111,7 @@ See the detailed descriptions of these fields:
 
 ### Event object SDK
 
-The `event` object is extended by functions making some operations easier. You can use every function by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
+The `event` object is extended by methods making some operations easier. You can use every method by providing `event.{FUNCTION_NAME(ARGUMENTS...)}`.
 
 <div tabs name="signature" group="function-specification">
 <details>
@@ -119,13 +119,13 @@ The `event` object is extended by functions making some operations easier. You c
 Node.js
 </summary>
 
-| Function name | Arguments | Description |
+| Method name | Arguments | Description |
 |---------------|-----------|-------------|
-| **setResponseHeader** | key, value | Sets a header to the response object based on the given key and value |
-| **setResponseContentType** | type | Sets the `ContentType` header to the response object based on the given type |
-| **setResponseStatus** | status | Sets the response status based on the given status |
+| **setResponseHeader** | key, value | Sets a header to the `response` object based on the given key and value |
+| **setResponseContentType** | type | Sets the `ContentType` header to the `response` object based on the given type |
+| **setResponseStatus** | status | Sets the `response` status based on the given status |
 | **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
-| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and the given arguments |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the `request` CloudEvent object and the given arguments |
 
 </details>
 <details>
@@ -136,7 +136,7 @@ Python
 | Function name | Arguments | Description |
 |----------|-----------|-------------|
 | **publishCloudEvent** | event | Publishes a CloudEvent on the publisher service based on the given CloudEvent object |
-| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the request CloudEvent object and the given arguments |
+| **buildResponseCloudEvent** | id, type, data | Builds a CloudEvent object based on the `request` CloudEvent object and the given arguments |
 
 </details>
 </div>
