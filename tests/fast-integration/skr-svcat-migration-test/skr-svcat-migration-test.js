@@ -18,7 +18,6 @@ const {
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
 
-
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -113,11 +112,11 @@ describe("SKR SVCAT migration test", function() {
     // TODO: Check if no Service Instances are left over
   });
 
-  // it(`Should deprovision SKR`, async function() {
-  //   await deprovisionSKR(keb, runtimeID);
-  // });
-  //
-  // it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
-  //   await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
-  // });
+  it(`Should deprovision SKR`, async function() {
+    await deprovisionSKR(keb, runtimeID);
+  });
+
+  it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
+    await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+  });
 });
