@@ -38,7 +38,6 @@ describe("SKR SVCAT migration test", function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
-
   let platformCreds;
   it(`Should Provision Platform`, async function() {
     platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform)
