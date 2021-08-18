@@ -19,7 +19,6 @@ containers:
       {{- toYaml .Values.securityContext | nindent 6 }}
     image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
-    command: ['sh','-c', './fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf']
   {{- if .Values.env }}
     env:
     {{- toYaml .Values.env | nindent 4 }}
@@ -129,7 +128,7 @@ initContainers:
       mountPath: /main
     - name: dynamic-config
       mountPath: /dynamic
-    command: ['sh', '-c', 'cp -a /main/. /fluent-bit/etc/ && cp -a /dynamic /fluent-bit/etc/dynamic']
+    command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic']
 volumes:
   - name: shared-fluent-bit-config
     emptyDir: {}
