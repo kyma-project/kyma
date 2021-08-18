@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-11819"
+  tag: "f435c01b"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -85,5 +85,5 @@ healthProbe:
 preUpgradeJob:
   image:
     name: "eventing-pre-upgrade-job-1-24"
-    tag: "PR-11819"
+    tag: "f435c01b"
     pullPolicy: IfNotPresent
