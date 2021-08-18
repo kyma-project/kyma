@@ -3,6 +3,7 @@ package beb
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -79,6 +80,10 @@ func (c *Commander) Start() error {
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
+	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
+		"domainName", c.envCfg.Domain,
+		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	reconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
@@ -87,6 +92,7 @@ func (c *Commander) Start() error {
 		ctrl.Log.WithName("reconciler").WithName("Subscription"),
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		nameMapper,
 	)
 
 	c.backend = reconciler.Backend

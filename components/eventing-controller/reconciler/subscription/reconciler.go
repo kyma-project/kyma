@@ -54,6 +54,8 @@ type Reconciler struct {
 	Backend          handlers.MessagingBackend
 	Domain           string
 	eventTypeCleaner eventtype.Cleaner
+	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
+	nameMapper handlers.NameMapper
 }
 
 var (
@@ -66,12 +68,15 @@ const (
 	externalSinkScheme    = "https"
 	apiRuleNamePrefix     = "webhook-"
 	clusterLocalURLSuffix = "svc.cluster.local"
+	reconcilerName        = "beb-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	log logr.Logger, recorder record.EventRecorder, cfg env.Config) *Reconciler {
-	bebHandler := &handlers.Beb{Log: log}
-	bebHandler.Initialize(cfg)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, log logr.Logger, recorder record.EventRecorder, cfg env.Config, mapper handlers.NameMapper) *Reconciler {
+	bebHandler := handlers.NewBEB(mapper, log)
+	if err := bebHandler.Initialize(cfg); err != nil {
+		log.Error(err, "start reconciler failed", "name", reconcilerName)
+		panic(err)
+	}
 
 	return &Reconciler{
 		ctx:              ctx,
@@ -82,6 +87,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		Backend:          bebHandler,
 		Domain:           cfg.Domain,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, log),
+		nameMapper:       mapper,
 	}
 }
 
@@ -248,9 +254,25 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 		return false, err
 	}
 
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
 	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
+		statusChanged = true
+	}
+
+	// Make sure the BEB subscription ID is written to the message
+	var subscribedCondition *eventingv1alpha1.Condition
+	for _, condition := range subscription.Status.Conditions {
+		if condition.Type == eventingv1alpha1.ConditionSubscribed {
+			subscribedCondition = condition.DeepCopy()
+		}
+	}
+	if subscribedCondition != nil && subscribedCondition.Message != message {
+		subscribedCondition.Message = message
+		if err := r.updateCondition(subscription, *subscribedCondition, ctx); err != nil {
 			return statusChanged, err
 		}
 		statusChanged = true

@@ -31,13 +31,13 @@ func TestCleanup(t *testing.T) {
 	log := ctrl.Log.WithName("test-cleaner-beb")
 
 	// create a Kyma subscription
-	subscription := controllertesting.NewSubscription("test-"+controllertesting.TestCommanderSuffix, "test",
+	subscription := controllertesting.NewSubscription("test", "test",
 		controllertesting.WithWebhookAuthForBEB, controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 
 	// create an APIRule
 	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("host-test-"+controllertesting.TestCommanderSuffix, "svc-test-"+controllertesting.TestCommanderSuffix, apiRule)
+	controllertesting.WithService("host-test", "svc-test", apiRule)
 	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
@@ -58,7 +58,8 @@ func TestCleanup(t *testing.T) {
 	}
 
 	// create a BEB handler to connect to BEB Mock
-	bebHandler := &handlers.Beb{Log: log}
+	nameMapper := handlers.NewBebSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
+	bebHandler := handlers.NewBEB(nameMapper, log)
 	err := bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.Backend = bebHandler
@@ -81,7 +82,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, subscription.Name)
+	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
 	resp, err := http.Get(getSubscriptionUrl)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
