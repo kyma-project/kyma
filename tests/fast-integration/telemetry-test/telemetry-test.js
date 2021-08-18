@@ -6,13 +6,13 @@ const path = require("path");
 const axios = require("axios");
 const helm = require("./helm");
 const {
-  waitForPodWithLabel,
   waitForDaemonSet,
   k8sCoreV1Api,
   k8sDynamicApi,
   k8sApply,
   k8sDelete,
   kubectlPortForward,
+  waitForDeployment,
 } = require("../utils");
 
 function sleep(ms) {
@@ -34,11 +34,6 @@ describe("Telemetry operator", function () {
   );
   const loggingConfigCRD = k8s.loadAllYaml(loggingConfigYaml);
 
-  after(() => {
-    // delete custom config TODO
-    // k8sDelete(loggingConfigCRD, namespace);
-  });
-
   it("Operator should be ready", async function () {
     let res = await k8sCoreV1Api.listNamespacedPod(
       namespace,
@@ -53,7 +48,7 @@ describe("Telemetry operator", function () {
   });
   describe("Prepare mockserver", function () {
     before(async function () {
-      // install helm chart
+      // TODO make sure mock is not installed before: error handling
       await helm.installChart(
         "mockserver",
         "./telemetry-test/helm/mockserver",
@@ -64,7 +59,7 @@ describe("Telemetry operator", function () {
         "./telemetry-test/helm/mockserver-config",
         "mockserver"
       );
-      sleep(3000); // TODO
+      await waitForDeployment("mockserver", "mockserver");
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       let mockPod = body.items[0].metadata.name;
       cancelPortForward = kubectlPortForward(
@@ -72,40 +67,37 @@ describe("Telemetry operator", function () {
         mockPod,
         mockServerPort
       );
-
-      // wait for pod to be ready
     });
     after(async function () {
       cancelPortForward();
       await helm.uninstallChart("mockserver", "mockserver");
       await helm.uninstallChart("mockserver-config", "mockserver");
+      k8sDelete(loggingConfigCRD, namespace);
     });
 
-    // it("Should not receive HTTP traffic", function () {
-    //   return mockServerClient("localhost", mockServerPort)
-    //     .verify(
-    //       {
-    //         path: "/",
-    //       },
-    //       0,
-    //       0
-    //     )
-    //     .then(
-    //       function () {},
-    //       function (error) {
-    //         assert.fail("HTTP endpoint was called");
-    //       }
-    //     );
-    // }).timeout(5000);
+    it("Should not receive HTTP traffic", function () {
+      return mockServerClient("localhost", mockServerPort)
+        .verify(
+          {
+            path: "/",
+          },
+          0,
+          0
+        )
+        .then(
+          function () {},
+          function (error) {
+            assert.fail("HTTP endpoint was called");
+          }
+        );
+    }).timeout(5000);
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
-      // await k8sApply(loggingConfigCRD, namespace);
-      // // await waitForDaemonSet("logging-fluent-bit", namespace);// TODO
-      // await sleep(70000);
-    }); //.timeout(90000);
+      await k8sApply(loggingConfigCRD, namespace);
+      await waitForDaemonSet("logging-fluent-bit", namespace);
+    });
 
     it("Should receive HTTP traffic from fluent-bit", function () {
-      // verify server
       return mockServerClient("localhost", mockServerPort)
         .verify(
           {
@@ -114,53 +106,11 @@ describe("Telemetry operator", function () {
           1
         )
         .then(
-          function () {
-            console.log("request found 1 times");
-          },
+          function () {},
           function (error) {
             assert.fail("The HTTP endpoint was not called");
           }
         );
-    }).timeout(10000);
+    }).timeout(5000);
   }).timeout(80000);
-
-  // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
-  //   metadata: { name: "test-server" },
-  //   spec: {
-  //     containers: [
-  //       {
-  //         name: "server",
-  //         image: "mockserver/mockserver",
-  //         ports: [
-  //           {
-  //             name: "server-port",
-  //             containerPort: 8081,
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // });
-  // console.log("path", k8sDynamicApi.basePath);
-  // let { body } = await k8sDynamicApi.requestPromise({
-  //   url:
-  //     k8sDynamicApi.basePath +
-  //     `/api/v1/namespaces/${namespace}/pods/${pname}/log`,
-  //   method: "GET",
-  // });
-  // let { body } = await k8sCoreV1Api.readNamespacedPodLog(
-  //   pname,
-  //   namespace,
-  //   undefined,
-  //   undefined,
-  //   true,
-  //   1000,
-  //   "false",
-  //   false,
-  //   undefined,
-  //   undefined,
-  //   undefined,
-  //   undefined
-  // );
-  // }).timeout(20000);
 });
