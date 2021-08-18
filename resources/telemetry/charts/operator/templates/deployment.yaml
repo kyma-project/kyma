@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "operator.fullname" . }}-controller-manager
+  labels:
+    {{- include "operator.labels" . | nindent 4 }}
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "operator.selectorLabels" . | nindent 6 }}
+      {{- toYaml .Values.extraLabels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "operator.selectorLabels" . | nindent 8 }}
+        {{- toYaml .Values.extraLabels | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - command:
+            - /manager
+          args:
+            - --leader-elect
+          name: manager
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

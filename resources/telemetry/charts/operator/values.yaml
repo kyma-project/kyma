@@ -1,0 +1,72 @@
+# Default values for operator.
+
+replicaCount: 1
+
+image:
+  repository: eu.gcr.io/kyma-project/telemetry-operator
+  pullPolicy: IfNotPresent
+  tag: PR-11882
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+
+securityContext:
+  allowPrivilegeEscalation: false
+
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
+terminationGracePeriodSeconds: 10
+
+extraLabels:
+  control-plane: telemetry-operator-controller-manager
+
+serviceMonitor:
+  endpoints:
+    path: /metrics
+    port: https
+    scheme: https
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    tlsConfig:
+      insecureSkipVerify: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
