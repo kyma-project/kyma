@@ -90,6 +90,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   // TODO: Remove
+  // this sleep is created to have a time to check the cluster before deprovisioning it
   it(`Should Sleep and wakeup properly`, async function() {
     await sampleResources.goodNight()
   });

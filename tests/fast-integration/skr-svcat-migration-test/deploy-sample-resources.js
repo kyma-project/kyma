@@ -194,15 +194,7 @@ async function storeSecretsAndPresets() {
     podPresets.push(podPreset.metadata.name)
   })
 
-  // return { secrets, podPresets }
-  return Promise
-    .all([ {secrets, podPresets} ])
-    .then( function () {
-      return arguments[0][0]
-    
-  }, function (err) {
-    console.log (err)
-  })
+  return { secrets, podPresets }
 }
 
 async function checkSecrets(allSecrets) {
