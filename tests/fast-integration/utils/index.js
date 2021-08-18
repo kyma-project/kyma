@@ -511,14 +511,11 @@ function waitForReplicaSet(name, namespace = "default", timeout = 90000) {
 
 function waitForDaemonSet(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
-    `/apis/apps/v1/namespaces/${namespace}/daemonsets/${name}`,
+    `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
     {},
     (_type, _apiObj, watchObj) => {
       return (
-        watchObj.status.numberReady ===
-          watchObj.status.desiredNumberScheduled &&
-        watchObj.status.numberAvailable ===
-          watchObj.status.desiredNumberScheduled
+        _apiObj.status.numberReady === _apiObj.status.desiredNumberScheduled
       );
     },
     timeout,
