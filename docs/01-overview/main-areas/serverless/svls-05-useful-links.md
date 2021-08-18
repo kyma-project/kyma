@@ -6,13 +6,13 @@ If you're interested in learning more about the Serverless area, follow these li
 
 - Perform some simple and more advances tasks:
 
-  - Create an [inline](../../../03-tutorials/serverless/svls-01-create-inline-function.md) or a [Git](../../../03-tutorials/serverless/svls-02-create-git-function.md) Function
-  - [Expose the Function](../../../03-tutorials/serverless/svls-03-expose-function.md)
-  - [Manage Functions through Kyma CLI](../../../03-tutorials/serverless/svls-04-manage-functions-with-kyma-cli.md)
-  - [Debug a Function](../../../03-tutorials/serverless/svls-05-debug-function.md)
-  - [Synchronize Functions in a GitOps fashion](../../../03-tutorials/serverless/svls-06-sync-function-with-gitops.md)
-  - [Set an external Docker registry](../../../03-tutorials/serverless/svls-07-set-external-registry.md) for your Function images and [switch between registries at runtime](../../../03-tutorials/serverless/svls-08-switch-to-external-registry.md)
-  - [Log into a private package registry](../../../03-tutorials/serverless/svls-09-log-into-private-packages-registry.md)
+  - Create an [inline](../../../03-tutorials/00-serverless/svls-01-create-inline-function.md) or a [Git](../../../03-tutorials/00-serverless/svls-02-create-git-function.md) Function
+  - [Expose the Function](../../../03-tutorials/00-serverless/svls-03-expose-function.md)
+  - [Manage Functions through Kyma CLI](../../../03-tutorials/00-serverless/svls-04-manage-functions-with-kyma-cli.md)
+  - [Debug a Function](../../../03-tutorials/00-serverless/svls-05-debug-function.md)
+  - [Synchronize Functions in a GitOps fashion](../../../03-tutorials/00-serverless/svls-06-sync-function-with-gitops.md)
+  - [Set an external Docker registry](../../../03-tutorials/00-serverless/svls-07-set-external-registry.md) for your Function images and [switch between registries at runtime](../../../03-tutorials/00-serverless/svls-08-switch-to-external-registry.md)
+  - [Log into a private package registry](../../../03-tutorials/00-serverless/svls-09-log-into-private-packages-registry.md)
 
 - Troubleshoot Serverless-related issues when:
 

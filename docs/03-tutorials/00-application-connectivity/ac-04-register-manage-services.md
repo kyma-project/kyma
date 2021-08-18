@@ -12,7 +12,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body:
 
-   >**NOTE:** Follow the [tutorial](../../03-tutorials/application-connectivity/ac-05-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+   >**NOTE:** Follow the [tutorial](../../03-tutorials/00-application-connectivity/ac-05-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
    ```json
    {

@@ -11,7 +11,7 @@ error:1401E410:SSL routines:CONNECT_CR_FINISHED:sslv3 alert handshake failure
 ```
 
 To access Application Registry, you need to pass a client certificate with the HTTP request.  
-To generate a client certificate, see [this tutorial](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md).
+To generate a client certificate, see [this tutorial](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md).
 
 ## Application Registry - Expired certificate
 
@@ -22,7 +22,7 @@ error:1401E415:SSL routines:CONNECT_CR_FINISHED:sslv3 alert certificate expired
 ```
 
 To access Application Registry, you need to pass a valid client certificate with the request.  
-To generate a new client certificate, see [this tutorial](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md).
+To generate a new client certificate, see [this tutorial](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md).
 
 ## Application Registry - Invalid subject
 
@@ -48,4 +48,4 @@ subject=/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APPLICATION_NAM
 Check that the common name `CN` matches the name of your Application.  
 If it does not, generate a new certificate for your Application.
 
-To generate a new client certificate, see [this tutorial](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md   ).
+To generate a new client certificate, see [this tutorial](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md   ).

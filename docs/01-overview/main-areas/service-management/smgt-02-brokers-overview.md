@@ -127,6 +127,6 @@ You can also use Helm Broker addons to install these third-party brokers:
 </div>
 
 
-To get the addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/addons) repository. To build your own Service Broker, follow the [Open Service Broker API specification](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md). For details on how to [register a sample Service Broker in Service Catalog](../../../03-tutorials/service-management/smgt-01-hb-broker-registration.md), go to the **Tutorials** section.
+To get the addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/addons) repository. To build your own Service Broker, follow the [Open Service Broker API specification](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md). For details on how to [register a sample Service Broker in Service Catalog](../../../03-tutorials/00-service-management/smgt-01-hb-broker-registration.md), go to the **Tutorials** section.
 
 >**NOTE:** The Service Catalog has the Istio sidecar injected. To enable the communication between the Service Catalog and Service Brokers, either inject Istio sidecar into all brokers or disable mutual TLS authentication.
