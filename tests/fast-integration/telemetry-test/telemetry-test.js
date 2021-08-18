@@ -4,6 +4,7 @@ const { assert } = require("chai");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const helm = require("./helm");
 const {
   waitForPodWithLabel,
   waitForDaemonSet,
@@ -19,7 +20,7 @@ function sleep(ms) {
 }
 const mockServerClient = require("mockserver-client").mockServerClient;
 
-describe("Telemtry operator", () => {
+describe("Telemetry operator", function () {
   let namespace = "kyma-system";
   let mockNamespace = "mockserver";
   let mockServerPort = 1080;
@@ -50,40 +51,52 @@ describe("Telemtry operator", () => {
     assert.equal(podList.length, 1);
   });
   describe("Prepare mockserver", function () {
-    before(async () => {
+    before(async function () {
       // install helm chart
+      await helm.installChart(
+        "mockserver",
+        "./telemetry-test/helm/mockserver",
+        "mockserver"
+      );
+      await helm.installChart(
+        "mockserver-config",
+        "./telemetry-test/helm/mockserver-config",
+        "mockserver"
+      );
+      sleep(3000); // TODO
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       let mockPod = body.items[0].metadata.name;
       kubectlPortForward(mockNamespace, mockPod, mockServerPort); //forward service?
 
       // wait for pod to be ready
     });
-    after(() => {
-      // uninstall helm chart
+    after(async function () {
+      await helm.uninstallChart("mockserver", "mockserver");
+      await helm.uninstallChart("mockserver-config", "mockserver");
     });
 
-    it("Should not receive HTTP traffic", function () {
-      return mockServerClient("localhost", mockServerPort)
-        .verify(
-          {
-            path: "/",
-          },
-          0,
-          0
-        )
-        .then(
-          function () {},
-          function (error) {
-            assert.fail("HTTP endpoint was called");
-          }
-        );
-    }).timeout(5000);
+    // it("Should not receive HTTP traffic", function () {
+    //   return mockServerClient("localhost", mockServerPort)
+    //     .verify(
+    //       {
+    //         path: "/",
+    //       },
+    //       0,
+    //       0
+    //     )
+    //     .then(
+    //       function () {},
+    //       function (error) {
+    //         assert.fail("HTTP endpoint was called");
+    //       }
+    //     );
+    // }).timeout(5000);
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
-      await k8sApply(loggingConfigCRD, namespace);
-      // await waitForDaemonSet("logging-fluent-bit", namespace);// TODO
-      await sleep(70000);
-    }).timeout(90000);
+      // await k8sApply(loggingConfigCRD, namespace);
+      // // await waitForDaemonSet("logging-fluent-bit", namespace);// TODO
+      // await sleep(70000);
+    }); //.timeout(90000);
 
     it("Should receive HTTP traffic from fluent-bit", function () {
       // verify server
@@ -103,7 +116,7 @@ describe("Telemtry operator", () => {
           }
         );
     }).timeout(5000);
-  });
+  }).timeout(80000);
 
   // let pod = await k8sCoreV1Api.createNamespacedPod(namespace, {
   //   metadata: { name: "test-server" },
