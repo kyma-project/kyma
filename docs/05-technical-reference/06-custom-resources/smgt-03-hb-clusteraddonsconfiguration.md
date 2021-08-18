@@ -106,4 +106,4 @@ These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| [Helm Broker](../../01-overview/02-main-areas/service-management/smgt-10-hb-overview.md) |  Fetches cluster-wide addons provided by this CR. |
+| [Helm Broker](../../01-overview/main-areas/service-management/smgt-10-hb-overview.md) |  Fetches cluster-wide addons provided by this CR. |
