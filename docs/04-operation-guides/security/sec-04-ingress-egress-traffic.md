@@ -17,7 +17,7 @@ The configuration specifies the following parameters and their values:
 
 ## TLS management
 
-Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. You can do it using a [values.yaml](../operations/03-change-kyma-config-values.md) file. See a sample YAML file specifying the values to override:
+Kyma employs the Bring Your Own Domain/Certificates model that requires you to supply the certificate and key during installation. You can do it using a [values.yaml](../operations/04-change-kyma-config-values.md) file. See a sample YAML file specifying the values to override:
 
 ```yaml
 global:

@@ -34,7 +34,7 @@ By default, `monitoring-prometheus-istio-server` is not provided as a data sourc
           enabled: "true"
   ```
 
-2. [Deploy](../../../04-operation-guides/operations/03-change-kyma-config-values.md) the values YAML file.
+2. [Deploy](../../../04-operation-guides/operations/04-change-kyma-config-values.md) the values YAML file.
 
 3. Restart the Grafana deployment with the following command:
 
