@@ -7,9 +7,9 @@ kind: DaemonSet
 replicaCount: 1
 
 image:
-  repository: fluent/fluent-bit
+  repository: eu.gcr.io/kyma-project/external/fluent/fluent-bit
   # Overrides the image tag whose default is {{ .Chart.AppVersion }}
-  tag: ""
+  tag: "1.8.3"
   pullPolicy: Always
 
 testFramework:
