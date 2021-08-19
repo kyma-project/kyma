@@ -195,4 +195,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    >**TIP:** To check the deployment name, run: `kubectl get deployments -A`
 
+   >**TIP:** To avoid adding every subdomain to the API Gateway **domain.allowlist** parameter, disable the allowlist mechanism. Override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart by changing its value to `false`. For more details on overrides, see how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
+
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
