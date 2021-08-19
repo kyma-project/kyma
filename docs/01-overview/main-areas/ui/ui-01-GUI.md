@@ -2,6 +2,8 @@
 title: Busola - the Kyma Dashboard
 ---
 
-Kyma uses Busola as a central administration dashboard, which provides an graphical overview of your cluster and deployments. You can deploy microservices, create Functions, and manage their configurations. You can also use it to register cloud providers for additional services, create instances of these services, and use them in your microservices or Functions.
+Kyma uses Busola as a central administration dashboard, which provides a graphical overview of your cluster and deployments.
 
-Busola is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro frontend applications managed by the [Luigi framework](https://luigi-project.io/). Busola has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
+You can deploy microservices, create Functions, and manage their configurations. You can also use it to register cloud providers for additional services, create instances of these services, and use them in your microservices or Functions.
+
+Busola is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro front-end applications managed by the [Luigi framework](https://luigi-project.io/). Busola has a dedicated Node.js back end, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
