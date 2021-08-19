@@ -128,7 +128,7 @@ initContainers:
       mountPath: /main
     - name: dynamic-config
       mountPath: /dynamic
-    command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic']
+    command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic || touch /fluent-bit/etc/dynamic/empty.conf']
 volumes:
   - name: shared-fluent-bit-config
     emptyDir: {}
