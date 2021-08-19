@@ -70,11 +70,6 @@ describe("SKR SVCAT migration test", function() {
     await sampleResources.deploy()
   });
 
-  let secretsAndPresets
-  it(`Should store secrets and presets`, async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
-  });
-
   it('Should mark the Platform for migration', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
   })
@@ -93,6 +88,11 @@ describe("SKR SVCAT migration test", function() {
   // this sleep is created to have a time to check the cluster before deprovisioning it
   it(`Should Sleep and wakeup properly`, async function() {
     await sampleResources.goodNight()
+  });
+
+  let secretsAndPresets
+  it(`Should store secrets and presets`, async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
   });
 
   it(`Should pass sanity check`, async function() {
