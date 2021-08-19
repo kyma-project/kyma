@@ -153,13 +153,18 @@ func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 			if !ok {
 				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", KeyKey)
 			}
-
-			_, err := ssh.ParsePrivateKey([]byte(key))
+			passphrase, ok := options.Credentials[PasswordKey]
+			var err error
+			if ok {
+				_, err =ssh.ParseRawPrivateKeyWithPassphrase([]byte(key), []byte(passphrase))
+			} else {
+				_, err = ssh.ParsePrivateKey([]byte(key))
+			}
 			if err != nil {
 				return git2go.RemoteCallbacks{}, err
 			}
 			//TODO: check if username is needed
-			cred, err := git2go.NewCredentialSSHKeyFromMemory("", "", key, "")
+			cred, err := git2go.NewCredentialSSHKeyFromMemory("", "", key, passphrase)
 			if err != nil {
 				return git2go.RemoteCallbacks{}, err
 			}

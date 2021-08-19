@@ -1,12 +1,10 @@
 package main
 
 import (
-	"log"
-	"os"
-
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	"log"
 )
 
 const envPrefix = "APP"
@@ -33,13 +31,6 @@ func main() {
 	gitOptions := cfg.getOptions()
 
 	log.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
-	commitId, err := operator.LastCommit(gitOptions)
-	if err != nil {
-		log.Fatalln(err.Error())
-		os.Exit(1)
-	}
-	log.Println(commitId)
-	os.Exit(0)
 	commit, err := operator.Clone(cfg.MountPath, gitOptions)
 	if err != nil {
 		log.Fatalln(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))

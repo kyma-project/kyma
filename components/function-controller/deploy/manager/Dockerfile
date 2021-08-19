@@ -4,6 +4,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2-dev
 
 WORKDIR ${BASE_APP_DIR}
 
@@ -21,7 +22,8 @@ FROM alpine:3.13.5 as certs
 RUN apk --update add ca-certificates
 
 # result container
-FROM scratch
+FROM alpine:3.13.5
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2-dev
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
