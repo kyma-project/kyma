@@ -148,25 +148,29 @@ func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 		}
 	case RepositoryAuthSSHKey:
 		{
-			//TODO: ssh with passphrase
 			key, ok := options.Credentials[KeyKey]
 			if !ok {
 				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", KeyKey)
 			}
 			passphrase, ok := options.Credentials[PasswordKey]
+			if !ok {
+				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", PasswordKey)
+			}
+
 			var err error
-			if ok {
-				_, err =ssh.ParseRawPrivateKeyWithPassphrase([]byte(key), []byte(passphrase))
-			} else {
+			if passphrase == "" {
 				_, err = ssh.ParsePrivateKey([]byte(key))
+			} else {
+				_, err = ssh.ParseRawPrivateKeyWithPassphrase([]byte(key), []byte(passphrase))
 			}
+
 			if err != nil {
-				return git2go.RemoteCallbacks{}, err
+				return git2go.RemoteCallbacks{}, errors.Wrapf(err, "while validation of key with passphrase set to: %t", passphrase != "")
 			}
-			//TODO: check if username is needed
-			cred, err := git2go.NewCredentialSSHKeyFromMemory("", "", key, passphrase)
+			log.Println(key)
+			cred, err := git2go.NewCredentialSSHKeyFromMemory("git", "", key, passphrase)
 			if err != nil {
-				return git2go.RemoteCallbacks{}, err
+				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating ssh credential in git2go")
 			}
 			return git2go.RemoteCallbacks{
 				CredentialsCallback:      authCallback(cred),
@@ -210,13 +214,14 @@ func (g *Git2GoClient) isBranch(ref *git2go.Reference, branchName string) bool {
 
 func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
 	return func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+		log.Println(username)
 		return cred, nil
 	}
 }
 
 func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
 	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
-		return 0
+		return git2go.ErrOk
 	}
 }
 

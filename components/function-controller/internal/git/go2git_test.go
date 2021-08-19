@@ -23,31 +23,6 @@ const (
 	secondCommitID = "8b27a9d6f148533773ae0666dc27c5b359b46553"
 )
 
-//
-//func TestGo2GitClient_LastCommitBranch(t *testing.T) {
-//	//GIVEN
-//	//repoPath := prepareRepo(t)
-//	//defer deleteTmpRepo(t, repoPath)
-//	//cloner := &git2goClonerMock{repoPath: repoPath}
-//	//assertHeadCommitNotEqual(t, repoPath, branchName)
-//
-//	cloner := &git2goCloner{}
-//	opts := Options{Reference: branchName, URL: "https://github.com/dbadura/test.git", Auth: &AuthOptions{}}
-//	//opts := Options{Reference: branchName, URL: "https://gitlab.com/dbadura/postgres_opencl_example.git", Auth: &AuthOptions{}}
-//	//opts := Options{Reference: "release-0.4", URL: "https://github.com/kyma-project/kyma.git", Auth: &AuthOptions{}}
-//	//opts := Options{Reference: "dupa", Auth: &AuthOptions{}}
-//	client := Git2GoClient{cloner}
-//	//WHEN
-//
-//	commitID, err := client.LastCommit(opts)
-//	//lastCommit, err := client.LastCommit(opts)
-//
-//	//THEN
-//	require.NoError(t, err)
-//	fmt.Println(commitID)
-//	//require.Equal(t, branchCommit, lastCommit)
-//}
-
 func TestNewGit2Go_LastCommit(t *testing.T) {
 	//GIVEN
 	testCases := []struct {
