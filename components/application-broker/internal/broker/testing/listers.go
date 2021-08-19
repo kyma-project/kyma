@@ -1,14 +1,12 @@
 package testing
 
 import (
+	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/pkg/errors"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-	"knative.dev/pkg/reconciler/testing"
-
-	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
@@ -18,7 +16,7 @@ var clientSetSchemes = []func(*runtime.Scheme) error{
 }
 
 type Listers struct {
-	sorter testing.ObjectSorter
+	sorter ObjectSorter
 }
 
 func NewScheme() *runtime.Scheme {
@@ -36,7 +34,7 @@ func NewListers(objs []runtime.Object) Listers {
 	scheme := NewScheme()
 
 	ls := Listers{
-		sorter: testing.NewObjectSorter(scheme),
+		sorter: NewObjectSorter(scheme),
 	}
 
 	ls.sorter.AddObjects(objs...)
