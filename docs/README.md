@@ -6,12 +6,12 @@ Out of the box, Kyma offers various functionalities, such as:
 
 - Serverless development platform to run lightweight Functions in a cost-efficient and scalable way
 - System connectivity that provides endpoint to register Events and APIs of external applications
-- Eventing that provides messaging channel to receive Events, enrich them, and trigger business flows using Functions or services
+- Eventing that provides messaging channel to receive events, enrich them, and trigger business flows using Functions or services
 - Service Mesh for service-to-service communication and proxying
-- Service consumption
+- Service management
 - Secure API exposure
 - In-cluster observability
-- CLI supported by the intuitive Console UI
+- CLI supported by the intuitive UI
 
 Read about [Kyma main areas](./01-overview/main-areas) to learn more.
 

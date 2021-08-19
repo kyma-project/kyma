@@ -96,4 +96,4 @@ Follow these steps to redirect the metrics:
 
    The Prometheus UI shows a new value every 10 seconds upon refreshing the page.
 
-4. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).
+4. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
