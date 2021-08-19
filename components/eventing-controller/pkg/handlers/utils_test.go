@@ -329,6 +329,12 @@ func TestShortenNameAndAppendHash(t *testing.T) {
 		nameWithHash := shortenNameAndAppendHash(test.name, test.hash, test.maxLen)
 		g.Expect(nameWithHash).To(Equal(test.output))
 	}
+
+	// shortenNameAndAppendHash should panic if it cannot fit the hash
+	defer func() {
+		g.Expect(recover()).ToNot(BeNil())
+	}()
+	shortenNameAndAppendHash("panic-much", fakeHash, len(fakeHash)-1)
 }
 
 func min(i, j int) int {
