@@ -1,9 +1,9 @@
 package testing
 
 import (
-"fmt"
+	"fmt"
 
-clientgotesting "k8s.io/client-go/testing"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 // Actions stores list of Actions recorded by the reactors.
@@ -58,4 +58,3 @@ func (l ActionRecorderList) ActionsByVerb() (Actions, error) {
 	}
 	return a, nil
 }
-
