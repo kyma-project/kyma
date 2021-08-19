@@ -8,4 +8,5 @@ loki:
 fluent-bit:
   resources:
     limits:
+      cpu: 800m
       memory: 256Mi

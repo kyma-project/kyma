@@ -7,7 +7,7 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   ensureCommerceMockLocalTestFixture,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
@@ -53,8 +53,8 @@ describe("CommerceMock tests", function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNamespace);
   });
 
   it("order.created.v1 event should trigger the lastorder function", async function () {
