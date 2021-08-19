@@ -21,11 +21,11 @@ The Application Gateway has the following parameters:
 ## Renaming secrets
 
 In order to rename secret containing CA cert the following arguments need to be passed:
-- caCertificateSecret containing a new name
-- caCertificateSecretToMigrate containing an old name
-- caCertificateSecretKeysToMigrate containing a list of keys to copy from the old secret
+- **caCertificateSecret** 
+- **caCertificateSecretToMigrate** 
+- **caCertificateSecretKeysToMigrate**
 
-In order to rename secret containing CA cert and key the following arguments need to be passed:
+To rename the Secret containing the CA cert and key, you must pass these arguments:
 - connectorCertificateSecret containing a new name
 - connectorCertificateSecretToMigrate containing an old name
 - connectorCertificateSecretKeysToMigrate containing a list of keys to copy from the old secret

@@ -40,12 +40,12 @@ The Runtime Agent uses these environment variables:
 - **APP_DIRECTOR_PROXY_PORT** specifies the port used by the Director Proxy.
 - **APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY** specifies whether to communicate with the Director with disabled TLS verification.
 - **APP_HEALTH_PORT** specifies the health check port.
-- **APP_CA_CERT_SECRET_TO_MIGRATE**  specifies namespace and the name of the Secret which stores the CA certificate to be renamed. Requires the `Namespace/secret name` format. 
-- **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE** specifies list of keys to be copied when migrating old secret specified in `APP_CA_CERT_SECRET_TO_MIGRATE` to the new one specified in `APP_CA_CERTIFICATES_SECRET`. Requires JSON table format.
+- **APP_CA_CERT_SECRET_TO_MIGRATE** specifies the Namespace and the name of the Secret which stores the CA certificate to be renamed. Requires the `{NAMESPACE}/{SECRET_NAME}` format. 
+- **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE** specifies the list of keys to be copied when migrating the old Secret specified in `APP_CA_CERT_SECRET_TO_MIGRATE` to the new one specified in `APP_CA_CERTIFICATES_SECRET`. Requires the JSON table format.
 
-## Renaming secrets
+## Renaming Secrets
 
-In order to rename secret containing CA cert the following environment variables need to be specified:
+To rename the Secret containing the CA cert, you must specify these environment variables:
 - **APP_CA_CERTIFICATES_SECRET**
 - **APP_CA_CERT_SECRET_TO_MIGRATE**
 - **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE**
