@@ -84,4 +84,4 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [`README.md`](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md) document.
 
-> **NOTE:** If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).
+> **NOTE:** If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).

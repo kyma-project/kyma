@@ -12,4 +12,4 @@ Different Service Brokers registered ClusterServiceClasses or ServiceClasses wit
 
 ## Remedy
 
-Make sure that the addons IDs you provide in your ClusterAddonsConfiguration or AddonsConfiguration CRs are uniqe. Read about the [addons registration rules](../../03-tutorials/service-management/smgt-16-hb-register-addons-sc.md#registration-rules) for more information.
+Make sure that the addons IDs you provide in your ClusterAddonsConfiguration or AddonsConfiguration CRs are uniqe. Read about the [addons registration rules](../../03-tutorials/00-service-management/smgt-16-hb-register-addons-sc.md#registration-rules) for more information.

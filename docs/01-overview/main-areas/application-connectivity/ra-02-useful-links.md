@@ -7,11 +7,11 @@ If you're interested in learning more about Runtime Agent, follow these links to
 - Perform some simple and more advanced tasks:
 
     - [Enable Kyma with Runtime Agent](../../../04-operation-guides/operations/ra-01-enable-kyma-with-runtime-agent.md)
-    - [Establish a secure connection with Compass](../../../03-tutorials/application-connectivity/ra-01-establish-secure-connection-with-compass.md)
-    - [Maintain a secure connection with Compass](../../../03-tutorials/application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
-    - [Revoke a client certificate](../../../03-tutorials/application-connectivity/ra-03-revoke-client-certificate.md)
-    - [Configure Runtime Agent with Compass](../../../03-tutorials/application-connectivity/ra-04-configure-runtime-agent-with-compass.md)
-    - [Reconnect Runtime Agent with Compass](../../../03-tutorials/application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md)
+    - [Establish a secure connection with Compass](../../../03-tutorials/00-application-connectivity/ra-01-establish-secure-connection-with-compass.md)
+    - [Maintain a secure connection with Compass](../../../03-tutorials/00-application-connectivity/ra-02-maintain-secure-connection-with-compass.md)
+    - [Revoke a client certificate](../../../03-tutorials/00-application-connectivity/ra-03-revoke-client-certificate.md)
+    - [Configure Runtime Agent with Compass](../../../03-tutorials/00-application-connectivity/ra-04-configure-runtime-agent-with-compass.md)
+    - [Reconnect Runtime Agent with Compass](../../../03-tutorials/00-application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md)
     
 - Analyze Runtime Agent specification and configuration files:
 

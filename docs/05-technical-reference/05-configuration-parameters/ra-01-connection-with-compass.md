@@ -15,7 +15,7 @@ The initial connection requires the following parameters:
 
 Runtime Agent reads this configuration from the Secret specified in the Runtime Agent Deployment (`compass-agent-configuration` by default).
 
-To see how to create the Secret, see the [tutorial](../../03-tutorials/application-connectivity/ra-04-configure-runtime-agent-with-compass.md).
+To see how to create the Secret, see the [tutorial](../../03-tutorials/00-application-connectivity/ra-04-configure-runtime-agent-with-compass.md).
 
 ## Connection status
 
@@ -25,4 +25,4 @@ The connection status is preserved in the [CompassConnection](../06-custom-resou
 
 If the connection with Compass fails, Runtime Agent keeps trying to connect with the token from the Secret. If the connection is established successfully, Runtime Agent ignores the Secret until the connection is lost.
 
-To see how to reconnect Runtime Agent with Compass, see the [tutorial](../../03-tutorials/application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md).
+To see how to reconnect Runtime Agent with Compass, see the [tutorial](../../03-tutorials/00-application-connectivity/ra-05-reconnect-runtime-agent-with-compass.md).

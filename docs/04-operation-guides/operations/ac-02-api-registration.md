@@ -22,4 +22,4 @@ You can specify additional headers and query parameters with requests to:
 
 The headers and query parameters for calls to the target URL and to authenticate with OAuth are stored in Kubernetes Secrets.
 
->**NOTE:** See the tutorial on how to [register a secured API](../../03-tutorials/application-connectivity/ac-05-register-secured-api.md).
+>**NOTE:** See the tutorial on how to [register a secured API](../../03-tutorials/00-application-connectivity/ac-05-register-secured-api.md).

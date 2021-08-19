@@ -14,7 +14,7 @@ The monitoring flow in Kyma comes down to the following components and steps:
 4. If you have configured a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
 5. You can visualize metrics and track their historical data on **Grafana** dashboards.
 
-Learn how to [set up the monitoring flow](../../03-tutorials/observability/obsv-01-monitoring-overview.md).
+Learn how to [set up the monitoring flow](../../03-tutorials/00-observability/obsv-01-monitoring-overview.md).
 
 ## Monitoring components
 
@@ -39,6 +39,6 @@ Prometheus stores this polled data in a time-series database (TSDB) and runs rul
 
 5. [**Alertmanager**](https://prometheus.io/docs/alerting/alertmanager/) receives alerts from Prometheus and forwards this data to configured notification channels like Slack or Victor Ops.
 
-    >**NOTE:** By default, no notification channels are configured. You need to [set them up](../../03-tutorials/observability/obsv-05-send-notifications.md).
+    >**NOTE:** By default, no notification channels are configured. You need to [set them up](../../03-tutorials/00-observability/obsv-04-send-notifications.md).
 
 6. [**Grafana**](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. Learn how to [access the Grafana UI](../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
