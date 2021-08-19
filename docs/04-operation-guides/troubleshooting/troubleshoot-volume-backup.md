@@ -1,11 +1,10 @@
 ---
 title: Cannot create a volume snapshot
-type: Troubleshooting
 ---
 
 ## Symptom
 
-Cannot create a volume snapshop
+You cannot create a volume snapshop.
 
 ## Cause
 
@@ -15,4 +14,5 @@ This may happen if PersistentVolumeClaim and VolumeSnapshot specifications are i
 
 ## Remedy
 
-Wait until the PersistentVolumeClaim is bound to the PersistentVolume and create the snapshot afterward.
+Wait until the PersistentVolumeClaim is bound to the PersistentVolume.
+Then, create the snapshot.
