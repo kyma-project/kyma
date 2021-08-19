@@ -14,7 +14,6 @@ limitations under the License.
 // temporarily copied from https://github.com/knative/pkg/blob/main/reconciler/testing/actions.go
 // to avoid importing knative.dev module containing security vulnerabilities
 
-
 package testing
 
 import (
