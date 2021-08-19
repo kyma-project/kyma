@@ -513,9 +513,9 @@ function waitForDaemonSet(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
     `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
     {},
-    (_type, _apiObj, watchObj) => {
+    (_type, watchObj, _) => {
       return (
-        _apiObj.status.numberReady === _apiObj.status.desiredNumberScheduled
+        watchObj.status.numberReady === watchObj.status.desiredNumberScheduled
       );
     },
     timeout,

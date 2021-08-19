@@ -1,24 +1,21 @@
-const uuid = require("uuid");
 const k8s = require("@kubernetes/client-node");
 const { assert } = require("chai");
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
 const helm = require("./helm");
 const {
   waitForDaemonSet,
+  waitForDeployment,
   k8sCoreV1Api,
-  k8sDynamicApi,
   k8sApply,
   k8sDelete,
   kubectlPortForward,
-  waitForDeployment,
 } = require("../utils");
+const mockServerClient = require("mockserver-client").mockServerClient;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-const mockServerClient = require("mockserver-client").mockServerClient;
 
 describe("Telemetry operator", function () {
   let namespace = "kyma-system";
@@ -26,13 +23,13 @@ describe("Telemetry operator", function () {
   let mockServerPort = 1080;
   let cancelPortForward = null;
 
-  const loggingConfigYaml = fs.readFileSync(
+  const _loggingConfigYaml = fs.readFileSync(
     path.join(__dirname, "./logging-config.yaml"),
     {
       encoding: "utf8",
     }
   );
-  const loggingConfigCRD = k8s.loadAllYaml(loggingConfigYaml);
+  const loggingConfigCRD = k8s.loadAllYaml(_loggingConfigYaml);
 
   it("Operator should be ready", async function () {
     let res = await k8sCoreV1Api.listNamespacedPod(
@@ -46,18 +43,17 @@ describe("Telemetry operator", function () {
     let podList = res.body.items;
     assert.equal(podList.length, 1);
   });
-  describe("Prepare mockserver", function () {
+  describe("Set up mockserver", function () {
     before(async function () {
-      // TODO make sure mock is not installed before: error handling
       await helm.installChart(
         "mockserver",
         "./telemetry-test/helm/mockserver",
-        "mockserver"
+        mockNamespace
       );
       await helm.installChart(
         "mockserver-config",
         "./telemetry-test/helm/mockserver-config",
-        "mockserver"
+        mockNamespace
       );
       await waitForDeployment("mockserver", "mockserver");
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
@@ -94,6 +90,7 @@ describe("Telemetry operator", function () {
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
       await k8sApply(loggingConfigCRD, namespace);
+      await sleep(10000); // wait for controller to reconcile
       await waitForDaemonSet("logging-fluent-bit", namespace);
     });
 

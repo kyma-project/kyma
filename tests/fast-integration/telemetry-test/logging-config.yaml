@@ -1,7 +1,7 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LoggingConfiguration
 metadata:
-  name: loggingconfiguration-sample
+  name: loggingconfiguration-test
 spec:
   sections:
     - content: |
