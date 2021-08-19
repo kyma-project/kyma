@@ -147,7 +147,6 @@ func New(applicationFinder appFinder,
 	service director.ServiceConfig, directorProxyURL string,
 	sbInformer cache.SharedIndexInformer, gatewayBaseURL string,
 	idSelector appSvcIDSelector,
-	newEventingFlow bool,
 ) *Server {
 
 	idpRaw := idprovider.New()
@@ -171,8 +170,7 @@ func New(applicationFinder appFinder,
 			appEnabledChecker: enabledChecker,
 		},
 		provisioner: NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
-			eaClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq,
-			newEventingFlow),
+			eaClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
 			eaClient, log, idSelector, directorSvc),
 		binder: &bindService{

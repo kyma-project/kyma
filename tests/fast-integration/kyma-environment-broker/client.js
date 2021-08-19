@@ -90,7 +90,7 @@ class KEBClient {
     }
   }
 
-  async provisionSKR(name, instanceID) {
+  async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
@@ -103,6 +103,19 @@ class KEBClient {
         name: name,
       },
     };
+
+    if (platformCreds && btpOperatorCreds) {
+      payload.context["sm_platform_credentials"] = {
+        credentials: {
+          basic: {
+            username: platformCreds.credentials.username,
+            password: platformCreds.credentials.password,
+          }
+        },
+        url: btpOperatorCreds.smURL
+      }
+    }
+
     const endpoint = `service_instances/${instanceID}`;
     try {
       return await this.callKEB(payload, endpoint, "put");

@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"
     pullPolicy: IfNotPresent
 
 tests:
@@ -34,14 +34,14 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210610-d25e85b1"
+      tag: "20210817-8cdbfce3"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-11656"
+    tag: "PR-11785"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -81,21 +81,21 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-11498"
+    tag: "PR-11697"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "6b4289ab"
+      tag: "PR-11697"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "6b4289ab"
+      tag: "PR-11697"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "6b4289ab"
+      tag: "PR-11697"
     python39:
       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "PR-11498"
+      tag: "PR-11697"
 
 deployment:
   replicas: 1
@@ -166,6 +166,8 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      functionPublisherProxyAddress:
+        value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:

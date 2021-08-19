@@ -4,29 +4,36 @@ import "fmt"
 
 type queryProvider struct{}
 
-func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
+func (qp queryProvider) applicationsAndLabelsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
-	result: applicationsForRuntime(runtimeID: "%s") {
-		%s
-	}
-}`, runtimeID, applicationsQueryData())
+		runtime(id: "%s") {
+			%s
+		}
+		applicationsForRuntime(runtimeID: "%s") {
+			%s
+		}
+	}`, runtimeID, labels(), runtimeID, applicationsQueryData())
 }
 
 func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
 	return fmt.Sprintf(`mutation {
-		result: setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
+		setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
 			%s
 		}
 	}`, runtimeId, key, value, labelData())
 }
 
-func labelData() string {
-	return `key
-			value`
+func labels() string {
+	return `labels`
 }
 
 func applicationsQueryData() string {
 	return pageData(applicationData())
+}
+
+func labelData() string {
+	return `key
+			value`
 }
 
 func pageData(item string) string {
