@@ -28,7 +28,6 @@ podSecurityContext:
 securityContext:
   allowPrivilegeEscalation: false
 
-
 livenessProbe:
   httpGet:
     path: /healthz
@@ -64,6 +63,8 @@ serviceMonitor:
     bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     tlsConfig:
       insecureSkipVerify: true
+
+logProcessor: fluent-bit
 
 nodeSelector: {}
 

@@ -26,6 +26,11 @@ spec:
             - /manager
           args:
             - --leader-elect
+            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
+            - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
+            - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
+            - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
+            - --fluent-bit-ns={{ .Release.Namespace }}
           name: manager
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
