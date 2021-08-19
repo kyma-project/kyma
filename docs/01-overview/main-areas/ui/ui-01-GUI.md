@@ -2,6 +2,8 @@
 title: Busola - Kyma Dashboard
 ---
 
+Kyma uses Busola as a simple, user-friendly dashboard that provides a graphical interface for administrative and development purposes. You can use it to keep an overview of your cluster, and to develop and maintain your deployments.
+
 Busola is a web-based UI for managing resources within Kyma or any Kubernetes cluster. It consists of separate micro frontend applications managed by the Luigi framework.
 
 Busola has a dedicated Node.js backend, which is a proxy for a [Kubernetes API server](https://kubernetes.io/docs/concepts/overview/components/#kube-apiserver).
