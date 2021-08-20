@@ -26,7 +26,7 @@ function loadCRD(filepath) {
 }
 
 describe("Telemetry operator", function () {
-  let namespace = "kyma-system";
+  let telemetryNamespace = "kyma-system"; // operator flag 'fluent-bit-ns' is set to kyma-system
   let mockNamespace = "mockserver";
   let mockServerPort = 1080;
   let cancelPortForward = null;
@@ -34,9 +34,24 @@ describe("Telemetry operator", function () {
 
   const loggingConfigCRD = loadCRD("./logging-config.yaml");
 
+  it("Should install the operator", async () => {
+    // await k8sCoreV1Api.createNamespace({
+    //   metadata: { name: telemetryNamespace },
+    // });
+    await helm.installChart(
+      "telemetry",
+      "../../resources/telemetry",
+      telemetryNamespace
+    );
+    await waitForDeployment(
+      "telemetry-operator-controller-manager",
+      telemetryNamespace
+    );
+  });
+
   it("Operator should be ready", async function () {
     let res = await k8sCoreV1Api.listNamespacedPod(
-      namespace,
+      telemetryNamespace,
       "true",
       undefined,
       undefined,
@@ -48,9 +63,16 @@ describe("Telemetry operator", function () {
   });
   describe("Set up mockserver", function () {
     before(async function () {
-      await k8sCoreV1Api.createNamespace({
-        metadata: { name: mockNamespace },
-      });
+      try {
+        await k8sCoreV1Api.createNamespace({
+          metadata: { name: mockNamespace },
+        });
+      } catch (error) {
+        console.log(
+          `Namespace ${telemetryNamespace} could not be created`,
+          error
+        );
+      }
       await helm.installChart(
         "mockserver",
         "./telemetry-test/helm/mockserver",
@@ -75,7 +97,8 @@ describe("Telemetry operator", function () {
       await helm.uninstallChart("mockserver", "mockserver");
       await helm.uninstallChart("mockserver-config", "mockserver");
       await k8sCoreV1Api.deleteNamespace(mockNamespace);
-      k8sDelete(loggingConfigCRD, namespace);
+      // await k8sCoreV1Api.deleteNamespace(telemetryNamespace);
+      k8sDelete(loggingConfigCRD, telemetryNamespace);
     });
 
     it("Should not receive HTTP traffic", function () {
@@ -96,9 +119,9 @@ describe("Telemetry operator", function () {
     }).timeout(5000);
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
-      await k8sApply(loggingConfigCRD, namespace);
+      await k8sApply(loggingConfigCRD, telemetryNamespace);
       await sleep(10000); // wait for controller to reconcile
-      await waitForDaemonSet(fluentBitName, namespace);
+      await waitForDaemonSet(fluentBitName, telemetryNamespace);
     });
 
     it("Should receive HTTP traffic from fluent-bit", function () {
