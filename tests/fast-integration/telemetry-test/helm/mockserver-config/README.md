@@ -3,7 +3,7 @@
 ### Prerequisites
 
 - Kubernetes (i.e. [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)) 
-- [Helm](https://docs.helm.sh/using_helm/#quickstart-guide)
+<!-- - [Helm](https://docs.helm.sh/using_helm/#quickstart-guide) -->
 
 ### Helm Install
 
