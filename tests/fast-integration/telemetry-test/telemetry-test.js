@@ -14,6 +14,8 @@ const {
 } = require("../utils");
 const mockServerClient = require("mockserver-client").mockServerClient;
 
+let mockServerPort = 1080;
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -25,19 +27,33 @@ function loadCRD(filepath) {
   return k8s.loadAllYaml(_loggingConfigYaml);
 }
 
+function checkMockserverWasCalled(wasCalled) {
+  const args = wasCalled ? [1] : [0, 0];
+  const not = wasCalled ? "not" : "";
+  return mockServerClient("localhost", mockServerPort)
+    .verify(
+      {
+        path: "/",
+      },
+      ...args
+    )
+    .then(
+      function () {},
+      function (error) {
+        assert.fail(`"The HTTP endpoint was ${not} called`);
+      }
+    );
+}
+
 describe("Telemetry operator", function () {
   let telemetryNamespace = "kyma-system"; // operator flag 'fluent-bit-ns' is set to kyma-system
   let mockNamespace = "mockserver";
-  let mockServerPort = 1080;
   let cancelPortForward = null;
   let fluentBitName = "telemetry-fluent-bit";
 
   const loggingConfigCRD = loadCRD("./logging-config.yaml");
 
   it("Should install the operator", async () => {
-    // await k8sCoreV1Api.createNamespace({
-    //   metadata: { name: telemetryNamespace },
-    // });
     await helm.installChart(
       "telemetry",
       "../../resources/telemetry",
@@ -94,28 +110,15 @@ describe("Telemetry operator", function () {
     });
     after(async function () {
       cancelPortForward();
-      await helm.uninstallChart("mockserver", "mockserver");
-      await helm.uninstallChart("mockserver-config", "mockserver");
+      await helm.uninstallChart("mockserver", mockNamespace);
+      await helm.uninstallChart("mockserver-config", mockNamespace);
+      await helm.uninstallChart("telemetry", telemetryNamespace);
       await k8sCoreV1Api.deleteNamespace(mockNamespace);
-      // await k8sCoreV1Api.deleteNamespace(telemetryNamespace);
       k8sDelete(loggingConfigCRD, telemetryNamespace);
     });
 
     it("Should not receive HTTP traffic", function () {
-      return mockServerClient("localhost", mockServerPort)
-        .verify(
-          {
-            path: "/",
-          },
-          0,
-          0
-        )
-        .then(
-          function () {},
-          function (error) {
-            assert.fail("HTTP endpoint was called");
-          }
-        );
+      return checkMockserverWasCalled(false);
     }).timeout(5000);
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
@@ -125,19 +128,7 @@ describe("Telemetry operator", function () {
     });
 
     it("Should receive HTTP traffic from fluent-bit", function () {
-      return mockServerClient("localhost", mockServerPort)
-        .verify(
-          {
-            path: "/",
-          },
-          1
-        )
-        .then(
-          function () {},
-          function (error) {
-            assert.fail("The HTTP endpoint was not called");
-          }
-        );
+      return checkMockserverWasCalled(true);
     }).timeout(5000);
   });
 });

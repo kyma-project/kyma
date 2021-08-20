@@ -22,15 +22,6 @@ function uninstallChart(name, namespace) {
   return execShellCommand(`helm uninstall -n ${namespace} ${name}`);
 }
 
-async function InstallAndUninstall() {
-  await installChart("mockserver", "./helm/mockserver", "mockserver");
-  await uninstallChart("mockserver", "mockserver");
-}
-
-// InstallAndUninstall();
-// asyncChartInstall("mockserver", "./helm/mockserver", "mockserver");
-// asyncChartUninstall("mockserver", "mockserver");
-
 module.exports = {
   installChart,
   uninstallChart,
