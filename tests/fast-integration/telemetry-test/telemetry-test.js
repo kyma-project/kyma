@@ -13,8 +13,9 @@ const {
   debug,
 } = require("../utils");
 const mockServerClient = require("mockserver-client").mockServerClient;
+const mockServerPort = 1080;
 
-let mockServerPort = 1080;
+// NOTE: Test needs to be manually triggered at the moment
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
