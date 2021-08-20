@@ -1,0 +1,12 @@
+{{- if gt (len .Values.luaScripts) 0 -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fluent-bit.fullname" . }}-luascripts
+  labels:
+    {{- include "fluent-bit.labels" . | nindent 4 }}
+data:
+  {{ range $key, $value := .Values.luaScripts }}
+  {{ $key }}: {{ $value | quote }}
+  {{ end }}
+{{- end -}}
