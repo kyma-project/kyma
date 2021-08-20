@@ -1,0 +1,36 @@
+apiVersion: logging.kubesphere.io/v1alpha2
+kind: FluentBit
+metadata:
+  name: fluent-bit
+  namespace: kubesphere-logging-system
+  labels:
+    app.kubernetes.io/name: fluent-bit
+spec:
+  image: kubesphere/fluent-bit:v1.8.3
+  fluentBitConfigName: fluent-bit-config
+---
+apiVersion: logging.kubesphere.io/v1alpha2
+kind: FluentBitConfig
+metadata:
+  name: fluent-bit-config
+  namespace: kubesphere-logging-system
+  labels:
+    app.kubernetes.io/name: fluent-bit
+spec:
+  inputSelector:
+    matchLabels:
+      logging.kubesphere.io/enabled: "true"
+  outputSelector:
+    matchLabels:
+      logging.kubesphere.io/enabled: "true"
+---
+apiVersion: logging.kubesphere.io/v1alpha2
+kind: Input
+metadata:
+  name: dummy
+  namespace: kubesphere-logging-system
+  labels:
+    logging.kubesphere.io/enabled: "true"
+spec:
+  dummy:
+    tag: my_dummy

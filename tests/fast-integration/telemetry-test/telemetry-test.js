@@ -5,6 +5,7 @@ const path = require("path");
 const helm = require("./helm");
 const {
   waitForDaemonSet,
+  waitForPodWithLabel,
   waitForDeployment,
   k8sCoreV1Api,
   k8sApply,
@@ -46,36 +47,33 @@ function checkMockserverWasCalled(wasCalled) {
 }
 
 describe("Telemetry operator", function () {
-  let telemetryNamespace = "kyma-system"; // operator flag 'fluent-bit-ns' is set to kyma-system
+  let telemetryNamespace = "kubesphere-logging-system"; // operator flag 'fluent-bit-ns' is set to kyma-system
   let mockNamespace = "mockserver";
   let cancelPortForward = null;
-  let fluentBitName = "telemetry-fluent-bit";
+  let fluentBitName = "fluent-bit";
 
   const loggingConfigCRD = loadCRD("./logging-config.yaml");
 
   it("Should install the operator", async () => {
-    await helm.installChart(
-      "telemetry",
-      "../../resources/telemetry",
-      telemetryNamespace
-    );
-    await waitForDeployment(
-      "telemetry-operator-controller-manager",
-      telemetryNamespace
-    );
+    try {
+      await k8sCoreV1Api.createNamespace({
+        metadata: { name: mockNamespace },
+      });
+    } catch (error) {
+      console.log(`Namespace ${telemetryNamespace} could not be created`);
+    }
+    await k8sApply(loadCRD("./setup-operator.yaml"));
   });
 
   it("Operator should be ready", async function () {
-    let res = await k8sCoreV1Api.listNamespacedPod(
-      telemetryNamespace,
-      "true",
-      undefined,
-      undefined,
-      undefined,
-      "control-plane=telemetry-operator-controller-manager"
+    await waitForDeployment("fluentbit-operator", telemetryNamespace);
+    await k8sApply(loadCRD("./install-fb.yaml"));
+    // await waitForDaemonSet(fluentBitName, telemetryNamespace);
+    await waitForPodWithLabel(
+      "app.kubernetes.io/name",
+      "fluent-bit",
+      telemetryNamespace
     );
-    let podList = res.body.items;
-    assert.equal(podList.length, 1);
   });
   describe("Set up mockserver", function () {
     before(async function () {
@@ -84,10 +82,7 @@ describe("Telemetry operator", function () {
           metadata: { name: mockNamespace },
         });
       } catch (error) {
-        console.log(
-          `Namespace ${telemetryNamespace} could not be created`,
-          error
-        );
+        console.log(`Namespace ${mockNamespace} could not be created`);
       }
       await helm.installChart(
         "mockserver",
@@ -114,7 +109,9 @@ describe("Telemetry operator", function () {
       await helm.uninstallChart("mockserver-config", mockNamespace);
       await helm.uninstallChart("telemetry", telemetryNamespace);
       await k8sCoreV1Api.deleteNamespace(mockNamespace);
-      k8sDelete(loggingConfigCRD, telemetryNamespace);
+      await k8sDelete(loggingConfigCRD, telemetryNamespace);
+      await k8sDelete(loadCRD("./install-fb.yaml"), telemetryNamespace);
+      await k8sDelete(loadCRD("./setup-operator.yaml"), telemetryNamespace);
     });
 
     it("Should not receive HTTP traffic", function () {
@@ -123,8 +120,7 @@ describe("Telemetry operator", function () {
 
     it("Apply HTTP output plugin to fluent-bit", async function () {
       await k8sApply(loggingConfigCRD, telemetryNamespace);
-      await sleep(10000); // wait for controller to reconcile
-      await waitForDaemonSet(fluentBitName, telemetryNamespace);
+      await sleep(600000); // wait for controller to reconcile
     });
 
     it("Should receive HTTP traffic from fluent-bit", function () {
