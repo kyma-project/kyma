@@ -7,7 +7,7 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   ensureCommerceMockLocalTestFixture,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
@@ -24,7 +24,7 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  const withCentralApplicationGateway = process.env.WITH_CENTRAL_APPLICATION_GATEWAY || false;
+  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
   const testNamespace = "test";
   const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;
@@ -43,9 +43,9 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway).catch((err) => {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralAppConnectivity).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralApplicationGateway);
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralAppConnectivity);
     });
   });
 
@@ -53,8 +53,8 @@ describe("CommerceMock tests", function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNamespace);
   });
 
   it("order.created.v1 event should trigger the lastorder function", async function () {

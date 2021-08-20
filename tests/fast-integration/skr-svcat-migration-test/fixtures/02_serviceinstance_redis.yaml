@@ -1,0 +1,10 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: hb-instbind-redis-1
+spec:
+  clusterServiceClassExternalName: redis
+  clusterServicePlanExternalName: micro
+  parameters:
+    imagePullPolicy: Always

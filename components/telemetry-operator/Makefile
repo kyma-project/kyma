@@ -78,7 +78,7 @@ run-local: manifests-local generate-local fmt-local vet-local ## Run a controlle
 	go run ./main.go
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
-release: resolve generate verify build-image push-image copy-external-crds
+release: resolve generate verify build-image push-image
 
 ##@ Deployment
 

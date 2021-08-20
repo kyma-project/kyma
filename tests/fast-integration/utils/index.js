@@ -188,6 +188,7 @@ async function kubectlDeleteDir(dir, namespace) {
 }
 
 function kubectlDelete(file, namespace) {
+  debug(`Deleting ${file}...`)
   const yaml = fs.readFileSync(file);
   const listOfSpecs = k8s.loadAllYaml(yaml);
   return k8sDelete(listOfSpecs, namespace);
@@ -243,6 +244,51 @@ async function getAllCRDs() {
   body.items.forEach(crd => stat[crd.spec.group] = stat[crd.spec.group] ? stat[crd.spec.group] + 1 : 1)
   return body.items
 
+}
+
+async function getClusteraddonsconfigurations() {
+  const path = '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations';
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body.items
+}
+
+async function getSecrets(namespace) {
+  const path = `/api/v1/namespaces/${namespace}/secrets`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body.items
+}
+
+async function getPodPresets(namespace) {
+  const path = `/apis/settings.svcat.k8s.io/v1alpha1/namespaces/${namespace}/podpresets/`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body.items
+}
+
+async function getSecret(name, namespace) {
+  const path = `/api/v1/namespaces/${namespace}/secrets/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body
+}
+
+async function getConfigMap(name, namespace) {
+  const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body
 }
 
 async function k8sApply(resources, namespace, patch = true) {
@@ -309,6 +355,18 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
       });
   });
   return result;
+}
+
+function waitForClusterAddonsConfiguration(name, timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name == name;
+    },
+    timeout,
+    `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`
+  );
 }
 
 function waitForFunction(name, namespace = "default", timeout = 90000) {
@@ -631,6 +689,23 @@ async function getAllResourceTypes() {
       console.log("Error:", e);
       throw e;
     }
+  }
+}
+
+async function getSecretData(name, namespace) {
+  try {
+    const secret = await getSecret(name, namespace);
+    const encodedData = secret.data;
+    return Object.fromEntries(
+      Object.entries(encodedData).map(([key, value]) => {
+        const buff = Buffer.from(value, "base64");
+        const decoded = buff.toString("ascii");
+        return [key, decoded];
+      })
+    );
+  } catch (e) {
+    console.log("Error:", e);
+    throw e;
   }
 }
 
@@ -981,6 +1056,7 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
+  waitForClusterAddonsConfiguration,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,
@@ -998,6 +1074,12 @@ module.exports = {
   deleteAllK8sResources,
   getAllResourceTypes,
   getAllCRDs,
+  getClusteraddonsconfigurations,
+  getSecret,
+  getSecrets,
+  getConfigMap,
+  getPodPresets,
+  getSecretData,
   listResources,
   listResourceNames,
   k8sDynamicApi,
