@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	bebHandlerName = "beb-handler"
+	bebHandlerName               = "beb-handler"
+	MaxBEBSubscriptionNameLength = 50
 )
 
 // compile time check
@@ -30,8 +31,12 @@ type OAuth2ClientCredentials struct {
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, logger *logger.Logger) *Beb {
-	return &Beb{OAth2credentials: credentials, logger: logger}
+func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *Beb {
+	return &Beb{
+		OAth2credentials: credentials,
+		logger:           logger,
+		SubNameMapper:    mapper,
+	}
 }
 
 type Beb struct {
@@ -40,6 +45,7 @@ type Beb struct {
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
 	OAth2credentials *OAuth2ClientCredentials
+	SubNameMapper    NameMapper
 	logger           *logger.Logger
 }
 
@@ -88,7 +94,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("get Kyma subscription internal view failed", "error", err)
 		return false, err
@@ -116,7 +122,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("get BEB subscription failed", "error", err)
+			log.Errorw("get BEB subscription failed", "bebSubscriptionName", sEv2.Name, "error", err)
 			return false, err
 		}
 		// get the internal view for the EMS subscription
@@ -148,13 +154,13 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 // DeleteSubscription deletes the corresponding EMS subscription
 func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	return b.deleteSubscription(subscription.Name)
+	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
 
 func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", "error", err)
+		log.Errorw("delete BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
@@ -166,14 +172,14 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", "error", err)
+		log.Errorw("create BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", "error", err)
+		log.Errorw("get BEB subscription failed", "bebSubscriptionName", subscription.Name, "error", err)
 		return nil, 0, err
 	}
 
