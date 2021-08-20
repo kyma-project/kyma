@@ -63,6 +63,13 @@ containers:
     resources:
       {{- toYaml .Values.resources | nindent 6 }}
     volumeMounts:
+      {{- if .Values.dynamicConfigMap }}
+      - name: shared-fluent-bit-config
+        mountPath: /fluent-bit/etc
+      {{- else }}
+      - name: config
+        mountPath: /fluent-bit/etc
+      {{- end }}
       {{- toYaml .Values.volumeMounts | nindent 6 }}
     {{- range $key, $value := .Values.luaScripts }}
       - name: luascripts
@@ -82,6 +89,13 @@ volumes:
   - name: config
     configMap:
       name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ include "fluent-bit.fullname" . }}{{- end }}
+  {{- if .Values.dynamicConfigMap }}
+  - name: shared-fluent-bit-config
+    emptyDir: {}
+  - name: dynamic-config
+    configMap:
+      name: {{ .Values.dynamicConfigMap }}
+  {{- end }}
 {{- if gt (len .Values.luaScripts) 0 }}
   - name: luascripts
     configMap:

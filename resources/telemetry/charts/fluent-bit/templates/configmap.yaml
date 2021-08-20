@@ -9,6 +9,9 @@ data:
   custom_parsers.conf: |
     {{- (tpl .Values.config.customParsers $) | nindent 4 }}
   fluent-bit.conf: |
+    {{- if .Values.dynamicConfigMap }}
+    @INCLUDE dynamic/*.conf
+    {{- end }}
     {{- (tpl .Values.config.service $)  | nindent 4 }}
     {{- (tpl .Values.config.inputs $)  | nindent 4 }}
     {{- (tpl .Values.config.filters $)  | nindent 4 }}
