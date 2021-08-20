@@ -3,11 +3,11 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "a743fb97"
+  tag: "5af1e378"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -49,6 +49,7 @@ config:
       - apiserver-proxy
       - apiserver-proxy-ssl
   domainAllowList:
+  enableDomainAllowList: true
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
     allowOrigins:
@@ -97,7 +98,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "49659ad2"
+    version: "7b9c624e"
   env:
     testUser: "admin-user"
     timeout: 120

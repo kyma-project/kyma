@@ -11,7 +11,6 @@ import (
 	istiofake "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
-	rt "knative.dev/pkg/reconciler/testing"
 
 	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 )
@@ -29,13 +28,13 @@ func NewFakeClients(objs ...runtime.Object) (*istiofake.Clientset, *eaFake.Clien
 }
 
 type ActionsAsserter struct {
-	rt.Actions
+	Actions
 }
 
-func NewActionsAsserter(t *testing.T, clis ...rt.ActionRecorder) *ActionsAsserter {
+func NewActionsAsserter(t *testing.T, clis ...ActionRecorder) *ActionsAsserter {
 	t.Helper()
 
-	actionRecorderList := rt.ActionRecorderList(clis)
+	actionRecorderList := ActionRecorderList(clis)
 
 	actions, err := actionRecorderList.ActionsByVerb()
 	if err != nil {
