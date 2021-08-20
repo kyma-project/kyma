@@ -97,6 +97,9 @@
 # The `logui` subchart
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
+# The 'telemetry' chart
+/resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby
+
 # The `eventing` chart
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @themue @pxsalehi
 
