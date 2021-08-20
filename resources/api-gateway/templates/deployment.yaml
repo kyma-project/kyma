@@ -39,7 +39,9 @@ spec:
             - --jwks-uri={{ .Values.config.jwksURI }}
             - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
+            {{- if .Values.config.enableDomainAllowList }}
             - --domain-allowlist={{ include "api-gateway.domainAllowList" . }}
+            {{- end }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}
