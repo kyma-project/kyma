@@ -71,18 +71,3 @@ tests:
   skipSslVerify: true
   image:
     pullPolicy: IfNotPresent
-
-jobs:
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210817-8cdbfce3"
-  installer:
-    namespace: kyma-installer
-
-certs:
-  cert1:
-    name: connector-service-app-ca
-    namespace: kyma-integration
-  cert2:
-    name: app-connector-certs
-    namespace: istio-system
