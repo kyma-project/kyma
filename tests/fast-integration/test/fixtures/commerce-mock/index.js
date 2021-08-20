@@ -72,9 +72,9 @@ const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 
-function prepareLastOrderObjs(type = 'central-app-gateway', appName = 'commerce') {
+function prepareLastOrderObjs(compassEnabled = false , appName = 'commerce') {
 
-  if (type === "central-app-gateway-compass") {
+  if (compassEnabled) {
     return k8s.loadAllYaml(lastorderFunctionYaml.toString()
       .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
       .replace('%%APP_NAME%%', appName));
@@ -291,7 +291,7 @@ async function connectCommerceMock(mockHost, tokenData) {
 }
 
 async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
-  const lastOrderObjs = prepareLastOrderObjs('central-app-gateway-compass', `mp-${appName}`);
+  const lastOrderObjs = prepareLastOrderObjs(true, `mp-${appName}`);
   const mockHost = await provisionCommerceMockResources(
     `mp-${appName}`,
     mockNamespace,
