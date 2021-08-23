@@ -24,9 +24,8 @@ import (
 )
 
 const (
-	TokenURLPath        = "/auth"
-	MessagingURLPath    = "/messaging"
-	TestCommanderSuffix = "commander"
+	TokenURLPath     = "/auth"
+	MessagingURLPath = "/messaging"
 )
 
 // BebMock implements a programmable mock for BEB

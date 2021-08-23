@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"crypto/sha1"
 	"fmt"
+	"strings"
 	"testing"
+
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -45,6 +49,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
+
+	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
+
 	defaultNamespace := "defaultNS"
 	svcName := "foo-svc"
 	host := "foo-host"
@@ -83,7 +90,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should be overriden by the given values in subscription
 		expectedBEBSubscription := types.Subscription{
-			Name:            subscription.Name,
+			Name:            defaultNameMapper.MapSubscriptionName(subscription),
 			ContentMode:     *givenProtocolSettings.ContentMode,
 			Qos:             types.QosAtLeastOnce,
 			ExemptHandshake: *givenProtocolSettings.ExemptHandshake,
@@ -107,7 +114,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "")
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "", defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -121,7 +128,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// Values should retain defaults
 		expectedBEBSubscription := types.Subscription{
-			Name: subscription.Name,
+			Name: defaultNameMapper.MapSubscriptionName(subscription),
 			Events: types.Events{
 				{
 					Source: defaultNamespace,
@@ -139,7 +146,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace)
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
@@ -197,4 +204,142 @@ func TestGetRandSuffix(t *testing.T) {
 		}
 		results[result] = true
 	}
+}
+
+func TestBebSubscriptionNameMapper(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	s1 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "subscription1",
+			Namespace: "my-namespace",
+		},
+	}
+	s2 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "mysub",
+			Namespace: "another-namespace",
+		},
+	}
+
+	s3 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub3-sink",
+		},
+	}
+	s4 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub4-sink",
+		},
+	}
+	s5 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name2",
+			Namespace: "name1",
+		},
+	}
+
+	domain1 := "my-domain-name.com"
+	domain2 := "another.domain.com"
+
+	hashLength := 40
+
+	tests := []struct {
+		domainName string
+		maxLen     int
+		inputSub   *eventingv1alpha1.Subscription
+		outputHash string
+	}{
+		{
+			domainName: domain1,
+			maxLen:     50,
+			inputSub:   s1,
+			outputHash: hashSubscriptionFullName(domain1, s1.Namespace, s1.Name),
+		},
+		{
+			domainName: domain2,
+			maxLen:     50,
+			inputSub:   s1,
+			outputHash: hashSubscriptionFullName(domain2, s1.Namespace, s1.Name),
+		},
+		{
+			domainName: "",
+			maxLen:     50,
+			inputSub:   s2,
+			outputHash: hashSubscriptionFullName("", s2.Namespace, s2.Name),
+		},
+	}
+	for _, test := range tests {
+		mapper := NewBebSubscriptionNameMapper(test.domainName, test.maxLen)
+		s := mapper.MapSubscriptionName(test.inputSub)
+		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
+		// the mapped name should always end with the SHA1
+		g.Expect(strings.HasSuffix(s, test.outputHash)).To(BeTrue())
+		// and have the first 10 char of the name
+		prefixLen := min(len(test.inputSub.Name), test.maxLen-hashLength)
+		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
+	}
+
+	// Same domain and subscription name/namespace should map to the same name
+	mapper := NewBebSubscriptionNameMapper(domain1, 50)
+	g.Expect(mapper.MapSubscriptionName(s3)).To(Equal(mapper.MapSubscriptionName(s4)))
+
+	// If the same names are used in different order, they get mapped to different names
+	g.Expect(mapper.MapSubscriptionName(s4)).ToNot(Equal(mapper.MapSubscriptionName(s5)))
+}
+
+func TestShortenNameAndAppendHash(t *testing.T) {
+	g := NewGomegaWithT(t)
+	fakeHash := fmt.Sprintf("%x", sha1.Sum([]byte("myshootmynamespacemyname")))
+
+	tests := []struct {
+		name   string
+		hash   string
+		maxLen int
+		output string
+	}{
+		{
+			name:   "mylongsubscription",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mylongsubs" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mysub" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 40,
+			output: fakeHash, // no room for name!
+		},
+	}
+	for _, test := range tests {
+		nameWithHash := shortenNameAndAppendHash(test.name, test.hash, test.maxLen)
+		g.Expect(nameWithHash).To(Equal(test.output))
+	}
+
+	// shortenNameAndAppendHash should panic if it cannot fit the hash
+	defer func() {
+		g.Expect(recover()).ToNot(BeNil())
+	}()
+	shortenNameAndAppendHash("panic-much", fakeHash, len(fakeHash)-1)
+}
+
+func min(i, j int) int {
+	if i < j {
+		return i
+	}
+	return j
 }
