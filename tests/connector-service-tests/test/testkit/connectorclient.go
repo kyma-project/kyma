@@ -8,7 +8,7 @@ import (
 	"net/http/httputil"
 	"testing"
 
-	retry "github.com/avast/retry-go"
+	"github.com/avast/retry-go"
 	"github.com/stretchr/testify/require"
 )
 
