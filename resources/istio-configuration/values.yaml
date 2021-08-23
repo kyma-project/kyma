@@ -112,16 +112,3 @@ monitoring:
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
-
-test:
-  istio_kyma_validate:
-    image: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
-    enabled: true
-    labels:
-      integration: true
-      after-upgrade: true
-  securityContext:
-    runAsUser: 65534
-    runAsNonRoot: true
-    runAsGroup: 65534
