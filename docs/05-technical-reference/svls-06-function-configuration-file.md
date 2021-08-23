@@ -110,6 +110,7 @@ source:
     repository: my-repo
     reference: main
     baseDir: /
+    credentialsType: basic
     credentialsSecretName: secret2
 ```
 
@@ -134,6 +135,7 @@ See all parameter descriptions.
 | **source.repository**             | No | Function | Function name | Specifies the name of the Git repository.  |
 | **source.reference**             | No | Function | | Specifies either the branch name or the commit revision from which the Function Controller automatically fetches the changes in the Function's code and dependencies.  |
 | **source.baseDir**             | No | Function | | Specifies the location of your code dependencies in the repository. It is recommended to keep the source files at the root of your repository (`/`).  |
+| **source.credentialsType** | No | Function | `basic` | Specifies the content type of the Secret with credentials to the Git repository. Defines if you must authenticate to the repository with a password or token (`basic`), or an SSH key (`key`). |
 | **source.credentialsSecretName**             | No | Function | | Specifies the name of the Secret with credentials to the Git repository. It is used by the Function Controller to authenticate to the Git repository to fetch the Function's source code and dependencies. This Secret must be stored in the same Namespace as the [GitRepository CR](./06-custom-resources/svls-02-gitrepository.md). |
 | **resources**             | No | Function | | Defines CPU and memory available for the Function's Pod to use.  |
 | **resources.limits**             | No | Function | | Defines the maximum available CPU and memory values for the Function.  |
