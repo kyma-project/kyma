@@ -151,8 +151,6 @@ spec:
               subPath: {{ .subPath }}
               readOnly: {{ .readOnly }}
           {{- end }}
-            - mountPath: /etc/prom-certs/
-              name: istio-certs
           {{- if .Values.server.extraVolumeMounts }}
             {{ toYaml .Values.server.extraVolumeMounts | nindent 12 }}
           {{- end }}
