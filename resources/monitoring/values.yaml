@@ -1652,7 +1652,6 @@ prometheus:
     ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
     ## Of type: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
     tlsConfig: {}
-
     bearerTokenFile:
 
     ## 	metric relabel configs to apply to samples before ingestion.
@@ -1770,7 +1769,8 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: []
+    secrets:
+      - istio.default
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
@@ -1997,12 +1997,6 @@ prometheus:
     - job_name: kube-etcd
     #  kubernetes_sd_configs:
     #   - role: node
-      scheme: https
-      tls_config:
-        ca_file: /etc/prom-certs/root-cert.pem
-        cert_file: /etc/prom-certs/cert-chain.pem
-        key_file: /etc/prom-certs/key.pem
-        insecure_skip_verify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
     #   relabel_configs:
     #   - action: labelmap
     #     regex: __meta_kubernetes_node_label_(.+)
