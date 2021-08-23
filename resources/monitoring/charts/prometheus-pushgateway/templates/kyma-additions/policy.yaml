@@ -11,4 +11,4 @@ spec:
     matchLabels:
       {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
   mtls:
-    mode: "PERMISSIVE"
+    mode: "STRICT"

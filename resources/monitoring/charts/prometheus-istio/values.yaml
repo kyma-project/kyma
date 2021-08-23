@@ -835,7 +835,7 @@ server:
   ## Annotations to be added to Prometheus server pods
   ##
   podAnnotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true" # Should STAY
     # iam.amazonaws.com/role: prometheus
 
   ## Labels to be added to Prometheus server pods
@@ -866,7 +866,14 @@ server:
 
   ## Annotations to be added to deployment
   ##
-  deploymentAnnotations: {}
+  deploymentAnnotations: 
+    traffic.sidecar.istio.io/includeInboundPorts: ""   # do not intercept any inbound ports
+    traffic.sidecar.istio.io/includeOutboundIPRanges: ""  # do not intercept any outbound traffic
+    proxy.istio.io/config: |  # configure an env variable `OUTPUT_CERTS` to write certificates to the given folder
+      proxyMetadata:
+        OUTPUT_CERTS: /etc/istio-output-certs
+    sidecar.istio.io/userVolumeMount: '[{"name": "istio-certs", "mountPath": "/etc/istio-output-certs"}]' # mount the shared volume at sidecar proxy
+
 
   statefulSet:
     ## If true, use a statefulset instead of a deployment for pod management.

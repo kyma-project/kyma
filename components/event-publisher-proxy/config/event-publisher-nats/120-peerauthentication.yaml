@@ -9,5 +9,5 @@ spec:
     matchLabels:
       app.kubernetes.io/instance: eventing
   mtls:
-    mode: "PERMISSIVE"
+    mode: "STRICT"
 ---
