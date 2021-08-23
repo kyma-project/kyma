@@ -63,7 +63,6 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(tmpPath)
 	defer removeDir(tmpPath)
 
 	repo, err := g.cloner.cloneRepo(options, tmpPath)
@@ -167,7 +166,6 @@ func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 			if err != nil {
 				return git2go.RemoteCallbacks{}, errors.Wrapf(err, "while validation of key with passphrase set to: %t", passphrase != "")
 			}
-			log.Println(key)
 			cred, err := git2go.NewCredentialSSHKeyFromMemory("git", "", key, passphrase)
 			if err != nil {
 				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating ssh credential in git2go")
@@ -214,7 +212,6 @@ func (g *Git2GoClient) isBranch(ref *git2go.Reference, branchName string) bool {
 
 func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
 	return func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
-		log.Println(username)
 		return cred, nil
 	}
 }
