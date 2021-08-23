@@ -8,6 +8,7 @@ import (
 	"net/http/httputil"
 	"testing"
 
+	retry "github.com/avast/retry-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,23 +23,25 @@ const (
 )
 
 type ConnectorClient interface {
-	CreateToken(t *testing.T) TokenResponse
+	CreateToken(t *testing.T) (TokenResponse, error)
 	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
 	RevokeCertificate(t *testing.T, revocationUrl, csr string) *Error
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
 type connectorClient struct {
-	httpClient   *http.Client
-	tokenRequest *http.Request
+	httpClient             *http.Client
+	createTokenRequestFunc func() (*http.Request, error)
 }
 
-func NewConnectorClient(tokenRequest *http.Request, skipVerify bool) ConnectorClient {
+type createTokenRequestFunc func() (*http.Request, error)
+
+func NewConnectorClient(createTokenRequestFunc createTokenRequestFunc, skipVerify bool) ConnectorClient {
 	client := NewHttpClient(skipVerify)
 
 	return connectorClient{
-		httpClient:   client,
-		tokenRequest: tokenRequest,
+		httpClient:             client,
+		createTokenRequestFunc: createTokenRequestFunc,
 	}
 }
 
@@ -50,10 +53,21 @@ func NewHttpClient(skipVerify bool) *http.Client {
 	return client
 }
 
-func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
-	response, err := cc.httpClient.Do(cc.tokenRequest)
-	require.NoError(t, err)
-	defer response.Body.Close()
+func (cc connectorClient) CreateToken(t *testing.T) (TokenResponse, error) {
+	var response *http.Response
+
+	err := retry.Do(func() error {
+		request, err := cc.createTokenRequestFunc()
+		if err != nil {
+			return err
+		}
+
+		response, err = cc.httpClient.Do(request)
+
+		return err
+	})
+
+	defer closeResponseBody(response)
 
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)
@@ -62,46 +76,65 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	require.Equal(t, http.StatusCreated, response.StatusCode)
 
 	tokenResponse := TokenResponse{}
-
 	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
-	require.NoError(t, err)
 
-	return tokenResponse
+	return tokenResponse, err
 }
 
 func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, hash string) *Error {
 	body, err := json.Marshal(RevocationBody{Hash: hash})
 	require.NoError(t, err)
 
-	request, err := http.NewRequest(http.MethodPost, revocationUrl, bytes.NewBuffer(body))
-	require.NoError(t, err)
-	request.Close = true
-	request.Header.Add("Content-Type", "application/json")
+	var response *http.Response
 
-	response, err := cc.httpClient.Do(request)
+	err = retry.Do(func() error {
+		request, err := http.NewRequest(http.MethodPost, revocationUrl, bytes.NewBuffer(body))
+		if err != nil {
+			return err
+		}
+		request.Close = true
+		request.Header.Add("Content-Type", "application/json")
+
+		response, err = cc.httpClient.Do(request)
+
+		return err
+	})
+
+	defer closeResponseBody(response)
+
 	require.NoError(t, err)
-	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusCreated {
 		return parseErrorResponse(t, response)
 	}
 
-	require.Equal(t, http.StatusCreated, response.StatusCode)
-
 	return nil
 }
 
 func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Error) {
-	request := getRequestWithHeaders(t, url)
+	var response *http.Response
 
-	response, err := cc.httpClient.Do(request)
+	err := retry.Do(func() error {
+		request, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return err
+		}
+
+		request.Close = true
+
+		response, err = cc.httpClient.Do(request)
+		require.NoError(t, err)
+
+		return err
+	})
+
+	defer closeResponseBody(response)
+
 	require.NoError(t, err)
-	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return nil, parseErrorResponse(t, response)
 	}
-
 	require.Equal(t, http.StatusOK, response.StatusCode)
 
 	infoResponse := &InfoResponse{}
@@ -116,14 +149,25 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	body, err := json.Marshal(CsrRequest{Csr: csr})
 	require.NoError(t, err)
 
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-	require.NoError(t, err)
-	request.Close = true
-	request.Header.Add("Content-Type", "application/json")
+	var response *http.Response
 
-	response, err := cc.httpClient.Do(request)
+	retry.Do(func() error {
+		request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		if err != nil {
+			return err
+		}
+
+		request.Close = true
+		request.Header.Add("Content-Type", "application/json")
+
+		response, err = cc.httpClient.Do(request)
+
+		return err
+	})
+
+	defer closeResponseBody(response)
+
 	require.NoError(t, err)
-	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusCreated {
 		return nil, parseErrorResponse(t, response)
@@ -139,13 +183,10 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	return crtResponse, nil
 }
 
-func getRequestWithHeaders(t *testing.T, url string) *http.Request {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
-
-	request.Close = true
-
-	return request
+func closeResponseBody(response *http.Response) {
+	if response != nil {
+		response.Body.Close()
+	}
 }
 
 func parseErrorResponse(t *testing.T, response *http.Response) *Error {
