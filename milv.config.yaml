@@ -1,4 +1,4 @@
-external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com"]
+external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://nip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com"]
 files-to-ignore: ["/vendor/", "/testdata/"]
 files-to-ignore-internal-links-in: ["./kyma/docs/"]
 timeout: 60
@@ -32,12 +32,12 @@ files:
   - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"
     config:
       external-links-to-ignore: ["custom.bundles-repository"]
-  - path: "./kyma/docs/kyma/04-07-aks-xip.io-domain.md"
+  - path: "./kyma/docs/kyma/04-07-aks-nip.io-domain.md"
     config:
-      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.xip.io"]
-  - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
+      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.nip.io"]
+  - path: "./kyma/docs/kyma/04-06-gke-nip.io-domain.md"
     config:
-      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.xip.io"]
+      external-links-to-ignore: ["https://console.{WILDCARD_DNS}.nip.io"]
   - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       external-links-to-ignore: ["https://{host}/{path}/{bundle_repo_version"]
