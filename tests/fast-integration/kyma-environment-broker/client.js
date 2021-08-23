@@ -1,12 +1,6 @@
 const axios = require("axios");
-const {
-    debug,
-    getEnvOrThrow,
-} = require("../utils");
-const {
-  OAuthCredentials,
-  OAuthToken,
-} = require("../lib/oauth");
+const { debug, getEnvOrThrow } = require("../utils");
+const { OAuthCredentials, OAuthToken } = require("../lib/oauth");
 
 const SCOPES = ["broker:write", "cld:read"];
 const KYMA_SERVICE_ID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
@@ -24,7 +18,15 @@ class KEBConfig {
     );
   }
 
-  constructor(host, credentials, globalAccountID, subaccountID, userID, planID, region) {
+  constructor(
+    host,
+    credentials,
+    globalAccountID,
+    subaccountID,
+    userID,
+    planID,
+    region
+  ) {
     this.host = host;
     this.credentials = credentials;
     this.globalAccountID = globalAccountID;
@@ -35,16 +37,17 @@ class KEBConfig {
   }
 }
 
-
 class KEBClient {
   constructor(config) {
     this.token = new OAuthToken(
-      `https://oauth2.${config.host}/oauth2/token`, config.credentials);
+      `https://oauth2.${config.host}/oauth2/token`,
+      config.credentials
+    );
     this.host = config.host;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
     this.userID = config.userID;
-    this.planID = config.planID
+    this.planID = config.planID;
     this.region = config.region;
   }
 
@@ -54,7 +57,7 @@ class KEBClient {
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
@@ -90,7 +93,13 @@ class KEBClient {
     }
   }
 
-  async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds) {
+  async provisionSKR(
+    name,
+    instanceID,
+    platformCreds,
+    btpOperatorCreds,
+    customParams
+  ) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
@@ -101,6 +110,7 @@ class KEBClient {
       },
       parameters: {
         name: name,
+        // ...customParams,
       },
     };
 
@@ -110,10 +120,10 @@ class KEBClient {
           basic: {
             username: platformCreds.credentials.username,
             password: platformCreds.credentials.password,
-          }
+          },
         },
-        url: btpOperatorCreds.smURL
-      }
+        url: btpOperatorCreds.smURL,
+      };
     }
 
     const endpoint = `service_instances/${instanceID}`;
@@ -124,12 +134,37 @@ class KEBClient {
     }
   }
 
+  //-- KK new function
+  async updateSKR(name, instanceID, params) {
+    const payload = {
+      service_id: KYMA_SERVICE_ID,
+      plan_id: this.planID,
+      context: {
+        globalaccount_id: this.globalAccountID,
+        subaccount_id: this.subaccountID,
+        user_id: this.userID,
+      },
+      parameters: {
+        name: name,
+        params,
+      },
+    };
+    const endpoint = `service_instances/${instanceID}`;
+    try {
+      // KK patch ?
+      return await this.callKEB(payload, endpoint, "put");
+    } catch (err) {
+      throw new Error(`error while updating SKR: ${err.toString()}`);
+    }
+  }
+  // --
+
   async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
     try {
       return await this.callKEB({}, endpoint, "get");
     } catch (err) {
-      debug(err.toString())
+      debug(err.toString());
       return new Error(`error while checking SKR State: ${err.toString()}`);
     }
   }
