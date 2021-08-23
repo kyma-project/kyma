@@ -32,4 +32,4 @@ This diagram illustrates the client certificate generation flow in details:
 
 >**NOTE:**  The external Application can call the `metadata` endpoint to fetch information required to generate a CSR prior to certificate renewal. This approach makes certificate rotation process convenient and flexible, since the external Application does not need to store information required to generate a CSR in its data model.
 
->**NOTE:** Learn how to [get a client certificate](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md) for your implementation.
+>**NOTE:** Learn how to [get a client certificate](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md) for your implementation.

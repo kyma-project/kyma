@@ -9,7 +9,7 @@ To create a simple Function and trigger it with an event, you must first registe
 - An Application bound to a Namespace
 - Client certificates generated for the connected Application
 
->**NOTE:** See the respective tutorials to learn how to [create an Application](../../03-tutorials/application-connectivity/ac-01-create-application.md), [get the client certificate](../../03-tutorials/application-connectivity/ac-02-get-client-certificate.md), and [bind the Application to a Namespace](../../03-tutorials/application-connectivity/ac-03-application-mapping.md).
+>**NOTE:** See the respective tutorials to learn how to [create an Application](../../03-tutorials/00-application-connectivity/ac-01-create-application.md), [get the client certificate](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md), and [bind the Application to a Namespace](../../03-tutorials/00-application-connectivity/ac-03-application-mapping.md).
 
 ## Steps
 
@@ -23,7 +23,7 @@ To create a simple Function and trigger it with an event, you must first registe
 
 2. Register a service with events in the desired Application. Use the example AsyncAPI specification.
 
-   > **NOTE:** See the [tutorial](../../03-tutorials/application-connectivity/ac-04-register-manage-services.md) to learn how to register a service.
+   > **NOTE:** See the [tutorial](../../03-tutorials/00-application-connectivity/ac-04-register-manage-services.md) to learn how to register a service.
 
    ```json
    {

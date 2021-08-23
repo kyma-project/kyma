@@ -49,7 +49,7 @@ If you call a registered service and receive an error, follow these steps to det
     </div>
 
     Then, register the service and try calling again. Registering the service again recreates the Access Service.
-    To register a service, see [this tutorial](../../03-tutorials/application-connectivity/ac-04-register-manage-services.md).
+    To register a service, see [this tutorial](../../03-tutorials/00-application-connectivity/ac-04-register-manage-services.md).
 
 
 4. Check the API URL.

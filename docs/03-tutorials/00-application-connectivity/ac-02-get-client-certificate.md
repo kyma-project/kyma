@@ -6,8 +6,8 @@ After you create an Application, connect it to an external solution to consume t
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See how to [renew the client certificate](../../03-tutorials/application-connectivity/ac-09-renew-client-cert.md), and 
-how to [revoke the client certificate](../../03-tutorials/application-connectivity/ac-10-revoke-client-cert.md), which prevents it from being renewed.
+>**NOTE:** The client certificate is valid for 92 days. See how to [renew the client certificate](../../03-tutorials/00-application-connectivity/ac-09-renew-client-cert.md), and 
+how to [revoke the client certificate](../../03-tutorials/00-application-connectivity/ac-10-revoke-client-cert.md), which prevents it from being renewed.
 
 ## Prerequisites
 

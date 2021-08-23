@@ -71,4 +71,4 @@ You have performed the steps to observe application metrics using the `monitorin
 
    ![Alert on the dashboard](./assets/fired-alert.png)
 
-6. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).
+6. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
