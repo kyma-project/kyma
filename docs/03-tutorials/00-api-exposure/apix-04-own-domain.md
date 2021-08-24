@@ -57,7 +57,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kubectl create ns {NAMESPACE_NAME}
    ```
 
-3. Create a Secret containing credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Remember to edit the **metadata.namespace** parameter and provide you {NAMESPACE_NAME} as the required value.  Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
+3. Create a Secret containing credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Remember to edit the **metadata.namespace** parameter and provide your {NAMESPACE_NAME} as the required value.  Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
 
    ```bash
    kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
@@ -238,6 +238,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    export DOMAIN={CLUSTER_DOMAIN}
    export ISSUER={ISSUER_NAME}
    export SUBDOMAIN={YOUR_SUBDOMAIN}
+   ```
 
    Create a Certificate CR. Run:
 
@@ -300,3 +301,5 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    >**TIP:** To avoid adding every subdomain to the API Gateway **domain.allowlist** parameter, disable the allowlist mechanism. Override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart by changing its value to `false`. For more details on overrides, see how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
+
+If you want to expose a different workload using a different domain,  repeat steps from 2 to 8.
