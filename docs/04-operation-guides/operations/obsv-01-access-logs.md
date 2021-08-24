@@ -12,7 +12,7 @@ There are two kinds of logs that give you insights into your cluster - Kubernete
 
 ## Kubernetes logs via kubectl
 
-## Kubernetes logs via Busola UI
+## Kubernetes logs via Kyma Dashboard
 
 ## Loki logs via Grafana UI
 
