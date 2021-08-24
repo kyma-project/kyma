@@ -78,6 +78,11 @@ describe("SKR SVCAT migration test", function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
   });
 
+  let secretsAndPresets
+  it(`Should store secrets and presets`, async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
+  });
+
   it(`Should install BTP Service Operator Migration helm chart`, async function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
 
@@ -88,11 +93,6 @@ describe("SKR SVCAT migration test", function() {
   // this sleep is created to have a time to check the cluster before deprovisioning it
   it(`Should Sleep and wakeup properly`, async function() {
     await sampleResources.goodNight()
-  });
-
-  let secretsAndPresets
-  it(`Should store secrets and presets`, async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
   });
 
   it(`Should pass sanity check`, async function() {
@@ -106,18 +106,18 @@ describe("SKR SVCAT migration test", function() {
   });
 
 
-  it(`Should destroy sample service catalogue ressources`, async function() {
-    // TODO: Remove anything from BT-Operator
-    await sampleResources.destroy()
-
-    // TODO: Check if no Service Instances are left over
-  });
-
-  it(`Should deprovision SKR`, async function() {
-    await deprovisionSKR(keb, runtimeID);
-  });
-
-  it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
-    await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
-  });
+  // it(`Should destroy sample service catalogue ressources`, async function() {
+  //   // TODO: Remove anything from BT-Operator
+  //   await sampleResources.destroy()
+  //
+  //   // TODO: Check if no Service Instances are left over
+  // });
+  //
+  // it(`Should deprovision SKR`, async function() {
+  //   await deprovisionSKR(keb, runtimeID);
+  // });
+  //
+  // it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
+  //   await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+  // });
 });
