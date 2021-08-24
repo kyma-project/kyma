@@ -6,7 +6,7 @@ This tutorial shows how to set up your custom domain and prepare a certificate t
 
 To learn how to expose a service, go to [this](./apix-01-expose-service-apigateway.md) tutorial.
 
-For the purposes of this tutorial, use Kyma 2.0 or higher.
+For this tutorial, use Kyma 2.0 or higher.
 
 ## Prerequisites
 
@@ -57,7 +57,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kubectl create ns {NAMESPACE_NAME}
    ```
 
-3. Create a Secret containing credentails for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Remember to edit the **metadata.namespace** parameter and provide your {NAMESPACE_NAME} as the required value.  Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
+3. Create a Secret containing credentials for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Remember to edit the **metadata.namespace** parameter and provide your {NAMESPACE_NAME} as the required value.  Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
 
    ```bash
    kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
