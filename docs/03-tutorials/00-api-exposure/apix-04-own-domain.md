@@ -233,7 +233,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
-   export NAMESPACE={NAMESPACE_NAME}
    export SECRET_2={SECRET_NAME}
    export DOMAIN={CLUSTER_DOMAIN}
    export ISSUER={ISSUER_NAME}
@@ -248,14 +247,14 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kind: Certificate
    metadata:
      name: httpbin-cert
-     namespace: $NAMESPACE
+     namespace: istio-system
      secretName: $SECRET_2
      commonName: $DOMAIN
      issuerRef:
        name: $ISSUER
        namespace: default
      dnsNames:
-       - my.sub1.mydomain.com # Edit this value
+       - $SUBDOMAIN
    EOF
    ```
 
