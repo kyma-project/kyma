@@ -36,7 +36,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 4. For the dashboard to turn red once the CPU temperature reaches and exceeds 75 °C, set a red color threshold to `75`.
 
-5. Go to the **Panel** tab and give a title to the dashboard - for example, `CPU Temperature`.
+5. Go to the **Panel** tab and title the dashboard, for example, `CPU Temperature`.
 
 6. Under **Panel > Display**, make sure the threshold labels and threshold markers are activated to display this range on the dashboard.
 
