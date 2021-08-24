@@ -123,7 +123,6 @@ func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Err
 		request.Close = true
 
 		response, err = cc.httpClient.Do(request)
-		require.NoError(t, err)
 
 		return err
 	})

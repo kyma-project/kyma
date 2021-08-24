@@ -81,6 +81,7 @@ func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr 
 			return nil, err
 		}
 		request.Close = true
+		request.Header.Add("Content-Type", "application/json")
 
 		return request, err
 	}
@@ -93,7 +94,7 @@ func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr 
 
 func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string) *Error {
 	createRequestFunction := func() (*http.Request, error) {
-		request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
+		request, err := http.NewRequest(http.MethodPost, url, nil)
 		if err != nil {
 			return nil, err
 		}
