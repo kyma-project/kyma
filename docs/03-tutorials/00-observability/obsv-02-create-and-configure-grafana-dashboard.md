@@ -20,7 +20,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 4. Pick the `cpu_temperature_celsius` metric.
 
-5. To to retrieve the latest metric value on demand, activate the **Instant** switch.
+5. To retrieve the latest metric value on demand, activate the **Instant** switch.
 
 6. From the visualization panels, select the **Gauge** dashboard type.
 
