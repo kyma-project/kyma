@@ -54,7 +54,7 @@ async function installBTPServiceOperatorMigrationHelmChart() {
     const btp = "sap-btp-service-operator-migration";
     const image = {
         repository: "eu.gcr.io/sap-se-cx-gopher/sap-btp-service-operator-migration",
-        tag: "v0.3.0"
+        tag: "v0.4.0-split"
     }
     const values = `image.repository=${image.repository},image.tag=${image.tag}`
 
