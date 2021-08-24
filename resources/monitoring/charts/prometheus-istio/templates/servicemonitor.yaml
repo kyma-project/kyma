@@ -17,6 +17,12 @@ spec:
   - path: /metrics
     targetPort: 9090
     honorLabels: true
+    scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
   - params:
       'match[]':
       - '{__name__=~"workload:(.*)"}'
@@ -29,3 +35,9 @@ spec:
       regex: 'workload:(.*)'
       targetLabel: "__name__"
       action: replace
+    scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
