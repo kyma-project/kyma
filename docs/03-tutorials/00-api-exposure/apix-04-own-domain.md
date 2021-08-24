@@ -273,7 +273,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      name: httpbin-gateway
    spec:
      selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as deafult
+       istio: ingressgateway # Use Istio Ingress Gateway as default
      servers:
        - port:
            number: 443
@@ -299,4 +299,4 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
 
-If you want to expose a different workload using a different domain,  repeat steps from 2 to 8.
+If you want to expose a different workload using a different domain, repeat steps from 2 to 8 with the new details.
