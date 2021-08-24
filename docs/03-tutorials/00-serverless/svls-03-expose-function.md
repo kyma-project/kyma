@@ -142,10 +142,10 @@ Follows these steps:
     </details>
     <details>
     <summary label="busola-ui">
-    Busola UI
+    Kyma Dashboard
     </summary>
 
->**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
+>**NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an APIRule.
 
