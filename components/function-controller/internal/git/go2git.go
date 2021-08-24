@@ -2,7 +2,6 @@ package git
 
 import "C"
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,7 +9,6 @@ import (
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -18,25 +16,10 @@ const (
 	branchRefPattern = "refs/remotes/origin"
 )
 
-type git2goCloner struct {
-}
-
-func (g *git2goCloner) cloneRepo(options Options, outputPath string) (*git2go.Repository, error) {
-	authCallbacks, err := getAuth(options.Auth)
-	if err != nil {
-		return nil, errors.Wrap(err, "while getting authentication opts")
-	}
-
-	repo, err := git2go.Clone(options.URL, outputPath, &git2go.CloneOptions{
-		FetchOptions: &git2go.FetchOptions{
-			RemoteCallbacks: authCallbacks,
-			DownloadTags:    git2go.DownloadTagsAll,
-		},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "while cloning the repository")
-	}
-	return repo, nil
+type Options struct {
+	URL       string
+	Reference string
+	Auth      *AuthOptions
 }
 
 type cloner interface {
@@ -118,67 +101,6 @@ func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
 	}
 
 	return ref.Target().String(), nil
-}
-
-func getAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
-	if options == nil {
-		return git2go.RemoteCallbacks{}, nil
-	}
-
-	switch authType := options.Type; authType {
-	case RepositoryAuthBasic:
-		{
-			username, ok := options.Credentials[UsernameKey]
-			if !ok {
-				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", UsernameKey)
-
-			}
-			password, ok := options.Credentials[PasswordKey]
-			if !ok {
-				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", PasswordKey)
-			}
-
-			cred, err := git2go.NewCredentialUserpassPlaintext(username, password)
-			if err != nil {
-				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating basic auth")
-			}
-			return git2go.RemoteCallbacks{
-				CredentialsCallback: authCallback(cred),
-			}, nil
-		}
-	case RepositoryAuthSSHKey:
-		{
-			key, ok := options.Credentials[KeyKey]
-			if !ok {
-				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", KeyKey)
-			}
-			passphrase, ok := options.Credentials[PasswordKey]
-			if !ok {
-				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", PasswordKey)
-			}
-
-			var err error
-			if passphrase == "" {
-				_, err = ssh.ParsePrivateKey([]byte(key))
-			} else {
-				_, err = ssh.ParseRawPrivateKeyWithPassphrase([]byte(key), []byte(passphrase))
-			}
-
-			if err != nil {
-				return git2go.RemoteCallbacks{}, errors.Wrapf(err, "while validation of key with passphrase set to: %t", passphrase != "")
-			}
-			cred, err := git2go.NewCredentialSSHKeyFromMemory("git", "", key, passphrase)
-			if err != nil {
-				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating ssh credential in git2go")
-			}
-			return git2go.RemoteCallbacks{
-				CredentialsCallback:      authCallback(cred),
-				CertificateCheckCallback: sshCheckCallback(),
-			}, nil
-
-		}
-	}
-	return git2go.RemoteCallbacks{}, nil
 }
 
 func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {
