@@ -12,7 +12,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 ## Create the dashboard
 
-1. [Access Grafana](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
+1. [Access Grafana](../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
 
 2. Add a new dashboard with a new panel.
 
@@ -52,6 +52,6 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 ## Next steps
 
-- Follow the tutorial to [Define alerting rules](obsv-04-define-alerting-rules-monitor.md).
+- Follow the tutorial to [Define alerting rules](obsv-03-define-alerting-rules-monitor.md).
 - You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [Grafana chart README file](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md).
-- If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-06-clean-up-configuration.md).
+- If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
