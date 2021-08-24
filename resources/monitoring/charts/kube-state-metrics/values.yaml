@@ -49,7 +49,7 @@ serviceAccount:
 
 prometheus:
   monitor:
-    enabled: false
+    enabled: true
     additionalLabels: {}
     namespace: ""
     honorLabels: false
