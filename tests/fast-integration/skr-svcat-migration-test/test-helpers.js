@@ -155,7 +155,7 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
     }
 
     try {
-        // usage: smctl curl -X PUT -d '{"sourcePlatformID": ":platformID"}' /v1/migrate/service_operator/:instanceID
+            // usage: smctl curl -X PUT -d '{"sourcePlatformID": ":platformID"}' /v1/migrate/service_operator/:instanceID
         let data = {sourcePlatformID: svcatPlatform}
         args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId]
         await execa('smctl', args)

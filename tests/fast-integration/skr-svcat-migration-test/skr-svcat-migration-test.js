@@ -70,22 +70,22 @@ describe("SKR SVCAT migration test", function() {
     await sampleResources.deploy()
   });
 
-  // it('Should mark the Platform for migration', async function() {
-  //   await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
-  // })
+  it('Should mark the Platform for migration', async function() {
+    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
+  })
 
   it(`Should install BTP Operator helm chart`, async function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
   });
 
-  // it(`Should install BTP Service Operator Migration helm chart`, async function() {
-  //   await t.installBTPServiceOperatorMigrationHelmChart();
-  //
-  //   // TODO: Print log output of migrator job "sap-btp-operator-migration"
-  // });
-  //
-  // // TODO: Remove
-  // // this sleep is created to have a time to check the cluster before deprovisioning it
+  it(`Should install BTP Service Operator Migration helm chart`, async function() {
+    await t.installBTPServiceOperatorMigrationHelmChart();
+
+    // TODO: Print log output of migrator job "sap-btp-operator-migration"
+  });
+
+  // TODO: Remove
+  // this sleep is created to have a time to check the cluster before deprovisioning it
   // it(`Should Sleep and wakeup properly`, async function() {
   //   await sampleResources.goodNight()
   // });
@@ -94,7 +94,7 @@ describe("SKR SVCAT migration test", function() {
   // it(`Should store secrets and presets`, async function() {
   //   secretsAndPresets = await sampleResources.storeSecretsAndPresets()
   // });
-  //
+
   // it(`Should pass sanity check`, async function() {
   //   // TODO: Wait/Check until Job of BTP-Migrator/SC-Removal is finished successfully
   //
@@ -112,7 +112,7 @@ describe("SKR SVCAT migration test", function() {
   //
   //   // TODO: Check if no Service Instances are left over
   // });
-  //
+
   // it(`Should deprovision SKR`, async function() {
   //   await deprovisionSKR(keb, runtimeID);
   // });
