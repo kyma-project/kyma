@@ -1,9 +1,11 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
-    CGO_ENABLED=0 \
+    CGO_ENABLED=1 \
     GOOS=linux \
     GOARCH=amd64
+
+RUN apk add gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2-dev
 
 WORKDIR ${BASE_APP_DIR}
