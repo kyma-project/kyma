@@ -172,8 +172,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    metadata:
      name: dns-entry
      namespace: $NAMESPACE
-     annotations:
-       dns.gardener.cloud/class: garden
    spec:
      dnsName: "$SUBDOMAIN"
      ttl: 600
