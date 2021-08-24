@@ -3,13 +3,14 @@ package git
 import "C"
 import (
 	"fmt"
-	git2go "github.com/libgit2/git2go/v31"
-	"github.com/pkg/errors"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	git2go "github.com/libgit2/git2go/v31"
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -185,7 +186,7 @@ func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) 
 	if err != nil {
 		return nil, err
 	}
-	for ; ; {
+	for {
 		item, err := iter.Next()
 		if err != nil {
 			if git2go.IsErrorCode(err, git2go.ErrorCodeIterOver) {

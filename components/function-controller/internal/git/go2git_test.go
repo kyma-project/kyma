@@ -3,13 +3,14 @@ package git
 import (
 	"archive/tar"
 	"errors"
-	git2go "github.com/libgit2/git2go/v31"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
+
+	git2go "github.com/libgit2/git2go/v31"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -108,7 +109,7 @@ func prepareRepo(t *testing.T) string {
 	require.NoError(t, err)
 	defer closeAssert(t, f.Close)
 	r := tar.NewReader(f)
-	for ; ; {
+	for {
 		h, err := r.Next()
 		if err == io.EOF {
 			break

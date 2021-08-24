@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
-	"log"
 )
 
 const envPrefix = "APP"
