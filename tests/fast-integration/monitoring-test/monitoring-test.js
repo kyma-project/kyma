@@ -1,10 +1,19 @@
 const uuid = require("uuid");
 
-const { assert } = require("chai");
+const { assert, expect } = require("chai");
 
-const { waitForPodWithLabel } = require("../utils");
-
+const {
+  waitForPodWithLabel,
+  k8sCoreV1Api,
+  k8sApply,
+  k8sDelete,
+  wait,
+} = require("../utils");
+const k8s = require("@kubernetes/client-node");
 const { getNotRegisteredPrometheusRuleNames } = require("./alert-rules");
+
+const fs = require("fs");
+const path = require("path");
 
 const {
   prometheusPortForward,
@@ -26,12 +35,22 @@ describe("Monitoring test", function () {
 
   var cancelPortForward;
 
-  before(() => {
+  const testNamespace = "test-prometheusrules";
+
+  before(async () => {
     cancelPortForward = prometheusPortForward();
+    try {
+      await k8sCoreV1Api.createNamespace({
+        metadata: { name: testNamespace },
+      });
+    } catch (error) {
+      console.log(`Namespace ${testNamespace} could not be created`, error);
+    }
   });
 
-  after(() => {
+  after(async () => {
     cancelPortForward();
+    await k8sCoreV1Api.deleteNamespace(testNamespace);
   });
 
   it("All monitoring pods should be ready", async () => {
@@ -91,7 +110,7 @@ describe("Monitoring test", function () {
     let allRules = ruleGroups.flatMap((g) => g.rules);
     let unhealthyRules = allRules
       .filter((r) => r.health != "ok")
-      .map((t) => r.name);
+      .map((r) => r.name);
 
     assert.isEmpty(
       unhealthyRules,
@@ -128,12 +147,22 @@ describe("Monitoring test", function () {
     await assertTimeSeriesExist("kube_service_labels", ["namespace"]);
   });
 
-  it("All prometheus rules are registered", async function () {
-    const testNamespace = "test";
-    await k8sCoreV1Api.createNamespace({
-      metadata: { name: testNamespace },
+  function loadCRD(filepath) {
+    const _loggingConfigYaml = fs.readFileSync(path.join(__dirname, filepath), {
+      encoding: "utf8",
     });
+    return k8s.loadAllYaml(_loggingConfigYaml);
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  it("All prometheus rules are registered", async function () {
+    const promrule = loadCRD("./test-rule.yaml");
+    await k8sApply(promrule, testNamespace);
+    await sleep(60000); // wait for prometheus to update
     let notRegisteredRules = await getNotRegisteredPrometheusRuleNames();
-    assert.strictEqual(notRegisteredRules, [], "Rules are not registered");
+    expect(notRegisteredRules, "Rules are not registered").to.be.empty;
   });
 });

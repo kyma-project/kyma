@@ -6,10 +6,9 @@ const {
 } = require("../monitoring/client");
 
 async function getK8sPrometheusRules() {
-  let res = await k8sCustomApi.listNamespacedCustomObject(
+  let res = await k8sCustomApi.listClusterCustomObject(
     "monitoring.coreos.com",
     "v1",
-    "kyma-system",
     "prometheusrules"
   );
   return res.body.items;
@@ -28,7 +27,12 @@ async function getRegisteredPrometheusRuleNames() {
 
 function removeNamePrefixes(ruleNames) {
   return ruleNames.map((rule) =>
-    rule.replace("monitoring-", "").replace("kyma-", "")
+    rule
+      .replace("monitoring-", "")
+      .replace("kyma-", "")
+      .replace("logging-", "")
+      .replace("fluent-bit-", "")
+      .replace("loki-", "")
   );
 }
 
