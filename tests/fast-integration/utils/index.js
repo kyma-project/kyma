@@ -9,7 +9,6 @@ var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
 var k8sCustomApi;
-
 var watch;
 var forward;
 
@@ -267,11 +266,10 @@ async function getClusteraddonsconfigurations() {
 async function getSecrets(namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets`;
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
   const body = JSON.parse(response.body);
-  return body.items
-
+  return body.items;
 }
 
 async function getPodPresets(namespace) {
@@ -299,15 +297,6 @@ async function getConfigMap(name, namespace) {
   });
   const body = JSON.parse(response.body);
   return body;
-}
-
-async function getConfigMap(name, namespace) {
-  const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
-  });
-  const body = JSON.parse(response.body);
-  return body
 }
 
 async function k8sApply(resources, namespace, patch = true) {
@@ -1195,6 +1184,7 @@ module.exports = {
   k8sCustomApi,
   k8sAppsApi,
   k8sCoreV1Api,
+  k8sCustomApi,
   getContainerRestartsForAllNamespaces,
   debug,
   switchDebug,
