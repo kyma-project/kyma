@@ -301,13 +301,13 @@ async function getConfigMap(name, namespace) {
   return body;
 }
 
-async function getConfigMap(name, namespace) {
-  const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
+async function getServiceInstance(name, namespace) {
+  const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances/${name}`;
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
   const body = JSON.parse(response.body);
-  return body
+  return body;
 }
 
 async function k8sApply(resources, namespace, patch = true) {
@@ -659,6 +659,24 @@ function waitForPodWithLabel(
     },
     timeout,
     `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`
+  );
+}
+
+function waitForConfigMap(
+    cmName,
+    namespace = "default",
+    timeout = 90000
+) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/configmaps`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return watchObj.object.metadata.name.includes(
+            cmName
+        );
+      },
+      timeout,
+      `Waiting for ${cmName} service plan timeout (${timeout} ms)`
   );
 }
 
@@ -1179,6 +1197,7 @@ module.exports = {
   waitForFunction,
   waitForSubscription,
   waitForPodWithLabel,
+  waitForConfigMap,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
@@ -1189,6 +1208,7 @@ module.exports = {
   getConfigMap,
   getPodPresets,
   getSecretData,
+  getServiceInstance,
   listResources,
   listResourceNames,
   k8sDynamicApi,
