@@ -41,7 +41,10 @@ class GardenerClient {
   }
 
   async getShoot(shootName) {
-    const secretResp = await this.coreV1API.readNamespacedSecret(`${shootName}.kubeconfig`, GARDENER_PROJECT);
+    const secretResp = await this.coreV1API.readNamespacedSecret(
+      `${shootName}.kubeconfig`,
+      GARDENER_PROJECT
+    );
     const shootResp = await this.dynamicAPI.read({
       apiVersion: "core.gardener.cloud/v1beta1",
       kind: "Shoot",

@@ -46,7 +46,7 @@ class KEBClient {
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
