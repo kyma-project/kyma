@@ -8,7 +8,7 @@ See the list of possible issues related to the External DNS Management comopnent
 
 ### Symptom
 
-Even though the DNS Manaement setup is finished, you receive the `connection refused` error when you try to expose a service. It occurs when you call the service endpoint by sending a GET request. The error looks as follows:
+The `connection refused` error occurs when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
 
 ```txt
 curl: (7) Failed to connect to httpbin.kyma-goat.ga port 443: Connection refused
@@ -27,16 +27,33 @@ Check if the IP address provided as the value of the **spec.targets** parameter 
 
 ### Symptom
 
+The `could not resolve host` error occurs when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
+
 ```txt
 curl: (6) Could not resolve host: httpbin.kyma-goat.ga
 ```
 
 ### Cause
 
+The error could result from:
+
+- Timing issues during the DNS Entry creation
+- VPN connection
+- `etc/host` or `etc/resolve-conf` settings
+
 ### Remedy
 
+- Wait for the DNS Entry to be created. To check the CR status, run:
+
+```bash
+kubectl get dnsentry.dns.gardener.cloud dns-entry
+```
+
+- Turn the VPN off.
+
+- Check if the subdomain is not added to the `etc/host` file or check the `etc/resolve-conf` settings.
+
 ## Resource ignored by the controller
----
 
 ### Symptom
 
