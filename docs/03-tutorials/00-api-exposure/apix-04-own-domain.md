@@ -65,14 +65,14 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 4. Set up the `external-dns-management` component.
 
-- Create a DNSProvider CR. Export values of the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters as environment variables. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from your `{SECRET}.yaml`. Run:
+- Create a DNSProvider CR. Export values of the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters as environment variables. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from your `{SECRET}.yaml`. The domain you provide is the one that you own, for example `mydomain.com`. In the next steps you provide a subdomain of this domain, for example `api.mydomain.com`. Run:
 
-   ```bash
-   export NAMESPACE={NAMESPACE_NAME}
-   export SPEC_TYPE={PROVIDER_TYPE}
-   export SECRET={SECRET_NAME}
-   export DOMAIN={CLUSTER_DOMAIN}
-   ```
+  ```bash
+  export NAMESPACE={NAMESPACE_NAME}
+  export SPEC_TYPE={PROVIDER_TYPE}
+  export SECRET={SECRET_NAME}
+  export DOMAIN={CLUSTER_DOMAIN} #eg. mydomain.com
+  ```
   
   Create a DNSProvider CR. Run:
 
@@ -83,23 +83,23 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   </summary>
 
   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSProvider
-   metadata:
-     name: dns-provider
-     namespace: $NAMESPACE
-     annotations:
-       dns.gardener.cloud/class: garden
-   spec:
-     type: $SPEC_TYPE
-     secretRef:
-       name: $SECRET
-     domains:
-       include:
-         - $DOMAIN
-   EOF  
-   ```
+  cat <<EOF | kubectl apply -f -
+  apiVersion: dns.gardener.cloud/v1alpha1
+  kind: DNSProvider
+  metadata:
+    name: dns-provider
+    namespace: $NAMESPACE
+    annotations:
+      dns.gardener.cloud/class: garden
+  spec:
+    type: $SPEC_TYPE
+    secretRef:
+      name: $SECRET
+    domains:
+      include:
+        - $DOMAIN
+  EOF
+  ```
 
   </details>
   <details>
@@ -108,34 +108,34 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   </summary>
 
   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSProvider
-   metadata:
-     name: dns-provider
-     namespace: $NAMESPACE
-   spec:
-     type: $SPEC_TYPE
-     secretRef:
-       name: $SECRET
-     domains:
-       include:
-         - $DOMAIN
-   EOF  
-   ```
+  cat <<EOF | kubectl apply -f -
+  apiVersion: dns.gardener.cloud/v1alpha1
+  kind: DNSProvider
+  metadata:
+    name: dns-provider
+    namespace: $NAMESPACE
+  spec:
+    type: $SPEC_TYPE
+    secretRef:
+      name: $SECRET
+    domains:
+      include:
+        - $DOMAIN
+  EOF
+  ```
 
-   </details>
-   </div>
+  </details>
+  </div>
 
 - Create a DNSEntry CR. Export values of the **metadata.namespace**, **metadata.spec.dnsName**, and **metadata.spec.targets.IP** parameters as environment variables. Optionally, you can also change the value of **metadata.spec.ttl**. Run:
 
-   ```bash
-   export NAMESPACE={NAMESPACE_NAME}
-   export SUBDOMAIN={YOUR_SUBDOMAIN}
-   export IP={SECRET_NAME}
-   ```
+  ```bash
+  export NAMESPACE={NAMESPACE_NAME}
+  export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g: *.api.mydomain.com
+  export IP={INGRESS_GATEWAY_IP}
+  ```
 
-   Create a DNSEntry CR. Run:
+ Create a DNSEntry CR. Run:
 
   <div tabs>
   <details>
@@ -144,20 +144,21 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   </summary>
 
   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSEntry
-   metadata:
-     name: dns-entry
-     namespace: $NAMESPACE
-     annotations:
-       dns.gardener.cloud/class: garden
-   spec:
-     dnsName: "$SUBDOMAIN"
-     ttl: 600
-     targets:
-       - $IP
-   ```
+  cat <<EOF | kubectl apply -f -
+  apiVersion: dns.gardener.cloud/v1alpha1
+  kind: DNSEntry
+  metadata:
+    name: dns-entry
+    namespace: $NAMESPACE
+    annotations:
+      dns.gardener.cloud/class: garden
+  spec:
+    dnsName: "$SUBDOMAIN"
+    ttl: 600
+    targets:
+      - $IP
+  EOF
+  ```
 
   </details>
   <details>
@@ -166,28 +167,29 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   </summary>
 
   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSEntry
-   metadata:
-     name: dns-entry
-     namespace: $NAMESPACE
-   spec:
-     dnsName: "$SUBDOMAIN"
-     ttl: 600
-     targets:
-       - $IP
-   ```
+  cat <<EOF | kubectl apply -f -
+  apiVersion: dns.gardener.cloud/v1alpha1
+  kind: DNSEntry
+  metadata:
+    name: dns-entry
+    namespace: $NAMESPACE
+  spec:
+    dnsName: "$SUBDOMAIN"
+    ttl: 600
+    targets:
+      - $IP
+  EOF
+  ```
 
-   </details>
-   </div>
+  </details>
+  </div>
 
-    >**NOTE:** To check the Ingress Gateway IP, run:
-    >```bash
-    >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-    >```
+  >**NOTE:** To check the Ingress Gateway IP, run:
+  >```bash
+  >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  >```
 
-   >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use.
+  >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: *.api.mydomain.com.
 
 5. Create an Issuer CR. Export values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters as environment variables. As the values for the **metadata.spec.domains.include** parameter, use the main domain, the subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
 
@@ -195,7 +197,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    export EMAIL={YOUR_EMAIL_ADDRESS}
    export DOMAIN={CLUSTER_DOMAIN}
    export SUBDOMAIN={YOUR_SUBDOMAIN}
-   export WILDCARD={YOUR_WILDCARD_DNS_RECORD, e.g. *.mydomain.com}
+   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} #e.g. *api.mydomain.com
    ```
 
    Create an Issuer CR. Run:
@@ -231,10 +233,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
-   export SECRET_2={SECRET_NAME}
+   export SECRET_2={SECRET_NAME} #e.g: httpbin-tls-credentials
    export DOMAIN={CLUSTER_DOMAIN}
    export ISSUER={ISSUER_NAME}
-   export SUBDOMAIN={YOUR_SUBDOMAIN}
+   export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g: *.api.mydomain.com
    ```
 
    Create a Certificate CR. Run:
