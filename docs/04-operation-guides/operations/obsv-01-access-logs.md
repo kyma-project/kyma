@@ -28,7 +28,7 @@ To see a visual representation of the Loki logs
 
 1. In Kyma Dashboard, go to **Observability** and open **Grafana**.
 2. In Grafana's **Explore** section, select `Loki` as data source.
-3. Enter a query following the [guidelines](https://grafana.com/docs/loki/latest/logql/), for example:
+3. Enter a query following the [query language guidelines](https://grafana.com/docs/loki/latest/logql/), for example:
 
    ```bash
    {namespace="kyma-system"} |= "info"
