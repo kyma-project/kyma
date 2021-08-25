@@ -11,7 +11,7 @@ The Function Controller requires the following components to be installed:
 
 ## Development
 
-To work with Function controller you need to have:
+To develop the Function Controller, you need:
 - [libgit2-dev](https://libgit2.org/) (v1.1)
 - [controller-gen](https://github.com/kubernetes-sigs/controller-tools/tree/master/cmd/controller-gen) (v0.2.9)
 
