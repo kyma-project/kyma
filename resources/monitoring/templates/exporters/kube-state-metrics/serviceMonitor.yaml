@@ -11,6 +11,12 @@ spec:
   jobLabel: app.kubernetes.io/name
   endpoints:
   - port: http
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
     {{- if .Values.kubeStateMetrics.serviceMonitor.interval }}
     interval: {{ .Values.kubeStateMetrics.serviceMonitor.interval }}
     {{- end }}
