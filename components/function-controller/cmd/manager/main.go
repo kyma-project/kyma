@@ -55,8 +55,6 @@ func main() {
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
-	println(config.Function.Build.RepoFetcherImage)
-	os.Exit(1)
 
 	logLevel, err := toZapLogLevel(config.LogLevel)
 	if err != nil {
