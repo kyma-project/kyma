@@ -2,7 +2,11 @@
 title: Create a Grafana dashboard
 ---
 
-Learn how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/latest/panels/visualizations/gauge-panel/#gauge-panel) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
+Kyma comes with a set of dashboards for monitoring Kubernetes clusters. These dashboards display metrics that the Prometheus server collects.
+
+You can create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/grafana/latest/panels/visualizations/gauge-panel/#gauge-panel) type. On the dashboard, you see how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 degrees Celsius. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of 75 degrees Celsius.
+
+In addition to creating a dashboard during runtime, you can also add it to the Kubernetes resources in your repository. This way, the dashboard configuration is portable and you can deploy it together with the application in any new cluster.
 
 ## Prerequisites
 
@@ -50,8 +54,30 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 - It turns **red** if the current metric value ranges from 75 to 90 degrees Celsius.
 
+## Add the dashboard as Kubernetes resource
+
+When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard's ConfigMap and add the dashboard to your Kubernetes resources. In this case, a Grafana sidecar automatically applies the resources and adds your custom dashboard when you create a cluster.
+
+1. Create a JSON file with the dashboard definition; for example, by exporting it from Grafana.
+2. Create a Kubernetes resource with a unique name for your dashboard and the JSON content, like the following example:
+
+   ```yaml
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: {UNIQUE_DASHBOARD_NAME}-grafana-dashboard
+     labels:
+       grafana_dashboard: "1"
+   data:
+     {UNIQUE_DASHBOARD_NAME}-dashboard.json: |-
+       {
+         # dashboard JSON content
+       }
+   ```
+
+3. To see your new dashboard, restart the Grafana UI.
+
 ## Next steps
 
 - Follow the tutorial to [Define alerting rules](obsv-03-define-alerting-rules-monitor.md).
-- You can also define the dashboard's ConfigMap and add it to the `resources` folder under the given component's chart. To make the dashboard visible, simply use the `kubectl apply` command to deploy it. For details on adding monitoring to components, see the [Grafana chart README file](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md).
 - If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
