@@ -97,27 +97,27 @@ describe("SKR SVCAT migration test", function() {
 
   it(`Should pass sanity check`, async function() {
     // TODO: Wait/Check until Job of BTP-Migrator/SC-Removal is finished successfully
-
+    let existing = await sampleResources.storeSecretsAndPresets()
     // Check if Secrets and PodPresets are still available
-    await sampleResources.checkSecrets(secretsAndPresets.secrets)
-    await sampleResources.checkPodPresets(secretsAndPresets.podPresets)
+    await sampleResources.checkSecrets(existing.secrets)
+    await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets)
 
     // TODO: Check if all other SVCat resources are successfully removed
   });
 
 
-  // it(`Should destroy sample service catalogue ressources`, async function() {
-  //   // TODO: Remove anything from BT-Operator
-  //   await sampleResources.destroy()
-  //
-  //   // TODO: Check if no Service Instances are left over
-  // });
-  //
-  // it(`Should deprovision SKR`, async function() {
-  //   await deprovisionSKR(keb, runtimeID);
-  // });
-  //
-  // it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
-  //   await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
-  // });
+  it(`Should destroy sample service catalogue ressources`, async function() {
+    // TODO: Remove anything from BT-Operator
+    await sampleResources.destroy()
+
+    // TODO: Check if no Service Instances are left over
+  });
+
+  it(`Should deprovision SKR`, async function() {
+    await deprovisionSKR(keb, runtimeID);
+  });
+
+  it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
+    await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+  });
 });

@@ -197,9 +197,8 @@ async function storeSecretsAndPresets() {
   return { secrets, podPresets }
 }
 
-async function checkSecrets(allSecrets) {
-  // allSecrets = await storeSecretsAndPresets()
-  // allSecrets = allSecrets.secrets
+async function checkSecrets(existing) {
+  let allSecrets = existing
 
   // this are fixed values from resource names of test fixtures
   let reference = [
@@ -235,14 +234,11 @@ async function checkSecrets(allSecrets) {
   console.log(`Missing ${missing.length} secrets`)
 }
 
-async function checkPodPresets(allPodPresets) {
-  // allPodPresets = await storeSecretsAndPresets()
-  // allPodPresets = allPodPresets.podPresets
+async function checkPodPresets(expected, existing) {
+  let allPodPresets = existing
 
-  let reference = await storeSecretsAndPresets()
-  reference = reference.podPresets
-
-  let missing = reference
+  let missing = expected
+  console.log("checking if all podpresets still exists: " + missing)
 
   // iterate through the list of all existing PodPresets in namespace
   // and check if this list still contains the same PodPresets
