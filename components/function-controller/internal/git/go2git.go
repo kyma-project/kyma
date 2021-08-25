@@ -1,6 +1,5 @@
 package git
 
-import "C"
 import (
 	"io/ioutil"
 	"log"

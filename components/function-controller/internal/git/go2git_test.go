@@ -51,7 +51,7 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 		{
 			name:             "Success, tricky tag name from bitbucket",
 			refName:          trickyTagName,
-			expectedCommitID: tagCommit,
+			expectedCommitID: branchCommit,
 		},
 		{
 			name:             "Return error when not found",
