@@ -209,7 +209,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659
 
 # Application Operator Component
-/components/application-operator/ @akgalwas @janmedrek componentscomponents @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
+/components/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
 
 # Application Gateway Component
 /components/application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @crabtree @rafalpotempa @koala7659
