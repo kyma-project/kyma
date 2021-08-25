@@ -13,4 +13,4 @@ See the list of Kyma components and main areas they support:
 | [Serverless](Link to Main Areas page)               |                                        | <ul><li>Link to architecture diagram</li><li>Link to a tutorial</li><li>Link to config chart(s)</li></ul> |
 | [API exposure](Link to Main Areas page)             |                                        | <ul><li>Link to architecture diagram</li><li>Link to a tutorial</li><li>Link to config chart(s)</li></ul>|
 | [Observability](Link to Main Areas page)            | Monitoring, <br> Tracing, <br> Logging | <ul><li>Link to architecture diagram</li><li>Link to a tutorial</li><li>Link to config chart(s)</li></ul> |
-| [UI](Link to Main Areas page)                       | CLI, <br> Busola                       | <ul><li>Link to architecture diagram</li><li>Link to a tutorial</li><li>Link to config chart(s)</li></ul> |
+| [UI](Link to Main Areas page)                       | CLI, <br> Kyma Dashboard                       | <ul><li>Link to architecture diagram</li><li>Link to a tutorial</li><li>Link to config chart(s)</li></ul> |
