@@ -83,3 +83,15 @@ func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 	}
 	return git2go.RemoteCallbacks{}, errors.Errorf("unknown authentication type: %s", options.Type)
 }
+
+func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+	return func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+		return cred, nil
+	}
+}
+
+func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
+	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
+		return git2go.ErrOk
+	}
+}

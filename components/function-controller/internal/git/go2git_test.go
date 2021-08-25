@@ -20,6 +20,7 @@ const (
 	branchName     = "branch2"
 	branchCommit   = "728c47705dabc65c12583ff5feb2e5300983afc3"
 	tagName        = "tag1"
+	trickyTagName  = "tricky1"
 	tagCommit      = "6eff122e8afb57a6f270285dc3bfcc9a4ef4b8ad"
 	secondCommitID = "8b27a9d6f148533773ae0666dc27c5b359b46553"
 )
@@ -48,10 +49,15 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 			expectedCommitID: tagCommit,
 		},
 		{
+			name:             "Success, tricky tag name from bitbucket",
+			refName:          trickyTagName,
+			expectedCommitID: tagCommit,
+		},
+		{
 			name:             "Return error when not found",
 			refName:          "testcase",
 			expectedCommitID: "11111705dabc65c12583ff5feb2e5300983afc3",
-			expectedError:    errors.New("Could find commit,branch or tag with given ref: testcase"),
+			expectedError:    errors.New("Could't find commit, branch or tag with given ref: testcase"),
 		},
 	}
 
@@ -99,7 +105,7 @@ type git2goClonerMock struct {
 	repoPath string
 }
 
-func (g *git2goClonerMock) cloneRepo(options Options, outputPath string) (*git2go.Repository, error) {
+func (g *git2goClonerMock) git2goClone(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
 	return git2go.OpenRepository(g.repoPath)
 
 }
@@ -144,7 +150,7 @@ func deleteTmpRepo(t *testing.T, tmpPath string) {
 
 func assertHeadCommitNotEqual(t *testing.T, repoPath, commit string) {
 	cloner := &git2goClonerMock{repoPath: repoPath}
-	repo, err := cloner.cloneRepo(Options{}, "")
+	repo, err := cloner.git2goClone("", "", git2go.RemoteCallbacks{})
 	require.NoError(t, err)
 	head, err := repo.Head()
 	require.NoError(t, err)
