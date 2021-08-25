@@ -10,15 +10,15 @@ metadata:
 spec:
   endpoints:
   {{- if .Values.prometheusOperator.tls.enabled }}
-  - port: https
-    scheme: https
-      tlsConfig: 
-        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-        keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+  - port: http
   {{- else }}
   - port: http
+    scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
   {{- end }}
     honorLabels: true
     {{- if .Values.prometheusOperator.serviceMonitor.interval }}
