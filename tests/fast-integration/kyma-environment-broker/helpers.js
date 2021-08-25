@@ -35,6 +35,30 @@ async function provisionSKR(
   };
 }
 
+function ensureValidShootOIDCConfig(shoot, targetOIDCConfig) {
+  expect(shoot).to.have.nested.property(
+    "oidcConfig.clientID",
+    targetOIDCConfig.clientID
+  );
+  expect(shoot).to.have.nested.property(
+    "oidcConfig.issuerURL",
+    targetOIDCConfig.issuerURL
+  );
+  expect(shoot).to.have.nested.property(
+    "oidcConfig.groupsClaim",
+    targetOIDCConfig.groupsClaim
+  );
+  expect(shoot).to.have.nested.property(
+    "oidcConfig.usernameClaim",
+    targetOIDCConfig.usernameClaim
+  );
+  expect(shoot).to.have.nested.property(
+    "oidcConfig.usernamePrefix",
+    targetOIDCConfig.usernamePrefix
+  );
+  expect(shoot.oidcConfig.signingAlgs).to.eql(targetOIDCConfig.signingAlgs);
+}
+
 async function deprovisionSKR(keb, instanceID) {
   const resp = await keb.deprovisionSKR(instanceID);
   expect(resp).to.have.property("operation");
@@ -45,6 +69,23 @@ async function deprovisionSKR(keb, instanceID) {
   await ensureOperationSucceeded(keb, instanceID, operationID);
 
   return operationID;
+}
+
+async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
+  const resp = await keb.updateSKR(instanceID, customParams);
+  expect(resp).to.have.property("operation");
+
+  const operationID = resp.operation;
+  debug(`Operation ID ${operationID}`);
+
+  await ensureOperationSucceeded(keb, instanceID, operationID);
+
+  const shoot = await gardener.getShoot(shootName);
+
+  return {
+    operationID,
+    shoot,
+  };
 }
 
 async function ensureOperationSucceeded(keb, instanceID, operationID) {
@@ -72,6 +113,8 @@ async function getShootName(keb, instanceID) {
 module.exports = {
   provisionSKR,
   deprovisionSKR,
+  updateSKR,
   ensureOperationSucceeded,
   getShootName,
+  ensureValidShootOIDCConfig,
 };

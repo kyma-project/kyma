@@ -110,7 +110,7 @@ class KEBClient {
       },
       parameters: {
         name: name,
-        // ...customParams,
+        ...customParams,
       },
     };
 
@@ -134,30 +134,23 @@ class KEBClient {
     }
   }
 
-  //-- KK new function
-  async updateSKR(name, instanceID, params) {
+  async updateSKR(instanceID, customParams) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
-      plan_id: this.planID,
       context: {
         globalaccount_id: this.globalAccountID,
-        subaccount_id: this.subaccountID,
-        user_id: this.userID,
       },
       parameters: {
-        name: name,
-        params,
+        ...customParams,
       },
     };
-    const endpoint = `service_instances/${instanceID}`;
+    const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
     try {
-      // KK patch ?
-      return await this.callKEB(payload, endpoint, "put");
+      return await this.callKEB(payload, endpoint, "patch");
     } catch (err) {
       throw new Error(`error while updating SKR: ${err.toString()}`);
     }
   }
-  // --
 
   async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;

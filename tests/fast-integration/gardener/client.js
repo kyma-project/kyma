@@ -42,25 +42,25 @@ class GardenerClient {
   }
 
   async getShoot(shootName) {
-    const secretResp = await this.coreV1API.readNamespacedSecret(
-      `${shootName}.kubeconfig`,
-      GARDENER_PROJECT
-    );
-    const shootResp = await this.dynamicAPI.read({
-      apiVersion: "core.gardener.cloud/v1beta1",
-      kind: "Shoot",
-      metadata: {
-        name: shootName,
-        namespace: GARDENER_PROJECT,
-      },
-    });
+      const secretResp = await this.coreV1API.readNamespacedSecret(
+        `${shootName}.kubeconfig`,
+        GARDENER_PROJECT
+      );
+      const shootResp = await this.dynamicAPI.read({
+        apiVersion: "core.gardener.cloud/v1beta1",
+        kind: "Shoot",
+        metadata: {
+          name: shootName,
+          namespace: GARDENER_PROJECT,
+        },
+      });
 
-    return {
-      name: shootName,
-      compassID: shootResp.body.metadata.annotations[COMPASS_ID_ANNOTATION_KEY],
-      kubeconfig: fromBase64(secretResp.body.data["kubeconfig"]),
-      oidcConfig: shootResp.body.spec.kubernetes.kubeAPIServer.oidcConfig,
-    };
+      return {
+        name: shootName,
+        compassID: shootResp.body.metadata.annotations[COMPASS_ID_ANNOTATION_KEY],
+        kubeconfig: fromBase64(secretResp.body.data["kubeconfig"]),
+        oidcConfig: shootResp.body.spec.kubernetes.kubeAPIServer.oidcConfig,
+      };
   }
 }
 

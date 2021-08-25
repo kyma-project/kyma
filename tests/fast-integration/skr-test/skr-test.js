@@ -4,6 +4,8 @@ const {
   KEBClient,
   provisionSKR,
   deprovisionSKR,
+  updateSKR,
+  ensureValidShootOIDCConfig,
 } = require("../kyma-environment-broker");
 const {
   DirectorConfig,
@@ -19,7 +21,13 @@ const {
   sendEventAndCheckResponse,
   deleteMockTestFixture,
 } = require("../test/fixtures/commerce-mock");
-const { debug, genRandom, initializeK8sClient } = require("../utils");
+const {
+  debug,
+  genRandom,
+  initializeK8sClient,
+  ensureKymaAdminBindingExistsForUser,
+  getEnvOrThrow,
+} = require("../utils");
 
 const {
   AuditLogCreds,
@@ -38,6 +46,26 @@ describe("SKR test", function () {
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
   const runtimeID = uuid.v4();
+  const oidc0 = {
+    clientID: "abc-xyz",
+    groupsClaim: "groups",
+    issuerURL: "https://custom.ias.com",
+    signingAlgs: ["RS256"],
+    usernameClaim: "sub",
+    usernamePrefix: "-",
+  };
+
+  const administrator0 = getEnvOrThrow("KEB_USER_ID");
+
+  const oidc1 = {
+    clientID: "foo-bar",
+    groupsClaim: "groups1",
+    issuerURL: "https://new.custom.ias.com",
+    signingAlgs: ["RS256"],
+    usernameClaim: "email",
+    usernamePrefix: "acme-",
+  };
+  const administrators1 = ["admin1@acme.com", "admin2@acme.com"];
 
   debug(
     `RuntimeID ${runtimeID}`,
@@ -56,17 +84,9 @@ describe("SKR test", function () {
 
   it(`Provision SKR with ID ${runtimeID}`, async function () {
     const customParams = {
-      oidc: {
-        clientID: "clientID",
-        groupsClaim: "groups",
-        issuerURL: "https://dupa.com",
-        signingAlgs: ["RS256"],
-        usernameClaim: "sub",
-        usernamePrefix: "-",
-      },
-      administrators: ["ziomeczek@admin.com"],
+      oidc: oidc0,
     };
-    //-- KK set oidc config {} i admins []
+
     skr = await provisionSKR(
       keb,
       gardener,
@@ -77,30 +97,57 @@ describe("SKR test", function () {
       customParams
     );
     initializeK8sClient({ kubeconfig: skr.shoot.kubeconfig });
-
-    let oidcConfig = skr.shoot.oidcConfig;
-    console.log("Oidc", oidcConfig);
-
-    //-- KK assert oidc config {} via gardener client
-    // assert on skr object // KK ??
-    //-- KK assert admins using k8s core API client
-
-    //owrapowac zeby nie smiecic
-    //i.e  waitForK8sObject( 'ClusterRoleBinding ', 'kyma-admin ' )
   });
 
-  // it(`assure oidc`)
+  it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
+    ensureValidShootOIDCConfig(skr.shoot, oidc0);
+  });
 
-  // it(`assure cluster admins`)
+  it(`Assure initial cluster admin`, async function () {
+    await ensureKymaAdminBindingExistsForUser(administrator0);
+  });
 
-  // it(`Update SKR service instance`, async function () {
-  //   //-- KK dodac parametry oidc i admins []
-  //   skr = await updateSKR(keb, gardener, runtimeID, runtimeName);
+  it(`Update SKR service instance with OIDC config`, async function () {
+    const customParams = {
+      oidc: oidc1,
+    };
 
-  //   //-- KK assert oidc gardener client
-  //   gardener.getShoot(); // KK ??
-  //   //-- KK assert admins using k8s core API client
-  // });
+    skr = await updateSKR(
+      keb,
+      gardener,
+      runtimeID,
+      skr.shoot.name,
+      customParams
+    );
+  });
+
+  it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
+    ensureValidShootOIDCConfig(skr.shoot, oidc1);
+  });
+
+  it(`Assure cluster admin is preserved`, async function () {
+    await ensureKymaAdminBindingExistsForUser(administrator0);
+  });
+
+  it(`Update SKR service instance with new admins`, async function () {
+    const customParams = {
+      administrators: administrators1,
+    };
+
+    skr = await updateSKR(
+      keb,
+      gardener,
+      runtimeID,
+      skr.shoot.name,
+      customParams
+    );
+  });
+
+  it(`Assure only new cluster admins are configured`, async function () {
+    await ensureKymaAdminBindingExistsForUser(administrators1[0]);
+    await ensureKymaAdminBindingExistsForUser(administrators1[1]);
+    await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
+  });
 
   // it("Assign SKR to scenario", async function () {
   //   await addScenarioInCompass(director, scenarioName);
@@ -146,7 +193,7 @@ describe("SKR test", function () {
     await deprovisionSKR(keb, runtimeID);
   });
 
-  it("Unregister SKR resources from Compass", async function () {
-    await unregisterKymaFromCompass(director, scenarioName);
-  });
+  // it("Unregister SKR resources from Compass", async function () {
+  //   await unregisterKymaFromCompass(director, scenarioName);
+  // });
 });

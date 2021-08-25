@@ -28,6 +28,7 @@ function initializeK8sClient(opts) {
     k8sCustomApi = kc.makeApiClient(k8s.CustomObjectsApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
   } catch (err) {
@@ -267,11 +268,10 @@ async function getClusteraddonsconfigurations() {
 async function getSecrets(namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets`;
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
   const body = JSON.parse(response.body);
-  return body.items
-
+  return body.items;
 }
 
 async function getPodPresets(namespace) {
@@ -304,10 +304,10 @@ async function getConfigMap(name, namespace) {
 async function getConfigMap(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
   const body = JSON.parse(response.body);
-  return body
+  return body;
 }
 
 async function k8sApply(resources, namespace, patch = true) {
@@ -870,6 +870,43 @@ async function getContainerRestartsForAllNamespaces() {
     }));
 }
 
+async function getKymaAdminBindings() {
+  const { body } = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+  const adminRoleBindings = body.items;
+  return adminRoleBindings
+    .filter(
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "kyma-admin"
+    )
+    .map((clusterRoleBinding) => ({
+      name: clusterRoleBinding.metadata.name,
+      role: clusterRoleBinding.roleRef.name,
+      users: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "User")
+        .map((sub) => sub.name),
+      groups: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "Group")
+        .map((sub) => sub.name),
+    }));
+}
+
+async function findKymaAdminBindingForUser(targetUser) {
+  let kymaAdminBindings = await getKymaAdminBindings();
+  return kymaAdminBindings.find(
+    (binding) => binding.users.indexOf(targetUser) >= 0
+  );
+}
+
+async function ensureKymaAdminBindingExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).not.to.be.undefined;
+  expect(binding.users).to.include(targetUser);
+}
+
+async function ensureKymaAdminBindingDoesNotExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).to.be.undefined;
+}
+
 function getContainerStatusByImage(pod, image) {
   return pod.containerStatuses.find((status) => status.image === image);
 }
@@ -1184,6 +1221,8 @@ module.exports = {
   getAllResourceTypes,
   getAllCRDs,
   getClusteraddonsconfigurations,
+  ensureKymaAdminBindingExistsForUser,
+  ensureKymaAdminBindingDoesNotExistsForUser,
   getSecret,
   getSecrets,
   getConfigMap,
