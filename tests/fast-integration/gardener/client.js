@@ -2,8 +2,7 @@ const k8s = require("@kubernetes/client-node");
 const { fromBase64, getEnvOrThrow } = require("../utils");
 
 const GARDENER_PROJECT = "garden-kyma-dev";
-const COMPASS_ID_ANNOTATION_KEY =
-  "compass.provisioner.kyma-project.io/runtime-id";
+const COMPASS_ID_ANNOTATION_KEY = "compass.provisioner.kyma-project.io/runtime-id";
 
 class GardenerConfig {
   static fromEnv() {
@@ -42,25 +41,22 @@ class GardenerClient {
   }
 
   async getShoot(shootName) {
-      const secretResp = await this.coreV1API.readNamespacedSecret(
-        `${shootName}.kubeconfig`,
-        GARDENER_PROJECT
-      );
-      const shootResp = await this.dynamicAPI.read({
-        apiVersion: "core.gardener.cloud/v1beta1",
-        kind: "Shoot",
-        metadata: {
-          name: shootName,
-          namespace: GARDENER_PROJECT,
-        },
-      });
-
-      return {
+    const secretResp = await this.coreV1API.readNamespacedSecret(`${shootName}.kubeconfig`, GARDENER_PROJECT);
+    const shootResp = await this.dynamicAPI.read({
+      apiVersion: "core.gardener.cloud/v1beta1",
+      kind: "Shoot",
+      metadata: {
         name: shootName,
-        compassID: shootResp.body.metadata.annotations[COMPASS_ID_ANNOTATION_KEY],
-        kubeconfig: fromBase64(secretResp.body.data["kubeconfig"]),
-        oidcConfig: shootResp.body.spec.kubernetes.kubeAPIServer.oidcConfig,
-      };
+        namespace: GARDENER_PROJECT,
+      },
+    });
+
+    return {
+      name: shootName,
+      compassID: shootResp.body.metadata.annotations[COMPASS_ID_ANNOTATION_KEY],
+      kubeconfig: fromBase64(secretResp.body.data["kubeconfig"]),
+      oidcConfig: shootResp.body.spec.kubernetes.kubeAPIServer.oidcConfig,
+    };
   }
 }
 

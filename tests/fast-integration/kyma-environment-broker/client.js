@@ -18,15 +18,7 @@ class KEBConfig {
     );
   }
 
-  constructor(
-    host,
-    credentials,
-    globalAccountID,
-    subaccountID,
-    userID,
-    planID,
-    region
-  ) {
+  constructor(host, credentials, globalAccountID, subaccountID, userID, planID, region) {
     this.host = host;
     this.credentials = credentials;
     this.globalAccountID = globalAccountID;
@@ -39,10 +31,7 @@ class KEBConfig {
 
 class KEBClient {
   constructor(config) {
-    this.token = new OAuthToken(
-      `https://oauth2.${config.host}/oauth2/token`,
-      config.credentials
-    );
+    this.token = new OAuthToken(`https://oauth2.${config.host}/oauth2/token`, config.credentials);
     this.host = config.host;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
@@ -57,7 +46,7 @@ class KEBClient {
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
-      Authorization: `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
@@ -84,22 +73,14 @@ class KEBClient {
       debug(err);
       const msg = "Error calling KEB";
       if (err.response) {
-        throw new Error(
-          `${msg}: ${err.response.status} ${err.response.statusText}`
-        );
+        throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
       } else {
         throw new Error(`${msg}: ${err.toString()}`);
       }
     }
   }
 
-  async provisionSKR(
-    name,
-    instanceID,
-    platformCreds,
-    btpOperatorCreds,
-    customParams
-  ) {
+  async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
