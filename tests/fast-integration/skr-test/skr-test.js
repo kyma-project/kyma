@@ -39,7 +39,7 @@ const {
 describe("SKR test", function () {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  // const director = new DirectorClient(DirectorConfig.fromEnv());
+  const director = new DirectorClient(DirectorConfig.fromEnv());
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -149,51 +149,51 @@ describe("SKR test", function () {
     await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
   });
 
-  // it("Assign SKR to scenario", async function () {
-  //   await addScenarioInCompass(director, scenarioName);
-  //   await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
-  // });
+  it("Assign SKR to scenario", async function () {
+    await addScenarioInCompass(director, scenarioName);
+    await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
+  });
 
-  // it("CommerceMock test fixture should be ready", async function () {
-  //   await ensureCommerceMockWithCompassTestFixture(
-  //     director,
-  //     appName,
-  //     scenarioName,
-  //     "mocks",
-  //     testNS
-  //   );
-  // });
+  it("CommerceMock test fixture should be ready", async function () {
+    await ensureCommerceMockWithCompassTestFixture(
+      director,
+      appName,
+      scenarioName,
+      "mocks",
+      testNS
+    );
+  });
 
-  // it("function should be reachable through secured API Rule", async function () {
-  //   await checkFunctionResponse(testNS);
-  // });
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNS);
+  });
 
-  // it("order.created.v1 event should trigger the lastorder function", async function () {
-  //   await sendEventAndCheckResponse();
-  // });
+  it("order.created.v1 event should trigger the lastorder function", async function () {
+    await sendEventAndCheckResponse();
+  });
 
-  // it("Deletes the resources that have been created", async function () {
-  //   await deleteMockTestFixture("mocks", testNS);
-  // });
+  it("Deletes the resources that have been created", async function () {
+    await deleteMockTestFixture("mocks", testNS);
+  });
 
-  // // Check audit log for AWS
-  // if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
-  //   const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
+  // Check audit log for AWS
+  if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
+    const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
-  //   it("Check audit logs", async function () {
-  //     await checkAuditLogs(auditlogs);
-  //   });
+    it("Check audit logs", async function () {
+      await checkAuditLogs(auditlogs);
+    });
 
-  //   it("Amount of audit events must not exceed a certain threshold", async function () {
-  //     await checkAuditEventsThreshold(2.5);
-  //   });
-  // }
+    it("Amount of audit events must not exceed a certain threshold", async function () {
+      await checkAuditEventsThreshold(2.5);
+    });
+  }
 
   it("Deprovision SKR", async function () {
     await deprovisionSKR(keb, runtimeID);
   });
 
-  // it("Unregister SKR resources from Compass", async function () {
-  //   await unregisterKymaFromCompass(director, scenarioName);
-  // });
+  it("Unregister SKR resources from Compass", async function () {
+    await unregisterKymaFromCompass(director, scenarioName);
+  });
 });
