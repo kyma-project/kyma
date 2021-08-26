@@ -231,7 +231,6 @@ async function checkSecrets(existing) {
 
   // if missing > 0 -> there are some secrets lost
   debug(`Missing ${missing.length} secrets`)
-  console.log(`Missing ${missing.length} secrets`)
 }
 
 async function checkPodPresets(expected, existing) {
@@ -255,7 +254,6 @@ async function checkPodPresets(expected, existing) {
 
   // if missing > 0 -> there are some secrets lost
   debug(`Missing ${missing.length} PodPresets`)
-  console.log(`Missing ${missing.length} PodPresets`)
 }
 
 async function deploy() {
