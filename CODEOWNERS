@@ -130,6 +130,9 @@
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
+# The `istio-configuration` chart
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl
 
