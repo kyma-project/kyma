@@ -36,7 +36,7 @@ If you use a cluster not managed by Gardener, install the required components ma
 4. Install the `external-dns-management` component in the `gardener-components` Namespace:
 
    ```bash
-   helm install external-dns {PATH_TO_EXTERNAL_DNS_MANAGEMENT}/charts/external-dns-management --namespace=gardener-components --set configuration.identifier=external-dns-identifier
+   helm install external-dns {PATH_TO_EXTERNAL_DNS_MANAGEMENT}/charts/external-dns-management --namespace=gardener-components --set configuration.identifier=external-dns-identifier --set configuration.disableNamespaceRestriction=true
    ```
 
 5. Install the `cert-management` component in the `gardener-components` Namespace:
@@ -45,13 +45,58 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace=gardener-components --set configuration.identifier=cert-manager-identifier
    ```
 
+6. Add the following RBAC rules to allow the Certificate Management component to configure objects in a user's Namespace. Create a Namspacer and add two RBAC rules. Run:
+
+   ```bash
+   kubectl create ns {NAMESPACE_NAME}
+   ```
+
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: cert-controller-manager-dnsentries
+    rules:
+    - apiGroups:
+      - dns.gardener.cloud
+      resources:
+      - dnsentries
+      verbs:
+      - get
+      - list
+      - update
+      - watch
+      - create
+      - delete
+    EOF
+    ```
+
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: cert-controller-manager-dnsentries
+      namespace: ${NAMESPACE_NAME}
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cert-controller-manager-dnsentries
+    subjects:
+    - kind: ServiceAccount
+      name: cert-controller-manager
+      namespace: gardener-components
+    EOF
+    ```
+
 ## Steps
 
 Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
 
 1. [Install Kyma](../../04-operation-guides/operations/01-install-kyma.md) 2.0 or higher.
 
-2. Create a Namespace. Run:
+2. Create a Namespace, if it doesn't exist yet. Run:
 
    ```bash
    kubectl create ns {NAMESPACE_NAME}
@@ -71,7 +116,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   export NAMESPACE={NAMESPACE_NAME}
   export SPEC_TYPE={PROVIDER_TYPE}
   export SECRET={SECRET_NAME}
-  export DOMAIN={CLUSTER_DOMAIN} #eg. mydomain.com
+  export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
   ```
   
   Create a DNSProvider CR. Run:
@@ -131,7 +176,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
   ```bash
   export NAMESPACE={NAMESPACE_NAME}
-  export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g: *.api.mydomain.com
+  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
   export IP={INGRESS_GATEWAY_IP}
   ```
 
@@ -174,7 +219,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
     name: dns-entry
     namespace: $NAMESPACE
   spec:
-    dnsName: "$SUBDOMAIN"
+    dnsName: "$WILDCARD"
     ttl: 600
     targets:
       - $IP
@@ -195,9 +240,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    ```bash
    export EMAIL={YOUR_EMAIL_ADDRESS}
-   export DOMAIN={CLUSTER_DOMAIN}
-   export SUBDOMAIN={YOUR_SUBDOMAIN}
-   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} #e.g. *api.mydomain.com
+   export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
+   export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g. api.mydomain.com
+   export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *api.mydomain.com
    ```
 
    Create an Issuer CR. Run:
@@ -233,10 +278,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
-   export TLS_SECRET={SECRET_NAME} #e.g: httpbin-tls-credentials
-   export DOMAIN={CLUSTER_DOMAIN}
+   export TLS_SECRET={SECRET_NAME} #e.g. httpbin-tls-credentials
+   export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
    export ISSUER={ISSUER_NAME}
-   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} #e.g: *.api.mydomain.com
+   export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *.api.mydomain.com
    ```
 
    Create a Certificate CR. Run:
@@ -262,8 +307,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 7. Create a Gateway CR. Export values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters as anvironment variables. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the wildcard DNS record. Run:
 
    ```bash
+   export NAMESPACE={NAMESPACE_NAME}
    export TLS_SECRET={SECRET_NAME}
-   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} # e.g. *api.mydomain.com
+   export WILDCARD={WILDCARD_SUBDOMAIN} # e.g. *api.mydomain.com
    ```
 
    Create a Gateway CR. Run:
@@ -274,6 +320,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kind: Gateway
    metadata:
      name: httpbin-gateway
+     namespace: $NAMESPACE
    spec:
      selector:
        istio: ingressgateway # Use Istio Ingress Gateway as default

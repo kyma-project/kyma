@@ -22,6 +22,11 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
   kubectl apply -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   ```
 
+  > **TIP:** To deploy the service in a user Namespace, run:
+  > ``` 
+  > kubectl -n {NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
+  > ```
+
 3. Expose the service by creating an APIRule CR:
 
   ```bash
@@ -54,7 +59,9 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   >**NOTE:** If you are running Kyma on Minikube, add `httpbin.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
-  >**NOTE:** If you use a custom domain, modify the value of the **spec.gateway** parameter. Use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.default.svc.cluster.local`.
+  >**NOTE:** If you use a custom domain, modify values of the following parameters:
+  > - **spec.gateway** - use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.default.svc.cluster.local`.
+  > - **spec.service.host** - as the $DOMAIN value use the subdomain you used following the [**Use a custom domain to expose a service**](./apix-04-own-domain.md) tutorial, for example `api.mydomain.com`.
 
 ## Access the exposed resources
 
