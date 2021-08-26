@@ -243,9 +243,9 @@ async function checkPodPresets(expected, existing) {
   // iterate through the list of all existing PodPresets in namespace
   // and check if this list still contains the same PodPresets
   allPodPresets.forEach( function (podPresetName) {
-    for (var i=0; i < reference.length; i++) {
-      if (podPresetName.includes(reference[i])) {
-        let index = missing.indexOf(reference[i])
+    for (var i=0; i < expected.length; i++) {
+      if (podPresetName.includes(expected[i])) {
+        let index = missing.indexOf(expected[i])
         if (index !== -1) {
           missing.splice(index, 1)
         }
