@@ -4,7 +4,7 @@ title: Access Kyma application logs
 
 Get insights into your applications (microservices, Functions...) by viewing the respective logs.
 
-To check out real-time logs immediately, use the Kubernetes functionalities - either with the CLI, or in Kyma Dashboard.
+To check out real-time logs immediately, use the Kubernetes functionalities - either with `kubectl`, or in Kyma Dashboard.
 
 If you want to see historical logs and use additional features, view the logs as aggregated by Loki. In Grafana, you can see a visual representation of your logs, while Loki itself provides an API for programmatic access.
 
