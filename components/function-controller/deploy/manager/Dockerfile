@@ -25,7 +25,7 @@ RUN apk --update add ca-certificates
 
 # result container
 FROM alpine:3.13.5
-RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2-dev
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
