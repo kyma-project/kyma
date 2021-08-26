@@ -45,7 +45,7 @@ func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig,
 		Log:         log.WithName("controllers").WithName("function"),
 		config:      config,
 		recorder:    recorder,
-		gitOperator: git.New(),
+		gitOperator: git.NewGit2Go(),
 	}
 }
 
