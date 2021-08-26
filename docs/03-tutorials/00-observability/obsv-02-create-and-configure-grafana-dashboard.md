@@ -16,7 +16,7 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 ## Create the dashboard
 
-1. [Access Grafana](../../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
+1. [Access Grafana](../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
 2. Add a new dashboard with a new panel.
 3. For your new query, select **Prometheus** from the data source selector.
 4. Pick the `cpu_temperature_celsius` metric.
