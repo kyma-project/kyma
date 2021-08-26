@@ -6,7 +6,7 @@ Now that we've got our `hello-world` Function deployed, let's expose it outside 
 
 ## Create an APIRule
 
-First, let's create an APIRule for the Function. 
+First, let's create an [APIRule](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for the Function. 
 
 <div tabs name="Expose the Function" group="expose-function">
   <details open>
@@ -54,7 +54,7 @@ EOF
 2. Click on **Expose Function +**.
 3. Provide the **Name** (`hello-world`) and **Hostname** (`hello-world`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules**, and continue with step 3.
+> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
   </details>
 </div>
 
@@ -84,6 +84,8 @@ The operation was successful if the call returns `Hello Serverless`.
 
 In your Function's **Configuration** tab, click on the APIRule's **Hostname**. 
 This will open the Function's external address in a new page. 
+
+> **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.
 
 The operation was successful if the page says `Hello World!`. 
   </details>
