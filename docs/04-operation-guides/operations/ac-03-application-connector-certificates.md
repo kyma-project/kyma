@@ -30,4 +30,4 @@ data:
   global.applicationConnectorCaKey: "{BASE64_ENCODED_PRIVATE_KEY}"
 ```
 
->**TIP:** Read more about how to [change Kyma settings](04-change-kyma-config-values.md).
+>**TIP:** Read more about how to [change Kyma settings](03-change-kyma-config-values.md).

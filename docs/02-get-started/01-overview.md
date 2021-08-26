@@ -20,13 +20,10 @@ All guides, whenever possible, demonstrate the steps in both kubectl and Console
 
 ## Prerequisites
 
-1. Install:
-
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (1.16 or greater)
 - [curl](https://github.com/curl/curl)
-- [Kyma](/root/kyma/#installation-install-kyma-on-a-cluster) on a cluster of your choice.
-
-2. [Download the `kubeconfig` file](/components/security#tutorials-get-the-kubeconfig-file) with the cluster configuration.
+- [k3d](https://k3d.io/#installation)
+- [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 
 ## Main actors
 

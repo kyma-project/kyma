@@ -1,0 +1,52 @@
+---
+title: Quick Install
+---
+
+To get started with Kyma, let's quickly install it first.
+
+## Install Kyma
+
+To install Kyma on a local k3d cluster, run:
+
+```bash
+kyma provision k3d
+kyma deploy
+```
+
+> **NOTE:** Check out [more installation options for Kyma](../04-operation-guides/operations/02-install-kyma.md).
+
+## Verify the installation
+
+Now let's verify that the installation was successful. Run:
+
+```bash
+kubectl get deployments -n kyma-system
+```
+
+The installation succeeded if all the Deployments returned are in status `READY`.
+
+## Connect to Kyma Dashboard
+
+To manage Kyma via GUI, connect it to Kyma Dashboard. Run:
+
+```bash
+docker run --rm -p 3001:3001 busola/local:latest
+```
+
+[Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and paste it into the Dashboard as prompted.
+
+<!--
+//TODO: finish when Busola working with Docker gets fixed
+-->
+
+## Check the list of Deployments via Dashboard
+
+Now let's check the list of deployments using the Dashboard.
+
+1. Navigate to **Namespaces**.
+2. Click on the `kyma-system` Namespace.
+    > **NOTE:** The system Namespaces are hidden by default. 
+    > To see `kyma-system` and other hidden Namespaces, go to your Dashboard profile, choose **Preferences**, and activate the **Show Hidden Namespaces** toggle in **Namespace Settings**.
+3. Click on **Deployments**.
+
+This gives you the same list of deployments as you got earlier via `kubectl`, just in a nicer visual packaging. 
