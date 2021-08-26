@@ -189,7 +189,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
   >```
 
-  >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: *.api.mydomain.com.
+  >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: `*.api.mydomain.com`.
 
 5. Create an Issuer CR. Export values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters as environment variables. As the values for the **metadata.spec.domains.include** parameter, use the main domain, the subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
 
@@ -233,10 +233,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
-   export SECRET_2={SECRET_NAME} #e.g: httpbin-tls-credentials
+   export TLS_SECRET={SECRET_NAME} #e.g: httpbin-tls-credentials
    export DOMAIN={CLUSTER_DOMAIN}
    export ISSUER={ISSUER_NAME}
-   export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g: *.api.mydomain.com
+   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} #e.g: *.api.mydomain.com
    ```
 
    Create a Certificate CR. Run:
@@ -249,21 +249,21 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      name: httpbin-cert
      namespace: istio-system
    spec:  
-     secretName: $SECRET_2
+     secretName: $TLS_SECRET
      commonName: $DOMAIN
      issuerRef:
        name: $ISSUER
        namespace: default
      dnsNames:
-       - $SUBDOMAIN
+       - "$WILDCARD"
    EOF
    ```
 
 7. Create a Gateway CR. Export values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters as anvironment variables. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the wildcard DNS record. Run:
 
    ```bash
-   export SECRET_2={SECRET_NAME}
-   export WILDCARD={YOUR_WILDCARD_DNS_RECORD, e.g. *.mydomain.com}
+   export TLS_SECRET={SECRET_NAME}
+   export WILDCARD={YOUR_WILDCARD_SUBDOMAIN} # e.g. *api.mydomain.com
    ```
 
    Create a Gateway CR. Run:
@@ -284,7 +284,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
            protocol: HTTPS
          tls:
            mode: SIMPLE
-           credentialName: $SECRET_2
+           credentialName: $TLS_SECRET
          hosts:
            - "$WILDCARD"
    EOF
