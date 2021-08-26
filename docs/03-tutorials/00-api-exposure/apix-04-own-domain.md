@@ -248,6 +248,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    metadata:
      name: httpbin-cert
      namespace: istio-system
+   spec:  
      secretName: $SECRET_2
      commonName: $DOMAIN
      issuerRef:
