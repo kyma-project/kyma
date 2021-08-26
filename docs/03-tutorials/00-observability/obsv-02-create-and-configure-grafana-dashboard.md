@@ -43,7 +43,7 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 ## Add the dashboard as Kubernetes resource
 
-When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard as a Kubernetes ConfigMap resource. In this case, a Grafana sidecar automatically loads the Dashboard on Grafana startup. Following that approach, you can easily keep the dashboard definition together with the kubernetes resource definitions of your application and port it to different clusters.
+When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard as a Kubernetes ConfigMap resource. In this case, a Grafana sidecar automatically loads the Dashboard on Grafana startup. Following that approach, you can easily keep the dashboard definition together with the Kubernetes resource definitions of your application and port it to different clusters.
 
 1. Create a JSON document with the dashboard definition; for example, by exporting it from Grafana.
 2. Create a Kubernetes resource with a unique name for your dashboard and the JSON content, like the following example:
