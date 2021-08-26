@@ -47,6 +47,19 @@ publisherProxy:
       cpu: 32m
       memory: 64Mi
 
+natsOperatorDoctor:
+  interval: 1m
+  image:
+    tag: "PR-11920"
+    name: "nats-operator-doctor"
+    pullPolicy: "IfNotPresent"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 8Mi
+    limits:
+      cpu: 20m
+      memory: 16Mi
 
 metrics:
   service:
