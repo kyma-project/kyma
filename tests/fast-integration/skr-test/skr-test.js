@@ -26,6 +26,7 @@ const {
   genRandom,
   initializeK8sClient,
   ensureKymaAdminBindingExistsForUser,
+  ensureKymaAdminBindingDoesNotExistsForUser,
   getEnvOrThrow,
 } = require("../utils");
 
@@ -87,15 +88,7 @@ describe("SKR test", function () {
       oidc: oidc0,
     };
 
-    skr = await provisionSKR(
-      keb,
-      gardener,
-      runtimeID,
-      runtimeName,
-      null,
-      null,
-      customParams
-    );
+    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, null, null, customParams);
     initializeK8sClient({ kubeconfig: skr.shoot.kubeconfig });
   });
 
@@ -112,13 +105,7 @@ describe("SKR test", function () {
       oidc: oidc1,
     };
 
-    skr = await updateSKR(
-      keb,
-      gardener,
-      runtimeID,
-      skr.shoot.name,
-      customParams
-    );
+    skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
   });
 
   it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
@@ -134,13 +121,7 @@ describe("SKR test", function () {
       administrators: administrators1,
     };
 
-    skr = await updateSKR(
-      keb,
-      gardener,
-      runtimeID,
-      skr.shoot.name,
-      customParams
-    );
+    skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
   });
 
   it(`Assure only new cluster admins are configured`, async function () {
