@@ -1,6 +1,5 @@
 ---
 title: Kiali Chart
-type: Configuration Parameters
 ---
 
 To configure the Kiali chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
