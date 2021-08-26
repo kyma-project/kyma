@@ -36,7 +36,8 @@ func TestGetRuntimeConfig(t *testing.T) {
 				FunctionFile:            "handler.py",
 				DockerfileConfigMapName: "dockerfile-python-38",
 				RuntimeEnvs: []corev1.EnvVar{{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.8/site-packages:$(KUBELESS_INSTALL_VOLUME)"},
-					{Name: "FUNC_RUNTIME", Value: "python38"}},
+					{Name: "FUNC_RUNTIME", Value: "python38"},
+					{Name: "PYTHONUNBUFFERED", Value: "TRUE"}},
 			},
 		},
 		"python39": {
@@ -48,7 +49,8 @@ func TestGetRuntimeConfig(t *testing.T) {
 				FunctionFile:            "handler.py",
 				DockerfileConfigMapName: "dockerfile-python-39",
 				RuntimeEnvs: []corev1.EnvVar{{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)"},
-					{Name: "FUNC_RUNTIME", Value: "python39"}},
+					{Name: "FUNC_RUNTIME", Value: "python39"},
+					{Name: "PYTHONUNBUFFERED", Value: "TRUE"}},
 			},
 		},
 		"nodej14": {
