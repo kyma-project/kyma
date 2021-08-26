@@ -237,7 +237,7 @@ async function checkPodPresets(expected, existing) {
   let allPodPresets = existing
 
   let missing = expected
-  console.log("checking if all podpresets still exists: " + missing)
+  debug("checking if all podpresets still exists: " + missing)
 
   // iterate through the list of all existing PodPresets in namespace
   // and check if this list still contains the same PodPresets
