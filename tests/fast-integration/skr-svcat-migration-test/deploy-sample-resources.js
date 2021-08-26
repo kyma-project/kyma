@@ -249,7 +249,6 @@ async function checkPodPresets(expected, existing) {
         if (index !== -1) {
           missing.splice(index, 1)
         }
-        console.log(missing)
       }
     }
   })
