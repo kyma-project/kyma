@@ -6,7 +6,7 @@ Get insights into your applications (microservices, Functions...) by viewing the
 
 To check out real-time logs immediately, use the Kubernetes functionalities - either with the CLI, or in Kyma Dashboard.
 
-If you want to see historical logs and use additional features, view the logs as aggregated by Loki. In Grafana, you can see a visual representation of your logs and filter functions for up to five days. If you want to see logs from up to five days back and to use search functionality, call the Loki API directly.
+If you want to see historical logs and use additional features, view the logs as aggregated by Loki. In Grafana, you can see a visual representation of your logs, while Loki itself provides an API for programmatic access.
 
 ## Kubernetes logs in Kyma Dashboard
 
