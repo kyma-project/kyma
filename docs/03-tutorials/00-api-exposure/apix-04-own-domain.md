@@ -337,7 +337,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
-8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. See the following example: `--domain-allowlist=my.sub1.mydomain.com`. Use a comma as a separator. Run the following command, to edit the deployment:
+8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. See the following example: `--domain-allowlist=api.mydomain.com`. Use a comma as a separator. Run the following command, to edit the deployment:
 
   ```bash
   kubectl edit deployment -n kyma-system api-gateway
