@@ -27,4 +27,4 @@ See the example:
 kyma deploy -s main
 ```
 
-See [the full list of commands and flags](/cli/commands/).
+See [the full list of commands and flags](/../../../05-technical-reference/04-cli-commands).
