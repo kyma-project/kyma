@@ -27,13 +27,19 @@ The installation succeeded if all the Deployments returned are in status `READY`
 
 ## Connect to Kyma Dashboard
 
-To manage Kyma via GUI, connect it to Kyma Dashboard. Run:
+To manage Kyma via GUI, connect it to Kyma Dashboard. 
 
-```bash
-docker run --rm -p 3001:3001 busola/local:latest
-```
+1. To start the Dashboard, run:
 
-[Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and paste it into the Dashboard as prompted.
+    ```bash
+    docker run --rm -p 3001:3001 busola/local:latest
+    ```
+
+2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
+3. Click to add your cluster to the Dashboard. 
+4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and paste it into the Dashboard as prompted.
+
+This takes you to your Kyma Dashboard.
 
 <!--
 //TODO: finish when Busola working with Docker gets fixed
