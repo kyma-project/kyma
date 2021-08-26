@@ -45,7 +45,7 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 When you create a dashboard to monitor one of your applications (Function, microservice,...), we recommend that you define the dashboard's ConfigMap and add the dashboard to your Kubernetes resources. In this case, a Grafana sidecar automatically applies the resources and adds your custom dashboard when you create a cluster.
 
-1. Create a JSON file with the dashboard definition; for example, by exporting it from Grafana.
+1. Create a JSON document with the dashboard definition; for example, by exporting it from Grafana.
 2. Create a Kubernetes resource with a unique name for your dashboard and the JSON content, like the following example:
 
    ```yaml
