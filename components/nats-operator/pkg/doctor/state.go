@@ -15,21 +15,31 @@ import (
 )
 
 const (
-	labelKeyEventingBackend    = "kyma-project.io/eventing-backend"
+	// namespace is used as a value for the Kubernetes namespace which contains Eventing resources.
+	namespace = "kyma-system"
+
+	// labelKeyEventingBackend is used as a named key for Eventing backend label.
+	labelKeyEventingBackend = "kyma-project.io/eventing-backend"
+	// labelValEventingBackendBeb is used as a value for Eventing backend label.
 	labelValEventingBackendBeb = "beb"
 
+	// labelKeyNatsOperator is used as a named key for NATS operator label.
 	labelKeyNatsOperator = "name"
+	// labelValNatsOperator is used as a value for NATS operator label.
 	labelValNatsOperator = "nats-operator"
 
+	// labelKeyNatsCluster is used as a named key for NATS server Pod label.
 	labelKeyNatsCluster = "nats_cluster"
+	// labelValNatsCluster is used as a value for NATS server Pod label.
 	labelValNatsCluster = "eventing-nats"
 
-	namespace                  = "kyma-system"
-	natsClusterName            = "eventing-nats"
+	// natsClusterName is used as a named key for NatsCluster CustomResource.
+	natsClusterName = "eventing-nats"
+	// natsOperatorDeploymentName is used as a value for NatsCluster CustomResource.
 	natsOperatorDeploymentName = "nats-operator"
 )
 
-// state TODO ...
+// state represents the state of a NATS cluster.
 type state struct {
 	natsOperatorDeployment *appsv1.Deployment
 	natsOperatorPod        *v1.Pod
@@ -40,12 +50,12 @@ type state struct {
 	natsClient *natscluster.Client
 }
 
-// newState TODO ...
+// newState returns a new state instance.
 func newState(k8sClient kubernetes.Interface, natsClient *natscluster.Client) *state {
 	return &state{k8sClient: k8sClient, natsClient: natsClient}
 }
 
-// compute TODO ...
+// compute updates the state internal objects.
 func (s *state) compute(ctx context.Context) error {
 	if err := s.computeNatsOperatorDeployment(ctx); err != nil {
 		return err
@@ -62,7 +72,7 @@ func (s *state) compute(ctx context.Context) error {
 	return nil
 }
 
-// isNatsBackend TODO ...
+// isNatsBackend returns true if the Eventing backend is NATS, otherwise returns false.
 func (s *state) isNatsBackend(ctx context.Context) (bool, error) {
 	secretList, err := s.k8sClient.CoreV1().Secrets("").List(ctx, metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("%s=%s", labelKeyEventingBackend, labelValEventingBackendBeb),
@@ -73,7 +83,7 @@ func (s *state) isNatsBackend(ctx context.Context) (bool, error) {
 	return len(secretList.Items) == 0, nil
 }
 
-// computeNatsOperatorDeployment TODO ...
+// computeNatsOperatorDeployment updates the state natsOperatorDeployment object.
 func (s *state) computeNatsOperatorDeployment(ctx context.Context) error {
 	s.natsOperatorDeployment = nil
 	natsOperatorDeployment, err := s.k8sClient.AppsV1().Deployments(namespace).Get(ctx, natsOperatorDeploymentName, metav1.GetOptions{})
@@ -90,7 +100,7 @@ func (s *state) computeNatsOperatorDeployment(ctx context.Context) error {
 	return err
 }
 
-// computeNatsOperatorPod TODO ...
+// computeNatsOperatorPod updates the state natsOperatorPod object.
 func (s *state) computeNatsOperatorPod(ctx context.Context) error {
 	s.natsOperatorPod = nil
 	podList, err := s.k8sClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
@@ -109,7 +119,7 @@ func (s *state) computeNatsOperatorPod(ctx context.Context) error {
 	return nil
 }
 
-// computeNatsServersActual TODO ...
+// computeNatsServersActual updates the state natsServersActual count.
 func (s *state) computeNatsServersActual(ctx context.Context) error {
 	s.natsServersActual = 0
 	podList, err := s.k8sClient.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
@@ -129,7 +139,7 @@ func (s *state) computeNatsServersActual(ctx context.Context) error {
 	return nil
 }
 
-// computeNatsServersDesired TODO ...
+// computeNatsServersDesired updates the state natsServersDesired count.
 func (s *state) computeNatsServersDesired(ctx context.Context) error {
 	s.natsServersDesired = 0
 	natsCluster, err := s.natsClient.Get(ctx, namespace, natsClusterName)
@@ -143,7 +153,7 @@ func (s *state) computeNatsServersDesired(ctx context.Context) error {
 	return err
 }
 
-// isPodListEmpty TODO ...
+// isPodListEmpty returns true if the given pod list is nil or has no items, otherwise returns false.
 func isPodListEmpty(podList *v1.PodList) bool {
 	return podList == nil || len(podList.Items) == 0
 }

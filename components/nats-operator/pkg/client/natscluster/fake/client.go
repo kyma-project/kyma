@@ -11,14 +11,14 @@ import (
 	"github.com/nats-io/nats-operator/pkg/apis/nats/v1alpha2"
 )
 
-// NewClientOrDie TODO ...
+// NewClientOrDie returns a new NATS fake client.
 func NewClientOrDie(natsClusterList *v1alpha2.NatsClusterList) *natscluster.Client {
 	scheme := setupSchemeOrDie()
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, natsClusterList)
 	return natscluster.NewClient(dynamicClient)
 }
 
-// setupSchemeOrDie TODO ...
+// setupSchemeOrDie returns a new scheme with the desired API resources.
 func setupSchemeOrDie() *runtime.Scheme {
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {

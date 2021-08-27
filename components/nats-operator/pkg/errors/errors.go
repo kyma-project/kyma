@@ -8,6 +8,7 @@ var (
 
 // recoverable is an interface of an error state that the application can recover from.
 type recoverable interface {
+	error
 	recover()
 }
 

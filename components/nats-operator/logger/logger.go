@@ -3,10 +3,10 @@ package logger
 import "github.com/sirupsen/logrus"
 
 const (
-	// LogKeyReason is used to log a reason for an issue.
+	// LogKeyReason is used as a named key for a log message with reason.
 	LogKeyReason = "reason"
 
-	// LogKeySolution is used to log a solution for an issue.
+	// LogKeySolution is used as a named key for a log message with solution.
 	LogKeySolution = "solution"
 )
 

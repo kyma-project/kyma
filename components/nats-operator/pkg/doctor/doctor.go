@@ -18,7 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Doctor TODO ...
+// Doctor represents a nats-operator doctor.
 type Doctor struct {
 	k8sClient kubernetes.Interface
 	interval  time.Duration
@@ -27,7 +27,7 @@ type Doctor struct {
 	stop      chan os.Signal
 }
 
-// New TODO ...
+// New returns a new nats-operator doctor instance.
 func New(k8sClient kubernetes.Interface, natsClient *natscluster.Client, interval time.Duration, log *logrus.Logger) *Doctor {
 	return &Doctor{
 		k8sClient: k8sClient,
@@ -38,12 +38,14 @@ func New(k8sClient kubernetes.Interface, natsClient *natscluster.Client, interva
 	}
 }
 
-// Start TODO ...
+// Start starts nats-operator doctor which runs forever unless received a shutdown signal.
 func (d *Doctor) Start(ctx context.Context) error {
+	d.log.Infof("nats-cluster health-check will start after %v", d.interval)
+
+	tick := time.NewTicker(d.interval)
+	defer tick.Stop()
 	defer close(d.stop)
 
-	d.log.Infof("nats-cluster health-check will start after %v", d.interval)
-	tick := time.NewTicker(d.interval)
 	for {
 		select {
 		case <-d.stop:
@@ -61,12 +63,12 @@ func (d *Doctor) Start(ctx context.Context) error {
 					continue
 				}
 
-				// compute current nats-cluster state
+				// compute cluster state
 				if err := d.state.compute(ctx); err != nil && !errors.IsRecoverable(err) {
 					return err
 				}
 
-				// resolve nats-cluster issues
+				// resolve issues
 				if err := d.resolveIssuesIfAny(ctx); err != nil {
 					d.stateLogger().WithField(logger.LogKeyReason, err).Infof("nats-cluster resolve issues failed will retry after %v", d.interval)
 					continue
@@ -76,7 +78,7 @@ func (d *Doctor) Start(ctx context.Context) error {
 	}
 }
 
-// resolveIssuesIfAny TODO ...
+// resolveIssuesIfAny detects any issues with the cluster and tries to fix them.
 func (d *Doctor) resolveIssuesIfAny(ctx context.Context) error {
 	// make sure nats-operator deployment exists
 	if d.state.natsOperatorDeployment == nil {
@@ -115,7 +117,7 @@ func (d *Doctor) resolveIssuesIfAny(ctx context.Context) error {
 	return nil
 }
 
-// stateLogger TODO ...
+// stateLogger returns a decorated logger from the state.
 func (d *Doctor) stateLogger() *logrus.Entry {
 	fields := make(logrus.Fields, 2)
 	if d.state.natsOperatorPod != nil {
@@ -125,14 +127,14 @@ func (d *Doctor) stateLogger() *logrus.Entry {
 	return d.log.WithFields(fields)
 }
 
-// newSignalHandler
+// newSignalHandler returns a new channel that receives os interrupt signals.
 func newSignalHandler() chan os.Signal {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	return stop
 }
 
-// deleteNatsOperatorPod TODO ...
+// deleteNatsOperatorPod deletes the nats-operator pod from the cluster.
 func (d *Doctor) deleteNatsOperatorPod(ctx context.Context) error {
 	if err := d.k8sClient.CoreV1().Pods(d.state.natsOperatorPod.Namespace).Delete(ctx, d.state.natsOperatorPod.Name, metav1.DeleteOptions{}); err != nil {
 		return err

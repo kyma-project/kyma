@@ -169,6 +169,7 @@ func TestComputeState(t *testing.T) {
 			gotError := err != nil
 
 			// expect
+			assert.NotNil(t, state)
 			if assert.Equal(t, tc.wantError, gotError) && tc.wantError {
 				gotRecoverable := errors.IsRecoverable(err)
 				assert.Equal(t, tc.wantRecoverable, gotRecoverable)
@@ -217,6 +218,7 @@ func TestComputeNatsOperatorDeployment(t *testing.T) {
 			gotError := err != nil
 
 			// expect
+			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantError, gotError)
 			assert.Equal(t, tc.deployment, state.natsOperatorDeployment)
 			if tc.wantError {
@@ -269,6 +271,7 @@ func TestComputeNatsOperatorPod(t *testing.T) {
 			gotError := err != nil
 
 			// expect
+			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantError, gotError)
 			assert.Equal(t, tc.pod, state.natsOperatorPod)
 			if tc.wantError {
@@ -321,6 +324,7 @@ func TestComputeNatsServersActual(t *testing.T) {
 			gotError := err != nil
 
 			// expect
+			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantNatsServersActual, state.natsServersActual)
 			assert.Equal(t, tc.wantError, gotError)
 			if tc.wantError {
@@ -370,6 +374,7 @@ func TestComputeNatsServersDesired(t *testing.T) {
 			gotError := err != nil
 
 			// expect
+			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantNatsServersDesired, state.natsServersDesired)
 			assert.Equal(t, tc.wantError, gotError)
 			if tc.wantError {
@@ -409,7 +414,10 @@ func TestIsPodListEmpty(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// when
 			gotEmpty := isPodListEmpty(tc.podList)
+
+			// expect
 			assert.Equal(t, tc.wantEmpty, gotEmpty)
 		})
 	}

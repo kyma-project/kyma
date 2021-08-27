@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	// argNameInterval is used to identify the interval command-line argument.
 	argNameInterval = "interval"
 )
 

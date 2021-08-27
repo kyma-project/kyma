@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/nats-operator/logger"
-
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	. "k8s.io/client-go/kubernetes/fake"
 
+	"github.com/kyma-project/kyma/components/nats-operator/logger"
 	. "github.com/kyma-project/kyma/components/nats-operator/pkg/client/natscluster/fake"
 	"github.com/kyma-project/kyma/components/nats-operator/pkg/errors"
 	. "github.com/kyma-project/kyma/components/nats-operator/pkg/testing"
@@ -39,8 +38,8 @@ func TestDoctor(t *testing.T) {
 			natsOperatorPod:                nil,
 			natsServerPods:                 nil,
 			natsCluster:                    nil,
-			interval:                       time.Millisecond * 10,
-			interrupt:                      time.Millisecond * 20,
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
 			wantRecoverable:                false,
 			wantOperatorPodDeleted:         false,
@@ -52,8 +51,8 @@ func TestDoctor(t *testing.T) {
 			natsOperatorPod:                nil,
 			natsServerPods:                 nil,
 			natsCluster:                    nil,
-			interval:                       time.Millisecond * 10,
-			interrupt:                      time.Millisecond * 20,
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
 			wantRecoverable:                false,
 			wantOperatorPodDeleted:         false,
@@ -65,8 +64,8 @@ func TestDoctor(t *testing.T) {
 			natsOperatorPod:                GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator)),
 			natsServerPods:                 nil,
 			natsCluster:                    nil,
-			interval:                       time.Millisecond * 10,
-			interrupt:                      time.Millisecond * 20,
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
 			wantRecoverable:                false,
 			wantOperatorPodDeleted:         true,
@@ -83,8 +82,8 @@ func TestDoctor(t *testing.T) {
 				GetPod("nats-server-3", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
 			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 4),
-			interval:                       time.Millisecond * 10,
-			interrupt:                      time.Millisecond * 20,
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
 			wantRecoverable:                false,
 			wantOperatorPodDeleted:         true,
@@ -102,8 +101,25 @@ func TestDoctor(t *testing.T) {
 				GetPod("nats-server-4", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
 			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 5),
-			interval:                       time.Millisecond * 10,
-			interrupt:                      time.Millisecond * 20,
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
+			wantError:                      false,
+			wantRecoverable:                false,
+			wantOperatorPodDeleted:         false,
+			wantOperatorDeploymentScaledUp: false,
+		},
+		{
+			name:                   "should not delete nats-operator pod if actual running nats-servers is more than the desired",
+			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
+			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
+			natsServerPods: []*v1.Pod{
+				GetPod("nats-server-0", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
+				GetPod("nats-server-1", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
+				GetPod("nats-server-2", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
+			},
+			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 1),
+			interval:                       time.Millisecond * 1,
+			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
 			wantRecoverable:                false,
 			wantOperatorPodDeleted:         false,
@@ -149,6 +165,7 @@ func TestDoctor(t *testing.T) {
 	}
 }
 
+// stopDoctorAfter sends an interrupt signal to the doctor instance after the given duration.
 func stopDoctorAfter(doctor *Doctor, duration time.Duration) {
 	go func() {
 		time.Sleep(duration)
