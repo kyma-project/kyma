@@ -97,6 +97,9 @@
 # The `logui` subchart
 /resources/logging/charts/logui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321  @kwiatekus
 
+# The 'telemetry' chart
+/resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby
+
 # The `eventing` chart
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @themue @pxsalehi
 
@@ -126,6 +129,9 @@
 
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+
+# The `istio-configuration` chart
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl
@@ -259,6 +265,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
+
+# Cluster-users integration tests
+/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
 # Dex integration tests
 /tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk

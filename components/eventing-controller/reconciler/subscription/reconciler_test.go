@@ -681,7 +681,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			processedBebRequests := 0
 
 			// Create service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
@@ -714,7 +713,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							// ensure the correct subscription was created
 							return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 						}
-						processedBebRequests++
 					}
 					return false
 				}).Should(BeTrue())
@@ -728,19 +726,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the BEB Subscription")
 			Eventually(func() bool {
-				i := -1
 				for r := range beb.Requests {
-					i++
-					// only consider requests against beb after the subscription creation request
-					if i <= processedBebRequests {
-						continue
-					}
 					if reconcilertesting.IsBebSubscriptionDelete(r) {
 						receivedSubscriptionName := reconcilertesting.GetRestAPIObject(r.URL)
 						// ensure the correct subscription was created
 						return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
 					}
-					// TODO: ensure that the remaining beb calls are neither create nor delete (means no new beb subscription is created)
 				}
 				return false
 			}).Should(BeTrue())
@@ -761,6 +752,87 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			_, creationRequests, deletionRequests := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+		})
+	})
+
+	When("Deleting BEB Subscription manually", func() {
+		It("Should recreate BEB Subscription again", func() {
+			kymaSubscriptionName := "test-subscription"
+			kymaSubscription := reconcilertesting.NewSubscription(kymaSubscriptionName, namespaceName,
+				reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
+
+			Context("Setup Kyma Subscription required resources", func() {
+				var svc *v1.Service
+				By("Creating Subscriber service", func() {
+					svc = reconcilertesting.NewSubscriberSvc("test-service", namespaceName)
+					ensureSubscriberSvcCreated(svc, ctx)
+				})
+
+				By("Creating Kyma Subscription", func() {
+					reconcilertesting.WithValidSink(svc.Namespace, svc.Name, kymaSubscription)
+					ensureSubscriptionCreated(kymaSubscription, ctx)
+				})
+
+				By("Creating APIRule", func() {
+					getAPIRuleForASvc(svc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
+				})
+
+				By("Updating APIRule status to be ready", func() {
+					apiRule := filterAPIRulesForASvc(getAPIRules(ctx, svc), svc)
+					ensureAPIRuleStatusUpdatedWithStatusReady(&apiRule, ctx).Should(BeNil())
+				})
+			})
+
+			Context("Check Kyma Subscription ready", func() {
+				By("Checking BEB mock server creation requests to contain Subscription creation request", func() {
+					Eventually(func() bool {
+						for r, payload := range beb.Requests {
+							if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+								if bebSubscription, ok := payload.(bebtypes.Subscription); !ok {
+									return false
+								} else {
+									return nameMapper.MapSubscriptionName(kymaSubscription) == bebSubscription.Name
+								}
+							}
+						}
+						return false
+					}).Should(BeTrue())
+				})
+
+				By("Checking Kyma Subscription ready condition to be true", func() {
+					getSubscription(kymaSubscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(kymaSubscriptionName),
+						reconcilertesting.HaveSubscriptionReady(),
+					))
+				})
+			})
+
+			Context("Delete BEB Subscription", func() {
+				By("Deleting its entry in BEB mock internal cache", func() {
+					for k := range beb.Subscriptions {
+						if strings.Contains(k, nameMapper.MapSubscriptionName(kymaSubscription)) {
+							delete(beb.Subscriptions, k)
+						}
+					}
+				})
+			})
+
+			Context("Trigger Kyma Subscription reconciliation request", func() {
+				By("Labeling Kyma Subscription", func() {
+					labels := map[string]string{"reconcile": "true"}
+					kymaSubscription.Labels = labels
+					updateSubscription(kymaSubscription, ctx).Should(reconcilertesting.HaveSubscriptionLabels(labels))
+				})
+			})
+
+			Context("Check BEB Subscription was recreated", func() {
+				By("Checking BEB mock server received a second creation request", func() {
+					Eventually(func() int {
+						_, countPost, _ := countBebRequests(nameMapper.MapSubscriptionName(kymaSubscription))
+						return countPost
+					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
+				})
+			})
 		})
 	})
 

@@ -201,10 +201,10 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
 
     try {
         args = [`delete-platform`, svcatPlatform, `-f`, "--cascade"];
-        let {stdout} = await execa(`smctl`, args);
-        if (stdout !== "Platform(s) successfully deleted.") {
-            errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
-        }
+        await execa(`smctl`, args);
+        // if (stdout !== "Platform(s) successfully deleted.") {
+        //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+        // }
     } catch (error) {
         errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
     }

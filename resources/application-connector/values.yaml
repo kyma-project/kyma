@@ -36,7 +36,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "PR-11909"
+    version: "cddfbc5b"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
