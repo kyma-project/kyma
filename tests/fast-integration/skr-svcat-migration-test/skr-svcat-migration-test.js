@@ -78,6 +78,11 @@ describe("SKR SVCAT migration test", function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
   });
 
+  let secretsAndPresets
+  it(`Should store secrets and presets`, async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
+  });
+
   it(`Should install BTP Service Operator Migration helm chart`, async function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
 
@@ -90,17 +95,12 @@ describe("SKR SVCAT migration test", function() {
     await sampleResources.goodNight()
   });
 
-  let secretsAndPresets
-  it(`Should store secrets and presets`, async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
-  });
-
   it(`Should pass sanity check`, async function() {
     // TODO: Wait/Check until Job of BTP-Migrator/SC-Removal is finished successfully
-
+    let existing = await sampleResources.storeSecretsAndPresets()
     // Check if Secrets and PodPresets are still available
-    await sampleResources.checkSecrets(secretsAndPresets.secrets)
-    await sampleResources.checkPodPresets(secretsAndPresets.podPresets)
+    await sampleResources.checkSecrets(existing.secrets)
+    await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets)
 
     // TODO: Check if all other SVCat resources are successfully removed
   });
