@@ -6,8 +6,8 @@ const {
   waitForPodWithLabel,
   k8sCoreV1Api,
   k8sApply,
-  k8sDelete,
-  wait,
+  sleep,
+  loadResource,
 } = require("../utils");
 const k8s = require("@kubernetes/client-node");
 const { getNotRegisteredPrometheusRuleNames } = require("./alert-rules");
@@ -147,21 +147,10 @@ describe("Monitoring test", function () {
     await assertTimeSeriesExist("kube_service_labels", ["namespace"]);
   });
 
-  function loadCRD(filepath) {
-    const _loggingConfigYaml = fs.readFileSync(path.join(__dirname, filepath), {
-      encoding: "utf8",
-    });
-    return k8s.loadAllYaml(_loggingConfigYaml);
-  }
-
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   it("All prometheus rules are registered", async function () {
-    const promrule = loadCRD("./test-rule.yaml");
+    const promrule = loadResource("./monitoring-test/test-rule.yaml");
     await k8sApply(promrule, testNamespace);
-    await sleep(60000); // wait for prometheus to update
+    await sleep(65000); // wait for prometheus to update
     let notRegisteredRules = await getNotRegisteredPrometheusRuleNames();
     expect(notRegisteredRules, "Rules are not registered").to.be.empty;
   });

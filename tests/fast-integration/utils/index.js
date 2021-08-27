@@ -1137,7 +1137,15 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
+function loadResource(filepath) {
+  const resource = fs.readFileSync(filepath, {
+    encoding: "utf8",
+  });
+  return k8s.loadAllYaml(resource);
+}
+
 module.exports = {
+  loadResource,
   initializeK8sClient,
   retryPromise,
   convertAxiosError,
