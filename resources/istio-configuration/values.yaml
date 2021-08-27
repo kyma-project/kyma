@@ -17,7 +17,7 @@ helmValues:
           cpu: 250m
           memory: 256Mi
 
-    proxyInit:
+    proxy_init:
       resources:
         limits:
           cpu: 100m
@@ -39,8 +39,8 @@ meshConfig:
   defaultConfig:
     tracing:
       sampling: 1
-    zipkin:
-      address: "zipkin.kyma-system:9411"
+      zipkin:
+        address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
   enableTracing: true
 
