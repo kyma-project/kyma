@@ -4,9 +4,9 @@ title: Use a custom domain to expose a service
 
 This tutorial shows how to set up your custom domain and prepare a certificate to use the domain for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
 
-To learn how to expose a service, go to [this](./apix-01-expose-service-apigateway.md) tutorial.
+To learn how to expose a service, go to the [**Expose a service**](./apix-01-expose-service-apigateway.md) tutorial.
 
-For this tutorial, use Kyma 2.0 or higher.
+TO follow this tutorial, use Kyma 2.0 or higher.
 
 ## Prerequisites
 
@@ -45,7 +45,11 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace=gardener-components --set configuration.identifier=cert-manager-identifier
    ```
 
-6. Add the following RBAC rules to allow the Certificate Management component to configure objects. Run:
+6. Add the following RBAC rules to allow the Certificate Management component to configure objects. Create an `istio-systen` Namespace, a ClutserRole and a RoleBinding:
+
+    ```bash
+    kubectl create ns istio-system
+    ```
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -92,7 +96,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 1. [Install Kyma](../../04-operation-guides/operations/01-install-kyma.md) 2.0 or higher.
 
-2. Create a Namespace, if it doesn't exist yet. Run:
+2. Create a Namespace. Run:
 
    ```bash
    kubectl create ns {NAMESPACE_NAME}
@@ -173,7 +177,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   ```bash
   export NAMESPACE={NAMESPACE_NAME}
   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
   ```
 
  Create a DNSEntry CR. Run:
@@ -224,11 +228,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
   </details>
   </div>
-
-  >**NOTE:** To check the Ingress Gateway IP, run:
-  >```bash
-  >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-  >```
 
   >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: `*.api.mydomain.com`. Remember that such a wildcard entry results in DNS configuration that doesn't support the following hosts: `api.mydomain.com` and `mydomain.com`. We don't use these hosts in this tutorial, but you can add DNS Entries for them if you need.
 
@@ -303,7 +302,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    ```
 
    > **NOTE:** The Certificte CR and the Secret with the TLS certificate are created in the same Namespace. Additionally, Istio requires the Secret to be stored in the `istio-system` Namespace so that the Secret could be used for HTTPS traffic. As a result the Certificate must be also created in the `istio-system` Namespace.
-
 
 7. Create a Gateway CR. Export values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters as anvironment variables. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the wildcard DNS record. Run:
 

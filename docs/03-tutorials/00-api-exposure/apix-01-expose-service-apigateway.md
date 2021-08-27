@@ -61,7 +61,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   >**NOTE:** If you use a custom domain, modify values of the following parameters:
   > - **spec.gateway** - use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.default.svc.cluster.local`.
-  > - **spec.service.host** - as the $DOMAIN value use the subdomain you used following the [**Use a custom domain to expose a service**](./apix-04-own-domain.md) tutorial, for example `api.mydomain.com`.
+  > - **spec.service.host** - as the $DOMAIN value, export the subdomain you used in the [**Use a custom domain to expose a service**](./apix-04-own-domain.md) tutorial, for example `api.mydomain.com`.
 
 ## Access the exposed resources
 
