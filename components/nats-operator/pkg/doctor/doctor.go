@@ -87,7 +87,7 @@ func (d *Doctor) resolveIssuesIfAny(ctx context.Context) error {
 
 	// resolve issue if nats-operator deployment spec replicas is zero
 	if *d.state.natsOperatorDeployment.Spec.Replicas == 0 {
-		d.stateLogger().WithField(logger.LogKeySolution, "scale-up nats-operator replicas to 1").Info("nats-operator replicas is 0")
+		d.log.WithField(logger.LogKeySolution, "scale-up nats-operator replicas to 1").Info("nats-operator replicas is 0")
 		replicas := int32(1)
 		d.state.natsOperatorDeployment.Spec.Replicas = &replicas
 		if _, err := d.k8sClient.AppsV1().Deployments(namespace).Update(ctx, d.state.natsOperatorDeployment, metav1.UpdateOptions{}); err != nil {
