@@ -8,6 +8,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
@@ -24,6 +30,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+  scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
