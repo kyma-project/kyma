@@ -24,7 +24,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   > **TIP:** To deploy the service in a user Namespace, run:
   > ``` 
-  > kubectl -n {NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
+  > kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   > ```
 
 3. Expose the service by creating an APIRule CR:

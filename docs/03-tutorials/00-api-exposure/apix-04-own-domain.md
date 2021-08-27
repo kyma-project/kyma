@@ -48,7 +48,11 @@ If you use a cluster not managed by Gardener, install the required components ma
 6. Add the following RBAC rules to allow the Certificate Management component to configure objects in a user's Namespace. Create a Namspacer and add two RBAC rules. Run:
 
    ```bash
-   kubectl create ns {NAMESPACE_NAME}
+   export NAMESPACE_NAME={YOUR_NAMESPACE}  #Namespace for your workload
+   ```
+
+   ```bash
+   kubectl create ns ${NAMESPACE_NAME}
    ```
 
     ```bash
@@ -78,7 +82,7 @@ If you use a cluster not managed by Gardener, install the required components ma
     kind: RoleBinding
     metadata:
       name: cert-controller-manager-dnsentries
-      namespace: ${NAMESPACE_NAME}
+      namespace: istio-system
     roleRef:
       apiGroup: rbac.authorization.k8s.io
       kind: ClusterRole
@@ -177,7 +181,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   ```bash
   export NAMESPACE={NAMESPACE_NAME}
   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export IP={INGRESS_GATEWAY_IP}
+  export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   ```
 
  Create a DNSEntry CR. Run:
@@ -198,7 +202,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
     annotations:
       dns.gardener.cloud/class: garden
   spec:
-    dnsName: "$SUBDOMAIN"
+    dnsName: "$WILDCARD"
     ttl: 600
     targets:
       - $IP
@@ -234,7 +238,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   >kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
   >```
 
-  >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: `*.api.mydomain.com`.
+  >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: `*.api.mydomain.com`. Remember that such a wildcard entry results in DNS configuration that doesn't support the following hosts: `api.mydomain.com` and `mydomain.com`. We don't use these hosts in this tutorial, but you can add DNS Entries for them if you need.
 
 5. Create an Issuer CR. Export values of the **metadata.spec.acme.email**, **metadata.spec.domains.include**, and **metadata.spec.domains.exclude** parameters as environment variables. As the values for the **metadata.spec.domains.include** parameter, use the main domain, the subdomain from the **spec.dnsName** parameter of the DNSEntry CR, and a wildcard DNS record. Run:
 
@@ -242,7 +246,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    export EMAIL={YOUR_EMAIL_ADDRESS}
    export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
    export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g. api.mydomain.com
-   export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *api.mydomain.com
+   export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *.api.mydomain.com
    ```
 
    Create an Issuer CR. Run:
@@ -304,6 +308,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
+   > **NOTE:** The Certificte CR and the Secret with the TLS certificate are created in the same Namespace. Additionally, Istio requires the Secret to be stored in the `istio-system` Namespace so that the Secret could be used for HTTPS traffic. As a result the Certificate must be also created in the `istio-system` Namespace.
+
+
 7. Create a Gateway CR. Export values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters as anvironment variables. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the wildcard DNS record. Run:
 
    ```bash
@@ -342,8 +349,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   ```bash
   kubectl edit deployment -n kyma-system api-gateway
   ```
-
-   Press `i` to enter and `esc` to exit the interactive mode. Save the changes and exit the editor by pressing `:wq`.
 
    >**TIP:** To avoid adding every subdomain to the API Gateway **domain.allowlist** parameter, disable the allowlist mechanism. Override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart by changing its value to `false`. For more details on overrides, see how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
