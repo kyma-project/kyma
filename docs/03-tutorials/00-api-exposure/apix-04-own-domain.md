@@ -6,7 +6,7 @@ This tutorial shows how to set up your custom domain and prepare a certificate t
 
 To learn how to expose a service, go to the [**Expose a service**](./apix-01-expose-service-apigateway.md) tutorial.
 
-TO follow this tutorial, use Kyma 2.0 or higher.
+To follow this tutorial, use Kyma 2.0 or higher.
 
 ## Prerequisites
 
