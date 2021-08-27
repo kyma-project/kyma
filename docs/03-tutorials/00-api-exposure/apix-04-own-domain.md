@@ -45,15 +45,7 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace=gardener-components --set configuration.identifier=cert-manager-identifier
    ```
 
-6. Add the following RBAC rules to allow the Certificate Management component to configure objects in a user's Namespace. Create a Namspacer and add two RBAC rules. Run:
-
-   ```bash
-   export NAMESPACE_NAME={YOUR_NAMESPACE}  #Namespace for your workload
-   ```
-
-   ```bash
-   kubectl create ns ${NAMESPACE_NAME}
-   ```
+6. Add the following RBAC rules to allow the Certificate Management component to configure objects. Run:
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -279,6 +271,8 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    EOF
    ```
 
+   > **NOTE:** The Issuer CR  must be created in the `default` Namespace.
+
 6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
@@ -346,9 +340,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 8. Add your subdomain(s) at the end of the API Gateway **domain.allowlist** parameter. See the following example: `--domain-allowlist=api.mydomain.com`. Use a comma as a separator. Run the following command, to edit the deployment:
 
-  ```bash
-  kubectl edit deployment -n kyma-system api-gateway
-  ```
+   ```bash
+   kubectl edit deployment -n kyma-system api-gateway
+   ```
 
    >**TIP:** To avoid adding every subdomain to the API Gateway **domain.allowlist** parameter, disable the allowlist mechanism. Override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart by changing its value to `false`. For more details on overrides, see how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
