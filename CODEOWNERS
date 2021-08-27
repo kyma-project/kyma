@@ -263,6 +263,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
 
+# Cluster-users integration tests
+/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+
 # Dex integration tests
 /tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
