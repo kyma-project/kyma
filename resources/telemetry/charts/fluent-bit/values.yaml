@@ -155,7 +155,7 @@ updateStrategy: {}
 
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
-dynamicConfigMap: "logging-fluent-bit-sections" # used for dynamic config
+dynamicConfigMap: "telemetry-fluent-bit-sections" # used for dynamic config
 
 networkPolicy:
   enabled: false
@@ -272,7 +272,8 @@ initContainers:
     - name: shared-fluent-bit-config
       mountPath: /fluent-bit/etc/
     - name: config
-      mountPath: /main
+      mountPath: /main/fluent-bit.conf
+      subPath: fluent-bit.conf
     - name: dynamic-config
       mountPath: /dynamic
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic || touch /fluent-bit/etc/dynamic/empty.conf']
