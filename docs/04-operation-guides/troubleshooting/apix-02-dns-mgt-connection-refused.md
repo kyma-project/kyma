@@ -1,5 +1,5 @@
 ---
-title: `External DNS managagement - "Connection refused" error`
+title: External DNS managagement - Connection refused
 ---
 
 ## Symptom
