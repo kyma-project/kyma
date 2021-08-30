@@ -23,7 +23,6 @@ Incorrect IP provided.
 Check if the IP address provided as the value of the **spec.targets** parameter of the DNS Entry Custom Resource (CR) is correct.
 
 ## "Could not resolve host" error
----
 
 ### Symptom
 
@@ -61,7 +60,7 @@ On a non-Gardener clutser, and the DNSProvider or DNSEntry CR you cretaed is ign
 
 ### Cause
 
-The following annotation was added to the CR.
+The following annotation was added to the CR(s).
 
 ```txt
  annotations:
@@ -70,4 +69,4 @@ The following annotation was added to the CR.
 
 ### Remedy
 
-Remove the **metadata.annotations.dns.gardener.cloud/class** parameter from the CR.
+Remove the **metadata.annotations.dns.gardener.cloud/class** parameter from the DNSProvider and/or DNSEntry CR.
