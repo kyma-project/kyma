@@ -835,7 +835,7 @@ server:
   ## Annotations to be added to Prometheus server pods
   ##
   podAnnotations:
-    sidecar.istio.io/inject: "true" # Should STAY
+    sidecar.istio.io/inject: "true"
     # iam.amazonaws.com/role: prometheus
 
   ## Labels to be added to Prometheus server pods
