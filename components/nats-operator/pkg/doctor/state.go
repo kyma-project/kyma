@@ -57,6 +57,9 @@ func newState(k8sClient kubernetes.Interface, natsClient *natscluster.Client) *s
 
 // compute updates the state internal objects.
 func (s *state) compute(ctx context.Context) error {
+	if err := s.computeNatsServersDesired(ctx); err != nil {
+		return err
+	}
 	if err := s.computeNatsOperatorDeployment(ctx); err != nil {
 		return err
 	}
@@ -64,9 +67,6 @@ func (s *state) compute(ctx context.Context) error {
 		return err
 	}
 	if err := s.computeNatsServersActual(ctx); err != nil {
-		return err
-	}
-	if err := s.computeNatsServersDesired(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -81,6 +81,20 @@ func (s *state) isNatsBackend(ctx context.Context) (bool, error) {
 		return false, err
 	}
 	return len(secretList.Items) == 0, nil
+}
+
+// computeNatsServersDesired updates the state natsServersDesired count.
+func (s *state) computeNatsServersDesired(ctx context.Context) error {
+	s.natsServersDesired = 0
+	natsCluster, err := s.natsClient.Get(ctx, namespace, natsClusterName)
+	if err == nil {
+		s.natsServersDesired = natsCluster.Spec.Size
+		return nil
+	}
+	if k8serrors.IsNotFound(err) {
+		return errors.Recoverable(err)
+	}
+	return err
 }
 
 // computeNatsOperatorDeployment updates the state natsOperatorDeployment object.
@@ -137,20 +151,6 @@ func (s *state) computeNatsServersActual(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-// computeNatsServersDesired updates the state natsServersDesired count.
-func (s *state) computeNatsServersDesired(ctx context.Context) error {
-	s.natsServersDesired = 0
-	natsCluster, err := s.natsClient.Get(ctx, namespace, natsClusterName)
-	if err == nil {
-		s.natsServersDesired = natsCluster.Spec.Size
-		return nil
-	}
-	if k8serrors.IsNotFound(err) {
-		return errors.Recoverable(err)
-	}
-	return err
 }
 
 // isPodListEmpty returns true if the given pod list is nil or has no items, otherwise returns false.

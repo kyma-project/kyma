@@ -83,11 +83,22 @@ func TestComputeState(t *testing.T) {
 		wantNatsServersDesired int
 	}{
 		{
-			name:                   "nats-operator deployment not found",
+			name:                   "nats-cluster custom-resource not found",
+			natsCluster:            nil,
 			natsOperatorDeployment: nil,
 			natsOperatorPod:        nil,
 			natsServerPods:         nil,
-			natsCluster:            nil,
+			wantError:              true,
+			wantRecoverable:        true,
+			wantNatsServersActual:  0,
+			wantNatsServersDesired: 0,
+		},
+		{
+			name:                   "nats-operator deployment not found",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 0),
+			natsOperatorDeployment: nil,
+			natsOperatorPod:        nil,
+			natsServerPods:         nil,
 			wantError:              true,
 			wantRecoverable:        true,
 			wantNatsServersActual:  0,
@@ -95,10 +106,10 @@ func TestComputeState(t *testing.T) {
 		},
 		{
 			name:                   "nats-operator pod not found",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 0),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace),
 			natsOperatorPod:        nil,
 			natsServerPods:         nil,
-			natsCluster:            nil,
 			wantError:              true,
 			wantRecoverable:        true,
 			wantNatsServersActual:  0,
@@ -106,33 +117,18 @@ func TestComputeState(t *testing.T) {
 		},
 		{
 			name:                   "nats-server pods not found",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 0),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace),
 			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator)),
 			natsServerPods:         nil,
-			natsCluster:            nil,
 			wantError:              true,
 			wantRecoverable:        true,
 			wantNatsServersActual:  0,
 			wantNatsServersDesired: 0,
 		},
 		{
-			name:                   "nats-cluster custom-resource not found",
-			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace),
-			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
-			natsServerPods: []*v1.Pod{
-				GetPod("nats-server-0", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodFailed)),
-				GetPod("nats-server-1", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodPending)),
-				GetPod("nats-server-2", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
-				GetPod("nats-server-3", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
-			},
-			natsCluster:            nil,
-			wantError:              true,
-			wantRecoverable:        true,
-			wantNatsServersActual:  2,
-			wantNatsServersDesired: 0,
-		},
-		{
 			name:                   "all resources found",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 5),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
 			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
 			natsServerPods: []*v1.Pod{
@@ -142,7 +138,6 @@ func TestComputeState(t *testing.T) {
 				GetPod("nats-server-3", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 				GetPod("nats-server-4", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
-			natsCluster:            GetNatsCluster(natsClusterName, namespace, 5),
 			wantError:              false,
 			wantRecoverable:        false,
 			wantNatsServersActual:  3,
@@ -174,10 +169,60 @@ func TestComputeState(t *testing.T) {
 				gotRecoverable := errors.IsRecoverable(err)
 				assert.Equal(t, tc.wantRecoverable, gotRecoverable)
 			}
+			assert.Equal(t, tc.wantNatsServersDesired, state.natsServersDesired)
 			assert.Equal(t, tc.natsOperatorDeployment, state.natsOperatorDeployment)
 			assert.Equal(t, tc.natsOperatorPod, state.natsOperatorPod)
 			assert.Equal(t, tc.wantNatsServersActual, state.natsServersActual)
+		})
+	}
+}
+
+func TestComputeNatsServersDesired(t *testing.T) {
+	testCases := []struct {
+		name                   string
+		natsCluster            *v1alpha2.NatsCluster
+		wantError              bool
+		wantRecoverable        bool
+		wantNatsServersDesired int
+	}{
+		{
+			name:                   "nats-cluster custom-resource not found",
+			natsCluster:            nil,
+			wantError:              true,
+			wantRecoverable:        true,
+			wantNatsServersDesired: 0,
+		},
+		{
+			name:                   "nats-cluster custom-resource found",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 1),
+			wantError:              false,
+			wantNatsServersDesired: 1,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// resources
+			natsClusterList := GetNatsClusterList(*GetNatsClusterIfNil(tc.natsCluster))
+
+			// clients
+			natsClient := NewClientOrDie(natsClusterList)
+
+			// given
+			state := newState(nil, natsClient)
+
+			// when
+			err := state.computeNatsServersDesired(context.Background())
+			gotError := err != nil
+
+			// expect
+			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantNatsServersDesired, state.natsServersDesired)
+			assert.Equal(t, tc.wantError, gotError)
+			if tc.wantError {
+				gotRecoverable := errors.IsRecoverable(err)
+				assert.Equal(t, tc.wantRecoverable, gotRecoverable)
+			}
 		})
 	}
 }
@@ -326,56 +371,6 @@ func TestComputeNatsServersActual(t *testing.T) {
 			// expect
 			assert.NotNil(t, state)
 			assert.Equal(t, tc.wantNatsServersActual, state.natsServersActual)
-			assert.Equal(t, tc.wantError, gotError)
-			if tc.wantError {
-				gotRecoverable := errors.IsRecoverable(err)
-				assert.Equal(t, tc.wantRecoverable, gotRecoverable)
-			}
-		})
-	}
-}
-
-func TestComputeNatsServersDesired(t *testing.T) {
-	testCases := []struct {
-		name                   string
-		natsCluster            *v1alpha2.NatsCluster
-		wantError              bool
-		wantRecoverable        bool
-		wantNatsServersDesired int
-	}{
-		{
-			name:                   "nats-cluster custom-resource not found",
-			natsCluster:            nil,
-			wantError:              true,
-			wantRecoverable:        true,
-			wantNatsServersDesired: 0,
-		},
-		{
-			name:                   "nats-cluster custom-resource found",
-			natsCluster:            GetNatsCluster(natsClusterName, namespace, 1),
-			wantError:              false,
-			wantNatsServersDesired: 1,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			// resources
-			natsClusterList := GetNatsClusterList(*GetNatsClusterIfNil(tc.natsCluster))
-
-			// clients
-			natsClient := NewClientOrDie(natsClusterList)
-
-			// given
-			state := newState(nil, natsClient)
-
-			// when
-			err := state.computeNatsServersDesired(context.Background())
-			gotError := err != nil
-
-			// expect
-			assert.NotNil(t, state)
-			assert.Equal(t, tc.wantNatsServersDesired, state.natsServersDesired)
 			assert.Equal(t, tc.wantError, gotError)
 			if tc.wantError {
 				gotRecoverable := errors.IsRecoverable(err)

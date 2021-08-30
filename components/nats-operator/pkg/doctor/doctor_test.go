@@ -21,10 +21,10 @@ import (
 func TestDoctor(t *testing.T) {
 	testCases := []struct {
 		name                           string
+		natsCluster                    *v1alpha2.NatsCluster
 		natsOperatorDeployment         *appsv1.Deployment
 		natsOperatorPod                *v1.Pod
 		natsServerPods                 []*v1.Pod
-		natsCluster                    *v1alpha2.NatsCluster
 		interval                       time.Duration
 		interrupt                      time.Duration
 		wantError                      bool
@@ -34,10 +34,10 @@ func TestDoctor(t *testing.T) {
 	}{
 		{
 			name:                           "should not error if no resources found",
+			natsCluster:                    nil,
 			natsOperatorDeployment:         nil,
 			natsOperatorPod:                nil,
 			natsServerPods:                 nil,
-			natsCluster:                    nil,
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -47,10 +47,10 @@ func TestDoctor(t *testing.T) {
 		},
 		{
 			name:                           "should scale-up nats-operator deployment if spec replica is zero",
+			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 0),
 			natsOperatorDeployment:         GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(0)),
 			natsOperatorPod:                nil,
 			natsServerPods:                 nil,
-			natsCluster:                    nil,
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -60,10 +60,10 @@ func TestDoctor(t *testing.T) {
 		},
 		{
 			name:                           "should delete nats-operator pod if it is found but not running",
+			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 0),
 			natsOperatorDeployment:         GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
-			natsOperatorPod:                GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator)),
+			natsOperatorPod:                GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodPending)),
 			natsServerPods:                 nil,
-			natsCluster:                    nil,
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -73,6 +73,7 @@ func TestDoctor(t *testing.T) {
 		},
 		{
 			name:                   "should delete nats-operator pod if actual running nats-servers is less than the desired",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 4),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
 			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
 			natsServerPods: []*v1.Pod{
@@ -81,7 +82,6 @@ func TestDoctor(t *testing.T) {
 				GetPod("nats-server-2", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 				GetPod("nats-server-3", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
-			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 4),
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -91,6 +91,7 @@ func TestDoctor(t *testing.T) {
 		},
 		{
 			name:                   "should not delete nats-operator pod if actual running nats-servers is equal to the desired",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 5),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
 			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
 			natsServerPods: []*v1.Pod{
@@ -100,7 +101,6 @@ func TestDoctor(t *testing.T) {
 				GetPod("nats-server-3", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 				GetPod("nats-server-4", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
-			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 5),
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -110,6 +110,7 @@ func TestDoctor(t *testing.T) {
 		},
 		{
 			name:                   "should not delete nats-operator pod if actual running nats-servers is more than the desired",
+			natsCluster:            GetNatsCluster(natsClusterName, namespace, 1),
 			natsOperatorDeployment: GetDeployment(natsOperatorDeploymentName, namespace, DeploymentWithReplicas(1)),
 			natsOperatorPod:        GetPod("nats-operator", namespace, PodWithLabel(labelKeyNatsOperator, labelValNatsOperator), PodWithPhase(v1.PodRunning)),
 			natsServerPods: []*v1.Pod{
@@ -117,7 +118,6 @@ func TestDoctor(t *testing.T) {
 				GetPod("nats-server-1", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 				GetPod("nats-server-2", namespace, PodWithLabel(labelKeyNatsCluster, labelValNatsCluster), PodWithPhase(v1.PodRunning)),
 			},
-			natsCluster:                    GetNatsCluster(natsClusterName, namespace, 1),
 			interval:                       time.Millisecond * 1,
 			interrupt:                      time.Millisecond * 10,
 			wantError:                      false,
@@ -159,7 +159,7 @@ func TestDoctor(t *testing.T) {
 				assert.Equal(t, tc.natsOperatorPod, doctor.state.natsOperatorPod)
 			}
 			if tc.wantOperatorDeploymentScaledUp {
-				assert.Equal(t, int32(1), *doctor.state.natsOperatorDeployment.Spec.Replicas)
+				assert.Equal(t, natsOperatorDeploymentReplicas, *doctor.state.natsOperatorDeployment.Spec.Replicas)
 			}
 		})
 	}
