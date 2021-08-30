@@ -1,20 +1,6 @@
-const { 
-  DirectorConfig, 
-  DirectorClient,
-  registerKymaInCompass,
-  unregisterKymaFromCompass,
-} = require("../compass/");
-
-const {
-  genRandom, debug
-} = require("../utils");
-
-const {
-  ensureCommerceMockWithCompassTestFixture,
-  cleanMockTestFixture,
-  checkFunctionResponse,
-  sendEventAndCheckResponse
-} = require("../test/fixtures/commerce-mock");
+import { DirectorConfig, DirectorClient, registerKymaInCompass, unregisterKymaFromCompass } from "../compass/";
+import { genRandom } from "../utils";
+import { ensureCommerceMockWithCompassTestFixture, cleanMockTestFixture, checkFunctionResponse, sendEventAndCheckResponse } from "../test/fixtures/commerce-mock";
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());

@@ -1,12 +1,5 @@
-const {
-  ensureGettingStartedTestFixture,
-  verifyOrderPersisted,
-  cleanGettingStartedTestFixture,
-} = require("./fixtures/getting-started-guides");
-const {
-  printRestartReport,
-  getContainerRestartsForAllNamespaces,
-} = require("../utils");
+import { ensureGettingStartedTestFixture, verifyOrderPersisted, cleanGettingStartedTestFixture } from "./fixtures/getting-started-guides";
+import { printRestartReport, getContainerRestartsForAllNamespaces } from "../utils";
 
 describe("Getting Started Guide Tests", function () {
   this.timeout(10 * 60 * 1000);
