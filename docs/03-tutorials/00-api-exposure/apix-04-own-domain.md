@@ -4,7 +4,7 @@ title: Use a custom domain to expose a service
 
 This tutorial shows how to set up your custom domain and prepare a certificate to use the domain for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
 
-To learn how to expose a service, go to the [**Expose a service**](./apix-01-expose-service-apigateway.md) tutorial.
+To learn how to expose a service, go to the [Expose a service](./apix-01-expose-service-apigateway.md) tutorial.
 
 To follow this tutorial, use Kyma 2.0 or higher.
 
@@ -45,7 +45,7 @@ If you use a cluster not managed by Gardener, install the required components ma
    helm install cert-manager {PATH_TO_CERT_MANAGEMENT}/charts/cert-management --namespace=gardener-components --set configuration.identifier=cert-manager-identifier
    ```
 
-6. Add the following RBAC rules to allow the Certificate Management component to configure objects. Create an `istio-systen` Namespace, a ClutserRole and a RoleBinding:
+6. Add the following RBAC rules to allow the Certificate Management component to configure objects. Create an `istio-system` Namespace, a ClutserRole and a RoleBinding:
 
     ```bash
     kubectl create ns istio-system
@@ -102,7 +102,11 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    kubectl create ns {NAMESPACE_NAME}
    ```
 
-3. Create a Secret containing credentials for your DNS cloud service provider account. See the [official External DNS Management docuemntation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Remember to edit the **metadata.namespace** parameter and provide your {NAMESPACE_NAME} as the required value.  Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
+3. Create a Secret containing credentials for your DNS cloud service provider account.
+
+- See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines.
+- Remember to edit the **metadata.namespace** parameter and provide your {NAMESPACE_NAME} as the required value.  
+- Once the YAML file with the relevant parameters is ready, create a Secret Custom Resource (CR). Run the following command:
 
    ```bash
    kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
@@ -110,7 +114,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 4. Set up the `external-dns-management` component.
 
-- Create a DNSProvider CR. Export values of the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters as environment variables. As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. For the **spec.secretRef.name** parameter, use the **metadata.name** value from your `{SECRET}.yaml`. The domain you provide is the one that you own, for example `mydomain.com`. In the next steps you provide a subdomain of this domain, for example `api.mydomain.com`. Run:
+- Create a DNSProvider CR. Export values of the **metadata.namespace**, [**spec.type**](https://github.com/gardener/external-dns-management#using-the-dns-controller-manager), **metadata.spec.secretRef.name** and **metadata.spec.domains.include** parameters as environment variables.
+- As the value of **spec.type**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR. 
+- For the **spec.secretRef.name** parameter, use the **metadata.name** value from your `{SECRET}.yaml`.
+- The domain you provide is the one that you own, for example `mydomain.com`. In the next steps you provide a subdomain of this domain, for example `api.mydomain.com`. Run:
 
   ```bash
   export NAMESPACE={NAMESPACE_NAME}
@@ -172,10 +179,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   </details>
   </div>
 
-- Create a DNSEntry CR. Export values of the **metadata.namespace**, **metadata.spec.dnsName**, and **metadata.spec.targets.IP** parameters as environment variables. Optionally, you can also change the value of **metadata.spec.ttl**. Run:
+- Create a DNSEntry CR. Export values of the **metadata.spec.dnsName**, and **metadata.spec.targets.IP** parameters as environment variables. Optionally, you can also change the value of **metadata.spec.ttl**. Run:
 
   ```bash
-  export NAMESPACE={NAMESPACE_NAME}
   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
   ```
@@ -272,13 +278,11 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    > **NOTE:** The Issuer CR  must be created in the `default` Namespace.
 
-6. Create a Certificate CR. Export values of the **metadata.namespace**, **spec.secretName**, **spec.commonName**, and **spec.issuerRef.name**, and **spec.dnsNames** parameters as environment variables. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
+6. Create a Certificate CR. Export values of the  **spec.secretName** and **spec.issuerRef.name** parameters as environment variables. As the value for **spec.commonName** use your ${DOMAIN} and for **spec.dnsNames** your ${SUBDOMAIN} and ${WILDCARD} DNS record. As the value for the **spec.issuerRef.name** parameter, use the value from te **metadata.name** parameter of the Issuer CR. Run:
 
    ```bash
    export TLS_SECRET={SECRET_NAME} #e.g. httpbin-tls-credentials
-   export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
    export ISSUER={ISSUER_NAME}
-   export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *.api.mydomain.com
    ```
 
    Create a Certificate CR. Run:
@@ -298,6 +302,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: default
      dnsNames:
        - "$WILDCARD"
+       - $SUBDOMAIN
    EOF
    ```
 
@@ -306,9 +311,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 7. Create a Gateway CR. Export values of the **spec.servers.tls.credentialName** and **spec.servers.hosts** parameters as anvironment variables. For the **spec.servers.tls.credentialName** parameter, use the **spec.secretName** value of the Certificate CR. As the value of **spec.servers.hosts**, use the wildcard DNS record. Run:
 
    ```bash
-   export NAMESPACE={NAMESPACE_NAME}
    export TLS_SECRET={SECRET_NAME}
-   export WILDCARD={WILDCARD_SUBDOMAIN} # e.g. *api.mydomain.com
    ```
 
    Create a Gateway CR. Run:
@@ -346,4 +349,4 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 When you finish the setup, go to [this](./apix-01-expose-service-apigateway.md) tutorial to learn how to expose a service.
 
-If you want to expose a different workload using a different domain, repeat steps from 2 to 8 with the new details.
+If you want to expose a different workload using a different domain, repeat steps 2 to 8 with the new details.

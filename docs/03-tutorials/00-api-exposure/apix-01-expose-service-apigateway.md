@@ -59,9 +59,10 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   >**NOTE:** If you are running Kyma on Minikube, add `httpbin.kyma.local` to the entry with Minikube IP in your system's `/etc/hosts` file.
 
-  >**NOTE:** If you use a custom domain, modify values of the following parameters:
-  > - **spec.gateway** - use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.default.svc.cluster.local`.
-  > - **spec.service.host** - as the $DOMAIN value, export the subdomain you used in the [**Use a custom domain to expose a service**](./apix-04-own-domain.md) tutorial, for example `api.mydomain.com`.
+  >**NOTE:** If you use a custom domain, modify the following parameters:
+  > - **spec.gateway** - use the value of the **metadata.name** parameter from your Gateway CR. See the following example: `gateway: httpbin-gateway.namespace-name.svc.cluster.local`.
+  > - **spec.service.host** - as the ${DOMAIN} value, export the subdomain you used in the [Use a custom domain to expose a service](./apix-04-own-domain.md) tutorial, for example `api.mydomain.com`.
+  > - add the **metadata.namespace** parameter with your ${NAMESPACE}.
 
 ## Access the exposed resources
 
