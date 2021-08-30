@@ -22,7 +22,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
   kubectl apply -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   ```
 
-  > **TIP:** To deploy the service in a user Namespace, run:
+  > **TIP:** If you use a custom domain, deploy the service in your Namespace, run:
   > ``` 
   > kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   > ```
