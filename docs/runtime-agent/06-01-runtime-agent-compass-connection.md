@@ -20,8 +20,8 @@ metadata:
   name: compass-connection
 spec:
   managementInfo:
-    connectorUrl: https://compass-gateway-mtls.34.76.33.244.xip.io/connector/graphql
-    directorUrl: https://compass-gateway-mtls.34.76.33.244.xip.io/director/graphql
+    connectorUrl: https://compass-gateway-mtls.34.76.33.244.nip.io/connector/graphql
+    directorUrl: https://compass-gateway-mtls.34.76.33.244.nip.io/director/graphql
 status:
   connectionState: ConnectionMaintenanceFailed
   connectionStatus:

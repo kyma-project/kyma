@@ -36,9 +36,9 @@ data:
 ```
 During installation, the values are [propagated in the cluster](#certificate-propagation-paths) to all components that require them.
 
-### Demo setup with xip.io
+### Demo setup with nip.io
 
-If you don't supply any certificates or domain during installation, the kyma-installer will default to a demo setup using the [xip.io](http://xip.io/) DNS-as-a-Service (DNSaaS) provider. In this case the domain is generated on demand using the clusters LoadBalancer IP in the form of `*.LoadBalancerIP.xip.io` along with a self-signed certificate for the domain.
+If you don't supply any certificates or domain during installation, the kyma-installer will default to a demo setup using the [nip.io](http://nip.io/) DNS-as-a-Service (DNSaaS) provider. In this case the domain is generated on demand using the clusters LoadBalancer IP in the form of `*.LoadBalancerIP.nip.io` along with a self-signed certificate for the domain.
 
 >**NOTE:** Due to limited availability of the DNSaaS provider and a self-singed certificate which can be rejected by some browsers and applications, this setup is regarded as a working, visual demo. Do not use it for other scenarios.
 
@@ -83,8 +83,8 @@ The order differs depending on the mode:
   | ConfigMap | apiserver-proxy | `kyma-system `|  
   </details>
   <details>
-  <summary label="demo-xip">
-  Demo xip.io setup
+  <summary label="demo-nip">
+  Demo nip.io setup
   </summary>
   | **Kind** | **Name** | **Namespace** |
   | :--- | :--- | :--- |

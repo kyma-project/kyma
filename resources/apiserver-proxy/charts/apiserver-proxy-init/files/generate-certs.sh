@@ -36,7 +36,7 @@ EOF
 {{- else }}
   source /app/utils.sh
   INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
-  DOMAIN="$INGRESS_IP.xip.io"
+  DOMAIN="$INGRESS_IP.nip.io"
 {{- end }}
   kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"  -o yaml --dry-run | kubectl apply -f -
 if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
@@ -51,7 +51,7 @@ if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
   echo "{{ .Values.global.tlsCrt }}" | base64 -d > /tmp/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key /tmp/key.pem --cert /tmp/cert.pem
 {{- else }}
-  echo "Running on xip.io enabled cluster, creating certificate for the domain"
+  echo "Running on nip.io enabled cluster, creating certificate for the domain"
   source /app/utils.sh
   generateCertificatesForDomain "$DOMAIN" /tmp/key.pem /tmp/cert.pem
   kubectl create secret tls {{ template "name" . }}-tls-cert  --key /tmp/key.pem --cert /tmp/cert.pem -o yaml --dry-run | kubectl apply -f -

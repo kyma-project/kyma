@@ -29,7 +29,7 @@ To fix this, follow one of these two approaches:
       </details>
       <details>
       <summary>
-      Cluster installation with xip.io
+      Cluster installation with nip.io
       </summary>
 
       Run this command after you install Kyma on your GKE or AKS cluster:
