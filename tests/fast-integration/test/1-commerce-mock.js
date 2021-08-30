@@ -1,13 +1,25 @@
-import { defaults } from "axios";
-import { Agent } from "https";
-import { ensureCommerceMockLocalTestFixture, checkFunctionResponse, sendEventAndCheckResponse, cleanMockTestFixture, checkInClusterEventDelivery } from "./fixtures/commerce-mock";
-import { printRestartReport, getContainerRestartsForAllNamespaces } from "../utils";
-import { checkLokiLogs, lokiPortForward } from "../logging";
-
-const httpsAgent = new Agent({
+const axios = require("axios");
+const https = require("https");
+const { expect } = require("chai");
+const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
-defaults.httpsAgent = httpsAgent;
+axios.defaults.httpsAgent = httpsAgent;
+const {
+  ensureCommerceMockLocalTestFixture,
+  checkFunctionResponse,
+  sendEventAndCheckResponse,
+  cleanMockTestFixture,
+  checkInClusterEventDelivery,
+} = require("./fixtures/commerce-mock");
+const {
+  printRestartReport,
+  getContainerRestartsForAllNamespaces,
+} = require("../utils");
+const {
+  checkLokiLogs,
+  lokiPortForward
+} = require("../logging");
 
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
