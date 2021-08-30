@@ -80,6 +80,7 @@ metadata:
   namespace: mocks
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
+
   rules:
     - accessStrategies:
         - config: {}
