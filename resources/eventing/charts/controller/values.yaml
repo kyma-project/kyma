@@ -56,10 +56,10 @@ natsOperatorDoctor:
   resources:
     requests:
       cpu: 10m
-      memory: 8Mi
+      memory: 16Mi
     limits:
       cpu: 20m
-      memory: 16Mi
+      memory: 32Mi
 
 metrics:
   service:
