@@ -1,0 +1,51 @@
+---
+meshConfig:
+  accessLogFile: ""
+
+helmValues:
+  global:
+    logging:
+      level: all:warn
+    proxy:
+      resources:
+        requests:
+          cpu: 150m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+  pilot:
+    autoscaleMax: 5
+    autoscaleMin: 2
+    configNamespace: istio-config     
+
+components:
+  ingressGateways:
+    enabled: true
+    config:
+      hpaSpec:
+        maxReplicas: 10
+        minReplicas: 3
+        metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
+          - resource:
+              name: memory
+              targetAverageUtilization: 80
+            type: Resource
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 1024Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+  pilot:
+    enabled: true
+    config:
+      hpaSpec:
+        maxReplicas: 5
+        minReplicas: 2

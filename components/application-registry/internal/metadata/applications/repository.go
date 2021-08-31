@@ -82,6 +82,7 @@ type Service struct {
 }
 
 // ServiceRepository contains operations for managing services stored in Application CRD
+//go:generate mockery --name ServiceRepository
 type ServiceRepository interface {
 	Create(appName string, service Service) apperrors.AppError
 	Get(appName, id string) (Service, apperrors.AppError)
@@ -98,7 +99,7 @@ func NewServiceRepository(appManager AppManager) ServiceRepository {
 // Create adds a new Service in Application
 func (r *repository) Create(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceNotExists(service.ID, app); err != nil {
+		if err := checkServiceCanBeAdded(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
@@ -150,7 +151,7 @@ func (r *repository) GetAll(appName string) ([]Service, apperrors.AppError) {
 // Update updates a given service defined in Application
 func (r *repository) Update(appName string, service Service) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if err := ensureServiceExists(service.ID, app); err != nil {
+		if err := checkServiceCanBeReplaced(service.ID, service.DisplayName, app); err != nil {
 			return err
 		}
 
@@ -167,7 +168,7 @@ func (r *repository) Update(appName string, service Service) apperrors.AppError 
 // Delete deletes a given service defined in Application
 func (r *repository) Delete(appName, id string) apperrors.AppError {
 	err := r.updateApplicationWithRetries(appName, func(app *v1alpha1.Application) error {
-		if !serviceExists(id, app) {
+		if !serviceExistsWithId(id, app) {
 			return nil
 		}
 

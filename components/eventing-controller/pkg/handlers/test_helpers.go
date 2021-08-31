@@ -10,7 +10,7 @@ import (
 func SendEventToNATS(natsClient *Nats, data string) error {
 	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
 	// because the publisher-application should have cleaned it already before publishing
-	eventType := eventingtesting.EventType
+	eventType := eventingtesting.OrderCreatedEventType
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
 	return natsClient.connection.Publish(eventType, []byte(sampleEvent))

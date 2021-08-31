@@ -10,3 +10,9 @@ If the domain does not match the allowlist, the API Gateway Controller sets an a
 >**TIP:** For more information, read about the [Api CR statuses](#custom-resource-api-rule-status-codes).
 
 By default, the only allowed domain is the domain of the Kyma cluster.
+
+To disable the allowlist mechanism, override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart.
+
+>**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
+>* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
+>* [Top-level charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides)

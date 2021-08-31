@@ -32,7 +32,7 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 RUN apk update --no-cache && \
 apk upgrade --no-cache && \
 apk add ca-certificates && \
-apk add --no-cache curl>=7.76.0-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
+apk add --no-cache curl>=7.77.0-r1 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
 rm -rf /var/cache/apk/*
 
 #

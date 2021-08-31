@@ -10,7 +10,7 @@ import (
 // +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
+// +kubebuilder:resource:scope=Cluster
 type CompassConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -30,8 +30,10 @@ type ManagementInfo struct {
 }
 
 type CompassConnectionStatus struct {
-	State                 ConnectionState        `json:"connectionState"`
-	ConnectionStatus      *ConnectionStatus      `json:"connectionStatus"`
+	State            ConnectionState   `json:"connectionState"`
+	ConnectionStatus *ConnectionStatus `json:"connectionStatus"`
+	// +optional
+	// +nullable
 	SynchronizationStatus *SynchronizationStatus `json:"synchronizationStatus"`
 }
 
@@ -107,9 +109,17 @@ type CompassConnectionList struct {
 
 // ConnectionStatus represents status of a connection to Compass
 type ConnectionStatus struct {
-	Established       metav1.Time       `json:"established"`
-	Renewed           metav1.Time       `json:"renewed,omitempty"`
-	LastSync          metav1.Time       `json:"lastSync"`
+	// +optional
+	// +nullable
+	Established metav1.Time `json:"established"`
+	// +optional
+	// +nullable
+	Renewed metav1.Time `json:"renewed,omitempty"`
+	// +optional
+	// +nullable
+	LastSync metav1.Time `json:"lastSync"`
+	// +optional
+	// +nullable
 	LastSuccess       metav1.Time       `json:"lastSuccess"`
 	CertificateStatus CertificateStatus `json:"certificateStatus"`
 	Error             string            `json:"error,omitempty"`
@@ -117,15 +127,27 @@ type ConnectionStatus struct {
 
 // CertificateStatus represents the status of the certificate
 type CertificateStatus struct {
-	Acquired  metav1.Time `json:"acquired"`
+	// +optional
+	// +nullable
+	Acquired metav1.Time `json:"acquired"`
+	// +optional
+	// +nullable
 	NotBefore metav1.Time `json:"notBefore"`
-	NotAfter  metav1.Time `json:"notAfter"`
+	// +optional
+	// +nullable
+	NotAfter metav1.Time `json:"notAfter"`
 }
 
 // SynchronizationStatus represent the status of Applications synchronization with Compass
 type SynchronizationStatus struct {
-	LastAttempt               metav1.Time `json:"lastAttempt"`
-	LastSuccessfulFetch       metav1.Time `json:"lastSuccessfulFetch"`
+	// +optional
+	// +nullable
+	LastAttempt metav1.Time `json:"lastAttempt"`
+	// +optional
+	// +nullable
+	LastSuccessfulFetch metav1.Time `json:"lastSuccessfulFetch"`
+	// +optional
+	// +nullable
 	LastSuccessfulApplication metav1.Time `json:"lastSuccessfulApplication"`
 	Error                     string      `json:"error,omitempty"`
 }

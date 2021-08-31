@@ -1,43 +1,52 @@
 package handlers
 
 import (
-	"os"
+	"fmt"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func Test_SyncBebSubscription(t *testing.T) {
-	g := NewGomegaWithT(t)
+	g := NewWithT(t)
 
 	credentials := &OAuth2ClientCredentials{
 		ClientID:     "foo-client-id",
 		ClientSecret: "foo-client-secret",
 	}
 	// given
-	beb := NewBEB(credentials, ctrl.Log)
-	clientId := "client-id"
-	clientSecret := "client-secret"
-	tokenEndpoint := "token-endpoint"
-	envConfig := env.Config{
-		ClientID:      clientId,
-		ClientSecret:  clientSecret,
-		TokenEndpoint: tokenEndpoint,
-	}
-	err := os.Setenv("CLIENT_ID", clientId)
-	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("CLIENT_SECRET", clientSecret)
-	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("TOKEN_ENDPOINT", tokenEndpoint)
-	g.Expect(err).ShouldNot(HaveOccurred())
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
 
-	beb.Initialize(envConfig)
+	nameMapper := NewBebSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
+	beb := NewBEB(credentials, nameMapper, defaultLogger)
+
+	// start BEB Mock
+	bebMock := startBebMock()
+	envConf := env.Config{
+		BebApiUrl:                bebMock.MessagingURL,
+		ClientID:                 "client-id",
+		ClientSecret:             "client-secret",
+		TokenEndpoint:            bebMock.TokenURL,
+		WebhookActivationTimeout: 0,
+		WebhookTokenEndpoint:     "webhook-token-endpoint",
+		Domain:                   "domain.com",
+		EventTypePrefix:          controllertesting.EventTypePrefix,
+		BEBNamespace:             "/default/ns",
+		Qos:                      "AT_LEAST_ONCE",
+	}
+
+	err = beb.Initialize(envConf)
+	g.Expect(err).To(BeNil())
 
 	// when
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
@@ -48,9 +57,9 @@ func Test_SyncBebSubscription(t *testing.T) {
 	controllertesting.WithService("foo-host", "foo-svc", apiRule)
 
 	// then
-	changed, err := beb.SyncSubscription(subscription, nil, apiRule)
-	g.Expect(err).To(Not(BeNil()))
-	g.Expect(changed).To(BeFalse())
+	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
+	g.Expect(err).To(BeNil())
+	g.Expect(changed).To(BeTrue())
 }
 
 // fixtureValidSubscription returns a valid subscription
@@ -102,11 +111,32 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 						EventType: &eventingv1alpha1.Filter{
 							Type:     "exact",
 							Property: "type",
-							Value:    controllertesting.EventTypeNotClean,
+							Value:    controllertesting.OrderCreatedEventTypeNotClean,
 						},
 					},
 				},
 			},
 		},
 	}
+}
+
+func startBebMock() *controllertesting.BebMock {
+	bebConfig := &config.Config{}
+	beb := controllertesting.NewBebMock(bebConfig)
+	bebURI := beb.Start()
+	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
+	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
+	beb.TokenURL = tokenURL
+	beb.MessagingURL = messagingURL
+	bebConfig = config.GetDefaultConfig(messagingURL)
+	beb.BebConfig = bebConfig
+	return beb
+}
+
+type Cleaner struct {
+}
+
+func (c *Cleaner) Clean(eventType string) (string, error) {
+	// Cleaning is not needed in this test
+	return eventType, nil
 }

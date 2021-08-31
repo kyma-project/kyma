@@ -5,20 +5,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"k8s.io/apimachinery/pkg/types"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
-
-	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
@@ -26,46 +30,46 @@ import (
 var _ MessagingBackend = &Nats{}
 
 type Nats struct {
-	config        env.NatsConfig
-	log           logr.Logger
-	client        cev2.Client
-	connection    *nats.Conn
-	subscriptions map[string]*nats.Subscription
+	config            env.NatsConfig
+	defaultSubsConfig env.DefaultSubscriptionConfig
+	logger            *logger.Logger
+	client            cev2.Client
+	connection        *nats.Conn
+	subscriptions     map[string]*nats.Subscription
 }
 
-func NewNats(config env.NatsConfig, log logr.Logger) *Nats {
-	return &Nats{config: config, log: log, subscriptions: make(map[string]*nats.Subscription)}
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
+	return &Nats{
+		config:            config,
+		logger:            logger,
+		subscriptions:     make(map[string]*nats.Subscription),
+		defaultSubsConfig: subsConfig,
+	}
 }
 
 const (
-	period   = time.Minute
-	maxTries = 5
+	period          = time.Minute
+	maxTries        = 5
+	natsHandlerName = "nats-handler"
 )
 
-// Initialize creates a connection to Nats
-func (n *Nats) Initialize(cfg env.Config) error {
-	n.log.Info("Initialize NATS connection")
-	var err error
+// Initialize creates a connection to NATS.
+func (n *Nats) Initialize(env.Config) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
-		n.connection, err = nats.Connect(n.config.Url,
-			nats.RetryOnFailedConnect(true),
-			nats.MaxReconnects(n.config.MaxReconnects),
-			nats.ReconnectWait(n.config.ReconnectWait))
+		n.connection, err = nats.Connect(n.config.Url, nats.RetryOnFailedConnect(true),
+			nats.MaxReconnects(n.config.MaxReconnects), nats.ReconnectWait(n.config.ReconnectWait))
 		if err != nil {
-			return errors.Wrapf(err, "failed to connect to Nats")
+			return errors.Wrapf(err, "connect to NATS failed")
 		}
 		if n.connection.Status() != nats.CONNECTED {
-			notConnectedErr := fmt.Errorf("not connected: status: %v", n.connection.Status())
-			return notConnectedErr
+			return errors.Errorf("connect to NATS failed status: %v", n.connection.Status())
 		}
 	}
-	n.log.Info("Successfully connected to Nats", "status", n.connection.Status())
 
 	if n.client != nil {
 		return nil
 	}
 
-	n.log.Info("Initialize cloudevents client")
 	if n.client, err = newCloudeventClient(n.config); err != nil {
 		return err
 	}
@@ -80,80 +84,97 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
 		IdleConnTimeout:     config.IdleConnTimeout,
 	}
-	protocol, err := cev2.NewHTTP(cev2.WithRoundTripper(transport))
-	if err != nil {
-		return nil, err
-	}
-	return cev2.NewClientObserved(protocol, cev2.WithTimeNow(), cev2.WithUUIDs(), cev2.WithTracePropagation)
+
+	return cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
 }
 
-// The returned bool should be ignored now. It's a marker for changed subscription status
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+// SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
+// note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BebFilter
 	if sub.Spec.Filter != nil {
-		filters = sub.Spec.Filter.Filters
+		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
+		if err != nil {
+			return false, errors.Wrap(err, "deduplicate subscription filters failed")
+		}
+		filters = uniqueFilters.Filters
 	}
-	// Create subscriptions in Nats
+
+	// Format logger
+	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
+
+	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
+	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
 		if err != nil {
-			n.log.Error(err, "failed to create a Nats subject")
+			log.Errorw("create NATS subject failed", "error", err)
 			return false, err
 		}
 
 		callback := n.getCallback(sub.Spec.Sink)
 
 		if n.connection.Status() != nats.CONNECTED {
-			n.log.Info("connection to Nats", "status", fmt.Sprintf("%v", n.connection.Status()))
-			initializeErr := n.Initialize(env.Config{})
-			if initializeErr != nil {
-				n.log.Error(initializeErr, "failed to reset NATS connection")
-				return false, initializeErr
+			if err := n.Initialize(env.Config{}); err != nil {
+				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
+				return false, err
 			}
 		}
 
-		natsSub, subscribeErr := n.connection.Subscribe(subject, callback)
-		if subscribeErr != nil {
-			n.log.Error(subscribeErr, "failed to create a Nats subscription")
-			return false, subscribeErr
+		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, subject, callback)
+			if subscribeErr != nil {
+				log.Errorw("create NATS subscription failed", "error", err)
+				return false, subscribeErr
+			}
+			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
-		n.subscriptions[createKey(sub, subject)] = natsSub
 	}
+	sub.Status.Config = subsConfig
+
 	return false, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	for key, sub := range n.subscriptions {
+		// Format logger
+		log := n.namedLogger().With(
+			"kind", subscription.GetObjectKind().GroupVersionKind().Kind,
+			"name", subscription.GetName(),
+			"namespace", subscription.GetNamespace(),
+			"version", subscription.GetGeneration(),
+			"key", key,
+			"subject", sub.Subject,
+		)
+
 		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
-			n.log.Info("connection status", "status", n.connection.Status())
-			// Unsubscribe call to Nats is async hence checking the status of the connection is important
+			// Unsubscribe call to NATS is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
-				initializeErr := n.Initialize(env.Config{})
-				if initializeErr != nil {
-					return errors.Wrapf(initializeErr, "can't connect to NATS server")
+				if err := n.Initialize(env.Config{}); err != nil {
+					log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
+					return errors.Wrapf(err, "connect to NATS failed")
 				}
 			}
 			if sub.IsValid() {
 				if err := sub.Unsubscribe(); err != nil {
-					return errors.Wrapf(err, "failed to unsubscribe")
+					log.Errorw("unsubscribe failed", "error", err)
+					return errors.Wrapf(err, "unsubscribe failed")
 				}
-			} else {
-				n.log.Info("cannot unsubscribe an invalid NATS subscription: ", "key", key, "subject", sub.Subject)
 			}
 			delete(n.subscriptions, key)
-			n.log.Info("successfully unsubscribed/deleted subscription")
+			log.Infow("unsubscribe succeeded")
 		}
 	}
 	return nil
 }
 
-// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions marked as "invalid" by NATS client
+// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions marked as "invalid" by NATS client.
 func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	var nsn []types.NamespacedName
 	for k, v := range n.subscriptions {
 		if !v.IsValid() {
-			n.log.Info("invalid NATS subscription: ", "key", k, "subject", v.Subject)
+			n.namedLogger().Debugw("invalid NATS subscription", "key", k, "subject", v.Subject)
 			nsn = append(nsn, createKymaSubscriptionNamespacedName(k, v))
 		}
 	}
@@ -164,7 +185,7 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
-			n.log.Error(err, "failed to convert Nats message to CE")
+			n.namedLogger().Errorw("convert NATS message to CE failed", "error", err)
 			return
 		}
 
@@ -178,13 +199,20 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
 
-		if result := n.client.Send(ctxWithCE, *ce); !cev2.IsACK(result) {
-			n.log.Error(result, "failed to dispatch event")
+		// Add tracing headers to the subsequent request
+		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
+
+		if result := n.client.Send(traceCtxWithCE, *ce); !cev2.IsACK(result) {
+			n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
 
-		n.log.Info(fmt.Sprintf("Successfully dispatched event id: %s to sink: %s", ce.ID(), sink))
+		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
+}
+
+func (n *Nats) namedLogger() *zap.SugaredLogger {
+	return n.logger.WithContext().Named(natsHandlerName)
 }
 
 func convertMsgToCE(msg *nats.Msg) (*cev2event.Event, error) {
@@ -207,8 +235,12 @@ func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 	return fmt.Sprintf("%s", namespacedName.String())
 }
 
-func createKey(sub *eventingv1alpha1.Subscription, subject string) string {
-	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), subject)
+func createKeySuffix(subject string, queueGoupInstanceNo int) string {
+	return subject + string(types.Separator) + strconv.Itoa(queueGoupInstanceNo)
+}
+
+func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInstanceNo int) string {
+	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
 func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
@@ -217,14 +249,14 @@ func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner
 		return "", nats.ErrBadSubject
 	}
 	// clean the application name segment in the event-type from none-alphanumeric characters
-	// return it as a Nats subject
+	// return it as a NATS subject
 	return cleaner.Clean(eventType)
 }
 
 func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) types.NamespacedName {
 	nsn := types.NamespacedName{}
-	nnvalues := strings.Split(strings.TrimSuffix(strings.TrimSuffix(key, sub.Subject), "."), string(types.Separator))
+	nnvalues := strings.Split(key, string(types.Separator))
 	nsn.Namespace = nnvalues[0]
-	nsn.Name = nnvalues[1]
+	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
 	return nsn
 }

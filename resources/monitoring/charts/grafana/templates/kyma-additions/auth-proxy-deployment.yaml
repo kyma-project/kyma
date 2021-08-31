@@ -20,6 +20,8 @@ spec:
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
@@ -62,6 +64,10 @@ spec:
           containerPort: {{ .Values.kyma.authProxy.port }}
           protocol: TCP
         livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        readinessProbe:
           httpGet:
             path: /ping
             port: http

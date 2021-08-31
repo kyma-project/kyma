@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -164,4 +166,8 @@ func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
 		newConditions = append(newConditions, condition)
 	}
 	s.Conditions = newConditions
+}
+
+func CreateMessageForConditionReasonSubscriptionCreated(bebName string) string {
+	return fmt.Sprintf("BEB-subscription-name=%s", bebName)
 }

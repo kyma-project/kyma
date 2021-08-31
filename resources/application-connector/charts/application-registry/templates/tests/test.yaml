@@ -35,9 +35,9 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
           - name: METADATA_URL
-            value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
+            value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.integrationNamespace }}.svc.cluster.local:8081
           - name: NAMESPACE
-            value: {{ .Values.global.namespace | quote }}
+            value: {{ .Values.global.integrationNamespace | quote }}
           securityContext:
             runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
             privileged: {{ .Values.global.podSecurityPolicy.privileged }}

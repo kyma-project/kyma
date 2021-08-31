@@ -33,12 +33,15 @@ spec:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.config.ports.metrics }}
+            - --health-probe-addr=0.0.0.0:{{ .Values.config.ports.healthProbe }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
-            - --service-blacklist={{ include "api-gateway.serviceBlackList" . | trimAll "," }}
+            - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
-            - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
+            {{- if .Values.config.enableDomainAllowList }}
+            - --domain-allowlist={{ include "api-gateway.domainAllowList" . }}
+            {{- end }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}
@@ -56,6 +59,17 @@ spec:
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
+          ports:
+          - containerPort: {{ .Values.config.ports.healthProbe }}
+            name: health           
+          livenessProbe:
+            httpGet:
+              port: health
+              path: "/healthz"
+          readinessProbe:
+            httpGet:
+              port: health
+              path: "/readyz"
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
       {{- with .Values.config.nodeSelector }}

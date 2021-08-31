@@ -1,5 +1,5 @@
 const k8s = require("@kubernetes/client-node");
-const net = require("net")
+const net = require("net");
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
@@ -8,6 +8,7 @@ const kc = new k8s.KubeConfig();
 var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
+var k8sCustomApi;
 
 var watch;
 var forward;
@@ -23,19 +24,18 @@ function initializeK8sClient(opts) {
       kc.loadFromDefault();
     }
 
-    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi); // deprecated, prefer CustomObjectsApi
+    k8sCustomApi = kc.makeApiClient(k8s.CustomObjectsApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
   } catch (err) {
     console.log(err.message);
   }
-
 }
 initializeK8sClient();
-
-
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
@@ -77,40 +77,41 @@ function convertAxiosError(axiosError, message) {
   if (!axiosError.response) {
     return axiosError;
   }
-  if (axiosError.response && axiosError.response.status && axiosError.response.statusText) {
+  if (
+    axiosError.response &&
+    axiosError.response.status &&
+    axiosError.response.statusText
+  ) {
     message += `\n${axiosError.response.status}: ${axiosError.response.statusText}`;
   }
   if (axiosError.response && axiosError.response.data) {
     message += ": " + JSON.stringify(axiosError.response.data);
     debug(axiosError.response.data);
   }
-  return new Error(message)
+  return new Error(message);
 }
 
-const updateNamespacedResource = (client, group, version, pluralName) => async (
-  name,
-  namespace,
-  updateFn
-) => {
-  const obj = await client.getNamespacedCustomObject(
-    group,
-    version,
-    namespace,
-    pluralName,
-    name
-  );
+const updateNamespacedResource =
+  (client, group, version, pluralName) => async (name, namespace, updateFn) => {
+    const obj = await client.getNamespacedCustomObject(
+      group,
+      version,
+      namespace,
+      pluralName,
+      name
+    );
 
-  const updatedObj = updateFn(_.cloneDeep(obj.body));
+    const updatedObj = updateFn(_.cloneDeep(obj.body));
 
-  await client.replaceNamespacedCustomObject(
-    group,
-    version,
-    namespace,
-    pluralName,
-    name,
-    updatedObj
-  );
-};
+    await client.replaceNamespacedCustomObject(
+      group,
+      version,
+      namespace,
+      pluralName,
+      name,
+      updatedObj
+    );
+  };
 
 async function removeServiceInstanceFinalizer(client, name, namespace) {
   const serviceInstanceUpdater = updateNamespacedResource(
@@ -158,13 +159,13 @@ async function promiseAllSettled(promises) {
 }
 
 /**
- * 
- * @param {string} dir path to the directory with yaml files 
+ *
+ * @param {string} dir path to the directory with yaml files
  */
 async function kubectlApplyDir(dir, namespace) {
   const files = fs.readdirSync(dir);
   for (let file of files) {
-    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
       await kubectlApply(join(dir, file), namespace).catch(console.error);
     } else {
       await kubectlApplyDir(join(dir, file), namespace);
@@ -181,13 +182,14 @@ async function kubectlApply(file, namespace) {
 async function kubectlDeleteDir(dir, namespace) {
   const files = fs.readdirSync(dir);
   for (let file of files) {
-    if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
       await kubectlDelete(join(dir, file), namespace).catch(console.error);
     }
   }
 }
 
 function kubectlDelete(file, namespace) {
+  debug(`Deleting ${file}...`);
   const yaml = fs.readFileSync(file);
   const listOfSpecs = k8s.loadAllYaml(yaml);
   return k8sDelete(listOfSpecs, namespace);
@@ -195,12 +197,14 @@ function kubectlDelete(file, namespace) {
 
 function kubectlPortForward(namespace, podName, port) {
   const server = net.createServer(function (socket) {
-    forward.portForward(namespace, podName, [port], socket, null, socket, 3)
-  })
+    forward.portForward(namespace, podName, [port], socket, null, socket, 3);
+  });
 
-  server.listen(port, 'localhost');
+  server.listen(port, "localhost");
 
-  return () => { server.close() }
+  return () => {
+    server.close();
+  };
 }
 
 async function k8sDelete(listOfSpecs, namespace) {
@@ -211,18 +215,20 @@ async function k8sDelete(listOfSpecs, namespace) {
     debug(`Delete ${res.metadata.name}`);
     try {
       if (res.kind) {
-        await k8sDynamicApi.delete(res)
+        await k8sDynamicApi.delete(res);
       } else if (res.metadata.selfLink) {
         await k8sDynamicApi.requestPromise({
           url: k8sDynamicApi.basePath + res.metadata.selfLink,
           method: "DELETE",
         });
       } else {
-        throw Error("Object kind or metadata.selfLink is required to delete the resource")
+        throw Error(
+          "Object kind or metadata.selfLink is required to delete the resource"
+        );
       }
       if (res.kind == "CustomResourceDefinition") {
         const version = res.spec.version || res.spec.versions[0].name;
-        const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`
+        const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`;
         await deleteAllK8sResources(path);
       }
     } catch (err) {
@@ -234,48 +240,115 @@ async function k8sDelete(listOfSpecs, namespace) {
 }
 
 async function getAllCRDs() {
-  const path = '/apis/apiextensions.k8s.io/v1/customresourcedefinitions';
+  const path = "/apis/apiextensions.k8s.io/v1/customresourcedefinitions";
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
-  const stat = {}
+  const stat = {};
   const body = JSON.parse(response.body);
-  body.items.forEach(crd => stat[crd.spec.group] = stat[crd.spec.group] ? stat[crd.spec.group] + 1 : 1)
-  return body.items
+  body.items.forEach(
+    (crd) =>
+      (stat[crd.spec.group] = stat[crd.spec.group]
+        ? stat[crd.spec.group] + 1
+        : 1)
+  );
+  return body.items;
+}
 
+async function getClusteraddonsconfigurations() {
+  const path =
+    "/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations";
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body.items;
+}
+
+async function getSecrets(namespace) {
+  const path = `/api/v1/namespaces/${namespace}/secrets`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body.items;
+}
+
+async function getPodPresets(namespace) {
+  const path = `/apis/settings.svcat.k8s.io/v1alpha1/namespaces/${namespace}/podpresets/`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body.items;
+}
+
+async function getSecret(name, namespace) {
+  const path = `/api/v1/namespaces/${namespace}/secrets/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
+}
+
+async function getConfigMap(name, namespace) {
+  const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
+}
+
+async function getServiceInstance(name, namespace) {
+  const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
 }
 
 async function k8sApply(resources, namespace, patch = true) {
-  const options = { "headers": { "Content-type": 'application/merge-patch+json' } };
+  const options = {
+    headers: { "Content-type": "application/merge-patch+json" },
+  };
   for (let resource of resources) {
     if (!resource || !resource.kind || !resource.metadata.name) {
       debug("Skipping invalid resource:", resource);
       continue;
     }
     if (!resource.metadata.namespace) {
-      resource.metadata.namespace = namespace
+      resource.metadata.namespace = namespace;
     }
     try {
-      const existing = await k8sDynamicApi.read(resource)
-      await k8sDynamicApi.patch(resource, undefined, undefined, undefined, undefined, options);
-      debug(resource.kind, resource.metadata.name, "reconfigured")
+      const existing = await k8sDynamicApi.read(resource);
+      await k8sDynamicApi.patch(
+        resource,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        options
+      );
+      debug(resource.kind, resource.metadata.name, "reconfigured");
     } catch (e) {
       {
-        if (e.body && e.body.reason == 'NotFound') {
+        if (e.body && e.body.reason == "NotFound") {
           try {
             await k8sDynamicApi.create(resource);
-            debug(resource.kind, resource.metadata.name, "created")
+            debug(resource.kind, resource.metadata.name, "created");
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, "failed to create");
-            console.log(createError)
+            console.log(createError);
             throw createError;
           }
         } else {
-          throw e
+          throw e;
         }
       }
     }
-
   }
 }
 
@@ -298,7 +371,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
             resolve(watchObj.object);
           }
         },
-        () => { }
+        () => {}
       )
       .then((r) => {
         res = r;
@@ -309,6 +382,18 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
       });
   });
   return result;
+}
+
+function waitForClusterAddonsConfiguration(name, timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name == name;
+    },
+    timeout,
+    `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`
+  );
 }
 
 function waitForFunction(name, namespace = "default", timeout = 90000) {
@@ -343,7 +428,7 @@ function waitForSubscription(name, namespace = "default", timeout = 90000) {
       );
     },
     timeout,
-    `Waiting for ${name} function timeout (${timeout} ms)`
+    `Waiting for ${name} subscription timeout (${timeout} ms)`
   );
 }
 
@@ -356,6 +441,24 @@ function waitForServiceClass(name, namespace = "default", timeout = 90000) {
     },
     timeout,
     `Waiting for ${name} service class timeout (${timeout} ms)`
+  );
+}
+
+function waitForServicePlanByServiceClass(
+  serviceClassName,
+  namespace = "default",
+  timeout = 90000
+) {
+  return waitForK8sObject(
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceplans`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.spec.serviceClassRef.name.includes(
+        serviceClassName
+      );
+    },
+    timeout,
+    `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`
   );
 }
 
@@ -419,18 +522,32 @@ function waitForServiceBindingUsage(
 
 function waitForReplicaSet(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/replicasets`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-            watchObj.object.metadata.name === name &&
-            watchObj.object.status &&
-            watchObj.object.status.readyReplicas > 0 &&
-            watchObj.object.status.availableReplicas > 0
-        );
-      },
-      timeout,
-      `Waiting for replica set ${name} timeout (${timeout} ms)`
+    `/apis/apps/v1/namespaces/${namespace}/replicasets`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status &&
+        watchObj.object.status.readyReplicas > 0 &&
+        watchObj.object.status.availableReplicas > 0
+      );
+    },
+    timeout,
+    `Waiting for replica set ${name} timeout (${timeout} ms)`
+  );
+}
+
+function waitForDaemonSet(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
+    {},
+    (_type, watchObj, _) => {
+      return (
+        watchObj.status.numberReady === watchObj.status.desiredNumberScheduled
+      );
+    },
+    timeout,
+    `Waiting for daemonset ${name} timeout (${timeout} ms)`
   );
 }
 
@@ -449,6 +566,21 @@ function waitForDeployment(name, namespace = "default", timeout = 90000) {
     },
     timeout,
     `Waiting for deployment ${name} timeout (${timeout} ms)`
+  );
+}
+
+function waitForStatefulSet(name, namespace = "default", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status.readyReplicas > 0
+      );
+    },
+    timeout,
+    `Waiting for StatefulSet ${name} timeout (${timeout} ms)`
   );
 }
 
@@ -481,21 +613,47 @@ async function getVirtualService(namespace, name) {
 
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
-  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
-    return watchObj.object.metadata.name === name && watchObj.object.status && watchObj.object.status.state == "OK"
-      && watchObj.object.status.url;
-  }, timeout, "Wait for TokenRequest timeout");
+  return waitForK8sObject(
+    path,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status &&
+        watchObj.object.status.state == "OK" &&
+        watchObj.object.status.url
+      );
+    },
+    timeout,
+    "Wait for TokenRequest timeout"
+  );
 }
 
 function waitForCompassConnection(name, timeout = 90000) {
   const path = `/apis/compass.kyma-project.io/v1alpha1/compassconnections`;
-  return waitForK8sObject(path, {}, (_type, _apiObj, watchObj) => {
-    return watchObj.object.metadata.name === name && watchObj.object.status.connectionState
-      && ["Connected", "Synchronized"].indexOf(watchObj.object.status.connectionState) !== -1
-  }, timeout, `Wait for Compass connection ${name} timeout (${timeout} ms)`);
+  return waitForK8sObject(
+    path,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status.connectionState &&
+        ["Connected", "Synchronized"].indexOf(
+          watchObj.object.status.connectionState
+        ) !== -1
+      );
+    },
+    timeout,
+    `Wait for Compass connection ${name} timeout (${timeout} ms)`
+  );
 }
 
-function waitForPodWithLabel(labelKey, labelValue, namespace = "default", timeout = 90000) {
+function waitForPodWithLabel(
+  labelKey,
+  labelValue,
+  namespace = "default",
+  timeout = 90000
+) {
   const query = {
     labelSelector: `${labelKey}=${labelValue}`,
   };
@@ -505,11 +663,29 @@ function waitForPodWithLabel(labelKey, labelValue, namespace = "default", timeou
     (_type, _apiObj, watchObj) => {
       return (
         watchObj.object.status.phase == "Running" &&
-        watchObj.object.status.containerStatuses.every(cs => cs.ready)
+        watchObj.object.status.containerStatuses.every((cs) => cs.ready)
       );
     },
     timeout,
     `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`
+  );
+}
+
+function waitForConfigMap(
+    cmName,
+    namespace = "default",
+    timeout = 90000
+) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/configmaps`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return watchObj.object.metadata.name.includes(
+            cmName
+        );
+      },
+      timeout,
+      `Waiting for ${cmName} service plan timeout (${timeout} ms)`
   );
 }
 
@@ -616,6 +792,23 @@ async function getAllResourceTypes() {
   }
 }
 
+async function getSecretData(name, namespace) {
+  try {
+    const secret = await getSecret(name, namespace);
+    const encodedData = secret.data;
+    return Object.fromEntries(
+      Object.entries(encodedData).map(([key, value]) => {
+        const buff = Buffer.from(value, "base64");
+        const decoded = buff.toString("ascii");
+        return [key, decoded];
+      })
+    );
+  } catch (e) {
+    console.log("Error:", e);
+    throw e;
+  }
+}
+
 function ignore404(e) {
   if (e.statusCode != 404) {
     throw e;
@@ -661,7 +854,11 @@ async function deleteK8sResource(o) {
     const obj = {
       kind: o.kind || "Secret", // Secret list doesn't return kind and apiVersion
       apiVersion: o.apiVersion || "v1",
-      metadata: { name: o.metadata.name, namespace: o.metadata.namespace, finalizers: [] },
+      metadata: {
+        name: o.metadata.name,
+        namespace: o.metadata.namespace,
+        finalizers: [],
+      },
     };
 
     debug("Removing finalizers from", obj);
@@ -672,9 +869,17 @@ async function deleteK8sResource(o) {
   }
 
   await k8sDynamicApi
-    .requestPromise({ url: k8sDynamicApi.basePath + o.metadata.selfLink, method: 'DELETE' })
+    .requestPromise({
+      url: k8sDynamicApi.basePath + o.metadata.selfLink,
+      method: "DELETE",
+    })
     .catch(ignore404);
-  debug("Deleted resource:", o.metadata.name, 'namespace:', o.metadata.namespace);
+  debug(
+    "Deleted resource:",
+    o.metadata.name,
+    "namespace:",
+    o.metadata.namespace
+  );
 }
 
 async function getContainerRestartsForAllNamespaces() {
@@ -690,6 +895,43 @@ async function getContainerRestartsForAllNamespaces() {
         restartCount: elem.restartCount,
       })),
     }));
+}
+
+async function getKymaAdminBindings() {
+  const { body } = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+  const adminRoleBindings = body.items;
+  return adminRoleBindings
+    .filter(
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "kyma-admin"
+    )
+    .map((clusterRoleBinding) => ({
+      name: clusterRoleBinding.metadata.name,
+      role: clusterRoleBinding.roleRef.name,
+      users: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "User")
+        .map((sub) => sub.name),
+      groups: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "Group")
+        .map((sub) => sub.name),
+    }));
+}
+
+async function findKymaAdminBindingForUser(targetUser) {
+  let kymaAdminBindings = await getKymaAdminBindings();
+  return kymaAdminBindings.find(
+    (binding) => binding.users.indexOf(targetUser) >= 0
+  );
+}
+
+async function ensureKymaAdminBindingExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).not.to.be.undefined;
+  expect(binding.users).to.include(targetUser);
+}
+
+async function ensureKymaAdminBindingDoesNotExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).to.be.undefined;
 }
 
 function getContainerStatusByImage(pod, image) {
@@ -719,20 +961,21 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
               status.image
             );
 
-            let restartsTillTestStart = 0
-            let message = ""
-            if(!afterTestContainerStatus || !status) {
-              restartsTillTestStart = -1
-              message = "Container removed during report generation"              
+            let restartsTillTestStart = 0;
+            let message = "";
+            if (!afterTestContainerStatus || !status) {
+              restartsTillTestStart = -1;
+              message = "Container removed during report generation";
             } else {
-              restartsTillTestStart  = afterTestContainerStatus.restartCount - status.restartCount
+              restartsTillTestStart =
+                afterTestContainerStatus.restartCount - status.restartCount;
             }
-            
+
             return {
               name: status.name,
               image: status.image,
               restartsTillTestStart: restartsTillTestStart,
-              info: message
+              info: message,
             };
           })
           .filter((status) => {
@@ -781,15 +1024,11 @@ function switchDebug(on = true) {
 }
 
 function fromBase64(s) {
-  return Buffer
-    .from(s, "base64")
-    .toString("utf8");
+  return Buffer.from(s, "base64").toString("utf8");
 }
 
 function toBase64(s) {
-  return Buffer
-    .from(s)
-    .toString("base64");
+  return Buffer.from(s).toString("base64");
 }
 
 function genRandom(len) {
@@ -818,8 +1057,11 @@ function wait(fn, checkFn, timeout, interval) {
     }, timeout);
     const ih = setInterval(async function () {
       let res;
-      try { res = await fn(); }
-      catch (ex) { res = ex; }
+      try {
+        res = await fn();
+      } catch (ex) {
+        res = ex;
+      }
       checkFn(res) && done(resolve, res);
     }, interval);
 
@@ -835,10 +1077,13 @@ async function ensureApplicationMapping(name, ns) {
   const applicationMapping = {
     apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
     kind: "ApplicationMapping",
-    metadata: { name: name, namespace: ns }
+    metadata: { name: name, namespace: ns },
   };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => { });
-  return await k8sDynamicApi.create(applicationMapping).catch((ex) => { debug(ex); throw ex });
+  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
+  return await k8sDynamicApi.create(applicationMapping).catch((ex) => {
+    debug(ex);
+    throw ex;
+  });
 }
 
 async function patchApplicationGateway(name, ns) {
@@ -851,20 +1096,25 @@ async function patchApplicationGateway(name, ns) {
   ).catch((err) => {
     throw new Error(`Timeout: ${name} is not ready`);
   });
-  if (deployment.body.spec.template.spec.containers[0].args.includes('--skipVerify=true')) {
-    debug('Application Gateway already patched');
+  if (
+    deployment.body.spec.template.spec.containers[0].args.includes(
+      "--skipVerify=true"
+    )
+  ) {
+    debug("Application Gateway already patched");
     return deployment;
   }
 
-  const skipVerifyIndex = deployment.body.spec.template.spec.containers[0].args.findIndex(
-      arg => arg.toString().includes('--skipVerify')
-  );
+  const skipVerifyIndex =
+    deployment.body.spec.template.spec.containers[0].args.findIndex((arg) =>
+      arg.toString().includes("--skipVerify")
+    );
   expect(skipVerifyIndex).to.not.equal(-1);
 
-  let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns)
+  let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
   const appGatewayRSsNames = replicaSets.body.items
-      .filter(rs => rs.metadata.labels["app"] === name)
-      .map(r => r.metadata.name);
+    .filter((rs) => rs.metadata.labels["app"] === name)
+    .map((r) => r.metadata.name);
   expect(appGatewayRSsNames.length).to.not.equal(0);
 
   const patch = [
@@ -878,20 +1128,22 @@ async function patchApplicationGateway(name, ns) {
     headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
   };
   await k8sAppsApi.patchNamespacedDeployment(
-      name,
-      ns,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options
+    name,
+    ns,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
   );
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
-      arg => arg.toString().includes('--skipVerify=true')
-  )).to.not.equal(-1);
+  expect(
+    patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes("--skipVerify=true")
+    )
+  ).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
@@ -902,9 +1154,16 @@ async function patchApplicationGateway(name, ns) {
   // the deployment are running and the old ones are being terminated.
   replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
   const patchedAppGatewayRSs = replicaSets.body.items.filter(
-      rs => rs.metadata.labels["app"] === name && !appGatewayRSsNames.includes(rs.metadata.name));
+    (rs) =>
+      rs.metadata.labels["app"] === name &&
+      !appGatewayRSsNames.includes(rs.metadata.name)
+  );
   expect(patchedAppGatewayRSs.length).to.not.equal(0);
-  await waitForReplicaSet(patchedAppGatewayRSs[0].metadata.name, ns, 120 * 1000);
+  await waitForReplicaSet(
+    patchedAppGatewayRSs[0].metadata.name,
+    ns,
+    120 * 1000
+  );
 
   return patchedDeployment;
 }
@@ -928,23 +1187,29 @@ function eventingSubscription(eventType, sink, name, namespace) {
     spec: {
       filter: {
         dialect: "beb",
-        filters: [{
-          eventSource: {
-            property: "source", type: "exact", value: "",
+        filters: [
+          {
+            eventSource: {
+              property: "source",
+              type: "exact",
+              value: "",
+            },
+            eventType: {
+              property: "type",
+              type: "exact",
+              value: eventType /*sap.kyma.custom.commerce.order.created.v1*/,
+            },
           },
-          eventType: {
-            property: "type", type: "exact", value: eventType/*sap.kyma.custom.commerce.order.created.v1*/
-          }
-        }]
+        ],
       },
       protocol: "BEB",
       protocolsettings: {
         exemptHandshake: true,
         qos: "AT-LEAST-ONCE",
       },
-      sink: sink/*http://lastorder.test.svc.cluster.local*/
-    }
-  }
+      sink: sink /*http://lastorder.test.svc.cluster.local*/,
+    },
+  };
 }
 
 
@@ -989,24 +1254,39 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
+  waitForClusterAddonsConfiguration,
   waitForServiceClass,
+  waitForServicePlanByServiceClass,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
+  waitForDaemonSet,
+  waitForStatefulSet,
   waitForTokenRequest,
   waitForCompassConnection,
   waitForFunction,
   waitForSubscription,
   waitForPodWithLabel,
+  waitForConfigMap,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
   getAllCRDs,
+  getClusteraddonsconfigurations,
+  ensureKymaAdminBindingExistsForUser,
+  ensureKymaAdminBindingDoesNotExistsForUser,
+  getSecret,
+  getSecrets,
+  getConfigMap,
+  getPodPresets,
+  getSecretData,
+  getServiceInstance,
   listResources,
   listResourceNames,
   k8sDynamicApi,
+  k8sCustomApi,
   k8sAppsApi,
   k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
@@ -1025,4 +1305,3 @@ module.exports = {
   patchDeployment,
   isKyma2
 };
-

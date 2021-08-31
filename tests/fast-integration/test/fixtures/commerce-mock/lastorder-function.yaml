@@ -17,7 +17,7 @@ spec:
     const axios = require('axios');
     function sendEvent(type, data) {
         const payload = {       
-          source: "kyma",
+          source: "/default/sap.kyma/tunas-prow",
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",
@@ -80,6 +80,16 @@ spec:
       }
     }
 ---
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: lastorder
+spec:
+  grantTypes:
+    - "client_credentials"
+  scope: "read write"
+  secretName: lastorder-oauth
+---
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
@@ -87,11 +97,17 @@ metadata:
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-    - accessStrategies:
-        - config: {}
-          handler: allow
-      methods: ["*"]
-      path: /.*
+    - path: /function
+      methods: ["GET", "POST"]
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]
+    - path: /.*
+      methods: ["GET", "POST"]
+      accessStrategies:
+        - handler: allow
+          config: {}
   service:
     host: lastorder
     name: lastorder

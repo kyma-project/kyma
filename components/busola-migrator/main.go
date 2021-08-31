@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(errors.Wrap(err, "while getting kubeconfig"))
 	}
 
-	busolaURL, err := busola.BuildInitURL(cfg, kubeConfig)
+	busolaURL, err := busola.BuildInitURL(cfg)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "while building Busola init url"))
 	}

@@ -1,5 +1,6 @@
 {{- /*
   Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+  Liveness/readiness probes were added since they are missing in the upstream chart
 */ -}}
 {{- $namespace := printf "%s" (include "kube-prometheus-stack.namespace" .) }}
 {{- if .Values.prometheusOperator.enabled }}
@@ -107,6 +108,38 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          {{- end }}
+          {{- if .Values.prometheusOperator.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.prometheusOperator.livenessProbe.path }}
+              {{- if .Values.prometheusOperator.tls.enabled }}
+              port: https
+              {{- else }}
+              port: http
+              {{- end }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.prometheusOperator.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.prometheusOperator.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.prometheusOperator.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.prometheusOperator.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.prometheusOperator.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.prometheusOperator.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.prometheusOperator.readinessProbe.path }}
+              {{- if .Values.prometheusOperator.tls.enabled }}
+              port: https
+              {{- else }}
+              port: http
+              {{- end }}
+              scheme: HTTP
+            initialDelaySeconds: {{ .Values.prometheusOperator.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.prometheusOperator.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.prometheusOperator.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.prometheusOperator.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.prometheusOperator.readinessProbe.successThreshold }}
           {{- end }}
           resources:
 {{ toYaml .Values.prometheusOperator.resources | indent 12 }}

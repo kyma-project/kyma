@@ -35,7 +35,7 @@ async function helmUninstall(release, namespace) {
   return result;
 }
 
-async function helmInstallUpgrade(release, chart, namespace, values, profile) {
+async function helmInstallUpgrade(release, chart, namespace, values, profile, additionalArgs) {
   const args = [
     "upgrade",
     "--wait",
@@ -45,6 +45,9 @@ async function helmInstallUpgrade(release, chart, namespace, values, profile) {
     release,
     chart,
   ];
+  if (Array.isArray(additionalArgs)) {
+    args.push(...additionalArgs);
+  }
 
   if (!!profile) {
     try {

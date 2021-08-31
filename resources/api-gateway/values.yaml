@@ -3,11 +3,11 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "992344de"
+  tag: "5af1e378"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -34,7 +34,7 @@ config:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
-  serviceBlackList:
+  serviceBlockList:
     default:
       - kubernetes
     istio-system:
@@ -48,7 +48,8 @@ config:
     kyma-system:
       - apiserver-proxy
       - apiserver-proxy-ssl
-  domainWhiteList:
+  domainAllowList:
+  enableDomainAllowList: true
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
     allowOrigins:
@@ -81,6 +82,7 @@ config:
   # Port configuration
   ports:
     metrics: 8080
+    healthProbe: 8081
 
 # Configure node affinity
 affinity: {}
@@ -96,7 +98,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "49659ad2"
+    version: "7b9c624e"
   env:
     testUser: "admin-user"
     timeout: 120

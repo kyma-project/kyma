@@ -15,6 +15,8 @@ spec:
     metadata:
       labels:
         app: {{ template "kiali-server.fullname" . }}-auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
@@ -57,6 +59,10 @@ spec:
           containerPort: {{ .Values.authProxy.port }}
           protocol: TCP
         livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        readinessProbe:
           httpGet:
             path: /ping
             port: http

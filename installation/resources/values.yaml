@@ -19,8 +19,6 @@ logging:
     virtualservice:
       enabled: false
 monitoring:
-  alertmanager:
-    enabled: false
   grafana:
     kyma:
       console:

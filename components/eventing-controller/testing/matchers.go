@@ -36,8 +36,18 @@ func HaveSubscriptionFinalizer(finalizer string) GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.Subscription) []string { return s.ObjectMeta.Finalizers }, ContainElement(finalizer))
 }
 
+func HaveSubscriptionLabels(labels map[string]string) GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) map[string]string { return s.Labels }, Equal(labels))
+}
+
 func HaveNotFoundSubscription(isReallyDeleted bool) GomegaMatcher {
 	return WithTransform(func(isDeleted bool) bool { return isDeleted }, Equal(isReallyDeleted))
+}
+
+func HaveSubsConfiguration(subsConf *eventingv1alpha1.SubscriptionConfig) GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) *eventingv1alpha1.SubscriptionConfig {
+		return s.Status.Config
+	}, Equal(subsConf))
 }
 
 func IsAnEmptySubscription() GomegaMatcher {

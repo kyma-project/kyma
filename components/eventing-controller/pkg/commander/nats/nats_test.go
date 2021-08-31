@@ -6,13 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/onsi/gomega"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -29,7 +28,6 @@ func TestCleanup(t *testing.T) {
 	// When
 	// Create a test subscriber
 	ctx := context.Background()
-	log := ctrl.Log.WithName("test-cleaner-nats")
 	subscriberPort := 8081
 	subscriber := controllertesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
 	subscriber.Start()
@@ -49,15 +47,19 @@ func TestCleanup(t *testing.T) {
 	natsURL := natsServer.ClientURL()
 	defer controllertesting.ShutDownNATSServer(natsServer)
 
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(gomega.BeNil())
+
 	envConf := env.NatsConfig{
 		Url:             natsURL,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
-	natsBackend := handlers.NewNats(envConf, log)
+	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
+	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
 	natsCommander.Backend = natsBackend
-	err := natsCommander.Backend.Initialize(env.Config{})
+	err = natsCommander.Backend.Initialize(env.Config{})
 	g.Expect(err).To(gomega.BeNil())
 
 	// Create fake Dynamic clients
@@ -79,7 +81,7 @@ func TestCleanup(t *testing.T) {
 	// Send an event
 	err = handlers.SendEventToNATS(natsBackend, data)
 	if err != nil {
-		t.Fatalf("failed to publish event: %v", err)
+		t.Fatalf("publish event failed: %v", err)
 	}
 
 	// Check for the event
@@ -89,7 +91,7 @@ func TestCleanup(t *testing.T) {
 	}
 
 	// Then
-	err = cleanup(natsCommander.Backend, natsCommander.Client)
+	err = cleanup(natsCommander.Backend, natsCommander.Client, defaultLogger.WithContext())
 	g.Expect(err).To(gomega.BeNil())
 
 	// Expect
@@ -101,10 +103,10 @@ func TestCleanup(t *testing.T) {
 	g.Expect(expectedSubStatus).To(gomega.Equal(gotSub.Status))
 
 	// Test NATS subscriptions are gone
-	// Send again an event and check subscriber, check subscriober should fail after 5 retries
+	// Send again an event and check subscriber, check subscriber should fail after 5 retries
 	err = handlers.SendEventToNATS(natsBackend, data)
 	if err != nil {
-		t.Fatalf("failed to publish event: %v", err)
+		t.Fatalf("publish event failed: %v", err)
 	}
 	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
 	g.Expect(err).NotTo(gomega.BeNil())

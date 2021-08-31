@@ -2,11 +2,8 @@ package clientcert
 
 import (
 	"crypto/tls"
-	"errors"
 	"sync"
 )
-
-var ErrMissingClientCertificate = errors.New("required client certificate is missing")
 
 type SetClientCertificateFunc func(cert *tls.Certificate)
 
@@ -37,7 +34,7 @@ func (c *clientCertificate) GetClientCertificate(_ *tls.CertificateRequestInfo) 
 	defer c.RUnlock()
 
 	if c.certificate == nil {
-		return nil, ErrMissingClientCertificate
+		return &tls.Certificate{}, nil
 	}
 	return c.certificate, nil
 }

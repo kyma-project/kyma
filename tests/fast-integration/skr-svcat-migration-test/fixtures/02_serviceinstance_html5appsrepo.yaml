@@ -1,0 +1,9 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: svcat-html5-apps-repo-1
+spec:
+  clusterServiceClassExternalName: html5-apps-repo
+  clusterServicePlanExternalName: app-runtime
+#  externalID: 8443e7eb-a405-48e8-8b83-30f2f3dfae33

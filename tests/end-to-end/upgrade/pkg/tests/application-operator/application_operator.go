@@ -2,6 +2,7 @@ package applicationoperator
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,21 +20,24 @@ import (
 )
 
 const (
-	applicationName                 = "operator-test-app"
-	applicationGatewayDeployment    = "operator-test-app-application-gateway"
-	connectivityValidatorDeployment = "operator-test-app-connectivity-validator"
-	integrationNamespace            = "kyma-integration"
+	applicationName                        = "operator-test-app"
+	applicationGatewayDeployment           = "operator-test-app-application-gateway"
+	connectivityValidatorDeployment        = "operator-test-app-connectivity-validator"
+	integrationNamespace                   = "kyma-integration"
+	centralConnectivityValidatorDeployment = "central-application-connectivity-validator"
+	systemNamespace                        = "kyma-system"
 
 	applicationOperatorStatefulset = "application-operator"
 
 	appGatewayImageOptPrefix            = "--applicationGatewayImage="
 	connectivityValidatorImageOptPrefix = "--applicationConnectivityValidatorImage="
+	centralAppValidatorEnabledOptPrefix = "--centralApplicationConnectivityValidatorEnabled="
 )
 
 type appImagesConfig struct {
-	eventServiceImage          string
-	appGatewayImage            string
-	connectivityValidatorImage string
+	appGatewayImage                     string
+	connectivityValidatorImage          string
+	centralConnectivityValidatorEnabled bool
 }
 
 // UpgradeTest checks if Application Operator upgrades image versions of Application Proxy and Events Service of the created Application.
@@ -121,7 +125,7 @@ func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error
 
 	containerArgs := statefulSet.Spec.Template.Spec.Containers[0].Args
 
-	appImagesConfig := appImagesConfig{}
+	appImagesConfig := appImagesConfig{centralConnectivityValidatorEnabled: true}
 
 	for _, arg := range containerArgs {
 		if strings.HasPrefix(arg, appGatewayImageOptPrefix) {
@@ -130,8 +134,14 @@ func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error
 		if strings.HasPrefix(arg, connectivityValidatorImageOptPrefix) {
 			appImagesConfig.connectivityValidatorImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
 		}
+		if strings.HasPrefix(arg, centralAppValidatorEnabledOptPrefix) {
+			v := strings.TrimPrefix(arg, centralAppValidatorEnabledOptPrefix)
+			appImagesConfig.centralConnectivityValidatorEnabled, err = strconv.ParseBool(strings.TrimSpace(v))
+			if err != nil {
+				return appImagesConfig, errors.Wrapf(err, "Failed to parse boolean '%s' from %s container arg", v, centralAppValidatorEnabledOptPrefix)
+			}
+		}
 	}
-
 	return appImagesConfig, nil
 }
 
@@ -189,9 +199,15 @@ func (ut *UpgradeTest) verifyResources(namespace string) error {
 	if err := ut.verifyDeployment(applicationGatewayDeployment, namespace, appImages.appGatewayImage); err != nil {
 		return errors.Wrap(err, "Application Gateway is not upgraded")
 	}
-
-	if err := ut.verifyDeployment(connectivityValidatorDeployment, namespace, appImages.connectivityValidatorImage); err != nil {
-		return errors.Wrap(err, "Application Connectivity Validator is not upgraded")
+	if appImages.centralConnectivityValidatorEnabled {
+		_, err := ut.getDeployment(centralConnectivityValidatorDeployment, systemNamespace)
+		if err != nil {
+			return errors.Wrapf(err, "Central Application Connectivity Validator deployment does not exist")
+		}
+	} else {
+		if err := ut.verifyDeployment(connectivityValidatorDeployment, namespace, appImages.connectivityValidatorImage); err != nil {
+			return errors.Wrap(err, "Application Connectivity Validator is not upgraded")
+		}
 	}
 
 	return nil

@@ -28,9 +28,13 @@ spec:
       securityContext:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
 {{- end }}
-{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
 {{- end }}
+      {{- if .Values.extraInitContainers }}
+      initContainers:
+      {{ toYaml .Values.extraInitContainers | nindent 6 }}
+      {{- end }}
       containers:
         - name: node-exporter
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -38,11 +42,16 @@ spec:
           args:
             - --path.procfs=/host/proc
             - --path.sysfs=/host/sys
+            {{- if .Values.hostRootFsMount }}
             - --path.rootfs=/host/root
+            {{- end }}
             - --web.listen-address=$(HOST_IP):{{ .Values.service.port }}
 {{- if .Values.extraArgs }}
 {{ toYaml .Values.extraArgs | indent 12 }}
 {{- end }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
           env:
           - name: HOST_IP
             {{- if .Values.service.listenOnAllInterfaces }}
@@ -55,7 +64,7 @@ spec:
             {{- end }}
           ports:
             - name: metrics
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -67,10 +76,6 @@ spec:
               port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-{{- if .Values.securityContext }}
-          securityContext:
-{{ toYaml .Values.securityContext | indent 12 }}
-{{- end }}
           volumeMounts:
             - name: proc
               mountPath: /host/proc
@@ -78,10 +83,12 @@ spec:
             - name: sys
               mountPath: /host/sys
               readOnly: true
+            {{- if .Values.hostRootFsMount }}
             - name: root
               mountPath: /host/root
               mountPropagation: HostToContainer
               readOnly: true
+            {{- end }}
             {{- if .Values.extraHostVolumeMounts }}
             {{- range $_, $mount := .Values.extraHostVolumeMounts }}
             - name: {{ $mount.name }}
@@ -104,6 +111,12 @@ spec:
             - name: {{ $mount.name }}
               mountPath: {{ $mount.mountPath }}
             {{- end }}
+            {{- if .Values.secrets }}
+            {{- range $_, $mount := .Values.secrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+            {{- end }}
             {{- end }}
 {{- if .Values.sidecars }}
 {{ toYaml .Values.sidecars | indent 8 }}
@@ -122,6 +135,10 @@ spec:
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
 {{- end }}
+{{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+{{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
@@ -137,9 +154,11 @@ spec:
         - name: sys
           hostPath:
             path: /sys
+        {{- if .Values.hostRootFsMount }}
         - name: root
           hostPath:
             path: /
+        {{- end }}
         {{- if .Values.extraHostVolumeMounts }}
         {{- range $_, $mount := .Values.extraHostVolumeMounts }}
         - name: {{ $mount.name }}
@@ -159,5 +178,12 @@ spec:
         - name: {{ $mount.name }}
           configMap:
             name: {{ $mount.name }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.secrets }}
+        {{- range $_, $mount := .Values.secrets }}
+        - name: {{ $mount.name }}
+          secret:
+            secretName: {{ $mount.name }}
         {{- end }}
         {{- end }}

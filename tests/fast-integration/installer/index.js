@@ -14,7 +14,6 @@ const k8s = require("@kubernetes/client-node");
 const {
   debug,
   k8sCoreV1Api,
-  k8sDynamicApi,
   kubectlDelete,
   kubectlApplyDir,
   kubectlApply,
@@ -22,11 +21,13 @@ const {
   deleteAllK8sResources,
   deleteNamespaces,
   getAllCRDs,
-  k8sApply
+  k8sApply,
+  waitForDeployment,
+  waitForStatefulSet
 } = require("../utils");
 const notDeployed = "not-deployed";
 const kymaCrds = require("./kyma-crds");
-const defaultIstioVersion = "1.8.2";
+const defaultIstioVersion = "1.10.0";
 
 
 async function waitForNodesToBeReady(timeout = "180s") {
@@ -106,7 +107,7 @@ function skipHelmTest(r) {
   return !(r.metadata.annotations && r.metadata.annotations["helm.sh/hook"] && r.metadata.annotations["helm.sh/hook"].includes("test-success"));
 }
 function skipNull(r) {
-  return (r!=null);
+  return (r != null);
 }
 
 async function applyRelease(
@@ -118,9 +119,18 @@ async function applyRelease(
   isUpgrade
 ) {
   const { stdout } = await helmTemplate(release, chart, namespace, values, profile);
-  const yamls = k8s.loadAllYaml(stdout);
-
-  await k8sApply(yamls.filter(skipNull).filter(skipHelmTest), namespace);
+  const yamls = k8s.loadAllYaml(stdout).filter(skipNull).filter(skipHelmTest);
+  const deployments = yamls.filter((r) => r.kind === 'Deployment');
+  const statefulsets = yamls.filter((r) => r.kind === 'StatefulSet');
+  await k8sApply(yamls, namespace);
+  for (let deployment of deployments) {
+    console.log("Waitng for deployment: ", deployment)
+    await waitForDeployment(deployment.metadata.name, deployment.metadata.namespace || namespace);
+  }
+  for (let ss of statefulsets) {
+    console.log("Waitng for StatefulSet: ", ss)
+    await waitForStatefulSet(ss.metadata.name, ss.metadata.namespace || namespace);
+  }
 }
 
 async function installRelease(
@@ -172,18 +182,44 @@ async function installRelease(
   debug(`Release ${release} deployed`);
 }
 
-async function chartList(options) {
-  const gardernerDomain = await getGardenerDomain();
-  const isGardener = process.env["GARDENER"] || (gardernerDomain) ? "true" : "false";
-  const domain = process.env["KYMA_DOMAIN"] || gardernerDomain || "local.kyma.dev";
+async function chartList(options) {  
+  const gardenerDomain = await getGardenerDomain();
+  const domain = process.env["KYMA_DOMAIN"] || gardenerDomain || "local.kyma.dev";
+
+  const isGardener = (gardenerDomain ? true : false) || (process.env["GARDENER"] === "true");
   const isCompassEnabled = !!options.withCompass;
-  const isCentralApplicationGatewayEnabled = !!options.withCentralApplicationGateway;
-  const overrides = `global.isLocalEnv=false,global.ingress.domainName=${domain},global.environment.gardener=${isGardener},global.domainName=${domain},global.tlsCrt=ZHVtbXkK,global.disableLegacyConnectivity=${isCompassEnabled},central_application_gateway.enabled=${isCentralApplicationGatewayEnabled},authProxy.config.useDex=false`;
+  const isCentralApplicationConnectivityEnabled = !!options.withCentralAppConnectivity;
+
+  const overrides = [
+    `authProxy.config.useDex=false`,
+    `global.centralApplicationConnectivityValidatorEnabled=${isCentralApplicationConnectivityEnabled}`,
+    `central_application_gateway.enabled=${isCentralApplicationConnectivityEnabled}`,
+    `global.disableLegacyConnectivity=${isCompassEnabled}`,
+    `global.domainName=${domain}`,
+    `global.environment.gardener=${isGardener}`,
+    `global.isLocalEnv=false`,
+    `global.ingress.domainName=${domain}`,
+    `global.tlsCrt=ZHVtbXkK`
+  ].join(',');
+
   // https://github.com/kyma-project/test-infra/pull/2967
-  let registryOverrides = `dockerRegistry.enableInternal=false,dockerRegistry.serverAddress=registry.localhost:5000,dockerRegistry.registryAddress=registry.localhost:5000,global.ingress.domainName=${domain},containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`;
-  if (isGardener == "true") {
-    registryOverrides = `dockerRegistry.enableInternal=true,global.ingress.domainName=${domain}`
+  let registryOverrides;
+  if (isGardener == true) {
+    registryOverrides = [
+      `dockerRegistry.enableInternal=true`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');
+  } else {
+    registryOverrides = [
+      `containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
+      `dockerRegistry.enableInternal=false`,
+      `dockerRegistry.registryAddress=registry.localhost:5000`,
+      `dockerRegistry.serverAddress=registry.localhost:5000`,
+      `global.ingress.domainName=${domain}`
+    ].join(',');
   }
+  const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
+  const tracingOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
 
   const kymaCharts = [
     {
@@ -255,12 +291,12 @@ async function chartList(options) {
     {
       release: "kiali",
       namespace: "kyma-system",
-      values: `${overrides}`,
+      values: `${kialiOverrides}`,
     },
     {
       release: "tracing",
       namespace: "kyma-system",
-      values: `${overrides}`,
+      values: `${tracingOverrides}`,
     },
     {
       release: "logging",
@@ -353,7 +389,6 @@ async function uninstallKyma(options) {
     debug("Uninstalling istio");
     await uninstallIstio();
   }
-
 }
 
 /**
@@ -362,11 +397,10 @@ async function uninstallKyma(options) {
  * @param {string} options.resourcesPath Path to the resources folder with Kyma charts
  * @param {string} options.istioVersion Istio version, eg. 1.8.2
  * @param {boolean} options.isUpgrade Upgrade existing installation
- * @param {boolean} options.newEventing Use new eventing
- * @param {boolean} options.withCentralApplicationGateway Install cluster-wide Application Gateway
+ * @param {boolean} options.withCompass
+ * @param {boolean} options.withCentralAppConnectivity Install Application Connectivity as single cluster-wide instances
  * @param {Array<string>} options.skipComponents List of components to not install
  * @param {Array<string>} options.components List of components to install
- * @param {boolean} options.isCompassEnabled
  * @param {boolean} options.useHelmTemplate Use "helm template | kubectl apply" instead of helm install/upgrade
  */
 async function installKyma(options) {

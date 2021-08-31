@@ -8,14 +8,11 @@ global:
 deployment:
   image:
     repository: "eu.gcr.io/kyma-project/busola-migrator"
-    tag: "a5b820ae"
+    tag: "PR-11619"
     pullPolicy: IfNotPresent
   env:
     busolaURL: "https://dashboard.kyma.cloud.sap"
-    oidcIssuerURL: "https://kyma.accounts.ondemand.com"
-    oidcClientURL: "12b13a26-d993-4d0c-aa08-5f5852bbdff6"
-    oidcScope: "openid"
-    oidcUsePKCE: "true"
+    kubeconfigID: "Should_be_overridden"
   replicaCount: 1
   imagePullSecrets: []
   podAnnotations:
@@ -48,7 +45,7 @@ config:
 vsPatch:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"
     pullPolicy: IfNotPresent
   suffixToAdd: "-old"
   virtualServices:
