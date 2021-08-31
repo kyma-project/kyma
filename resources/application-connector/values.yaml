@@ -1,19 +1,21 @@
 connector_service:
   enabled: &connectorServiceEnabled true
-
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+central_application_connectivity_validator:
+  enabled: &centralApplicationConnectivityValidatorEnabled false
+
 central_application_gateway:
-  enabled: true
+  enabled: false
 
 global:
-  centralApplicationConnectivityValidatorEnabled: true
+  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
   disableLegacyConnectivity: false
   isLocalEnv: false
-  integrationNamespace: kyma-integration
-  systemNamespace: kyma-system
+  namespace: kyma-integration
   strictMode: disabled
+  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -36,13 +38,13 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "PR-11784"
+    version: "cddfbc5b"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
     version: "1683d7cf"
   application_connectivity_validator:
-    version: "PR-11558"
+    version: "d2dc1a2b"
   application_operator:
     version: "14604d09"
   application_operator_tests:
@@ -94,7 +96,7 @@ application_connectivity_certs_sync:
       namespace: istio-system
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210817-8cdbfce3"
+    tag: "20210610-d25e85b1"
 tests:
   application_connector_tests:
     labels:

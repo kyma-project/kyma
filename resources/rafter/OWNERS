@@ -2,6 +2,8 @@ approvers:
   - derberg
 reviewers:
   - m00g3n
+  - aerfio
   - pPrecel
+  - magicmatatjahu
 labels:
   - area/core-and-supporting
