@@ -1,5 +1,5 @@
 ---
-title: External DNS managagement - Connection refused
+title: External DNS management - Connection refused
 ---
 
 ## Symptom

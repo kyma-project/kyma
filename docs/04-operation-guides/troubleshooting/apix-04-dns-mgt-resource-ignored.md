@@ -1,5 +1,5 @@
 ---
-title: External DNS managagement - Resource ignored by the controller
+title: External DNS management - Resource ignored by the controller
 ---
 
 ## Symptom
