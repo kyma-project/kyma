@@ -17,6 +17,21 @@ spec:
       terminationGracePeriodSeconds: 10
       securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
+        - name: nats-operator-doctor
+          image: "{{ .Values.global.image.repository }}/{{ .Values.natsOperatorDoctor.image.name }}:{{ .Values.natsOperatorDoctor.image.tag }}"
+          imagePullPolicy: "{{ .Values.natsOperatorDoctor.image.pullPolicy }}"
+          args:
+          - --interval={{ .Values.natsOperatorDoctor.interval }}
+          resources:
+            requests:
+              cpu: {{ .Values.natsOperatorDoctor.resources.requests.cpu }}
+              memory: {{ .Values.natsOperatorDoctor.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.natsOperatorDoctor.resources.limits.cpu }}
+              memory: {{ .Values.natsOperatorDoctor.resources.limits.memory }}
+          {{- if .Values.global.securityContext }}
+          securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
+          {{- end }}
         - image: "{{ .Values.global.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           name: controller
