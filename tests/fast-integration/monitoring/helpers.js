@@ -261,32 +261,32 @@ async function resetProxy() {
   // remove add reverse proxy
   updateProxyDeployment("--trusted-ip=0.0.0.0/0","--reverse-proxy=true")
   // Check if the redirect works like again after reset
-  let res = await assertGrafanaredirect("https://kyma-project.io/docs");
+  let res = await assertGrafanaRedirect("https://kyma-project.io/docs");
   assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
 
   return res
 }
 
 async function checkGrafanaRedirectsInKyma1() {
-  let res = await assertGrafanaredirect("https://dex.")
+  let res = await assertGrafanarRedirect("https://dex.")
   assert.isTrue(res, "Grafana redirect to dex does not work!");
 }
 
 async function checkGrafanaRedirectsInKyma2() {
   // Checking grafana redirect to kyma docs
-  let res = await assertGrafanaredirect("https://kyma-project.io/docs")
+  let res = await assertGrafanaRedirect("https://kyma-project.io/docs")
   assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
 
   // Creating secret for auth proxy redirect
   await manageSecret("create");
   await restartProxyPod();
   // Checking grafana redirect to OIDC provider
-  res = await assertGrafanaredirect("https://accounts.google.com/signin/oauth");
+  res = await assertGrafanaRedirect("https://accounts.google.com/signin/oauth");
   assert.isTrue(res, "Grafana redirect to google does not work!");
 
   await updateProxyDeployment("--reverse-proxy=true", "--trusted-ip=0.0.0.0/0");
   // Checking that authentication works and redirects to grafana URL
-  res = await assertGrafanaredirect("https://grafana.");
+  res = await assertGrafanaRedirect("https://grafana.");
   assert.isTrue(res, "Grafana redirect to grafana landing page does not work!");
 
   res = await resetProxy() 
@@ -298,7 +298,7 @@ module.exports = {
   shouldIgnoreAlert,
   buildScrapePoolSet,
   assertTimeSeriesExist,
-  assertGrafanaredirect,
+  assertGrafanaRedirect,
   restartProxyPod,
   updateProxyDeployment,
   checkGrafanaRedirectsInKyma1,
