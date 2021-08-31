@@ -4,7 +4,7 @@ title: Certificate management - Issuer not created
 
 ## Symptom
 
-Whey you try to create an Issuer CR using `cert.gardener.cloud/v1alpha1`, the resource is no created. There are no logs in the `cert-management` controller.
+Whey you try to create an Issuer CR using `cert.gardener.cloud/v1alpha1`, the resource is not created. There are no logs in the `cert-management` controller.
 
 ## Cause
 
