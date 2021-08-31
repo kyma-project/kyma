@@ -29,7 +29,7 @@ Connector Service:
 
 >**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
 
-Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](../../05-technical-reference/06-custom-resources/ac-01-application.md) custom resource (CR).
+Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR).
 The system creates a new Kubernetes service for each registered API.
 
 >**NOTE:** Using Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
@@ -47,7 +47,7 @@ All Applications are instances of the Application custom resource, which also st
 
 ## Application Broker
 
-Application Broker (AB) watches all [Application](../../05-technical-reference/06-custom-resources/ac-01-application.md) custom resources (CRs). These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to be able to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
+Application Broker (AB) watches all [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resources (CRs). These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to be able to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
 
 The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details, see the [Service Brokers documentation](../../01-overview/main-areas/service-management/smgt-02-brokers-overview.md).
 

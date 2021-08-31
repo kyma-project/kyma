@@ -22,16 +22,16 @@ If you're interested in learning more about the Serverless area, follow these li
 
 - Analyze Function specification and configuration files:
 
-  - [Function](../../../05-technical-reference/06-custom-resources/svls-01-function.md) and [GitRepository](../../../05-technical-reference/06-custom-resources/svls-02-gitrepository.md) custom resources
+  - [Function](../../../05-technical-reference/00-custom-resources/svls-01-function.md) and [GitRepository](../../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) custom resources
   - [`config.yaml` file](../../../05-technical-reference/svls-06-function-configuration-file.md) in Kyma CLI
   - [Function specification details](../../../05-technical-reference/svls-08-function-specification.md)
 
 - Understand technicalities behind Serverless implementation:
 
-  - [Serverless architecture](../../../05-technical-reference/03-architecture/svls-01-architecture.md) and [Function processing](../../../05-technical-reference/svls-02-function-processing-stages.md)
+  - [Serverless architecture](../../../05-technical-reference/00-architecture/svls-01-architecture.md) and [Function processing](../../../05-technical-reference/svls-02-function-processing-stages.md)
   - [Switching registries](../../../05-technical-reference/svls-03-switching-registries.md)
   - [Git source type](../../../05-technical-reference/svls-04-git-source-type.md)
   - [Supported webhooks](../../../05-technical-reference/svls-07-supported-webhooks.md)
   - [Exposing Functions](../../../05-technical-reference/svls-05-exposing-functions.md)
   - [Available presets](../../../05-technical-reference/svls-09-available-presets.md)
-  - [Environment variables in Functions](../../../05-technical-reference/05-configuration-parameters/svls-02-environment-variables.md)
+  - [Environment variables in Functions](../../../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md)

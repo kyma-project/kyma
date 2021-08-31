@@ -34,20 +34,20 @@ If you're interested in learning more about the Application Connectivity area, f
 - Analyze Application Connectivity specification and configuration files:
 
   - [Application Connectivity API specification](../../../05-technical-reference/ac-01-application-connectivity-api-specification.md)
-  - [Application](../../../05-technical-reference/06-custom-resources/ac-01-application.md) custom resource (CR)
-  - [ApplicationMapping](../../../05-technical-reference/06-custom-resources/ac-02-applicationmapping.md) CR
-  - [EventActivation](../../../05-technical-reference/06-custom-resources/ac-03-eventactivation.md) CR
-  - [TokenRequest](../../../05-technical-reference/06-custom-resources/ac-04-tokenrequest.md) CR
-  - [Application Connector chart](../../../05-technical-reference/05-configuration-parameters/ac-01-application-connector-chart.md)
-  - [Application Operator sub-chart](../../../05-technical-reference/05-configuration-parameters/ac-02-application-operator-sub-chart.md)
-  - [Application Registry sub-chart](../../../05-technical-reference/05-configuration-parameters/ac-03-application-registry-sub-chart.md)
-  - [Connector Service sub-chart](../../../05-technical-reference/05-configuration-parameters/ac-04-connector-service-sub-chart.md)
-  - [Application Connectivity Certs Setup Job](../../../05-technical-reference/05-configuration-parameters/ac-05-application-connectivity-certs-setup-job.md)
+  - [Application](../../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR)
+  - [ApplicationMapping](../../../05-technical-reference/00-custom-resources/ac-02-applicationmapping.md) CR
+  - [EventActivation](../../../05-technical-reference/00-custom-resources/ac-03-eventactivation.md) CR
+  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-04-tokenrequest.md) CR
+  - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
+  - [Application Operator sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-02-application-operator-sub-chart.md)
+  - [Application Registry sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-03-application-registry-sub-chart.md)
+  - [Connector Service sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-04-connector-service-sub-chart.md)
+  - [Application Connectivity Certs Setup Job](../../../05-technical-reference/00-configuration-parameters/ac-05-application-connectivity-certs-setup-job.md)
 
 - Understand technicalities behind the Application Connectivity implementation:
 
-  - [Application Connector components](../../../05-technical-reference/03-architecture/ac-01-application-connector-components.md)
-  - [Connector Service workflow](../../../05-technical-reference/03-architecture/ac-02-connector-service.md)
-  - [Application Gateway workflow](../../../05-technical-reference/03-architecture/ac-03-application-gateway.md)
-  - [Application Broker workflow](../../../05-technical-reference/03-architecture/ac-04-application-broker.md)
+  - [Application Connector components](../../../05-technical-reference/00-architecture/ac-01-application-connector-components.md)
+  - [Connector Service workflow](../../../05-technical-reference/00-architecture/ac-02-connector-service.md)
+  - [Application Gateway workflow](../../../05-technical-reference/00-architecture/ac-03-application-gateway.md)
+  - [Application Broker workflow](../../../05-technical-reference/00-architecture/ac-04-application-broker.md)
   - [Application Gateway details](../../../05-technical-reference/ac-02-application-gateway-details.md)
