@@ -268,7 +268,7 @@ async function resetProxy() {
 }
 
 async function checkGrafanaRedirectsInKyma1() {
-  let res = await assertGrafanarRedirect("https://dex.")
+  let res = await assertGrafanaRedirect("https://dex.")
   assert.isTrue(res, "Grafana redirect to dex does not work!");
 }
 
