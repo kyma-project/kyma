@@ -27,4 +27,4 @@ Run:
 
 ```bash
 host httpbin.kyma-goat.ga
-...
+```

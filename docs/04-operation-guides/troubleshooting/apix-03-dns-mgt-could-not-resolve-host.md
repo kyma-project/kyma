@@ -30,4 +30,4 @@ kubectl get dnsentry.dns.gardener.cloud dns-entry
 
 - Log in to your DNS provider's console and check if your new domain entry was added.
 
-- Check if your local DNS configuration in `/etc/hosts` or an equivalent file on your OS contains an entry for the target host. If it does, remove the entry.
+- Check if your local DNS configuration in `/etc/hosts`, or an equivalent file on your OS, contains an entry for the target host. If it does, remove the entry.
