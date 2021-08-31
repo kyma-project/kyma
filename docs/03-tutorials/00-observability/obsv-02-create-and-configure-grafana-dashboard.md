@@ -65,7 +65,7 @@ When you create a dashboard to monitor one of your applications (Function, micro
 3. To apply the Kubernetes resource to you cluster, run:
    
    ```bash
-   kubectl apply-f
+   kubectl apply -f <configmap.yaml>
    ```
 
 4. Restart the Grafana deployment with the following command:
