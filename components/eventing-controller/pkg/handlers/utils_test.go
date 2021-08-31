@@ -140,7 +140,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
 			expectedWebhookURL,
 			bebSubEvents,
-			expectedWebhookAuth,
+			expectedWebhookAuth, // WebhookAuth should retain the supplied config
 		)
 
 		apiRule := reconcilertesting.NewAPIRule(subWithGivenWebhookAuth, reconcilertesting.WithPath)
