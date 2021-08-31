@@ -2,7 +2,7 @@
 title: Issues with Istio sidecar injection
 ---
 
-## Symptom & cause
+## Symptom and cause
 
 Kyma has sidecar injection enabled by default - a sidecar is injected to every Pod in a cluster without the need to add any labels. For more information, read the document about [disabling Istio sidecar proxy injection](../operations/smsh-01-istio-disable-sidecar-injection.md).
 If a Pod doesn't have a sidecar and you did not disable sidecar injection on purpose, you may want to fix that.
