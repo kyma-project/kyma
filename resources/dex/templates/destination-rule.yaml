@@ -6,7 +6,4 @@ spec:
   host: dex-service.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
-      mode: MUTUAL
-      caCertificates: /etc/prometheus/secrets/istio.default/root-cert.pem
-      clientCertificate: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      privateKey: /etc/prometheus/secrets/istio.default/key.pem
+      mode: SIMPLE
