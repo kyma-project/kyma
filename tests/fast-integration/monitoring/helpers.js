@@ -126,7 +126,7 @@ async function assertTimeSeriesExist(metric, labels) {
 async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
   let retries = 0
   while (retries < 20) {
-    let res = await queryGrafana(url, redirectURL, ignoreSSl, httpStatus)
+    let res = await queryGrafana(url, redirectURL, ignoreSSL, httpStatus)
     if (res === true) {
       return res
     }
