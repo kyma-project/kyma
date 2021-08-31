@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/avast/retry-go"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,10 +54,19 @@ func NewTLSClientWithCert(skipVerify bool, key *rsa.PrivateKey, certificate ...[
 }
 
 func (cc securedConnectorClient) GetMgmInfo(t *testing.T, url string) (*ManagementInfoResponse, *Error) {
-	request := getRequestWithHeaders(t, url)
+	createRequestFunction := func() (*http.Request, error) {
+		request, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		request.Close = true
+
+		return request, nil
+	}
 
 	var mgmInfoResponse ManagementInfoResponse
-	errorResp := cc.secureConnectorRequest(t, request, &mgmInfoResponse, http.StatusOK)
+	errorResp := cc.secureConnectorRequest(t, createRequestFunction, &mgmInfoResponse, http.StatusOK)
 
 	return &mgmInfoResponse, errorResp
 }
@@ -64,29 +75,56 @@ func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr 
 	body, err := json.Marshal(CsrRequest{Csr: csr})
 	require.NoError(t, err)
 
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
-	require.NoError(t, err)
+	createRequestFunction := func() (*http.Request, error) {
+		request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+		if err != nil {
+			return nil, err
+		}
+		request.Close = true
+		request.Header.Add("Content-Type", "application/json")
+
+		return request, err
+	}
 
 	var certificateResponse CrtResponse
-	errorResp := cc.secureConnectorRequest(t, request, &certificateResponse, http.StatusCreated)
+	errorResp := cc.secureConnectorRequest(t, createRequestFunction, &certificateResponse, http.StatusCreated)
 
 	return &certificateResponse, errorResp
 }
 
 func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string) *Error {
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
-	require.NoError(t, err)
-	request.Close = true
+	createRequestFunction := func() (*http.Request, error) {
+		request, err := http.NewRequest(http.MethodPost, url, nil)
+		if err != nil {
+			return nil, err
+		}
+		request.Close = true
 
-	errorResponse := cc.secureConnectorRequest(t, request, nil, http.StatusCreated)
+		return request, err
+	}
+
+	errorResponse := cc.secureConnectorRequest(t, createRequestFunction, nil, http.StatusCreated)
 
 	return errorResponse
 }
 
-func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *http.Request, data interface{}, expectedStatus int) *Error {
-	response, err := cc.httpClient.Do(request)
+func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, createTokenRequestFunc createTokenRequestFunc, data interface{}, expectedStatus int) *Error {
+
+	var response *http.Response
+
+	err := retry.Do(func() error {
+		request, err := createTokenRequestFunc()
+		if err != nil {
+			return err
+		}
+		response, err = cc.httpClient.Do(request)
+
+		return err
+	})
+
+	defer closeResponseBody(response)
+
 	require.NoError(t, err)
-	defer response.Body.Close()
 
 	if response.StatusCode != expectedStatus {
 		return parseErrorResponse(t, response)
