@@ -1,10 +1,10 @@
 ---
-title: External DNS management - connection refused
+title: External DNS management - connection refused or timeout
 ---
 
 ## Symptom
 
-After all the steps required to prepare your custom domain are finished, you receive the `connection refused` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
+After all the steps required to prepare your custom domain are finished, you receive the `connection refused` or `connection timeout` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
 
 ```txt
 curl: (7) Failed to connect to httpbin.kyma-goat.ga port 443: Connection refused
@@ -21,3 +21,10 @@ Check if the IP address provided as the value of the **spec.targets** parameter 
 ```bash
 kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'`
 ```
+
+In addion, ensure that your OS resolves the target host name to the same Ingress Gateway IP address.
+Run:
+
+```bash
+host httpbin.kyma-goat.ga
+...
