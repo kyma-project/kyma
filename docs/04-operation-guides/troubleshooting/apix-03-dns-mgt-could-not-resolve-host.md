@@ -4,7 +4,7 @@ title: External DNS management - could not resolve host
 
 ## Symptom
 
-If you use a custom domain, you receive the `could not resolve host` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
+After all the steps required to prepare your custom domain are finished, you receive the `could not resolve host` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
 
 ```txt
 curl: (6) Could not resolve host: httpbin.kyma-goat.ga
@@ -16,7 +16,7 @@ The error could result from:
 
 - Timing issues during the DNS Entry creation
 - VPN connection
-- Invalid DNS settings on your OS.
+- Invalid DNS settings on your OS
 
 ## Remedy
 

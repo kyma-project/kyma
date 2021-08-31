@@ -8,7 +8,7 @@ Whey you try to create an Issuer CR using `cert.gardener.cloud/v1alpha1`, the re
 
 ## Cause
 
-By default, the `cert-management` watches the `default` Namespace for all Issuer CRs.
+The Namespece in which the Issuer CR was cretaed is incorrect. By default, the `cert-management` watches the `default` Namespace for all Issuer CRs.
 
 ## Remedy
 

@@ -4,7 +4,7 @@ title: External DNS management - resource ignored by the controller
 
 ## Symptom
 
-If you use a custom domain to expose a service and you have a non-Gardener clutser, the DNSProvider or DNSEntry CR you cretaed are ignored by the controller.
+If you have a non-Gardener clutser, the DNSProvider or DNSEntry CR you cretaed are ignored by the controller.
 
 ## Cause
 
