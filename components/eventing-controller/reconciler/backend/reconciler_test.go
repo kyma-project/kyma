@@ -282,7 +282,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			createOAuth2Secret(ctx)
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
-			Eventually(oauth2ClientGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
+			//Eventually(oauth2ClientGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
 			eventuallyPublisherProxySecret(ctx).Should(And(
