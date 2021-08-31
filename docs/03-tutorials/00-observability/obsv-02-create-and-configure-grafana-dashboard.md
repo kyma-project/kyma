@@ -62,10 +62,10 @@ When you create a dashboard to monitor one of your applications (Function, micro
        }
    ```
 
-3. To apply the Kubernetes resource to you cluster, run:
+3. To apply the Kubernetes resource created in the previous step to your cluster, run:
    
    ```bash
-   kubectl apply -f <configmap.yaml>
+   kubectl apply -f <{UNIQUE_CONFIGMAP_NAME}.yaml>
    ```
 
 4. Restart the Grafana deployment with the following command:
@@ -73,8 +73,6 @@ When you create a dashboard to monitor one of your applications (Function, micro
    ```bash
    kubectl -n kyma-system rollout restart deployment monitoring-grafana
    ```
-
-5. To see your new dashboard, restart the Grafana UI.
 
 ## Next steps
 
