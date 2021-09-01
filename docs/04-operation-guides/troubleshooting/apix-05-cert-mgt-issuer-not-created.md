@@ -18,4 +18,4 @@ Make sure if you created the Issuer CR in the `default` Namespace. Run:
 kubectl get issuers -A
 ```
 
-If you want to create the Issuer CR in a different Namespace, adjust the `cert-management` component settings during the installation.
+If you want to create the Issuer CR in a different Namespace, adjust the `cert-management` settings during the installation.
