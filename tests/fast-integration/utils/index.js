@@ -602,6 +602,15 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   );
 }
 
+async function getVirtualService(namespace, name) {
+  const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body.spec.hosts[0]
+}
+
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
   return waitForK8sObject(
@@ -1203,6 +1212,32 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
+
+async function patchDeployment(name, ns, patch) {
+  const options = {
+    headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
+  };
+  await k8sAppsApi.patchNamespacedDeployment(
+    name,
+    ns,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
+  );
+}
+
+async function isKyma2() {
+  try {
+    const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
+    return res.body.items.length === 0;
+  } catch(err) {
+    throw new Error(`Error while trying to get pods in kyma-installer namespace: ${err.toString()}`);
+  }
+}
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -1266,4 +1301,7 @@ module.exports = {
   ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription,
+  getVirtualService,
+  patchDeployment,
+  isKyma2
 };
