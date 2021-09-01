@@ -2,14 +2,10 @@ package git
 
 import (
 	"fmt"
-	"net"
 
-	"golang.org/x/crypto/ssh"
-
-	"github.com/go-git/go-git/v5/plumbing/transport"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	gitssh "github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/ssh"
 )
 
 const (
@@ -18,86 +14,84 @@ const (
 	KeyKey      = "key"
 )
 
+type RepositoryAuthType string
+
+const (
+	RepositoryAuthBasic  RepositoryAuthType = "basic"
+	RepositoryAuthSSHKey                    = "key"
+)
+
 type AuthOptions struct {
 	Type        RepositoryAuthType
 	Credentials map[string]string
 	SecretName  string
 }
 
-func (a *AuthOptions) ToAuthMethod() (transport.AuthMethod, error) {
-	if a == nil {
-		return nil, nil
+func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
+	if options == nil {
+		return git2go.RemoteCallbacks{}, nil
 	}
 
-	switch a.Type {
+	switch authType := options.Type; authType {
 	case RepositoryAuthBasic:
-		basic, err := a.toBasicAuth()
-		if err != nil {
-			return nil, errors.Wrapf(err, "while converting authentication config to %s auth method", a.Type)
+		{
+			username, ok := options.Credentials[UsernameKey]
+			if !ok {
+				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", UsernameKey)
+
+			}
+			password, ok := options.Credentials[PasswordKey]
+			if !ok {
+				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", PasswordKey)
+			}
+
+			cred, err := git2go.NewCredentialUserpassPlaintext(username, password)
+			if err != nil {
+				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating basic auth")
+			}
+			return git2go.RemoteCallbacks{
+				CredentialsCallback: authCallback(cred),
+			}, nil
 		}
-		return transport.AuthMethod(basic), nil
 	case RepositoryAuthSSHKey:
-		key, err := a.toKeyAuth()
-		if err != nil {
-			return nil, errors.Wrapf(err, "while converting authentication config to %s auth method", a.Type)
+		{
+			key, ok := options.Credentials[KeyKey]
+			if !ok {
+				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", KeyKey)
+			}
+			passphrase, _ := options.Credentials[PasswordKey]
+			var err error
+			if passphrase == "" {
+				_, err = ssh.ParsePrivateKey([]byte(key))
+			} else {
+				_, err = ssh.ParseRawPrivateKeyWithPassphrase([]byte(key), []byte(passphrase))
+			}
+
+			if err != nil {
+				return git2go.RemoteCallbacks{}, errors.Wrapf(err, "while validation of key with passphrase set to: %t", passphrase != "")
+			}
+			cred, err := git2go.NewCredentialSSHKeyFromMemory("git", "", key, passphrase)
+			if err != nil {
+				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating ssh credential in git2go")
+			}
+			return git2go.RemoteCallbacks{
+				CredentialsCallback:      authCallback(cred),
+				CertificateCheckCallback: sshCheckCallback(),
+			}, nil
+
 		}
-		return transport.AuthMethod(key), nil
-	default:
-		return nil, fmt.Errorf("unknown authentication type: %s", a.Type)
+	}
+	return git2go.RemoteCallbacks{}, errors.Errorf("unknown authentication type: %s", options.Type)
+}
+
+func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+	return func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+		return cred, nil
 	}
 }
 
-func (a *AuthOptions) toBasicAuth() (*http.BasicAuth, error) {
-	if a.Credentials == nil {
-		return &http.BasicAuth{}, nil
+func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
+	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
+		return git2go.ErrOk
 	}
-
-	username, ok := a.Credentials[UsernameKey]
-	if !ok {
-		return nil, fmt.Errorf("missing field %s", UsernameKey)
-	}
-
-	password, ok := a.Credentials[PasswordKey]
-	if !ok {
-		return nil, fmt.Errorf("missing field %s", PasswordKey)
-	}
-
-	return &http.BasicAuth{
-		Username: username,
-		Password: password,
-	}, nil
-}
-
-func (a *AuthOptions) toKeyAuth() (*gitssh.PublicKeys, error) {
-	if a.Credentials == nil {
-		return &gitssh.PublicKeys{}, nil
-	}
-
-	key, ok := a.Credentials[KeyKey]
-	if !ok {
-		return nil, fmt.Errorf("missing field %s", KeyKey)
-	}
-
-	password, _ := a.Credentials[PasswordKey]
-
-	var signer ssh.Signer
-	var err error
-	if password == "" {
-		signer, err = ssh.ParsePrivateKey([]byte(key))
-	} else {
-		signer, err = ssh.ParsePrivateKeyWithPassphrase([]byte(key), []byte(password))
-	}
-	if err != nil {
-		return nil, errors.Wrapf(err, "while creating public keys authentication method")
-	}
-
-	auth := gitssh.PublicKeys{
-		User:   "git",
-		Signer: signer,
-		HostKeyCallbackHelper: gitssh.HostKeyCallbackHelper{HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
-			return nil
-		}},
-	}
-
-	return &auth, nil
 }
