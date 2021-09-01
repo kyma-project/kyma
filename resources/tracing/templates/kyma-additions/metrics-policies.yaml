@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
   mtls:
-    mode: "PERMISSIVE"
+    mode: "STRICT"
 
 {{- if eq .Values.jaeger.spec.strategy "allInOne" }}
 ---
@@ -24,7 +24,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
   mtls:
-    mode: "PERMISSIVE"
+    mode: "STRICT"
 {{- end }}
 {{- if eq .Values.jaeger.spec.strategy "production" }}
 ---

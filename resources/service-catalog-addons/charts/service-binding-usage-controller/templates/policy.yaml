@@ -8,4 +8,4 @@ spec:
     matchLabels:
       app: {{ template "fullname" . }}
   mtls:
-    mode: "PERMISSIVE" 
+    mode: "STRICT" 

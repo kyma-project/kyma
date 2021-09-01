@@ -9,4 +9,4 @@ spec:
     matchLabels: {{- include "publisher-proxy.peerauth.selectorLabels" . | nindent 6 }}
   portLevelMtls:
     {{ .Values.metrics.config.port }}:
-      mode: "PERMISSIVE"
+      mode: "STRICT"
