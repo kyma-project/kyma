@@ -202,7 +202,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
-	defaultMaxInflight := 9
+	defaultMaxInflight := 1
 	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
 
 	if err := natsClient.Initialize(env.Config{}); err != nil {
