@@ -27,12 +27,12 @@ func Test_registryCfgCredentials_MarshalJSON(t *testing.T) {
 			args: args{
 				username:       []byte("Z1d6dDZveUU1dHhIQ3dlYWtPV2M="),
 				password:       []byte("eHVwNE5GRkpIRzZvTWVZd094b09xWmpBeE92QzBOWTBOZ0lzUlVYTg=="),
-				serverAddress:  []byte("registry.35.246.34.254.xip.io"),
+				serverAddress:  []byte("registry.35.246.34.254.nip.io"),
 				provideEncoder: base64.NewEncoder,
 			},
 			want: []byte(`{
 				"auths": {
-				  "registry.35.246.34.254.xip.io": {
+				  "registry.35.246.34.254.nip.io": {
 					"auth": "WjFkNmREWnZlVVUxZEhoSVEzZGxZV3RQVjJNPTplSFZ3TkU1R1JrcElSelp2VFdWWmQwOTRiMDl4V21wQmVFOTJRekJPV1RCT1owbHpVbFZZVGc9PQ=="
 				  }
 				}
@@ -44,7 +44,7 @@ func Test_registryCfgCredentials_MarshalJSON(t *testing.T) {
 			args: args{
 				username:      []byte("Z1d6dDZveUU1dHhIQ3dlYWtPV2M="),
 				password:      []byte("eHVwNE5GRkpIRzZvTWVZd094b09xWmpBeE92QzBOWTBOZ0lzUlVYTg=="),
-				serverAddress: []byte("registry.35.246.34.254.xip.io"),
+				serverAddress: []byte("registry.35.246.34.254.nip.io"),
 				provideEncoder: func(enc *base64.Encoding, w io.Writer) io.WriteCloser {
 					return &failingWriterCloser{
 						failType: failWrite,
@@ -58,7 +58,7 @@ func Test_registryCfgCredentials_MarshalJSON(t *testing.T) {
 			args: args{
 				username:      []byte("Z1d6dDZveUU1dHhIQ3dlYWtPV2M="),
 				password:      []byte("eHVwNE5GRkpIRzZvTWVZd094b09xWmpBeE92QzBOWTBOZ0lzUlVYTg=="),
-				serverAddress: []byte("registry.35.246.34.254.xip.io"),
+				serverAddress: []byte("registry.35.246.34.254.nip.io"),
 				provideEncoder: func(enc *base64.Encoding, w io.Writer) io.WriteCloser {
 					return &failingWriterCloser{
 						failType: failClose,

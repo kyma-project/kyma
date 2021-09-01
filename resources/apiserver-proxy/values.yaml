@@ -57,4 +57,4 @@ global:
     path: eu.gcr.io/kyma-project
   xip_patch:
     dir:
-    version: 49659ad2
+    version: 0cd4d2c7
