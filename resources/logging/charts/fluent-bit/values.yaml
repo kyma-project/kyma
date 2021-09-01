@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/kyma-project/tpi/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.8.4-PR-117
+  tag: 1.8.5-ea0b3c70
 
 imagePullSecrets: []
 nameOverride: ""
