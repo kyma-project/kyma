@@ -1,0 +1,13 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: eventing-event-publisher-nats
+  labels:
+    app.kubernetes.io/instance: eventing
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: eventing
+  mtls:
+    mode: "PERMISSIVE"
+---
