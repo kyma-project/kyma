@@ -16,7 +16,7 @@ import (
 
 const (
 	crPropagationWaitTime              = 10
-	deleteApplicationResourcesWaitTime = 10
+	deleteApplicationResourcesWaitTime = 20
 )
 
 var (
@@ -1045,7 +1045,6 @@ func TestK8sApplicationDeletion(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		defer metadataServiceClient.DeleteService(t, serviceId)
 
 		resourceName := dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
