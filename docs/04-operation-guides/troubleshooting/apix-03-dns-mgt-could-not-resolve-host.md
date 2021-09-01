@@ -4,7 +4,7 @@ title: External DNS management - could not resolve host
 
 ## Symptom
 
-After all the steps required to prepare your custom domain are finished, you receive the `could not resolve host` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
+After all the steps required to [prepare your custom domain](../../03-tutorials/00-api-exposure/apix-04-own-domain.md) are finished, you receive the `could not resolve host` error when you try to expose a service. It shows up when you call the service endpoint by sending a GET request. The error looks as follows:
 
 ```txt
 curl: (6) Could not resolve host: httpbin.kyma-goat.ga
