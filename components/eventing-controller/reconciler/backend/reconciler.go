@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -36,6 +35,8 @@ import (
 const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
+
+	BEBSecretNameSuffix = "-beb-oauth2"
 
 	BackendCRLabelKey   = "kyma-project.io/eventing"
 	BackendCRLabelValue = "backend"
@@ -87,7 +88,6 @@ func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Co
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;update;patch;create;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=eventingbackends/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=hydra.ory.sh,resources=oauth2clients,verbs=get;create;update;list;watch
 
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
 	var secretList v1.SecretList
@@ -212,15 +212,9 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		return ctrl.Result{}, err
 	}
 
-	//// Ensure that an OAuth2Client CR exists that gets processed by the Hydra operator and creates a secret
-	//// containing the oauth2 credentials.
-	//oauth2Client, err := r.syncOAuth2ClientCR(ctx)
-	//if err != nil {
-	//	return ctrl.Result{}, errors.Wrap(err, "sync OAuth2Client CR failed")
-	//}
 	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
 	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
-	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, deployment.OAuth2ClientSecretName(), deployment.ControllerNamespace)
+	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, getOAuth2ClientSecretName(), deployment.ControllerNamespace)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -627,33 +621,6 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 	return backend, err
 }
 
-func (r *Reconciler) syncOAuth2ClientCR(ctx context.Context) (*hydrav1alpha1.OAuth2Client, error) {
-	desiredOAuth2Client := deployment.NewOAuth2Client()
-	if err := r.setAsOwnerReference(ctx, desiredOAuth2Client); err != nil {
-		return nil, errors.Wrapf(err, "set OAuth2Client CR owner reference failed")
-	}
-	CRNamespacedName := types.NamespacedName{
-		Namespace: desiredOAuth2Client.Namespace,
-		Name:      desiredOAuth2Client.Name,
-	}
-	currentOAuth2Client := new(hydrav1alpha1.OAuth2Client)
-	if err := r.Cache.Get(ctx, CRNamespacedName, currentOAuth2Client); err != nil {
-		if k8serrors.IsNotFound(err) {
-			return desiredOAuth2Client, r.Create(ctx, desiredOAuth2Client)
-		}
-		return nil, err
-	}
-
-	desiredOAuth2Client.ResourceVersion = currentOAuth2Client.ResourceVersion
-	if object.Semantic.DeepEqual(currentOAuth2Client, desiredOAuth2Client) {
-		return currentOAuth2Client, nil
-	}
-	if err := r.Update(ctx, desiredOAuth2Client); err != nil {
-		return nil, errors.Wrap(err, "update OAuth2Client failed")
-	}
-	return desiredOAuth2Client, nil
-}
-
 func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context, name, namespace string) (clientID, clientSecret []byte, err error) {
 	oauth2Secret := new(v1.Secret)
 	oauth2SecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
@@ -777,4 +744,8 @@ func (r *Reconciler) setAsOwnerReference(ctx context.Context, obj metav1.Object)
 	}
 	obj.SetOwnerReferences(references)
 	return nil
+}
+
+func getOAuth2ClientSecretName() string {
+	return deployment.ControllerName + BEBSecretNameSuffix
 }
