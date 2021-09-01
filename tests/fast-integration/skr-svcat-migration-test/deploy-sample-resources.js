@@ -197,9 +197,8 @@ async function storeSecretsAndPresets() {
   return { secrets, podPresets }
 }
 
-async function checkSecrets(allSecrets) {
-  // allSecrets = await storeSecretsAndPresets()
-  // allSecrets = allSecrets.secrets
+async function checkSecrets(existing) {
+  let allSecrets = existing
 
   // this are fixed values from resource names of test fixtures
   let reference = [
@@ -232,35 +231,29 @@ async function checkSecrets(allSecrets) {
 
   // if missing > 0 -> there are some secrets lost
   debug(`Missing ${missing.length} secrets`)
-  console.log(`Missing ${missing.length} secrets`)
 }
 
-async function checkPodPresets(allPodPresets) {
-  // allPodPresets = await storeSecretsAndPresets()
-  // allPodPresets = allPodPresets.podPresets
+async function checkPodPresets(expected, existing) {
+  let allPodPresets = existing
 
-  let reference = await storeSecretsAndPresets()
-  reference = reference.podPresets
-
-  let missing = reference
+  let missing = expected
+  debug("checking if all podpresets still exists: " + missing)
 
   // iterate through the list of all existing PodPresets in namespace
   // and check if this list still contains the same PodPresets
   allPodPresets.forEach( function (podPresetName) {
-    for (var i=0; i < reference.length; i++) {
-      if (podPresetName.includes(reference[i])) {
-        let index = missing.indexOf(reference[i])
+    for (var i=0; i < expected.length; i++) {
+      if (podPresetName.includes(expected[i])) {
+        let index = missing.indexOf(expected[i])
         if (index !== -1) {
           missing.splice(index, 1)
         }
-        console.log(missing)
       }
     }
   })
 
   // if missing > 0 -> there are some secrets lost
   debug(`Missing ${missing.length} PodPresets`)
-  console.log(`Missing ${missing.length} PodPresets`)
 }
 
 async function deploy() {

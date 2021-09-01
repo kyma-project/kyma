@@ -85,6 +85,12 @@ spec:
     enablePrometheusMerge: false
     enableTracing: {{ .Values.global.tracing.enabled }}
   values:
+    gateways:
+      istio-ingressgateway:
+        name: istio-ingressgateway
+        serviceAnnotations:
+          dns.gardener.cloud/class: garden
+          dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
     global:
       imagePullPolicy: IfNotPresent
       priorityClassName: "{{ .Values.global.priorityClassName }}"

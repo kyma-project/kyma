@@ -1,5 +1,7 @@
 const axios = require('axios');
 const axiosRetry = require('axios-retry');
+const https = require('https');
+
 
 const {
     kubectlPortForward,
@@ -49,10 +51,43 @@ async function get(path) {
     return responseBody;
 }
 
+async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
+    try {
+        // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
+        delete axios.defaults.headers.common["Accept"]
+        // Ignore SSL certificate for self signed certificates
+        const agent = new https.Agent({
+            rejectUnauthorized: !ignoreSSL
+        });
+        const res = await axios.get(url, { httpsAgent: agent })
+        if (res.status === httpErrorCode) {
+            if (res.request.res.responseUrl.includes(redirectURL)) {
+                return true
+            }
+        }
+        return false;
+    } catch(err) {
+        const msg = "Error when querying Grafana: ";
+        if (err.response) {
+            if (err.response.status === httpErrorCode) {
+                if (err.response.data.includes(redirectURL)) {
+                    return true
+                }
+            }
+            console.log(msg + err.response.status + " : " + err.response.data)
+            return false
+        } else {
+            console.log(`${msg}: ${err.toString()}`);
+            return false
+        }
+    }
+}
+
 module.exports = {
     prometheusPortForward,
     getPrometheusActiveTargets,
     getPrometheusAlerts,
     getPrometheusRuleGroups,
     queryPrometheus,
+    queryGrafana,
 };
