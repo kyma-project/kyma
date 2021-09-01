@@ -14,13 +14,13 @@ curl: (6) Could not resolve host: httpbin.kyma-goat.ga
 
 The error could result from:
 
-- Timing issues during the DNS Entry creation
+- Timing issues during the DNSEntry creation
 - VPN connection on - issues related to DNS servers managed by your VPN provider
 - Invalid DNS settings on your OS
 
 ## Remedy
 
-- Wait for the DNS Entry to be created and if it's in the `Ready` status. To check the CR status, run:
+- Wait for the DNSEntry to be created and if it's in the `Ready` status. To check the CR status, run:
 
 ```bash
 kubectl get dnsentry.dns.gardener.cloud dns-entry

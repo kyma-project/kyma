@@ -16,7 +16,7 @@ DNS resolves to an incorrect IP address.
 
 ## Remedy
 
-Check if the IP address provided as the value of the **spec.targets** parameter of the DNS Entry Custom Resource (CR) is the IP address of the Ingress Gateway you are using. To check the Ingress Gateway IP, run:
+Check if the IP address provided as the value of the **spec.targets** parameter of the DNSEntry Custom Resource (CR) is the IP address of the Ingress Gateway you are using. To check the Ingress Gateway IP, run:
 
 ```bash
 kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}'`
