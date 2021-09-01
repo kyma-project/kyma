@@ -9,5 +9,5 @@ spec:
     matchLabels:
       {{- include "fluent-bit.selectorLabels" . | nindent 6 }}
   mtls:
-    mode: "PERMISSIVE"
+    mode: "STRICT"
 {{- end }}
