@@ -67,6 +67,12 @@
 # The `application-operator` subchart
 /resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
+# The `central-application-gateway` subchart
+/resources/application-connector/charts/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+
+# The `central-application-connectivity-validator` subchart
+/resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+
 # The `application-connector-helper` chart
 /resources/application-connector-helper/ @strekm @Tomasz-Smelcerz-SAP @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
@@ -129,6 +135,9 @@
 
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+
+# The `istio-configuration` chart
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl
@@ -251,10 +260,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Central Application Gateway
-/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio @ralikio @everesio
+/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # Central Connectivity Validator
-/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio @ralikio @everesio
+/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # Telemetry Operator
 /components/telemetry-operator @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl
@@ -262,6 +271,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
+
+# Cluster-users integration tests
+/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
 
 # Dex integration tests
 /tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk

@@ -168,7 +168,7 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 		},
 		{
 			Name:  "APP_REPOSITORY_COMMIT",
-			Value: instance.Status.Repository.Reference,
+			Value: instance.Status.Commit,
 		},
 		{
 			Name:  "APP_MOUNT_PATH",
