@@ -9,7 +9,7 @@ If the domain does not match the allowlist, the API Gateway Controller sets an a
 
 >**TIP:** For more information, read about the [Api CR statuses](#custom-resource-api-rule-status-codes).
 
-By default, all domains are allowed
+By default, the feature is disabled and all domains are allowed
 
 To enable the allowlist mechanism, override the value of the **config.enableDomainAllowList** parameter in the API Gateway chart.
 
