@@ -37,7 +37,7 @@ broker:
   metricsPort: 8072
 
 webhook:
-  image: "eu.gcr.io/kyma-project/helm-broker-webhook:5edd6b42"
+  image: "eu.gcr.io/kyma-project/helm-broker-webhook:81dc2bd6"
   imagePullPolicy: IfNotPresent
   securityContext: { runAsUser: 1001 }
   strategy:
