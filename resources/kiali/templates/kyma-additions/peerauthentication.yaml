@@ -10,9 +10,9 @@ spec:
     matchLabels:
       app: {{ template "kiali-server.fullname" . }}
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
   portLevelMtls:
     9090:
-      mode: STRICT
+      mode: PERMISSIVE
     {{ .Values.kiali.spec.server.port }}:
-      mode: STRICT
+      mode: PERMISSIVE
