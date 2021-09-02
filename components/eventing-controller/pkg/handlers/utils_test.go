@@ -51,10 +51,10 @@ func TestGetInternalView4Ev2(t *testing.T) {
 	}
 	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
 
-	bebSubEvents := eventingtesting.GetBEBEvents(types.Event{
+	bebSubEvents := types.Events{types.Event{
 		Source: reconcilertesting.EventSource,
 		Type:   reconcilertesting.OrderCreatedEventType,
-	})
+	}}
 
 	defaultNamespace := "defaultNS"
 	svcName := "foo-svc"
@@ -68,7 +68,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subscription)
 
-		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithQOS, eventingtesting.WithWebhookAuth)
+		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 
 		// Values should be overriden by the given values in subscription
 		expectedWebhookAuth := types.WebhookAuth{
@@ -126,7 +126,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		subWithGivenWebhookAuth := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subWithGivenWebhookAuth)
 
-		subWithGivenWebhookAuth.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithQOS, eventingtesting.WithWebhookAuth)
+		subWithGivenWebhookAuth.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 		expectedWebhookAuth := types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,

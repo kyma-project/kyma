@@ -145,7 +145,7 @@ func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
 	return protoSettings
 }
 
-func WithContentMode(protoSettings *eventingv1alpha1.ProtocolSettings) {
+func WithBinaryContentMode(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	protoSettings.ContentMode = func() *string {
 		contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
 		return &contentMode
@@ -159,14 +159,14 @@ func WithExemptHandshake(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	}()
 }
 
-func WithQOS(protoSettings *eventingv1alpha1.ProtocolSettings) {
+func WithAtLeastOnceQOS(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	protoSettings.Qos = func() *string {
 		qos := "AT-LEAST_ONCE"
 		return &qos
 	}()
 }
 
-func WithWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
+func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	protoSettings.WebhookAuth = &eventingv1alpha1.WebhookAuth{
 		Type:         "oauth2",
 		GrantType:    "client_credentials",
@@ -218,7 +218,7 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 			return &contentMode
 		}(),
 		ExemptHandshake: exemptHandshake(true),
-		Qos:             qos("AT-LEAST_ONCE"),
+		Qos:             qos("AT_LEAST_ONCE"),
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
@@ -228,15 +228,6 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 			Scope:        []string{"guid-identifier"},
 		},
 	}
-}
-
-func GetBEBEvents(events ...types.Event) types.Events {
-	result := types.Events{}
-	for _, e := range events {
-		result = append(result, e)
-	}
-
-	return result
 }
 
 func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
