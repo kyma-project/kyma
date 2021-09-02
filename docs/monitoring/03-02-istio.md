@@ -11,6 +11,54 @@ Following the [Istio's observability best practice](https://istio.io/latest/docs
 
 The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`. This instance has a short data retention time and hardcoded configuration that should not be changed. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
 
+The monitoring chart is configured in such way, that it is possible to scrape metrics using [`Strict mTLS`](https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus redirection is configured to not intercept or redirect any traffic.
+
+If a component wants to make use of Strict mTLS scraping, a Strict PeerAuthentication policy has to be added:
+
+```yaml
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: sample-metrics
+spec:
+  selector:
+    matchLabels:
+      app: sample-metrics
+  mtls:
+    mode: "STRICT"
+```
+
+Furthermore, the corresponding ServiceMonitor needs to have the Istio TLS certificates:
+
+```yaml
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metrics
+  namespace: kyma-system
+  labels:
+    prometheus: monitoring
+    example: monitoring-custom-metrics
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics
+  targetLabels:
+    - k8s-app
+  endpoints:
+    - port: web
+      interval: 10s
+      scheme: https
+      tlsConfig: 
+        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+        keyFile: /etc/prometheus/secrets/istio.default/key.pem
+        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+  namespaceSelector:
+    any: true
+```
+
 See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
 
 ![Istio Monitoring](./assets/monitoring-istio.svg)
