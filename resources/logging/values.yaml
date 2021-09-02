@@ -20,6 +20,9 @@ fluent-bit:
 loki:
   enabled: true
 
+logui:
+  enabled: false
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
