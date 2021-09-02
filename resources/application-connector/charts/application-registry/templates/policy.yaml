@@ -15,5 +15,5 @@ spec:
     matchLabels:
       app: {{ .Chart.Name }}
   mtls:
-    mode: "STRICT"
+    mode: "PERMISSIVE"
 {{- end }} 
