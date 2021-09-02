@@ -64,7 +64,7 @@ global:
   connector_service:
     version: "1683d7cf"
   connector_service_tests:
-    version: "9776cb81"
+    version: "PR-11939"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
@@ -96,5 +96,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "PR-11783"
+      version: "PR-11939"
       pullPolicy: IfNotPresent

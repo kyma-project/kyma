@@ -21,9 +21,7 @@
     "test-telemetry": "mocha --timeout 130000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./telemetry-test/",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
     "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
-    "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",
-    "test-application-connectivity-2": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
-    "test-application-connectivity-2-compass": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/"
+    "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
