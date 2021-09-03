@@ -28,6 +28,7 @@ function initializeK8sClient(opts) {
     k8sCustomApi = kc.makeApiClient(k8s.CustomObjectsApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
+    k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
   } catch (err) {
@@ -267,11 +268,10 @@ async function getClusteraddonsconfigurations() {
 async function getSecrets(namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets`;
   const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path
+    url: k8sDynamicApi.basePath + path,
   });
   const body = JSON.parse(response.body);
-  return body.items
-
+  return body.items;
 }
 
 async function getPodPresets(namespace) {
@@ -602,6 +602,15 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   );
 }
 
+async function getVirtualService(namespace, name) {
+  const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path
+  });
+  const body = JSON.parse(response.body);
+  return body.spec.hosts[0]
+}
+
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
   return waitForK8sObject(
@@ -888,6 +897,43 @@ async function getContainerRestartsForAllNamespaces() {
     }));
 }
 
+async function getKymaAdminBindings() {
+  const { body } = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
+  const adminRoleBindings = body.items;
+  return adminRoleBindings
+    .filter(
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "kyma-admin"
+    )
+    .map((clusterRoleBinding) => ({
+      name: clusterRoleBinding.metadata.name,
+      role: clusterRoleBinding.roleRef.name,
+      users: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "User")
+        .map((sub) => sub.name),
+      groups: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == "Group")
+        .map((sub) => sub.name),
+    }));
+}
+
+async function findKymaAdminBindingForUser(targetUser) {
+  let kymaAdminBindings = await getKymaAdminBindings();
+  return kymaAdminBindings.find(
+    (binding) => binding.users.indexOf(targetUser) >= 0
+  );
+}
+
+async function ensureKymaAdminBindingExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).not.to.be.undefined;
+  expect(binding.users).to.include(targetUser);
+}
+
+async function ensureKymaAdminBindingDoesNotExistsForUser(targetUser) {
+  let binding = await findKymaAdminBindingForUser(targetUser);
+  expect(binding).to.be.undefined;
+}
+
 function getContainerStatusByImage(pod, image) {
   return pod.containerStatuses.find((status) => status.image === image);
 }
@@ -1166,6 +1212,32 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
+
+async function patchDeployment(name, ns, patch) {
+  const options = {
+    headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
+  };
+  await k8sAppsApi.patchNamespacedDeployment(
+    name,
+    ns,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
+  );
+}
+
+async function isKyma2() {
+  try {
+    const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
+    return res.body.items.length === 0;
+  } catch(err) {
+    throw new Error(`Error while trying to get pods in kyma-installer namespace: ${err.toString()}`);
+  }
+}
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -1203,6 +1275,8 @@ module.exports = {
   getAllResourceTypes,
   getAllCRDs,
   getClusteraddonsconfigurations,
+  ensureKymaAdminBindingExistsForUser,
+  ensureKymaAdminBindingDoesNotExistsForUser,
   getSecret,
   getSecrets,
   getConfigMap,
@@ -1227,4 +1301,7 @@ module.exports = {
   ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription,
+  getVirtualService,
+  patchDeployment,
+  isKyma2
 };
