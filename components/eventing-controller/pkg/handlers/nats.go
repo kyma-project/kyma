@@ -122,6 +122,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 
 		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if subscribeErr != nil {

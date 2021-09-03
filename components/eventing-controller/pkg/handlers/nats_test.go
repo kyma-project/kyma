@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -230,7 +229,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	// Create 3 subscriptions having the same sink and the same event type
 	var subs [3]*eventingv1alpha1.Subscription
 	for i:=0; i< len (subs); i++ {
-		subs[i] = eventingtesting.NewSubscription("sub" + strconv.Itoa(i), "foo", eventingtesting.WithNotCleanEventTypeFilter)
+		subs[i] = eventingtesting.NewSubscription(fmt.Sprintf("sub-%d", i), "foo", eventingtesting.WithNotCleanEventTypeFilter)
 		subs[i].Spec.Sink = subscriberReceiveURL
 		if _, err = natsClient.SyncSubscription(subs[i], cleaner); err != nil {
 			t.Fatalf("sync subscription %s failed: %v", subs[i].Name, err)
