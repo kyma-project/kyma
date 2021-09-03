@@ -15,10 +15,7 @@ function lokiPortForward() {
 async function queryLoki(labels, startTimestamp) {
     try {
         const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
-        console.log("Before get")
         const responseBody = await get(url);
-        console.log("After get")
-        console.log(responseBody.data)
         return responseBody.data;
     } catch(err) {
         const msg = "Error when querying Loki";
