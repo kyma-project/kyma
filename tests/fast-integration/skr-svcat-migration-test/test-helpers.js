@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap
+    getEnvOrThrow, getConfigMap, waitForJob, printContainerLogs
 } = require("../utils");
 
 class SMCreds {
@@ -167,6 +167,11 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
     }
 }
 
+async function printMigrationLog() {
+    waitForJob("sap-btp-operator-migration", "sap-btp-operator");
+    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
+}
+
 async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
     let errors = [];
     let args = [];
@@ -179,11 +184,10 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
 
     try {
         args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`, `--mode=sync`];
-        await execa(`smctl`, args);
-        // let {stdout} = await execa(`smctl`, args);
-        // if (stdout !== "Service Binding successfully deleted.") {
-        //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
-        // }
+        let {stdout} = await execa(`smctl`, args);
+        if (stdout !== "Service Binding successfully deleted.") {
+             errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+        }
     } catch (error) {
         errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
     }
@@ -220,6 +224,7 @@ module.exports = {
     cleanupInstanceBinding,
     installBTPOperatorHelmChart,
     installBTPServiceOperatorMigrationHelmChart,
+    printMigrationLog,
     saveKubeconfig,
     markForMigration,
     readClusterID,

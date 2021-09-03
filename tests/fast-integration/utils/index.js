@@ -1,3 +1,4 @@
+const stream = require('stream');
 const k8s = require("@kubernetes/client-node");
 const net = require("net");
 const fs = require("fs");
@@ -9,6 +10,7 @@ var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
 var k8sCustomApi;
+var k8sLog;
 
 var watch;
 var forward;
@@ -29,6 +31,7 @@ function initializeK8sClient(opts) {
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
   } catch (err) {
@@ -582,6 +585,40 @@ function waitForStatefulSet(name, namespace = "default", timeout = 90000) {
     timeout,
     `Waiting for StatefulSet ${name} timeout (${timeout} ms)`
   );
+}
+
+function waitForJob(name, namespace = "default", timeout = 900000, success = 1) {
+  return waitForK8sObject(
+    `/apis/batch/v1/namespaces/${namespace}/jobs`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status.succeeded >= success
+      );
+    },
+    timeout,
+    `Waiting for Job ${name} to suceed ${success} timeout (${timeout} ms)`
+  );
+}
+
+async function printContainerLogs(labelSelector, container, namespace = "default", timeout = 90000) {
+  const res = await k8sCoreV1Api.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector);
+  for (const p of res.body.items) {
+    process.stdout.write(`Getting logs for pod ${p.metadata.name}/${container}\n`);
+    const logStream = new stream.PassThrough();
+    logStream.on('data', (chunk) => {
+        // use write rather than console.log to prevent double line feed
+        process.stdout.write(chunk);
+    });
+    let end = new Promise(function(resolve, reject){
+      logStream.on('end', () => {process.stdout.write("\n"); resolve()});
+      logStream.on('error', reject);
+    });
+    k8sLog.log(namespace, p.metadata.name, container, logStream)
+    await end;
+  }
+  process.stdout.write(`Done getting logs\n`);
 }
 
 function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
@@ -1281,6 +1318,7 @@ module.exports = {
   waitForSubscription,
   waitForPodWithLabel,
   waitForConfigMap,
+  waitForJob,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
@@ -1315,5 +1353,6 @@ module.exports = {
   getVirtualService,
   patchDeployment,
   isKyma2,
-  getEnvOrDefault
+  getEnvOrDefault,
+  printContainerLogs
 };

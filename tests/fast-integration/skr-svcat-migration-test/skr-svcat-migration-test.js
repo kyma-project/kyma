@@ -85,14 +85,10 @@ describe("SKR SVCAT migration test", function() {
 
   it(`Should install BTP Service Operator Migration helm chart`, async function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
-
-    // TODO: Print log output of migrator job "sap-btp-operator-migration"
   });
 
-  // TODO: Remove
-  // this sleep is created to have a time to check the cluster before deprovisioning it
-  it(`Should Sleep and wakeup properly`, async function() {
-    await sampleResources.goodNight()
+  it(`Should wait for migration job to finish and print the container logs`, async function() {
+    await t.printMigrationLog();
   });
 
   it(`Should pass sanity check`, async function() {
@@ -106,7 +102,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
 
-  it(`Should destroy sample service catalogue ressources`, async function() {
+  it(`Should destroy sample service catalogue resources`, async function() {
     // TODO: Remove anything from BT-Operator
     await sampleResources.destroy()
 
