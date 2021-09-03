@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/tpi/loki
-  tag: 2.2.1-PR-121
+  tag: 2.2.1-88dec1f7
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
