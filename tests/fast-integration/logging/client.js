@@ -13,7 +13,7 @@ function lokiPortForward() {
 async function queryLoki(labels, startTimestamp) {
     try {
         const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
-        const responseBody = await axios.get(url);
+        const responseBody = await get(url);
         return responseBody.data;
     } catch(err) {
         const msg = "Error when querying Loki";
@@ -23,6 +23,23 @@ async function queryLoki(labels, startTimestamp) {
             throw new Error(`${msg}: ${err.toString()}`);
         }
     }
+}
+
+async function get(url) {
+    axiosRetry(axios, {
+        retries: 30,
+        retryDelay: (retryCount) => {
+            return retryCount * 5000;
+        },
+        retryCondition: (error) => {
+            return !error.response || error.response.status != 200;
+        },
+    });
+
+    let response = await axios.get(url, {
+        timeout: 5000,
+    });
+    return response.data;
 }
 
 module.exports = {
