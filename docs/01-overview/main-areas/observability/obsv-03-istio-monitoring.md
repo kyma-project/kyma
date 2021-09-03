@@ -12,7 +12,7 @@ Following [Istio's observability best practice](https://istio.io/latest/docs/ops
 
 The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`, configured with a short data retention time and hardcoded configuration that you should not change. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
 
-The monitoring chart is configured in such way, that it is possible to scrape metrics using [`Strict mTLS`](https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus redirection is configured to not intercept or redirect any traffic.
+The monitoring chart is configured in such a way that it is possible to scrape metrics using [`Strict mTLS`](https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus redirection is configured to not intercept or redirect any traffic.
 
 ## Istio monitoring flow
 
