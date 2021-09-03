@@ -18,6 +18,8 @@ spec:
   - from:
     - source:
         requestPrincipals: ["*"]
+    - source:
+        principals: ["*"]
     to:
     - operation:
         paths: ["/api/prom/query","/api/prom/label/*","/api/prom/tail"]
