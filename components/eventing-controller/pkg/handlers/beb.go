@@ -84,7 +84,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, *b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		b.Log.Error(err, "failed to get internal view for ev2 subscription", "name:", subscription.Name)
 		return false, err
