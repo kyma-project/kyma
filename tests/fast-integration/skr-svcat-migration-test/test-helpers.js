@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap, waitForJob, printContainerLogs
+    getEnvOrThrow, getConfigMap
 } = require("../utils");
 
 class SMCreds {
@@ -167,11 +167,6 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
     }
 }
 
-async function printMigrationLog() {
-    waitForJob("sap-btp-operator-migration", "sap-btp-operator");
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
-}
-
 async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
     let errors = [];
     let args = [];
@@ -224,7 +219,6 @@ module.exports = {
     cleanupInstanceBinding,
     installBTPOperatorHelmChart,
     installBTPServiceOperatorMigrationHelmChart,
-    printMigrationLog,
     saveKubeconfig,
     markForMigration,
     readClusterID,

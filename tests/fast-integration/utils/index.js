@@ -604,6 +604,7 @@ function waitForJob(name, namespace = "default", timeout = 900000, success = 1) 
 
 async function printContainerLogs(labelSelector, container, namespace = "default", timeout = 90000) {
   const res = await k8sCoreV1Api.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector);
+  res.body.items.sort((a,b) => {return a.metadata.creationTimestamp - b.metadata.creationTimestamp});
   for (const p of res.body.items) {
     process.stdout.write(`Getting logs for pod ${p.metadata.name}/${container}\n`);
     const logStream = new stream.PassThrough();

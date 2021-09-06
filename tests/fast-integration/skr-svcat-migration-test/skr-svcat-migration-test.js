@@ -14,6 +14,8 @@ const {
   genRandom,
   initializeK8sClient,
   switchDebug,
+  waitForJob,
+  printContainerLogs,
 } = require("../utils");
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
@@ -87,8 +89,12 @@ describe("SKR SVCAT migration test", function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
   });
 
-  it(`Should wait for migration job to finish and print the container logs`, async function() {
-    await t.printMigrationLog();
+  it(`Should wait for migration job to finish`, async function() {
+    await waitForJob("sap-btp-operator-migration", "sap-btp-operator");
+  });
+  
+  it(`Should print the container logs of the migration job`, async function() {
+    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
   });
 
   it(`Should pass sanity check`, async function() {
