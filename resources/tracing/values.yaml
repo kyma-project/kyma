@@ -124,11 +124,11 @@ authProxy:
   enabled: true
   replicaCount: 1
   inPort: 10001
-  configDocsLink: ""
+  configDocsLink: "https://kyma-project.io/docs"
   config:
     clientId: "jaeger"
     clientSecret: "oiEWUWOIEwedfgg"
-    useDex: true
+    useDex: false
     tlsVerify: false
     emailDomains: "*"
     groups: ""

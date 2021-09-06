@@ -773,15 +773,15 @@ virtualservice:
 kyma:
   console:
     ## If true, a console backendmodule gets deployed which activates the linking to grafana in the console
-    enabled: true
+    enabled: false
   authProxy:
     enabled: false
     replicaCount: 1
-    configDocsLink: ""
+    configDocsLink: "https://kyma-project.io/docs"
     config:
       clientId: "grafana"
       clientSecret: "apie4eeX6hiC9ainieli"
-      useDex: true
+      useDex: false
       tlsVerify: false
       emailDomains: "*"
       groups: ""
