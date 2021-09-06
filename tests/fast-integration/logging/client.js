@@ -29,7 +29,7 @@ async function queryLoki(labels, startTimestamp) {
 
 async function get(url) {
     axiosRetry(axios, {
-        retries: 300,
+        retries: 5,
         retryDelay: (retryCount) => {
             return retryCount * 5000;
         },
