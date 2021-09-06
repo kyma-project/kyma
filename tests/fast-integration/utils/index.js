@@ -3,6 +3,8 @@ const net = require("net");
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 const kc = new k8s.KubeConfig();
 var k8sDynamicApi;

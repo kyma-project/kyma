@@ -1,6 +1,3 @@
-const axios = require('axios');
-const axiosRetry = require('axios-retry');
-const https = require('https');
 
 const {
     kubectlPortForward, getResponse,
