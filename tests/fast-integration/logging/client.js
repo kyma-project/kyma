@@ -3,7 +3,7 @@ const axiosRetry = require('axios-retry');
 const https = require('https');
 
 const {
-    kubectlPortForward,
+    kubectlPortForward, getResponse,
 } = require("../utils");
 
 const lokiPort = 3100;
@@ -15,7 +15,7 @@ function lokiPortForward() {
 async function queryLoki(labels, startTimestamp) {
     try {
         const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
-        const responseBody = await get(url);
+        const responseBody = await getResponse(url, 5);
         return responseBody.data;
     } catch(err) {
         const msg = "Error when querying Loki";
@@ -25,24 +25,6 @@ async function queryLoki(labels, startTimestamp) {
             throw new Error(`${msg}: ${err.toString()}`);
         }
     }
-}
-
-async function get(url) {
-    axiosRetry(axios, {
-        retries: 5,
-        retryDelay: (retryCount) => {
-            return retryCount * 5000;
-        },
-        retryCondition: (error) => {
-            console.log(error);
-            return !error.response || error.response.status != 200;
-        },
-    });
-
-    let response = await axios.get(url, {
-        timeout: 5000,
-    });
-    return response;
 }
 
 module.exports = {
