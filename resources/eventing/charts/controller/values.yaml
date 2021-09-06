@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-11992"
+  tag: "f435c01b"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -36,7 +36,7 @@ publisherProxy:
   image:
     # name is the name of the container image for the eventing-publisher-proxy
     name: "event-publisher-proxy"
-    tag: "947fb1cd"
+    tag: "4c1d4ed7"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
@@ -50,7 +50,7 @@ publisherProxy:
 natsOperatorDoctor:
   interval: 1m
   image:
-    tag: "PR-11920"
+    tag: "26523737"
     name: "nats-operator-doctor"
     pullPolicy: "IfNotPresent"
   resources:
@@ -74,7 +74,6 @@ clusterRoleBindingSuffix: ""
 
 eventingBackend:
   name: eventing-backend
-  defaultMaxInflightMessages: 10
 
 healthProbe:
   port: 8081
@@ -95,3 +94,9 @@ healthProbe:
     periodSeconds: 3
     successThreshold: 1
     timeoutSeconds: 2
+
+preUpgradeJob:
+  image:
+    name: "eventing-pre-upgrade-job-1-24"
+    tag: "f435c01b"
+    pullPolicy: IfNotPresent
