@@ -18,7 +18,6 @@ async function checkLokiLogs(startTimestamp) {
         await sleep(5*1000);
         retries++;
     }
-    
     assert.isTrue(logsFetched, "No logs fetched from Loki");
 }
 
