@@ -72,7 +72,7 @@ livenessProbe:
 
 image:
   repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.5.9-68c3e77b
+  tag: 7.5.9-4c48514d
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -626,7 +626,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.12.2-68c3e77b
+    tag: 1.12.2-4c48514d
   imagePullPolicy: IfNotPresent
   resources:
     limits:
@@ -798,7 +798,7 @@ kyma:
     port: 3000
     image:
       repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
-      tag: 7.1.3-96ae36d3
+      tag: 7.1.3-4c48514d
       pullPolicy: IfNotPresent
     resources:
       limits:
