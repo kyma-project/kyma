@@ -1041,8 +1041,11 @@ function genRandom(len) {
   return res;
 }
 
-function getEnvOrThrow(key) {
+function getEnvOrThrow(key, defValue = "") {
   if (!process.env[key]) {
+    if (defValue != "") {
+      return defValue
+    }
     throw new Error(`Env ${key} not present`);
   }
 
