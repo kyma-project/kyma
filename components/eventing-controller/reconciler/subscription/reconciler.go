@@ -94,13 +94,10 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
-
 // Generate required RBAC to emit kubernetes events in the controller
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
-// Source: https://book-v1.book.kubebuilder.io/beyond_basics/creating_events.html
-
+// +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
-// Source: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 // TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
