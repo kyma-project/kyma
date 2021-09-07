@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap
+    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sResource, sleep
 } = require("../utils");
 
 class SMCreds {
@@ -24,6 +24,12 @@ class SMCreds {
         this.url = url;
     }
 }
+
+const functions = [
+    {name: "svcat-auditlog-api-1", checkEnvVars: "uaa url vendor"},
+    {name: "svcat-auditlog-management-1", checkEnvVars: "uaa url vendor"},
+    {name: "svcat-html5-apps-repo-1", checkEnvVars:"grant_type saasregistryenabled sap.cloud.service uaa uri vendor"},
+];
 
 async function saveKubeconfig(kubeconfig) {
     fs.mkdirSync(`${os.homedir()}/.kube`, true);
@@ -60,6 +66,85 @@ async function installBTPServiceOperatorMigrationHelmChart() {
             throw new Error(`failed to install ${btp}: ${error}`);
         }
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
+    }
+}
+
+async function getFunctionPod(functionName) {
+    let labelSelector = `serverless.kyma-project.io/function-name=${functionName},serverless.kyma-project.io/resource=deployment`;
+    let res = {};
+    for (let i = 0; i < 30; i++) {
+        res = await listPods(labelSelector);
+        if (res.body.items.length == 1) {
+            let pod = res.body.items[0];
+            if (pod.status.phase == "Running") {
+                return pod
+            }
+        }
+        sleep(10000);
+    }
+    if (res.body.items.length != 1) {
+        let podNames = res.body.items.map(p=>p.metadata.name);
+        let phases = res.body.items.map(p=>p.status.phase);
+        throw new Error(`Failed to find function ${functionName} pod in 5 minutes. Expected 1 ${labelSelector} pod with phase "Runninng" but found ${res.body.items.length}, ${podNames}, ${phases}`);
+    }
+}
+
+async function checkPodPresetEnvInjected() {
+    let cmd = `for v in {vars}; do x="$(eval echo \\$$v)"; if [[ -z "$x" ]]; then echo missing $v env variable; exit 1; else echo found $v env variable; fi; done`;
+    for (let f of functions) {
+        let pod = await getFunctionPod(f.name);
+        let envCmd = cmd.replace("{vars}",f.checkEnvVars);
+        await kubectlExecInPod(pod.metadata.name, "function", ["sh", "-c", envCmd]);
+    }
+}
+
+async function restartFunctionsPods() {
+    let podNames = {}
+    for (let f of functions) {
+        let pod = await getFunctionPod(f.name);
+        console.log("delete pod", pod.metadata.name);
+        await deleteK8sResource(pod);
+        podNames[f.name] = pod.metadata.name;
+    }
+
+    let finished = false;
+    let needsPoll = [];
+    for (let i = 0; i < 10; i++) {
+        needsPoll = [];
+        for (let f of functions) {
+            let labelSelector = `serverless.kyma-project.io/function-name=${f.name},serverless.kyma-project.io/resource=deployment`;
+            console.log(`polling pods with labelSelector ${labelSelector}`);
+            const res = await listPods(labelSelector);
+            if (res.body.items.length != 1) {
+                // there are either multiple or 0 pods for the function, we need to wait
+                let pn = res.body.items.map(p=> {return {"pod name": p.metadata.name, phase: p.status.phase}});
+                needsPoll.push({"function name": f.name, pods: pn});
+                continue;
+            }
+            let pod = res.body.items[0]
+            let pn = pod.metadata.name
+            let psp = pod.status.phase
+            if (pn == podNames[f.name]) {
+                // there is single pod for the function, but it is still the old one
+                needsPoll.push({"function name": f.name, pods: [{"pod name": pn, phase: psp}]});
+                continue;
+            }
+            if (psp != "Running") {
+                // there is single pod for the function, it has new name, but it's not in Running state
+                needsPoll.push({"function name": f.name, pods: [{"pod name": pn, phase: psp}]});
+                continue;
+            }
+        }
+        if (needsPoll.length != 0) {
+            await sleep(10000); // 10 seconds
+        } else {
+            break;
+        }
+    }
+    if (needsPoll.length != 0) {
+        let info = JSON.stringify(needsPoll, null, 2);
+        let originalNames = JSON.stringify(podNames, null, 2);
+        throw new Error(`Failed to restart function pods in 100 seconds. Expecting exactly one pod for each function with new unique names and in ready status but found:\n${info}\n\nPod names before restart:\n${originalNames}`);
     }
 }
 
@@ -218,4 +303,6 @@ module.exports = {
     markForMigration,
     readClusterID,
     SMCreds,
+    checkPodPresetEnvInjected,
+    restartFunctionsPods
 };
