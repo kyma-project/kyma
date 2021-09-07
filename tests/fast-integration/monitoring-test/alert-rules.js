@@ -1,8 +1,6 @@
-var assert = require("assert");
 const { k8sCustomApi } = require("../utils");
 const {
   getPrometheusRuleGroups,
-  prometheusPortForward,
 } = require("../monitoring/client");
 
 async function getK8sPrometheusRules() {
