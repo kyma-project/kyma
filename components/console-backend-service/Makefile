@@ -22,13 +22,8 @@ build-image: pull-licenses
 push-image:
 	docker tag $(APP_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
-ifeq ($(JOB_TYPE), postsubmit)
-	@echo "Sign image with Cosign"
 	cosign version
-	cosign sign -key ${KMS_KEY_URL} $(IMG_NAME):$(TAG)
-else
 	@echo "Image signing skipped"
-endif
 
 pull-licenses:
 ifdef LICENSE_PULLER_PATH

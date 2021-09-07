@@ -11,12 +11,7 @@ build-image:
 push-image:
 	docker tag $(APP_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
-ifeq ($(JOB_TYPE), postsubmit)
-	@echo "Sign image with Cosign"
 	cosign version
-	cosign sign -key ${KMS_KEY_URL} $(IMG_NAME):$(TAG)
-else
 	@echo "Image signing skipped"
-endif
 
 release: build-image push-image
