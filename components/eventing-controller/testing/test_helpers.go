@@ -177,14 +177,14 @@ func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	}
 }
 
-func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth types.WebhookAuth) types.Subscription {
-	return types.Subscription{
+func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth *types.WebhookAuth) *types.Subscription {
+	return &types.Subscription{
 		Name:            name,
 		ContentMode:     contentMode,
 		Qos:             types.QosAtLeastOnce,
 		ExemptHandshake: true,
 		Events:          events,
-		WebhookAuth:     &webhookAuth,
+		WebhookAuth:     webhookAuth,
 		WebhookUrl:      webhookURL,
 	}
 }
