@@ -129,7 +129,7 @@ func getQos(qosStr string) (types.Qos, error) {
 }
 
 func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
-	defaultWebhookAuth types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
+	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
 	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
 	if err != nil {
@@ -181,6 +181,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	// Using default webhook auth unless specified in Subscription CR
 	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
+		auth = &types.WebhookAuth{}
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
@@ -195,7 +196,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		}
 		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
 	}
-	emsSubscription.WebhookAuth = &auth
+	emsSubscription.WebhookAuth = auth
 	return emsSubscription, nil
 }
 

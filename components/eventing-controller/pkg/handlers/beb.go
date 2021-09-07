@@ -98,7 +98,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
-	sEv2, err := getInternalView4Ev2(subscription, apiRule, *b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
+	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
 		log.Errorw("get Kyma subscription internal view failed", ERROR_LOG_KEY, err)
 		return false, err
