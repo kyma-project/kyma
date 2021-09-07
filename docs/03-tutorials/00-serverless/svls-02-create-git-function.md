@@ -60,7 +60,7 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../05-technical-reference/06-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a [GitRepository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
 
     ```yaml
     cat <<EOF | kubectl apply -f -

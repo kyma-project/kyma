@@ -97,7 +97,7 @@ Follows these steps:
 
     >**NOTE:** Function takes the name from the Function CR name. The APIRule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 
-2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../05-technical-reference/03-architecture/svls-01-architecture.md).
+2. Create an APIRule CR for your Function. It is exposed on port `80` that is the default port of the [Service Placeholder](../../05-technical-reference/00-architecture/svls-01-architecture.md).
 
     ```yaml
     cat <<EOF | kubectl apply -f -
