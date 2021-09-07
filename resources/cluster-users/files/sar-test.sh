@@ -283,9 +283,9 @@ function getConfigFileHydra() {
 
   local token
   local issuer_url
-  local oidc_client_id=$(kubectl -n kyma-system get secret testclient3 -o jsonpath='{.data.client_id}' | base64 -d)
-  local oidc_client_redirect_url=$(kubectl -n kyma-system get oauth2clients.hydra.ory.sh testclient3 -o jsonpath='{.spec.redirectUris[0]}')
-  local oidc_provider_fqdn=$(kubectl -n kyma-system get vs ory-hydra -o jsonpath='{.spec.hosts[0]}')
+  local oidc_client_id="auth-code-client"
+  local oidc_client_redirect_url="http://testclient3.example.com"
+  local oidc_provider_fqdn="oauth2-fake.local.kyma.dev"
   issuer_url=$(curl --insecure https://"${oidc_provider_fqdn}"/.well-known/openid-configuration | jq .issuer | tr -d '"')
 
   pushd "${KYMA_PROJECT_DIR}"/tests/integration/cluster-users/oidc_token_fetcher
