@@ -1,10 +1,10 @@
 ---
-title: CustomResources
+title: Custom resources
 ---
 
-A CustomResource (CR) is an extension to the Kubernetes API that allows you to cover use cases that are not directly covered by core Kubernetes. Here's the list of the CustomResources provided by Kyma to meet the needs of our functionalities:
+A custom resource (CR) is an extension to the Kubernetes API which allows you to cover use cases that are not directly covered by core Kubernetes. Here's the list of the CRs provided by Kyma to support its functionality:
 
-| Area | CustomResource |
+| Area | Custom resource |
 | ---- | -------------- |
 | Application Connectivity | Application, ApplicationMapping, EventActivation, TokenRequest, CompassConnection |
 | API Exposure | APIRule |

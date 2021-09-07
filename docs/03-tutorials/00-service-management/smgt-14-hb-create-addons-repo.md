@@ -30,7 +30,7 @@ entries:
 
 ## Supported protocols
 
-Expose your addons repository so that you can provide URLs in the [AddonsConfiguration](../../../05-technical-reference/00-custom-resources/smgt-04-hb-addonsconfiguration.md) (AC) and [ClusterAddonsConfiguration](../../../05-technical-reference/00-custom-resources/smgt-03-hb-clusteraddonsconfiguration.md) (CAC) custom resources. The Helm Broker supports exposing addons using the following protocols:
+Expose your addons repository so that you can provide URLs in the [AddonsConfiguration](../../05-technical-reference/00-custom-resources/smgt-04-hb-addonsconfiguration.md) (AC) and [ClusterAddonsConfiguration](../../05-technical-reference/00-custom-resources/smgt-03-hb-clusteraddonsconfiguration.md) (CAC) custom resources. The Helm Broker supports exposing addons using the following protocols:
 
 <div tabs>
   <details>
@@ -89,7 +89,7 @@ sample-addon-repository
 See the [example](https://github.com/kyma-project/addons/tree/master/addons) of the Kyma `addons` repository.
 
 > **NOTE:** The amount of memory and storage size determine the maximum size of your addons repository. These limits are set in the
-[Helm Broker chart](../../../05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md).
+[Helm Broker chart](../../05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md).
 
 You can specify a Git repository URL by adding a special `git::` prefix to the URL address. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can specify a branch, commit, or tag version. You can also add the `depth` query parameter with a number that specifies the last revision you want to clone from the repository.
 
@@ -130,7 +130,7 @@ sample-addon-repository
   └── ...                                                    
 ```
 > **NOTE:** The amount of memory and storage size determine the maximum size of your addons repository. These limits are set in the
-[Helm Broker chart](../../../05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md).
+[Helm Broker chart](../../05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md).
 
 You can specify a Mercurial repository URL by adding a special `hg::` prefix to the URL address. After this prefix, provide a valid Mercurial URL with one of the supported protocols. In the URL, you can specify a revision to checkout.
 

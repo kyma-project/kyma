@@ -7,7 +7,7 @@ If you're interested in learning more about the Service Management area, follow 
 - Perform some simple and more advances tasks:
   - [Provision and bind a service](../../../03-tutorials/00-service-management/smgt-01-sc-provisioning.md)
   - [Unbind and deprovision a service](../../../03-tutorials/00-service-management/smgt-02-sc-deprovisioning.md)
-  - [Register a broker in Service Catalog](../../../03-tutorials/00-service-management/smgt-01-hb-broker-registration.md)
+  - [Register a broker in Service Catalog](../../../03-tutorials/00-service-management/smgt-03-sc-broker-registration.md)
   - [Create addons](../../../03-tutorials/00-service-management/smgt-11-hb-create-addons.md)
   - [Create addons for bindable plans](../../../03-tutorials/00-service-management/smgt-12-hb-bind-addons.md)
   - [Test addons](../../../03-tutorials/00-service-management/smgt-13-hb-test-addons.md)

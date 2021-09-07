@@ -6,7 +6,7 @@ This section contains chart values that you can modify to [change the default Ky
 
 ## Global Kyma chart and component sub-charts
 
-To modify the default Kyma setting, override the values from the global Kyma chart and sub-charts for the components.
+To modify the default Kyma settings, override the values from the global Kyma chart and sub-charts for the components.
 
 ## Syntax and semantic of the values yaml
 

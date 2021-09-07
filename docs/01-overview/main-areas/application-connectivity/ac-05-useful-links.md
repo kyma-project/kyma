@@ -10,7 +10,7 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Register an API in Application Registry](../../../04-operation-guides/operations/ac-02-api-registration.md)
   - [Provide a custom AC certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md)
   - [Access AC on a local deployment](../../../04-operation-guides/operations/ac-04-access-ac-on-local.md)
-  - [Disable SSL certificate verification](../../../04-operation-guides/security/ac-01-disable-ssl-certificate-verification.md)
+  - [Disable SSL certificate verification](../../../03-tutorials/00-application-connectivity/ac-14-disable-ssl-certificate-verification.md)
   - [Create a new Application](../../../03-tutorials/00-application-connectivity/ac-01-create-application.md)
   - [Get the client certificate](../../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md)
   - [Bind an Application to a Namespace](../../../03-tutorials/00-application-connectivity/ac-03-application-mapping.md)
