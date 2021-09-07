@@ -67,9 +67,13 @@ func buildClient() (*http.Client, error) {
 }
 
 func getToken(req *http.Request) string {
-	tokenWithTrailingState := strings.Split(req.URL.Fragment, "=")[1]
-	t := strings.Split(tokenWithTrailingState, "&")[0]
-	return t
+	urlFragments := strings.Split(req.URL.Fragment, "&")
+	for i := 0; i < len(urlFragments); i++ {
+		if strings.HasPrefix(urlFragments[i], "id_token") {
+			return strings.Split(urlFragments[i], "=")[1]
+		}
+	}
+	return ""
 }
 
 type oidcConfig struct {
