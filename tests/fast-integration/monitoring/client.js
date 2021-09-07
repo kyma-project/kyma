@@ -14,31 +14,31 @@ function prometheusPortForward() {
 }
 
 async function getPrometheusActiveTargets() {
-    let path = "/api/v1/targets?state=active"
-    let url = `http://localhost:${prometheusPort}${path}`
+    let path = "/api/v1/targets?state=active";
+    let url = `http://localhost:${prometheusPort}${path}`;
     let responseBody = await getResponse(url, 30);
     return responseBody.data.data.activeTargets;
 }
 
 async function getPrometheusAlerts() {
-    let path = "/api/v1/alerts"
-    let url = `http://localhost:${prometheusPort}${path}`
+    let path = "/api/v1/alerts";
+    let url = `http://localhost:${prometheusPort}${path}`;
     let responseBody = await getResponse(url, 30);
 
     return responseBody.data.data.alerts;
 }
 
 async function getPrometheusRuleGroups() {
-    let path = "/api/v1/rules"
-    let url = `http://localhost:${prometheusPort}${path}`
+    let path = "/api/v1/rules";
+    let url = `http://localhost:${prometheusPort}${path}`;
     let responseBody = await getResponse(url, 30);
 
     return responseBody.data.data.groups;
 }
 
 async function queryPrometheus(query) {
-    let path = `/api/v1/query?query=${encodeURIComponent(query)}`
-    let url = `http://localhost:${prometheusPort}${path}`
+    let path = `/api/v1/query?query=${encodeURIComponent(query)}`;
+    let url = `http://localhost:${prometheusPort}${path}`;
     let responseBody = await getResponse(url, 30);
 
     return responseBody.data.data.result;
@@ -55,7 +55,7 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
         const res = await axios.get(url, { httpsAgent: agent })
         if (res.status === httpErrorCode) {
             if (res.request.res.responseUrl.includes(redirectURL)) {
-                return true
+                return true;
             }
         }
         return false;
@@ -64,14 +64,14 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
         if (err.response) {
             if (err.response.status === httpErrorCode) {
                 if (err.response.data.includes(redirectURL)) {
-                    return true
+                    return true;
                 }
             }
             console.log(msg + err.response.status + " : " + err.response.data)
-            return false
+            return false;
         } else {
             console.log(`${msg}: ${err.toString()}`);
-            return false
+            return false;
         }
     }
 }

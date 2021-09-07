@@ -1,6 +1,7 @@
 
 const {
-    kubectlPortForward, getResponse,
+    kubectlPortForward,
+    getResponse,
 } = require("../utils");
 
 const lokiPort = 3100;
