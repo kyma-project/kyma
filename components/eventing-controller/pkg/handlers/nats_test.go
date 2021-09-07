@@ -180,6 +180,107 @@ func TestSubscription(t *testing.T) {
 	}
 }
 
+func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
+	g := NewWithT(t)
+	natsPort := 5222
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	if err != nil {
+		t.Fatalf("initialize logger failed: %v", err)
+	}
+
+	natsConfig := env.NatsConfig{
+		Url:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultMaxInflight := 1
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+
+	if err := natsClient.Initialize(env.Config{}); err != nil {
+		t.Fatalf("connect to Nats server failed: %v", err)
+	}
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+
+	// Shutting down subscriber
+	defer subscriber.Shutdown()
+
+	// Check if the subscriber is running or not by checking its store
+	err = subscriber.CheckEvent("", subscriberCheckURL)
+	if err != nil {
+		t.Fatalf("subscriber did not receive the event: %v", err)
+	}
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+
+	// Create 3 subscriptions having the same sink and the same event type
+	var subs [3]*eventingv1alpha1.Subscription
+	for i:=0; i< len (subs); i++ {
+		subs[i] = eventingtesting.NewSubscription(fmt.Sprintf("sub-%d", i), "foo", eventingtesting.WithNotCleanEventTypeFilter)
+		subs[i].Spec.Sink = subscriberReceiveURL
+		if _, err = natsClient.SyncSubscription(subs[i], cleaner); err != nil {
+			t.Fatalf("sync subscription %s failed: %v", subs[i].Name, err)
+		}
+		g.Expect(subs[i].Status.Config).NotTo(BeNil()) // It should apply the defaults
+		g.Expect(subs[i].Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
+	}
+
+	// Send only one event. It should be multiplexed to 3 by NATS, cause 3 subscriptions exist
+	data := "sampledata"
+	err = SendEventToNATS(natsClient, data)
+	if err != nil {
+		t.Fatalf("publish event failed: %v", err)
+	}
+
+	// Check for the 3 events that should be received by the subscriber
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	for i:=0; i < len(subs); i++ {
+		if err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL); err != nil {
+			t.Fatalf("subscriber did not receive the event: %v", err)
+		}
+	}
+
+	// Delete all 3 subscription
+	for i:=0; i < len(subs); i++ {
+		if err = natsClient.DeleteSubscription(subs[i]); err != nil {
+			t.Fatalf("delete subscription %s failed: %v", subs[i].Name, err)
+		}
+	}
+
+	// Check if all subscriptions are deleted in NATS
+	// Send an event again which should not be delivered to subscriber
+	newData := "test-data"
+	err = SendEventToNATS(natsClient, newData)
+	if err != nil {
+		t.Fatalf("publish event failed: %v", err)
+	}
+
+	// Check for the event that did not reach the subscriber
+	// Store should never return newdata hence CheckEvent should fail to match newdata
+	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
+	err = subscriber.CheckEvent(notExpectedNewDataInStore, subscriberCheckURL)
+	if err != nil && !strings.Contains(err.Error(), "check event after retries failed") {
+		t.Fatalf("check event failed: %v", err)
+	}
+	// newdata was received by the subscriber meaning the subscription was not deleted
+	if err == nil {
+		t.Fatal("subscriptions still exists in NATS")
+	}
+}
+
 func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g := NewWithT(t)
 

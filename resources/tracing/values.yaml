@@ -124,11 +124,11 @@ authProxy:
   enabled: true
   replicaCount: 1
   inPort: 10001
-  configDocsLink: ""
+  configDocsLink: "https://kyma-project.io/docs"
   config:
     clientId: "jaeger"
     clientSecret: "oiEWUWOIEwedfgg"
-    useDex: true
+    useDex: false
     tlsVerify: false
     emailDomains: "*"
     groups: ""
@@ -145,7 +145,7 @@ authProxy:
     runAsNonRoot: true
   image:
     repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
-    tag: 7.1.3-96ae36d3
+    tag: 7.1.3-4c48514d
     pullPolicy: IfNotPresent
   resources:
     limits:

@@ -7,8 +7,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -19,7 +17,6 @@ import (
 var Semantic = conversion.EqualitiesOrDie(
 	apiRuleEqual,
 	eventingBackendEqual,
-	oauth2ClientEqual,
 	publisherProxyDeploymentEqual,
 	eventingBackendStatusEqual,
 )
@@ -74,27 +71,6 @@ func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
 	}
 
 	if !reflect.DeepEqual(b1.Spec, b2.Spec) {
-		return false
-	}
-
-	return true
-}
-
-// oauth2ClientEqual asserts the equality of two OAuth2Client objects for the
-// eventing backend.
-func oauth2ClientEqual(oa1, oa2 *hydrav1alpha1.OAuth2Client) bool {
-	if oa1 == nil || oa2 == nil {
-		return false
-	}
-	if oa1 == oa2 {
-		return true
-	}
-
-	if !reflect.DeepEqual(oa1.Labels, oa2.Labels) {
-		return false
-	}
-
-	if !reflect.DeepEqual(oa1.Spec, oa2.Spec) {
 		return false
 	}
 
