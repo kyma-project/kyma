@@ -19,6 +19,11 @@ ci-skr-svcat-migration:
 	npm install
 	npm run test-skr-svcat-migration
 
+.PHONY: ci-kyma-preview
+ci-kyma-preview:
+	npm install
+	npm run test-kyma-preview
+
 .PHONY: ci-pre-upgrade
 ci-pre-upgrade:
 	npm install
