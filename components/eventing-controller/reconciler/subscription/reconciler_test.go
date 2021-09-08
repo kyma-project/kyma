@@ -857,6 +857,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRule).Should(reconcilertesting.HaveNotEmptyAPIRule())
 			Expect(k8sClient.Delete(ctx, &apiRule)).ShouldNot(HaveOccurred())
 
+			// wait until it is removed
+			apiRuleKey := client.ObjectKey{
+				Namespace: apiRule.Namespace,
+				Name:      apiRule.Name,
+			}
+			Eventually(func() bool {
+				apiRule := new(apigatewayv1alpha1.APIRule)
+				err := k8sClient.Get(ctx, apiRuleKey, apiRule)
+				return k8serrors.IsNotFound(err)
+			}).Should(BeTrue())
+
 			By("Ensuring a new APIRule is created")
 			getAPIRuleForASvc(subscriberSvc, ctx).Should(reconcilertesting.HaveNotEmptyAPIRule())
 		})
