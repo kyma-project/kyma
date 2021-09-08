@@ -9,17 +9,18 @@ const {
   toBase64,
   patchDeployment,
   k8sAppsApi,
+  k8sCustomApi,
 } = require("../utils");
-const k8s = require("@kubernetes/client-node");
+
 const { expect } = require("chai");
 
 const {
   queryPrometheus,
   queryGrafana,
+  getPrometheusRuleGroups,
 } = require("./client");
 
 const { assert } = require("chai");
-const { V1ServerAddressByClientCIDR } = require("@kubernetes/client-node");
 
 function shouldIgnoreTarget(target) {
   let podsToBeIgnored = [
@@ -293,6 +294,43 @@ async function checkGrafanaRedirectsInKyma2() {
   assert.isTrue(res, "Grafana Authproxy is not reset successfully!  ")
 }
 
+async function getK8sPrometheusRules() {
+  let res = await k8sCustomApi.listClusterCustomObject(
+    "monitoring.coreos.com",
+    "v1",
+    "prometheusrules"
+  );
+  return res.body.items;
+}
+
+async function getK8sPrometheusRuleNames() {
+  let rules = await getK8sPrometheusRules();
+  return rules.map((o) => o.metadata.name);
+}
+
+async function getRegisteredPrometheusRuleNames() {
+  let rules = await getPrometheusRuleGroups();
+  return rules.map((o) => o.name);
+}
+
+function removeNamePrefixes(ruleNames) {
+  return ruleNames.map((rule) =>
+    rule
+      .replace("monitoring-", "")
+      .replace("kyma-", "")
+      .replace("logging-", "")
+      .replace("fluent-bit-", "")
+      .replace("loki-", "")
+  );
+}
+
+async function getNotRegisteredPrometheusRuleNames() {
+  let registeredRules = await getRegisteredPrometheusRuleNames();
+  let k8sRuleNames = await getK8sPrometheusRuleNames();
+  k8sRuleNames = removeNamePrefixes(k8sRuleNames);
+  return k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
+}
+
 module.exports = {
   shouldIgnoreTarget,
   shouldIgnoreAlert,
@@ -302,5 +340,6 @@ module.exports = {
   restartProxyPod,
   updateProxyDeployment,
   checkGrafanaRedirectsInKyma1,
-  checkGrafanaRedirectsInKyma2
+  checkGrafanaRedirectsInKyma2,
+  getNotRegisteredPrometheusRuleNames
 };

@@ -7,7 +7,6 @@ const {
   sleep,
   loadResource,
 } = require("../utils");
-const { getNotRegisteredPrometheusRuleNames } = require("./alert-rules");
 
 const {
   prometheusPortForward,
@@ -21,6 +20,7 @@ const {
   shouldIgnoreAlert,
   buildScrapePoolSet,
   assertTimeSeriesExist,
+  getNotRegisteredPrometheusRuleNames,
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
