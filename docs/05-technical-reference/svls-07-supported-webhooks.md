@@ -6,7 +6,7 @@ A newly created or modified Function CR is first updated by the defaulting webho
 
 ## Defaulting webhook
 
->**NOTE:** It only applies to the [Function custom resource (CR)](./06-custom-resources/svls-01-function.md).
+>**NOTE:** It only applies to the [Function custom resource (CR)](./00-custom-resources/svls-01-function.md).
 
 The defaulting webhook:
 

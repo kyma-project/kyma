@@ -189,4 +189,4 @@ See the detailed descriptions of all related custom resources referred to in the
 
 - [Function](./00-custom-resources/svls-01-function.md)
 - [Subscription](./00-custom-resources/evnt-01-subscription.md)
-- [APIRule](./00-custom-resources/apig-01-apirule.md)
+- [APIRule](./00-custom-resources/apix-01-apirule.md)

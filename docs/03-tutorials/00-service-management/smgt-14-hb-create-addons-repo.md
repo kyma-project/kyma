@@ -38,7 +38,7 @@ Expose your addons repository so that you can provide URLs in the [AddonsConfigu
   HTTP/HTTPS
   </summary>
 
->**NOTE:** The HTTP protocol is supported only in `DevelopMode`. To learn more, read about [addons registration rules](./smgt-16-hb-register-addons-sc.md/#addons-ur-ls-must-be-secured-with-tls).
+>**NOTE:** The HTTP protocol is supported only in `DevelopMode`. To learn more, read about [addons registration rules](./smgt-16-hb-register-addons-sc.md/#registration-rules).
 
 If you want to use an HTTP or HTTPS server, you must compress your addons to `.tgz` files. The repository structure looks as follows:
 ```
