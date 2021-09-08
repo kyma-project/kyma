@@ -52,6 +52,6 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     ```
 
 <!-- Update step 6 once the long-lasting certificate is implemented. Probably, only the details about Gardener will be needed. -->
-6. To regenerate a corrupted certificate, follow [this tutorial](../../../03-tutorials/sec-01-tls-certificates-security.md). If you are running Kyma provisioned through Gardener, follow [this troubleshooting guide](./sec-01-certificates-gardener/) instead.
+6. To regenerate a corrupted certificate, follow [this tutorial](../../03-tutorials/sec-01-tls-certificates-security.md). If you are running Kyma provisioned through Gardener, follow [this troubleshooting guide](./sec-01-certificates-gardener.md) instead.
 
    >**NOTE**: Remember to switch back to the `distroless` image after you resolved the issue.

@@ -112,5 +112,5 @@ These components use this CR:
 
 | Component   |   Description |
 |----------|------|
-| [ServiceBindingUsage Controller](https://github.com/kyma-project/kyma/tree/main/components/service-binding-usage-controller) |  Reacts to every action of creating, updating, and deleting ServiceBindingUsage resources in all Namespaces and uses ServiceBindingUsage data to inject the binding. |
-| [Console Backend Service](todo) |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |
+| [ServiceBindingUsage Controller](../../../components/service-binding-usage-controller/README.md) |  Reacts to every action of creating, updating, and deleting ServiceBindingUsage resources in all Namespaces and uses ServiceBindingUsage data to inject the binding. |
+| [Console Backend Service](../../../components/console-backend-service/README.md) |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |

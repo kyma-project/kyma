@@ -41,7 +41,7 @@ These are the resources related to this CR:
 
 | Custom resource           | Description                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [Function](#custom-resource-function)     | Stores the Function's source code and dependencies on a cluster.  |
+| [Function](./svls-01-function.md)     | Stores the Function's source code and dependencies on a cluster.  |
 
 These components use this CR:
 

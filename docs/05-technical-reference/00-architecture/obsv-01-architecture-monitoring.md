@@ -14,7 +14,7 @@ The monitoring flow in Kyma comes down to the following components and steps:
 4. If you have configured a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
 5. You can visualize metrics and track their historical data on **Grafana** dashboards.
 
-Learn how to [set up the monitoring flow](../../03-tutorials/00-observability/obsv-01-monitoring-overview.md).
+Learn how to [set up the monitoring flow](../../03-tutorials/00-observability/README.md).
 
 ## Monitoring components
 
@@ -31,7 +31,7 @@ The diagram presents monitoring components and the way they interact with one an
 
 Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to create aggregated metrics or generate alerts if it detects any metric anomalies.
 
-   >**NOTE:** Besides this main Prometheus instance, there is a second Prometheus instance running in the `kyma-system` Namespace. This second instance is responsible for collecting and aggregating [Istio Service Mesh metrics](../../../01-overview/main-areas/service-mesh/con-monitoring-istio.md).
+   >**NOTE:** Besides this main Prometheus instance, there is a second Prometheus instance running in the `kyma-system` Namespace. This second instance is responsible for collecting and aggregating [Istio Service Mesh metrics](../../01-overview/main-areas/service-mesh/smsh-01-details.md).
 
 3. You can use **PrometheusRules** to define alert conditions for metrics. Kyma provides a set of out-of-the-box alerting rules. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more.
 

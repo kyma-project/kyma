@@ -8,7 +8,7 @@ The `addonsconfiguration.addons.kyma-project.io` CustomResourceDefinition (CRD) 
 kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
 ```
 
->**NOTE:** Only users with the **kyma-admin** role can modify the AddonsConfiguration CR. For more information, read about [roles in Kyma](todo).
+>**NOTE:** Only users with the **kyma-admin** role can modify the AddonsConfiguration CR. For more information, read about [roles in Kyma](../../04-operation-guides/security/sec-02-authorization-in-kyma.md).
 
 ## Sample custom resource
 
