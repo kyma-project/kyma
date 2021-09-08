@@ -104,6 +104,14 @@ build-image-function-controller:
 push-image-function-controller:
 	docker tag $(MANAGER_NAME) $(MANAGER_IMG_TAG):$(DOCKER_TAG)
 	docker push $(MANAGER_IMG_TAG):$(DOCKER_TAG)
+	cosign version
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(MANAGER_IMG_TAG):$(DOCKER_TAG)
+else
+	@echo "Image signing skipped"
+endif
 
 ######## function webhook
 
@@ -117,6 +125,14 @@ build-function-webhook:
 push-function-webhook:
 	docker tag $(WEBHOOK_NAME) $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
 	docker push $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
+	cosign version
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(WEBHOOK_IMG_NAME):$(DOCKER_TAG)
+else
+	@echo "Image signing skipped"
+endif
 
 ######## builder init container image
 
@@ -130,3 +146,11 @@ build-function-build-init:
 push-function-build-init:
 	docker tag $(JOBINIT_NAME) $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
 	docker push $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
+	cosign version
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(JOBINIT_IMG_NAME):$(DOCKER_TAG)
+else
+	@echo "Image signing skipped"
+endif

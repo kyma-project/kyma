@@ -35,6 +35,14 @@ build-image-nats-operator:
 push-image-nats-operator:
 	docker tag $(NATS_OPERATOR_APP_NAME) $(NATS_OPERATOR_IMG_NAME):$(TAG)
 	docker push $(NATS_OPERATOR_IMG_NAME):$(TAG)
+	cosign version
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(NATS_OPERATOR_IMG_NAME):$(TAG)
+else
+	@echo "Image signing skipped"
+endif
 
 ############################
 #                          #
@@ -53,3 +61,11 @@ build-image-nats-operator-doctor: pull-licenses
 push-image-nats-operator-doctor:
 	docker tag $(NATS_OPERATOR_DOCTOR_APP_NAME) $(NATS_OPERATOR_DOCTOR_IMG_NAME):$(TAG)
 	docker push $(NATS_OPERATOR_DOCTOR_IMG_NAME):$(TAG)
+	cosign version
+ifeq ($(JOB_TYPE), postsubmit)
+	@echo "Sign image with Cosign"
+	cosign version
+	cosign sign -key ${KMS_KEY_URL} $(NATS_OPERATOR_DOCTOR_IMG_NAME):$(TAG)
+else
+	@echo "Image signing skipped"
+endif
