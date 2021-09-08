@@ -42,7 +42,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		}(),
 	}
 
-	defaultWebhookAuth := types.WebhookAuth{
+	defaultWebhookAuth := &types.WebhookAuth{
 		Type:         types.AuthTypeClientCredentials,
 		GrantType:    types.GrantTypeClientCredentials,
 		ClientID:     "clientID",
@@ -71,7 +71,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 
 		// Values should be overriden by the given values in subscription
-		expectedWebhookAuth := types.WebhookAuth{
+		expectedWebhookAuth := &types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
 			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientId,
@@ -94,7 +94,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubscription).To(Equal(*gotBEBSubscription))
+		g.Expect(*expectedBEBSubscription).To(Equal(*gotBEBSubscription))
 	})
 
 	t.Run("subscription with default setting", func(t *testing.T) {
@@ -118,7 +118,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
 	})
 
 	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
 			expectedWebhookURL,
 			bebSubEvents,
-			expectedWebhookAuth, // WebhookAuth should retain the supplied config
+			&expectedWebhookAuth, // WebhookAuth should retain the supplied config
 		)
 
 		apiRule := reconcilertesting.NewAPIRule(subWithGivenWebhookAuth, reconcilertesting.WithPath)
@@ -151,7 +151,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
+		g.Expect(*expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
 
 		// Use another subscription without webhookAuthConfig
 		// given
@@ -174,7 +174,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
 		g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
 
 	})
