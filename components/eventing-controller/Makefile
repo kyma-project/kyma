@@ -1,3 +1,6 @@
+# Install lint on the local environment
+# curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
+
 APP_NAME = eventing-controller
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0
@@ -104,7 +107,10 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-test-local: generate-local fmt-local vet-local
+lint-local:
+	-SKIP_VERIFY="true" ../../hack/verify-lint.sh .
+
+test-local: generate-local fmt-local vet-local lint-local
 	go test ./... -coverprofile cover.out
 
 release: resolve generate verify build-image push-image copy-external-crds
