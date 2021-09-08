@@ -6,6 +6,7 @@ const {
   deprovisionSKR,
   updateSKR,
   ensureValidShootOIDCConfig,
+  ensureValidOIDCConfigInCustomerFacingKubeconfig,
 } = require("../kyma-environment-broker");
 const {
   DirectorConfig,
@@ -94,6 +95,7 @@ describe("SKR test", function () {
 
   it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
     ensureValidShootOIDCConfig(skr.shoot, oidc0);
+    await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc0);
   });
 
   it(`Assure initial cluster admin`, async function () {
@@ -110,6 +112,7 @@ describe("SKR test", function () {
 
   it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
     ensureValidShootOIDCConfig(skr.shoot, oidc1);
+    await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc1);
   });
 
   it(`Assure cluster admin is preserved`, async function () {
@@ -157,7 +160,7 @@ describe("SKR test", function () {
     await deleteMockTestFixture("mocks", testNS);
   });
 
-  // Check audit log for AWS
+  //Check audit log for AWS
   if (process.env.KEB_PLAN_ID == AWS_PLAN_ID) {
     const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
