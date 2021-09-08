@@ -108,7 +108,7 @@ mod-verify-local:
 	GO111MODULE=on go mod verify
 
 lint-local:
-	-SKIP_VERIFY="true" ../../hack/verify-lint.sh .
+	-SKIP_VERIFY="true" $(realpath $(shell pwd)/../..)/hack/verify-lint.sh .
 
 test-local: generate-local fmt-local vet-local lint-local
 	go test ./... -coverprofile cover.out
