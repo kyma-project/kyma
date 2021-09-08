@@ -734,7 +734,7 @@ kiali:
         in_cluster_url: "http://tracing-jaeger-query.kyma-system:16686"
     #      namespace_selector: true
         url: "https://jaeger.{{ .Values.global.ingress.domainName }}"
-    #      #use_grpc:
+        use_grpc: false
     #      whitelist_istio_system: ["jaeger-query", "istio-ingressgateway"]
 
     ##########
