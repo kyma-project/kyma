@@ -107,11 +107,10 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-lint-local:
-	@echo "CURDIR: "$(CURDIR)
-	-SKIP_VERIFY="true" $(realpath $(shell pwd)/../..)/hack/verify-lint.sh .
+# Use it before commit
+check-code: check-imports fmt-local vet-local lint
 
-test-local: generate-local fmt-local vet-local lint-local
+test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
 release: resolve generate verify build-image push-image copy-external-crds
