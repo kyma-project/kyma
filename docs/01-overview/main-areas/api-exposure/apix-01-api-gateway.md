@@ -6,4 +6,4 @@ To make your service accessible outside the Kyma cluster, expose it using the Ky
 
 The API Gateway Controller allows you to secure the exposed services using JWT tokens issued by an OpenID Connect-compliant identity provider, or OAuth2 tokens issued by the Kyma OAuth2 server. You can secure the entire service, or secure the selected endpoints. Alternatively, you can leave the service unsecured.
 
-> **NOTE:** To learn more, read about the [Kyma OAuth2 server](/components/security/#details-o-auth2-and-open-id-connect-server).
+> **NOTE:** To learn more, read about the [Kyma OAuth2 server](../../../04-operation-guides/security/sec-05-customization-operation.md).

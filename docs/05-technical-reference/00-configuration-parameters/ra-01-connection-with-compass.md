@@ -19,7 +19,7 @@ To see how to create the Secret, see the [tutorial](../../03-tutorials/00-applic
 
 ## Connection status
 
-The connection status is preserved in the [CompassConnection](../06-custom-resources/ra-01-compassconnection.md) custom resource (CR). This CR also stores the Connector URL and the Director URL.
+The connection status is preserved in the [CompassConnection](../00-custom-resources/ra-01-compassconnection.md) custom resource (CR). This CR also stores the Connector URL and the Director URL.
 
 ## Reconnecting Runtime Agent
 
