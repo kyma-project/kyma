@@ -95,6 +95,9 @@ describe("SKR test", function () {
 
   it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
     ensureValidShootOIDCConfig(skr.shoot, oidc0);
+  });
+
+  it(`Assure initial OIDC config is part of kubeconfig`, async function () {
     await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc0);
   });
 
@@ -112,6 +115,9 @@ describe("SKR test", function () {
 
   it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
     ensureValidShootOIDCConfig(skr.shoot, oidc1);
+  });
+
+  it(`Assure updated OIDC config is part of kubeconfig`, async function () {
     await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc1);
   });
 
