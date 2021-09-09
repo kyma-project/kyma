@@ -50,16 +50,11 @@ async function installBTPOperatorHelmChart(creds, clusterId) {
 }
 
 async function installBTPServiceOperatorMigrationHelmChart() {
-    const chart = "https://github.com/kyma-incubator/sc-removal/releases/download/0.3.0/sap-btp-service-operator-migration-0.3.0.tar.gz";
+    const chart = "https://github.com/kyma-incubator/sc-removal/releases/download/0.5.0/sap-btp-operator-migration-v0.5.0.tgz";
     const btp = "sap-btp-service-operator-migration";
-    const image = {
-        repository: "eu.gcr.io/sap-se-cx-gopher/sap-btp-service-operator-migration",
-        tag: "v0.4.0"
-    }
-    const values = `image.repository=${image.repository},image.tag=${image.tag}`
 
     try {
-        await installer.helmInstallUpgrade(btp, chart, "sap-btp-operator", values, null, ["--create-namespace"]);
+        await installer.helmInstallUpgrade(btp, chart, "sap-btp-operator", null, null, ["--create-namespace"]);
     } catch (error) {
         if (error.stderr === undefined) {
             throw new Error(`failed to install ${btp}: ${error}`);
