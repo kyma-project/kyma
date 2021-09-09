@@ -26,8 +26,11 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+# Use it before commit
+check-code: check-imports fmt-local vet-local lint
+
 test-local:
-	GO111MODULE=on go test ./...
+	GO111MODULE=on go test ./... -coverprofile cover.out
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
