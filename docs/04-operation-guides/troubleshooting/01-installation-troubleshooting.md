@@ -11,4 +11,4 @@ If the installation is successful but a component does not behave in the expecte
 kubectl get pods --all-namespaces
 ```
 
-The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the status is `Running` for all Pods. If any of the Pods that you require do not start successfully, install Kyma again.
+The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the status is `Running` for all Pods. If any of the Pods that you require has not started successfully, install Kyma again.
