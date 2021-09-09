@@ -81,21 +81,21 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "4862778b"
+    tag: "08ee5d82"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-12096"
+      tag: "b0aadb76"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "PR-12096"
+      tag: "b0aadb76"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "19830ec3"
+      tag: "b0aadb76"
     python39:
       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "19830ec3"
+      tag: "b0aadb76"
 
 deployment:
   replicas: 1
@@ -256,7 +256,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "4862778b"
+    tag: "08ee5d82"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
