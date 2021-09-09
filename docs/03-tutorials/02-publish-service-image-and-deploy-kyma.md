@@ -22,7 +22,7 @@ The `http-db-service` example used in this guide provides you with the `Dockerfi
 
 ### Register the image in the Docker Hub
 
-This guide bases on Docker Hub. However, there are many other Docker registries available. You can use a private Docker registry, but it must be available in the Internet.
+This guide bases on Docker Hub. However, there are many other Docker registries available. You can use a private Docker registry, but it must be available on the Internet.
 
 1. Open the [Docker Hub](https://hub.docker.com/) webpage.
 2. Provide all of the required details and sign up.

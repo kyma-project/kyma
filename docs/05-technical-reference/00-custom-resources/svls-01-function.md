@@ -100,7 +100,7 @@ This table lists all the possible parameters of a given resource together with t
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
-| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a ConfigMap. |
+| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-configmap). |
 | **spec.deps**                            |       No       | Specifies the Function's dependencies.  |
 | **spec.labels**                          |       No       | Specifies the Function's Pod labels.    |
 | **spec.minReplicas**                     |       No       | Defines the minimum number of Function's Pods to run at a time.  |
