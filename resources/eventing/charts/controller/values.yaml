@@ -50,7 +50,7 @@ publisherProxy:
 natsOperatorDoctor:
   interval: 1m
   image:
-    tag: "PR-11920"
+    tag: "ae9f0bf8"
     name: "nats-operator-doctor"
     pullPolicy: "IfNotPresent"
   resources:
