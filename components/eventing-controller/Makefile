@@ -104,6 +104,9 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+# Use it before commit
+check-code: check-imports fmt-local vet-local lint
+
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
