@@ -8,8 +8,17 @@ The Event Publisher Proxy receives legacy and Cloud Event publishing requests fr
 
 - Go modules
 - [ko](https://github.com/google/ko)
+- lint
+  - Install lint on the local environment:
+```bash
+curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
+```    
 
 ## Development
+- check code quality before a commit:
+```bash
+$ make code-check
+```
 
 ### Build
 
