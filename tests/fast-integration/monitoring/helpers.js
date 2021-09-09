@@ -9,7 +9,6 @@ const {
   toBase64,
   patchDeployment,
   k8sAppsApi,
-  k8sCustomApi,
 } = require("../utils");
 
 const { expect } = require("chai");
@@ -294,17 +293,9 @@ async function checkGrafanaRedirectsInKyma2() {
   assert.isTrue(res, "Grafana Authproxy is not reset successfully!  ")
 }
 
-async function getK8sPrometheusRules() {
-  let res = await k8sCustomApi.listClusterCustomObject(
-    "monitoring.coreos.com",
-    "v1",
-    "prometheusrules"
-  );
-  return res.body.items;
-}
-
 async function getK8sPrometheusRuleNames() {
-  let rules = await getK8sPrometheusRules();
+  let path = '/apis/monitoring.coreos.com/v1/prometheusrules';
+  let rules = await listResources(path);
   return rules.map((o) => o.metadata.name);
 }
 
@@ -325,10 +316,33 @@ function removeNamePrefixes(ruleNames) {
 }
 
 async function getNotRegisteredPrometheusRuleNames() {
-  let registeredRules = await getRegisteredPrometheusRuleNames();
-  let k8sRuleNames = await getK8sPrometheusRuleNames();
-  k8sRuleNames = removeNamePrefixes(k8sRuleNames);
-  return k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
+  let notRegisteredRules = []
+  let retries = 0;
+  while (retries < 20) {
+    let registeredRules = await getRegisteredPrometheusRuleNames();
+    let k8sRuleNames = await getK8sPrometheusRuleNames();
+    k8sRuleNames = removeNamePrefixes(k8sRuleNames);
+    notRegisteredRules = k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
+    if (notRegisteredRules.length === 0) {
+      break;
+    }
+    await sleep(5*1000);
+    retries++;
+  }
+  return notRegisteredRules;
+}
+
+async function waitForPrometheusToRemoveRule(ruleName) {
+  let retries = 0;
+  while (retries < 20) {
+    let registeredRules = await getRegisteredPrometheusRuleNames();
+    if (!registeredRules.includes(ruleName)) {
+      return;
+    }
+    await sleep(5*1000);
+    retries++;
+  }
+  throw new Error(`Timeout exceeded while waiting for Prometheus to remove the rule group: ${ruleName}`);
 }
 
 module.exports = {
@@ -341,5 +355,6 @@ module.exports = {
   updateProxyDeployment,
   checkGrafanaRedirectsInKyma1,
   checkGrafanaRedirectsInKyma2,
-  getNotRegisteredPrometheusRuleNames
+  getNotRegisteredPrometheusRuleNames,
+  waitForPrometheusToRemoveRule,
 };

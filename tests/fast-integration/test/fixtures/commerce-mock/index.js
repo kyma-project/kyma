@@ -34,7 +34,9 @@ const {
   patchApplicationGateway,
   eventingSubscription,
   k8sDelete,
-  getSecretData
+  getSecretData,
+  namespaceObj,
+  serviceInstanceObj
 } = require("../../../utils");
 
 const {
@@ -82,25 +84,6 @@ function prepareLastOrderObjs(compassEnabled = false , appName = 'commerce') {
 
   return k8s.loadAllYaml(lastorderFunctionYaml.toString()
     .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
-}
-
-function namespaceObj(name) {
-  return {
-    apiVersion: "v1",
-    kind: "Namespace",
-    metadata: { name },
-  };
-}
-
-function serviceInstanceObj(name, serviceClassExternalName) {
-  return {
-    apiVersion: "servicecatalog.k8s.io/v1beta1",
-    kind: "ServiceInstance",
-    metadata: {
-      name: name,
-    },
-    spec: { serviceClassExternalName },
-  };
 }
 
 async function checkFunctionResponse(functionNamespace) {

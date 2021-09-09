@@ -8,7 +8,6 @@ const kc = new k8s.KubeConfig();
 var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
-var k8sCustomApi;
 var watch;
 var forward;
 
@@ -23,8 +22,7 @@ function initializeK8sClient(opts) {
       kc.loadFromDefault();
     }
 
-    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi); // deprecated, prefer CustomObjectsApi
-    k8sCustomApi = kc.makeApiClient(k8s.CustomObjectsApi);
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
@@ -1243,6 +1241,25 @@ async function isKyma2() {
   }
 }
 
+function namespaceObj(name) {
+  return {
+    apiVersion: "v1",
+    kind: "Namespace",
+    metadata: { name },
+  };
+}
+
+function serviceInstanceObj(name, serviceClassExternalName) {
+  return {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceInstance",
+    metadata: {
+      name: name,
+    },
+    spec: { serviceClassExternalName },
+  };
+}
+
 module.exports = {
   loadResource,
   initializeK8sClient,
@@ -1292,10 +1309,8 @@ module.exports = {
   listResources,
   listResourceNames,
   k8sDynamicApi,
-  k8sCustomApi,
   k8sAppsApi,
   k8sCoreV1Api,
-  k8sCustomApi,
   getContainerRestartsForAllNamespaces,
   debug,
   switchDebug,
@@ -1310,5 +1325,7 @@ module.exports = {
   eventingSubscription,
   getVirtualService,
   patchDeployment,
-  isKyma2
+  isKyma2,
+  namespaceObj,
+  serviceInstanceObj,
 };

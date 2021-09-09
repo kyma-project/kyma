@@ -1,11 +1,12 @@
-const { assert, expect } = require("chai");
+const { assert } = require("chai");
+const path = require("path");
 
 const {
   waitForPodWithLabel,
-  k8sCoreV1Api,
   k8sApply,
-  sleep,
   loadResource,
+  namespaceObj,
+  deleteNamespaces,
 } = require("../utils");
 
 const {
@@ -21,6 +22,7 @@ const {
   buildScrapePoolSet,
   assertTimeSeriesExist,
   getNotRegisteredPrometheusRuleNames,
+  waitForPrometheusToRemoveRule,
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
@@ -29,22 +31,15 @@ describe("Monitoring test", function () {
 
   var cancelPortForward;
 
-  const testNamespace = "test-prometheusrules";
+  const testNamespace = "test-prometheus";
+  const testRuleName = "test-prom.rules";
 
   before(async () => {
     cancelPortForward = prometheusPortForward();
-    try {
-      await k8sCoreV1Api.createNamespace({
-        metadata: { name: testNamespace },
-      });
-    } catch (error) {
-      console.log(`Namespace ${testNamespace} could not be created`, error);
-    }
   });
 
   after(async () => {
     cancelPortForward();
-    await k8sCoreV1Api.deleteNamespace(testNamespace);
   });
 
   it("All monitoring pods should be ready", async () => {
@@ -57,6 +52,12 @@ describe("Monitoring test", function () {
       "kube-state-metrics",
       namespace
     );
+  });
+
+  it("Provision monitoring test resources", async () => {
+    await k8sApply([namespaceObj(testNamespace)]);
+    const promrule = loadResource(path.join(__dirname, "./test-rule.yaml"));
+    await k8sApply(promrule, testNamespace);
   });
 
   it("All Prometheus targets should be healthy", async () => {
@@ -142,10 +143,15 @@ describe("Monitoring test", function () {
   });
 
   it("All prometheus rules are registered", async function () {
-    const promrule = loadResource("./monitoring-test/test-rule.yaml");
-    await k8sApply(promrule, testNamespace);
-    await sleep(65000); // wait for prometheus to update
     let notRegisteredRules = await getNotRegisteredPrometheusRuleNames();
-    expect(notRegisteredRules, "Rules are not registered").to.be.empty;
+    assert.isEmpty(
+      notRegisteredRules,
+      `Following rules are not picked up by Prometheus: ${notRegisteredRules.join(", ")}`
+    );
   });
+
+  it("Delete monitoring test resources", async function() {
+    await deleteNamespaces([testNamespace]);
+    await waitForPrometheusToRemoveRule(testRuleName);
+  })
 });
