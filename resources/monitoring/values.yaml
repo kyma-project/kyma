@@ -1233,7 +1233,7 @@ prometheusOperator:
       ##
       priorityClassName: ""
       podAnnotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
       nodeSelector: {}
       affinity: {}
       tolerations: []
