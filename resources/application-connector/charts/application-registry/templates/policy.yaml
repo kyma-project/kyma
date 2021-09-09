@@ -16,4 +16,4 @@ spec:
       app: {{ .Chart.Name }}
   mtls:
     mode: "PERMISSIVE"
-{{- end }} 
+{{- end }}
