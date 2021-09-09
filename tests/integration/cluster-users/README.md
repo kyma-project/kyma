@@ -1,6 +1,6 @@
 # Running cluster user test suite locally
 
-## Prerequistes
+## Prerequisites
 - Debian-based Linux machine with access to the Internet to install dependencies
 ## Run tests
 
