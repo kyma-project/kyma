@@ -179,11 +179,10 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
 
     try {
         args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`, `--mode=sync`];
-        await execa(`smctl`, args);
-        // let {stdout} = await execa(`smctl`, args);
-        // if (stdout !== "Service Binding successfully deleted.") {
-        //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
-        // }
+        let {stdout} = await execa(`smctl`, args);
+        if (stdout !== "Service Binding successfully deleted.") {
+             errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
+        }
     } catch (error) {
         errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
     }
