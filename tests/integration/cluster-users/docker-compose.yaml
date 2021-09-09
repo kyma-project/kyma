@@ -1,0 +1,82 @@
+version: '3.7'
+
+services:
+
+  hydra:
+    image: oryd/hydra:v1.10.6-sqlite
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command:
+      serve -c /etc/config/hydra/hydra.yml all --dangerous-force-http
+    volumes:
+      -
+        type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      -
+        type: bind
+        source: ./hydra.yml
+        target: /etc/config/hydra/hydra.yml
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    restart: unless-stopped
+    depends_on:
+      - hydra-migrate
+    networks:
+      - k3d-kyma
+
+  hydra-migrate:
+    image: oryd/hydra:v1.10.6-sqlite
+    environment:
+      - DSN=sqlite:///var/lib/sqlite/db.sqlite?_fk=true
+    command:
+      migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      -
+        type: volume
+        source: hydra-sqlite
+        target: /var/lib/sqlite
+        read_only: false
+      -
+        type: bind
+        source: ./hydra.yml
+        target: /etc/config/hydra/hydra.yml
+    restart: on-failure
+    networks:
+      - k3d-kyma
+
+  consent:
+    environment:
+      - HYDRA_ADMIN_URL=http://hydra:4445
+    image: eu.gcr.io/kyma-project/incubator/test-hydra-login-consent:d6e6d3bc
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - k3d-kyma
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./kyma-cert.pem:/etc/ssl/certs/kyma-cert.pem
+      - ./kyma-cert.key:/etc/ssl/certs/kyma-cert.key
+    ports:
+      - 443:443
+    depends_on:
+      - hydra
+    networks:
+      k3d-kyma:
+        aliases:
+          - oauth2-fake.local.kyma.dev
+
+networks:
+  k3d-kyma:
+    name: k3d-kyma
+
+volumes:
+  hydra-sqlite:
