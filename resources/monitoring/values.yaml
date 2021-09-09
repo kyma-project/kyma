@@ -1306,7 +1306,7 @@ prometheusOperator:
   ## Annotations to add to the operator pod
   ##
   podAnnotations:
-    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/inject: "false"
 
   ## Assign a PriorityClassName to pods if set
   # priorityClassName: ""
