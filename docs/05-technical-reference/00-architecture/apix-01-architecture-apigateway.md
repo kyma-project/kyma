@@ -4,7 +4,7 @@ title: API Gateway Architecture
 
 This diagram illustrates the workflow that leads to exposing a service in Kyma:
 
-![service-exposure-flow](./assets/001-api-gateway-flow.svg)
+![service-exposure-flow](./assets/apix-api-gateway-flow.svg)
 
 - **API Gateway Controller** is a component responsible for exposing services. The API Gateway Controller is an application deployed in the `kyma-system` Namespace, implemented according to the [Kubernetes Controller](https://book.kubebuilder.io/) principles. The API Gateway Controller listens for newly created custom resources (CR) that follow the set `apirule.gateway.kyma-project.io` CustomResourceDefinition (CRD), which describes the details of exposing services in Kyma.
 
@@ -30,7 +30,7 @@ This diagram illustrates the request flow for three cases:
   - Accessing secured resources with a JWT token
   - Accessing unsecured resources without a token
 
-![request-flow](./assets/002-api-gateway-request-flow.svg)
+![request-flow](./assets/apix-api-gateway-request-flow.svg)
 
 ### Accessing secured resources with an OAuth2 token
 

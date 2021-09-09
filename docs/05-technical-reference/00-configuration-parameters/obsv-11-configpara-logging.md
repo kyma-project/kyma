@@ -2,11 +2,13 @@
 title: Logging chart
 ---
 
-To configure the Logging chart, override the default values of its `values.yaml` file. 
+To configure the Logging chart, override the default values of its `values.yaml` file.
 Learn how it works under [Configurable Parameters](./README.md).
 
-Here are some of the parameters you can set. 
+Here are some of the parameters you can set.
 For the complete list, see the `values.yaml` file.
+
+>**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 
 ## Configurable parameters
 
@@ -27,7 +29,7 @@ For the complete list, see the `values.yaml` file.
 | **config.storage_config.boltdb.directory** | Specifies the physical location of indexes in `boltdb`. | `/data/loki/index` |
 | **config.storage_config.filesystem.directory** | Specifies the physical location of log chunks in `filesystem`. | `/data/loki/chunks` |
 | **loki.resources.limits.memory** | Maximum amount of memory available for Loki to use. | `300Mi` |
-| **loki.resources.limits.cpu** | Maximum amount of CPU available for Loki to use. | `200m` | 
+| **loki.resources.limits.cpu** | Maximum amount of CPU available for Loki to use. | `200m` |
 | **fluent-bit.resources.limits.memory** | Maximum amount of memory available for Fluent Bit to use. |`128Mi`|
 | **fluent-bit.resources.limits.cpu** | Maximum amount of CPU available for Fluent Bit to use. |`100m`|
 

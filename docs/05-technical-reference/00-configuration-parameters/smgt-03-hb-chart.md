@@ -4,6 +4,8 @@ title: Helm Broker chart
 
 To configure the Helm Broker chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
+>**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
+
 ## Configurable parameters
 
 This table lists the configurable parameters, their descriptions, and default values:

@@ -2,7 +2,7 @@
 title: Exposing Functions
 ---
 
-To access a Function within the cluster, use the `{function-name}.{namespace}.svc.cluster.local` endpoint, such as `test-function.default.svc.cluster.local`. To expose a Function outside the cluster, you must create an [APIRule custom resource (CR)](./06-custom-resources/apig-01-apirule.md):
+To access a Function within the cluster, use the `{function-name}.{namespace}.svc.cluster.local` endpoint, such as `test-function.default.svc.cluster.local`. To expose a Function outside the cluster, you must create an [APIRule custom resource (CR)](./00-custom-resources/apix-01-apirule.md):
 
 ![Expose a Function service](./assets/svls-api-rules.svg)
 
