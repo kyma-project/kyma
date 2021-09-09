@@ -165,7 +165,7 @@ serviceMonitor:
   path: /metrics
   #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
   labels: {}
-  interval: 1m
+  scrapeInterval: 1m
   scheme: https
   tlsConfig: 
       caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
