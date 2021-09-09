@@ -70,6 +70,10 @@ data:
         Multiline_Flush   {{ .Values.config.inputs.tail.multilineFlush }}
         Parser_Firstline  {{ .Values.config.inputs.tail.parserFirstline }}
         {{- end }}
+        {{- if .Values.config.inputs.tail.multilineParser }}
+        multiline.parser  {{ .Values.config.inputs.tail.multilineParser }}
+        {{- end }}
+        Read_from_Head    {{ .Values.config.inputs.tail.readFromHead }}
         
 {{- end }}
 

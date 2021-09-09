@@ -1038,6 +1038,17 @@ function genRandom(len) {
   return res;
 }
 
+function getEnvOrDefault(key, defValue = "") {
+  if (!process.env[key]) {
+    if (defValue != "") {
+      return defValue
+    }
+    throw new Error(`Env ${key} not present`);
+  }
+
+  return process.env[key];
+}
+
 function getEnvOrThrow(key) {
   if (!process.env[key]) {
     throw new Error(`Env ${key} not present`);
@@ -1328,4 +1339,5 @@ module.exports = {
   isKyma2,
   namespaceObj,
   serviceInstanceObj,
+  getEnvOrDefault
 };

@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: eu.gcr.io/kyma-project/tpi/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.5.7-a558c5c4
+  tag: 1.8.6-4c48514d
 
 imagePullSecrets: []
 nameOverride: ""
@@ -197,6 +197,10 @@ config:
       multilineFlush: 4
       # Name of the parser that matchs the beginning of a multiline message.
       parserFirstline:
+      # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
+      readFromHead: "Off"
+      # Specify one or Multiline Parser definition to apply to the content.
+      multilineParser:
       exclude:
         namespaces:
     additional: ""
@@ -214,7 +218,7 @@ config:
       parser: "On"
       exclude: "On"
       # Set the buffer size for HTTP client when reading responses from Kubernetes API server.
-      bufferSize: "32k"
+      bufferSize: "1MB"
       kubeUrl: "https://kubernetes.default.svc:443"
       # When the source records comes from Tail input plugin, this option allows to specify what's the prefix used in Tail configuration.
       kubeTagPrefix: "kube.var.log.containers."
