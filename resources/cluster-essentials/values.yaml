@@ -17,8 +17,8 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "978664da"
+  repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
+  tag: "ac45e9ce"
   # Image pull policy
   pullPolicy: IfNotPresent
 
