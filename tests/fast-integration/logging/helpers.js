@@ -6,7 +6,7 @@ const {
 } = require("./client");
 
 async function checkLokiLogs(startTimestamp) {
-    const labels = '{app="commerce-mock", container="commerce-mock", namespace="mocks"}';
+    const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
     let logsFetched = false;
     let retries = 0;
     while (retries < 20) {
