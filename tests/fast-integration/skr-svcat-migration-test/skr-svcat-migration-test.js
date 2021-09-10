@@ -85,6 +85,10 @@ describe("SKR SVCAT migration test", function() {
     secretsAndPresets = await sampleResources.storeSecretsAndPresets()
   });
 
+  it(`Should check if pod presets injected secrets to functions containers`, async function() {
+    await t.checkPodPresetEnvInjected();
+  });
+
   it(`Should install BTP service operator migration helm chart`, async function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
   });
@@ -102,6 +106,14 @@ describe("SKR SVCAT migration test", function() {
     // Check if Secrets and PodPresets are still available
     await sampleResources.checkSecrets(existing.secrets)
     await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets)
+  });
+
+  it(`Should restart functions pods`, async function() {
+    await t.restartFunctionsPods();
+  });
+
+  it(`Should check if pod presets injected secrets in functions containers are present after migration`, async function() {
+    await t.checkPodPresetEnvInjected();
   });
 
   it(`Should destroy sample service catalog resources`, async function() {

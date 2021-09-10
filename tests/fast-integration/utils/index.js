@@ -6,6 +6,7 @@ const { join } = require("path");
 const { expect } = require("chai");
 const axios = require('axios');
 const axiosRetry = require('axios-retry');
+const execa = require("execa");
 
 const kc = new k8s.KubeConfig();
 var k8sDynamicApi;
@@ -602,6 +603,22 @@ function waitForJob(name, namespace = "default", timeout = 900000, success = 1) 
     timeout,
     `Waiting for Job ${name} to suceed ${success} timeout (${timeout} ms)`
   );
+}
+
+async function kubectlExecInPod(pod, container, cmd, namespace = "default") {
+  let execCmd = [`exec`, pod, `-c`, container, `-n`, namespace, '--', ...cmd];
+  try {
+    let out = await execa(`kubectl`, execCmd);
+  } catch (error) {
+    if (error.stdout === undefined) {
+      throw error;
+    }
+    throw new Error(`failed to execute kubectl ${execCmd.join(" ")}:\n${error.stdout},\n${error.stderr}`);
+  }
+}
+
+async function listPods(labelSelector, namespace = "default") {
+  return await k8sCoreV1Api.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector);
 }
 
 async function printContainerLogs(labelSelector, container, namespace = "default", timeout = 90000) {
@@ -1376,5 +1393,8 @@ module.exports = {
   getResponse,
   isKyma2,
   getEnvOrDefault,
-  printContainerLogs
+  printContainerLogs,
+  kubectlExecInPod,
+  deleteK8sResource,
+  listPods,
 };
