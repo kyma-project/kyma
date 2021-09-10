@@ -4,6 +4,8 @@ const net = require("net");
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
 
 const kc = new k8s.KubeConfig();
 var k8sDynamicApi;
@@ -1278,6 +1280,24 @@ async function patchDeployment(name, ns, patch) {
   );
 }
 
+async function getResponse(url, retries) {
+  axiosRetry(axios, {
+      retries: retries,
+      retryDelay: (retryCount) => {
+          return retryCount * 5000;
+      },
+      retryCondition: (error) => {
+          console.log(error);
+          return !error.response || error.response.status != 200;
+      },
+  });
+
+  let response = await axios.get(url, {
+      timeout: 5000,
+  });
+  return response;
+}
+
 async function isKyma2() {
   try {
     const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
@@ -1353,6 +1373,7 @@ module.exports = {
   eventingSubscription,
   getVirtualService,
   patchDeployment,
+  getResponse,
   isKyma2,
   getEnvOrDefault,
   printContainerLogs
