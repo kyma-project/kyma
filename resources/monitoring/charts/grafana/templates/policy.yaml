@@ -7,4 +7,4 @@ spec:
     matchLabels:
       app.kubernetes.io/name: grafana
   mtls:
-    mode: "PERMISSIVE" 
+    mode: "PERMISSIVE"

@@ -14,7 +14,7 @@ metadata:
     {{- end }}
 spec:
   endpoints:
-  - interval: {{ .Values.serviceMonitor.scrapeInterval }}
+  - interval: {{ .Values.serviceMonitor.interval }}
     {{- if .Values.serviceMonitor.scrapeTimeout }}
     scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
     {{- end }}

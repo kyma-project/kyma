@@ -165,13 +165,9 @@ serviceMonitor:
   path: /metrics
   #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
   labels: {}
-  scrapeInterval: 1m
-  scheme: https
-  tlsConfig: 
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+  interval: 1m
+  scheme: http
+  tlsConfig: {}
   scrapeTimeout: 30s
   relabelings: []
 
