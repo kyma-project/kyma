@@ -6,13 +6,13 @@ title: Observe application metrics
 
 Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
 
-Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8080`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
 - From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
 - At `10s` interval
 
-The instructions focus on the `cpu_temperature_celsius` metric, which is one of the custom metrics exposed by the `sample-metrics-8081` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
+The instructions focus on the `cpu_temperature_celsius` metric, which is one of the custom metrics exposed by the `sample-metrics-8080` service. Using the metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 degrees Celsius when Prometheus calls the `/metrics` endpoint.
 
 ## Prerequisites
 
@@ -45,13 +45,7 @@ Follow this tutorial to:
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/service-monitor.yaml
    ```
 
-4. Deploy the PeerAuthentication in `testing-monitoring` Namespace.
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/policy.yaml
-   ```
-
-5. Test your deployment.
+4. Test your deployment.
 
    ```bash
    kubectl get pods -n testing-monitoring
@@ -66,17 +60,17 @@ Follow this tutorial to:
 
 ## View metrics on a localhost
 
-1. Run the `port-forward` command on the `sample-metrics-8081` service for port `8081` to check the metrics.
+1. Run the `port-forward` command on the `sample-metrics-8080` service for port `8080` to check the metrics.
 
    ```bash
-   kubectl port-forward svc/sample-metrics-8081 -n testing-monitoring 8081:8081
+   kubectl port-forward svc/sample-metrics-8080 -n testing-monitoring 8080:8080
    ```
 
-2. Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics).
+2. Open a browser and access [`http://localhost:8080/metrics`](http://localhost:8080/metrics).
 
-You can see the `cpu_temperature_celsius` metric and its current value of `62` on the list of all metrics exposed by the `sample-metrics-8081` service.
+You can see the `cpu_temperature_celsius` metric and its current value of `62` on the list of all metrics exposed by the `sample-metrics-8080` service.
 
-![metrics on port 8081](./assets/sample-metrics-2.png)
+![metrics on port 8080](./assets/sample-metrics-2.png)
 
 Thanks to the example logic, the custom metric value changes each time you refresh the localhost address.
 
@@ -92,7 +86,7 @@ Follow these steps to redirect the metrics:
    kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
    ```
 
-2. Access the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8081) to see the service endpoint and its details on the **Targets** list.
+2. Access the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8080) to see the service endpoint and its details on the **Targets** list.
 
    ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
