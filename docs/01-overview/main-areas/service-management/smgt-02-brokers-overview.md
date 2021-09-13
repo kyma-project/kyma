@@ -14,7 +14,7 @@ Service Catalog lists all services that Service Brokers offer. Use the Service B
 
 Each of the Service Brokers available in Kyma performs these operations in a different way. See the documentation of a given Service Broker to learn how it operates. Service Catalog provided by Kyma is currently integrated with the following Service Brokers:
 
-* [Application Broker](../../../05-technical-reference/03-architecture/ac-01-application-connector-components.md#application-broker)
+* [Application Broker](../../../05-technical-reference/00-architecture/ac-01-application-connector-components.md#application-broker)
 * [Helm Broker](./smgt-10-hb-overview.md)
 
 ## Third-party Service Brokers

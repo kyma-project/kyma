@@ -120,10 +120,10 @@ Follow these steps:
     </details>
     <details>
     <summary label="busola-ui">
-    Busola UI
+    Kyma Dashboard
     </summary>
 
->**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
+>**NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1.  Create a Namespace or select one from the drop-down list in the top navigation panel.
 

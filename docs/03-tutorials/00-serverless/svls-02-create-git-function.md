@@ -60,7 +60,7 @@ Follows these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../05-technical-reference/06-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a [GitRepository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -120,10 +120,10 @@ Follows these steps:
     </details>
     <details>
     <summary label="busola-ui">
-    Busola UI
+    Kyma Dashboard
     </summary>
 
->**NOTE:** Busola is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
+>**NOTE:** Kyma Dashboard uses Busola, which is not installed by default. Follow the [instructions](https://github.com/kyma-project/busola#installation) to install it.
 
 1. Create a Namespace or select one from the drop-down list in the top navigation panel.
 

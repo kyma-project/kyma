@@ -11,9 +11,9 @@ The Function CR must contain `type: git` to specify that you use a Git repositor
 
 To create a Function with the Git source, you must:
 
-1. Create a [GitRepository CR](./06-custom-resources/svls-02-gitrepository.md) with details of your Git repository.
+1. Create a [GitRepository CR](./00-custom-resources/svls-02-gitrepository.md) with details of your Git repository.
 2. Create a [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) (optional, only if you must authenticate to the repository).
-3. Create a [Function CR](./06-custom-resources/svls-01-function.md) with your Function definition and references to the Git repository.
+3. Create a [Function CR](./00-custom-resources/svls-01-function.md) with your Function definition and references to the Git repository.
 
 >**NOTE:** For detailed steps, see the tutorial on [creating a Function from Git repository sources](../03-tutorials/00-serverless/svls-02-create-git-function.md).
 

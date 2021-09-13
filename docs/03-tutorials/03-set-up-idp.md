@@ -24,8 +24,8 @@ Configure a dedicated client (often referred to as an application) at your ident
 1. Note down these details of your application at your identity provider:
 
 - `issuerUrl`
-- `clientId` 
-- `clientSecret` 
+- `clientId`
+- `clientSecret`
 
 2. Add `http://localhost:8000` to allowed redirect URIs that are required for the OIDC login plugin.
 3. Configure the name of the `username` and `group` claims.
@@ -56,7 +56,7 @@ You must now define which individuals or groups should have access to which Kyma
 By default, Kyma comes with the following ClusterRoles:
 
 - **kyma-admin**: gives full admin access to the entire cluster
-- **kyma-namespace-admin**: gives full admin access except for the write access to [AddonsConfigurations](/components/helm-broker#custom-resource-addons-configuration)
+- **kyma-namespace-admin**: gives full admin access except for the write access to [AddonsConfigurations](../05-technical-reference/00-custom-resources/smgt-04-hb-addonsconfiguration.md)
 - **kyma-edit**: gives full access to all Kyma-managed resources
 - **kyma-developer**: gives full access to Kyma-managed resources and basic Kubernetes resources
 - **kyma-view**: allows viewing and listing all of the resources in the cluster
@@ -88,7 +88,7 @@ With this step, you will set up the OIDC provider in the kubeconfig file to enfo
 
 1. Install the [kubelogin](https://github.com/int128/kubelogin) plugin.
 2. Copy your current kubeconfig file into a new file.
-3. In the new kubeconfig file, define a new OIDC user and set up the OIDC provider. 
+3. In the new kubeconfig file, define a new OIDC user and set up the OIDC provider.
 
     ```yaml
     users:

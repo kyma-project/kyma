@@ -4,9 +4,9 @@ title: Register your addons in Service Catalog
 
 ## Register your addons in Service Catalog
 
-After you successfully create your addons, you can register them in Service Catalog. To do so, create a [ClusterAddonsConfiguration](../../05-technical-reference/06-custom-resources/smgt-03-hb-clusteraddonsconfiguration.md) or [AddonsConfiguration](../../05-technical-reference/06-custom-resources/smgt-04-hb-addonsconfiguration.md) CR for cluster-wide or Namespace-scoped addons respectively.
+After you successfully create your addons, you can register them in Service Catalog. To do so, create a [ClusterAddonsConfiguration](../../05-technical-reference/00-custom-resources/smgt-03-hb-clusteraddonsconfiguration.md) or [AddonsConfiguration](../../05-technical-reference/00-custom-resources/smgt-04-hb-addonsconfiguration.md) CR for cluster-wide or Namespace-scoped addons respectively.
 
-Service Catalog will then fetch the addons you provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs and will create respective ServiceClasses for them. To learn more about the technicalities behind this process, read [Helm Broker basic architecture](../../05-technical-reference/03-architecture/smgt-10-hb.md) and [Helm Broker architecture deep-dive](../../05-technical-reference/03-architecture/smgt-11-hb-deep-dive.md).
+Service Catalog will then fetch the addons you provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs and will create respective ServiceClasses for them. To learn more about the technicalities behind this process, read [Helm Broker basic architecture](../../05-technical-reference/00-architecture/smgt-10-hb.md) and [Helm Broker architecture deep-dive](../../05-technical-reference/00-architecture/smgt-11-hb-deep-dive.md).
 
 
 ## Registration rules

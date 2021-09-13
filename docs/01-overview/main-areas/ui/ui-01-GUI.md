@@ -1,8 +1,8 @@
 ---
-title: Busola - the Kyma Dashboard
+title: Kyma Dashboard
 ---
 
-Kyma uses Busola as a central administration dashboard, which provides a graphical overview of your cluster and deployments.
+Kyma uses [Busola](https://github.com/kyma-project/busola) as a central administration dashboard, which provides a graphical overview of your cluster and deployments.
 
 You can deploy microservices, create Functions, and manage their configurations. You can also use it to register cloud providers for additional services, create instances of these services, and use them in your microservices or Functions.
 
