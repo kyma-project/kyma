@@ -137,7 +137,7 @@ migrator:
       pullPolicy: IfNotPresent
     minioClient:
       repository: "eu.gcr.io/kyma-project/tpi/minio/mc"
-      tag: "RELEASE.2019-04-03T17-59-57Z-1de56388"
+      tag: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:

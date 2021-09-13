@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 image:
   repository: eu.gcr.io/kyma-project/tpi/jaeger-operator
-  tag: 1.18.1-1de56388
+  tag: 1.18.1-e0da5a68
   pullPolicy: IfNotPresent
   imagePullSecrets: []
 
