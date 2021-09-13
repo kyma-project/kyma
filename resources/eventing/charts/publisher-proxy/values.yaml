@@ -23,3 +23,7 @@ metrics:
     portName: http-metrics
     nameSuffix: "-metrics"
     interval: 30s
+
+publisherProxy:
+  config:
+    portName: tcp-client
