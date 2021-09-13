@@ -41,8 +41,6 @@ spec:
 EOF
 ```
 
-The operation was successful if the command returns the status `OK`.
-
   </details>
   <details>
   <summary label="Kyma Dashboard">

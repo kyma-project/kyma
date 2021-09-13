@@ -52,7 +52,7 @@ Now let's check the list of deployments using the Dashboard.
 1. Navigate to **Namespaces**.
 2. Click on the `kyma-system` Namespace.
     > **NOTE:** The system Namespaces are hidden by default. 
-    > To see `kyma-system` and other hidden Namespaces, go to your Dashboard profile, choose **Preferences**, and activate the **Show Hidden Namespaces** toggle in **Namespace Settings**.
+    > To see `kyma-system` and other hidden Namespaces, go to your Dashboard profile, choose **Preferences** > **Clusters**, and activate the **Show Hidden Namespaces** toggle.
 3. Click on **Deployments**.
 
 This gives you the same list of deployments as you got earlier via `kubectl`, just in a nicer visual packaging. 

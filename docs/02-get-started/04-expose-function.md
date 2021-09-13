@@ -52,7 +52,7 @@ EOF
 
 1. In your Function's view, go to the **Configuration** tab.
 2. Click on **Expose Function +**.
-3. Provide the **Name** (`hello-world`) and **Hostname** (`hello-world`) and click **Create**.
+3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
   </details>

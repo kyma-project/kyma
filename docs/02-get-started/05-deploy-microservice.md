@@ -1,5 +1,5 @@
 ---
-title: Deploy and expose a container microservice
+title: Deploy a container microservice
 ---
 
 You already know how to [deploy](03-deploy-function.md) and [expose a Function](04-expose-function.md). Let's now do the same with a container microservice.
