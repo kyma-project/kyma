@@ -52,6 +52,7 @@ spec:
         - --reverse-proxy=true
         - --auth-logging={{ .Values.kyma.authProxy.config.authLogging }}
         - --request-logging={{ .Values.kyma.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.kyma.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
             name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
