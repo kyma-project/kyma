@@ -20,7 +20,7 @@ resources:
     memory: 16Mi
 
 image:
-  tag: "26523737"
+  tag: "775123fa"
   name: "nats-operator"
   pullPolicy: "IfNotPresent"
 
