@@ -246,9 +246,7 @@ config:
       config:
         loglevel: warn
         lineFormat: json
-        removeKeys:
-          - kubernetes
-          - stream
+        removeKeys: kubernetes, stream
         labels: '{job="fluent-bit"}'
         labelMap:
           kubernetes:
