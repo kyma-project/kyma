@@ -2,25 +2,26 @@
 title: Install Kyma
 ---
 
-You can simply use the default Kyma installation, or modify it as it fits your purposes:
-
-## Default installation
-
+You can simply use the default Kyma installation, or modify it as it fits your purposes.
 Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to run Kyma locally.
 
-### Prerequisites
+## Prerequisites
+
+You have installed the following:
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://docs.docker.com/get-docker/)
 - [k3d](https://k3d.io/#installation)
 
-### Provision and install
+## Provision a cluster
 
 You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
 
   ```bash
   kyma provision k3d
   ```
+
+## Default installation
 
 Use the `deploy` command to install Kyma.
 
@@ -80,8 +81,10 @@ Optionally, you can specify from which source you want to deploy Kyma. For examp
 For example, to install Kyma from a specific version, such as `1.19.1`, run:
 
   ```bash
-  kyma deploy --source=1.19.1
+  kyma deploy --source=2.0
   ```
+
+>**NOTE:** You can choose to write either `kyma deploy --source=2.0` or `kyma deploy --source=release-2.0`.
 
 - Alternatively, to build Kyma from your local sources and deploy it on a remote cluster, run:
 
