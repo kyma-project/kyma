@@ -78,16 +78,13 @@ To install Kyma using your own domain name, you must provide the certificate and
 
 Optionally, you can specify from which source you want to deploy Kyma. For example, you can choose the `main` branch (or any other branch on the Kyma repository), a specific PR, or a release version. For more details, see the documentation for the `deploy` command.
 
-For example, to install Kyma from a specific version, such as `1.24.1`, run:
+- For example, to install Kyma from a specific version, such as `1.24.1`, run:
 
   ```bash
   kyma deploy --source=1.24.1
   ```
 
->**NOTE:** As Kyma follows the strategy "one branch for each release", `kyma deploy --source=2.0` and `kyma deploy --source=release-2.0` have the same result:
->
-> - `kyma deploy --source=2.0` deploys the specified Kyma release. 
-> - `kyma deploy --source=release-2.0` deploys Kyma from the branch called `release-2.0`.
+  As Kyma follows the strategy "one branch for each release", `kyma deploy --source=2.0` and `kyma deploy --source=release-2.0` have the same result: `kyma deploy --source=2.0` deploys the specified Kyma release or patch. `kyma deploy --source=release-2.0` deploys Kyma from the branch called `release-2.0`.
 
 - Alternatively, to build Kyma from your local sources and deploy it on a remote cluster, run:
 
