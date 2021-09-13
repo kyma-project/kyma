@@ -84,7 +84,8 @@ Optionally, you can specify from which source you want to deploy Kyma. For examp
   kyma deploy --source=1.24.1
   ```
 
-  As Kyma follows the strategy "one branch for each release", `kyma deploy --source=2.0` and `kyma deploy --source=release-2.0` have the same result: `kyma deploy --source=2.0` deploys the specified Kyma release or patch. `kyma deploy --source=release-2.0` deploys Kyma from the branch called `release-2.0`.
+  As Kyma follows the strategy "one branch for each minor release", `kyma deploy --source=2.0` and `kyma deploy --source=release-2.0` have the same result: `kyma deploy --source=release-2.0` deploys Kyma from the branch called `release-2.0`. `kyma deploy --source=2.0` deploys the specified Kyma release.
+  Install patches with `kyma deploy source=X.X.X` because there's no separate branch for a patch release.
 
 - Alternatively, to build Kyma from your local sources and deploy it on a remote cluster, run:
 
