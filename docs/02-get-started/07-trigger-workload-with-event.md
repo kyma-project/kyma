@@ -2,14 +2,14 @@
 title: Trigger a workload with an event
 ---
 
-We already have our workloads, [Function](04-expose-function.md) and [microservice](06-expose-microservice.md), exposed. 
-Now it's time to use them.
-We're going to trigger our workload with an event. 
+We already know how to create and expose a workload ([Function](04-expose-function.md) and [microservice](06-expose-microservice.md)). 
+Now it's time to actually use them.
+We're going to trigger a workload with an event. 
 
 ## Create a Function 
 
 To trigger our workload, we need something to trigger it with. 
-For this, we are going to create another Function with a corresponding OAuth2Client and an APIRule. 
+For this, we are going to create a new Function with a corresponding OAuth2Client and an APIRule. As this is a sample Function, we'll make it so that it both sends and receives the events. 
 
 <div tabs name="Create" group="trigger-workload">
   <details open>
