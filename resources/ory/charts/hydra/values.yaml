@@ -229,4 +229,4 @@ maester:
 
 busybox:
   repository: eu.gcr.io/kyma-project/external/busybox
-  tag: 1.32.0
+  tag: 1.32.0-v1

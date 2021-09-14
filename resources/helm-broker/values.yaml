@@ -72,7 +72,7 @@ defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/downlo
 additionalAddonsRepositories: {}
 
 addons-ui:
-  enabled: true
+  enabled: false
 
 global:
   containerRegistry:

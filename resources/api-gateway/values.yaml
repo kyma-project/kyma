@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "5af1e378"
+  tag: "ac45e9ce"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -49,7 +49,7 @@ config:
       - apiserver-proxy
       - apiserver-proxy-ssl
   domainAllowList:
-  enableDomainAllowList: true
+  enableDomainAllowList: false
   defaultDomain:
   cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
     allowOrigins:

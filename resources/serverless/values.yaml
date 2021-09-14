@@ -24,7 +24,7 @@ tests:
     e2e-skr: true
 
   long:
-    initTimeout: 120s
+    waitTimeout: 180s
     resources:
       requests:
         memory: 128Mi

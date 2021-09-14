@@ -104,6 +104,9 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+# Use it before commit
+check-code: check-imports fmt-local vet-local lint
+
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
@@ -123,7 +126,6 @@ copy-crds: manifests-local
 copy-external-crds:
 	@echo "copying external CRDs to config/crd/external"
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
-	cp ../../installation/resources/crds/ory/oauth2clients.crd.yaml config/crd/external/hydra.ory.sh_oauth2clients.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary

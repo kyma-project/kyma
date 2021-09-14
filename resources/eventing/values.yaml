@@ -13,6 +13,7 @@ global:
   istio:
     proxy:
       statusPort: 15020
+      portName: http-status
 
   securityContext:
     allowPrivilegeEscalation: false

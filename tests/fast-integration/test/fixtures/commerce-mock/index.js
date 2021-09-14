@@ -504,14 +504,13 @@ async function deleteMockTestFixture(targetNamespace) {
   await k8sDelete(commerceObjs)
   await k8sDelete(applicationObjs)
 }
-
-async function checkInClusterEventDelivery(targetNamespace) {
+async function checkInClusterEventDelivery(targetNamespace, encoding) {
   const eventId = "event-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
 
   // send event using function query parameter send=true
-  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true } }), 10, 1000)
+  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)
   // verify if event was received using function query parameter inappevent=eventId
   await retryPromise(async () => {
     debug("Waiting for event: ", eventId);

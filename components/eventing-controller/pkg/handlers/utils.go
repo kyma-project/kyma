@@ -181,6 +181,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	// Using default webhook auth unless specified in Subscription CR
 	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
+		auth = &types.WebhookAuth{}
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {

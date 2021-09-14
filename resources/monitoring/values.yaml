@@ -411,7 +411,7 @@ alertmanager:
     ##
     image:
       repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
-      tag: v0.21.0
+      tag: v0.23.0
       sha: ""
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration

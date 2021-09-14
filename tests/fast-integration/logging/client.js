@@ -1,7 +1,7 @@
-const axios = require('axios');
 
 const {
     kubectlPortForward,
+    getResponse,
 } = require("../utils");
 
 const lokiPort = 3100;
@@ -13,7 +13,7 @@ function lokiPortForward() {
 async function queryLoki(labels, startTimestamp) {
     try {
         const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
-        const responseBody = await axios.get(url);
+        const responseBody = await getResponse(url, 5);
         return responseBody.data;
     } catch(err) {
         const msg = "Error when querying Loki";

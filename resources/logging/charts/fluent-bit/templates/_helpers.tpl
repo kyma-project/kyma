@@ -62,11 +62,6 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{- define "helm-toolkit.utils.joinListWithComma" -}}
-{{- $local := dict "first" true -}}
-{{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
-{{- end -}}
-
 {{- define "loki.namespace.filter" -}}
 {{- if .Values.config.inputs.tail.exclude.namespaces -}}
 {{- $namespaces := splitList "," .Values.config.inputs.tail.exclude.namespaces -}}
