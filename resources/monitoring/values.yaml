@@ -706,7 +706,6 @@ kubeApiServer:
     keyFile: /etc/prometheus/secrets/istio.default/key.pem
     insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
     serverName: kubernetes
-    insecureSkipVerify: false
 
   ## If your API endpoint address is not reachable (as in AKS) you can replace it with the kubernetes service
   ##

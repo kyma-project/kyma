@@ -10,7 +10,15 @@ metadata:
 spec:
   endpoints:
   {{- if .Values.prometheusOperator.tls.enabled }}
-  - port: http
+  - port: https
+    scheme: https
+    tlsConfig:
+      serverName: {{ template "kube-prometheus-stack.operator.fullname" . }}
+      ca:
+        secret:
+          name: {{ template "kube-prometheus-stack.fullname" . }}-admission
+          key: ca
+          optional: false
   {{- else }}
   - port: http
     scheme: http
