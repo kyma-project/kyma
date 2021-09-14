@@ -4,7 +4,7 @@ title: Deploy a Function
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
 
-## Create and apply your function
+## Create a function
 
 First, let's create the Function and apply it.
 
@@ -35,7 +35,7 @@ kyma apply function
 </div>
 
 
-## Verify the Function deployment
+### Verify the Function deployment
 
 Now let's make sure that the Function has been deployed successfully. 
 
@@ -66,4 +66,96 @@ The operation was successful if the Function **Status** changed from `DEPLOYING`
   </details>
 </div>
 
+<!--
+## Expose the Function
 
+After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
+
+> **CAUTION:** Exposing a Function to the outside world is always a potential security vulnerability, so tread carefully.
+
+First, let's create an [APIRule](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for the Function.
+
+<div tabs name="Expose the Function" group="expose-function">
+  <details open>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+
+Run:
+
+```bash
+cat <<EOF | kubectl apply -f -
+  apiVersion: gateway.kyma-project.io/v1alpha1
+  kind: APIRule
+  metadata:
+    name: hello-world
+    namespace: default
+  spec:
+    gateway: kyma-gateway.kyma-system.svc.cluster.local
+    rules:
+      - accessStrategies:
+        - config: {}
+          handler: allow
+        methods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - HEAD
+        path: /.*
+    service:
+      host: hello-world.$CLUSTER_DOMAIN
+      name: hello-world
+      port: 80
+EOF
+```
+
+  </details>
+  <details>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In your Function's view, go to the **Configuration** tab.
+2. Click on **Expose Function +**.
+3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
+
+> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
+  </details>
+</div>
+
+### Verify the Function exposure
+
+Now let's verify that the Function has been exposed successfully.
+
+<div tabs name="Access the Function" group="expose-function">
+  <details open>
+  <summary label="kubectl">
+  kubectl
+  </summary>
+
+Run:
+
+```bash
+curl https://hello-world.$CLUSTER_DOMAIN
+```
+
+The operation was successful if the call returns `Hello Serverless`.
+
+  </details>
+  <details>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+In your Function's **Configuration** tab, click on the APIRule's **Hostname**.
+This will open the Function's external address as a new page.
+
+> **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.
+
+The operation was successful if the page says `Hello World!`.
+  </details>
+</div>
+
+-->

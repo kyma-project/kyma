@@ -4,9 +4,8 @@ title: Overview
 
 This set of Get Started guides will walk you through the major Kyma components and show its main use cases as an Application runtime.
 
-
-
 All guides, whenever possible, demonstrate the steps in both kubectl and Kyma Dashboard.
+All the steps are performed in the `deafult` Namespace. 
 
 ## Prerequisites
 

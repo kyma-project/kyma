@@ -15,7 +15,7 @@ kyma deploy
 
 > **NOTE:** Check out [more installation options for Kyma](../04-operation-guides/operations/02-install-kyma.md).
 
-## Verify the installation
+### Verify the installation
 
 Now let's verify that the installation was successful. Run:
 
@@ -24,6 +24,19 @@ kubectl get deployments -n kyma-system
 ```
 
 The installation succeeded if all the Deployments returned are in status `READY`.
+
+### Export your cluster domain
+
+For convenience, expose the domain of the cluster as an environment variable now. 
+We will use it later in the guides. 
+
+```bash
+export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
+```
+
+<!---TODO
+> **NOTE:** For local installation, the cluster domain is ``.
+-->
 
 ## Connect to Kyma Dashboard
 
@@ -37,12 +50,12 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
 
 2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
 3. Click to add your cluster to the Dashboard. 
-4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and paste it into the Dashboard as prompted.
+4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and upload it into the Dashboard as prompted.
 
 This takes you to your Kyma Dashboard.
 
 <!--
-//TODO: finish when Busola working with Docker gets fixed
+//TODO: Finish when Busola working with Docker gets fixed. Replace the Docker command in step 1 with `kyma dashboard --local` and the address in step 2 with `https://dashboard.kyma-project/`.
 -->
 
 ## Check the list of Deployments via Dashboard
