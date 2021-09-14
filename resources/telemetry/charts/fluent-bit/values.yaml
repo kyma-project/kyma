@@ -267,7 +267,7 @@ command: []
 
 initContainers: 
   - name: prep-fluent-bit-config
-    image: eu.gcr.io/kyma-project/external/busybox:1.32.0
+    image: eu.gcr.io/kyma-project/external/busybox:1.32.0-v1
     volumeMounts:
     - name: shared-fluent-bit-config
       mountPath: /fluent-bit/etc/

@@ -30,7 +30,7 @@
     "mocha-multi-reporters": "^1.5.1"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.13.0",
+    "@kubernetes/client-node": "0.15.1",
     "adm-zip": "^0.5.3",
     "axios": "^0.21.0",
     "axios-retry": "^3.1.9",

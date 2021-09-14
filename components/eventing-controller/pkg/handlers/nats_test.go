@@ -228,7 +228,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 
 	// Create 3 subscriptions having the same sink and the same event type
 	var subs [3]*eventingv1alpha1.Subscription
-	for i:=0; i< len (subs); i++ {
+	for i := 0; i < len(subs); i++ {
 		subs[i] = eventingtesting.NewSubscription(fmt.Sprintf("sub-%d", i), "foo", eventingtesting.WithNotCleanEventTypeFilter)
 		subs[i].Spec.Sink = subscriberReceiveURL
 		if _, err = natsClient.SyncSubscription(subs[i], cleaner); err != nil {
@@ -247,14 +247,14 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 
 	// Check for the 3 events that should be received by the subscriber
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	for i:=0; i < len(subs); i++ {
+	for i := 0; i < len(subs); i++ {
 		if err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL); err != nil {
 			t.Fatalf("subscriber did not receive the event: %v", err)
 		}
 	}
 
 	// Delete all 3 subscription
-	for i:=0; i < len(subs); i++ {
+	for i := 0; i < len(subs); i++ {
 		if err = natsClient.DeleteSubscription(subs[i]); err != nil {
 			t.Fatalf("delete subscription %s failed: %v", subs[i].Name, err)
 		}

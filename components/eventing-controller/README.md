@@ -11,6 +11,10 @@ This component contains controllers for various CustomResourceDefinitions relate
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
 - Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
+- Install lint on the local environment
+```bash
+curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
+```
 
 ### Installation
 
@@ -100,6 +104,11 @@ make uninstall-samples
 ```
 
 ## Development
+
+- check code quality before a commit:
+```bash
+$ make code-check
+```
 
 ### Project setup
 
