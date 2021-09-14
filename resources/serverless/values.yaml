@@ -86,10 +86,10 @@ images:
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "19830ec3"
+      tag: "PR-12096"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "19830ec3"
+      tag: "PR-12096"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
       tag: "19830ec3"
