@@ -15,12 +15,7 @@ spec:
       {{- include "kube-state-metrics.selectorLabels" . | nindent 6 }}
   endpoints:
     - port: http
-      scheme: https
-      tlsConfig: 
-        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-        keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+      scheme: http
     {{- if .Values.prometheus.monitor.honorLabels }}
       honorLabels: true
       {{- end }}
