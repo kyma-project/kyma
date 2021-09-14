@@ -696,11 +696,8 @@ grafana:
 ##
 kubeApiServer:
   enabled: true
-
-    ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
-    ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
   tlsConfig: 
-    insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+    insecureSkipVerify: false
     serverName: kubernetes
 
   ## If your API endpoint address is not reachable (as in AKS) you can replace it with the kubernetes service

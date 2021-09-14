@@ -15,8 +15,7 @@ spec:
       {{- include "kube-state-metrics.selectorLabels" . | nindent 6 }}
   endpoints:
     - port: http
-      scheme: http
-    {{- if .Values.prometheus.monitor.honorLabels }}
+      {{- if .Values.prometheus.monitor.honorLabels }}
       honorLabels: true
       {{- end }}
 {{- end }}
