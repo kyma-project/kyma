@@ -17,7 +17,6 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Register a service](../../../03-tutorials/00-application-connectivity/ac-04-register-manage-services.md)
   - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-05-register-secured-api.md)
   - [Bind a service to a Namespace](../../../03-tutorials/00-application-connectivity/ac-06-service-mapping.md)
-  - [Trigger a Function with events](../../../03-tutorials/00-application-connectivity/ac-07-trigger-function-with-event.md)
   - [Call a registered external service from Kyma](../../../03-tutorials/00-application-connectivity/ac-08-call-registered-service-from-kyma.md)
   - [Renew a client certificate](../../../03-tutorials/00-application-connectivity/ac-09-renew-client-cert.md)
   - [Revoke a client certificate](../../../03-tutorials/00-application-connectivity/ac-10-revoke-client-cert.md)
