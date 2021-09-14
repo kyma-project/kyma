@@ -1,12 +1,7 @@
 const { assert } = require("chai");
-const path = require("path");
 
 const {
   waitForPodWithLabel,
-  k8sApply,
-  loadResource,
-  namespaceObj,
-  deleteNamespaces,
 } = require("../utils");
 
 const {
@@ -22,7 +17,6 @@ const {
   buildScrapePoolSet,
   assertTimeSeriesExist,
   getNotRegisteredPrometheusRuleNames,
-  waitForPrometheusToRemoveRule,
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
@@ -30,9 +24,6 @@ describe("Monitoring test", function () {
   this.slow(5 * 1000);
 
   var cancelPortForward;
-
-  const testNamespace = "test-prometheus";
-  const testRuleName = "test-prom.rules";
 
   before(async () => {
     cancelPortForward = prometheusPortForward();
@@ -52,12 +43,6 @@ describe("Monitoring test", function () {
       "kube-state-metrics",
       namespace
     );
-  });
-
-  it("Provision monitoring test resources", async () => {
-    await k8sApply([namespaceObj(testNamespace)]);
-    const promrule = loadResource(path.join(__dirname, "./test-rule.yaml"));
-    await k8sApply(promrule, testNamespace);
   });
 
   it("All Prometheus targets should be healthy", async () => {
@@ -149,9 +134,4 @@ describe("Monitoring test", function () {
       `Following rules are not picked up by Prometheus: ${notRegisteredRules.join(", ")}`
     );
   });
-
-  it("Delete monitoring test resources", async function() {
-    await deleteNamespaces([testNamespace]);
-    await waitForPrometheusToRemoveRule(testRuleName);
-  })
 });

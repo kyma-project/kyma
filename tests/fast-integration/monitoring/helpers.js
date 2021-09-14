@@ -316,33 +316,11 @@ function removeNamePrefixes(ruleNames) {
 }
 
 async function getNotRegisteredPrometheusRuleNames() {
-  let notRegisteredRules = []
-  let retries = 0;
-  while (retries < 20) {
     let registeredRules = await getRegisteredPrometheusRuleNames();
     let k8sRuleNames = await getK8sPrometheusRuleNames();
     k8sRuleNames = removeNamePrefixes(k8sRuleNames);
-    notRegisteredRules = k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
-    if (notRegisteredRules.length === 0) {
-      break;
-    }
-    await sleep(5*1000);
-    retries++;
-  }
-  return notRegisteredRules;
-}
-
-async function waitForPrometheusToRemoveRule(ruleName) {
-  let retries = 0;
-  while (retries < 20) {
-    let registeredRules = await getRegisteredPrometheusRuleNames();
-    if (!registeredRules.includes(ruleName)) {
-      return;
-    }
-    await sleep(5*1000);
-    retries++;
-  }
-  throw new Error(`Timeout exceeded while waiting for Prometheus to remove the rule group: ${ruleName}`);
+    let notRegisteredRules = k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
+    return notRegisteredRules;
 }
 
 module.exports = {
@@ -356,5 +334,4 @@ module.exports = {
   checkGrafanaRedirectsInKyma1,
   checkGrafanaRedirectsInKyma2,
   getNotRegisteredPrometheusRuleNames,
-  waitForPrometheusToRemoveRule,
 };

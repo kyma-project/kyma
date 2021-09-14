@@ -1220,13 +1220,6 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
-function loadResource(filepath) {
-  const resource = fs.readFileSync(filepath, {
-    encoding: "utf8",
-  });
-  return k8s.loadAllYaml(resource);
-}
-
 async function patchDeployment(name, ns, patch) {
   const options = {
     headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
@@ -1272,7 +1265,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
 }
 
 module.exports = {
-  loadResource,
   initializeK8sClient,
   retryPromise,
   convertAxiosError,
