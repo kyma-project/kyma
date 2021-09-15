@@ -1,15 +1,15 @@
 ---
-title: Deploy a container microservice
+title: Deploy and expose a container microservice
 ---
 
-You already know how to [deploy](03-deploy-function.md) and [expose a Function](04-expose-function.md). Let's now do the same with a container microservice.
+You already know how to [deploy](03-deploy-expose-function.md#create-a-function) and [expose a Function](03-deploy-expose-function.md#expose-the-function). Let's now do the same with a container microservice.
 We'll use the Kyma example [`orders-service`](https://github.com/kyma-project/examples/blob/master/orders-service/README.md) for this.
 
 ## Deploy the microservice
 
 First, let's create a Deployment that provides the microservice definition and lets you run it on the cluster. 
 
-<div tabs name="Create a microservice Deployment" group="deploy-microservice">
+<div tabs name="Create a microservice Deployment" group="deploy-expose-microservice">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -94,7 +94,7 @@ The operation was successful if the Pod **Status** for the Deployment is `RUNNIN
 
 Now that we have the Deployment, let's deploy the Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) to allow other Kubernetes resources to communicate with your microservice.
 
-<div tabs name="Create a Service" group="deploy-microservice">
+<div tabs name="Create a Service" group="deploy-expose-microservice">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -153,14 +153,13 @@ The operation was successful if ... .
   </details>
 </div>
 
-<!--
 ## Expose the microservice
 
 We have the Service created. Let's now expose it outside the cluster.
 
-To expose our microservice, we must create an [APIRule CR](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for it, just like when we [exposed our Function](04-expose-function.md).
+To expose our microservice, we must create an [APIRule CR](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for it, just like when we [exposed our Function](03-deploy-expose-function.md#expose-the-function).
 
-<div tabs name="Expose the microservice" group="deploy-microservice">
+<div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -180,7 +179,7 @@ metadata:
 #    example: orders-service
 spec:
   service:
-    host: orders-service
+    host: orders-service.$CLUSTER_DOMAIN
     name: orders-service
     port: 80
   gateway: kyma-gateway.kyma-system.svc.cluster.local
@@ -210,7 +209,7 @@ EOF
 
 Now let's check that the microservice has been exposed successfully.
 
-<div tabs name="Verify microservice exposure" group="deploy-microservice">
+<div tabs name="Verify microservice exposure" group="deploy-expose-microservice">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -239,5 +238,3 @@ The operation was successful if the command returns the (possibly empty `[]`) li
 The operation was successful if the page shows the (possibly empty `[]`) list of orders.
   </details>
 </div>
-
--->

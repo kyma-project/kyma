@@ -1,5 +1,5 @@
 ---
-title: Deploy a Function
+title: Deploy and expose a Function
 ---
 
 Now that you've installed Kyma, let's deploy your first Function. We'll call it `hello-world`.
@@ -8,7 +8,7 @@ Now that you've installed Kyma, let's deploy your first Function. We'll call it 
 
 First, let's create the Function and apply it.
 
-<div tabs name="Deploy a Function" group="deploy-function">
+<div tabs name="Deploy a Function" group="deploy-expose-function">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -28,7 +28,7 @@ kyma apply function
   </summary>
 
 1. In Kyma Dashboard, go to the `default` Namespace.
-2. Go to **Functions**.
+2. Go to **Workloads** > **Functions**.
 3. Click on **Create Function +**.
 4. Name the Function `hello-world` and click **Create**.
   </details>
@@ -39,7 +39,7 @@ kyma apply function
 
 Now let's make sure that the Function has been deployed successfully. 
 
-<div tabs name="Verify the Function deployment" group="deploy-function">
+<div tabs name="Verify the Function deployment" group="deploy-expose-function">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -66,7 +66,6 @@ The operation was successful if the Function **Status** changed from `DEPLOYING`
   </details>
 </div>
 
-<!--
 ## Expose the Function
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
@@ -75,7 +74,7 @@ After we've got our `hello-world` Function deployed, we might want to expose it 
 
 First, let's create an [APIRule](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for the Function.
 
-<div tabs name="Expose the Function" group="expose-function">
+<div tabs name="Expose the Function" group="deploy-expose-function">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -129,7 +128,7 @@ EOF
 
 Now let's verify that the Function has been exposed successfully.
 
-<div tabs name="Access the Function" group="expose-function">
+<div tabs name="Access the Function" group="deploy-expose-function">
   <details open>
   <summary label="kubectl">
   kubectl
@@ -157,5 +156,3 @@ This will open the Function's external address as a new page.
 The operation was successful if the page says `Hello World!`.
   </details>
 </div>
-
--->
