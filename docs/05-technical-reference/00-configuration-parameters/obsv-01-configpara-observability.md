@@ -18,10 +18,10 @@ To override the configuration, redefine the default values in your custom `value
 
 ### Logging
 
-[Logging values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
+[Logging `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/values.yaml) and subcharts:
 
-- [Fluent Bit values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/fluent-bit/values.yaml)
-- [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
+- [Fluent Bit `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/fluent-bit/values.yaml)
+- [Loki `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml)
 
 ### Tracing
 
