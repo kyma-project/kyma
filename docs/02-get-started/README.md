@@ -1,3 +1,7 @@
+---
+title: Get Started
+---
+
 This set of Get Started guides will show you how to set sail with Kyma and demonstrate its main use cases.
 
 All guides, whenever possible, demonstrate the steps in both kubectl and Kyma Dashboard.
