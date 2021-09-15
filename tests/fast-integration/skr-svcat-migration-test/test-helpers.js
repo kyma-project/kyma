@@ -85,7 +85,7 @@ async function getFunctionPod(functionName) {
     if (res.body.items.length != 1) {
         let podNames = res.body.items.map(p=>p.metadata.name);
         let phases = res.body.items.map(p=>p.status.phase);
-        throw new Error(`Failed to find function ${functionName} pod in 5 minutes. Expected 1 ${labelSelector} pod with phase "Runninng" but found ${res.body.items.length}, ${podNames}, ${phases}`);
+        throw new Error(`Failed to find function ${functionName} pod in 5 minutes. Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}`);
     }
 }
 
