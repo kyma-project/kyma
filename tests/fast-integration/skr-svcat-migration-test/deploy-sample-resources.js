@@ -17,7 +17,6 @@ const {
 } = require('perf_hooks');
 
 async function installResource(manifest, resource, name, namespace) {
-
   try {
     debug(`Applying ${resource} manifest ${manifest}`)
     await kubectlApply(manifest);
@@ -51,11 +50,9 @@ async function installResource(manifest, resource, name, namespace) {
     console.log(error)
     throw new Error(`Failed to wait for resource ${resource} with name ${name}.`)
   }
-
 }
 
 async function installRedisExample(options) {
-  // console.time('installRedisExample')
   let t0 = performance.now()
 
   options = options || {};
@@ -79,14 +76,12 @@ async function installRedisExample(options) {
   await installResource(funcSBManifestPath, "servicebinding", "func-sb-redis-function-1", "default")
   await installResource(sbuManifestPath, "servicebindingusage", "hb-instbind-redis-1", "default")
   
-  // return console.timeEnd('installRedisExample')
   let t1 = performance.now()
   console.log(`Finished deployment of Redis in ${t1-t0} ms`)
   return {resource: "Redis", duration: t1-t0}
 }
 
 async function installAuditlogExample(options) {
-  // console.time('installAuditlogExample')
   let t0 = performance.now()
   
   options = options || {};
@@ -101,14 +96,13 @@ async function installAuditlogExample(options) {
   await installResource(funcSBManifestPath, "servicebinding", "func-sb-svcat-auditlog-api-1", "default")
   await installResource(sbuManifestPath, "servicebindingusage", "func-sbu-svcat-auditlog-api-1", "default")
   
-  // return console.timeEnd('installAuditlogExample')
+
   let t1 = performance.now()
   console.log(`Finished deployment of Audit-Log in ${t1-t0} ms`)
   return {resource: "Audit-Log", duration: t1-t0}
 }
 
 async function installHTML5AppsRepoExample(options) {
-  // console.time('installHTML5AppsRepoExample')
   let t0 = performance.now()
 
   options = options || {};
@@ -123,14 +117,12 @@ async function installHTML5AppsRepoExample(options) {
   await installResource(funcSBManifestPath, "servicebinding", "func-sb-svcat-html5-apps-repo-1", "default")
   await installResource(sbuManifestPath, "servicebindingusage", "func-sbu-svcat-html5-apps-repo-1", "default")
   
-  // return console.timeEnd('installHTML5AppsRepoExample')
   let t1 = performance.now()
   console.log(`Finished deployment of HTML5-Apps-Repo in ${t1-t0} ms`)
   return {resource: "HTML5-Apps-Repo", duration: t1-t0}
 }
 
 async function installAuditManagementExample(options) {
-  // console.time('installAuditManagementExample')
   let t0 = performance.now()
 
   options = options || {};
@@ -145,7 +137,6 @@ async function installAuditManagementExample(options) {
   await installResource(funcSBManifestPath, "servicebinding", "func-sb-svcat-auditlog-management-1", "default")
   await installResource(sbuManifestPath, "servicebindingusage", "func-sbu-svcat-auditlog-management-1", "default")
   
-  // return console.timeEnd('installAuditManagementExample')
   let t1 = performance.now()
   console.log(`Finished deployment of Audit-Management in ${t1-t0} ms`)
   return {resource: "Audit-Management", duration: t1-t0}
