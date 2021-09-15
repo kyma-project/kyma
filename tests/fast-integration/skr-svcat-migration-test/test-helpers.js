@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sResource, sleep
+    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sResource, sleep, deleteAllK8sResources, listResources
 } = require("../utils");
 
 class SMCreds {
@@ -293,6 +293,38 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
     }
 }
 
+async function deleteBTPResources() {
+    const group = "services.cloud.sap.com";
+    const version = "v1alpha1";
+    const instances = "serviceinstances";
+    const bindings = "servicebindings";
+    const keepFinalizers = true;
+    await deleteAllK8sResources(`/apis/${group}/${version}/${instances}`, {}, 10, 1000, keepFinalizers);
+    await deleteAllK8sResources(`/apis/${group}/${version}/${bindings}`, {}, 10, 1000, keepFinalizers);
+
+    let needsPoll = [];
+    for (let i = 0; i < 90; i++) { // 15 minutes
+        needsPoll = [];
+        let k8sInstances = listResources(`/apis/${group}/${version}/${instances}`);
+        if (k8sInstances > 1) {
+            needsPoll.push(k8sInstances);
+        }
+        let k8sBindings = listResources(`/apis/${group}/${version}/${bindings}`);
+        if (k8sBindings > 1) {
+            needsPoll.push(k8sBindings);
+        }
+        if (needsPoll.length != 0) {
+            await sleep(10000); // 10 seconds
+        } else {
+            break;
+        }
+    }
+    if (needsPoll.length != 0) {
+        let info = JSON.stringify(needsPoll, null, 2);
+        throw new Error(`Failed to delete BTP Operator ServiceInstances and ServiceBindings in 15 minutes.\n${info}`);
+    }
+}
+
 module.exports = {
     provisionPlatform,
     smInstanceBinding,
@@ -304,5 +336,6 @@ module.exports = {
     readClusterID,
     SMCreds,
     checkPodPresetEnvInjected,
-    restartFunctionsPods
+    restartFunctionsPods,
+    deleteBTPResources,
 };

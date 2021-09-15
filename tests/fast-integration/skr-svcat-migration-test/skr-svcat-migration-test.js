@@ -117,10 +117,11 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should destroy sample service catalog resources`, async function() {
-    // TODO: Remove anything from BT-Operator
     await sampleResources.destroy()
+  });
 
-    // TODO: Check if no Service Instances are left over
+  it(`Should delete migrated BTP resources`, async function() {
+    await t.deleteBTPResources();
   });
 
   it(`Should deprovision SKR`, async function() {
