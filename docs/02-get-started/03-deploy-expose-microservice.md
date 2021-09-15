@@ -2,7 +2,7 @@
 title: Deploy and expose a container microservice
 ---
 
-You already know how to [deploy](03-deploy-expose-function.md#create-a-function) and [expose a Function](03-deploy-expose-function.md#expose-the-function). Let's now do the same with a container microservice.
+You already know how to [deploy](02-deploy-expose-function.md#create-a-function) and [expose a Function](02-deploy-expose-function.md#expose-the-function). Let's now do the same with a container microservice.
 We'll use the Kyma example [`orders-service`](https://github.com/kyma-project/examples/blob/master/orders-service/README.md) for this.
 
 ## Deploy the microservice
@@ -157,7 +157,7 @@ The operation was successful if ... .
 
 We have the Service created. Let's now expose it outside the cluster.
 
-To expose our microservice, we must create an [APIRule CR](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for it, just like when we [exposed our Function](03-deploy-expose-function.md#expose-the-function).
+To expose our microservice, we must create an [APIRule CR](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
 <div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>

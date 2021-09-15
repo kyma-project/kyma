@@ -2,7 +2,7 @@
 title: Observability
 ---
 
-We successfully got our Function [triggered](05-trigger-workload-with-event.md).
+We successfully got our Function [triggered](04-trigger-workload-with-event.md).
 Now we would like to check its logs. 
 To do that, we'll use the Grafana dashboard that comes with Kyma. 
 
