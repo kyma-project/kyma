@@ -29,4 +29,4 @@ To override the configuration, redefine the default values in your custom `value
 
 ### Kiali
 
-[Kiali values.yaml](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml)
+[Kiali `values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/kiali/values.yaml)
