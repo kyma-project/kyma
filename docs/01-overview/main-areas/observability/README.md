@@ -10,7 +10,7 @@ Kyma comes with tools that give you the most accurate and up-to-date monitoring,
 
 ## Benefits of distributed tracing
 
-Observability tools should clearly show the big picture, no matter if you're monitoring just a couple or multiple components. In a cloud-native microservice architecture, a user request often flows through dozens of different microservices. Tools such as logging or monitoring help to track the way, however, they treat each component or microservice in isolation. This individual treatment results in operational issues.
+Observability tools should clearly show the big picture, no matter if you're monitoring just a few or many components. In a cloud-native microservice architecture, a user request often flows through dozens of different microservices. Tools such as logging or monitoring help to track the request's path. However, they treat each component or microservice in isolation. This individual treatment results in operational issues.
 
 Distributed tracing charts out the transactions in cloud-native systems, helping you to understand the application behavior and relations between the frontend actions and backend implementation.
 
