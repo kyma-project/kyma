@@ -430,9 +430,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 									},
 								},
 								InitialDelaySeconds: 0,
-								PeriodSeconds:       1, // the lowest acceptable value, we should check it even more often but k8s doesn't let us
+								PeriodSeconds:       5,
 								SuccessThreshold:    1,
-								FailureThreshold:    120, // FailureThreshold * PeriodSeconds = 120s in this case, this should be enough for any function pod to start up
+								FailureThreshold:    30, // FailureThreshold * PeriodSeconds = 150s in this case, this should be enough for any function pod to start up
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
@@ -444,6 +444,18 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
 								FailureThreshold:    1,
 								PeriodSeconds:       5,
+								TimeoutSeconds:		 2,
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								FailureThreshold:    3,
+								PeriodSeconds:       15,
+								TimeoutSeconds:		 2,
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							SecurityContext: &corev1.SecurityContext{
