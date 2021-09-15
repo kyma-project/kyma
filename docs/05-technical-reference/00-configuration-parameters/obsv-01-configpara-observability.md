@@ -8,7 +8,7 @@ To override the configuration, redefine the default values in your custom `value
 
 ### Monitoring
 
-[Monitoring values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/values.yaml) and subcharts:
+[Monitoring `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/values.yaml) and subcharts:
 
 - [Grafana values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/grafana/values.yaml)
 - [Kube-state-metrics values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/kube-state-metrics/values.yaml)
