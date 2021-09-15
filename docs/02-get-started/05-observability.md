@@ -6,7 +6,7 @@ We successfully got our Function [triggered](04-trigger-workload-with-event.md).
 Now we would like to check its logs. 
 To do that, we'll use the Grafana dashboard that comes with Kyma. 
 
-> **NOTE:** See how to access logs from the Function's Pod [via Kyma Dashboard](../04-operation-guides/operations/obsv-01-access-logs.md/#kubernetes-logs-in-kyma-dashboard) and [using kubectl](../04-operation-guides/operations/obsv-01-access-logs.md/#kubernetes-logs-using-kubectl). 
+> **NOTE:** See how to access logs from the Function's Pod [via Kyma Dashboard](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-in-kyma-dashboard) and [using kubectl](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-using-kubectl). 
 
 1. To access Grafana, forward a local port to a port on the service's Pod:
     ```bash
@@ -24,4 +24,4 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 You may now browse the logs. That's it! 
 
-Go ahead and dive a little deeper into the Kyma documentation for more [guides](../04-operation-guides), [tutorials](../03-tutorials), and [technical references](../05-technical-reference), as well as information on the [main areas in Kyma](../01-overview/02-main-areas). Happy Kyma-ing!
+Go ahead and dive a little deeper into the Kyma documentation for more [guides](../04-operation-guides), [tutorials](../03-tutorials), and [technical references](../05-technical-reference), as well as information on the [main areas in Kyma](../01-overview/main-areas). Happy Kyma-ing!

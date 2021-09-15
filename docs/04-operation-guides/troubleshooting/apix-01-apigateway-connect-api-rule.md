@@ -4,7 +4,7 @@ title: Cannot connect to a service exposed by an APIRule
 
 ## Basic diagnostics
 
-API Gateway is a Kubernetes controller, which operates on APIRule custom resources. To diagnose the problems, inspect the [`status`](../../05-technical-reference/00-custom-resources/apix-01-apirule.md/#status-codes) field of the APIRule CR:
+API Gateway is a Kubernetes controller, which operates on APIRule custom resources. To diagnose the problems, inspect the [`status`](../../05-technical-reference/00-custom-resources/apix-01-apirule.md#status-codes) field of the APIRule CR:
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
@@ -37,7 +37,7 @@ If you reach your service and get `401 Unauthorized` or `403 Forbidden` in respo
       curl -X POST "https://oauth2.{DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
       ```
 
-  4. Generate a [new access token](../../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md/#register-an-oauth2-client-and-get-tokens) if needed.
+  4. Generate a [new access token](../../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md#register-an-oauth2-client-and-get-tokens) if needed.
 
 - Your client from OAuth2Client resource is registered properly in Hydra OAuth2 and OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow this steps:
 
