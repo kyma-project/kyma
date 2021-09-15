@@ -2,16 +2,8 @@
 title: Configuration parameters
 ---
 
-This section contains chart values that you can modify to [change the default Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
+Kyma uses Helm's chart templating mechanism with `values.yaml` files that contain the configuration parameters.
 
-## Global Kyma chart and component sub-charts
+A global chart can override the subcharts that complement it. Learn more about the syntax and semantics of [global charts and subcharts in Helm](https://helm.sh/docs/chart_template_guide/subcharts_and_globals/).
 
-To modify the default Kyma settings, override the values from the global Kyma chart and sub-charts for the components.
-
-## Syntax and semantic of the values yaml
-
-The `prerequisites` attribute of the yaml file must conform to the following syntax and semantic:
-
-- TBD
-- TBD
-- TBD
+If you want to [change the Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md), simply redefine them in your custom `values.yaml` file and supply them as input to the `kyma deploy` command, similar to Helm commands.
