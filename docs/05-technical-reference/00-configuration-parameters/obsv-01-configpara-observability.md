@@ -25,7 +25,7 @@ To override the configuration, redefine the default values in your custom `value
 
 ### Tracing
 
-[Tracing values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/tracing/values.yaml)
+[Tracing `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/tracing/values.yaml)
 
 ### Kiali
 
