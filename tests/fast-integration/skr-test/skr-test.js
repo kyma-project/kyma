@@ -85,6 +85,16 @@ describe("SKR test", function () {
 
   let skr;
 
+  if (getEnvOrDefault("FI_RUN_INITIAL_CLEANUP", "false") == "true") {
+    it("Deprovision SKR", async function () {
+      await deprovisionSKR(keb, runtimeID);
+    });
+
+    it("Unregister SKR resources from Compass", async function () {
+      await unregisterKymaFromCompass(director, scenarioName);
+    });
+  }
+
   if (getEnvOrDefault("FI_SKIP_PROVISIONING", "false") != "true") {
     it(`Provision SKR with ID ${runtimeID}`, async function () {
       const customParams = {
