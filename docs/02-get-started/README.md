@@ -11,7 +11,7 @@ All the steps are performed in the `deafult` Namespace.
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (1.19 or greater)
 - [curl](https://github.com/curl/curl)
-- [k3d](https://k3d.io/#installation)
+- [k3d](https://k3d.io)
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 
 ## Steps
