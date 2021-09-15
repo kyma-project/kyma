@@ -94,7 +94,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should wait for migration job to finish`, async function() {
-    await waitForJob("sap-btp-operator-migration", "sap-btp-operator");
+    await waitForJob("sap-btp-operator-migration", "sap-btp-operator", 10 * 60 * 1000); //10 minutes
   });
   
   it(`Should print the container logs of the migration job`, async function() {

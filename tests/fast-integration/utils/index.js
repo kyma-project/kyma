@@ -599,7 +599,7 @@ function waitForJob(name, namespace = "default", timeout = 900000, success = 1) 
       );
     },
     timeout,
-    `Waiting for Job ${name} to suceed ${success} timeout (${timeout} ms)`
+    `Waiting for Job ${name} to succeed ${success} timeout (${timeout} ms)`
   );
 }
 
