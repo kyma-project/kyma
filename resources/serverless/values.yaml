@@ -81,7 +81,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "4862778b"
+    tag: "PR-12110"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
