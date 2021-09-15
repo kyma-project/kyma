@@ -16,12 +16,9 @@ To perform tasks with Eventing, go through these tutorials:
 
 - [Tutorial: Send events without a Kyma Application](../../../03-tutorials/00-eventing/evnt-01-setup-in-cluster-eventing.md) - explains how to send events without the need for a Kyma Application.
 
-> **NOTE:** The two tutorials below are part of the Getting Started Guide and are not meant to be standalone. As a prerequisite you should complete the previous tutorials first, especially [Connect an external application](../../../02-get-started/00-08-connect-external-application.md).
+- [Tutorial: Trigger your workload with an event](../../../02-get-started/04-trigger-workload-with-event.md) - part of the [Get Started guides](../../../02-get-started), shows how to deploy a Function and trigger it with an event.
 
-- [Tutorial: Trigger microservice with event](../../../02-get-started/00-09-trigger-microservice-with-event.md)
-- [Tutorial: Trigger function with event](../../../02-get-started/00-13-trigger-function-with-event.md)
-
-For other technical resources, check out these links on the the Kyma GitHub repository:
+For other technical resources, check out these links on the Kyma GitHub repository:
 
 - [Eventing Helm chart](https://github.com/kyma-project/kyma/tree/main/resources/eventing)
 - [Event Publishing Proxy](https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy)

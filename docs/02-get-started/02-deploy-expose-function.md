@@ -72,7 +72,7 @@ After we've got our `hello-world` Function deployed, we might want to expose it 
 
 > **CAUTION:** Exposing a Function to the outside world is always a potential security vulnerability, so tread carefully.
 
-First, let's create an [APIRule](../05-technical-reference/06-custom-resources/apix-01-apirule.md) for the Function.
+First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
 <div tabs name="Expose the Function" group="deploy-expose-function">
   <details open>
