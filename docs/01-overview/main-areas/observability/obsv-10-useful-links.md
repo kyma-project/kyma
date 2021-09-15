@@ -14,4 +14,4 @@ If you're interested in learning more about the Observability area, check out th
 
 - Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md docs/05-technical-reference/00-configuration-parameters/obsv-01-configpara-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
 
-- Find the configuration parameters for [Monitoring](../../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-monitoring.md), [Logging](../../../05-technical-reference/00-configuration-parameters/obsv-02-configpara-logging.md), [Tracing](../../../05-technical-reference/00-configuration-parameters/obsv-03-configpara-tracing.md), and [Kiali](../../../05-technical-reference/00-configuration-parameters/obsv-04-configpara-kiali.md).
+- Find the [configuration parameters for Monitoring, Logging, Tracing, and [Kiali](../../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md).
