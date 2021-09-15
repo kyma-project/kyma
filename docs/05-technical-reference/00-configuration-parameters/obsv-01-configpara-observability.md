@@ -10,11 +10,11 @@ To override the configuration, redefine the default values in your custom `value
 
 [Monitoring `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/values.yaml) and subcharts:
 
-- [Grafana values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/grafana/values.yaml)
-- [Kube-state-metrics values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/kube-state-metrics/values.yaml)
-- [Prometheus Istio values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-istio/values.yaml)
-- [Prometheus Node Exporter values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-node-exporter/values.yaml)
-- [Prometheus Pushgateway values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-pushgateway/values.yaml)
+- [Grafana `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/grafana/values.yaml)
+- [Kube-state-metrics `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/kube-state-metrics/values.yaml)
+- [Prometheus Istio `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-istio/values.yaml)
+- [Prometheus Node Exporter `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-node-exporter/values.yaml)
+- [Prometheus Pushgateway `values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/monitoring/charts/prometheus-pushgateway/values.yaml)
 
 ### Logging
 
