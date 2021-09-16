@@ -560,7 +560,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	defaultMaxInflight := 1
 	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
 
-	err = natsClient.Initialize(env.Config{});
+	err = natsClient.Initialize(env.Config{})
 	g.Expect(err).To(BeNil())
 
 	// Create a new subscriber
@@ -600,7 +600,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	err = SendStructuredCloudEventToNATS(natsClient, subject)
 	g.Expect(err).To(BeNil())
 	// Check for the event
-	err = subscriber.CheckEvent("\"" + eventingtesting.EventData +"\"", subscriberCheckURL)
+	err = subscriber.CheckEvent("\""+eventingtesting.EventData+"\"", subscriberCheckURL)
 	g.Expect(err).To(BeNil())
 
 	// Delete subscription
