@@ -13,12 +13,10 @@ Following [Istio's observability best practice](https://istio.io/latest/docs/ops
 The Istio-related instance is a Deployment named `monitoring-prometheus-istio-server`, configured with a short data retention time and hardcoded configuration that you should not change. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
 
 The monitoring chart is configured in such a way that it is possible to scrape metrics using [`Strict mTLS`]
-(https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in
--strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the 
-corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus's Istio-proxy is configured to not intercept or redirect any traffic.
+(https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the 
+corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus's Istio-proxy is configured to not intercept or redirect any traffic. By default, metrics from Kyma components are scraped using mTLS besides selected components (i.e. Kiali, Prometheus Operator, Prometheus Istio) due to several reasons.
 
-By default metrics from Kyma components are scraped using mTLS
-
+Look [here]() if you want to learn how to deploy a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
 ## Istio monitoring flow
 
 See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
