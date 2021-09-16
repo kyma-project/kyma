@@ -6,7 +6,7 @@ The API Gateway Controller uses an allowlist of domains for which it allows to e
 
 If the domain does not match the allowlist, the API Gateway Controller sets an appropriate validation status on the APIRule CR created for that service.
 
->**TIP:** For more information, read about the [Api CR statuses](./06-custom-resources/apix-01-apirule.md#status-codes).
+>**TIP:** For more information, read about the [Api CR statuses](./00-custom-resources/apix-01-apirule.md#status-codes).
 
 By default, the feature is disabled and all domains are allowed.
 
