@@ -1,5 +1,5 @@
 ---
-title: Deploy and expose a container microservice
+title: Deploy and expose a microservice
 ---
 
 You already know how to [deploy](02-deploy-expose-function.md#create-a-function) and [expose a Function](02-deploy-expose-function.md#expose-the-function). Let's now do the same with a container microservice.
@@ -138,7 +138,7 @@ The operation was successful if the command returns the **uid** of your Service.
   Kyma Dashboard
   </summary>
 
-As you've already created the Service in step 3 in the [previous section](#deploy-the-microservice), skip this part.
+As you've already [created the Kubernetes Service with the microservice](#deploy-the-microservice), skip this part.
 
 <!--
 //TODO: Functionality not added yet. Check with Hasselhoffs in a while.
@@ -155,7 +155,7 @@ The operation was successful if ... .
 
 ## Expose the microservice
 
-We have the Service created. Let's now expose it outside the cluster.
+We have created the Service. Let's now expose it outside the cluster.
 
 > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) you expose.
 

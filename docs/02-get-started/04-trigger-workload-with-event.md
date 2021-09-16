@@ -113,7 +113,7 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
     > **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
 To check that the Function is properly exposed, call it. 
-In your Function's **Configuration** tab, click on the APIRule's **Hostname**. This will open the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
+In your Function's **Configuration** tab, click on the APIRule's **Hostname**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
 
   </details>
 </div>

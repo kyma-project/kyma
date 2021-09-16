@@ -47,7 +47,7 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
     ```
 
 2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
-3. Click to add your cluster to the Dashboard. 
+3. Add your cluster to the Dashboard. 
 4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).  Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`.
 5. Upload it into the Dashboard as prompted.
 

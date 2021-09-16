@@ -149,7 +149,7 @@ The operation was successful if the call returns `Hello Serverless`.
   </summary>
 
 In your Function's **Configuration** tab, click on the APIRule's **Hostname**.
-This will open the Function's external address as a new page.
+This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.
 

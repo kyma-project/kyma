@@ -4,11 +4,13 @@ title: Observability
 
 We successfully got our Function [triggered](04-trigger-workload-with-event.md).
 Now we would like to check its logs and metrics. 
-To do that, we'll use the Grafana dashboard that comes with Kyma. 
+To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 > **NOTE:** See how to access logs from the Function's Pod [via Kyma Dashboard](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-in-kyma-dashboard) and [using kubectl](../04-operation-guides/operations/obsv-01-access-logs.md#kubernetes-logs-using-kubectl). 
 
 ## Access Grafana
+
+> **NOTE:** See how to [expose Grafana securely](../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana/#kubernetes-logs-in-kyma-dashboard) for easier access in the future.
 
 1. To access Grafana, forward a local port to a port on the service's Pod:
     ```bash
@@ -27,7 +29,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
     > **NOTE:** Alternatively, type or paste the `{function="lastorder", container="function"}` query and press `Shift`+`Enter` or click on **Run query**. 
 
-You may now browse the logs. 
+You can now browse the logs. 
 
 ## View the metrics
 
@@ -35,7 +37,7 @@ You may now browse the logs.
 2. Search for the `Kyma / Function` board and select it. 
 3. From the **Function** dropdown, select `lastorder`.
 
-You may now view the metrics, such as success rate and resource consumption.
+You can now view the metrics, such as success rate and resource consumption.
 
 That's it! 
 
