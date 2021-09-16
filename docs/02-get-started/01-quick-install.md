@@ -34,9 +34,7 @@ We will use it later in the guides.
 export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
 ```
 
-<!---TODO
-> **NOTE:** For local installation, the cluster domain is ``.
--->
+> **NOTE:** For local installation, the cluster domain is `local.kyma.dev`.
 
 ## Connect to Kyma Dashboard
 
@@ -50,7 +48,8 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
 
 2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
 3. Click to add your cluster to the Dashboard. 
-4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) and upload it into the Dashboard as prompted.
+4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).  Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`.
+5. Upload it into the Dashboard as prompted.
 
 This takes you to your Kyma Dashboard.
 

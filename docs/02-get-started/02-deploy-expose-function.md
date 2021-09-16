@@ -70,7 +70,7 @@ The operation was successful if the Function **Status** changed from `DEPLOYING`
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a Function to the outside world is always a potential security vulnerability, so tread carefully.
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) you expose.
 
 First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
