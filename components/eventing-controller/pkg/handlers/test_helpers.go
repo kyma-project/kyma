@@ -1,7 +1,16 @@
 package handlers
 
 import (
+	"bytes"
+	"context"
 	"fmt"
+	cev2nats "github.com/cloudevents/sdk-go/protocol/nats/v2"
+	cev2 "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/binding"
+	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
+	"github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"net/http"
+
 	"time"
 
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
@@ -19,4 +28,54 @@ func SendEventToNATS(natsClient *Nats, data string) error {
 func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string {
 	jsonCE := fmt.Sprintf("{\"data\":\"%s\",\"datacontenttype\":\"application/json\",\"id\":\"%s\",\"source\":\"%s\",\"specversion\":\"1.0\",\"time\":\"%s\",\"type\":\"%s\"}", data, id, source, eventTime, eventType)
 	return jsonCE
+}
+
+func SendCEBinaryModeToNATSUsingCESDK(natsClient *Nats, subject string) error {
+
+	// TODO do it like  in publisher-proxy
+	body := testing.CloudEventData
+	headers := testing.GetBinaryMessageHeaders()
+
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		return err
+	}
+	for k, v := range headers {
+		req.Header[k] = v
+	}
+
+	// convert to the CE Event
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	message := cev2http.NewMessageFromHttpRequest(req)
+	defer func() { _ = message.Finish(nil) }()
+	event, err := binding.ToEvent(ctx, message)
+	if err != nil {
+		return err
+	}
+	if err := event.Validate(); err != nil {
+		return err
+	}
+
+	// get a CE sender for the embedded NATS
+	natsOpts  := cev2nats.NatsOptions()
+	url := natsClient.config.Url
+	sender, err := cev2nats.NewSender(url, subject, natsOpts)
+	if err != nil {
+		return nil
+	}
+
+	// send the event using CE sdk
+	client, err := cev2.NewClient(sender)
+	if err != nil {
+		return err
+	}
+	err = client.Send(ctx, *event)
+	if err != nil {
+		return err
+	}
+
+	//return natsClient.connection.Publish(eventType, []byte(sampleEvent))
+	return nil
 }

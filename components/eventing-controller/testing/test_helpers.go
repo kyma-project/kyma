@@ -40,6 +40,19 @@ const (
 	EventSpecVersion              = "1.0"
 	EventData                     = "test-data"
 
+	// event properties
+	CloudEventType            = "sap.kyma" + "." + ApplicationName + ".order.created.v1"
+	CloudEventSource          = "/default/sap.kyma/id"
+	CloudEventSpecVersion     = "1.0"
+	CloudEventData            = "{\"key\":\"value\"}"
+	CloudEventDataContentType = "application/json"
+
+	// binary cloudevent headers
+	CeIDHeader          = "ce-id"
+	CeTypeHeader        = "ce-type"
+	CeSourceHeader      = "ce-source"
+	CeSpecVersionHeader = "ce-specversion"
+
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
@@ -496,4 +509,17 @@ func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Inte
 
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
 	return dynamicClient, nil
+}
+
+func GetStructuredMessageHeaders() http.Header {
+	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
+}
+
+func GetBinaryMessageHeaders() http.Header {
+	headers := make(http.Header)
+	headers.Add(CeIDHeader, EventID)
+	headers.Add(CeTypeHeader, CloudEventType)
+	headers.Add(CeSourceHeader, CloudEventSource)
+	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
+	return headers
 }

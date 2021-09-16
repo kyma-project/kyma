@@ -538,6 +538,69 @@ func TestIsValidSubscription(t *testing.T) {
 
 }
 
+func TestSubscriptionWithBinaryCE(t *testing.T) {
+	g := NewWithT(t)
+	natsPort := 5222
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
+
+	natsConfig := env.NatsConfig{
+		Url:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultMaxInflight := 1
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+
+	err = natsClient.Initialize(env.Config{});
+	g.Expect(err).To(BeNil())
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+
+	// Shutting down subscriber
+	defer subscriber.Shutdown()
+
+	// Check subscriber is running or not by checking the store
+	err = subscriber.CheckEvent("", subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
+
+	// Send a binary event
+	subject := eventingtesting.CloudEventType
+	err = SendCEBinaryModeToNATSUsingCESDK(natsClient, subject)
+	g.Expect(err).To(BeNil())
+
+	// Check for the event
+	err = subscriber.CheckEvent(eventingtesting.CloudEventData, subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Delete subscription
+	err = natsClient.DeleteSubscription(sub)
+	g.Expect(err).To(BeNil())
+}
+
 func checkIsValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, true, t)
 }
