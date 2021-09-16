@@ -27,7 +27,8 @@ const (
 
 	// Available:
 	// MinimumReplicasAvailable is added in a deployment when it has its minimum replicas required available.
-	MinimumReplicasAvailable = "MinimumReplicasAvailable"
+	MinimumReplicasAvailable   = "MinimumReplicasAvailable"
+	MinimumReplicasUnavailable = "MinimumReplicasUnavailable"
 )
 
 func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
@@ -117,6 +118,15 @@ func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log log
 			Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
 			Message:            fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()),
 		})
+	case r.hasDeploymentConditionFalseStatusWithReason(deployments[0], appsv1.DeploymentAvailable, MinimumReplicasUnavailable):
+		log.Info(fmt.Sprintf("Deployment %s is ready but not all replicas are healthy", deployments[0].GetName()))
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionRunning,
+			Status:             corev1.ConditionUnknown,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonMinReplicasNotAvailable,
+			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deployments[0].GetName()),
+		})
 	case r.hasDeploymentConditionTrueStatus(deployments[0], appsv1.DeploymentProgressing):
 		log.Info(fmt.Sprintf("Deployment %s is not ready yet", deployments[0].GetName()))
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
@@ -160,6 +170,16 @@ func (r *FunctionReconciler) hasDeploymentConditionTrueStatusWithReason(deployme
 	for _, condition := range deployment.Status.Conditions {
 		if condition.Type == conditionType {
 			return condition.Status == corev1.ConditionTrue &&
+				condition.Reason == reason
+		}
+	}
+	return false
+}
+
+func (r *FunctionReconciler) hasDeploymentConditionFalseStatusWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status == corev1.ConditionFalse &&
 				condition.Reason == reason
 		}
 	}

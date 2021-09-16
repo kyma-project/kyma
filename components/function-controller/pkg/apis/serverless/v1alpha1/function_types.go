@@ -118,6 +118,7 @@ const (
 	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
 	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
+	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
 )
 
 type Condition struct {
