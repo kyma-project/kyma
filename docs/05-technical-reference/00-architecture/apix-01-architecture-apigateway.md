@@ -30,7 +30,7 @@ This diagram illustrates the request flow for three cases:
   - Accessing secured resources with a JWT token
   - Accessing unsecured resources without a token
 
-![request-flow](../assets/002-api-gateway-request-flow.svg)
+![request-flow](./assets/apix-api-gateway-request-flow.svg)
 
 ### Accessing secured resources with an OAuth2 token
 
