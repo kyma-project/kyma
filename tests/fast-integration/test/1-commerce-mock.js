@@ -48,12 +48,8 @@ describe("CommerceMock tests", function () {
     });
   });
 
-  it("in-cluster event should be delivered (structured mode)", async function () {
-    await checkInClusterEventDelivery(testNamespace, 'structured');
-  });
-
-  it("in-cluster event should be delivered (binary mode)", async function () {
-    await checkInClusterEventDelivery(testNamespace, 'binary');
+  it("in-cluster event should be delivered (structured and binary mode)", async function () {
+    await checkInClusterEventDelivery(testNamespace);
   });
 
   it("function should be reachable through secured API Rule", async function () {
