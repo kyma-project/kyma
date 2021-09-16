@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
-	github.com/cloudevents/sdk-go/v2 v2.3.1
+	github.com/cloudevents/sdk-go/v2 v2.4.1
 	github.com/google/uuid v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210520105418-ddc3a476c40a
