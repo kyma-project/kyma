@@ -16,7 +16,7 @@ The monitoring chart is configured in such a way that it is possible to scrape m
 (https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the 
 corresponding Prometheus container. To stick to Istio's observability best practices, Prometheus's Istio-proxy is configured to not intercept or redirect any traffic. By default, metrics from Kyma components are scraped using mTLS besides selected components (i.e. Kiali, Prometheus Operator, Prometheus Istio) due to several reasons.
 
-Look [here]() if you want to learn how to deploy a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
+Learn how to [deploy](../../../03-tutorials/00-observability/obsv-01-observe-application-metrics.md#deploy-the-example-configuration) a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
 ## Istio monitoring flow
 
 See the diagram for a broader view of how the Istio-related instance fits into the monitoring setup in Kyma:
