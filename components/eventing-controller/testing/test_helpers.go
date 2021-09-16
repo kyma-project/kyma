@@ -40,14 +40,13 @@ const (
 	EventSpecVersion              = "1.0"
 	EventData                     = "test-data"
 
-	// event properties
+	// cloud event properties
 	CloudEventType            = "sap.kyma" + "." + ApplicationName + ".order.created.v1"
 	CloudEventSource          = "/default/sap.kyma/id"
 	CloudEventSpecVersion     = "1.0"
-	CloudEventData            = "{\"key\":\"value\"}"
-	CloudEventDataContentType = "application/json"
+	CloudEventData            = "{\"foo\":\"bar\"}"
 
-	// binary cloudevent headers
+	// binary CE headers
 	CeIDHeader          = "ce-id"
 	CeTypeHeader        = "ce-type"
 	CeSourceHeader      = "ce-source"

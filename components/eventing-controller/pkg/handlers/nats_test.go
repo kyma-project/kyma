@@ -538,7 +538,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 }
 
-func TestSubscriptionWithBinaryCE(t *testing.T) {
+func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
 	natsPort := 5222
 	subscriberPort := 8080
@@ -587,13 +587,20 @@ func TestSubscriptionWithBinaryCE(t *testing.T) {
 	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
 	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
 
-	// Send a binary event
 	subject := eventingtesting.CloudEventType
-	err = SendCEBinaryModeToNATSUsingCESDK(natsClient, subject)
-	g.Expect(err).To(BeNil())
 
+	// Send a binary CE
+	err = SendBinaryCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
 	// Check for the event
 	err = subscriber.CheckEvent(eventingtesting.CloudEventData, subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	//  Send a structured CE
+	err = SendStructuredCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+	// Check for the event
+	err = subscriber.CheckEvent("\"" + eventingtesting.EventData +"\"", subscriberCheckURL)
 	g.Expect(err).To(BeNil())
 
 	// Delete subscription

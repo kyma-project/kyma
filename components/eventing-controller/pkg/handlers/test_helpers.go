@@ -30,12 +30,10 @@ func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string
 	return jsonCE
 }
 
-func SendCEBinaryModeToNATSUsingCESDK(natsClient *Nats, subject string) error {
-
-	// TODO do it like  in publisher-proxy
+func SendBinaryCloudEventToNATS(natsClient *Nats, subject string) error {
+	// create a CE binary-mode http request
 	body := testing.CloudEventData
 	headers := testing.GetBinaryMessageHeaders()
-
 	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return err
@@ -43,11 +41,9 @@ func SendCEBinaryModeToNATSUsingCESDK(natsClient *Nats, subject string) error {
 	for k, v := range headers {
 		req.Header[k] = v
 	}
-
-	// convert to the CE Event
+	// convert  to the CE Event
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	message := cev2http.NewMessageFromHttpRequest(req)
 	defer func() { _ = message.Finish(nil) }()
 	event, err := binding.ToEvent(ctx, message)
@@ -57,7 +53,48 @@ func SendCEBinaryModeToNATSUsingCESDK(natsClient *Nats, subject string) error {
 	if err := event.Validate(); err != nil {
 		return err
 	}
+	// get a CE sender for the embedded NATS using CE-SDK
+	natsOpts  := cev2nats.NatsOptions()
+	url := natsClient.config.Url
+	sender, err := cev2nats.NewSender(url, subject, natsOpts)
+	if err != nil {
+		return nil
+	}
+	client, err := cev2.NewClient(sender)
+	if err != nil {
+		return err
+	}
+	// force binary binding and send the event to NATS using CE-SDK
+	ctx = binding.WithForceBinary(ctx)
+	if err := client.Send(ctx, *event); err != nil {
+		return err
+	}
+	return nil
+}
 
+func SendStructuredCloudEventToNATS(natsClient *Nats, subject string) error {
+	// create a CE structured-mode http request
+	body := testing.StructuredCloudEvent
+	headers := testing.GetStructuredMessageHeaders()
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		return err
+	}
+	for k, v := range headers {
+		req.Header[k] = v
+	}
+	// convert to CE Event
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	message := cev2http.NewMessageFromHttpRequest(req)
+	defer func() { _ = message.Finish(nil) }()
+	event, err := binding.ToEvent(ctx, message)
+	if err != nil {
+		return err
+	}
+	if err := event.Validate(); err != nil {
+		return err
+	}
 	// get a CE sender for the embedded NATS
 	natsOpts  := cev2nats.NatsOptions()
 	url := natsClient.config.Url
@@ -65,17 +102,14 @@ func SendCEBinaryModeToNATSUsingCESDK(natsClient *Nats, subject string) error {
 	if err != nil {
 		return nil
 	}
-
-	// send the event using CE sdk
 	client, err := cev2.NewClient(sender)
 	if err != nil {
 		return err
 	}
-	err = client.Send(ctx, *event)
-	if err != nil {
+	// force structured binding and send the event to NATS
+	ctx = binding.WithForceStructured(ctx)
+	if err := client.Send(ctx, *event); err != nil {
 		return err
 	}
-
-	//return natsClient.connection.Publish(eventType, []byte(sampleEvent))
 	return nil
 }
