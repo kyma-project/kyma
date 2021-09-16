@@ -95,3 +95,15 @@ files:
   - path: "./kyma/docs/security/08-06-generate-kubeconfig.md"
     config:
       external-links-to-ignore: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/02-get-started/04-trigger-workload-with-event.md"
+    config:
+      external-links-to-ignore: ["http://eventing-event-publisher-proxy.kyma-system/publish"]
+  - path: "./kyma/docs/02-get-started/01-quick-install.md"
+    config:
+      external-links-to-ignore: [ "https://dashboard.kyma-project/" ]
+  - path: "./kyma/docs/02-get-started/README.md"
+    config:
+      external-links-to-ignore: [ "https://k3d.io/#installation" ]
+  - path: "./kyma/docs/04-operation-guides/operations/02-install-kyma.md"
+    config:
+      external-links-to-ignore: [ "https://dashboard.kyma-project.io/" ]

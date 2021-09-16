@@ -27,7 +27,7 @@ To inject sensitive data into a core component during the Kyma installation, fol
 
   Use the same `secrets.yaml` file for all core components. The structure of the **config** section is different for each component. For more details, see the `values.yaml` files associated with specific components.
 
-2. Start a container during the [installation](../../docs/04-operation-guides/operations/01-install-kyma.md), and mount the `secrets.yaml` file in the `run.sh` script with the following command:
+2. Start a container during the [installation](../../docs/04-operation-guides/operations/02-install-kyma.md), and mount the `secrets.yaml` file in the `run.sh` script with the following command:
 
   ```
   ./run.sh -s ${PATH_TO_DIRECTORY_WITH_THE_SECRET_YAML_FILE}/secrets.yaml

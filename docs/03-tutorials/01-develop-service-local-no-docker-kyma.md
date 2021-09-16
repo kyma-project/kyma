@@ -35,7 +35,7 @@ Install [Go tools](https://golang.org/dl/).
 
 ### Mount the example directory into Minikube
 
-For this step, you need a running local Kyma instance. Read the [installation document](../04-operation-guides/operations/01-install-kyma.md) to learn how to install Kyma locally.
+For this step, you need a running local Kyma instance. Read the [installation document](../04-operation-guides/operations/02-install-kyma.md) to learn how to install Kyma locally.
 
 1. Open the terminal window. Do not close it until the development finishes.
 2. Mount your local drive into Minikube:
