@@ -13,6 +13,8 @@ kyma provision k3d
 kyma deploy
 ```
 
+When asked whether to install the Kyma certificate, confirm.
+
 > **NOTE:** Check out [more installation options for Kyma](../04-operation-guides/operations/02-install-kyma.md).
 
 ### Verify the installation
