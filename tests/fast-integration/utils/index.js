@@ -874,7 +874,8 @@ async function deleteAllK8sResources(
   path,
   query = {},
   retries = 2,
-  interval = 1000
+  interval = 1000,
+  keepFinalizer = false
 ) {
   try {
     let i = 0;
@@ -889,10 +890,10 @@ async function deleteAllK8sResources(
       const body = JSON.parse(response.body);
       if (body.items && body.items.length) {
         for (let o of body.items) {
-          deleteK8sResource(o);
+          deleteK8sResource(o, keepFinalizer);
         }
       } else if (!body.items) {
-        deleteK8sResource(body);
+        deleteK8sResource(body, keepFinalizer);
       }
     }
   } catch (e) {
@@ -900,8 +901,8 @@ async function deleteAllK8sResources(
   }
 }
 
-async function deleteK8sResource(o) {
-  if (o.metadata.finalizers && o.metadata.finalizers.length) {
+async function deleteK8sResource(o, keepFinalizer = false) {
+  if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
       headers: { "Content-type": "application/merge-patch+json" },
     };
