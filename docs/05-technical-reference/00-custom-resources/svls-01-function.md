@@ -149,7 +149,7 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                                                             |
 | `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                                                                  |
 | `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                                                                 |
-| `MinimumReplicasUnavailable`     | `Running`            | Unsufficient available replicas. Function is unhealthy.                                                                                                       |
+| `MinimumReplicasUnavailable`     | `Running`            | Insufficient number of available replicas. The Function is unhealthy.                                                                                                       |
 
 ## Related resources and components
 
