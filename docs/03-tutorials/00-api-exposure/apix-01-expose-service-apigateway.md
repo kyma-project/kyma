@@ -10,7 +10,7 @@ The tutorial comes with a sample HttpBin service deployment and is a follow-up t
 
 Follow the instruction to deploy an unsecured instance of the HttpBin service and expose it.
 
-1. Deploy an instance of the HttpBin service in your Namespace.
+1. Deploy an instance of the HttpBin service in your Namespace:
 
   ```bash
   kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
@@ -50,9 +50,9 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
    EOF
    ```
 
-  > **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
-
 4. Expose the service by creating an APIRule CR in your Namespace:
+
+> **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
 
   ```bash
   cat <<EOF | kubectl apply -f -
