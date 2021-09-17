@@ -238,3 +238,5 @@ This call returns the code `200` response. If you call the Function without a to
 
   </details>
 </div>
+
+> **TIP:** To learn more about the security options read the document describing [authorization configuration](../../05-technical-reference/apix-01-config-authorizations-apigateway.md).
