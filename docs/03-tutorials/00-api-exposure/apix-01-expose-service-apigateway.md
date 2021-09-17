@@ -4,26 +4,26 @@ title: Expose a service
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
 
-The tutorial comes with a sample HttpBin service deployment and may be a follow-up to the [Use a custom domain to expose a service](./apix-03-own-domain.md) tutorial.
+The tutorial comes with a sample HttpBin service deployment and is a follow-up to the [Use a custom domain to expose a service](./apix-03-own-domain.md) tutorial.
 
 ## Deploy and expose a service
 
 Follow the instruction to deploy an unsecured instance of the HttpBin service and expose it.
 
-1. Export these values as an environment variables:
-
-```bash
-export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
-export TLS_SECRET={SECRET_NAME} #This is the **spec.secretName** value of the Certificate CR, e.g. httpbin-tls-credentials.
-export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-```
-
-2. Deploy an instance of the HttpBin service in your Namespace.
+1. Deploy an instance of the HttpBin service in your Namespace.
 
   ```bash
   kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   ```
+
+2. Export these values as environment variables:
+
+```bash
+export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
+export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
+export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
+export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+```
 
 3. Create a Gateway CR. Run:
 
@@ -50,9 +50,9 @@ export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e
    EOF
    ```
 
-4. Expose the service by creating an APIRule CR in your Namespace:
-
 > **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
+
+4. Expose the service by creating an APIRule CR in your Namespace:
 
   ```bash
   cat <<EOF | kubectl apply -f -

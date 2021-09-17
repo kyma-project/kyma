@@ -129,7 +129,7 @@ Export the following values as environment variables and run the command provide
    EOF
    ```
 
-   > **NOTE:** The Issuer CR must be created in the `default` Namespace.
+   > **NOTE:** The Issuer CR must be created in the `default` Namespace. It is a global CR which many Certificate CRs may refer to.
 
 5. Create a Certificate CR.
 
@@ -159,6 +159,6 @@ Export the following values as environment variables and run the command provide
    EOF
    ```
 
-   > **NOTE:** The Certificte CR and the Secret with the TLS certificate are created in the same Namespace. Additionally, Istio requires the Secret to be stored in the `istio-system` Namespace so that the Secret could be used for HTTPS traffic. As a result the Certificate must be also created in the `istio-system` Namespace.
+   > **NOTE:** Istio requires the Certificate CR containing the Secret to be created in the `istio-system` Namespace.
 
 Proceed with [this](./apix-01-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
