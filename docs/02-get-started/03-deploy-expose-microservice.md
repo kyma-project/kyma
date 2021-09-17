@@ -84,7 +84,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Memory limits**: `32Mi`
     - **CPU limits (m)**: `20m`
    
-    Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](#create-the-service).
+    Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](.#create-the-service).
 4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.

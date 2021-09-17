@@ -47,7 +47,9 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
     ```bash
     docker run --rm -p 3001:3001 busola/local:latest
     ```
-
+<!--
+//TODO: The `latest` tag is not working at the moment, in the sense that it doesn't return the latest Busola image. This must be fixed, or the latest image at the time of release must be provided. Currently (Sep 17, 2021), the latest available image is `4ba38aba` and this is the one that the guides base on.
+--->
 2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
 3. Add your cluster to the Dashboard. 
 4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).  Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`.
