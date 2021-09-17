@@ -11,6 +11,7 @@ spec:
   jobLabel: app.kubernetes.io/name
   endpoints:
   - port: http
+    scheme: http
     {{- if .Values.kubeStateMetrics.serviceMonitor.interval }}
     interval: {{ .Values.kubeStateMetrics.serviceMonitor.interval }}
     {{- end }}

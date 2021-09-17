@@ -21,6 +21,15 @@ spec:
     {{- if .Values.grafana.serviceMonitor.interval }}
     interval: {{ .Values.grafana.serviceMonitor.interval }}
     {{- end }}
+    scheme: {{ .Values.grafana.serviceMonitor.scheme }}
+    {{- if .Values.grafana.serviceMonitor.tlsConfig }}
+    tlsConfig:
+    {{- toYaml .Values.grafana.serviceMonitor.tlsConfig | nindent 6 }}
+    {{- end }}
+    {{- if .Values.grafana.serviceMonitor.relabelings }}
+    relabelings:
+    {{- toYaml .Values.grafana.serviceMonitor.relabelings | nindent 4 }}
+    {{- end }}
     path: "/metrics"
 {{- if .Values.grafana.serviceMonitor.metricRelabelings }}
     metricRelabelings:
