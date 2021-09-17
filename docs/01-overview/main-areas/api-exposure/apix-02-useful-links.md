@@ -25,4 +25,4 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
 
 - Analyze configuration details for:
 
-  - The [ORY chart](../../../05-technical-reference/05-configuration-parameters/apix-02-ory-chart.md)
+  - The [ORY chart](../../../05-technical-reference/00-configuration-parameters/apix-02-ory-chart.md)
