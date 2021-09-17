@@ -18,12 +18,12 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
 2. Export these values as environment variables:
 
-```bash
-export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
-export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
-export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-```
+  ```bash
+  export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
+  export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
+  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
+  export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+  ```
 
 3. Create a Gateway CR. Run:
 
@@ -50,7 +50,7 @@ export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e
    EOF
    ```
 
-> **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
+  > **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
 
 4. Expose the service by creating an APIRule CR in your Namespace:
 

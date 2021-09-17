@@ -20,13 +20,13 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 1. Create a Namespace. Run:
 
-   ```bash
+  ```bash
    kubectl create ns {NAMESPACE_NAME}
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
 
-See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Then run:
+  See the [official External DNS Management documentation](https://github.com/gardener/external-dns-management/blob/master/README.md#external-dns-management), choose your DNS cloud service provider, and follow the relevant guidelines. Then run:
 
   ```bash
   kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
@@ -36,7 +36,9 @@ See the [official External DNS Management documentation](https://github.com/gard
 
 > **CAUTION:** Bear in mind that the **metadata.annotation** parameter, may be either not needed or subject to change depending on the External DNS Management configuration provided during the component installation.
 
-- Export the following values as environment variables and run the command provided to create a DNSProvider CR. As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
+- Export the following values as environment variables and run the command provided. 
+  
+  As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
 
   ```bash
   export NAMESPACE={NAMESPACE_NAME}
@@ -64,7 +66,7 @@ See the [official External DNS Management documentation](https://github.com/gard
   EOF
   ```
 
-- Export the following values as environment variables and run the command provided to create a DNSEntry CR:
+- Export the following values as environment variables and run the command provided:
 
   ```bash
   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
@@ -92,7 +94,7 @@ See the [official External DNS Management documentation](https://github.com/gard
 
 4. Create an Issuer CR.
 
-Export the following values as environment variables and run the command provided.
+  Export the following values as environment variables and run the command provided.
 
    ```bash
    export EMAIL={YOUR_EMAIL_ADDRESS}
@@ -133,7 +135,7 @@ Export the following values as environment variables and run the command provide
 
 5. Create a Certificate CR.
 
-Export the following values as environment variables and run the command provided.
+  Export the following values as environment variables and run the command provided.
 
    ```bash
    export TLS_SECRET={SECRET_NAME} #e.g. httpbin-tls-credentials
