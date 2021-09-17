@@ -120,7 +120,7 @@ EOF
 2. Click on **Expose Function +**.
 3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
   </details>
 </div>
 
@@ -148,7 +148,7 @@ The operation was successful if the call returns `Hello Serverless`.
   Kyma Dashboard
   </summary>
 
-In your Function's **Configuration** tab, click on the APIRule's **Hostname**.
+In your Function's **Configuration** tab, click on the APIRule's **Host**.
 This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.

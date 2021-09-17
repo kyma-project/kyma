@@ -73,18 +73,19 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 1. From the left navigation, go to **Deployments**.
 2. Click on **Create Deployment +**.
-3. Provide the following parameters:
+3. Choose the **Advanced** view and provide the following parameters:
     - **Name**: `orders-service`
-    - **Labels**: `app=orders-service` and `example=orders-service`
+    - **Labels**: add labels `app` and `example` and set their values to `orders-service`   
     - **Docker image**: `eu.gcr.io/kyma-project/develop/orders-service:e8175c63`
    
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
-    - **CPU requests**: `16m`
+    - **CPU requests (m)**: `16m`
     - **Memory limits**: `32Mi`
-    - **CPU limits**: `20m`
+    - **CPU limits (m)**: `20m`
    
-    Leave the checkbox to create a Service checked and skip the next Section.
+    Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](#create-the-service).
+4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
   </details>
@@ -200,10 +201,11 @@ EOF
   Kyma Dashboard
   </summary>
 
-1. In your Services's view, click on **Expose Service +**.
-2. Provide the **Name** (`hello-world`) and **Hostname** (`hello-world`) and click **Create**.
+1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
+2. In your Services's view, click on **Expose Service +**.
+3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **APIRules**, click on **Create apirules +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
 </div>
 
@@ -231,11 +233,11 @@ The operation was successful if the command returns the (possibly empty `[]`) li
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Hostname**.
+1. From your Services's view, get the APIRule's **Host**.
 
    > **NOTE:** Alternatively, from the left navigation go to **APIRules** and get the **Host** URL from there.
 
-2. Paste this **Hostname** in your browser and add the `/orders` suffix to the end of it, like this: `{HOSTNAME}/orders`. Open it.
+2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
 
 The operation was successful if the page shows the (possibly empty `[]`) list of orders.
   </details>
