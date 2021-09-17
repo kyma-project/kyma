@@ -49,7 +49,7 @@ describe("CommerceMock tests", function () {
     });
   });
 
-  it("in-cluster event should be delivered", async function () {
+  it("in-cluster event should be delivered (structured and binary mode)", async function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 

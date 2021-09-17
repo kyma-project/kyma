@@ -455,7 +455,6 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
 }
 
 async function deleteMockTestFixture(targetNamespace) {
-
   const serviceBindingUsage = {
     apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
     kind: "ServiceBindingUsage",
@@ -480,13 +479,18 @@ async function deleteMockTestFixture(targetNamespace) {
   await k8sDelete(applicationObjs)
 }
 
-async function checkInClusterEventDelivery(targetNamespace){
-  const eventId = "event-"+genRandom(5);
+async function checkInClusterEventDelivery(targetNamespace) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
+}
+
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
+  const eventId = "event-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
 
   // send event using function query parameter send=true
-  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, {params:{send:true}}), 10, 1000)
+  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)
   // verify if event was received using function query parameter inappevent=eventId
   await retryPromise(async () => {
     debug("Waiting for event: ",eventId);
