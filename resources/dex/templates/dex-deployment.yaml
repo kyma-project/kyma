@@ -33,6 +33,11 @@ spec:
 {{ toYaml .Values.resources | indent 10 }}
         securityContext:
 {{ toYaml .Values.securityContext | indent 10 }}
+        env:
+        - name: KUBERNETES_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}
