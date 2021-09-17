@@ -45,6 +45,6 @@ In general, the Deployment is considered updated when both configuration and the
 
 Thanks to the implemented reconciliation loop, the Function Controller constantly observes all newly created or updated resources. If it detects changes, it fetches the appropriate resource's status and only then updates the Function's status.
 
-The Function Controller observes the status of the underlying deployment. If the minimum availability condition for the replicas is not satisfied, the Function Controller sets the **Running** status to `Unknown` with reason `MinimumReplicasUnavailable`. Such a Function should be considered unhealthy and the runtime profile or number of replicas must be adjusted.
+The Function Controller observes the status of the underlying Deployment. If the minimum availability condition for the replicas is not satisfied, the Function Controller sets the **Running** status to `Unknown` with reason `MinimumReplicasUnavailable`. Such a Function should be considered unhealthy and the runtime profile or number of Replicas must be adjusted.
 
 ![Function running](./assets/svls-running.svg)
