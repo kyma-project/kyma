@@ -5,19 +5,16 @@ import (
 	"path"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/api/resource"
-
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -430,9 +427,9 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 									},
 								},
 								InitialDelaySeconds: 0,
-								PeriodSeconds:       1, // the lowest acceptable value, we should check it even more often but k8s doesn't let us
+								PeriodSeconds:       5,
 								SuccessThreshold:    1,
-								FailureThreshold:    120, // FailureThreshold * PeriodSeconds = 120s in this case, this should be enough for any function pod to start up
+								FailureThreshold:    30, // FailureThreshold * PeriodSeconds = 150s in this case, this should be enough for any function pod to start up
 							},
 							ReadinessProbe: &corev1.Probe{
 								Handler: corev1.Handler{
@@ -444,6 +441,18 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
 								FailureThreshold:    1,
 								PeriodSeconds:       5,
+								TimeoutSeconds:      2,
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								FailureThreshold: 3,
+								PeriodSeconds:    5,
+								TimeoutSeconds:   4,
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							SecurityContext: &corev1.SecurityContext{
