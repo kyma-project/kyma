@@ -8,8 +8,6 @@ With the API Gateway Controller, you can secure the services you expose in the f
 - with JWT tokens
 - with both OAuth2 and JWT tokens
 
-<!-- the following paragraphs need clarification; are they instructions or a reference to look up info? -->
-
 If you secure a service with either OAuth2 or JWT tokens, by default, you must include a valid OAuth2 or JWT token in the `Authorization` header of the call to the service.
 
 If you secure a service with both OAuth2 and JWT, by default, the Oathkeeper proxy expects OAuth2 tokens in the `Authorization` header of incoming calls. For endpoints secured with JWT, you must define the header from which the system extracts the JWT token for every **accessStrategy** you define. Set the **token_from.location** parameter to `header:{NAME}` to extract the JWT token from a specific header. You can use any header name different from `Authorization`.
@@ -86,4 +84,4 @@ See these sample excerpts from APIRule custom resources that show the **rules** 
 
 </div>
 
->**TIP:** To learn more, read about the [APIRule custom resource](../../05-technical-reference/00-custom-resources/apix-01-apirule.md). You can also follow the [tutorial](./apix-02-expose-and-secure-service.md) to learn how to expose and secure services.
+>**TIP:** To learn more, read about the [APIRule custom resource](./00-custom-resources/apix-01-apirule.md). You can also follow the [tutorial](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) to learn how to expose and secure services.
