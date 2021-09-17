@@ -451,8 +451,8 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 									},
 								},
 								FailureThreshold: 3,
-								PeriodSeconds:    15,
-								TimeoutSeconds:   2,
+								PeriodSeconds:    5,
+								TimeoutSeconds:   4,
 							},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							SecurityContext: &corev1.SecurityContext{
