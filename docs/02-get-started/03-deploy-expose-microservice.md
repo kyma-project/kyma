@@ -86,8 +86,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Memory limits**: `32Mi`
     - **CPU limits (m)**: `20m`  
     - **Port**: `80`
-    - **Target Port**: `8080`
-    <br>
+    - **Target Port**: `8080`<br>
     Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
 4. Click **Create**.
 

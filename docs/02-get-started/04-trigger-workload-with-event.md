@@ -173,8 +173,7 @@ The operation was successful if the returned status says `true`.
     - **Application name**: `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
-    - **Event version**: `myapp.order.received.v1`  
-    <br>
+    - **Event version**: `myapp.order.received.v1` <br>
     The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
 
   </details>
