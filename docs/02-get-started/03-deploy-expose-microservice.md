@@ -65,6 +65,8 @@ kubectl get deployment orders-service -o=jsonpath="{.status.readyReplicas}"
 
 The operation was successful if the returned number of **readyReplicas** is `1`.
 
+> **NOTE:** You might need to wait a few seconds for the replica to be ready and return the status.
+
   </details>
   <details>
   <summary label="Kyma Dashboard">
@@ -82,9 +84,9 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Memory requests**: `10Mi`
     - **CPU requests (m)**: `16m`
     - **Memory limits**: `32Mi`
-    - **CPU limits (m)**: `20m`
-   
-    Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](.#create-the-service).
+    - **CPU limits (m)**: `20m`  
+    <br>
+    Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
 4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
@@ -139,7 +141,7 @@ The operation was successful if the command returns the **uid** of your Service.
   Kyma Dashboard
   </summary>
 
-As you've already [created the Kubernetes Service with the microservice](#deploy-the-microservice), skip this part.
+As you've already [created the Kubernetes Service with the microservice](03-deploy-expose-microservice.md#deploy-the-microservice), skip this part.
 
 <!--
 //TODO: Functionality not added yet. Check with Hasselhoffs in a while.
@@ -178,8 +180,8 @@ metadata:
   name: orders-service
   namespace: default
   labels:
-#    app: orders-service
-#    example: orders-service
+    app: orders-service
+    example: orders-service
 spec:
   service:
     host: orders-service.$CLUSTER_DOMAIN
@@ -205,7 +207,7 @@ EOF
 2. In your Services's view, click on **Expose Service +**.
 3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **APIRules**, click on **Create apirules +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
 </div>
 

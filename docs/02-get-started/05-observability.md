@@ -12,7 +12,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 > **NOTE:** See how to [expose Grafana securely](../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana/#kubernetes-logs-in-kyma-dashboard) for easier access in the future.
 
-1. To access Grafana, forward a local port to a port on the service's Pod:
+1. To access Grafana, forward a local port to the Service's port:
     ```bash
     kubectl -n kyma-system port-forward svc/monitoring-grafana 3000:80
     ```
