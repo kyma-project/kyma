@@ -3,6 +3,7 @@ ci:
 	npm install
 	npm test
 	npm run test-monitoring
+	npm run test-eventing
 
 .PHONY: ci-compass
 ci-compass:
@@ -30,3 +31,8 @@ ci-post-upgrade:
 	npm install
 	npm run upgrade-test-tests
 	npm run upgrade-test-cleanup
+
+.PHONY: ci-test-eventing
+ci-test-eventing:
+	npm ci
+	npm run test-eventing
