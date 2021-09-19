@@ -1,5 +1,3 @@
-imageRegistry: "eu.gcr.io/kyma-project/incubator/develop"
-
 replicaCount: 1
 
 containerPort: 5556
@@ -89,14 +87,24 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
-  dex_static_user_configurer:
-    dir:
-    version: fe9f5885
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  dex_integration_tests:
-    dir:
-    version: "277f4247"
+  images:
+    dex:
+      name: "dex"
+      version: "c366a60e"
+      directory: "incubator/develop"
+    dex_static_user_configurer:
+      name: "dex-static-user-configurer"
+      version: "7b9c624e"
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20210817-8cdbfce3"
+      directory: "tpi"
+  testImages:
+    dex_integration_tests:
+      name: "dex_integration_tests"
+      version: "cddfbc5b"
 
 nodeSelector: {}
 

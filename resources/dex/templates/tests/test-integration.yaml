@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}dex-integration-tests:{{ .Values.global.dex_integration_tests.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.dex_integration_tests) }}
         env:
         - name: DOMAIN_NAME
           value: {{ .Values.global.domainName }}

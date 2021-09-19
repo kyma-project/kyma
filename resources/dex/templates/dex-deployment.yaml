@@ -26,7 +26,7 @@ spec:
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       containers:
-      - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.dex) }}
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
         resources:
@@ -55,7 +55,7 @@ spec:
       {{ if .Values.dex.useStaticConnector }}
       initContainers:
       - name: dex-users-configurator
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_static_user_configurer.dir }}dex-static-user-configurer:{{ .Values.global.dex_static_user_configurer.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.dex_static_user_configurer) }}
         volumeMounts:
         - name: config
           mountPath: /config/dst
