@@ -12,6 +12,11 @@ describe("Getting Started Guide Tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
+  if (process.env.WITH_CENTRAL_APP_CONNECTIVITY) {
+    console.log("Getting Started Guide test for Central Application Connectivity not implemented. Omitting...");
+    return;
+  }
+
   let initialRestarts = null;
 
   it("Listing all pods in cluster", async function () {

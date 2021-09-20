@@ -18,6 +18,7 @@ const {
 
 describe("Kyma with Compass test", async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
+  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -34,7 +35,7 @@ describe("Kyma with Compass test", async function() {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName,  "mocks", testNS);
+    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName,  "mocks", testNS, withCentralAppConnectivity);
   });
 
   it("function should be reachable through secured API Rule", async function () {
