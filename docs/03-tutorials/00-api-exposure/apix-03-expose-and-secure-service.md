@@ -10,23 +10,23 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
 
 1. Export these values as environment variables:
 
-   - The name of your client and the Secret which stores the client credentials:
+- The name of your client and the Secret which stores the client credentials:
 
-   ```shell
-   export CLIENT_NAME={YOUR_CLIENT_NAME}
-   ```
+  ```shell
+  export CLIENT_NAME={YOUR_CLIENT_NAME}
+  ```
 
-   - The Namespace in which you want to create the client and the Secret that stores its credentials:
+- The Namespace in which you want to create the client and the Secret that stores its credentials:
 
-   ```shell
-   export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
-   ```
+  ```shell
+  export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
+  ```
 
-   - The domain of your cluster:
+- The domain of your cluster:
 
-   ```shell
-   export DOMAIN={CLUSTER_DOMAIN}
-   ```
+  ```shell
+  export DOMAIN={CLUSTER_DOMAIN}
+  ```
 
 2. Create an OAuth2 client with `read` and `write` scopes. Run:
 
