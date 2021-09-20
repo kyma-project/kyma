@@ -60,7 +60,7 @@ The operation was successful if the statuses for **CONFIGURED**, **BUILT**, and 
   Kyma Dashboard
   </summary>
 
-The operation was successful if the Function **Status** changed from `DEPLOYING` to `RUNNING`.
+The operation was successful if the Function **Status** changed to `RUNNING`.
 
 > **NOTE:** You might need to wait a few seconds for the status to change.
   </details>
@@ -120,7 +120,7 @@ EOF
 2. Click on **Expose Function +**.
 3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** (`hello-world`) from the dropdown menu.
   </details>
 </div>
 
@@ -148,7 +148,7 @@ The operation was successful if the call returns `Hello Serverless`.
   Kyma Dashboard
   </summary>
 
-In your Function's **Configuration** tab, click on the APIRule's **Hostname**.
+In your Function's **Configuration** tab, click on the APIRule's **Host**.
 This opens the Function's external address as a new page.
 
 > **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.

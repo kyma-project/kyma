@@ -49,8 +49,8 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
     ```
 
 2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
-3. Add your cluster to the Dashboard. 
-4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/).  Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`.
+3. Click the button to add your cluster to the Dashboard. 
+4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/). Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`. <!-- //TODO: Remove the info about replacing the **cluster.server** value when this gets fixed. -->
 5. Upload it into the Dashboard as prompted.
 
 This takes you to your Kyma Dashboard.
@@ -67,6 +67,6 @@ Now let's check the list of deployments using the Dashboard.
 2. Click on the `kyma-system` Namespace.
     > **NOTE:** The system Namespaces are hidden by default. 
     > To see `kyma-system` and other hidden Namespaces, go to your Dashboard profile, choose **Preferences** > **Clusters**, and activate the **Show Hidden Namespaces** toggle.
-3. Click on **Deployments**.
+3. Go to **Workloads** > **Deployments**.
 
 This gives you the same list of deployments as you got earlier via `kubectl`, just in a nicer visual packaging. 

@@ -65,6 +65,8 @@ kubectl get deployment orders-service -o=jsonpath="{.status.readyReplicas}"
 
 The operation was successful if the returned number of **readyReplicas** is `1`.
 
+> **NOTE:** You might need to wait a few seconds for the replica to be ready and return the status.
+
   </details>
   <details>
   <summary label="Kyma Dashboard">
@@ -73,18 +75,20 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 
 1. From the left navigation, go to **Deployments**.
 2. Click on **Create Deployment +**.
-3. Provide the following parameters:
+3. Choose the **Advanced** view and provide the following parameters:
     - **Name**: `orders-service`
-    - **Labels**: `app=orders-service` and `example=orders-service`
+    - **Labels**: add labels `app` and `example` and set their values to `orders-service`   
     - **Docker image**: `eu.gcr.io/kyma-project/develop/orders-service:e8175c63`
    
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
-    - **CPU requests**: `16m`
+    - **CPU requests (m)**: `16m`
     - **Memory limits**: `32Mi`
-    - **CPU limits**: `20m`
-   
-    Leave the checkbox to create a Service checked and skip the next Section.
+    - **CPU limits (m)**: `20m`  
+    - **Port**: `80`
+    - **Target Port**: `8080` 
+    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
+4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
   </details>
@@ -138,7 +142,7 @@ The operation was successful if the command returns the **uid** of your Service.
   Kyma Dashboard
   </summary>
 
-As you've already [created the Kubernetes Service with the microservice](#deploy-the-microservice), skip this part.
+As you've already [created the Kubernetes Service with the microservice](03-deploy-expose-microservice.md#deploy-the-microservice), skip this part.
 
 <!--
 //TODO: Functionality not added yet. Check with Hasselhoffs in a while.
@@ -177,8 +181,8 @@ metadata:
   name: orders-service
   namespace: default
   labels:
-#    app: orders-service
-#    example: orders-service
+    app: orders-service
+    example: orders-service
 spec:
   service:
     host: orders-service.$CLUSTER_DOMAIN
@@ -200,10 +204,11 @@ EOF
   Kyma Dashboard
   </summary>
 
-1. In your Services's view, click on **Expose Service +**.
-2. Provide the **Name** (`hello-world`) and **Hostname** (`hello-world`) and click **Create**.
+1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
+2. In your Services's view, click on **Expose Service +**.
+3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
+> **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
   </details>
 </div>
 
@@ -231,11 +236,11 @@ The operation was successful if the command returns the (possibly empty `[]`) li
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Hostname**.
+1. From your Services's view, get the APIRule's **Host**.
 
    > **NOTE:** Alternatively, from the left navigation go to **APIRules** and get the **Host** URL from there.
 
-2. Paste this **Hostname** in your browser and add the `/orders` suffix to the end of it, like this: `{HOSTNAME}/orders`. Open it.
+2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
 
 The operation was successful if the page shows the (possibly empty `[]`) list of orders.
   </details>

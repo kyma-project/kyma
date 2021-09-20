@@ -82,13 +82,15 @@ curl https://lastorder.$CLUSTER_DOMAIN
 
 As we haven't sent our event yet, we expect to get an empty object `{}` in response.
 
+> **NOTE:** You might need to wait a few seconds for the Function to be ready and return the expected response.
+
   </details>
   <details>
   <summary label="Kyma Dashboard">
   Kyma Dashboard
   </summary>
 
-1. From the left navigation, go to **Functions** and click to create a new Function.
+1. From the left navigation, go to **Workloads** > **Functions** and click to create a new Function.
 2. Name the Function `lastorder` and click **Create**.
 3. In the inline editor for the Function, modify its source replacing it with this code:
     ```js
@@ -110,10 +112,10 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
 4. In your Function's view, go to the **Configuration** tab.
 5. Click on **Expose Function +**.
 6. Provide the **Name** (`lastorder`) and **Subdomain** (`lastorder`) and click **Create**.
-    > **NOTE:** Alternatively, from the left navigation go to **APIRules**, click on **Create apirules +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
+    > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
 To check that the Function is properly exposed, call it. 
-In your Function's **Configuration** tab, click on the APIRule's **Hostname**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
+In your Function's **Configuration** tab, click on the APIRule's **Host**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
 
   </details>
 </div>
@@ -171,9 +173,7 @@ The operation was successful if the returned status says `true`.
     - **Application name**: `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
-    - **Event version**: `myapp.order.received.v1`
-
-    The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
+    - **Event version**: `myapp.order.received.v1`. The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
 
   </details>
 </div>
