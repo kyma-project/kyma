@@ -1,7 +1,6 @@
 version: '3.7'
 
 services:
-
   hydra:
     image: oryd/hydra:v1.10.6-sqlite
     ports:
