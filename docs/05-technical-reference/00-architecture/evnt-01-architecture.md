@@ -2,7 +2,7 @@
 title: Eventing Architecture
 ---
 
-Eventing uses NATS to implement the Event Publisher Proxy and the Eventing Controller which work together to process and deliver events in Kyma. See also the [Event processing and delivery](../evnt-01-event-processing.md) document for more information.
+Eventing uses NATS to implement the Event Publisher Proxy and the Eventing Controller, which work together to process and deliver events in Kyma. See also the [Event processing and delivery](../evnt-01-event-processing.md) document for more information.
 
 ## Event Publisher Proxy
 
@@ -14,7 +14,7 @@ The Eventing Controller component manages the internal infrastructure in order t
 
 ## Event types
 
-Eventing supports both Cloud Events and legacy events. The Event Publisher Proxy  converts legacy events to Cloud Events and adds the `sap.kyma.custom` prefix.
+Eventing supports both Cloud Events and legacy events. The Event Publisher Proxy converts legacy events to Cloud Events and adds the `sap.kyma.custom` prefix.
 
 For a Subscription Custom Resource, the fully qualified event type takes the sample form of `sap.kyma.custom.commerce.order.created.v1`. The event type is composed of the following components:
 
