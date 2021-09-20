@@ -30,8 +30,6 @@ spec:
         property: type
         type: exact
         value: sap.kyma.custom.commerce.order.created.v1
-  protocol: ""
-  protocolsettings: {}
   sink: http://test.test.svc.cluster.local
 ```
 
