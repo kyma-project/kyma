@@ -52,7 +52,7 @@ func parseOptions() (*options, error) {
 	healthPort := flag.String("healthPort", "8090", "Port for healthcheck server")
 	profile := flag.String("profile", "", "Profile name")
 	podSecurityPolicyEnabled := flag.Bool("podSecurityPolicyEnabled", false, "The information if applications should be created with PodSecurityPolicies")
-	centralApplicationConnectivityValidatorEnabled := flag.Bool("centralApplicationConnectivityValidatorEnabled", false, "Use Central Application Connectivity Validator")
+	centralApplicationConnectivityValidatorEnabled := flag.Bool("centralApplicationConnectivityValidatorEnabled", false, "Use_Central_Application Connectivity Validator")
 
 	flag.Parse()
 
