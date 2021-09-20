@@ -14,6 +14,7 @@ const (
 	connectedApp              = "connected-app"
 	centralGatewayPort        = "8082"
 	centralGatewayServicePath = "http://central-application-gateway.kyma-system"
+	// TODO: Check why the only option is HTTP here?
 )
 
 //go:generate mockery --name=Converter
@@ -136,8 +137,7 @@ func (c converter) toRequestParametersSecretName(applicationName string, apiPack
 	return ""
 }
 
-// make destination URL to reach this package
-// builds such URL http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{SERVICE_NAME}/{API_ENTRY_NAME}
+// builds such URL http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{NORMALIZED_SERVICE_NAME}/{NORMALIZED_API_ENTRY_NAME}
 func (c converter) toCentralGatewayURL(applicationName string, apiPackageName string, apiDefinitionName string) string {
 
 	return centralGatewayServicePath + ":" + centralGatewayPort +
