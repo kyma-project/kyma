@@ -2,6 +2,7 @@
 
 ## Prerequisites
 - Debian-based Linux machine with access to the Internet to install dependencies
+- wget, jq
 ## Run tests
 
 Use this command to run the cluster user tests:
