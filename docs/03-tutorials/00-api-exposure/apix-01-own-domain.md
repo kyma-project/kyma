@@ -4,11 +4,11 @@ title: Use a custom domain to expose a service
 
 This tutorial shows how to set up your custom domain and prepare a certificate to use the domain for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
 
-Once you finish the steps, learn how to expose a service using the [Expose a service](./apix-01-expose-service-apigateway.md) tutorial.
-
-To follow this tutorial, use Kyma 2.0 or higher.
+Once you finish the steps, learn how to [expose a service](./apix-02-expose-service-apigateway.md) or how to [expose and secure a service](./apix-03-expose-and-sercure-service.md).
 
 ## Prerequisites
+
+To follow this tutorial, use Kyma 2.0 or higher.
 
 If you use a cluster not managed by Gardener, install the [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components manually in a dedicated Namespace.
 
@@ -32,63 +32,63 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   kubectl apply -n {NAMESPACE_NAME} -f {SECRET}.yaml
   ```
 
-3. Create a DNSProvider and a DNEntry CRs.
+3. Create a DNSProvider and a DNSEntry CRs.
 
-> **CAUTION:** Bear in mind that the **metadata.annotation** parameter, may be either not needed or subject to change depending on the External DNS Management configuration provided during the component installation.
+  > **CAUTION:** Bear in mind that the **metadata.annotation** parameter, may be either not needed or subject to change depending on the External DNS Management configuration provided during the component installation.
 
-- Export the following values as environment variables and run the command provided. 
+  - Export the following values as environment variables and run the command provided. 
   
-  As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
+    As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
 
-  ```bash
-  export NAMESPACE={NAMESPACE_NAME}
-  export SPEC_TYPE={PROVIDER_TYPE}
-  export SECRET={SECRET_NAME}
-  export DOMAIN={CLUSTER_DOMAIN} # The domain that you own, e.g. mydomain.com.
-  ```
+    ```bash
+    export NAMESPACE={NAMESPACE_NAME}
+    export SPEC_TYPE={PROVIDER_TYPE}
+    export SECRET={SECRET_NAME}
+    export DOMAIN={CLUSTER_DOMAIN} # The domain that you own, e.g. mydomain.com.
+    ```
 
-  ```bash
-  cat <<EOF | kubectl apply -f -
-  apiVersion: dns.gardener.cloud/v1alpha1
-  kind: DNSProvider
-  metadata:
-    name: dns-provider
-    namespace: $NAMESPACE
-    annotations:
-      dns.gardener.cloud/class: garden
-  spec:
-    type: $SPEC_TYPE
-    secretRef:
-      name: $SECRET
-    domains:
-      include:
-        - $DOMAIN
-  EOF
-  ```
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    apiVersion: dns.gardener.cloud/v1alpha1
+    kind: DNSProvider
+    metadata:
+      name: dns-provider
+      namespace: $NAMESPACE
+      annotations:
+        dns.gardener.cloud/class: garden
+    spec:
+      type: $SPEC_TYPE
+      secretRef:
+        name: $SECRET
+      domains:
+        include:
+          - $DOMAIN
+    EOF
+    ```
 
-- Export the following values as environment variables and run the command provided:
+  - Export the following values as environment variables and run the command provided:
 
-  ```bash
-  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
-  ```
+    ```bash
+    export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
+    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
+    ```
 
-  ```bash
-  cat <<EOF | kubectl apply -f -
-  apiVersion: dns.gardener.cloud/v1alpha1
-  kind: DNSEntry
-  metadata:
-    name: dns-entry
-    namespace: $NAMESPACE
-    annotations:
-      dns.gardener.cloud/class: garden
-  spec:
-    dnsName: "$WILDCARD"
-    ttl: 600
-    targets:
-      - $IP
-  EOF
-  ```
+    ```bash
+    cat <<EOF | kubectl apply -f -
+    apiVersion: dns.gardener.cloud/v1alpha1
+    kind: DNSEntry
+    metadata:
+      name: dns-entry
+      namespace: $NAMESPACE
+      annotations:
+        dns.gardener.cloud/class: garden
+    spec:
+      dnsName: "$WILDCARD"
+      ttl: 600
+      targets:
+        - $IP
+    EOF
+    ```
 
   >**NOTE:** You can create many DNSEntry CRs for one DNSProvider, depending on the number of subdomains you want to use. To simplify your setup, consider using a wildcard subdomain if all your DNSEntry objects share the same subdomain and resolve to the same IP, for example: `*.api.mydomain.com`. Remember that such a wildcard entry results in DNS configuration that doesn't support the following hosts: `api.mydomain.com` and `mydomain.com`. We don't use these hosts in this tutorial, but you can add DNS Entries for them if you need.
 

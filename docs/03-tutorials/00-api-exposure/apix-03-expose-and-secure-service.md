@@ -10,23 +10,23 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
 
 1. Export these values as environment variables:
 
-  - The name of your client and the Secret which stores the client credentials:
+   - The name of your client and the Secret which stores the client credentials:
 
-    ```shell
-    export CLIENT_NAME={YOUR_CLIENT_NAME}
-    ```
+   ```shell
+   export CLIENT_NAME={YOUR_CLIENT_NAME}
+   ```
 
-  - The Namespace in which you want to create the client and the Secret that stores its credentials:
+   - The Namespace in which you want to create the client and the Secret that stores its credentials:
 
-    ```shell
-    export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
-    ```
+   ```shell
+   export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
+   ```
 
-  - The domain of your cluster:
+   - The domain of your cluster:
 
-    ```shell
-    export DOMAIN={CLUSTER_DOMAIN}
-    ```
+   ```shell
+   export DOMAIN={CLUSTER_DOMAIN}
+   ```
 
 2. Create an OAuth2 client with `read` and `write` scopes. Run:
 
@@ -60,44 +60,44 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
 
 5. Get tokens to interact with secured resources using client credentials flow:
 
-<div tabs>
-  <details>
-  <summary>
-  Token with "read" scope
-  </summary>
+   <div tabs>
+     <details>
+     <summary>
+     Token with "read" scope
+     </summary>
 
-  1. Get the token:
+     1. Get the token:
 
-      ```shell
-      curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=read"
-      ```
+         ```shell
+         curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=read"
+         ```
 
-  2. Export the issued token as an environment variable:
+     2. Export the issued token as an environment variable:
 
-      ```shell
-      export ACCESS_TOKEN_READ={ISSUED_READ_TOKEN}
-      ```
+         ```shell
+         export ACCESS_TOKEN_READ={ISSUED_READ_TOKEN}
+         ```
 
-  </details>
-  <details>
-  <summary>
-  Token with "write" scope
-  </summary>
+     </details>
+     <details>
+     <summary>
+     Token with "write" scope
+     </summary>
 
-  1. Get the token:
+     1. Get the token:
 
-      ```shell
-      curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=write"
-      ```
+         ```shell
+         curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=write"
+         ```
 
-  2. Export the issued token as an environment variable:
+     2. Export the issued token as an environment variable:
 
-      ```shell
-      export ACCESS_TOKEN_WRITE={ISSUED_WRITE_TOKEN}
-      ```
+         ```shell
+         export ACCESS_TOKEN_WRITE={ISSUED_WRITE_TOKEN}
+         ```
 
-   </details>
-</div>
+      </details>
+   </div>
 
 ## Deploy, expose, and secure the sample resources
 
@@ -125,7 +125,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
   ```
 
-3. Create a Gateway CR. Run:
+3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -150,9 +150,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
    EOF
    ```
 
-4. Expose the service and secure it by creating an APIRule CR in your Namespace:
-
-> **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
+4. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -209,7 +207,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
   ```
 
-3. Create a Gateway CR. Run:
+3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -234,9 +232,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
    EOF
    ```
 
-4. Expose the Function and secure it by creating an APIRule CR in your Namespace:
-
-> **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
+4. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -

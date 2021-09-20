@@ -25,7 +25,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
   ```
 
-3. Create a Gateway CR. Run:
+3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -50,9 +50,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
    EOF
    ```
 
-4. Expose the service by creating an APIRule CR in your Namespace:
-
-> **NOTE:** If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`.
+4. Expose the service by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```bash
   cat <<EOF | kubectl apply -f -
@@ -66,7 +64,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
       host: httpbin.$DOMAIN
       name: httpbin
       port: 8000
-    gateway: httpbin-gateway.namespace-name.svc.cluster.local #The value corresponds to the Gateway CR you created. 
+    gateway: httpbin-gateway.namespace-name.svc.cluster.local #The value corresponds to the Gateway CR you created.
     rules:
       - path: /.*
         methods: ["GET"]
