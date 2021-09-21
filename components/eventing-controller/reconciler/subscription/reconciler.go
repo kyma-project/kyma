@@ -19,14 +19,11 @@ import (
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -54,6 +51,8 @@ type Reconciler struct {
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *handlers.OAuth2ClientCredentials
+	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
+	nameMapper handlers.NameMapper
 }
 
 var (
@@ -69,8 +68,8 @@ const (
 	reconcilerName        = "beb-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials) *Reconciler {
-	bebHandler := handlers.NewBEB(credential, logger)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+	bebHandler := handlers.NewBEB(credential, mapper, logger)
 	if err := bebHandler.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -86,18 +85,16 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		Domain:            cfg.Domain,
 		eventTypeCleaner:  eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		oauth2credentials: credential,
+		nameMapper:        mapper,
 	}
 }
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
-
 // Generate required RBAC to emit kubernetes events in the controller
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
-// Source: https://book-v1.book.kubebuilder.io/beyond_basics/creating_events.html
-
+// +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
-// Source: https://book.kubebuilder.io/reference/generating-crd.html#additional-printer-columns
 
 // TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -247,9 +244,25 @@ func (r *Reconciler) syncBEBSubscription(subscription *eventingv1alpha1.Subscrip
 		return false, err
 	}
 
+	message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(r.nameMapper.MapSubscriptionName(subscription))
 	if !subscription.Status.IsConditionSubscribed() {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, message)
 		if err := r.updateCondition(subscription, condition, ctx); err != nil {
+			return statusChanged, err
+		}
+		statusChanged = true
+	}
+
+	// Make sure the BEB subscription ID is written to the message
+	var subscribedCondition *eventingv1alpha1.Condition
+	for _, condition := range subscription.Status.Conditions {
+		if condition.Type == eventingv1alpha1.ConditionSubscribed {
+			subscribedCondition = condition.DeepCopy()
+		}
+	}
+	if subscribedCondition != nil && subscribedCondition.Message != message {
+		subscribedCondition.Message = message
+		if err := r.updateCondition(subscription, *subscribedCondition, ctx); err != nil {
 			return statusChanged, err
 		}
 		statusChanged = true
@@ -763,13 +776,6 @@ func (r *Reconciler) emitConditionEvent(subscription *eventingv1alpha1.Subscript
 	r.recorder.Event(subscription, eventType, string(condition.Reason), condition.Message)
 }
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&eventingv1alpha1.Subscription{}).
-		Watches(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, r.getAPIRuleEventHandler()).
-		Complete(r)
-}
-
 // SetupUnmanaged creates a controller under the client control
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
@@ -783,6 +789,12 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		return err
 	}
 
+	apiRuleEventHandler := &handler.EnqueueRequestForOwner{OwnerType: &eventingv1alpha1.Subscription{}, IsController: false}
+	if err := ctru.Watch(&source.Kind{Type: &apigatewayv1alpha1.APIRule{}}, apiRuleEventHandler); err != nil {
+		r.namedLogger().Errorw("watch APIRule failed", "error", err)
+		return err
+	}
+
 	go func(r *Reconciler, c controller.Controller) {
 		if err := c.Start(r.ctx); err != nil {
 			r.namedLogger().Errorw("start controller failed", "name", reconcilerName, "error", err)
@@ -791,119 +803,6 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}(r, ctru)
 
 	return nil
-}
-
-// getAPIRuleEventHandler returns an APIRule event handler.
-func (r *Reconciler) getAPIRuleEventHandler() handler.EventHandler {
-	eventHandler := func(eventType, name, namespace string, q workqueue.RateLimitingInterface) {
-		log := r.namedLogger().With("event-type", eventType, "kind", "APIRule", "name", name, "namespace", namespace)
-		if err := r.handleAPIRuleEvent(name, namespace, q, log); err != nil {
-			log.Errorw("handle APIRule event failed, requeue event", "error", err)
-			q.Add(reconcile.Request{NamespacedName: k8stypes.NamespacedName{Name: name, Namespace: namespace}})
-		}
-	}
-
-	return handler.Funcs{
-		CreateFunc: func(e event.CreateEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Create", e.Object.GetName(), e.Object.GetNamespace()
-			eventHandler(eventType, name, namespace, q)
-		},
-		UpdateFunc: func(e event.UpdateEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Update", e.ObjectNew.GetName(), e.ObjectNew.GetNamespace()
-			eventHandler(eventType, name, namespace, q)
-		},
-		DeleteFunc: func(e event.DeleteEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Delete", e.Object.GetName(), e.Object.GetNamespace()
-			eventHandler(eventType, name, namespace, q)
-		},
-		GenericFunc: func(e event.GenericEvent, q workqueue.RateLimitingInterface) {
-			eventType, name, namespace := "Generic", e.Object.GetName(), e.Object.GetNamespace()
-			eventHandler(eventType, name, namespace, q)
-		},
-	}
-}
-
-// handleAPIRuleEvent handles APIRule event.
-func (r *Reconciler) handleAPIRuleEvent(name, namespace string, q workqueue.RateLimitingInterface, log *zap.SugaredLogger) error {
-	// skip not relevant APIRules
-	if !isRelevantAPIRuleName(name) {
-		return nil
-	}
-
-	log.Debug("handle APIRule event")
-
-	// try to get the APIRule from the API server
-	ctx := context.Background()
-	apiRule := &apigatewayv1alpha1.APIRule{}
-	key := k8stypes.NamespacedName{Name: name, Namespace: namespace}
-	if err := r.Client.Get(ctx, key, apiRule); err != nil && !k8serrors.IsNotFound(err) {
-		return err
-	}
-
-	// list all namespace subscriptions
-	namespaceSubscriptions := &eventingv1alpha1.SubscriptionList{}
-	if err := r.Client.List(ctx, namespaceSubscriptions, client.InNamespace(namespace)); err != nil {
-		log.Errorw("list namespace subscriptions failed", "error", err)
-		return err
-	}
-
-	// filter namespace subscriptions that are relevant to the current APIRule
-	apiRuleSubscriptions := make([]eventingv1alpha1.Subscription, 0, len(apiRule.ObjectMeta.OwnerReferences))
-	for _, subscription := range namespaceSubscriptions.Items {
-		// skip if the subscription is marked for deletion
-		if subscription.DeletionTimestamp != nil {
-			continue
-		}
-
-		// check if APIRule name match
-		if subscription.Status.APIRuleName == name {
-			apiRuleSubscriptions = append(apiRuleSubscriptions, subscription)
-			continue
-		}
-
-		// check if APIRule OwnerReferences contains subscription info
-		if containsOwnerReference(apiRule.ObjectMeta.OwnerReferences, subscription.UID) {
-			apiRuleSubscriptions = append(apiRuleSubscriptions, subscription)
-			continue
-		}
-	}
-
-	// queue reconcile requests for APIRule subscriptions
-	r.queueReconcileRequestForSubscriptions(apiRuleSubscriptions, q, log)
-
-	return nil
-}
-
-// containsOwnerReference returns true if the OwnerReferences list contains the given uid, otherwise returns false.
-func containsOwnerReference(ownerReferences []v1.OwnerReference, uid k8stypes.UID) bool {
-	for _, ownerReference := range ownerReferences {
-		if ownerReference.UID == uid {
-			return true
-		}
-	}
-	return false
-}
-
-// queueReconcileRequestForSubscriptions queues reconciliation requests for the given subscriptions.
-func (r *Reconciler) queueReconcileRequestForSubscriptions(subscriptions []eventingv1alpha1.Subscription, q workqueue.RateLimitingInterface, log *zap.SugaredLogger) {
-	subscriptionNames := make([]string, 0, len(subscriptions))
-	for _, subscription := range subscriptions {
-		request := reconcile.Request{
-			NamespacedName: k8stypes.NamespacedName{
-				Name:      subscription.Name,
-				Namespace: subscription.Namespace,
-			},
-		}
-		q.Add(request)
-		subscriptionNames = append(subscriptionNames, subscription.Name)
-	}
-	log.Debugw("queue subscription reconcile requests", "subscriptions", subscriptionNames)
-}
-
-// isRelevantAPIRuleName returns true if the given name matches the APIRule name pattern
-// used by the eventing-controller, otherwise returns false.
-func isRelevantAPIRuleName(name string) bool {
-	return strings.HasPrefix(name, apiRuleNamePrefix)
 }
 
 // computeAPIRuleReadyStatus returns true if all APIRule statuses is ok, otherwise returns false.

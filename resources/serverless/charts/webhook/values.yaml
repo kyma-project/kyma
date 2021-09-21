@@ -165,6 +165,6 @@ values:
             "requestCpu": "1100m",
             "requestMemory": "1100Mi",
             "limitCpu": "1700m",
-            "limitMemory": "1700Mi"
+            "limitMemory": "1100Mi"
           }
         }

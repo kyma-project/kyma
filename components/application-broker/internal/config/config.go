@@ -42,7 +42,6 @@ type Config struct {
 		ProxyURL string
 	}
 	GatewayBaseURLFormat string `default:"http://%s-gateway"`
-	NewEventingFlow      bool
 }
 
 // Load method has following strategy:

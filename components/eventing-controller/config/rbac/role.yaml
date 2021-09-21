@@ -78,12 +78,14 @@ rules:
   - patch
   - update
 - apiGroups:
-  - hydra.ory.sh
+  - gateway.kyma-project.io
   resources:
-  - oauth2clients
+  - apirules
   verbs:
   - create
+  - delete
   - get
   - list
+  - patch
   - update
   - watch

@@ -61,8 +61,8 @@ central-application-connectivity-validator:
   deployment:
     resources:
       limits:
-        cpu: 10m
+        cpu: 100m
         memory: 64Mi
       requests:
-        cpu: 1m
+        cpu: 10m
         memory: 16Mi

@@ -13,6 +13,7 @@ global:
   istio:
     proxy:
       statusPort: 15020
+      portName: http-status
 
   securityContext:
     allowPrivilegeEscalation: false
@@ -42,4 +43,4 @@ authentication:
 preUpgradeJob:
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
+    tag: "20210817-8cdbfce3"

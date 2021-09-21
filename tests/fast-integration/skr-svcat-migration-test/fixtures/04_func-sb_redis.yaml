@@ -1,0 +1,8 @@
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: func-sb-redis-function-1
+spec:
+  instanceRef:
+    name: hb-instbind-redis-1

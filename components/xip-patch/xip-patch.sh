@@ -38,7 +38,7 @@ generateXipDomain() {
         fi
     fi
 
-    echo "${EXTERNAL_PUBLIC_IP}.xip.io"
+    echo "${EXTERNAL_PUBLIC_IP}.nip.io"
 
 }
 

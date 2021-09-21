@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"github.com/go-logr/zapr"
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/onsi/ginkgo"
@@ -168,9 +167,6 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
-	err = hydrav1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
 	err = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
@@ -277,12 +273,10 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// As there is no deployment-controller running in envtest, patching the deployment
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
-			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs,
-			// we create a secret, and just ensure that the OAuth2Client CR is created correctly.
+			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
 			createOAuth2Secret(ctx)
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
-			Eventually(oauth2ClientGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
 			eventuallyPublisherProxySecret(ctx).Should(And(
@@ -520,7 +514,7 @@ func resetPublisherProxyStatus(ctx context.Context) {
 func createOAuth2Secret(ctx context.Context) {
 	sec := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      deployment.OAuth2ClientSecretName(),
+			Name:      getOAuth2ClientSecretName(),
 			Namespace: deployment.ControllerNamespace,
 		},
 		Data: map[string][]byte{
@@ -597,20 +591,6 @@ func controllerDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment,
 			return nil, err
 		}
 		return dep, nil
-	}
-}
-
-func oauth2ClientGetter(ctx context.Context) func() (*hydrav1alpha1.OAuth2Client, error) {
-	lookupKey := types.NamespacedName{
-		Namespace: deployment.ControllerNamespace,
-		Name:      deployment.ControllerName,
-	}
-	oa2c := new(hydrav1alpha1.OAuth2Client)
-	return func() (*hydrav1alpha1.OAuth2Client, error) {
-		if err := k8sClient.Get(ctx, lookupKey, oa2c); err != nil {
-			return nil, err
-		}
-		return oa2c, nil
 	}
 }
 

@@ -1,0 +1,32 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "fluent-bit.fullname" . }}
+  labels:
+    {{- include "fluent-bit.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      {{- if .Values.rbac.nodeAccess }}
+      - nodes
+      - nodes/proxy
+      {{- end }}
+    verbs:
+      - get
+      - list
+      - watch
+  {{- if .Values.podSecurityPolicy.create }}
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    resourceNames:
+      - {{ include "fluent-bit.fullname" . }}
+    verbs:
+      - use
+  {{- end }}
+{{- end -}}

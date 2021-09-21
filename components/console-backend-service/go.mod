@@ -42,7 +42,8 @@ require (
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.34.1
 	github.com/coreos/etcd => github.com/coreos/etcd v3.3.24+incompatible
-	golang.org/x/text => golang.org/x/text v0.3.3
+	github.com/gorilla/websocket => github.com/gorilla/websocket v1.4.2
+	golang.org/x/text => golang.org/x/text v0.3.6
 	k8s.io/client-go => k8s.io/client-go v0.18.18
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 	// kyma/components/function-controller uses new version knative.dev, with another impelmntations functions.

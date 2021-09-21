@@ -8,6 +8,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
@@ -24,6 +30,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
@@ -41,6 +53,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-metrics
@@ -55,6 +73,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
@@ -69,6 +93,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-metrics

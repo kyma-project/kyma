@@ -25,6 +25,8 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about o
 
 Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/docs/root/kyma#installation-installation) for details.
 
+> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/docs/#installation-upgrade-kyma).
+
 ## Usage
 
 Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
