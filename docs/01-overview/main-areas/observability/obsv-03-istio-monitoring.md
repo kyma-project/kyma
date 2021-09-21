@@ -49,7 +49,7 @@ By default, `monitoring-prometheus-istio-server` is not provided as a data sourc
 
 ## Enable mTLS for custom metrics
 
-To enable Strict mTLS scraping for a component, the corresponding ServiceMonitor needs to have the Istio TLS certificates configured:
+To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding ServiceMonitor:
 
 ```yaml
 ---
