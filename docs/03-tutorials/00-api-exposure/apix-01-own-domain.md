@@ -2,7 +2,7 @@
 title: Use a custom domain to expose a service
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate to use the domain for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
+This tutorial shows how to set up your custom domain and prepare a certificate for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
 
 Once you finish the steps, learn how to [expose a service](./apix-02-expose-service-apigateway.md) or how to [expose and secure a service](./apix-03-expose-and-sercure-service.md).
 
@@ -36,16 +36,16 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
   > **CAUTION:** Bear in mind that the **metadata.annotation** parameter, may be either not needed or subject to change depending on the External DNS Management configuration provided during the component installation.
 
-  - Export the following values as environment variables and run the command provided. 
+   - Export the following values as environment variables and run the command provided. 
   
-    As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
+   As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNSProvider CR.
 
-    ```bash
-    export NAMESPACE={NAMESPACE_NAME}
-    export SPEC_TYPE={PROVIDER_TYPE}
-    export SECRET={SECRET_NAME}
-    export DOMAIN={CLUSTER_DOMAIN} # The domain that you own, e.g. mydomain.com.
-    ```
+   ```bash
+   export NAMESPACE={NAMESPACE_NAME}
+   export SPEC_TYPE={PROVIDER_TYPE}
+   export SECRET={SECRET_NAME}
+   export DOMAIN={CLUSTER_DOMAIN} # The domain that you own, e.g. mydomain.com.
+   ```
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -66,12 +66,12 @@ Follow these steps to set up your custom domain and prepare a certificate requir
     EOF
     ```
 
-  - Export the following values as environment variables and run the command provided:
+   - Export the following values as environment variables and run the command provided:
 
-    ```bash
-    export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
-    ```
+   ```bash
+   export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
+   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}') # assuming only one LoadBalancer with external IP
+   ```
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -163,4 +163,4 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    > **NOTE:** Istio requires the Certificate CR containing the Secret to be created in the `istio-system` Namespace.
 
-Proceed with [this](./apix-01-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
+Proceed with [this](./apix-02-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
