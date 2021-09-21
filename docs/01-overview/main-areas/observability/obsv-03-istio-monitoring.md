@@ -49,22 +49,7 @@ By default, `monitoring-prometheus-istio-server` is not provided as a data sourc
 
 ## Enable mTLS for custom metrics
 
-If a component wants to make use of Strict mTLS scraping, a Strict PeerAuthentication policy has to be added:
-
-```yaml
-apiVersion: security.istio.io/v1beta1
-kind: PeerAuthentication
-metadata:
-  name: sample-metrics
-spec:
-  selector:
-    matchLabels:
-      app: sample-metrics
-  mtls:
-    mode: "STRICT"
-```
-
-Furthermore, the corresponding ServiceMonitor needs to have the Istio TLS certificates configured:
+To enable Strict mTLS scraping for a component, the corresponding ServiceMonitor needs to have the Istio TLS certificates configured:
 
 ```yaml
 ---
