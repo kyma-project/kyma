@@ -4,7 +4,7 @@
 
 The Application Operator (AO) can work in two modes.
 By default, it detects changes in [Application](../../docs/05-technical-reference/00-custom-resources/ac-01-application.md) custom resources and acts accordingly. In this mode, Application Gateway is created for each Application.
-In the alternative mode, it detects changes in [ServiceInstance](../../docs/01-overview/main-areas/service-management/smgt-03-sc-resources.md) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
+In the alternative mode, it detects changes in [ServiceInstance](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) custom resources and acts accordingly. In this mode, Application Gateway is created per Namespace.
 
 
 ## Performed operations
