@@ -1,4 +1,4 @@
-external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://kyma-project.io/docs/components/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
+external-links-to-ignore: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://github.com/kyma-project/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service"]
 files-to-ignore: ["/vendor/", "/testdata/"]
 timeout: 60
 request-repeats: 5
@@ -28,7 +28,7 @@ files:
   - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
     config:
       external-links-to-ignore: ["https://www.orders.com/v1/orders"]
-  - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"
+  - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/smgt-03-hb-chart.md"
     config:
       external-links-to-ignore: ["custom.bundles-repository"]
   - path: "./kyma/docs/kyma/04-07-aks-xip.io-domain.md"
@@ -40,7 +40,7 @@ files:
   - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       external-links-to-ignore: ["https://{host}/{path}/{bundle_repo_version"]
-  - path: "./kyma/docs/application-connector/08-09-revoke-cert.md"
+  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-10-revoke-client-cert.md"
     config:
       external-links-to-ignore: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
   - path: "./kyma/resources/istio/README.md"
@@ -64,19 +64,19 @@ files:
   - path: "./kyma/tests/perf/README.md"
     config:
       external-links-to-ignore: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]
-  - path: "./kyma/docs/monitoring/08-02-create-and-configure-grafana-dashboard.md"
+  - path: "./kyma/docs/03-tutorials/00-observability/obsv-02-create-and-configure-grafana-dashboard.md"
     config:
       external-links-to-ignore: ["https://grafana.example.com/"]
-  - path: "./kyma/docs/helm-broker/03-03-create-addons-repo.md"
+  - path: "./kyma/docs/03-tutorials/00-service-management/smgt-14-hb-create-addons-repo.md"
     config:
       external-links-to-ignore: ["https://admin:secretPassword@repository.addons.com/index.yaml"]
-  - path: "./kyma/docs/monitoring/08-05-send-notifications.md"
+  - path: "./kyma/docs/03-tutorials/00-observability/obsv-04-send-notifications.md"
     config:
       external-links-to-ignore: ["https://hooks.slack.com/services/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"]
   - path: "./kyma/docs/kyma/05-04-component-source-url.md"
     config:
       external-links-to-ignore: ["https://user:pass@hosting.com/your-user/files/kyma-custom-ory.zip"]
-  - path: "./kyma/docs/runtime-agent/08-07-establish-secure-connection-with-compass.md"
+  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ra-01-establish-secure-connection-with-compass.md"
     config:
       external-links-to-ignore: ["https://compass.{CLUSTER_DOMAIN"]
   - path: "./kyma/docs/migration-guides/1.10-1.11.md"
