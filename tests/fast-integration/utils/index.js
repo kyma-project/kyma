@@ -965,6 +965,61 @@ function eventingSubscription(eventType, sink, name, namespace) {
   }
 }
 
+/**
+ * Switches eventing backend to specified backend-type (beb or nats)
+ * @param {string} secretName - name of the beb secret
+ * @param {string} namespace - namespace where the secret exists
+ * @param {string} backendType - backend type to switch to. (beb or nats)
+ * @returns
+ */
+async function switchEventingBackend(secretName, namespace="default", backendType="beb") {
+  const patch = [
+    {
+        "op": "replace",
+        "path":"/metadata/labels",
+        "value": {
+          "kyma-project.io/eventing-backend": backendType.toLowerCase()
+        }
+    }
+  ];
+
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
+
+  await k8sCoreV1Api.patchNamespacedSecret(
+    secretName,
+    namespace,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
+  );
+}
+
+/**
+ * Waits for eventing backend until its ready
+ * @param {string} name - name of the eventing backend
+ * @param {string} namespace - namespace where the eventing backend exists
+ * @param {string} backendType - eventing backend type (beb or nats)
+ * @returns 
+ */
+function waitForEventingBackendToReady(name="eventing-backend", namespace = "kyma-system", backendType="beb", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
+        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
+        watchObj.object.status.eventingReady == true
+      );
+    },
+    timeout,
+    `Waiting for eventing-backend: ${name} to get ready  timeout (${timeout} ms)`
+  );
+}
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -1015,5 +1070,7 @@ module.exports = {
   ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription,
+  switchEventingBackend,
+  waitForEventingBackendToReady
 };
 
