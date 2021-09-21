@@ -5,9 +5,10 @@ title: Useful links
 If you're interested in learning more about API Exposure in Kyma, follow these links to:
 
 - Perform some simple and more advanced tasks:
-  - [Expose a service](../../../03-tutorials/00-api-exposure/apix-01-expose-service-apigateway.md)
-  - [Expose and secure a service](../../../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md)
-  - [Use a custom domain to expose a service](../../../03-tutorials/00-api-exposure/apix-03-own-domain.md)
+  - [Use a custom domain to expose a service](../../../03-tutorials/00-api-exposure/apix-01-own-domain.md)
+  - [Expose a service](../../../03-tutorials/00-api-exposure/apix-02-expose-service-apigateway.md)
+  - [Expose and secure a service](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md)
+  
 
 - Troubleshoot API Exposure-related issues when:
 
