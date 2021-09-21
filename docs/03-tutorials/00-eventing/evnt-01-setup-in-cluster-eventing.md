@@ -23,8 +23,6 @@ spec:
         property: type
         type: exact
         value: sap.kyma.custom.nonexistingapp.order.created.v1
-  protocol: ""
-  protocolsettings: {}
   sink: http://myservice.mynamespace.svc.cluster.local
 ```
 
