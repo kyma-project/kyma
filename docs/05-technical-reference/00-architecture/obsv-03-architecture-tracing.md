@@ -23,5 +23,5 @@ The process of collecting traces by Jaeger looks as follows:
 The process of querying traces from Jaeger looks as follows:
 
 1. A Kyma user accesses the Jaeger UI to look for specific traces.
-2. The user passes the request to the Jaeger Query service and retrieves the trace information. Learn more about [accessing Jaeger](../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
+2. The user passes the request to the Jaeger Query service and retrieves the trace information. Learn more about [accessing Jaeger](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md).
 3. The Jaeger Deployment provides trace information.
