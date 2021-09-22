@@ -40,3 +40,8 @@ ci-application-connectivity-2:
 ci-application-connectivity-2-compass:
 	npm install
 	npm run test-application-connectivity-2-compass
+
+.PHONY: ci-test-eventing
+ci-test-eventing:
+	npm ci
+	npm run test-eventing
