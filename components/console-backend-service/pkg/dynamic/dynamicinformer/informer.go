@@ -124,7 +124,7 @@ func NewFilteredDynamicInformer(client dynamic.Interface, gvr schema.GroupVersio
 					if tweakListOptions != nil {
 						tweakListOptions(&options)
 					}
-					return client.Resource(gvr).Namespace(namespace).List(context.Background(),options)
+					return client.Resource(gvr).Namespace(namespace).List(context.Background(), options)
 				},
 				WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 					if tweakListOptions != nil {
