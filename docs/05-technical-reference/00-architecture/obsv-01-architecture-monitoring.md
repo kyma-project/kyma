@@ -41,4 +41,4 @@ Prometheus stores this polled data in a time-series database (TSDB) and runs rul
 
     >**NOTE:** By default, no notification channels are configured. You need to [set them up](../../03-tutorials/00-observability/obsv-04-send-notifications.md).
 
-6. [**Grafana**](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. Learn how to [access the Grafana UI](../../04-operation-guides/operations/obsv-02-access-expose-kiali-grafana.md).
+6. [**Grafana**](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. Learn how to [access the Grafana UI](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md.
