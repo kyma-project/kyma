@@ -33,7 +33,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "dex.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.domainName }}"
       {{- end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
@@ -56,7 +56,7 @@ spec:
         - --upstream=https://kubernetes.default
         - --logtostderr=true
         - --v=9
-        - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
+        - --oidc-issuer=https://dex.{{ .Values.global.domainName }}
         - --oidc-clientID=kyma-client
         {{- if not .Values.global.environment.gardener }}
         - --oidc-ca-file=/etc/dex-tls-cert/tls.crt

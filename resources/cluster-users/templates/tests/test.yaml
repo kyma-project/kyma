@@ -25,8 +25,8 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "configurations-generator.{{ .Values.global.ingress.domainName }}"
-          - "apiserver.{{ .Values.global.ingress.domainName }}"
+          - "configurations-generator.{{ .Values.global.domainName }}"
+          - "apiserver.{{ .Values.global.domainName }}"
       {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: {{ .Chart.Name }}-tests
@@ -99,7 +99,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.tests.env.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-            value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
+            value: "https://configurations-generator.{{ .Values.global.domainName }}"
           - name: HOME
             value: /tmp
           securityContext:

@@ -166,7 +166,7 @@ oathkeeper:
           enabled: true
           config:
             # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
-            issuer_url: https://oathkeeper.{{ .Values.global.ingress.domainName }}/
+            issuer_url: https://oathkeeper.{{ .Values.global.domainName }}/
             # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
             # well as local filesystem paths.
             jwks_url: "file:///etc/secrets/jwks.json"

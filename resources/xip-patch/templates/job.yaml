@@ -30,7 +30,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: net-global-overrides
-              key: global.ingress.domainName
+              key: global.domainName
               optional: true
         - name: INGRESS_TLS_CERT
           valueFrom:

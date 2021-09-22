@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-  - "apiserver.{{ .Values.global.ingress.domainName }}"
+  - "apiserver.{{ .Values.global.domainName }}"
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:
