@@ -6,7 +6,7 @@ jobs:
 
 global:
   isLocalEnv: false
-  installCRDs: true
+  installCRDs: false
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false

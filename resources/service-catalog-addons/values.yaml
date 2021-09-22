@@ -1,5 +1,5 @@
 service-catalog-ui:
-  enabled: true
+  enabled: false
 
 global:
   containerRegistry:
