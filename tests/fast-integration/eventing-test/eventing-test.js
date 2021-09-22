@@ -10,34 +10,91 @@ const {
   sendEventAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
+  waitForSubscriptionsTillReady,
+  setEventMeshSourceNamespace,
 } = require("../test/fixtures/commerce-mock");
+const {
+  switchEventingBackend,
+  createEventingBackendK8sSecret,
+  deleteEventingBackendK8sSecret,
+} = require("../utils");
 
 describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";
-  const testStartTimestamp = new Date().toISOString();
+  const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
+  const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
+  const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
 
-  it("CommerceMock test fixture should be ready", async function () {
+  // eventingE2ETestSuite - Runs Eventing end-to-end tests
+  function eventingE2ETestSuite () {
+    it("In-cluster event should be delivered (structured and binary mode)", async function () {
+      await checkInClusterEventDelivery(testNamespace);
+    });
+  
+    it("function should reach Commerce mock API through app gateway", async function () {
+      await checkAppGatewayResponse();
+    });
+  
+    it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
+      await sendEventAndCheckResponse();
+    });
+  }
+
+  before(async function() {
+    // runs once before the first test in this block
+
+    // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
+    // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
+    if (eventMeshSecretFilePath !== "") {
+      console.log("Creating Event Mesh secret")
+      const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath, backendK8sSecretName, backendK8sSecretNamespace);
+      setEventMeshSourceNamespace(eventMeshInfo["namespace"]);
+    }
+
+    // Deploy Commerce mock application, function and subscriptions for tests
+    console.log("Preparing CommerceMock test fixture")
     await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
       console.dir(err); // first error is logged
       return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
     });
   });
 
-  it("In-cluster event should be delivered (structured and binary mode)", async function () {
-    await checkInClusterEventDelivery(testNamespace);
-  });
-
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
-  });
-
-  it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
-    await sendEventAndCheckResponse();
-  });
-
-  it("Test namespaces should be deleted", async function () {
+  after(async function() {
+    // runs once after the last test in this block
+    console.log("Cleaning: Test namespaces should be deleted")
     await cleanMockTestFixture("mocks", testNamespace, true);
+
+    // Delete eventing backend secret if it was created by test
+    if (eventMeshSecretFilePath != "") {
+      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
+    }
+  });
+
+  // Tests
+  context('with Nats backend', function() {
+    // Running Eventing end-to-end tests
+    eventingE2ETestSuite();
+  });
+
+  context('with BEB backend', function() {
+    it("Switch Eventing Backend to BEB", async function () {
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, "beb");
+      await waitForSubscriptionsTillReady(testNamespace)
+    });
+
+    // Running Eventing end-to-end tests
+    eventingE2ETestSuite();
+  });
+
+  context('with Nats backend switched back from BEB', function() {
+    it("Switch Eventing Backend to Nats", async function () {
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, "nats");
+      await waitForSubscriptionsTillReady(testNamespace)
+    });
+
+    // Running Eventing end-to-end tests
+    eventingE2ETestSuite();
   });
 });

@@ -46,6 +46,24 @@ npm install
 npm test
 ```
 
+
+#### To run eventing specific tests locally, follow these steps:
+1. Install dependencies:
+```bash
+cd kyma/tests/fast-integration
+npm install
+```
+
+2. Define SAP Event Mesh secret file path in `EVENTMESH_SECRET_FILE` environment variable.
+```
+ export EVENTMESH_SECRET_FILE="<PATH_TO_EVENT_MESH_SECRET_FILE>"
+```
+
+3. Execute the eventing tests:
+```
+npm run test-eventing
+```
+
 ## Local development
 
 Here you have sample development tasks you can execute on your local machine working with the Kyma source code.

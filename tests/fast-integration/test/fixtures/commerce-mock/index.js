@@ -64,18 +64,25 @@ const lastorderFunctionYaml = fs.readFileSync(
 const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
+let eventMeshSourceNamespace = "/default/sap.kyma/tunas-prow"
+
+function setEventMeshSourceNamespace(namespace) {
+  eventMeshSourceNamespace = `/${namespace.trimStart("/")}`;
+}
 
 function prepareLastorderObjs(type='standard', appName='commerce') {
+  const lastOrderFunctionDataYaml = lastorderFunctionYaml.toString().replace(/%%BEB_NAMESPACE%%/g, eventMeshSourceNamespace)
+
   switch (type) {
     case "central-app-gateway":
-      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
         .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
     case "central-app-gateway-compass":
-      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
         .replace('%%URL%%', '"http://central-application-gateway.kyma-integration:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
         .replace('%%APP_NAME%%', appName));
     default:
-      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
         .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
   }
 }
@@ -479,6 +486,11 @@ async function deleteMockTestFixture(targetNamespace) {
   await k8sDelete(applicationObjs)
 }
 
+async function waitForSubscriptionsTillReady(targetNamespace) {
+  await waitForSubscription("order-received", targetNamespace);
+  await waitForSubscription("order-created", targetNamespace);
+}
+
 async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
@@ -508,4 +520,6 @@ module.exports = {
   checkInClusterEventDelivery,
   cleanMockTestFixture,
   deleteMockTestFixture,
+  waitForSubscriptionsTillReady,
+  setEventMeshSourceNamespace,
 };
