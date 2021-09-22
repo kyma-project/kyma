@@ -133,9 +133,9 @@ Follows these steps:
 
     - Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
-    - In the **Metadata** tab, enter the Secret name under **Name**.
+    - Open the **Advanced** view and enter the secret name and type.
 
-    - In the **Data** tab, select **Add data entry** and enter these key-value pairs with credentials:
+    - Select **Add data entry** and enter these key-value pairs with credentials:
 
         - Basic authentication: `username: {USERNAME}` and `password: {PASSWORD_OR_TOKEN}``
 

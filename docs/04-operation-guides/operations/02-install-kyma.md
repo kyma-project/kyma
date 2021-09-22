@@ -38,6 +38,8 @@ Use the `deploy` command to install Kyma.
 
 With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard --local`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. With Kyma installed on a remote cluster, access the Dashboard at [`https://dashboard.kyma-project.io`](https://dashboard.kyma-project.io).
 
+<!-- `kyma dashboard --local` and the URL aren't working yet, see 02-get-started/01-quick-install.md -->
+
 ## Choose resource consumption
 
 By default, Kyma is installed with the default chart values defined in the `values.yaml` files. You can also control the allocation of resources, such as memory and CPU, that the components consume by installing Kyma with the following pre-defined profiles:
