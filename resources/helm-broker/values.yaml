@@ -37,7 +37,7 @@ broker:
   metricsPort: 8072
 
 webhook:
-  image: "eu.gcr.io/kyma-project/helm-broker-webhook:81dc2bd6"
+  image: "eu.gcr.io/kyma-project/helm-broker-webhook:995c0f10"
   imagePullPolicy: IfNotPresent
   securityContext: { runAsUser: 1001 }
   strategy:
@@ -85,10 +85,10 @@ global:
   # paths to docker images
   helm_broker:
     dir: ""
-    version: "81dc2bd6"
+    version: "995c0f10"
   helm_controller:
     dir: ""
-    version: "81dc2bd6"
+    version: "995c0f10"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
