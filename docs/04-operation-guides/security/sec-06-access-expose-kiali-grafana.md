@@ -4,6 +4,8 @@ title: Access and Expose Kiali, Grafana, and Jaeger
 
 By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can still access them using port forwarding. If you want to expose Kiali, Grafana, and Jaeger securely, use an identity provider of your choice.
 
+![Access services flow](./assets/obsv-access-services.svg)
+
 ## Prerequisites
 
 - You have defined the kubeconfig file for your cluster as default (see [Kubernetes: Organizing Cluster Access Using kubeconfig Files](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)).
