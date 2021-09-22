@@ -121,7 +121,6 @@ func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 										LabelSelector: &metav1.LabelSelector{
 											MatchLabels: map[string]string{AppLabelKey: PublisherName},
 										},
-										Namespaces:  []string{PublisherNamespace},
 										TopologyKey: "kubernetes.io/hostname",
 									},
 								},
