@@ -68,11 +68,11 @@ tests:
 global:
   commonLabels:
     app: '{{ template "name" . }}'
-    version: "{{ .Values.images.manager.tag }}"
+    version: "{{ .Values.global.images.function_controller.version }}"
     app.kubernetes.io/name: '{{ template "name" . }}'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-    app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
+    app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   ingress:
@@ -115,24 +115,10 @@ global:
 
 
 
-# images:
-#   manager:
-#     repository: "eu.gcr.io/kyma-project/function-controller"
-#     tag: "PR-12110"
-#     pullPolicy: IfNotPresent
-#   runtimes:
-#     nodejs12:
-#       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-#       tag: "PR-12096"
-#     nodejs14:
-#       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-#       tag: "PR-12096"
-#     python38:
-#       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-#       tag: "19830ec3"
-#     python39:
-#       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-#       tag: "19830ec3"
+images:
+  function_controller:
+    pullPolicy: IfNotPresent
+
 
 deployment:
   replicas: 1

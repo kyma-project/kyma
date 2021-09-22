@@ -23,7 +23,7 @@ spec:
         - name: inject-certs
           securityContext:
 {{- include "tplValue" ( dict "value" .Values.containers.daemonset.initContainerSecurityContext "context" . ) | nindent 12 }}
-          image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           resources:
             requests:
               cpu: 70m
