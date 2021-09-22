@@ -1,14 +1,18 @@
+const stream = require('stream');
 const k8s = require("@kubernetes/client-node");
 const net = require("net");
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
+const axios = require('axios');
+const axiosRetry = require('axios-retry');
+const execa = require("execa");
 
 const kc = new k8s.KubeConfig();
 var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
-var k8sCustomApi;
+var k8sLog;
 
 var watch;
 var forward;
@@ -24,11 +28,11 @@ function initializeK8sClient(opts) {
       kc.loadFromDefault();
     }
 
-    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi); // deprecated, prefer CustomObjectsApi
-    k8sCustomApi = kc.makeApiClient(k8s.CustomObjectsApi);
+    k8sDynamicApi = kc.makeApiClient(k8s.KubernetesObjectApi);
     k8sAppsApi = kc.makeApiClient(k8s.AppsV1Api);
     k8sCoreV1Api = kc.makeApiClient(k8s.CoreV1Api);
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+    k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
   } catch (err) {
@@ -584,6 +588,57 @@ function waitForStatefulSet(name, namespace = "default", timeout = 90000) {
   );
 }
 
+function waitForJob(name, namespace = "default", timeout = 900000, success = 1) {
+  return waitForK8sObject(
+    `/apis/batch/v1/namespaces/${namespace}/jobs`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
+        watchObj.object.status.succeeded >= success
+      );
+    },
+    timeout,
+    `Waiting for Job ${name} to succeed ${success} timeout (${timeout} ms)`
+  );
+}
+
+async function kubectlExecInPod(pod, container, cmd, namespace = "default") {
+  let execCmd = [`exec`, pod, `-c`, container, `-n`, namespace, '--', ...cmd];
+  try {
+    let out = await execa(`kubectl`, execCmd);
+  } catch (error) {
+    if (error.stdout === undefined) {
+      throw error;
+    }
+    throw new Error(`failed to execute kubectl ${execCmd.join(" ")}:\n${error.stdout},\n${error.stderr}`);
+  }
+}
+
+async function listPods(labelSelector, namespace = "default") {
+  return await k8sCoreV1Api.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector);
+}
+
+async function printContainerLogs(labelSelector, container, namespace = "default", timeout = 90000) {
+  const res = await k8sCoreV1Api.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector);
+  res.body.items.sort((a,b) => {return a.metadata.creationTimestamp - b.metadata.creationTimestamp});
+  for (const p of res.body.items) {
+    process.stdout.write(`Getting logs for pod ${p.metadata.name}/${container}\n`);
+    const logStream = new stream.PassThrough();
+    logStream.on('data', (chunk) => {
+        // use write rather than console.log to prevent double line feed
+        process.stdout.write(chunk);
+    });
+    let end = new Promise(function(resolve, reject){
+      logStream.on('end', () => {process.stdout.write("\n"); resolve()});
+      logStream.on('error', reject);
+    });
+    k8sLog.log(namespace, p.metadata.name, container, logStream)
+    await end;
+  }
+  process.stdout.write(`Done getting logs\n`);
+}
+
 function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices`;
   const query = {
@@ -819,7 +874,8 @@ async function deleteAllK8sResources(
   path,
   query = {},
   retries = 2,
-  interval = 1000
+  interval = 1000,
+  keepFinalizer = false
 ) {
   try {
     let i = 0;
@@ -834,10 +890,10 @@ async function deleteAllK8sResources(
       const body = JSON.parse(response.body);
       if (body.items && body.items.length) {
         for (let o of body.items) {
-          deleteK8sResource(o);
+          deleteK8sResource(o, keepFinalizer);
         }
       } else if (!body.items) {
-        deleteK8sResource(body);
+        deleteK8sResource(body, keepFinalizer);
       }
     }
   } catch (e) {
@@ -845,8 +901,8 @@ async function deleteAllK8sResources(
   }
 }
 
-async function deleteK8sResource(o) {
-  if (o.metadata.finalizers && o.metadata.finalizers.length) {
+async function deleteK8sResource(o, keepFinalizer = false) {
+  if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
       headers: { "Content-type": "application/merge-patch+json" },
     };
@@ -1223,7 +1279,6 @@ function eventingSubscription(eventType, sink, name, namespace) {
   };
 }
 
-
 async function patchDeployment(name, ns, patch) {
   const options = {
     headers: { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH },
@@ -1240,6 +1295,24 @@ async function patchDeployment(name, ns, patch) {
   );
 }
 
+async function getResponse(url, retries) {
+  axiosRetry(axios, {
+      retries: retries,
+      retryDelay: (retryCount) => {
+          return retryCount * 5000;
+      },
+      retryCondition: (error) => {
+          console.log(error);
+          return !error.response || error.response.status != 200;
+      },
+  });
+
+  let response = await axios.get(url, {
+      timeout: 5000,
+  });
+  return response;
+}
+
 async function isKyma2() {
   try {
     const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
@@ -1247,6 +1320,25 @@ async function isKyma2() {
   } catch(err) {
     throw new Error(`Error while trying to get pods in kyma-installer namespace: ${err.toString()}`);
   }
+}
+
+function namespaceObj(name) {
+  return {
+    apiVersion: "v1",
+    kind: "Namespace",
+    metadata: { name },
+  };
+}
+
+function serviceInstanceObj(name, serviceClassExternalName) {
+  return {
+    apiVersion: "servicecatalog.k8s.io/v1beta1",
+    kind: "ServiceInstance",
+    metadata: {
+      name: name,
+    },
+    spec: { serviceClassExternalName },
+  };
 }
 
 module.exports = {
@@ -1281,6 +1373,7 @@ module.exports = {
   waitForSubscription,
   waitForPodWithLabel,
   waitForConfigMap,
+  waitForJob,
   deleteNamespaces,
   deleteAllK8sResources,
   getAllResourceTypes,
@@ -1297,7 +1390,6 @@ module.exports = {
   listResources,
   listResourceNames,
   k8sDynamicApi,
-  k8sCustomApi,
   k8sAppsApi,
   k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
@@ -1314,6 +1406,13 @@ module.exports = {
   eventingSubscription,
   getVirtualService,
   patchDeployment,
+  getResponse,
   isKyma2,
-  getEnvOrDefault
+  namespaceObj,
+  serviceInstanceObj,
+  getEnvOrDefault,
+  printContainerLogs,
+  kubectlExecInPod,
+  deleteK8sResource,
+  listPods,
 };

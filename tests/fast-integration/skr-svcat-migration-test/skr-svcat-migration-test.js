@@ -14,6 +14,8 @@ const {
   genRandom,
   initializeK8sClient,
   switchDebug,
+  waitForJob,
+  printContainerLogs,
 } = require("../utils");
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
@@ -38,12 +40,12 @@ describe("SKR SVCAT migration test", function() {
   this.slow(5000);
 
   let platformCreds;
-  it(`Should Provision Platform`, async function() {
+  it(`Should provision new ServiceManager platform`, async function() {
     platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform)
   });
 
   let btpOperatorCreds;
-  it(`Should instantiate SM Instance and Binding`, async function() {
+  it(`Should instantiate ServiceManager instance and binding for BTP operator`, async function() {
     btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
   });
 
@@ -52,65 +54,74 @@ describe("SKR SVCAT migration test", function() {
     skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, platformCreds, btpOperatorCreds);
   });
 
-  it(`Should save kubeconfig`, async function() {
+  it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
     t.saveKubeconfig(skr.shoot.kubeconfig);
   });
 
-  it(`Should initialize K8s`, async function() {
+  it(`Should initialize K8s client`, async function() {
     await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
 
   let clusterid
-  it('Should read cluster id from Service Catalog', async function() {
+  it('Should read cluster id from Service Catalog ConfigMap', async function() {
     clusterid = await  t.readClusterID()
     debug('Found Service Catalog ClusterID: ' + clusterid)
   })
 
-  it(`Should install sample service catalogue resources`, async function() {
+  it(`Should install sample Service Catalog resources`, async function() {
     await sampleResources.deploy()
   });
 
-  it('Should mark the Platform for migration', async function() {
+  it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
   })
 
-  it(`Should install BTP Operator helm chart`, async function() {
+  it(`Should install BTP operator helm chart`, async function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
   });
 
   let secretsAndPresets
-  it(`Should store secrets and presets`, async function() {
+  it(`Should store secrets and presets of sample resources`, async function() {
     secretsAndPresets = await sampleResources.storeSecretsAndPresets()
   });
 
-  it(`Should install BTP Service Operator Migration helm chart`, async function() {
+  it(`Should check if pod presets injected secrets to functions containers`, async function() {
+    await t.checkPodPresetEnvInjected();
+  });
+
+  it(`Should install BTP service operator migration helm chart`, async function() {
     await t.installBTPServiceOperatorMigrationHelmChart();
-
-    // TODO: Print log output of migrator job "sap-btp-operator-migration"
   });
 
-  // TODO: Remove
-  // this sleep is created to have a time to check the cluster before deprovisioning it
-  it(`Should Sleep and wakeup properly`, async function() {
-    await sampleResources.goodNight()
+  it(`Should wait for migration job to finish`, async function() {
+    await waitForJob("sap-btp-operator-migration", "sap-btp-operator", 10 * 60 * 1000); //10 minutes
+  });
+  
+  it(`Should print the container logs of the migration job`, async function() {
+    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
   });
 
-  it(`Should pass sanity check`, async function() {
-    // TODO: Wait/Check until Job of BTP-Migrator/SC-Removal is finished successfully
+  it(`Should still contain pod presets and the secrets`, async function() {
     let existing = await sampleResources.storeSecretsAndPresets()
     // Check if Secrets and PodPresets are still available
     await sampleResources.checkSecrets(existing.secrets)
     await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets)
-
-    // TODO: Check if all other SVCat resources are successfully removed
   });
 
+  it(`Should restart functions pods`, async function() {
+    await t.restartFunctionsPods();
+  });
 
-  it(`Should destroy sample service catalogue ressources`, async function() {
-    // TODO: Remove anything from BT-Operator
+  it(`Should check if pod presets injected secrets in functions containers are present after migration`, async function() {
+    await t.checkPodPresetEnvInjected();
+  });
+
+  it(`Should destroy sample service catalog resources`, async function() {
     await sampleResources.destroy()
+  });
 
-    // TODO: Check if no Service Instances are left over
+  it(`Should delete migrated BTP resources`, async function() {
+    await t.deleteBTPResources();
   });
 
   it(`Should deprovision SKR`, async function() {

@@ -34,7 +34,9 @@ const {
   patchApplicationGateway,
   eventingSubscription,
   k8sDelete,
-  getSecretData
+  getSecretData,
+  namespaceObj,
+  serviceInstanceObj
 } = require("../../../utils");
 
 const {
@@ -72,35 +74,19 @@ const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 
-function prepareLastOrderObjs(compassEnabled = false , appName = 'commerce') {
-
-  if (compassEnabled) {
-    return k8s.loadAllYaml(lastorderFunctionYaml.toString()
-      .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
-      .replace('%%APP_NAME%%', appName));
+function prepareLastorderObjs(type = 'standard', appName = 'commerce') {
+  switch (type) {
+    case "central-app-gateway":
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+    case "central-app-gateway-compass":
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
+        .replace('%%APP_NAME%%', appName));
+    default:
+      return k8s.loadAllYaml(lastorderFunctionYaml.toString()
+        .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
   }
-
-  return k8s.loadAllYaml(lastorderFunctionYaml.toString()
-    .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
-}
-
-function namespaceObj(name) {
-  return {
-    apiVersion: "v1",
-    kind: "Namespace",
-    metadata: { name },
-  };
-}
-
-function serviceInstanceObj(name, serviceClassExternalName) {
-  return {
-    apiVersion: "servicecatalog.k8s.io/v1beta1",
-    kind: "ServiceInstance",
-    metadata: {
-      name: name,
-    },
-    spec: { serviceClassExternalName },
-  };
 }
 
 async function checkFunctionResponse(functionNamespace) {
@@ -120,9 +106,9 @@ async function checkFunctionResponse(functionNamespace) {
 
   // expect no error when authorized
   let res = await retryPromise(
-    () => axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, {
+    () => axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, { 
       timeout: 5000,
-      headers: { Authorization: `bearer ${accessToken}` }
+      headers: { Authorization: `bearer ${accessToken}`}
     }),
     45,
     2000
@@ -290,13 +276,12 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
-  const lastOrderObjs = prepareLastOrderObjs(true, `mp-${appName}`);
+async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
   const mockHost = await provisionCommerceMockResources(
     `mp-${appName}`,
     mockNamespace,
     targetNamespace,
-    lastOrderObjs);
+    withCentralApplicationConnectivity ? prepareLastorderObjs('central-app-gateway-compass', `mp-${appName}`) : prepareLastorderObjs());
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
@@ -308,9 +293,15 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     2000
   );
   await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
-  await waitForDeployment('central-application-gateway', 'kyma-system');
-  await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  await patchApplicationGateway('central-application-gateway', 'kyma-system');
+
+  if (withCentralApplicationConnectivity) {
+    await waitForDeployment('central-application-gateway', 'kyma-system');
+    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
+    await patchApplicationGateway('central-application-gateway', 'kyma-system');
+  } else {
+    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
+    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+  }
 
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
@@ -348,21 +339,21 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   return mockHost;
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
   await k8sApply(applicationObjs);
-
-  const lastOrderObjs = prepareLastOrderObjs();
   const mockHost = await provisionCommerceMockResources(
     "commerce",
     mockNamespace,
     targetNamespace,
-    lastOrderObjs);
+    withCentralApplicationConnectivity ? prepareLastorderObjs('central-app-gateway') : prepareLastorderObjs());
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
-  await waitForDeployment('central-application-gateway', 'kyma-system');
-  await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  await patchApplicationGateway('central-application-gateway', 'kyma-system');
+  if (withCentralApplicationConnectivity) {
+    await waitForDeployment('central-application-gateway', 'kyma-system');
+    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
+    await patchApplicationGateway('central-application-gateway', 'kyma-system');
+  }
 
   const webServicesSC = await waitForServiceClass(
     "webservices",
@@ -480,7 +471,6 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
 }
 
 async function deleteMockTestFixture(targetNamespace) {
-
   const serviceBindingUsage = {
     apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
     kind: "ServiceBindingUsage",
@@ -506,12 +496,17 @@ async function deleteMockTestFixture(targetNamespace) {
 }
 
 async function checkInClusterEventDelivery(targetNamespace) {
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
+  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
+}
+
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   const eventId = "event-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
 
   // send event using function query parameter send=true
-  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true } }), 10, 1000)
+  await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)
   // verify if event was received using function query parameter inappevent=eventId
   await retryPromise(async () => {
     debug("Waiting for event: ", eventId);

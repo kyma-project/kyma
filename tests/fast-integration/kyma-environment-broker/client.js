@@ -1,4 +1,5 @@
 const axios = require("axios");
+const fs = require("fs");
 const { debug, getEnvOrThrow } = require("../utils");
 const { OAuthCredentials, OAuthToken } = require("../lib/oauth");
 
@@ -150,6 +151,40 @@ class KEBClient {
     } catch (err) {
       return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
+  }
+
+  async downloadKubeconfig(instanceID) {
+    return new Promise(async (resolve, reject) => {
+      let writeStream = fs
+        .createWriteStream("./shoot-kubeconfig.yaml")
+        .on("error", function (err) {
+          reject(err);
+        })
+        .on("finish", function () {
+          writeStream.close();
+          fs.readFile("./shoot-kubeconfig.yaml", "utf8", (err, data) => {
+            fs.unlinkSync("./shoot-kubeconfig.yaml");
+            resolve(data);
+          });
+        });
+
+      try {
+        const resp = await axios.request({
+          method: "get",
+          url: `https://kyma-env-broker.${this.host}/kubeconfig/${instanceID}`,
+          responseType: "stream",
+        });
+        if (resp.data.errors) {
+          debug(resp);
+          throw new Error(resp.data);
+        }
+        resp.data.pipe(writeStream);
+      } catch (err) {
+        debug(err);
+        fs.unlinkSync("./shoot-kubeconfig.yaml");
+        reject(err);
+      }
+    });
   }
 
   getRegion() {

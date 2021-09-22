@@ -12,6 +12,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+      name: {{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -25,6 +26,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+      name: {{ .Values.publisherProxy.config.portName }}
 ---
 apiVersion: v1
 kind: Service
@@ -49,7 +51,7 @@ spec:
   type: ClusterIP
   selector: {{- include "publisher-proxy.selectorLabels" . | nindent 4 }}
   ports:
-    - name: proxy-status
+    - name: {{ .Values.global.istio.proxy.portName }}
       protocol: TCP
       port: {{ .Values.global.istio.proxy.statusPort }}
       targetPort: {{ .Values.global.istio.proxy.statusPort }}

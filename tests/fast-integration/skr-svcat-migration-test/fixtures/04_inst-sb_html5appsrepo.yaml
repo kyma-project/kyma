@@ -1,9 +1,0 @@
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: inst-sb-svcat-html5-apps-repo-1
-spec:
-  # externalID: a42a5dde-8bd8-4491-9cca-6a6343e97158
-  instanceRef:
-    name: svcat-html5-apps-repo-1

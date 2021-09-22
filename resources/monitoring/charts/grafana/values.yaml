@@ -166,8 +166,12 @@ serviceMonitor:
   #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
   labels: {}
   interval: 1m
-  scheme: http
-  tlsConfig: {}
+  scheme: https
+  tlsConfig:
+    caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+    certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+    keyFile: /etc/prometheus/secrets/istio.default/key.pem
+    insecureSkipVerify: true
   scrapeTimeout: 30s
   relabelings: []
 
@@ -308,7 +312,7 @@ initChownData:
   ##
   image:
     repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.32.0"
+    tag: "1.32.0-v1"
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -789,6 +793,7 @@ kyma:
       scopes: "groups"
       authLogging: true
       requestLogging: false
+      passHostHeader: false
     env: {}
     nodeSelector: {}
     securityContext:

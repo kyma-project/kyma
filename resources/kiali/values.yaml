@@ -43,6 +43,7 @@ authProxy:
     scopes: "groups"
     authLogging: true
     requestLogging: false
+    passHostHeader: false
   env: {}
   nodeSelector: {}
   securityContext:

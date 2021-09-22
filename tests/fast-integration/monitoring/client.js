@@ -1,10 +1,10 @@
 const axios = require('axios');
-const axiosRetry = require('axios-retry');
 const https = require('https');
 
 
 const {
     kubectlPortForward,
+    getResponse
 } = require("../utils");
 
 let prometheusPort = 9090;
@@ -14,41 +14,34 @@ function prometheusPortForward() {
 }
 
 async function getPrometheusActiveTargets() {
-    let responseBody = await get("/api/v1/targets?state=active");
-    return responseBody.data.activeTargets;
+    let path = "/api/v1/targets?state=active";
+    let url = `http://localhost:${prometheusPort}${path}`;
+    let responseBody = await getResponse(url, 30);
+    return responseBody.data.data.activeTargets;
 }
 
 async function getPrometheusAlerts() {
-    let responseBody = await get("/api/v1/alerts");
-    return responseBody.data.alerts;
+    let path = "/api/v1/alerts";
+    let url = `http://localhost:${prometheusPort}${path}`;
+    let responseBody = await getResponse(url, 30);
+
+    return responseBody.data.data.alerts;
 }
 
 async function getPrometheusRuleGroups() {
-    let responseBody = await get("/api/v1/rules");
-    return responseBody.data.groups;
+    let path = "/api/v1/rules";
+    let url = `http://localhost:${prometheusPort}${path}`;
+    let responseBody = await getResponse(url, 30);
+
+    return responseBody.data.data.groups;
 }
 
 async function queryPrometheus(query) {
-    let responseBody = await get(`/api/v1/query?query=${encodeURIComponent(query)}`);
-    return responseBody.data.result;
-}
+    let path = `/api/v1/query?query=${encodeURIComponent(query)}`;
+    let url = `http://localhost:${prometheusPort}${path}`;
+    let responseBody = await getResponse(url, 30);
 
-async function get(path) {
-    axiosRetry(axios, {
-        retries: 30,
-        retryDelay: (retryCount) => {
-            return retryCount * 5000;
-        },
-        retryCondition: (error) => {
-            return !error.response || error.response.status != 200;
-        },
-    });
-
-    let response = await axios.get(`http://localhost:${prometheusPort}${path}`, {
-        timeout: 5000,
-    });
-    let responseBody = response.data;
-    return responseBody;
+    return responseBody.data.data.result;
 }
 
 async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
@@ -62,7 +55,7 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
         const res = await axios.get(url, { httpsAgent: agent })
         if (res.status === httpErrorCode) {
             if (res.request.res.responseUrl.includes(redirectURL)) {
-                return true
+                return true;
             }
         }
         return false;
@@ -71,14 +64,14 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
         if (err.response) {
             if (err.response.status === httpErrorCode) {
                 if (err.response.data.includes(redirectURL)) {
-                    return true
+                    return true;
                 }
             }
             console.log(msg + err.response.status + " : " + err.response.data)
-            return false
+            return false;
         } else {
             console.log(`${msg}: ${err.toString()}`);
-            return false
+            return false;
         }
     }
 }

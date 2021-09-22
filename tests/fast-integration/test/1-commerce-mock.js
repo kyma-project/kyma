@@ -24,6 +24,7 @@ const {
 describe("CommerceMock tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
+  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
   const testNamespace = "test";
   const testStartTimestamp = new Date().toISOString();
   let initialRestarts = null;
@@ -42,13 +43,13 @@ describe("CommerceMock tests", function () {
   });
 
   it("CommerceMock test fixture should be ready", async function () {
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
+    await ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralAppConnectivity).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
+      return ensureCommerceMockLocalTestFixture("mocks", testNamespace, withCentralAppConnectivity);
     });
   });
 
-  it("in-cluster event should be delivered", async function () {
+  it("in-cluster event should be delivered (structured and binary mode)", async function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 

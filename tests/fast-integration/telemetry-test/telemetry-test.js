@@ -85,10 +85,7 @@ describe("Telemetry operator", function () {
           metadata: { name: mockNamespace },
         });
       } catch (error) {
-        console.log(
-          `Namespace ${telemetryNamespace} could not be created`,
-          error
-        );
+        console.log(`Namespace ${mockNamespace} could not be created`, error);
       }
       await helm.installChart(
         "mockserver",

@@ -367,11 +367,15 @@ alertmanager:
     selfMonitor: true
 
     ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
-    scheme: ""
+    scheme: https
 
     ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
     ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
-    tlsConfig: {}
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
 
     bearerTokenFile:
 
@@ -401,7 +405,7 @@ alertmanager:
     ##
     podMetadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
 
     ## Image of Alertmanager
     ##
@@ -681,13 +685,20 @@ grafana:
     #   replacement: $1
     #   action: replace
 
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true
+
 ## Component scraping the kube api server
 ##
 kubeApiServer:
   enabled: true
-  tlsConfig:
-    serverName: kubernetes
+  tlsConfig: 
     insecureSkipVerify: false
+    serverName: kubernetes
 
   ## If your API endpoint address is not reachable (as in AKS) you can replace it with the kubernetes service
   ##
@@ -1650,9 +1661,8 @@ prometheus:
     scheme: ""
 
     ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
-    ## Of type: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+    ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
     tlsConfig: {}
-
     bearerTokenFile:
 
     ## 	metric relabel configs to apply to samples before ingestion.
@@ -1770,12 +1780,12 @@ prometheus:
     ## reflected in the running Pods. To change the secrets mounted into the Prometheus Pods, the object must be deleted and recreated
     ## with the new list of secrets.
     ##
-    secrets: []
+    secrets: {}
 
     ## ConfigMaps is a list of ConfigMaps in the same namespace as the Prometheus object, which shall be mounted into the Prometheus Pods.
     ## The ConfigMaps are mounted into /etc/prometheus/configmaps/.
     ##
-    configMaps: []
+    configMaps: {}
 
     ## QuerySpec defines the query command line flags when starting Prometheus.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#queryspec
@@ -1794,7 +1804,7 @@ prometheus:
     ## prometheus resource to be created with selectors based on values in the helm deployment,
     ## which will also match the PrometheusRule resources created
     ##
-    ruleSelectorNilUsesHelmValues: true
+    ruleSelectorNilUsesHelmValues: false
 
     ## PrometheusRules to be selected for target discovery.
     ## If {}, select all ServiceMonitors
@@ -1839,7 +1849,7 @@ prometheus:
     ## prometheus resource to be created with selectors based on values in the helm deployment,
     ## which will also match the podmonitors created
     ##
-    podMonitorSelectorNilUsesHelmValues: true
+    podMonitorSelectorNilUsesHelmValues: false
 
     ## PodMonitors to be selected for target discovery.
     ## If {}, select all PodMonitors
@@ -1859,7 +1869,7 @@ prometheus:
     ## prometheus resource to be created with selectors based on values in the helm deployment,
     ## which will also match the probes created
     ##
-    probeSelectorNilUsesHelmValues: true
+    probeSelectorNilUsesHelmValues: false
 
     ## Probes to be selected for target discovery.
     ## If {}, select all Probes
@@ -1913,7 +1923,14 @@ prometheus:
     ##
     podMetadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/includeInboundPorts: ""   # do not intercept any inbound ports
+        traffic.sidecar.istio.io/includeOutboundIPRanges: ""  # do not intercept any outbound traffic
+        proxy.istio.io/config: |
+          # configure an env variable `OUTPUT_CERTS` to write certificates to the given folder
+          proxyMetadata:
+            OUTPUT_CERTS: /etc/istio-output-certs
+        sidecar.istio.io/userVolumeMount: '[{"name": "istio-certs", "mountPath": "/etc/istio-output-certs"}]' # mount the shared volume at sidecar proxy
       labels:
         app: prometheus
 
@@ -1978,9 +1995,14 @@ prometheus:
     #    selector: {}
 
     # Additional volumes on the output StatefulSet definition.
-    volumes: []
+    volumes: 
+      - emptyDir:
+          medium: Memory
+        name: istio-certs
     # Additional VolumeMounts on the output StatefulSet definition.
-    volumeMounts: []
+    volumeMounts: 
+      - mountPath: /etc/prometheus/secrets/istio.default/
+        name: istio-certs
 
     ## AdditionalScrapeConfigs allows specifying additional Prometheus scrape configurations. Scrape configurations
     ## are appended to the configurations generated by the Prometheus Operator. Job configurations must have the form
@@ -1994,14 +2016,9 @@ prometheus:
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes main nodes
     ##
     additionalScrapeConfigs: []
-    # - job_name: kube-etcd
-    #   kubernetes_sd_configs:
-    #     - role: node
-    #   scheme: https
-    #   tls_config:
-    #     ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-    #     cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-    #     key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+    #  - job_name: kube-etcd
+    #  kubernetes_sd_configs:
+    #   - role: node
     #   relabel_configs:
     #   - action: labelmap
     #     regex: __meta_kubernetes_node_label_(.+)

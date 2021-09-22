@@ -77,3 +77,15 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - gateway.kyma-project.io
+  resources:
+  - apirules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
