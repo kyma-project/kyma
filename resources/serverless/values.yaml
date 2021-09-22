@@ -4,17 +4,17 @@
 
 fullnameOverride: "serverless"
 
-injectCerts:
-  image:
-    repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210922-530cfc39"
-    pullPolicy: IfNotPresent
+# injectCerts:
+#   image:
+#     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+#     tag: "20210817-8cdbfce3"
+#     pullPolicy: IfNotPresent
 
-migration:
-  image:
-    repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210922-530cfc39"
-    pullPolicy: IfNotPresent
+# migration:
+#   image:
+#     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+#     tag: "20210817-8cdbfce3"
+#     pullPolicy: IfNotPresent
 
 tests:
   enabled: true
@@ -32,17 +32,17 @@ tests:
       limits:
         memory: 256Mi
         cpu: 200m
-    image:
-      repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210922-530cfc39"
-      pullPolicy: IfNotPresent
+    # image:
+    #   repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
+    #   tag: "20210817-8cdbfce3"
+    #   pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
-  image:
-    repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "449a5e4a"
-    pullPolicy: IfNotPresent
+  # image:
+  #   repository: "eu.gcr.io/kyma-project/function-controller-test"
+  #   tag: "449a5e4a"
+  #   pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
   resources:
@@ -77,25 +77,62 @@ global:
   dockerServicePort: 5000
   ingress:
     domainName:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20210817-8cdbfce3"
+    function_controller:
+      name: "function-controller"
+      version: "PR-12110"
+      pullPolicy: IfNotPresent
+    function_runtime_nodejs12:
+      name: "function-runtime-nodejs12"
+      version: "PR-12096"
+    function_runtime_nodejs14:
+      name: "function-runtime-nodejs14"
+      version: "PR-12096"
+    function_runtime_python38:
+      name: "function-runtime-python38"
+      version: "19830ec3"
+    function_runtime_python39:
+      name: "function-runtime-python39"
+      version: "19830ec3"
+    function_webhook:
+      name: "function-webhook"
+      version: "4862778b"
+    kaniko_executor:
+      name: "tpi/kaniko-executor:1.6.0"
+      version: "d302fe1a"
+    function_build_init:
+      name: "function-build-init"
+      version: "4862778b"
+  testImages:
+    function_controller_test:
+      name: "function-controller-test"
+      version: "449a5e4a"
 
-images:
-  manager:
-    repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "c21665db"
-    pullPolicy: IfNotPresent
-  runtimes:
-    nodejs12:
-      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "a3baf33c"
-    nodejs14:
-      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "a3baf33c"
-    python38:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "a3baf33c"
-    python39:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "a3baf33c"
+
+
+# images:
+#   manager:
+#     repository: "eu.gcr.io/kyma-project/function-controller"
+#     tag: "PR-12110"
+#     pullPolicy: IfNotPresent
+#   runtimes:
+#     nodejs12:
+#       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
+#       tag: "PR-12096"
+#     nodejs14:
+#       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
+#       tag: "PR-12096"
+#     python38:
+#       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
+#       tag: "19830ec3"
+#     python39:
+#       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
+#       tag: "19830ec3"
 
 deployment:
   replicas: 1
@@ -172,10 +209,10 @@ containers:
         value: 5m
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
-      functionBuildExecutorImage:
-        value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-7b6e8d78
-      functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:a2f445a2
+      # functionBuildExecutorImage:
+      #   value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-d302fe1a
+      # functionBuildRepoFetcherImage:
+      #   value: eu.gcr.io/kyma-project/function-build-init:4862778b
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -254,9 +291,9 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
-  image:
-    repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "c21665db"
+#   image:
+#     repository: "eu.gcr.io/kyma-project/function-webhook"
+#     tag: "4862778b"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
