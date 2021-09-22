@@ -18,6 +18,7 @@
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
     "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
     "test-monitoring": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./monitoring-test/",
+    "test-eventing": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
     "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
     "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",

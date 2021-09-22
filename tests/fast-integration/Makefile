@@ -3,6 +3,7 @@ ci:
 	npm install
 	npm test
 	npm run test-monitoring
+	npm run test-eventing
 
 .PHONY: ci-no-install
 ci-no-install:
@@ -41,3 +42,8 @@ ci-application-connectivity-2:
 ci-application-connectivity-2-compass:
 	npm install
 	npm run test-application-connectivity-2-compass
+
+.PHONY: ci-test-eventing
+ci-test-eventing:
+	npm ci
+	npm run test-eventing
