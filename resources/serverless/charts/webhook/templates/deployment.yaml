@@ -35,7 +35,7 @@ spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       containers:
         - name: webhook
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           livenessProbe:
             httpGet:
