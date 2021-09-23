@@ -26,7 +26,7 @@ spec:
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
         - name: {{ include "tests.name" . }}
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller_test) }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
           command:
             - "/bin/sh"
