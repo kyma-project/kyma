@@ -25,6 +25,7 @@ compassRuntimeAgent:
     dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://rafter-upload-service.kyma-system.svc.cluster.local:80
+    centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
     insecureConfigurationFetch: true
     secret:
