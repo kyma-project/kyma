@@ -6,18 +6,19 @@ import (
 )
 
 type options struct {
-	externalAPIPort       int
-	proxyPort             int
-	minioURL              string
-	namespace             string
-	requestTimeout        int
-	requestLogging        bool
-	specRequestTimeout    int
-	rafterRequestTimeout  int
-	detailedErrorResponse bool
-	uploadServiceURL      string
-	insecureAssetDownload bool
-	insecureSpecDownload  bool
+	externalAPIPort         int
+	proxyPort               int
+	minioURL                string
+	namespace               string
+	requestTimeout          int
+	requestLogging          bool
+	specRequestTimeout      int
+	rafterRequestTimeout    int
+	detailedErrorResponse   bool
+	uploadServiceURL        string
+	centralGatewayUrlFormat string
+	insecureAssetDownload   bool
+	insecureSpecDownload    bool
 }
 
 func parseArgs() *options {
@@ -30,30 +31,32 @@ func parseArgs() *options {
 	rafterRequestTimeout := flag.Int("rafterRequestTimeout", 20, "Timeout for Rafter Service.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
 	uploadServiceURL := flag.String("uploadServiceURL", "http://rafter-upload-service.kyma-system.svc.cluster.local:80", "Upload Service URL.")
-	insecureAssetDownload := flag.Bool("insecureAssetDownload", false, "Flag for skipping certificate verification for asset download. ")
-	insecureSpecDownload := flag.Bool("insecureSpecDownload", false, "Flag for skipping certificate verification for API specification download. ")
+	centralGatewayUrlFormat := flag.String("centralGatewayUrlFormat", "http://central-application-gateway.kyma-system:8080/%s/%s", "Central Application Gateway URL format.")
+	insecureAssetDownload := flag.Bool("insecureAssetDownload", false, "Flag for skipping certificate verification for asset download.")
+	insecureSpecDownload := flag.Bool("insecureSpecDownload", false, "Flag for skipping certificate verification for API specification download.")
 
 	flag.Parse()
 
 	return &options{
-		externalAPIPort:       *externalAPIPort,
-		proxyPort:             *proxyPort,
-		namespace:             *namespace,
-		requestTimeout:        *requestTimeout,
-		requestLogging:        *requestLogging,
-		specRequestTimeout:    *specRequestTimeout,
-		rafterRequestTimeout:  *rafterRequestTimeout,
-		detailedErrorResponse: *detailedErrorResponse,
-		uploadServiceURL:      *uploadServiceURL,
-		insecureAssetDownload: *insecureAssetDownload,
-		insecureSpecDownload:  *insecureSpecDownload,
+		externalAPIPort:         *externalAPIPort,
+		proxyPort:               *proxyPort,
+		namespace:               *namespace,
+		requestTimeout:          *requestTimeout,
+		requestLogging:          *requestLogging,
+		specRequestTimeout:      *specRequestTimeout,
+		rafterRequestTimeout:    *rafterRequestTimeout,
+		detailedErrorResponse:   *detailedErrorResponse,
+		uploadServiceURL:        *uploadServiceURL,
+		centralGatewayUrlFormat: *centralGatewayUrlFormat,
+		insecureAssetDownload:   *insecureAssetDownload,
+		insecureSpecDownload:    *insecureSpecDownload,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s"+
+	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s --centralGatewayUrlFormat=%s"+
 		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d"+
 		"--rafterRequestTimeout=%d --detailedErrorResponse=%t --insecureAssetDownload=%t --insecureSpecDownload=%t",
-		o.externalAPIPort, o.proxyPort, o.uploadServiceURL,
+		o.externalAPIPort, o.proxyPort, o.uploadServiceURL, o.centralGatewayUrlFormat,
 		o.namespace, o.requestTimeout, o.requestLogging, o.specRequestTimeout, o.rafterRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
 }

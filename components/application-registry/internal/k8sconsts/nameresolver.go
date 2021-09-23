@@ -3,6 +3,8 @@ package k8sconsts
 import (
 	"fmt"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
 )
 
 const (
@@ -19,18 +21,22 @@ type NameResolver interface {
 	GetResourceName(application, id string) string
 	// GetGatewayUrl return gateway url with given ID
 	GetGatewayUrl(application, id string) string
+	// GetCentralGatewayUrl return central gateway url
+	GetCentralGatewayUrl(applicationName, serviceDisplayName string) string
 	// ExtractServiceId extracts service ID from given host
 	ExtractServiceId(applicaton, host string) string
 }
 
 type nameResolver struct {
-	namespace string
+	namespace               string
+	centralGatewayUrlFormat string
 }
 
 // NewNameResolver creates NameResolver that uses application name and namespace.
-func NewNameResolver(namespace string) NameResolver {
+func NewNameResolver(namespace, centralGatewayUrlFormat string) NameResolver {
 	return nameResolver{
-		namespace: namespace,
+		namespace:               namespace,
+		centralGatewayUrlFormat: centralGatewayUrlFormat,
 	}
 }
 
@@ -42,6 +48,11 @@ func (resolver nameResolver) GetResourceName(application, id string) string {
 // GetGatewayUrl return gateway url with given ID
 func (resolver nameResolver) GetGatewayUrl(application, id string) string {
 	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(application, id), resolver.namespace)
+}
+
+// TODO: Check if it's ok
+func (resolver nameResolver) GetCentralGatewayUrl(applicationName, serviceDisplayName string) string {
+	return fmt.Sprintf(resolver.centralGatewayUrlFormat, applicationName, normalization.NormalizeName(serviceDisplayName))
 }
 
 // ExtractServiceId extracts service ID from given host

@@ -83,6 +83,7 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 	}
 	service := initService(serviceDef, serviceDef.Identifier, application)
 
+	//var gatewayUrl, centralGatewayUrl string
 	var gatewayUrl string
 
 	appUID, apperr := sds.getApplicationUID(application)
@@ -91,15 +92,18 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 	}
 
 	if apiDefined(serviceDef) {
-		serviceAPI, apperr := sds.serviceAPIService.New(application, appUID, serviceDef.ID, serviceDef.Api)
+		serviceAPI, apperr := sds.serviceAPIService.New(application, appUID, serviceDef.ID, serviceDef.Name, serviceDef.Api)
 		if apperr != nil {
 			return "", apperr.Append("Adding new API failed")
 		}
 
 		service.API = serviceAPI
 		gatewayUrl = serviceAPI.GatewayURL
+		//centralGatewayUrl = serviceAPI.CentralGatewayURL
 	}
 
+	// TODO: What should be there
+	//apperr = sds.specService.PutSpec(serviceDef, gatewayUrl, centralGatewayUrl)
 	apperr = sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if apperr != nil {
 		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
@@ -175,7 +179,7 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, deleting API failed", serviceDef.ID)
 		}
 	} else {
-		service.API, apperr = sds.serviceAPIService.Update(application, appUID, serviceDef.ID, serviceDef.Api)
+		service.API, apperr = sds.serviceAPIService.Update(application, appUID, serviceDef.ID, serviceDef.Name, serviceDef.Api)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}

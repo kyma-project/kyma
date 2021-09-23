@@ -16,12 +16,14 @@ import (
 )
 
 const (
-	resourceName = "resource-uuid-1"
-	gatewayUrl   = "url-uuid-1"
+	resourceName      = "resource-uuid-1"
+	gatewayUrl        = "url-uuid-1"
+	centralGatewayUrl = "http://central-application-gateway.kyma-system:8080/app/service-display-name"
 
-	appName   = "app"
-	appUID    = types.UID("appUID")
-	serviceId = "uuid-1"
+	appName            = "app"
+	appUID             = types.UID("appUID")
+	serviceId          = "uuid-1"
+	serviceDisplayName = "Service Display Name"
 )
 
 func TestNewService(t *testing.T) {
@@ -47,6 +49,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)

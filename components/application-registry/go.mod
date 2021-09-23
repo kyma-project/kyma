@@ -13,10 +13,10 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
-	k8s.io/api v0.21.2
-	k8s.io/apimachinery v0.21.2
-	k8s.io/client-go v0.21.2
-	k8s.io/code-generator v0.21.2
+	k8s.io/api v0.22.0
+	k8s.io/apimachinery v0.22.0
+	k8s.io/client-go v0.22.0
+	k8s.io/code-generator v0.21.3
 )
 
 replace (
@@ -24,6 +24,7 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
+	github.com/kyma-project/kyma/components/application-operator => github.com/koala7659/kyma/components/application-operator v0.0.0-20210921112657-832920a47743
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc92
 
 	github.com/satori/go.uuid => github.com/google/uuid v1.2.0
