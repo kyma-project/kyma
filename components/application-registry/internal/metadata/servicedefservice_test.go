@@ -83,7 +83,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
@@ -402,7 +402,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(nil, apperrors.Internal("some error"))
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(nil, apperrors.Internal("some error"))
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -486,7 +486,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.Internal("some error"))
 		specService := new(specmocks.Service)
@@ -545,7 +545,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.NotFound("some error"))
 		specService := new(specmocks.Service)
@@ -663,7 +663,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
@@ -1009,7 +1009,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1069,7 +1069,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1239,7 +1239,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1303,7 +1303,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1367,7 +1367,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1443,7 +1443,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1522,7 +1522,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)

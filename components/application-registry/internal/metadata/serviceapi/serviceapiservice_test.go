@@ -66,7 +66,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -101,6 +101,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -117,7 +118,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -140,6 +141,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -147,7 +149,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -176,6 +178,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
@@ -183,7 +186,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -209,6 +212,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -225,7 +229,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -251,6 +255,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -267,7 +272,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -299,6 +304,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -311,7 +317,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -644,6 +650,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -657,7 +664,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -693,6 +700,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -706,7 +714,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -731,6 +739,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -744,7 +753,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
@@ -775,6 +784,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).
@@ -783,7 +793,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -811,6 +821,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -821,7 +832,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -849,6 +860,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -859,7 +871,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -882,6 +894,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -892,7 +905,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -926,6 +939,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -939,7 +953,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
