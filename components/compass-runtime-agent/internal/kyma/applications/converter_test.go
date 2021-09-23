@@ -11,11 +11,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	centralGatewayServiceUrl = "http://central-application-gateway.kyma-system.svc.cluster.local:8082"
+)
+
 func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -56,7 +60,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -163,7 +167,7 @@ func TestConverter(t *testing.T) {
 								Name:              "serviceName1",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/1",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename1/servicename1",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename1",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
 									SecretName:        "Appname1-package1",
@@ -178,7 +182,7 @@ func TestConverter(t *testing.T) {
 								Name:              "serviceName2",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/2",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename1/servicename2",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename2",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
 									SecretName:        "Appname1-package1",
@@ -202,7 +206,7 @@ func TestConverter(t *testing.T) {
 								Name:              "serviceName3",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/3",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename2/servicename3",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename2/servicename3",
 								Credentials: v1alpha1.Credentials{
 									Type:       "Basic",
 									SecretName: "Appname1-package2",
@@ -232,7 +236,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -294,7 +298,7 @@ func TestConverter(t *testing.T) {
 								Name:              "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/1",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename1/veryveryveryveryveryveryveryveryveryveryveryveryveryveryv",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/veryveryveryveryveryveryveryveryveryveryveryveryveryveryv",
 								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 							{
@@ -320,7 +324,7 @@ func TestConverter(t *testing.T) {
 	// TODO: This must be fixed!!!
 	t.Run("should convert application with services containing API with packages that will be passed to ", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -384,7 +388,7 @@ func TestConverter(t *testing.T) {
 								Name:              "entry name",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/1",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename1/entry-name",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/entry-name",
 								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 							{
@@ -392,7 +396,7 @@ func TestConverter(t *testing.T) {
 								Name:              "Entry Name",
 								Type:              SpecAPIType,
 								TargetUrl:         "www.example.com/2",
-								CentralGatewayUrl: "http://central-application-gateway.kyma-system:8082/Appname1/packagename1/entry-name",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/entry-name",
 								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 						},

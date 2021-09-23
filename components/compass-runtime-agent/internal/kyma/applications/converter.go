@@ -11,10 +11,7 @@ import (
 const defaultDescription = "Description not provided"
 
 const (
-	connectedApp              = "connected-app"
-	centralGatewayPort        = "8082"
-	centralGatewayServicePath = "http://central-application-gateway.kyma-system"
-	// TODO: Check why the only option is HTTP here?
+	connectedApp = "connected-app"
 )
 
 //go:generate mockery --name=Converter
@@ -23,11 +20,15 @@ type Converter interface {
 }
 
 type converter struct {
-	nameResolver k8sconsts.NameResolver
+	nameResolver             k8sconsts.NameResolver
+	centralGatewayServiceUrl string
 }
 
-func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
-	return converter{nameResolver: nameResolver}
+func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl string) Converter {
+	return converter{
+		nameResolver:             nameResolver,
+		centralGatewayServiceUrl: centralGatewayServiceUrl,
+	}
 }
 
 func (c converter) Do(application model.Application) v1alpha1.Application {
@@ -138,10 +139,11 @@ func (c converter) toRequestParametersSecretName(applicationName string, apiPack
 }
 
 // builds such URL http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{NORMALIZED_SERVICE_NAME}/{NORMALIZED_API_ENTRY_NAME}
+// TODO: remove this stupid comment above
 func (c converter) toCentralGatewayURL(applicationName string, apiPackageName string, apiDefinitionName string) string {
 
-	return centralGatewayServicePath + ":" + centralGatewayPort +
-		"/" + applicationName + "/" + normalization.NormalizeName(apiPackageName) +
+	return c.centralGatewayServiceUrl + "/" + applicationName +
+		"/" + normalization.NormalizeName(apiPackageName) +
 		"/" + normalization.NormalizeName(apiDefinitionName)
 }
 
