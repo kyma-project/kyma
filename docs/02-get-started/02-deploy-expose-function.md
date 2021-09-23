@@ -37,7 +37,7 @@ kyma apply function
 
 ### Verify the Function deployment
 
-Now let's make sure that the Function has been deployed successfully. 
+Now let's make sure that the Function has been deployed successfully.
 
 <div tabs name="Verify the Function deployment" group="deploy-expose-function">
   <details open>
@@ -48,7 +48,7 @@ Now let's make sure that the Function has been deployed successfully.
 Run:
 
 ```bash
-kubectl get functions hello-world 
+kubectl get functions hello-world
 ```
 
 The operation was successful if the statuses for **CONFIGURED**, **BUILT**, and **RUNNING** are `True`.
@@ -70,7 +70,7 @@ The operation was successful if the Function **Status** changed to `RUNNING`.
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) you expose.
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
 
 First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
