@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,7 +28,7 @@ func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url strin
 	}
 }
 
-func (o oauthStrategy) AddAuthorization(r *http.Request, _ TransportSetter) apperrors.AppError {
+func (o oauthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
 	headers, queryParameters := o.requestParameters.unpack()
 	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url, headers, queryParameters)
 	if err != nil {

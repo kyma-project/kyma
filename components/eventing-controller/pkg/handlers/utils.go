@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -9,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/hashstructure"
+	"github.com/mitchellh/hashstructure/v2"
 	"github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +34,7 @@ type MessagingBackend interface {
 
 	// SyncSubscription should synchronize the Kyma eventing susbscription with the susbcriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
+	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
 	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
 	// TODO: This should contain all the infos necessary for the handler to do its job.
 	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error)
@@ -43,10 +45,59 @@ type MessagingBackend interface {
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
+// NameMapper is used to map Kyma-specific resource names to their corresponding name on other
+// (external) systems, e.g. on different eventing backends, the same Kyma subscription name
+// could map to a different name.
+type NameMapper interface {
+	MapSubscriptionName(sub *eventingv1alpha1.Subscription) string
+}
+
+// bebSubscriptionNameMapper maps a Kyma subscription to an ID that can be used on the BEB backend,
+// which has a max length. Domain name is used to make the names on BEB unique.
+type bebSubscriptionNameMapper struct {
+	domainName string
+	maxLength  int
+}
+
+func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
+	return &bebSubscriptionNameMapper{
+		domainName: domainName,
+		maxLength:  maxNameLength,
+	}
+}
+
+func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Subscription) string {
+	hash := hashSubscriptionFullName(m.domainName, sub.Namespace, sub.Name)
+	return shortenNameAndAppendHash(sub.Name, hash, m.maxLength)
+}
+
+func hashSubscriptionFullName(domainName, namespace, name string) string {
+	hash := sha1.Sum([]byte(domainName + namespace + name))
+	return fmt.Sprintf("%x", hash)
+}
+
+// produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
+// Requires maxLength >= len(hash)
+func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
+	if len(hash) > maxLength {
+		// This shouldn't happen!
+		panic(fmt.Sprintf("max name length (%d) used for BEB subscription mapper is not large enough to hold the hash (%s)", maxLength, hash))
+	}
+	maxNameLen := maxLength - len(hash)
+	// keep the first maxNameLen characters of the name
+	if maxNameLen <= 0 {
+		return hash
+	}
+	if len(name) > maxNameLen {
+		name = name[:maxNameLen]
+	}
+	return name + hash
+}
+
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
-	if hash, err := hashstructure.Hash(subscription, nil); err != nil {
+	if hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil); err != nil {
 		return 0, err
 	} else {
 		return int64(hash), nil
@@ -77,13 +128,15 @@ func getQos(qosStr string) (types.Qos, error) {
 	}
 }
 
-func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule, defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings, defaultNamespace string) (*types.Subscription, error) {
+func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *apigatewayv1alpha1.APIRule,
+	defaultWebhookAuth *types.WebhookAuth, defaultProtocolSettings *eventingv1alpha1.ProtocolSettings,
+	defaultNamespace string, nameMapper NameMapper) (*types.Subscription, error) {
 	emsSubscription, err := getDefaultSubscription(defaultProtocolSettings)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to apply default protocol settings")
+		return nil, errors.Wrap(err, "apply default protocol settings failed")
 	}
 	// Name
-	emsSubscription.Name = subscription.Name
+	emsSubscription.Name = nameMapper.MapSubscriptionName(subscription)
 
 	// Applying protocol settings if provided in subscription CR
 	if subscription.Spec.ProtocolSettings != nil {
@@ -107,12 +160,16 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	// WebhookUrl
 	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get exposed URL from APIRule")
+		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}
 	emsSubscription.WebhookUrl = urlTobeRegistered
 
 	// Events
-	for _, e := range subscription.Spec.Filter.Filters {
+	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
+	if err != nil {
+		return nil, errors.Wrap(err, "deduplicate subscription filters failed")
+	}
+	for _, e := range uniqueFilters.Filters {
 		s := defaultNamespace
 		if e.EventSource.Value != "" {
 			s = e.EventSource.Value
@@ -124,6 +181,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	// Using default webhook auth unless specified in Subscription CR
 	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
+		auth = &types.WebhookAuth{}
 		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
@@ -205,7 +263,7 @@ func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscript
 func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
 	unstructuredObj, err := toUnstructuredSub(sub)
 	if err != nil {
-		return errors.Wrap(err, "failed to convert subscription to unstructured")
+		return errors.Wrap(err, "convert subscription to unstructured failed")
 	}
 	_, err = dClient.
 		Resource(SubscriptionGroupVersionResource()).

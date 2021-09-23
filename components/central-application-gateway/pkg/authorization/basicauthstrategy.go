@@ -3,9 +3,9 @@ package authorization
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/util"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/util"
 )
 
 type basicAuthStrategy struct {
@@ -20,7 +20,7 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ TransportSetter) apperrors.AppError {
+func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ clientcert.SetClientCertificateFunc) apperrors.AppError {
 	util.AddBasicAuthHeader(r, b.username, b.password)
 	return nil
 }

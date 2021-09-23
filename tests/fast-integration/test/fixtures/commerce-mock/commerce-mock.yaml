@@ -19,10 +19,9 @@ spec:
         app: commerce-mock
     spec:
       containers:
-        #      - image: eu.gcr.io/kyma-project/xf-application-mocks/commerce-mock:latest
-        - image: ghcr.io/pbochynski/commerce-mock-lite:0.4 # TODO: change it to proper image
+        - image: ghcr.io/sap-samples/xf-application-mocks/commerce-mock-lite:0.5.0
           imagePullPolicy: Always
-          name: commerce-mock
+          name: mock
           ports:
             - name: http
               containerPort: 10000
@@ -33,7 +32,7 @@ spec:
               value: "00 00 */12 * * *"
           volumeMounts:
             - mountPath: "/app/keys"
-              name: commerce-mock-volume
+              name: mock-volume
           resources:
             requests:
               memory: "150Mi"
@@ -42,7 +41,7 @@ spec:
               memory: "350Mi"
               cpu: "300m"
       volumes:
-        - name: commerce-mock-volume
+        - name: mock-volume
           persistentVolumeClaim:
             claimName: commerce-mock
 ---

@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: {{ .Values.global.istio.gateway.name }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   selector:
     app: istio-ingressgateway

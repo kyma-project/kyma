@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"strings"
 	"time"
@@ -9,22 +10,30 @@ import (
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
-func New(timeoutDuration int, tokenCache TokenCache, httpClient *http.Client) csrf.Client {
+func New(timeoutDuration int, tokenCache TokenCache) csrf.Client {
+	clientCertificate := clientcert.NewClientCertificate(nil)
+	httpClient := &http.Client{
+		Transport: httptools.NewRoundTripper(httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate)),
+	}
 	return &client{
-		timeoutDuration: timeoutDuration,
-		tokenCache:      tokenCache,
-		httpClient:      httpClient,
+		timeoutDuration:   timeoutDuration,
+		tokenCache:        tokenCache,
+		httpClient:        httpClient,
+		clientCertificate: clientCertificate,
 	}
 }
 
 type client struct {
-	timeoutDuration int
-	tokenCache      TokenCache
-	httpClient      *http.Client
+	timeoutDuration   int
+	tokenCache        TokenCache
+	httpClient        *http.Client
+	clientCertificate clientcert.ClientCertificate
 }
 
 func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy) (*csrf.Response, apperrors.AppError) {
@@ -58,7 +67,7 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
-	err = addAuthorization(tokenRequest, c.httpClient, strategy)
+	err = addAuthorization(tokenRequest, c.clientCertificate, strategy)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
@@ -87,9 +96,9 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 
 }
 
-func addAuthorization(r *http.Request, client *http.Client, strategy authorization.Strategy) apperrors.AppError {
-	return strategy.AddAuthorization(r, func(transport *http.Transport) {
-		client.Transport = transport
+func addAuthorization(r *http.Request, clientCertificate clientcert.ClientCertificate, strategy authorization.Strategy) apperrors.AppError {
+	return strategy.AddAuthorization(r, func(cert *tls.Certificate) {
+		clientCertificate.SetCertificate(cert)
 	})
 }
 

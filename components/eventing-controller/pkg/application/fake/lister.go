@@ -21,10 +21,10 @@ func NewApplicationListerOrDie(ctx context.Context, app *applicationv1alpha1.App
 func setupSchemeOrDie() *runtime.Scheme {
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
-		log.Fatalf("Failed to setup scheme with error: %v", err)
+		log.Fatalf("setup scheme failed: %v", err)
 	}
 	if err := applicationv1alpha1.AddToScheme(scheme); err != nil {
-		log.Fatalf("Failed to setup scheme with error: %v", err)
+		log.Fatalf("setup scheme failed: %v", err)
 	}
 	return scheme
 }
@@ -32,7 +32,7 @@ func setupSchemeOrDie() *runtime.Scheme {
 func mapToUnstructuredOrDie(app *applicationv1alpha1.Application) map[string]interface{} {
 	unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(app)
 	if err != nil {
-		log.Fatalf("Failed to map application to unstruchtured object with error: %v", err)
+		log.Fatalf("map application to unstruchtured object failed: %v", err)
 	}
 	return unstructuredMap
 }

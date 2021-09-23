@@ -13,7 +13,7 @@ tests:
 
   image:
     repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "8b74b38e"
+    tag: "PR-12096"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -32,7 +32,7 @@ controller-manager:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: 6d342230
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -206,11 +206,11 @@ controller-manager:
       secretName: "rafter-minio-old-credentials"
       image:
         repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-        tag: "20210610-d25e85b1"
+        tag: "20210922-530cfc39"
         pullPolicy: IfNotPresent
 
     image:
-      tag: RELEASE.2020-09-21T22-31-59Z-deb4ee80
+      tag: RELEASE.2020-09-21T22-31-59Z-e85e5eaf
       repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
@@ -277,7 +277,7 @@ upload-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: a9c94fb7
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -364,11 +364,11 @@ upload-service:
     images:
       alpineKubectl:
         repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-        tag: "20210610-d25e85b1"
+        tag: "20210922-530cfc39"
         pullPolicy: IfNotPresent
       minioClient:
         repository: eu.gcr.io/kyma-project/tpi/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-1de56388
+        tag: RELEASE.2019-04-03T17-59-57Z-e0da5a68
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -383,7 +383,7 @@ front-matter-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: d999a403
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -419,7 +419,7 @@ asyncapi-service:
 
   image:
     repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: "49766840"
+    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:

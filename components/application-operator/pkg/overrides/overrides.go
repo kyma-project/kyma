@@ -22,7 +22,6 @@ type OverridesData struct {
 	LogFormat                                      string `json:"logFormat,omitempty"`
 	GatewayOncePerNamespace                        bool   `json:"deployGatewayOncePerNamespace,omitempty"`
 	StrictMode                                     string `json:"strictMode,omitempty"`
-	IsBEBEnabled                                   bool   `json:"isBEBEnabled,omitempty"`
 	PodSecurityPolicyEnabled                       bool   `json:"podSecurityPolicyEnabled,omitempty"`
 	CentralApplicationConnectivityValidatorEnabled bool   `json:"centralApplicationConnectivityValidatorEnabled,omitempty"`
 }

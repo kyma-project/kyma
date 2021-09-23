@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "fluent-bit.fullname" . }}-test-connection"
+  labels:
+    {{- include "fluent-bit.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: "{{ .Values.testFramework.image.repository }}:{{ .Values.testFramework.image.tag }}"
+      imagePullPolicy: {{ .Values.testFramework.image.pullPolicy }}
+      command: ['wget']
+      args: ['{{ include "fluent-bit.fullname" . }}:{{ .Values.service.port }}']
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  restartPolicy: Never

@@ -13,6 +13,7 @@ rules:
   - list
   - get
   - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -104,3 +105,9 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - nats.io
+  resources:
+  - natsclusters
+  verbs:
+  - get

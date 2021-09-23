@@ -1,6 +1,8 @@
 package fake
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -15,7 +17,7 @@ func (c *Commander) Init(mgr manager.Manager) error {
 	return nil
 }
 
-func (c *Commander) Start() error {
+func (c *Commander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) error {
 	return nil
 }
 

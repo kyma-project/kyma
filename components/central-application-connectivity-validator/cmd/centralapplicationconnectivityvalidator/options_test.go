@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,9 +18,9 @@ func TestOptionsValidation(t *testing.T) {
 			valid: true,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
-				eventServicePathPrefixV1: "/%%APP_NAME%%/v1/events",
-				eventServicePathPrefixV2: "/%%APP_NAME%%/v2/events",
-				eventMeshPathPrefix:      "/%%APP_NAME%%/events",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
 			},
 		},
@@ -28,42 +29,42 @@ func TestOptionsValidation(t *testing.T) {
 			valid: true,
 			args: args{
 				appNamePlaceholder:       "",
-				eventServicePathPrefixV1: "/app1/v1/events",
-				eventServicePathPrefixV2: "/app1/v2/events",
-				eventMeshPathPrefix:      "//events",
+				eventingPathPrefixV1:     "/app1/v1/events",
+				eventingPathPrefixV2:     "/app1/v2/events",
+				eventingPathPrefixEvents: "//events",
 				appRegistryPathPrefix:    "/app2/v1/metadata",
 			},
 		},
 		{
-			name:  "missing app name prefix in eventServicePathPrefixV1",
+			name:  "missing app name prefix in eventingPathPrefixV1",
 			valid: false,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
-				eventServicePathPrefixV1: "/v1/events",
-				eventServicePathPrefixV2: "/%%APP_NAME%%/v2/events",
-				eventMeshPathPrefix:      "/%%APP_NAME%%/events",
+				eventingPathPrefixV1:     "/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
 			},
 		},
 		{
-			name:  "missing app name prefix in eventServicePathPrefixV2",
+			name:  "missing app name prefix in eventingPathPrefixV2",
 			valid: false,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
-				eventServicePathPrefixV1: "/%%APP_NAME%%/v1/events",
-				eventServicePathPrefixV2: "//v2/events",
-				eventMeshPathPrefix:      "/%%APP_NAME%%/events",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "//v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
 			},
 		},
 		{
-			name:  "missing app name prefix in eventMeshPathPrefix",
+			name:  "missing app name prefix in eventingPathPrefixEvents",
 			valid: false,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
-				eventServicePathPrefixV1: "/%%APP_NAME%%/v1/events",
-				eventServicePathPrefixV2: "/%%APP_NAME%%/v2/events",
-				eventMeshPathPrefix:      "//events",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "//events",
 				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
 			},
 		},
@@ -72,10 +73,23 @@ func TestOptionsValidation(t *testing.T) {
 			valid: false,
 			args: args{
 				appNamePlaceholder:       "%%APP_NAME%%",
-				eventServicePathPrefixV1: "/%%APP_NAME%%/v1/events",
-				eventServicePathPrefixV2: "/%%APP_NAME%%/v2/events",
-				eventMeshPathPrefix:      "/%%APP_NAME%%/events",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
 				appRegistryPathPrefix:    "//v1/metadata",
+			},
+		},
+		{
+			name:  "syncPeriod greater than cacheExpirationSeconds",
+			valid: false,
+			args: args{
+				appNamePlaceholder:       "%%APP_NAME%%",
+				eventingPathPrefixV1:     "/%%APP_NAME%%/v1/events",
+				eventingPathPrefixV2:     "/%%APP_NAME%%/v2/events",
+				eventingPathPrefixEvents: "/%%APP_NAME%%/events",
+				appRegistryPathPrefix:    "/%%APP_NAME%%/v1/metadata",
+				cacheExpirationSeconds:   120,
+				syncPeriod:               121 * time.Second,
 			},
 		},
 	}

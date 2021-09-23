@@ -1,12 +1,9 @@
 const axios = require("axios");
-const {
-    debug,
-    getEnvOrThrow,
-} = require("../utils");
-const {
-  OAuthCredentials
-} = require("../lib/oauth");
+const fs = require("fs");
+const { debug, getEnvOrThrow } = require("../utils");
+const { OAuthCredentials, OAuthToken } = require("../lib/oauth");
 
+const SCOPES = ["broker:write", "cld:read"];
 const KYMA_SERVICE_ID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
 
 class KEBConfig {
@@ -33,60 +30,24 @@ class KEBConfig {
   }
 }
 
-
 class KEBClient {
   constructor(config) {
+    this.token = new OAuthToken(`https://oauth2.${config.host}/oauth2/token`, config.credentials);
     this.host = config.host;
-    this.credentials = config.credentials;
     this.globalAccountID = config.globalAccountID;
     this.subaccountID = config.subaccountID;
     this.userID = config.userID;
-    this.planID = config.planID
-    this.serviceID = KYMA_SERVICE_ID;
+    this.planID = config.planID;
     this.region = config.region;
-
-    this._token = undefined;
-  }
-
-  async getToken() {
-    if (!this._token || this._token.expires_at < +new Date()) {
-      const url = `https://oauth2.${this.host}/oauth2/token`;
-      const scopes = ["broker:write", "cld:read"];
-      const body = `grant_type=client_credentials&scope=${scopes.join(" ")}`;
-      const params = {
-        auth: {
-          username: this.credentials.clientID,
-          password: this.credentials.clientSecret,
-        },
-      };
-
-      try {
-        const resp = await axios.post(url, body, params);
-
-        this._token = resp.data;
-        this._token.expires_at = (+new Date() + this._token.expires_in * 1000);
-      } catch (err) {
-        const msg = "Error when requesting bearer token from KCP";
-        if (err.response) {
-          throw new Error(
-            `${msg}: ${err.response.status} ${err.response.statusText}`
-          );
-        } else {
-          throw new Error(`${msg}: ${err.toString()}`);
-        }
-      }
-    }
-
-    return this._token.access_token;
   }
 
   async buildRequest(payload, endpoint, verb) {
-    const token = await this.getToken();
+    const token = await this.token.getToken(SCOPES);
     const region = this.getRegion();
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
       "X-Broker-API-Version": 2.14,
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
@@ -102,7 +63,6 @@ class KEBClient {
   async callKEB(payload, endpoint, verb) {
     const config = await this.buildRequest(payload, endpoint, verb);
 
-    const msg = "Error calling KEB";
     try {
       const resp = await axios.request(config);
       if (resp.data.errors) {
@@ -112,19 +72,18 @@ class KEBClient {
       return resp.data;
     } catch (err) {
       debug(err);
+      const msg = "Error calling KEB";
       if (err.response) {
-        throw new Error(
-          `${msg}: ${err.response.status} ${err.response.statusText}`
-        );
+        throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
       } else {
         throw new Error(`${msg}: ${err.toString()}`);
       }
     }
   }
 
-  async provisionSKR(name, instanceID) {
+  async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
     const payload = {
-      service_id: this.serviceID,
+      service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
       context: {
         globalaccount_id: this.globalAccountID,
@@ -133,8 +92,22 @@ class KEBClient {
       },
       parameters: {
         name: name,
+        ...customParams,
       },
     };
+
+    if (platformCreds && btpOperatorCreds) {
+      payload.context["sm_platform_credentials"] = {
+        credentials: {
+          basic: {
+            username: platformCreds.credentials.username,
+            password: platformCreds.credentials.password,
+          },
+        },
+        url: btpOperatorCreds.smURL,
+      };
+    }
+
     const endpoint = `service_instances/${instanceID}`;
     try {
       return await this.callKEB(payload, endpoint, "put");
@@ -143,23 +116,75 @@ class KEBClient {
     }
   }
 
+  async updateSKR(instanceID, customParams) {
+    const payload = {
+      service_id: KYMA_SERVICE_ID,
+      context: {
+        globalaccount_id: this.globalAccountID,
+      },
+      parameters: {
+        ...customParams,
+      },
+    };
+    const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
+    try {
+      return await this.callKEB(payload, endpoint, "patch");
+    } catch (err) {
+      throw new Error(`error while updating SKR: ${err.toString()}`);
+    }
+  }
+
   async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
     try {
       return await this.callKEB({}, endpoint, "get");
     } catch (err) {
-      debug(err.toString())
+      debug(err.toString());
       return new Error(`error while checking SKR State: ${err.toString()}`);
     }
   }
 
   async deprovisionSKR(instanceID) {
-    const endpoint = `service_instances/${instanceID}?service_id=${this.serviceID}&plan_id=${this.planID}`;
+    const endpoint = `service_instances/${instanceID}?service_id=${KYMA_SERVICE_ID}&plan_id=${this.planID}`;
     try {
       return await this.callKEB(null, endpoint, "delete");
     } catch (err) {
       return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
+  }
+
+  async downloadKubeconfig(instanceID) {
+    return new Promise(async (resolve, reject) => {
+      let writeStream = fs
+        .createWriteStream("./shoot-kubeconfig.yaml")
+        .on("error", function (err) {
+          reject(err);
+        })
+        .on("finish", function () {
+          writeStream.close();
+          fs.readFile("./shoot-kubeconfig.yaml", "utf8", (err, data) => {
+            fs.unlinkSync("./shoot-kubeconfig.yaml");
+            resolve(data);
+          });
+        });
+
+      try {
+        const resp = await axios.request({
+          method: "get",
+          url: `https://kyma-env-broker.${this.host}/kubeconfig/${instanceID}`,
+          responseType: "stream",
+        });
+        if (resp.data.errors) {
+          debug(resp);
+          throw new Error(resp.data);
+        }
+        resp.data.pipe(writeStream);
+      } catch (err) {
+        debug(err);
+        fs.unlinkSync("./shoot-kubeconfig.yaml");
+        reject(err);
+      }
+    });
   }
 
   getRegion() {

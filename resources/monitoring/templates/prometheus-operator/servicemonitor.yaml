@@ -21,6 +21,7 @@ spec:
           optional: false
   {{- else }}
   - port: http
+    scheme: http
   {{- end }}
     honorLabels: true
     {{- if .Values.prometheusOperator.serviceMonitor.interval }}

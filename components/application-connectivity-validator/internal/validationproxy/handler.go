@@ -19,8 +19,6 @@ import (
 
 const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
-	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy (https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy#send-events)
-	BEBEnabledPublishEndpoint = "/publish"
 
 	handlerName = "validation_proxy_handler"
 )
@@ -43,18 +41,16 @@ type Cache interface {
 type proxyHandler struct {
 	group                    string
 	tenant                   string
-	eventServicePathPrefixV1 string
-	eventServicePathPrefixV2 string
-	eventServiceHost         string
-	eventMeshPathPrefix      string
-	eventMeshHost            string
-	isBEBEnabled             bool
+	eventingPathPrefixV1     string
+	eventingPathPrefixV2     string
+	eventingPublisherHost    string
+	eventingPathPrefixEvents string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 
-	eventsProxy      *httputil.ReverseProxy
-	eventMeshProxy   *httputil.ReverseProxy
-	appRegistryProxy *httputil.ReverseProxy
+	legacyEventsProxy *httputil.ReverseProxy
+	cloudEventsProxy  *httputil.ReverseProxy
+	appRegistryProxy  *httputil.ReverseProxy
 
 	log *logger.Logger
 
@@ -64,35 +60,29 @@ type proxyHandler struct {
 func NewProxyHandler(
 	group string,
 	tenant string,
-	eventServicePathPrefixV1 string,
-	eventServicePathPrefixV2 string,
-	eventServiceHost string,
-	eventMeshPathPrefix string,
-	eventMeshHost string,
-	eventMeshDestinationPath string,
+	eventingPathPrefixV1 string,
+	eventingPathPrefixV2 string,
+	eventingPublisherHost string,
+	eventingPathPrefixEvents string,
+	eventingDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
-	isBEBEnabled := false
-	if eventMeshDestinationPath == BEBEnabledPublishEndpoint {
-		isBEBEnabled = true
-	}
+
 	return &proxyHandler{
 		group:                    group,
 		tenant:                   tenant,
-		eventServicePathPrefixV1: eventServicePathPrefixV1,
-		eventServicePathPrefixV2: eventServicePathPrefixV2,
-		eventServiceHost:         eventServiceHost,
-		eventMeshPathPrefix:      eventMeshPathPrefix,
-		eventMeshHost:            eventMeshHost,
-		isBEBEnabled:             isBEBEnabled,
+		eventingPathPrefixV1:     eventingPathPrefixV1,
+		eventingPathPrefixV2:     eventingPathPrefixV2,
+		eventingPublisherHost:    eventingPublisherHost,
+		eventingPathPrefixEvents: eventingPathPrefixEvents,
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(log, eventServiceHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		eventMeshProxy:   createReverseProxy(log, eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		appRegistryProxy: createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
+		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		appRegistryProxy:  createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		cache: cache,
 		log:   log,
@@ -156,23 +146,13 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
 	switch {
-	// For a cluster which is BEB enabled, events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching with prefix /{application}/events will be routed to /{application}/v1/events endpoint of event-service
-	case strings.HasPrefix(path, ph.eventServicePathPrefixV1):
-		return ph.eventsProxy, nil
+	// legacy-events reaching /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
+	case strings.HasPrefix(path, ph.eventingPathPrefixV1):
+		return ph.legacyEventsProxy, nil
 
-	// For a cluster which is BEB enabled, events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching /{application}/v2/events will be routed to /{application}/v2/events endpoint of event-service
-	case strings.HasPrefix(path, ph.eventServicePathPrefixV2):
-		if ph.isBEBEnabled {
-			return ph.eventMeshProxy, nil
-		}
-		return ph.eventsProxy, nil
-
-	// For a cluster which is BEB enabled, events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
-	// For a cluster which is not BEB enabled, events reaching /{application}/events will be routed to / endpoint of http-source-adapter
-	case strings.HasPrefix(path, ph.eventMeshPathPrefix):
-		return ph.eventMeshProxy, nil
+	// cloud-events reaching /{application}/v2/events or /{application}/events will be routed to /publish endpoint of event-publisher-proxy
+	case strings.HasPrefix(path, ph.eventingPathPrefixV2), strings.HasPrefix(path, ph.eventingPathPrefixEvents):
+		return ph.cloudEventsProxy, nil
 
 	case strings.HasPrefix(path, ph.appRegistryPathPrefix):
 		return ph.appRegistryProxy, nil

@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"crypto/sha1"
 	"fmt"
+	"strings"
 	"testing"
+
+	v1meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -25,7 +29,7 @@ func TestGetHash(t *testing.T) {
 func TestGetInternalView4Ev2(t *testing.T) {
 	defaultProtocolSettings := &eventingv1alpha1.ProtocolSettings{
 		ContentMode: func() *string {
-			cm := "test"
+			cm := types.ContentModeBinary
 			return &cm
 		}(),
 		ExemptHandshake: func() *bool {
@@ -45,6 +49,13 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
+	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
+
+	bebSubEvents := types.Events{types.Event{
+		Source: reconcilertesting.EventSource,
+		Type:   reconcilertesting.OrderCreatedEventType,
+	}}
+
 	defaultNamespace := "defaultNS"
 	svcName := "foo-svc"
 	host := "foo-host"
@@ -57,93 +68,115 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subscription)
 
-		givenProtocolSettings := &eventingv1alpha1.ProtocolSettings{
-			ContentMode: func() *string {
-				contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
-				return &contentMode
-			}(),
-			ExemptHandshake: func() *bool {
-				exemptHandshake := true
-				return &exemptHandshake
-			}(),
-			Qos: func() *string {
-				qos := "AT-LEAST_ONCE"
-				return &qos
-			}(),
-			WebhookAuth: &eventingv1alpha1.WebhookAuth{
-				Type:         "oauth2",
-				GrantType:    "client_credentials",
-				ClientId:     "xxx",
-				ClientSecret: "xxx",
-				TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
-				Scope:        []string{"guid-identifier"},
-			},
-		}
-		subscription.Spec.ProtocolSettings = givenProtocolSettings
+		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 
 		// Values should be overriden by the given values in subscription
-		expectedBEBSubscription := types.Subscription{
-			Name:            subscription.Name,
-			ContentMode:     *givenProtocolSettings.ContentMode,
-			Qos:             types.QosAtLeastOnce,
-			ExemptHandshake: *givenProtocolSettings.ExemptHandshake,
-			Events: types.Events{
-				{
-					Source: reconcilertesting.EventSource,
-					Type:   reconcilertesting.EventType,
-				},
-			},
-			WebhookUrl: expectedWebhookURL,
-			WebhookAuth: &types.WebhookAuth{
-				Type:         types.AuthTypeClientCredentials,
-				GrantType:    types.GrantTypeClientCredentials,
-				ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientId,
-				ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-				TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
-			},
+		expectedWebhookAuth := &types.WebhookAuth{
+			Type:         types.AuthTypeClientCredentials,
+			GrantType:    types.GrantTypeClientCredentials,
+			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
+			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
 		}
+		expectedBEBSubscription := eventingtesting.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscription),
+			*subscription.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			expectedWebhookAuth,
+		)
 
 		apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "")
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, "", defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubscription).To(Equal(*gotBEBSubscription))
+		g.Expect(*expectedBEBSubscription).To(Equal(*gotBEBSubscription))
 	})
 
 	t.Run("subscription with default setting", func(t *testing.T) {
 		// given
-		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEmptySourceEventType)
+		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subscription)
 
-		// Values should retain defaults
-		expectedBEBSubscription := types.Subscription{
-			Name: subscription.Name,
-			Events: types.Events{
-				{
-					Source: defaultNamespace,
-					Type:   reconcilertesting.EventType,
-				},
-			},
-			WebhookUrl:      expectedWebhookURL,
-			WebhookAuth:     defaultWebhookAuth,
-			Qos:             types.QosAtLeastOnce,
-			ExemptHandshake: *defaultProtocolSettings.ExemptHandshake,
-			ContentMode:     *defaultProtocolSettings.ContentMode,
-		}
+		expectedBEBSubWithDefault := eventingtesting.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscription),
+			*defaultProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			defaultWebhookAuth, // WebhookAuth should retain defaults
+		)
 
 		apiRule := reconcilertesting.NewAPIRule(subscription, reconcilertesting.WithPath)
 		reconcilertesting.WithService(host, svcName, apiRule)
 
 		// then
-		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace)
+		gotBEBSubscription, err := getInternalView4Ev2(subscription, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
 
 		// when
 		g.Expect(err).To(BeNil())
-		g.Expect(expectedBEBSubscription).To(Equal(*gotBEBSubscription))
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubscription))
+	})
+
+	t.Run("subscription with custom webhookauth config followed by a subscription with default webhookauth config should not alter the default config", func(t *testing.T) {
+		// given
+		subWithGivenWebhookAuth := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
+		eventingtesting.WithValidSink("ns", svcName, subWithGivenWebhookAuth)
+
+		subWithGivenWebhookAuth.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
+		expectedWebhookAuth := types.WebhookAuth{
+			Type:         types.AuthTypeClientCredentials,
+			GrantType:    types.GrantTypeClientCredentials,
+			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
+			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
+		}
+
+		expectedBEBSubWithWebhookAuth := eventingtesting.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subWithGivenWebhookAuth),
+			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			&expectedWebhookAuth, // WebhookAuth should retain the supplied config
+		)
+
+		apiRule := reconcilertesting.NewAPIRule(subWithGivenWebhookAuth, reconcilertesting.WithPath)
+		reconcilertesting.WithService(host, svcName, apiRule)
+
+		// then
+		gotBEBSubscription, err := getInternalView4Ev2(subWithGivenWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubWithWebhookAuth).To(Equal(*gotBEBSubscription))
+
+		// Use another subscription without webhookAuthConfig
+		// given
+		subscriptionWithoutWebhookAuth := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
+		eventingtesting.WithValidSink("ns", svcName, subscriptionWithoutWebhookAuth)
+
+		expectedBEBSubWithDefault := eventingtesting.NewBEBSubscription(
+			defaultNameMapper.MapSubscriptionName(subscriptionWithoutWebhookAuth),
+			*subWithGivenWebhookAuth.Spec.ProtocolSettings.ContentMode,
+			expectedWebhookURL,
+			bebSubEvents,
+			defaultWebhookAuth, // WebhookAuth should retain defaults
+		)
+
+		apiRule = reconcilertesting.NewAPIRule(subscriptionWithoutWebhookAuth, reconcilertesting.WithPath)
+		reconcilertesting.WithService(host, svcName, apiRule)
+
+		// then
+		gotBEBSubWithDefaultCfg, err := getInternalView4Ev2(subscriptionWithoutWebhookAuth, apiRule, defaultWebhookAuth, defaultProtocolSettings, defaultNamespace, defaultNameMapper)
+
+		// when
+		g.Expect(err).To(BeNil())
+		g.Expect(*expectedBEBSubWithDefault).To(Equal(*gotBEBSubWithDefaultCfg))
+		g.Expect(*expectedBEBSubWithDefault.WebhookAuth).To(Equal(*gotBEBSubWithDefaultCfg.WebhookAuth))
+
 	})
 }
 
@@ -161,7 +194,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 		Events: []types.Event{
 			{
 				Source: reconcilertesting.EventSource,
-				Type:   reconcilertesting.EventTypeNotClean,
+				Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
 			},
 		},
 	}
@@ -180,7 +213,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
 			Source: reconcilertesting.EventSource,
-			Type:   reconcilertesting.EventTypeNotClean,
+			Type:   reconcilertesting.OrderCreatedEventTypeNotClean,
 		},
 	}))
 	g.Expect(bebSubscription)
@@ -197,4 +230,142 @@ func TestGetRandSuffix(t *testing.T) {
 		}
 		results[result] = true
 	}
+}
+
+func TestBebSubscriptionNameMapper(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	s1 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "subscription1",
+			Namespace: "my-namespace",
+		},
+	}
+	s2 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "mysub",
+			Namespace: "another-namespace",
+		},
+	}
+
+	s3 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub3-sink",
+		},
+	}
+	s4 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name1",
+			Namespace: "name2",
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Sink: "sub4-sink",
+		},
+	}
+	s5 := &eventingv1alpha1.Subscription{
+		ObjectMeta: v1meta.ObjectMeta{
+			Name:      "name2",
+			Namespace: "name1",
+		},
+	}
+
+	domain1 := "my-domain-name.com"
+	domain2 := "another.domain.com"
+
+	hashLength := 40
+
+	tests := []struct {
+		domainName string
+		maxLen     int
+		inputSub   *eventingv1alpha1.Subscription
+		outputHash string
+	}{
+		{
+			domainName: domain1,
+			maxLen:     50,
+			inputSub:   s1,
+			outputHash: hashSubscriptionFullName(domain1, s1.Namespace, s1.Name),
+		},
+		{
+			domainName: domain2,
+			maxLen:     50,
+			inputSub:   s1,
+			outputHash: hashSubscriptionFullName(domain2, s1.Namespace, s1.Name),
+		},
+		{
+			domainName: "",
+			maxLen:     50,
+			inputSub:   s2,
+			outputHash: hashSubscriptionFullName("", s2.Namespace, s2.Name),
+		},
+	}
+	for _, test := range tests {
+		mapper := NewBebSubscriptionNameMapper(test.domainName, test.maxLen)
+		s := mapper.MapSubscriptionName(test.inputSub)
+		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
+		// the mapped name should always end with the SHA1
+		g.Expect(strings.HasSuffix(s, test.outputHash)).To(BeTrue())
+		// and have the first 10 char of the name
+		prefixLen := min(len(test.inputSub.Name), test.maxLen-hashLength)
+		g.Expect(strings.HasPrefix(s, test.inputSub.Name[:prefixLen]))
+	}
+
+	// Same domain and subscription name/namespace should map to the same name
+	mapper := NewBebSubscriptionNameMapper(domain1, 50)
+	g.Expect(mapper.MapSubscriptionName(s3)).To(Equal(mapper.MapSubscriptionName(s4)))
+
+	// If the same names are used in different order, they get mapped to different names
+	g.Expect(mapper.MapSubscriptionName(s4)).ToNot(Equal(mapper.MapSubscriptionName(s5)))
+}
+
+func TestShortenNameAndAppendHash(t *testing.T) {
+	g := NewGomegaWithT(t)
+	fakeHash := fmt.Sprintf("%x", sha1.Sum([]byte("myshootmynamespacemyname")))
+
+	tests := []struct {
+		name   string
+		hash   string
+		maxLen int
+		output string
+	}{
+		{
+			name:   "mylongsubscription",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mylongsubs" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 50,
+			output: "mysub" + fakeHash,
+		},
+		{
+			name:   "mysub",
+			hash:   fakeHash,
+			maxLen: 40,
+			output: fakeHash, // no room for name!
+		},
+	}
+	for _, test := range tests {
+		nameWithHash := shortenNameAndAppendHash(test.name, test.hash, test.maxLen)
+		g.Expect(nameWithHash).To(Equal(test.output))
+	}
+
+	// shortenNameAndAppendHash should panic if it cannot fit the hash
+	defer func() {
+		g.Expect(recover()).ToNot(BeNil())
+	}()
+	shortenNameAndAppendHash("panic-much", fakeHash, len(fakeHash)-1)
+}
+
+func min(i, j int) int {
+	if i < j {
+		return i
+	}
+	return j
 }

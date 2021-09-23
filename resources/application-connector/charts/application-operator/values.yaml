@@ -15,6 +15,14 @@ controller:
     requests:
       cpu: 100m
       memory: 128Mi
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 tests:
   enabled: true

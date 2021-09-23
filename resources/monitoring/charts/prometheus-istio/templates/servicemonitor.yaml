@@ -17,6 +17,7 @@ spec:
   - path: /metrics
     targetPort: 9090
     honorLabels: true
+    scheme: http
   - params:
       'match[]':
       - '{__name__=~"workload:(.*)"}'
@@ -29,3 +30,4 @@ spec:
       regex: 'workload:(.*)'
       targetLabel: "__name__"
       action: replace
+    scheme: http

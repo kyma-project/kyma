@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
 
-	"github.com/bmizerany/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOverridesMap_MergeLabelOverrides(t *testing.T) {

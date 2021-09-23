@@ -3,7 +3,7 @@ replicaCount: 1
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: 20210610-d25e85b1
+    tag: 20210922-530cfc39
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
@@ -36,7 +36,8 @@ port:
 deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
-  resources: {}
+  resources:
+    {}
     #  We usually recommend not to specify default resources and to leave this as a conscious
     #  choice for the user. This also increases chances charts run on environments with little
     #  resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -58,6 +59,16 @@ deployment:
   tolerations: []
   annotations: {}
   podLabels: {}
+
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 # Configure node affinity
 affinity: {}

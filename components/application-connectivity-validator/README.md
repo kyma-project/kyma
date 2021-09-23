@@ -3,19 +3,19 @@
 ## Overview
 
 The Application Connectivity Validator validates client certificate subjects.
-It proxies the requests to the Event Service and the Application Registry.
+It proxies the requests to the Eventing Publisher and the Application Registry.
 
 A single instance of the component is deployed for an Application and uses these parameters:
 - **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
 - **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
 - **tenant** is the tenant of the Application for which the proxy is deployed. Omitted if empty.
 - **group** is the group of the Application for which the proxy is deployed. Omitted if empty.
-- **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/v1/events`.
-- **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/v2/events`.
-- **eventServiceHost** is the host and the port of the Event Service. The default value is `events-api:8080`.
-- **eventMeshDestinationPath** is the destination path for the requests coming to the Event Mesh. The default value is `/`.
+- **eventingPathPrefixV1** is the path prefix for which requests are forwarded to the Eventing Publisher V1 API. The default value is `/v1/events`.
+- **eventingPathPrefixV2** is the path prefix for which requests are forwarded to the Eventing Publisher V2 API. The default value is `/v2/events`.
+- **eventingPublisherHost** is the host and the port of the Eventing Publisher. The default value is `events-api:8080`.
+- **eventingDestinationPath** is the destination path for the requests coming to the Eventing. The default value is `/`.
 - **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
-- **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
+- **appRegistryHost** is the host and the port of the Eventing Publisher. The default value is `application-registry-external-api:8081`.
 - **kubeConfig** is the path to a cluster kubeconfig. Used for running the service outside of the cluster.
 - **apiServerURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
 - **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `120 seconds`.

@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
-
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (
@@ -28,38 +28,44 @@ func TestCleanup(t *testing.T) {
 
 	// When
 	ctx := context.Background()
-	log := ctrl.Log.WithName("test-cleaner-beb")
 
 	// create a Kyma subscription
-	subscription := controllertesting.NewSubscription("test-"+controllertesting.TestCommanderSuffix, "test",
+	subscription := controllertesting.NewSubscription("test", "test",
 		controllertesting.WithWebhookAuthForBEB, controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 
 	// create an APIRule
 	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("host-test-"+controllertesting.TestCommanderSuffix, "svc-test-"+controllertesting.TestCommanderSuffix, apiRule)
+	controllertesting.WithService("host-test", "svc-test", apiRule)
 	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
 	bebMock := startBebMock()
 	envConf := env.Config{
+
 		BebApiUrl:                bebMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
 		WebhookActivationTimeout: 0,
-		WebhookClientID:          "webhook-client-id",
-		WebhookClientSecret:      "webhook-client-secret",
 		WebhookTokenEndpoint:     "webhook-token-endpoint",
 		Domain:                   domain,
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
 		Qos:                      "AT_LEAST_ONCE",
 	}
+	credentials := &handlers.OAuth2ClientCredentials{
+		ClientID:     "webhook_client_id",
+		ClientSecret: "webhook_client_secret",
+	}
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(gomega.BeNil())
 
 	// create a BEB handler to connect to BEB Mock
-	bebHandler := &handlers.Beb{Log: log}
-	err := bebHandler.Initialize(envConf)
+	nameMapper := handlers.NewBebSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
+	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
+	err = bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
 	bebCommander.Backend = bebHandler
 
@@ -81,7 +87,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, subscription.Name)
+	getSubscriptionUrl := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
 	resp, err := http.Get(getSubscriptionUrl)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
@@ -98,7 +104,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(unstructuredApiRuleBeforeCleanup).ToNot(gomega.BeNil())
 
 	// Then
-	err = cleanup(bebCommander.Backend, bebCommander.Client)
+	err = cleanup(bebCommander.Backend, bebCommander.Client, defaultLogger.WithContext())
 	g.Expect(err).To(gomega.BeNil())
 
 	// Expect

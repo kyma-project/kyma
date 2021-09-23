@@ -130,8 +130,8 @@ func TestCompassConnectionController(t *testing.T) {
 	certsConnectorClientMock := connectorCertClientMock()
 	// Director config client
 	configurationClientMock := &directorMocks.DirectorClient{}
-	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
-	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
+	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
+	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	// Director proxy configurator
 	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
 	directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
@@ -265,12 +265,12 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in MetadataUpdateFailed state if failed to set labels on Runtime", func(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, apperrors.Internal("error"))
+		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
+		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(nil, apperrors.Internal("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", runtimeURLsConfig)
+			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", runtimeURLsConfig, graphql.Labels{})
 		})
 
 		// then
@@ -300,7 +300,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configurationClientMock.ExpectedCalls = nil
 		configurationClientMock.Calls = nil
-		configurationClientMock.On("FetchConfiguration").Return(nil, errors.New("error"))
+		configurationClientMock.On("FetchConfiguration").Return(nil, nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {

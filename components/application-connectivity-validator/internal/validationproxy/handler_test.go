@@ -30,12 +30,12 @@ const (
 	group  = "group"
 	tenant = "tenant"
 
-	eventServicePathPrefixV1               = "/test-application/v1/events"
-	eventServicePathPrefixV2               = "/test-application/v2/events"
-	eventMeshPathPrefix                    = "/test-application/events"
-	appRegistryPathPrefix                  = "/test-application/v1/metadata"
-	eventMeshDestinationPath               = "/"
-	eventMeshDestinationPathWhenBEBEnabled = "/publish"
+	eventingPathPrefixV1           = "/test-application/v1/events"
+	eventingPathPrefixV2           = "/test-application/v2/events"
+	eventingPathPrefixEvents       = "/test-application/events"
+	appRegistryPathPrefix          = "/test-application/v1/metadata"
+	eventingDestinationPathPublish = "/publish"
+	eventingDestinationPath        = "/"
 )
 
 type event struct {
@@ -73,7 +73,6 @@ var (
 )
 
 func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
-
 	log, err := logger.New(logger.TEXT, logger.ERROR)
 	require.NoError(t, err)
 	testCases := []struct {
@@ -218,13 +217,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	}
 
 	t.Run("should proxy requests", func(t *testing.T) {
-		eventServiceHandler := mux.NewRouter()
-		eventServiceServer := httptest.NewServer(eventServiceHandler)
-		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -239,28 +234,27 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
+			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
+			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
+			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
 			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventServiceHost,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPublisherHost,
+				eventingPathPrefixEvents,
+				eventingDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
 				log)
 
-			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
+			t.Run("should proxy eventing V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
 
-				eventServiceHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				eventingPublisherHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
 					assert.Equal(t, testCase.application.Name, appName, `Error reading "application" route variable from request context`)
 
@@ -290,44 +284,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				assert.Equal(t, testCase.expectedStatus, recorder.Code)
 			})
 
-			t.Run("should proxy event service V2 request when "+testCase.caseDescription, func(t *testing.T) {
-				eventTitle := "my-event-2"
-
-				eventServiceHandler.PathPrefix("/{application}/v2/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					appName := mux.Vars(r)["application"]
-					assert.Equal(t, testCase.application.Name, appName, `Error reading "application" route variable from request context`)
-
-					var receivedEvent event
-
-					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
-					require.NoError(t, err)
-					assert.Equal(t, eventTitle, receivedEvent.Title)
-
-					w.WriteHeader(http.StatusOK)
-				})
-
-				body, err := json.Marshal(event{Title: eventTitle})
-				require.NoError(t, err)
-
-				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", testCase.application.Name), bytes.NewReader(body))
-				require.NoError(t, err)
-				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
-				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.Name})
-
-				recorder := httptest.NewRecorder()
-
-				// when
-				proxyHandler.ProxyAppConnectorRequests(recorder, req)
-
-				// then
-				assert.Equal(t, testCase.expectedStatus, recorder.Code)
-			})
-
-			t.Run("should proxy event mesh request when "+testCase.caseDescription, func(t *testing.T) {
+			t.Run("should proxy eventing request when "+testCase.caseDescription, func(t *testing.T) {
 				const eventTitle = "my-event"
 				const mockIncomingRequestHost = "fake.istio.gateway"
 
-				eventMeshHandler.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				eventingPublisherHandler.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var receivedEvent event
 
 					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
@@ -383,13 +344,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
-		eventServiceHandler := mux.NewRouter()
-		eventServiceServer := httptest.NewServer(eventServiceHandler)
-		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -404,19 +361,18 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
+			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
+			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
+			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
 			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventServiceHost,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPublisherHost,
+				eventingPathPrefixEvents,
+				eventingDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
@@ -445,13 +401,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
-		eventServiceHandler := mux.NewRouter()
-		eventServiceServer := httptest.NewServer(eventServiceHandler)
-		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -461,19 +413,18 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
+			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
+			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
+			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
 			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
-				eventServicePathPrefixV1,
-				eventServicePathPrefixV2,
-				eventServiceHost,
-				eventMeshPathPrefix,
-				eventMeshHost,
-				eventMeshDestinationPath,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPublisherHost,
+				eventingPathPrefixEvents,
+				eventingDestinationPath,
 				appRegistryPathPrefix,
 				appRegistryHost,
 				idCache,
@@ -494,13 +445,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 400 when application not specified in path", func(t *testing.T) {
-		eventServiceHandler := mux.NewRouter()
-		eventServiceServer := httptest.NewServer(eventServiceHandler)
-		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -515,12 +462,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		proxyHandler := NewProxyHandler(
 			group,
 			tenant,
-			eventServicePathPrefixV1,
-			eventServicePathPrefixV2,
-			eventServiceHost,
-			eventMeshPathPrefix,
-			eventMeshHost,
-			eventMeshDestinationPath,
+			eventingPathPrefixV1,
+			eventingPathPrefixV2,
+			eventingPublisherHost,
+			eventingPathPrefixEvents,
+			eventingDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			idCache,
@@ -539,13 +485,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should return 404 when path is invalid", func(t *testing.T) {
-		eventServiceHandler := mux.NewRouter()
-		eventServiceServer := httptest.NewServer(eventServiceHandler)
-		eventServiceHost := strings.TrimPrefix(eventServiceServer.URL, "http://")
-
-		eventMeshHandler := mux.NewRouter()
-		eventMeshServer := httptest.NewServer(eventMeshHandler)
-		eventMeshHost := strings.TrimPrefix(eventMeshServer.URL, "http://")
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
@@ -564,12 +506,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		proxyHandler := NewProxyHandler(
 			"",
 			"",
-			eventServicePathPrefixV1,
-			eventServicePathPrefixV2,
-			eventServiceHost,
-			eventMeshPathPrefix,
-			eventMeshHost,
-			eventMeshDestinationPath,
+			eventingPathPrefixV1,
+			eventingPathPrefixV2,
+			eventingPublisherHost,
+			eventingPathPrefixEvents,
+			eventingDestinationPath,
 			appRegistryPathPrefix,
 			appRegistryHost,
 			idCache,
@@ -588,7 +529,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, recorder.Code)
 	})
 
-	t.Run("should proxy requests to Event Publisher Proxy(EPP) when BEB is enabled", func(t *testing.T) {
+	t.Run("should proxy requests to Event Publisher Proxy(EPP)", func(t *testing.T) {
 		appRegistryHandler := mux.NewRouter()
 		appRegistryServer := httptest.NewServer(appRegistryHandler)
 		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
@@ -606,9 +547,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
 			}
 
-			eventServicePathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
-			eventServicePathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
-			eventMeshPathPrefix := fmt.Sprintf("/%s/events", testCase.application.Name)
+			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
+			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
+			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
 			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 
 			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
@@ -616,12 +557,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				proxyHandlerBEB := NewProxyHandler(
 					testCase.group,
 					testCase.tenant,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					eventPublisherV1ProxyHost, // For a BEB enabled cluster requests should be forwarded to Event Publisher Proxy
-					eventMeshPathPrefix,
-					"randomMesh",
-					eventMeshDestinationPathWhenBEBEnabled,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventPublisherV1ProxyHost,
+					eventingPathPrefixEvents,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
@@ -668,12 +608,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				proxyHandlerBEB := NewProxyHandler(
 					testCase.group,
 					testCase.tenant,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					"randomV1Proxy",
-					eventMeshPathPrefix,
-					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
-					eventMeshDestinationPathWhenBEBEnabled,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventPublisherProxyHost,
+					eventingPathPrefixEvents,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
@@ -716,12 +655,11 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				proxyHandlerBEB := NewProxyHandler(
 					testCase.group,
 					testCase.tenant,
-					eventServicePathPrefixV1,
-					eventServicePathPrefixV2,
-					"randomV1Proxy",
-					eventMeshPathPrefix,
-					eventPublisherProxyHost, // For a BEB enabled cluster requests to /v2 and /events should be forwarded to Event Publisher Proxy
-					eventMeshDestinationPathWhenBEBEnabled,
+					eventingPathPrefixV1,
+					eventingPathPrefixV2,
+					eventPublisherProxyHost,
+					eventingPathPrefixEvents,
+					eventingDestinationPathPublish,
 					appRegistryPathPrefix,
 					appRegistryHost,
 					idCache,
@@ -760,5 +698,4 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			})
 		}
 	})
-
 }

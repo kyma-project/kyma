@@ -48,7 +48,7 @@ hpa:
 maintenance:
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
+    tag: "20210922-530cfc39"
   podSecurityPolicy:
     enabled: true
 
@@ -110,7 +110,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210610-d25e85b1
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
   oathkeeper:
     config:
       authenticators:
@@ -152,6 +152,7 @@ oathkeeper:
           config:
             jwks_urls:
             - http://dex-service.kyma-system.svc.cluster.local:5556/keys
+            - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
             scope_strategy: wildcard
       authorizers:
         allow:

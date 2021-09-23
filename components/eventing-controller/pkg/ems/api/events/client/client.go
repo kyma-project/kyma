@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
@@ -74,7 +73,7 @@ func (c Client) Create(subscription *types.Subscription) (*types.CreateResponse,
 	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, fmt.Errorf("could not unmarshal response: %v", resp)
+		return nil, fmt.Errorf("unmarshal response failed: %v", resp)
 	} else {
 		if response == nil {
 			response = &types.CreateResponse{}
@@ -100,7 +99,7 @@ func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 	if resp, responseBody, err := c.httpClient.Do(req, &subscriptions); err != nil {
 		return nil, nil, err
 	} else if resp == nil {
-		return nil, nil, fmt.Errorf("could not unmarshal response: %v", resp)
+		return nil, nil, fmt.Errorf("unmarshal response failed: %v", resp)
 	} else {
 		response.StatusCode = resp.StatusCode
 		response.Message = resp.Status
@@ -123,7 +122,7 @@ func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
 	if resp, responseBody, err := c.httpClient.Do(req, &subscription); err != nil {
 		return nil, nil, err
 	} else if resp == nil {
-		return nil, nil, fmt.Errorf("could not unmarshal response: %v", resp)
+		return nil, nil, fmt.Errorf("unmarshal response failed: %v", resp)
 	} else {
 		response.StatusCode = resp.StatusCode
 		response.Message = resp.Status

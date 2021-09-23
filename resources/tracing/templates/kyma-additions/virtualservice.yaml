@@ -13,7 +13,7 @@ spec:
   http:
   - route:
     - destination:
-        {{if .Values.kcproxy.enabled}}
+        {{if .Values.authProxy.enabled}}
         host: {{ template "jaeger-operator.fullname" . }}-jaeger-query-secured
         {{else}}
         host: {{ template "jaeger-operator.fullname" . }}-jaeger-query

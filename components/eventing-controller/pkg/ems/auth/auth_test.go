@@ -34,11 +34,11 @@ func TestAuthenticator(t *testing.T) {
 
 	secTransport, ok := httpClient.Transport.(*oauth2.Transport)
 	if !ok {
-		t.Errorf("Failed to convert to oauth2 transport")
+		t.Errorf("convert to oauth2 transport failed")
 	}
 	httpTransport, ok := secTransport.Base.(*http.Transport)
 	if !ok {
-		t.Errorf("Failed to convert to HTTP transport")
+		t.Errorf("convert to HTTP transport failed")
 	}
 
 	if httpTransport.MaxIdleConns != maxIdleConns {

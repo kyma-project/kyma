@@ -15,18 +15,41 @@ spec:
     let lastEvent = {};
     let inAppEvent = {};
     const axios = require('axios');
-    function sendEvent(type, data) {
-        const payload = {       
-          source: "kyma",
+    function sendEvent(type, data, encoding) {
+        const event = getEventPayloadAndHeaders(type, data, encoding)
+        console.log("Headers:", event.headers)
+        console.log("Payload:", event.payload)
+        return axios.post("http://eventing-event-publisher-proxy.kyma-system/publish",event.payload,{headers:event.headers})
+    }
+    function getEventPayloadAndHeaders(type, data, encoding) {
+      if(encoding==='binary') {
+        return {
+          payload: data,
+          headers: {
+            "ce-source": "/default/sap.kyma/tunas-prow",
+            "ce-specversion": "1.0",
+            "ce-eventtypeversion": "v1",
+            "ce-id": (data.id || "dummyId"),
+            "ce-type": type,
+            "Content-Type": "application/json"
+          }
+        }
+      }
+      // structured encoding
+      return {
+        payload: {
+          source: "/default/sap.kyma/tunas-prow",
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",
           id: (data.id || "dummyId"),
           type,
           data
+        },
+        headers: {
+          "Content-Type": "application/cloudevents+json"
         }
-      console.log("Payload:", payload)
-      return axios.post("http://eventing-event-publisher-proxy.kyma-system/publish",payload,{headers:{"Content-Type": "application/cloudevents+json"}})
+      }
     }
     async function getOrder(code) {
       let url = %%URL%%;
@@ -59,7 +82,8 @@ spec:
       main: async function (event, context) {
         if (event.extensions.request.query.send) {
           try {
-            const response = await sendEvent("sap.kyma.custom.inapp.order.received.v1", event.data);
+            const encoding = event.extensions.request.query.encoding
+            const response = await sendEvent("sap.kyma.custom.inapp.order.received.v1", event.data, encoding);
             console.log("In-app message sent");
           } catch (e) {
             console.dir(e)
@@ -80,6 +104,16 @@ spec:
       }
     }
 ---
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: lastorder
+spec:
+  grantTypes:
+    - "client_credentials"
+  scope: "read write"
+  secretName: lastorder-oauth
+---
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
@@ -87,11 +121,17 @@ metadata:
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-    - accessStrategies:
-        - config: {}
-          handler: allow
-      methods: ["*"]
-      path: /.*
+    - path: /function
+      methods: ["GET", "POST"]
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["read"]
+    - path: /.*
+      methods: ["GET", "POST"]
+      accessStrategies:
+        - handler: allow
+          config: {}
   service:
     host: lastorder
     name: lastorder

@@ -66,28 +66,5 @@ authorizationPolicy:
   serviceAccount:
     consoleBackendService: console-backend
 
-eventService:
-  deployment:
-    labels:
-      grafana: "enabled"
-      alerts: "enabled"
-    image:
-      pullPolicy: IfNotPresent
-    args:
-      externalAPIPort: &eventServiceExternalAPIPort 8081
-      maxRequestSize: 65536
-      requestTimeout: 10
-      requestLogging: false
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 50m
-        memory: 64Mi
-  service:
-    externalapi:
-      port: *eventServiceExternalAPIPort
-
 podSecurityPolicy:
   runAsUser: 1000

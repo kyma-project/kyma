@@ -64,7 +64,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ template "pod-preset.fullname" . }}-pdb
 spec:
-  minAvailable: 1
+  minAvailable: {{ .Values.webhook.pdb.minAvailable }}
   selector:
     matchLabels:
       app: {{ template "pod-preset.name" . }}-webhook

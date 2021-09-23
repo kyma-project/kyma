@@ -3,8 +3,11 @@
 package commander
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
+
+type Params map[string]interface{}
 
 // Commander defines the interface of different implementations
 type Commander interface {
@@ -12,7 +15,7 @@ type Commander interface {
 	Init(mgr manager.Manager) error
 
 	// Start runs the initialized commander instance.
-	Start() error
+	Start(defaultSubsConfig env.DefaultSubscriptionConfig, params Params) error
 
 	// Stop tells the commander instance to shutdown and clean-up.
 	Stop() error

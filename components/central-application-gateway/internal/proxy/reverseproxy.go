@@ -1,21 +1,27 @@
 package proxy
 
 import (
-	"crypto/tls"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, skipVerify bool, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy, clientCertificate clientcert.ClientCertificate, timeout int) (*httputil.ReverseProxy, apperrors.AppError) {
+	roundTripper := httptools.NewRoundTripper(httptools.WithTLSSkipVerify(skipVerify), httptools.WithGetClientCertificate(clientCertificate.GetClientCertificate))
+	retryableRoundTripper := NewRetryableRoundTripper(roundTripper, authorizationStrategy, csrfTokenStrategy, clientCertificate, timeout)
+	return newProxy(targetURL, requestParameters, serviceName, retryableRoundTripper)
+}
+
+func newProxy(targetURL string, requestParameters *authorization.RequestParameters, serviceName string, transport http.RoundTripper) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetURL)
 	if err != nil {
 		log.Errorf("failed to parse target url '%s': '%s'", targetURL, err.Error())
@@ -49,11 +55,7 @@ func makeProxy(targetURL string, requestParameters *authorization.RequestParamet
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
-	newProxy := &httputil.ReverseProxy{Director: director}
-
-	newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify}}
-
-	return newProxy, nil
+	return &httputil.ReverseProxy{Director: director, Transport: transport}, nil
 }
 
 func joinPaths(a, b string) string {

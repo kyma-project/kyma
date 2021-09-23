@@ -9,16 +9,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
-
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
-
 	"github.com/kyma-project/kyma/components/central-application-gateway/internal/httperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 )
 
 type proxy struct {
@@ -67,12 +65,6 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handleErrors(w, err)
 		return
 	}
-
-	if err := p.addModifyResponseHandler(newRequest, apiIdentifier, cacheEntry, p.createCacheEntry); err != nil {
-		handleErrors(w, err)
-		return
-	}
-
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
@@ -100,16 +92,15 @@ func (p *proxy) createCacheEntry(apiIdentifier model.APIIdentifier) (*CacheEntry
 	if err != nil {
 		return nil, err
 	}
-
-	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier.Service, p.skipVerify)
+	clientCertificate := clientcert.NewClientCertificate(nil)
+	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
+	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
+	proxy, err := makeProxy(serviceAPI.TargetUrl, serviceAPI.RequestParameters, apiIdentifier.Service, p.skipVerify, authorizationStrategy, csrfTokenStrategy, clientCertificate, p.proxyTimeout)
 	if err != nil {
 		return nil, err
 	}
 
-	authorizationStrategy := p.newAuthorizationStrategy(serviceAPI.Credentials)
-	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceAPI.Credentials)
-
-	return p.cache.Put(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry, proxy, authorizationStrategy, csrfTokenStrategy), nil
+	return p.cache.Put(apiIdentifier.Application, apiIdentifier.Service, apiIdentifier.Entry, proxy, authorizationStrategy, csrfTokenStrategy, clientCertificate), nil
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *authorization.Credentials) authorization.Strategy {
@@ -148,22 +139,6 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	}
 
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
-}
-
-func (p *proxy) addModifyResponseHandler(r *http.Request, apiIdentifier model.APIIdentifier, cacheEntry *CacheEntry, cacheUpdateFunc updateCacheEntryFunction) apperrors.AppError {
-	// Handle the case when credentials has been changed or OAuth token has expired
-	secondRequestBody, err := copyRequestBody(r)
-	if err != nil {
-		return err
-	}
-
-	modifyResponseFunction := func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(apiIdentifier, r, secondRequestBody, p.proxyTimeout, cacheUpdateFunc)
-		return retrier.RetryIfFailedToAuthorize(response)
-	}
-
-	cacheEntry.Proxy.ModifyResponse = modifyResponseFunction
-	return nil
 }
 
 func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {

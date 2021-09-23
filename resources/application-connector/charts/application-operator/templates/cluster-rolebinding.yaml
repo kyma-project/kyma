@@ -90,7 +90,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 subjects:
   - kind: User
-    name: system:serviceaccount:{{ .Values.global.namespace }}:{{ .Chart.Name }}
+    name: system:serviceaccount:{{ .Values.global.integrationNamespace }}:{{ .Chart.Name }}
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   apiGroup: rbac.authorization.k8s.io

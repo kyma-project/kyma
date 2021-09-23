@@ -1,0 +1,31 @@
+{{- if (and .Values.monitoring.enabled .Values.monitoring.istioServiceMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:	
+    meta.helm.sh/release-name: {{ $.Release.Name | quote }}	
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  name: istio-component-monitor
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ $.Release.Name }}	
+    app.kubernetes.io/instance: {{ $.Release.Name }}	
+    app.kubernetes.io/managed-by: Helm	
+    app.kubernetes.io/name: istio-component-monitor	
+    helm.sh/chart: {{ .Chart.AppVersion }}	
+    prometheus: monitoring
+spec:
+  jobLabel: istio
+  targetLabels: [app]
+  selector:
+    matchExpressions:
+    - {key: istio, operator: In, values: [pilot]}
+  namespaceSelector:
+    matchNames:
+    - istio-system
+  endpoints:
+  - port: http-monitoring
+    {{- if .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    interval: {{ .Values.monitoring.istioServiceMonitor.scrapeInterval }}	
+    {{- end }}
+{{- end }}

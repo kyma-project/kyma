@@ -35,8 +35,6 @@ manager: generate-local fmt-local vet-local
 # TODO Useful default values have to be found.
 run: export NATS_URL ?= nats://127.0.0.1:4222
 run: export EVENT_TYPE_PREFIX ?= sap.kyma.custom
-run: export WEBHOOK_CLIENT_ID ?= WEBHOOK_CLIENT_ID
-run: export WEBHOOK_CLIENT_SECRET ?= WEBHOOK_CLIENT_SECRET
 run: export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
 run: export DOMAIN ?= example.com
 run: generate-local fmt-local vet-local manifests
@@ -106,21 +104,28 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
+# Use it before commit
+check-code: check-imports fmt-local vet-local lint
+
 test-local: generate-local fmt-local vet-local
 	go test ./... -coverprofile cover.out
 
-release: resolve generate verify build-image push-image
+release: resolve generate verify build-image push-image copy-external-crds
 
 path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
 
 copy-crds: manifests-local
-	@echo "copying to cluster-essentials"
+	@echo "copying Eventing CRDs to cluster-essentials"
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
-	@echo "copying to installation/eventing"
+	@echo "copying Eventing CRDs to installation/eventing"
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
+
+copy-external-crds:
+	@echo "copying external CRDs to config/crd/external"
+	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
 
 # find or download controller-gen
 # download controller-gen if necessary

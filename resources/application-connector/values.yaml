@@ -4,19 +4,16 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-central_application_connectivity_validator:
-  enabled: &centralApplicationConnectivityValidatorEnabled false
-
 central_application_gateway:
-  enabled: false
+  enabled: true
 
 global:
-  centralApplicationConnectivityValidatorEnabled: *centralApplicationConnectivityValidatorEnabled
+  centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
-  namespace: kyma-integration
+  integrationNamespace: kyma-integration
+  systemNamespace: kyma-system
   strictMode: disabled
-  isBEBEnabled: true
   log:
     format: "json"
     level: "warn"
@@ -39,43 +36,43 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_broker:
-    version: "96c3c891"
+    version: "cddfbc5b"
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "1683d7cf"
+    version: "PR-11678"
   application_connectivity_validator:
-    version: "1683d7cf"
+    version: "PR-11558"
   application_operator:
-    version: "b11a4b7b"
+    version: "PR-12147"
   application_operator_tests:
-    version: "68baa911"
+    version: "PR-11558"
   application_gateway:
-    version: "1683d7cf"
+    version: "PR-11558"
   application_gateway_tests:
     version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "1683d7cf"
+    version: "PR-11623"
   application_registry_tests:
-    version: "68baa911"
+    version: "PR-11558"
   connection_token_handler:
-    version: "1683d7cf"
+    version: "PR-11558"
   connection_token_handler_tests:
     version: "9776cb81"
   connector_service:
     version: "1683d7cf"
   connector_service_tests:
-    version: "9776cb81"
+    version: "PR-11939"
   event_service:
     version: "e6b97e48"
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "b11a4b7b"
+    version: "PR-11846"
   central_application_gateway:
-    version: "ec86782f"
+    version: "PR-11859"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -83,22 +80,13 @@ application_connectivity_certs_setup_job:
       name: connector-service-app-ca
       namespace: kyma-integration
     caCertificateSecret:
-      name: app-connector-certs
+      name: kyma-gateway-certs-cacert
       namespace: istio-system
+      migration:
+        name: app-connector-certs
+        keys: ["cacert"]
   certificate:
     validityTime: 92d
-
-application_connectivity_certs_sync:
-  secrets:
-    caCertificateSecret:
-      name: app-connector-certs
-      namespace: istio-system
-    tlsCertificateSecret:
-      name: kyma-gateway-certs
-      namespace: istio-system
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
 
 tests:
   application_connector_tests:
@@ -108,5 +96,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "9776cb81"
+      version: "PR-11939"
       pullPolicy: IfNotPresent

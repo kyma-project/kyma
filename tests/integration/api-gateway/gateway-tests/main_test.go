@@ -55,8 +55,8 @@ var (
 
 type Config struct {
 	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
-	User             string        `envconfig:"TEST_USER_EMAIL"`
-	Pwd              string        `envconfig:"TEST_USER_PASSWORD"`
+	User             string        `envconfig:"TEST_USER_EMAIL,default=admin@kyma.cx"`
+	Pwd              string        `envconfig:"TEST_USER_PASSWORD,default=1234"`
 	ReqTimeout       uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
 	ReqDelay         uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
 	Domain           string        `envconfig:"TEST_DOMAIN"`
@@ -108,7 +108,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
-	jwtConfig, err := jwt.LoadConfig()
+	jwtConfig, err := jwt.LoadConfig(oauthClientID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -304,7 +304,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
@@ -354,7 +354,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
@@ -547,7 +547,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(oauth)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}

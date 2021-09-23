@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	csrfmocks "github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf/mocks"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,10 +33,11 @@ func TestCache(t *testing.T) {
 		// when
 		authorizationStrategyMock := &mocks.Strategy{}
 		csrfTokenStrategy := &csrfmocks.TokenStrategy{}
+		clientCertificate := clientcert.NewClientCertificate(nil)
 		url := net.FormatURL("http", "www.example.com", 8080, "")
 		proxy := httputil.NewSingleHostReverseProxy(url)
 
-		cacheEntry := cache.Put("app1", "service1", "api1", proxy, authorizationStrategyMock, csrfTokenStrategy)
+		cacheEntry := cache.Put("app1", "service1", "api1", proxy, authorizationStrategyMock, csrfTokenStrategy, clientCertificate)
 
 		// then
 		require.NotNil(t, cacheEntry)

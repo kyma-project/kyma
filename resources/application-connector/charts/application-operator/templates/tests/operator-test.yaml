@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
           - name: NAMESPACE
-            value: {{ .Values.global.namespace }}
+            value: {{ .Values.global.integrationNamespace }}
           - name: HELM_DRIVER
             value: {{ .Values.controller.args.helmDriver }}
           - name: GATEWAY_DEPLOYED_PER_NAMESPACE

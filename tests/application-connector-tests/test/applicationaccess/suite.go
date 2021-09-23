@@ -197,9 +197,9 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 			return false, nil
 		}
 
-		// Event Service returns 500 when Event Mesh is not ready, therefore retry on any error status
+		// Eventing Publisher Proxy returns non 2xx when eventing is not ready, therefore retry on any error status
 		if errorResponse.Code != http.StatusOK {
-			t.Logf("Event Service not ready, received %d status", errorResponse.Code)
+			t.Logf("Eventing Publisher Proxy not ready, received %d status", errorResponse.Code)
 			return true, nil
 		}
 

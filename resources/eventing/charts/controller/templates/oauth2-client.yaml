@@ -6,7 +6,7 @@ metadata:
   labels: {{- include "controller.labels" . | nindent 4 }}
 spec:
   grantTypes:
-  - client_credentials
+    - client_credentials
   hydraAdmin: {}
   scope: read write beb uaa.resource
   secretName: {{ include "controller.fullname" . }}{{ .Values.bebSecret.nameSuffix }}
