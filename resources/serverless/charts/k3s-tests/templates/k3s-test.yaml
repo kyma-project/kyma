@@ -34,7 +34,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: test
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
+          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
           args: ["serverless-integration"]
           env:
             - name: APP_TEST_WAIT_TIMEOUT
