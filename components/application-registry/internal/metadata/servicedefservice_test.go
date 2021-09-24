@@ -59,9 +59,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -463,9 +464,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
@@ -523,9 +525,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
@@ -796,9 +799,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -885,9 +889,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 	t.Run("should return error when reading API fails", func(t *testing.T) {
 		// given
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -986,10 +991,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
-
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				SecretName: "secret-name",
 			},
@@ -1059,9 +1064,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -1420,9 +1426,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -1499,10 +1506,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
-
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				SecretName: "secret-name",
 			},

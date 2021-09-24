@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	resourceNamePrefixFormat = "%s-"
-	metadataUrlFormat        = "http://%s.%s.svc.cluster.local"
+	resourceNamePrefixFormat        = "%s-"
+	metadataUrlFormat               = "http://%s.%s.svc.cluster.local"
+	centralApplicationGatewayFormat = "%s/%s/%s"
 
 	maxResourceNameLength = 63 // Kubernetes limit for services
 	uuidLength            = 36 // UUID has 36 characters
@@ -28,15 +29,15 @@ type NameResolver interface {
 }
 
 type nameResolver struct {
-	namespace               string
-	centralGatewayUrlFormat string
+	namespace         string
+	centralGatewayUrl string
 }
 
 // NewNameResolver creates NameResolver that uses application name and namespace.
-func NewNameResolver(namespace, centralGatewayUrlFormat string) NameResolver {
+func NewNameResolver(namespace, centralGatewayUrl string) NameResolver {
 	return nameResolver{
-		namespace:               namespace,
-		centralGatewayUrlFormat: centralGatewayUrlFormat,
+		namespace:         namespace,
+		centralGatewayUrl: centralGatewayUrl,
 	}
 }
 
@@ -52,7 +53,10 @@ func (resolver nameResolver) GetGatewayUrl(application, id string) string {
 
 // TODO: Check if it's ok
 func (resolver nameResolver) GetCentralGatewayUrl(applicationName, serviceDisplayName string) string {
-	return fmt.Sprintf(resolver.centralGatewayUrlFormat, applicationName, normalization.NormalizeName(serviceDisplayName))
+	return fmt.Sprintf(centralApplicationGatewayFormat,
+		resolver.centralGatewayUrl,
+		applicationName,
+		normalization.NormalizeName(serviceDisplayName))
 }
 
 // ExtractServiceId extracts service ID from given host

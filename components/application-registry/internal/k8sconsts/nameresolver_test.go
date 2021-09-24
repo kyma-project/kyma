@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	namespace               = "namespace"
-	centralGatewayUrlFormat = "http://central-application-gateway.kyma-system:8080/%s/%s"
+	namespace         = "namespace"
+	centralGatewayUrl = "http://central-application-gateway.kyma-system:8080"
 )
 
 func TestNameResolver(t *testing.T) {
@@ -52,7 +52,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should get resource name with truncated application name if needed", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(namespace, centralGatewayUrlFormat)
+			resolver := NewNameResolver(namespace, centralGatewayUrl)
 
 			result := resolver.GetResourceName(testCase.application, testCase.id)
 
@@ -62,7 +62,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should get gateway url with truncated application name if needed", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(namespace, centralGatewayUrlFormat)
+			resolver := NewNameResolver(namespace, centralGatewayUrl)
 
 			result := resolver.GetGatewayUrl(testCase.application, testCase.id)
 
@@ -72,7 +72,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should get central gateway url", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(namespace, centralGatewayUrlFormat)
+			resolver := NewNameResolver(namespace, centralGatewayUrl)
 
 			result := resolver.GetCentralGatewayUrl(testCase.application, testCase.serviceDisplayName)
 
@@ -82,7 +82,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should extract service ID from gateway host", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(namespace, centralGatewayUrlFormat)
+			resolver := NewNameResolver(namespace, centralGatewayUrl)
 
 			result := resolver.ExtractServiceId(testCase.application, testCase.host)
 

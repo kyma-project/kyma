@@ -71,6 +71,7 @@ func TestNewService(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, api.Credentials.Oauth.URL, applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -123,6 +124,7 @@ func TestNewService(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "Basic", applicationServiceAPI.Credentials.Type)
@@ -154,6 +156,7 @@ func TestNewService(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -322,6 +325,7 @@ func TestNewService(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
@@ -669,6 +673,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "http://oauth.com", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -719,6 +724,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "Basic", applicationServiceAPI.Credentials.Type)
@@ -758,6 +764,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -958,6 +965,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
 

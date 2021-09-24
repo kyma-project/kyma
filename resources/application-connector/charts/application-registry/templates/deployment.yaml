@@ -51,6 +51,7 @@ spec:
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--uploadServiceURL={{ .Values.deployment.args.uploadServiceURL }}"
+          - "--centralGatewayUrl={{ .Values.deployment.args.centralGatewayUrl }}"
           - "--namespace={{ .Values.global.integrationNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
