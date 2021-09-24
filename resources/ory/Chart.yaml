@@ -4,3 +4,10 @@ name: ory
 version: 1.0.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
+dependencies:
+  - name: postgresql
+    version: 8.5.0
+    condition: global.ory.hydra.persistence.postgresql.enabled
+  - name: gcloud-sqlproxy
+    version: 0.19.7
+    condition: global.ory.hydra.persistence.gcloud.enabled
