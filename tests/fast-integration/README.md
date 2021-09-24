@@ -47,20 +47,20 @@ npm test
 ```
 
 
-#### To run eventing specific tests locally, follow these steps:
+To run Eventing-specific tests locally, follow these steps:
 1. Install dependencies:
 ```bash
 cd kyma/tests/fast-integration
 npm install
 ```
 
-2. Define SAP EventMesh Credentials JSON file path in `EVENTMESH_SECRET_FILE` environment variable.
+2. Define the Event Mesh Credentials JSON file path in the `EVENTMESH_SECRET_FILE` environment variable:
 ```
  export EVENTMESH_SECRET_FILE="<PATH_TO_EVENT_MESH_SECRET_FILE>"
 ```
-**Note:** SAP EventMesh Credentials JSON file can be downloaded from SAP BTP Cockpit under your subaccount instances.
+>**NOTE:** The Event Mesh Credentials JSON file can be downloaded from the BTP Cockpit under your subaccount instances.
 
-3. Execute the eventing tests:
+3. Execute the Eventing tests:
 ```
 npm run test-eventing
 ```
