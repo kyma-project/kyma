@@ -14,12 +14,12 @@ spec:
   version: v1
   category: Diagnostics
   placement: cluster
-  viewBaseUrl: https://grafana.{{ js .Values.global.ingress.domainName }}/explore?left=%5B"now-1h","now","Loki",%7B%7D,%7B"mode":"Logs"%7D,%7B"ui":%5Btrue,true,true,"none"%5D%7D%5D
+  viewBaseUrl: https://grafana.{{ js .Values.global.domainName }}/explore?left=%5B"now-1h","now","Loki",%7B%7D,%7B"mode":"Logs"%7D,%7B"ui":%5Btrue,true,true,"none"%5D%7D%5D
   navigationNodes:
     - label: Logs
       navigationPath: ''
       viewUrl: ''
-      externalLink: https://grafana.{{ js .Values.global.ingress.domainName }}/explore?left=%5B"now-1h","now","Loki",%7B%7D,%7B"mode":"Logs"%7D,%7B"ui":%5Btrue,true,true,"none"%5D%7D%5D
+      externalLink: https://grafana.{{ js .Values.global.domainName }}/explore?left=%5B"now-1h","now","Loki",%7B%7D,%7B"mode":"Logs"%7D,%7B"ui":%5Btrue,true,true,"none"%5D%7D%5D
       order: 0
 {{- end }}
 {{- end }}

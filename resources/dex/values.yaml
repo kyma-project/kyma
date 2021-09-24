@@ -17,32 +17,32 @@ oidc:
     - id: console
       name: Console
       redirectURIs:
-      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
-      - 'https://console.{{ .Values.global.ingress.domainName }}'
+      - 'http://console-dev.{{ .Values.global.domainName }}:4200'
+      - 'https://console.{{ .Values.global.domainName }}'
       secret: ZXhhbXBsZS1hcHAtc2VjcmV0
     - id: grafana
       name: Grafana UI
       redirectURIs:
-      - 'https://grafana.{{ .Values.global.ingress.domainName }}/login/generic_oauth'
-      - 'https://grafana.{{ .Values.global.ingress.domainName }}/oauth2/callback'
+      - 'https://grafana.{{ .Values.global.domainName }}/login/generic_oauth'
+      - 'https://grafana.{{ .Values.global.domainName }}/oauth2/callback'
       secret: apie4eeX6hiC9ainieli
     - id: jaeger
       name: Jaeger UI
       redirectURIs:
-      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth2/callback'
-      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth2/callback'
+      - 'http://jaeger.{{ .Values.global.domainName }}:3000/oauth2/callback'
+      - 'https://jaeger.{{ .Values.global.domainName }}/oauth2/callback'
       secret: oiEWUWOIEwedfgg
     - id: kiali
       name: Kiali UI
       redirectURIs:
-      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth2/callback'
-      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth2/callback'
+      - 'http://kiali.{{ .Values.global.domainName }}:3000/oauth2/callback'
+      - 'https://kiali.{{ .Values.global.domainName }}/oauth2/callback'
       secret: hiFWLWqIxw5d3gl
     - id: compass-ui
       name: Compass UI
       redirectURIs:
-      - 'https://compass.{{ .Values.global.ingress.domainName }}'
-      - 'http://compass-dev.{{ .Values.global.ingress.domainName }}:8080'
+      - 'https://compass.{{ .Values.global.domainName }}'
+      - 'http://compass-dev.{{ .Values.global.domainName }}:8080'
       secret: th2T43VyHp43bqr
   staticClientsExtra: |-
 

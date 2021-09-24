@@ -29,7 +29,7 @@ spec:
           image: "{{ .Values.image.registryPath }}/uaa-activator:{{ .Values.image.version }}"
           env:
             - name: CLUSTER_DOMAIN_NAME
-              value: {{ .Values.global.ingress.domainName }}
+              value: {{ .Values.global.domainName }}
 
             - name: UAA_IS_UPGRADE
               value: "{{ .Release.IsUpgrade }}"

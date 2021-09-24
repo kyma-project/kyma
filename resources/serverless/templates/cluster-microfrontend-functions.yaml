@@ -11,7 +11,7 @@ spec:
   version: v1
   category: Workloads
   placement: namespace
-  viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
+  viewBaseUrl: 'https://core-ui.{{ js .Values.global.domainName }}'
   navigationNodes:
     - label: Functions
       navigationPath: functions

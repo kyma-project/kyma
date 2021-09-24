@@ -10,8 +10,8 @@ spec:
   version: v1
   category: Service Management
   placement: namespace
-  viewBaseUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}"
-  preloadUrl: "https://catalog.{{ js .Values.global.ingress.domainName }}/preload"
+  viewBaseUrl: "https://catalog.{{ js .Values.global.domainName }}"
+  preloadUrl: "https://catalog.{{ js .Values.global.domainName }}/preload"
   navigationNodes:
     - label: Catalog
       navigationPath: service-catalog

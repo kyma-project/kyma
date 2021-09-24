@@ -72,7 +72,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "minio.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.domainName }}"
       {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

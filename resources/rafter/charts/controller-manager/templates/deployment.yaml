@@ -62,7 +62,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "storage.{{ .Values.global.ingress.domainName }}"
+            - "storage.{{ .Values.global.domainName }}"
       {{ end }}
       # MODIFIED: Block - END
       containers:

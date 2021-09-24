@@ -29,9 +29,9 @@ spec:
       hostAliases:
       - ip: {{ .Values.global.minikubeIP }}
         hostnames:
-            - "configurations-generator.{{ .Values.global.ingress.domainName }}"
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "apiserver.{{ .Values.global.ingress.domainName }}"
+            - "configurations-generator.{{ .Values.global.domainName }}"
+            - "dex.{{ .Values.global.domainName }}"
+            - "apiserver.{{ .Values.global.domainName }}"
       {{ end }}
       containers:
       - name: tests
@@ -45,7 +45,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: DOMAIN
-          value: {{ .Values.global.ingress.domainName }}
+          value: {{ .Values.global.domainName }}
         - name: USER_EMAIL
           valueFrom:
             secretKeyRef:

@@ -13,6 +13,6 @@ spec:
     matchLabels:
       app: {{ template "loki.name" . }}
   jwtRules:	
-  - issuer: https://dex.{{ .Values.global.ingress.domainName }}
+  - issuer: https://dex.{{ .Values.global.domainName }}
     jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
 {{- end }}
