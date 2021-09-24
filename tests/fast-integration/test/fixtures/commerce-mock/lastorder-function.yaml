@@ -26,7 +26,7 @@ spec:
         return {
           payload: data,
           headers: {
-            "ce-source": "/default/sap.kyma/tunas-prow",
+            "ce-source": "%%BEB_NAMESPACE%%",
             "ce-specversion": "1.0",
             "ce-eventtypeversion": "v1",
             "ce-id": (data.id || "dummyId"),
@@ -38,7 +38,7 @@ spec:
       // structured encoding
       return {
         payload: {
-          source: "/default/sap.kyma/tunas-prow",
+          source: "%%BEB_NAMESPACE%%",
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",

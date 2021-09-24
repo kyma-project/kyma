@@ -3,7 +3,6 @@ ci:
 	npm install
 	npm test
 	npm run test-monitoring
-	npm run test-eventing
 
 .PHONY: ci-no-install
 ci-no-install:
