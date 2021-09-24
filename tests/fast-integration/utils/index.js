@@ -1436,7 +1436,7 @@ async function switchEventingBackend(secretName, namespace="default", backendTyp
     options
   );
 
-  await sleep(10000); // Putting on sleep because there may be a delay in eventing-backend status update propagantion
+  await sleep(30 * 1000); // Putting on sleep because there may be a delay in eventing-backend status update propagation
   await waitForEventingBackendToReady(backendType)
 }
 

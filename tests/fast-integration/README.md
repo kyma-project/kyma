@@ -28,7 +28,7 @@ The project also contains the `kyma-js` tool which you can use in the developmen
 
 ## Usage
 
-### To run tests locally, follow these steps:
+To run tests locally, follow these steps:
 
 1. Checkout the Kyma project:
 ```bash
@@ -46,19 +46,19 @@ npm install
 npm test
 ```
 
-### To run eventing specific tests locally, follow these steps:
+To run Eventing-specific tests locally, follow these steps:
 1. Install dependencies:
 ```bash
 cd kyma/tests/fast-integration
 npm install
 ```
 
-2. Define SAP Event Mesh secret file path in `EVENTMESH_SECRET_FILE` environment variable.
+2. Define the Event Mesh Credentials JSON file path in the `EVENTMESH_SECRET_FILE` environment variable:
 ```
  export EVENTMESH_SECRET_FILE="<PATH_TO_EVENT_MESH_SECRET_FILE>"
 ```
-
-3. Execute the eventing tests:
+>**NOTE:** The Event Mesh Credentials JSON file can be downloaded from the BTP Cockpit under your subaccount instances.
+3. Execute the Eventing tests:
 ```
 npm run test-eventing
 ```
