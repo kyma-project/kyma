@@ -2,7 +2,7 @@
 title: What is Service Management in Kyma?
 ---
 
->**NOTE:** If you're using the deprecated approach to Service Management in Kyma that is based on Service Catalog and Service Brokers, go the the archived version of the documentation.
+>**NOTE:** If you're using the deprecated approach to Service Management in Kyma that is based on Service Catalog and Service Brokers, go to the archived version of the documentation.
 >- [Service Catalog and Service Brokers](https://kyma-project-old.netlify.app/docs/release-1.22/components/service-catalog/)
 >- [Helm Broker and addons](https://kyma-project-old.netlify.app/docs/release-1.22/components/helm-broker)
 
