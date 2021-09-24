@@ -54,10 +54,11 @@ cd kyma/tests/fast-integration
 npm install
 ```
 
-2. Define SAP Event Mesh secret file path in `EVENTMESH_SECRET_FILE` environment variable.
+2. Define SAP EventMesh Credentials JSON file path in `EVENTMESH_SECRET_FILE` environment variable.
 ```
  export EVENTMESH_SECRET_FILE="<PATH_TO_EVENT_MESH_SECRET_FILE>"
 ```
+**Note:** SAP EventMesh Credentials JSON file can be downloaded from SAP BTP Cockpit under your subaccount instances.
 
 3. Execute the eventing tests:
 ```

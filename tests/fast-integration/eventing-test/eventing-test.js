@@ -67,7 +67,7 @@ describe("Eventing tests", function () {
     await cleanMockTestFixture("mocks", testNamespace, true);
 
     // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath != "") {
+    if (eventMeshSecretFilePath !== "") {
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
   });
