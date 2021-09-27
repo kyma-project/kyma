@@ -73,7 +73,7 @@ global:
     path: eu.gcr.io/kyma-project
   images:
     k8s_tools:
-      name: "tpi/k8s-tools"
+      name: "k8s-tools"
       version: "20210922-530cfc39"
       directory: "tpi"
     function_controller:
