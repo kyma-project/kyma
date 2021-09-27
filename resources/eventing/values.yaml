@@ -1,8 +1,20 @@
 # globally shared values among Helm subcharts
 global:
-  image:
-    # repository is the container registry where the image for event-publisher-proxy is located in
-    repository: "eu.gcr.io/kyma-project"
+  containerRegistry:
+    path: "eu.gcr.io/kyma-project"
+  images:
+    nats_operator_doctor:
+      name: nats-operator-doctor
+      version: PR-11920
+    eventing_controller:
+      name: eventing-controller
+      version: PR-12283
+    publisher_proxy:
+      name: event-publisher-proxy
+      version: 947fb1cd
+    nats_operator:
+      name: nats-operator
+      version: PR-12170
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
@@ -39,8 +51,3 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
-
-preUpgradeJob:
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
