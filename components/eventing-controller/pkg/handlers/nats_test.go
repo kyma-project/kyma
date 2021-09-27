@@ -266,6 +266,75 @@ func TestIsValidSubscription(t *testing.T) {
 
 }
 
+func TestSubscriptionUsingCESDK(t *testing.T) {
+	g := NewWithT(t)
+	natsPort := 5222
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	// Create NATS client
+	natsURL := natsServer.ClientURL()
+	natsClient := &Nats{
+		subscriptions: make(map[string]*nats.Subscription),
+		config: env.NatsConfig{
+			Url:           natsURL,
+			MaxReconnects: 2,
+			ReconnectWait: time.Second,
+		},
+		log: ctrl.Log.WithName("NatsClient").WithName("TestCESDK"),
+	}
+
+	err := natsClient.Initialize(env.Config{})
+	g.Expect(err).To(BeNil())
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+
+	// Shutting down subscriber
+	defer subscriber.Shutdown()
+
+	// Check subscriber is running or not by checking the store
+	err = subscriber.CheckEvent("", subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, ctrl.Log.WithName("cleaner"))
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	subject := eventingtesting.CloudEventType
+
+	// Send a binary CE
+	err = SendBinaryCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+	// Check for the event
+	err = subscriber.CheckEvent(eventingtesting.CloudEventData, subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	//  Send a structured CE
+	err = SendStructuredCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+	// Check for the event
+	err = subscriber.CheckEvent("\""+eventingtesting.EventData+"\"", subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Delete subscription
+	err = natsClient.DeleteSubscription(sub)
+	g.Expect(err).To(BeNil())
+}
+
 func checkIsValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, true, t)
 }
