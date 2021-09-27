@@ -35,6 +35,8 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+  testImages:
   application_broker:
     version: "cddfbc5b"
   application_broker_eventing_migration:
