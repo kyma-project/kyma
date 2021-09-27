@@ -11,7 +11,6 @@ If you want to see historical logs and use additional features, view the logs as
 ## Kubernetes logs in Kyma Dashboard
 
 You can view real-time logs in Kyma Dashboard:
-<!--- to be confirmed -->
 1. Open Kyma Dashboard and select the Namespace.
 2. Access the Pod and select the container.
 3. Click **View Logs**.
