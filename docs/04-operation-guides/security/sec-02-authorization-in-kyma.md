@@ -33,7 +33,7 @@ You can assign any of the predefined roles to a user or to a group of users in t
 - The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 - A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 
->**TIP:** The **Global permissions** view in the **Settings** section of Kyma Dashboard allows you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to the **Configuration** section of the **Permissions** view. <!--- I don't find any of those UI elements -->
+>**TIP:** The **Cluster Roles** and **Cluster Role Bindings** view in the **Configuration** section of Kyma Dashboard allow you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to **Roles** and **Role Bindings** in the **Configuration** section.
 
 >**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
