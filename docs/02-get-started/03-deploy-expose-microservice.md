@@ -7,7 +7,7 @@ We'll use the Kyma example [`orders-service`](https://github.com/kyma-project/ex
 
 ## Deploy the microservice
 
-First, let's create a Deployment that provides the microservice definition and lets you run it on the cluster. 
+First, let's create a Deployment that provides the microservice definition and lets you run it on the cluster.
 
 <div tabs name="Create a microservice Deployment" group="deploy-expose-microservice">
   <details open>
@@ -58,7 +58,7 @@ cat <<EOF | kubectl apply -f -
 EOF
 ```
 
-To check that the Deployment was created successfully, run: 
+To check that the Deployment was created successfully, run:
 ```bash
 kubectl get deployment orders-service -o=jsonpath="{.status.readyReplicas}"
 ```
@@ -79,14 +79,14 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Name**: `orders-service`
     - **Labels**: add labels `app` and `example` and set their values to `orders-service`
     - **Containers**: enter docker image `eu.gcr.io/kyma-project/develop/orders-service:e8175c63`
-   
+
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
     - **CPU limits (m)**: `20m`  
     - **Port**: `80`
-    - **Target Port**: `8080` 
+    - **Target Port**: `8080`
     - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
 4. Click **Create**.
 
@@ -162,7 +162,7 @@ The operation was successful if ... .
 
 We have created the Service. Let's now expose it outside the cluster.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-02-expose-and-secure-service.md) you expose.
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
 
 To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 

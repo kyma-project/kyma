@@ -26,7 +26,7 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. See how to [disable sidecar proxy injection](../../../04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection.md).
 - Resource requests and limits for Istio sidecars are modified to best suit the needs of the evaluation and production profiles.
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide in a STRICT mode.
-- Global tracing is set to use the Zipkin installation provided by Kyma.
+- Global tracing is set to use the Zipkin protocol to send requests to the tracing component provided by Kyma. Learn more about [tracing]](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md).
 - Ingress Gateway is expanded to handle ports `80`, `443`, and `31400` for local Kyma deployments.
 - The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the `kube-system` Namespace and the timeout is set to 10 seconds.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.

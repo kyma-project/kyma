@@ -56,7 +56,7 @@ You must now define which individuals or groups should have access to which Kyma
 By default, Kyma comes with the following ClusterRoles:
 
 - **kyma-admin**: gives full admin access to the entire cluster
-- **kyma-namespace-admin**: gives full admin access except for the write access to [AddonsConfigurations](../05-technical-reference/00-custom-resources/smgt-04-hb-addonsconfiguration.md)
+- **kyma-namespace-admin**: gives full admin access to the specific Namespace
 - **kyma-edit**: gives full access to all Kyma-managed resources
 - **kyma-developer**: gives full access to Kyma-managed resources and basic Kubernetes resources
 - **kyma-view**: allows viewing and listing all of the resources in the cluster
