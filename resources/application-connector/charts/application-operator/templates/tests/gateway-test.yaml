@@ -30,7 +30,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-gateway-tests
       containers:
         - name: tests
-          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway_tests) }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_gateway_tests) }}
           imagePullPolicy: {{ .Values.tests.pullPolicy }}
           env:
             - name: GATEWAY_NAMESPACE

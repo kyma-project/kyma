@@ -38,7 +38,7 @@ spec:
       {{ end }}
       containers:
         - name: tests
-          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connector_tests) }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_connector_tests) }}
           imagePullPolicy: {{ .Values.tests.application_connector_tests.image.pullPolicy }}
           env:
           - name: NAMESPACE

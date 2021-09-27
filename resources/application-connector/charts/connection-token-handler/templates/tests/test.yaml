@@ -31,7 +31,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connection_token_handler_tests) }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.connection_token_handler_tests) }}
         imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}

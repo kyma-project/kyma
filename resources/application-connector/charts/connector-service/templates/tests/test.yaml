@@ -33,7 +33,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connector_service_tests) }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.connector_service_tests) }}
         imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
         env:
         - name: INTERNAL_API_URL
