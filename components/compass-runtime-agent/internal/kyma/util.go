@@ -3,7 +3,7 @@ package kyma
 import (
 	"fmt"
 
-	"github.com/kofalt/go-memoize"
+	memoize "github.com/kofalt/go-memoize"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
